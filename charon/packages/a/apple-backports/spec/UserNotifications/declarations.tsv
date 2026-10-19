@@ -1,0 +1,290 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+category	c:objc(cy)NSString@UNUserNotificationCenterSupport	-			-	-	-	-	-	ff3b707e05015905	-
+method	c:objc(cs)NSString(cm)localizedUserNotificationStringForKey:arguments:	UNUserNotificationCenterSupport			NSString *	NSString * key | NSArray * arguments	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	ade0a005641de416	-
+var	c:@UNErrorDomain	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	eb12179b512afc08	-
+typedef	c:@T@UNErrorCode	-			enum UNErrorCode	-	-	-	-	fa8bdfd538dee22f	-
+enum	c:@E@UNErrorCode	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	967970f40de87fe9	-
+enumconst	c:@E@UNErrorCode@UNErrorCodeNotificationsNotAllowed	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b3d7fdd5eccb7b61	1
+enumconst	c:@E@UNErrorCode@UNErrorCodeAttachmentInvalidURL	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	20de70ed4b9b36cd	100
+enumconst	c:@E@UNErrorCode@UNErrorCodeAttachmentUnrecognizedType	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c42bcc06f6bbb46a	101
+enumconst	c:@E@UNErrorCode@UNErrorCodeAttachmentInvalidFileSize	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	54879a853b81abe0	102
+enumconst	c:@E@UNErrorCode@UNErrorCodeAttachmentNotInDataStore	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	de0c1cd35e74dead	103
+enumconst	c:@E@UNErrorCode@UNErrorCodeAttachmentMoveIntoDataStoreFailed	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	cb73e3029830cf9b	104
+enumconst	c:@E@UNErrorCode@UNErrorCodeAttachmentCorrupt	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4c0cdedba9990f1d	105
+enumconst	c:@E@UNErrorCode@UNErrorCodeNotificationInvalidNoDate	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4bda42d4145aa308	1400
+enumconst	c:@E@UNErrorCode@UNErrorCodeNotificationInvalidNoContent	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8bf906eaa63e9384	1401
+enumconst	c:@E@UNErrorCode@UNErrorCodeContentProvidingObjectNotAllowed	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d56ba868a1ee8254	1500
+enumconst	c:@E@UNErrorCode@UNErrorCodeContentProvidingInvalid	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4936c8ba0c9ebe9c	1501
+enumconst	c:@E@UNErrorCode@UNErrorCodeBadgeInputInvalid	UNErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b3f3b27f72431fd3	1600
+interface	c:objc(cs)UNNotification	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f50a6dc5618e23e5	-
+super	-	UNNotification	NSObject		-	-	-	-	-	290b661c4769f3aa	-
+conforms	c:objc(cs)UNNotification	UNNotification	NSCopying		-	-	-	-	-	9ad43e3715ee7f68	-
+conforms	c:objc(cs)UNNotification	UNNotification	NSSecureCoding		-	-	-	-	-	29d2a0105ba5b045	-
+property	c:objc(cs)UNNotification(py)date	-			NSDate *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	62c3ca90452f346d	-
+property	c:objc(cs)UNNotification(py)request	-			UNNotificationRequest *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	75e5bebf60fda811	-
+method	c:objc(cs)UNNotification(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f70cafa3216c86ea	-
+typedef	c:@T@UNNotificationActionOptions	-			enum UNNotificationActionOptions	-	-	-	-	d0adf30cd79c4d9e	-
+enum	c:@E@UNNotificationActionOptions	-			NSUInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	6e94dea7d0d5ee75	-
+enumconst	c:@E@UNNotificationActionOptions@UNNotificationActionOptionAuthenticationRequired	UNNotificationActionOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	ea387bc018265188	1
+enumconst	c:@E@UNNotificationActionOptions@UNNotificationActionOptionDestructive	UNNotificationActionOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	8a8af3d4db8d7dee	2
+enumconst	c:@E@UNNotificationActionOptions@UNNotificationActionOptionForeground	UNNotificationActionOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	2d62df0d60440ac9	4
+interface	c:objc(cs)UNNotificationAction	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	53920addd76cf53a	-
+super	-	UNNotificationAction	NSObject		-	-	-	-	-	26bddb44051f9bef	-
+conforms	c:objc(cs)UNNotificationAction	UNNotificationAction	NSCopying		-	-	-	-	-	4f04282c7fa0cdb6	-
+conforms	c:objc(cs)UNNotificationAction	UNNotificationAction	NSSecureCoding		-	-	-	-	-	3f93c2756020f208	-
+property	c:objc(cs)UNNotificationAction(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	78dc3a6ad6510f73	-
+property	c:objc(cs)UNNotificationAction(py)title	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	a133299c7a7b0350	-
+property	c:objc(cs)UNNotificationAction(py)options	-			UNNotificationActionOptions	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	1e521595bfefa202	-
+property	c:objc(cs)UNNotificationAction(py)icon	-			UNNotificationActionIcon *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	50c42b009d4bbbe8	-
+method	c:objc(cs)UNNotificationAction(cm)actionWithIdentifier:title:options:	-			instancetype	NSString * identifier | NSString * title | UNNotificationActionOptions options	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	4555a93804428c82	-
+method	c:objc(cs)UNNotificationAction(cm)actionWithIdentifier:title:options:icon:	-			instancetype	NSString * identifier | NSString * title | UNNotificationActionOptions options | UNNotificationActionIcon * icon	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	915a803ba99cbeed	-
+method	c:objc(cs)UNNotificationAction(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	d79d9ee2f5ef497f	-
+interface	c:objc(cs)UNTextInputNotificationAction	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	cc8672de16449d05	-
+super	-	UNTextInputNotificationAction	UNNotificationAction		-	-	-	-	-	8eef53df53cf68d8	-
+method	c:objc(cs)UNTextInputNotificationAction(cm)actionWithIdentifier:title:options:textInputButtonTitle:textInputPlaceholder:	-			instancetype	NSString * identifier | NSString * title | UNNotificationActionOptions options | NSString * textInputButtonTitle | NSString * textInputPlaceholder	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	87e3ab5b84b1cbb3	-
+method	c:objc(cs)UNTextInputNotificationAction(cm)actionWithIdentifier:title:options:icon:textInputButtonTitle:textInputPlaceholder:	-			instancetype	NSString * identifier | NSString * title | UNNotificationActionOptions options | UNNotificationActionIcon * icon | NSString * textInputButtonTitle | NSString * textInputPlaceholder	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	cf04a94d97427c02	-
+property	c:objc(cs)UNTextInputNotificationAction(py)textInputButtonTitle	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	92db407e20a60c9c	-
+property	c:objc(cs)UNTextInputNotificationAction(py)textInputPlaceholder	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	3bbd166f9eeaec1d	-
+interface	c:objc(cs)UNNotificationActionIcon	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	c97562d43b352ff4	-
+super	-	UNNotificationActionIcon	NSObject		-	-	-	-	-	357d7324845d47f1	-
+conforms	c:objc(cs)UNNotificationActionIcon	UNNotificationActionIcon	NSCopying		-	-	-	-	-	1a82b327a3237ce4	-
+conforms	c:objc(cs)UNNotificationActionIcon	UNNotificationActionIcon	NSSecureCoding		-	-	-	-	-	c6904a0079c2aad8	-
+method	c:objc(cs)UNNotificationActionIcon(cm)iconWithTemplateImageName:	-			instancetype	NSString * templateImageName	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	b203350c8952eb78	-
+method	c:objc(cs)UNNotificationActionIcon(cm)iconWithSystemImageName:	-			instancetype	NSString * systemImageName	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	ad611530183aa607	-
+method	c:objc(cs)UNNotificationActionIcon(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	9848f94a55632c03	-
+interface	c:objc(cs)UNNotificationAttachment	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	7a959a7b1661eb91	-
+super	-	UNNotificationAttachment	NSObject		-	-	-	-	-	64d544cdb4371c39	-
+conforms	c:objc(cs)UNNotificationAttachment	UNNotificationAttachment	NSCopying		-	-	-	-	-	12a0ef5cbdb2f9eb	-
+conforms	c:objc(cs)UNNotificationAttachment	UNNotificationAttachment	NSSecureCoding		-	-	-	-	-	3104b2a68376a810	-
+property	c:objc(cs)UNNotificationAttachment(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	0e8ce0059627bd4e	-
+property	c:objc(cs)UNNotificationAttachment(py)URL	-			NSURL *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	44b4d7fd516c6404	-
+property	c:objc(cs)UNNotificationAttachment(py)type	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	bc35560b2fe51ff8	-
+method	c:objc(cs)UNNotificationAttachment(cm)attachmentWithIdentifier:URL:options:error:	-			instancetype	NSString * identifier | NSURL * URL | NSDictionary * options | NSError * _Nullable * error	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	6acb4bddeeb67437	-
+method	c:objc(cs)UNNotificationAttachment(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	5131d00cd7a57269	-
+var	c:@UNNotificationAttachmentOptionsTypeHintKey	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	720eb3334a3846f3	-
+var	c:@UNNotificationAttachmentOptionsThumbnailHiddenKey	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	e38d5ea7c9671862	-
+var	c:@UNNotificationAttachmentOptionsThumbnailClippingRectKey	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	7b65e859a91c10a3	-
+var	c:@UNNotificationAttachmentOptionsThumbnailTimeKey	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	4fee7a19afede63b	-
+protocol	c:objc(pl)UNNotificationContentProviding	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	3ac27b0605ade68f	-
+conforms	c:objc(pl)UNNotificationContentProviding	UNNotificationContentProviding	NSObject		-	-	-	-	-	aad9e9e47740fffe	-
+typedef	c:@T@UNNotificationInterruptionLevel	-			enum UNNotificationInterruptionLevel	-	-	-	-	5057bdbedc63bc9c	-
+enum	c:@E@UNNotificationInterruptionLevel	-			NSUInteger	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	a2a722ba4b083eaa	-
+enumconst	c:@E@UNNotificationInterruptionLevel@UNNotificationInterruptionLevelPassive	UNNotificationInterruptionLevel			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	b9dce574d017fe10	0
+enumconst	c:@E@UNNotificationInterruptionLevel@UNNotificationInterruptionLevelActive	UNNotificationInterruptionLevel			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	959643fd6a95a795	1
+enumconst	c:@E@UNNotificationInterruptionLevel@UNNotificationInterruptionLevelTimeSensitive	UNNotificationInterruptionLevel			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	f74e9e3f1f472d08	2
+enumconst	c:@E@UNNotificationInterruptionLevel@UNNotificationInterruptionLevelCritical	UNNotificationInterruptionLevel			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	df245caeb9e69fde	3
+interface	c:objc(cs)UNNotificationContent	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	deprecated: summaryArgument is ignored	a24b5a7ea3a41d8f	-
+super	-	UNNotificationContent	NSObject		-	-	-	-	-	b1ac0fe8433d0b51	-
+conforms	c:objc(cs)UNNotificationContent	UNNotificationContent	NSCopying		-	-	-	-	-	73b4bf42881e1941	-
+conforms	c:objc(cs)UNNotificationContent	UNNotificationContent	NSMutableCopying		-	-	-	-	-	589035390cc166e3	-
+conforms	c:objc(cs)UNNotificationContent	UNNotificationContent	NSSecureCoding		-	-	-	-	-	303c5262f6efd415	-
+property	c:objc(cs)UNNotificationContent(py)attachments	-			NSArray<UNNotificationAttachment *> *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	f6f86e6745dc5721	-
+property	c:objc(cs)UNNotificationContent(py)badge	-			NSNumber *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	2792f81ad6b0fea7	-
+property	c:objc(cs)UNNotificationContent(py)body	-			NSString *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	5add4d8ad0547359	-
+property	c:objc(cs)UNNotificationContent(py)categoryIdentifier	-			NSString *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	048b63b98b85d8dc	-
+property	c:objc(cs)UNNotificationContent(py)launchImageName	-			NSString *	-	readonly,copy,nonatomic	macos=-/-/-/1,tvos=-/-/-/1	-	d0b8ba3ba0c2c584	-
+property	c:objc(cs)UNNotificationContent(py)sound	-			UNNotificationSound *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	12be8d93418c2af7	-
+property	c:objc(cs)UNNotificationContent(py)subtitle	-			NSString *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	a0869e6ff5b9650c	-
+property	c:objc(cs)UNNotificationContent(py)threadIdentifier	-			NSString *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	a3a4cd862fbb9d2d	-
+property	c:objc(cs)UNNotificationContent(py)title	-			NSString *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	474016fa6bb76cde	-
+property	c:objc(cs)UNNotificationContent(py)userInfo	-			NSDictionary *	-	readonly,copy,nonatomic	tvos=-/-/-/1	-	d793941b078780a8	-
+property	c:objc(cs)UNNotificationContent(py)summaryArgument	-			NSString *	-	readonly,copy,nonatomic	ios=12.0/15.0/-/0,tvos=12.0/15.0/-/0,watchos=5.0/8.0/-/0	-	1873cc0bd6620f73	-
+property	c:objc(cs)UNNotificationContent(py)summaryArgumentCount	-			NSUInteger	-	readonly,assign,nonatomic	ios=12.0/15.0/-/0,tvos=12.0/15.0/-/0,watchos=5.0/8.0/-/0	-	400b77cc36efb0dd	-
+property	c:objc(cs)UNNotificationContent(py)targetContentIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=13.0/-/-/0	-	1f15a19bf391fe02	-
+property	c:objc(cs)UNNotificationContent(py)interruptionLevel	-			UNNotificationInterruptionLevel	-	readonly,assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	6b43607970d74152	-
+property	c:objc(cs)UNNotificationContent(py)relevanceScore	-			double	-	readonly,assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	760d138b4e758deb	-
+property	c:objc(cs)UNNotificationContent(py)filterCriteria	-			NSString *	-	readonly,copy,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=9.0/-/-/0	-	1bde9aedc8b89665	-
+method	c:objc(cs)UNNotificationContent(im)contentByUpdatingWithProvider:error:	-			UNNotificationContent *	id<UNNotificationContentProviding> provider | NSError * _Nullable * outError	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	077a91074805c0e2	-
+interface	c:objc(cs)UNMutableNotificationContent	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	deprecated: summaryArgument is ignored	a4b9ea3da96abf0c	-
+super	-	UNMutableNotificationContent	UNNotificationContent		-	-	-	-	-	e37620f334fe19d5	-
+property	c:objc(cs)UNMutableNotificationContent(py)attachments	-			NSArray<UNNotificationAttachment *> *	-	copy,nonatomic	tvos=-/-/-/1	-	d7b785897f1b0d99	-
+property	c:objc(cs)UNMutableNotificationContent(py)badge	-			NSNumber *	-	copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	895caf7a5acea037	-
+property	c:objc(cs)UNMutableNotificationContent(py)body	-			NSString *	-	copy,nonatomic	tvos=-/-/-/1	-	419944620756da19	-
+property	c:objc(cs)UNMutableNotificationContent(py)categoryIdentifier	-			NSString *	-	copy,nonatomic	tvos=-/-/-/1	-	52e13d5a2d7515d9	-
+property	c:objc(cs)UNMutableNotificationContent(py)launchImageName	-			NSString *	-	copy,nonatomic	macos=-/-/-/1,tvos=-/-/-/1	-	bfcce55e9103db5c	-
+property	c:objc(cs)UNMutableNotificationContent(py)sound	-			UNNotificationSound *	-	copy,nonatomic	tvos=-/-/-/1	-	599d568eee0b5348	-
+property	c:objc(cs)UNMutableNotificationContent(py)subtitle	-			NSString *	-	copy,nonatomic	tvos=-/-/-/1	-	9970f286991557c2	-
+property	c:objc(cs)UNMutableNotificationContent(py)threadIdentifier	-			NSString *	-	copy,nonatomic	tvos=-/-/-/1	-	7cb7729dd1096c38	-
+property	c:objc(cs)UNMutableNotificationContent(py)title	-			NSString *	-	copy,nonatomic	tvos=-/-/-/1	-	3349d7a2f90b65eb	-
+property	c:objc(cs)UNMutableNotificationContent(py)userInfo	-			NSDictionary *	-	copy,nonatomic	tvos=-/-/-/1	-	e186b050135b320e	-
+property	c:objc(cs)UNMutableNotificationContent(py)summaryArgument	-			NSString *	-	copy,nonatomic	ios=12.0/15.0/-/0,tvos=12.0/15.0/-/0,watchos=5.0/8.0/-/0	-	ba16f8771c991698	-
+property	c:objc(cs)UNMutableNotificationContent(py)summaryArgumentCount	-			NSUInteger	-	assign,nonatomic	ios=12.0/15.0/-/0,tvos=12.0/15.0/-/0,watchos=5.0/8.0/-/0	-	1e0732e8cd83fa67	-
+property	c:objc(cs)UNMutableNotificationContent(py)targetContentIdentifier	-			NSString *	-	copy,nonatomic	ios=13.0/-/-/0	-	5bb50ab1f81d46ec	-
+property	c:objc(cs)UNMutableNotificationContent(py)interruptionLevel	-			UNNotificationInterruptionLevel	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	003de5a74bfc6c5a	-
+property	c:objc(cs)UNMutableNotificationContent(py)relevanceScore	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	6ad896c4a51b196d	-
+property	c:objc(cs)UNMutableNotificationContent(py)filterCriteria	-			NSString *	-	copy,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,watchos=9.0/-/-/0	-	f47348eb307b56a0	-
+interface	c:objc(cs)UNNotificationAttributedMessageContext	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=11.0/-/-/0	-	c76a9f79ad7ba72c	-
+super	-	UNNotificationAttributedMessageContext	NSObject		-	-	-	-	-	cb27d7070d23da3e	-
+conforms	c:objc(cs)UNNotificationAttributedMessageContext	UNNotificationAttributedMessageContext	UNNotificationContentProviding		-	-	-	-	-	0870b7eb573d4269	-
+method	c:objc(cs)UNNotificationAttributedMessageContext(cm)contextWithSendMessageIntent:attributedContent:	-			instancetype	INSendMessageIntent * sendMessageIntent | NSAttributedString * attributedContent	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=11.0/-/-/0	-	7115cc04be7019c4	-
+method	c:objc(cs)UNNotificationAttributedMessageContext(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=11.0/-/-/0	-	e9da7946811fdbbd	-
+typedef	c:@T@UNNotificationCategoryOptions	-			enum UNNotificationCategoryOptions	-	-	-	-	1fa1c01c0f5b8549	-
+enum	c:@E@UNNotificationCategoryOptions	-			NSUInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	697fe7b8be220476	-
+enumconst	c:@E@UNNotificationCategoryOptions@UNNotificationCategoryOptionCustomDismissAction	UNNotificationCategoryOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	3f985665f9bf9043	1
+enumconst	c:@E@UNNotificationCategoryOptions@UNNotificationCategoryOptionAllowInCarPlay	UNNotificationCategoryOptions			-	-	-	macos=-/-/-/1	-	e6b11e4e0a4cb38d	2
+enumconst	c:@E@UNNotificationCategoryOptions@UNNotificationCategoryOptionHiddenPreviewsShowTitle	UNNotificationCategoryOptions			-	-	-	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	277c951b2acb2c9c	4
+enumconst	c:@E@UNNotificationCategoryOptions@UNNotificationCategoryOptionHiddenPreviewsShowSubtitle	UNNotificationCategoryOptions			-	-	-	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6d82de915099e5c4	8
+enumconst	c:@E@UNNotificationCategoryOptions@UNNotificationCategoryOptionAllowAnnouncement	UNNotificationCategoryOptions			-	-	-	ios=13.0/15.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=6.0/7.0/-/0	deprecated: Announcement option is ignored	d3669bc0597d08ea	16
+interface	c:objc(cs)UNNotificationCategory	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	6b521caaf71d13e2	-
+super	-	UNNotificationCategory	NSObject		-	-	-	-	-	8423edf7fc1a161c	-
+conforms	c:objc(cs)UNNotificationCategory	UNNotificationCategory	NSCopying		-	-	-	-	-	0140a97d13c2971b	-
+conforms	c:objc(cs)UNNotificationCategory	UNNotificationCategory	NSSecureCoding		-	-	-	-	-	5d9d85cc8385d148	-
+property	c:objc(cs)UNNotificationCategory(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	3115883821362ed7	-
+property	c:objc(cs)UNNotificationCategory(py)actions	-			NSArray<UNNotificationAction *> *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	7b8da7b6564a8aa4	-
+property	c:objc(cs)UNNotificationCategory(py)intentIdentifiers	-			NSArray<NSString *> *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	48a9fab0409d8c2f	-
+property	c:objc(cs)UNNotificationCategory(py)options	-			UNNotificationCategoryOptions	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	ec4248f5d4f113d2	-
+property	c:objc(cs)UNNotificationCategory(py)hiddenPreviewsBodyPlaceholder	-			NSString *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2b7468ecde919e80	-
+property	c:objc(cs)UNNotificationCategory(py)categorySummaryFormat	-			NSString *	-	readonly,copy,nonatomic	ios=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bab0aa7e61069079	-
+method	c:objc(cs)UNNotificationCategory(cm)categoryWithIdentifier:actions:intentIdentifiers:options:	-			instancetype	NSString * identifier | NSArray<UNNotificationAction *> * actions | NSArray<NSString *> * intentIdentifiers | UNNotificationCategoryOptions options	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	5f12183bb3ca1fbf	-
+method	c:objc(cs)UNNotificationCategory(cm)categoryWithIdentifier:actions:intentIdentifiers:hiddenPreviewsBodyPlaceholder:options:	-			instancetype	NSString * identifier | NSArray<UNNotificationAction *> * actions | NSArray<NSString *> * intentIdentifiers | NSString * hiddenPreviewsBodyPlaceholder | UNNotificationCategoryOptions options	-	ios=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4881b33da6c08d30	-
+method	c:objc(cs)UNNotificationCategory(cm)categoryWithIdentifier:actions:intentIdentifiers:hiddenPreviewsBodyPlaceholder:categorySummaryFormat:options:	-			instancetype	NSString * identifier | NSArray<UNNotificationAction *> * actions | NSArray<NSString *> * intentIdentifiers | NSString * hiddenPreviewsBodyPlaceholder | NSString * categorySummaryFormat | UNNotificationCategoryOptions options	-	ios=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ed4bb872abaf455b	-
+method	c:objc(cs)UNNotificationCategory(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	cb217592d4150266	-
+interface	c:objc(cs)UNNotificationRequest	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	abd527e934d584bc	-
+super	-	UNNotificationRequest	NSObject		-	-	-	-	-	e970f25b8055564b	-
+conforms	c:objc(cs)UNNotificationRequest	UNNotificationRequest	NSCopying		-	-	-	-	-	298b0cc5867dd08a	-
+conforms	c:objc(cs)UNNotificationRequest	UNNotificationRequest	NSSecureCoding		-	-	-	-	-	d4a0d95f946f6c3d	-
+property	c:objc(cs)UNNotificationRequest(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	74b802b7c6e5b7d8	-
+property	c:objc(cs)UNNotificationRequest(py)content	-			UNNotificationContent *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	905e4e30a281f3af	-
+property	c:objc(cs)UNNotificationRequest(py)trigger	-			UNNotificationTrigger *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4a3e809591255464	-
+method	c:objc(cs)UNNotificationRequest(cm)requestWithIdentifier:content:trigger:	-			instancetype	NSString * identifier | UNNotificationContent * content | UNNotificationTrigger * trigger	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c22f4b759cee3547	-
+method	c:objc(cs)UNNotificationRequest(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a11347a4660196b1	-
+var	c:@UNNotificationDefaultActionIdentifier	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	e5ef84190cb10f0f	-
+var	c:@UNNotificationDismissActionIdentifier	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	a92aad069998c19b	-
+interface	c:objc(cs)UNNotificationResponse	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	2abfcc47eefe67d7	-
+super	-	UNNotificationResponse	NSObject		-	-	-	-	-	533205482f9d4c22	-
+conforms	c:objc(cs)UNNotificationResponse	UNNotificationResponse	NSCopying		-	-	-	-	-	a523212658b159d1	-
+conforms	c:objc(cs)UNNotificationResponse	UNNotificationResponse	NSSecureCoding		-	-	-	-	-	1b5e6ae0c85daebf	-
+property	c:objc(cs)UNNotificationResponse(py)notification	-			UNNotification *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	368314117967ab12	-
+property	c:objc(cs)UNNotificationResponse(py)actionIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	f97d00fb6db435ba	-
+method	c:objc(cs)UNNotificationResponse(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	a300f90a6d1fbabc	-
+interface	c:objc(cs)UNTextInputNotificationResponse	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	125ba036c8b52f7c	-
+super	-	UNTextInputNotificationResponse	UNNotificationResponse		-	-	-	-	-	568e1937063c69b9	-
+property	c:objc(cs)UNTextInputNotificationResponse(py)userText	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	30f0d6fcf8cf98c0	-
+interface	c:objc(cs)UNNotificationServiceExtension	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=6.0/-/-/0	-	360a9db5e417cad2	-
+super	-	UNNotificationServiceExtension	NSObject		-	-	-	-	-	44615331c054ce61	-
+method	c:objc(cs)UNNotificationServiceExtension(im)didReceiveNotificationRequest:withContentHandler:	-			void	UNNotificationRequest * request | void (^)(UNNotificationContent * _Nonnull) contentHandler	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=6.0/-/-/0	-	a7e859f9636987f4	-
+method	c:objc(cs)UNNotificationServiceExtension(im)serviceExtensionTimeWillExpire	-			void	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=6.0/-/-/0	-	073cc25f924b148c	-
+typedef	c:@T@UNAuthorizationStatus	-			enum UNAuthorizationStatus	-	-	-	-	b29da3b752b454fb	-
+enum	c:@E@UNAuthorizationStatus	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	414262a42a85a5c6	-
+enumconst	c:@E@UNAuthorizationStatus@UNAuthorizationStatusNotDetermined	UNAuthorizationStatus			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e3e8679d763ccb0a	0
+enumconst	c:@E@UNAuthorizationStatus@UNAuthorizationStatusDenied	UNAuthorizationStatus			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	3225f92de0eb56f8	1
+enumconst	c:@E@UNAuthorizationStatus@UNAuthorizationStatusAuthorized	UNAuthorizationStatus			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1450bb9abce39da1	2
+enumconst	c:@E@UNAuthorizationStatus@UNAuthorizationStatusProvisional	UNAuthorizationStatus			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	b2e6e60e5d0b2a44	3
+enumconst	c:@E@UNAuthorizationStatus@UNAuthorizationStatusEphemeral	UNAuthorizationStatus			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c7af193064b9382f	4
+typedef	c:@T@UNShowPreviewsSetting	-			enum UNShowPreviewsSetting	-	-	-	-	acb4394c64815205	-
+enum	c:@E@UNShowPreviewsSetting	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	72acef9ada09637c	-
+enumconst	c:@E@UNShowPreviewsSetting@UNShowPreviewsSettingAlways	UNShowPreviewsSetting			-	-	-	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fcf347f27ac9ca96	0
+enumconst	c:@E@UNShowPreviewsSetting@UNShowPreviewsSettingWhenAuthenticated	UNShowPreviewsSetting			-	-	-	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	57f8729d4ca42695	1
+enumconst	c:@E@UNShowPreviewsSetting@UNShowPreviewsSettingNever	UNShowPreviewsSetting			-	-	-	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cd0203ae002b0263	2
+typedef	c:@T@UNNotificationSetting	-			enum UNNotificationSetting	-	-	-	-	9c1327be70e64ab9	-
+enum	c:@E@UNNotificationSetting	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a219698635481690	-
+enumconst	c:@E@UNNotificationSetting@UNNotificationSettingNotSupported	UNNotificationSetting			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	9f605da27c437d81	0
+enumconst	c:@E@UNNotificationSetting@UNNotificationSettingDisabled	UNNotificationSetting			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	712fcd38fce73bdb	1
+enumconst	c:@E@UNNotificationSetting@UNNotificationSettingEnabled	UNNotificationSetting			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	9f2d8f295f07b92f	2
+typedef	c:@T@UNAlertStyle	-			enum UNAlertStyle	-	-	-	-	ba41bc913b40ec6b	-
+enum	c:@E@UNAlertStyle	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	284e0b64b6b8fc8d	-
+enumconst	c:@E@UNAlertStyle@UNAlertStyleNone	UNAlertStyle			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3bc12ab8daaf601b	0
+enumconst	c:@E@UNAlertStyle@UNAlertStyleBanner	UNAlertStyle			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5d407a39de88b091	1
+enumconst	c:@E@UNAlertStyle@UNAlertStyleAlert	UNAlertStyle			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	39a58d25b9e32018	2
+interface	c:objc(cs)UNNotificationSettings	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	00345b717d9ab090	-
+super	-	UNNotificationSettings	NSObject		-	-	-	-	-	a834f0af457891b2	-
+conforms	c:objc(cs)UNNotificationSettings	UNNotificationSettings	NSCopying		-	-	-	-	-	a9bcacee42fe54ae	-
+conforms	c:objc(cs)UNNotificationSettings	UNNotificationSettings	NSSecureCoding		-	-	-	-	-	e8ece32954b29240	-
+property	c:objc(cs)UNNotificationSettings(py)authorizationStatus	-			UNAuthorizationStatus	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	867ce0aff3460422	-
+property	c:objc(cs)UNNotificationSettings(py)soundSetting	-			UNNotificationSetting	-	readonly,nonatomic	tvos=-/-/-/1	-	7a58a3707cef6e78	-
+property	c:objc(cs)UNNotificationSettings(py)badgeSetting	-			UNNotificationSetting	-	readonly,nonatomic	watchos=-/-/-/1	-	d79c2291cd73648d	-
+property	c:objc(cs)UNNotificationSettings(py)alertSetting	-			UNNotificationSetting	-	readonly,nonatomic	tvos=-/-/-/1	-	a6c94ffb03d00460	-
+property	c:objc(cs)UNNotificationSettings(py)notificationCenterSetting	-			UNNotificationSetting	-	readonly,nonatomic	tvos=-/-/-/1	-	2c98e8c824ca76a0	-
+property	c:objc(cs)UNNotificationSettings(py)lockScreenSetting	-			UNNotificationSetting	-	readonly,nonatomic	tvos=-/-/-/1,watchos=-/-/-/1	-	aa5708a79f6bb377	-
+property	c:objc(cs)UNNotificationSettings(py)carPlaySetting	-			UNNotificationSetting	-	readonly,nonatomic	macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4ee7159c6cb1a2ca	-
+property	c:objc(cs)UNNotificationSettings(py)alertStyle	-			UNAlertStyle	-	readonly,nonatomic	tvos=-/-/-/1,watchos=-/-/-/1	-	545ea01afad00e73	-
+property	c:objc(cs)UNNotificationSettings(py)showPreviewsSetting	-			UNShowPreviewsSetting	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c497b0bf851eaf74	-
+property	c:objc(cs)UNNotificationSettings(py)criticalAlertSetting	-			UNNotificationSetting	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=5.0/-/-/0	-	907bba0e7c183286	-
+property	c:objc(cs)UNNotificationSettings(py)providesAppNotificationSettings	-			BOOL	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=5.0/-/-/0	-	c0b0fd1217491bae	-
+property	c:objc(cs)UNNotificationSettings(py)announcementSetting	-			UNNotificationSetting	-	readonly,nonatomic	ios=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=6.0/-/-/0	-	9aa3f85aa2b47f76	-
+property	c:objc(cs)UNNotificationSettings(py)timeSensitiveSetting	-			UNNotificationSetting	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=8.0/-/-/0	-	35cc0ba5049063b6	-
+property	c:objc(cs)UNNotificationSettings(py)scheduledDeliverySetting	-			UNNotificationSetting	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=8.0/-/-/0	-	d7193ae00a6cb3f4	-
+property	c:objc(cs)UNNotificationSettings(py)directMessagesSetting	-			UNNotificationSetting	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=8.0/-/-/0	-	aa6ef4cac456658c	-
+method	c:objc(cs)UNNotificationSettings(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a0d2bc2c3c9290c4	-
+typedef	c:@T@UNNotificationSoundName	-			NSString *	-	-	-	-	f6bffdee8d2d7f12	-
+interface	c:objc(cs)UNNotificationSound	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	c3d7e52e8f58875d	-
+super	-	UNNotificationSound	NSObject		-	-	-	-	-	4c92c636084e7146	-
+conforms	c:objc(cs)UNNotificationSound	UNNotificationSound	NSCopying		-	-	-	-	-	4396184e7a12e2af	-
+conforms	c:objc(cs)UNNotificationSound	UNNotificationSound	NSSecureCoding		-	-	-	-	-	b35b769405fc99a7	-
+property	c:objc(cs)UNNotificationSound(cpy)defaultSound	-			UNNotificationSound *	-	readonly,copy,nonatomic,class	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	cd58a7506e9eb7e2	-
+property	c:objc(cs)UNNotificationSound(cpy)defaultRingtoneSound	-			UNNotificationSound *	-	readonly,copy,nonatomic,class	ios=15.2/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c6e205077a4a3503	-
+property	c:objc(cs)UNNotificationSound(cpy)defaultCriticalSound	-			UNNotificationSound *	-	readonly,copy,nonatomic,class	ios=12.0/-/-/0,tvos=-/-/-/1,watchos=5.0/-/-/0	-	fe6cccb74c843768	-
+method	c:objc(cs)UNNotificationSound(cm)defaultCriticalSoundWithAudioVolume:	-			instancetype	float volume	-	ios=12.0/-/-/0,tvos=-/-/-/1,watchos=5.0/-/-/0	-	9dab2c8b8f13d7c4	-
+method	c:objc(cs)UNNotificationSound(cm)soundNamed:	-			instancetype	UNNotificationSoundName name	-	tvos=-/-/-/1,watchos=-/-/-/1	-	41cf25c9a0df7bc5	-
+method	c:objc(cs)UNNotificationSound(cm)ringtoneSoundNamed:	-			instancetype	UNNotificationSoundName name	-	ios=15.2/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	dace63593f1348cd	-
+method	c:objc(cs)UNNotificationSound(cm)criticalSoundNamed:	-			instancetype	UNNotificationSoundName name	-	ios=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	04fc0191443aa436	-
+method	c:objc(cs)UNNotificationSound(cm)criticalSoundNamed:withAudioVolume:	-			instancetype	UNNotificationSoundName name | float volume	-	ios=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5b5f336d4ffbdd87	-
+method	c:objc(cs)UNNotificationSound(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	38fb2d6fd80afcf5	-
+interface	c:objc(cs)UNNotificationTrigger	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	70289d9bff3de7ea	-
+super	-	UNNotificationTrigger	NSObject		-	-	-	-	-	2f4965aa786bc0a0	-
+conforms	c:objc(cs)UNNotificationTrigger	UNNotificationTrigger	NSCopying		-	-	-	-	-	ee07ad1a7ed983db	-
+conforms	c:objc(cs)UNNotificationTrigger	UNNotificationTrigger	NSSecureCoding		-	-	-	-	-	bc2948cd74b399f9	-
+property	c:objc(cs)UNNotificationTrigger(py)repeats	-			BOOL	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	63fd3545d43f74ac	-
+method	c:objc(cs)UNNotificationTrigger(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4995bf980fe9fe41	-
+interface	c:objc(cs)UNPushNotificationTrigger	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	70b581ce128e7828	-
+super	-	UNPushNotificationTrigger	UNNotificationTrigger		-	-	-	-	-	7ce7bb60797cb904	-
+interface	c:objc(cs)UNTimeIntervalNotificationTrigger	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	0acbc59b505d811e	-
+super	-	UNTimeIntervalNotificationTrigger	UNNotificationTrigger		-	-	-	-	-	842be0d8d2c9cc4b	-
+property	c:objc(cs)UNTimeIntervalNotificationTrigger(py)timeInterval	-			NSTimeInterval	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c2778edc2ca3874e	-
+method	c:objc(cs)UNTimeIntervalNotificationTrigger(cm)triggerWithTimeInterval:repeats:	-			instancetype	NSTimeInterval timeInterval | BOOL repeats	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	60a3928ff0ad239c	-
+method	c:objc(cs)UNTimeIntervalNotificationTrigger(im)nextTriggerDate	-			NSDate *	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f934c92d818f298b	-
+interface	c:objc(cs)UNCalendarNotificationTrigger	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4afea62778df26cb	-
+super	-	UNCalendarNotificationTrigger	UNNotificationTrigger		-	-	-	-	-	fc5d3c75e233165d	-
+property	c:objc(cs)UNCalendarNotificationTrigger(py)dateComponents	-			NSDateComponents *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d1b09298d1c6000b	-
+method	c:objc(cs)UNCalendarNotificationTrigger(cm)triggerWithDateMatchingComponents:repeats:	-			instancetype	NSDateComponents * dateComponents | BOOL repeats	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	06ecbc48395bce56	-
+method	c:objc(cs)UNCalendarNotificationTrigger(im)nextTriggerDate	-			NSDate *	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	76856052bdf4c486	-
+interface	c:objc(cs)UNLocationNotificationTrigger	-			-	-	-	ios=10.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=3.0/-/-/0,xros=-/-/-/1	-	f2f35fb4ce9dabdb	-
+super	-	UNLocationNotificationTrigger	UNNotificationTrigger		-	-	-	-	-	5f9a07ecd821c26d	-
+property	c:objc(cs)UNLocationNotificationTrigger(py)region	-			CLRegion *	-	readonly,copy,nonatomic	ios=10.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=3.0/-/-/0,xros=-/-/-/1	-	7d5d37ed1dd82611	-
+method	c:objc(cs)UNLocationNotificationTrigger(cm)triggerWithRegion:repeats:	-			instancetype	CLRegion * region | BOOL repeats	-	watchos=8.0/-/-/0	-	9d0c5193a69a0519	-
+typedef	c:@T@UNAuthorizationOptions	-			enum UNAuthorizationOptions	-	-	-	-	35b6e0820313db9a	-
+enum	c:@E@UNAuthorizationOptions	-			NSUInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d5eb89b57329df42	-
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionBadge	UNAuthorizationOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	07593dfa7330a362	1
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionSound	UNAuthorizationOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8776152a2406f02c	2
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionAlert	UNAuthorizationOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	0640b0c449fd98a4	4
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionCarPlay	UNAuthorizationOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	adfd739551b703e2	8
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionCriticalAlert	UNAuthorizationOptions			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	7875b9b635e2df2b	16
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionProvidesAppNotificationSettings	UNAuthorizationOptions			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	28ed500473eb585d	32
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionProvisional	UNAuthorizationOptions			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	4bdc13398bcd4838	64
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionAnnouncement	UNAuthorizationOptions			-	-	-	ios=13.0/15.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=6.0/7.0/-/0	deprecated: Announcement authorization is always included	2b4aad57984b7268	128
+enumconst	c:@E@UNAuthorizationOptions@UNAuthorizationOptionTimeSensitive	UNAuthorizationOptions			-	-	-	ios=15.0/15.0/-/0,macos=12.0/12.0/-/0,tvos=15.0/15.0/-/0,watchos=8.0/8.0/-/0	deprecated: Use time-sensitive entitlement	3d4e3bb14f1163de	256
+interface	c:objc(cs)UNUserNotificationCenter	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8e4d87173d8c913f	-
+super	-	UNUserNotificationCenter	NSObject		-	-	-	-	-	25f1eee982e70105	-
+property	c:objc(cs)UNUserNotificationCenter(py)delegate	-			id<UNUserNotificationCenterDelegate>	-	weak,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e40697e5f4ed2bcb	-
+property	c:objc(cs)UNUserNotificationCenter(py)supportsContentExtensions	-			BOOL	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	203bb0cc47d2f44b	-
+method	c:objc(cs)UNUserNotificationCenter(cm)currentNotificationCenter	-			UNUserNotificationCenter *	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1288355d6c1a839c	-
+method	c:objc(cs)UNUserNotificationCenter(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	aeb459f9b3319a23	-
+method	c:objc(cs)UNUserNotificationCenter(im)requestAuthorizationWithOptions:completionHandler:	-			void	UNAuthorizationOptions options | void (^)(BOOL, NSError * _Nullable) completionHandler	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f629139e235d787e	-
+method	c:objc(cs)UNUserNotificationCenter(im)setNotificationCategories:	-			void	NSSet<UNNotificationCategory *> * categories	-	tvos=-/-/-/1	-	8de619cf32497cb8	-
+method	c:objc(cs)UNUserNotificationCenter(im)getNotificationCategoriesWithCompletionHandler:	-			void	void (^)(NSSet<UNNotificationCategory *> * _Nonnull) completionHandler	-	tvos=-/-/-/1	-	0a0f710e79ea2c04	-
+method	c:objc(cs)UNUserNotificationCenter(im)getNotificationSettingsWithCompletionHandler:	-			void	void (^)(UNNotificationSettings * _Nonnull) completionHandler	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4246b219aba8cf4e	-
+method	c:objc(cs)UNUserNotificationCenter(im)addNotificationRequest:withCompletionHandler:	-			void	UNNotificationRequest * request | void (^)(NSError * _Nullable) completionHandler	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	435d641e04ee13c6	-
+method	c:objc(cs)UNUserNotificationCenter(im)getPendingNotificationRequestsWithCompletionHandler:	-			void	void (^)(NSArray<UNNotificationRequest *> * _Nonnull) completionHandler	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	7e151bf32282fc42	-
+method	c:objc(cs)UNUserNotificationCenter(im)removePendingNotificationRequestsWithIdentifiers:	-			void	NSArray<NSString *> * identifiers	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c217b85ff880019f	-
+method	c:objc(cs)UNUserNotificationCenter(im)removeAllPendingNotificationRequests	-			void	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	9374918e6df3fcd1	-
+method	c:objc(cs)UNUserNotificationCenter(im)getDeliveredNotificationsWithCompletionHandler:	-			void	void (^)(NSArray<UNNotification *> * _Nonnull) completionHandler	-	tvos=-/-/-/1	-	3d0c5945a87a3291	-
+method	c:objc(cs)UNUserNotificationCenter(im)removeDeliveredNotificationsWithIdentifiers:	-			void	NSArray<NSString *> * identifiers	-	tvos=-/-/-/1	-	788806bcd1df34e2	-
+method	c:objc(cs)UNUserNotificationCenter(im)removeAllDeliveredNotifications	-			void	-	-	tvos=-/-/-/1	-	5aec960337a4d2da	-
+method	c:objc(cs)UNUserNotificationCenter(im)setBadgeCount:withCompletionHandler:	-			void	NSInteger newBadgeCount | void (^)(NSError * _Nullable) completionHandler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=-/-/-/1	-	4764767746a11ddd	-
+typedef	c:@T@UNNotificationPresentationOptions	-			enum UNNotificationPresentationOptions	-	-	-	-	41038f283e951a49	-
+enum	c:@E@UNNotificationPresentationOptions	-			NSUInteger	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	97db2cd20d7e8fef	-
+enumconst	c:@E@UNNotificationPresentationOptions@UNNotificationPresentationOptionBadge	UNNotificationPresentationOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1c5248d5465d109e	1
+enumconst	c:@E@UNNotificationPresentationOptions@UNNotificationPresentationOptionSound	UNNotificationPresentationOptions			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	7ff42c0d9d385d11	2
+enumconst	c:@E@UNNotificationPresentationOptions@UNNotificationPresentationOptionAlert	UNNotificationPresentationOptions			-	-	-	ios=10.0/14.0/-/0,macos=10.14/11.0/-/0,tvos=10.0/14.0/-/0,watchos=3.0/7.0/-/0	deprecated: Use UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner instead	a85a72e17bda94fc	4
+enumconst	c:@E@UNNotificationPresentationOptions@UNNotificationPresentationOptionList	UNNotificationPresentationOptions			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	5b720a4fa9308ebd	8
+enumconst	c:@E@UNNotificationPresentationOptions@UNNotificationPresentationOptionBanner	UNNotificationPresentationOptions			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	1319f4fe99fecb46	16
+protocol	c:objc(pl)UNUserNotificationCenterDelegate	-			-	-	-	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d24f32f03c85b5c8	-
+conforms	c:objc(pl)UNUserNotificationCenterDelegate	UNUserNotificationCenterDelegate	NSObject		-	-	-	-	-	c933a2e59df1be59	-
+method	c:objc(pl)UNUserNotificationCenterDelegate(im)userNotificationCenter:willPresentNotification:withCompletionHandler:	-			void	UNUserNotificationCenter * center | UNNotification * notification | void (^)(UNNotificationPresentationOptions) completionHandler	optional	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	9be30da13f340b82	-
+method	c:objc(pl)UNUserNotificationCenterDelegate(im)userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:	-			void	UNUserNotificationCenter * center | UNNotificationResponse * response | void (^)(void) completionHandler	optional	ios=10.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=3.0/-/-/0	-	d09b6a92c6378ccc	-
+method	c:objc(pl)UNUserNotificationCenterDelegate(im)userNotificationCenter:openSettingsForNotification:	-			void	UNUserNotificationCenter * center | UNNotification * notification	optional	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e29b7aaf164dcfdc	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-

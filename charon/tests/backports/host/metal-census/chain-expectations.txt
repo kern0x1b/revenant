@@ -1,0 +1,41 @@
+the device: Apple M4 Pro
+ZZZNoSuchNameCharonR16 -> nil (right)
+
+MTL4CommandQueue, both ways the 26.2 header declares them
+   newMTL4CommandQueue -> <AGXG16XFamilyCommandQueue_mtlnext>
+   a fresh queue's label              -> (nil)
+   its device                         -> <AGXG16SDevice>
+   newMTL4CommandQueueWithDescriptor:error: (a REAL descriptor) -> a queue, error (nil)
+
+MTL4CommandAllocator, MTLDevice.h:1240
+   newCommandAllocator -> <AGXG16XFamilyCommandAllocator_mtlnext>
+   label                              -> (nil)
+   device                             -> <AGXG16SDevice>
+
+MTL4CommandBuffer, MTLDevice.h:1278
+   newCommandBuffer -> <AGXG16XFamilyCommandBuffer_mtlnext>
+   a fresh buffer's label             -> (nil)
+   device                             -> <AGXG16SDevice>
+   commandQueue                       -> not a member of AGXG16XFamilyCommandBuffer_mtlnext
+   status before begin                -> not a member of AGXG16XFamilyCommandBuffer_mtlnext
+
+beginCommandBufferWithAllocator:, MTL4CommandBuffer.h:71
+   beginCommandBufferWithAllocator: answered without raising
+   status after begin                 -> not a member of AGXG16XFamilyCommandBuffer_mtlnext
+
+the two encoders
+   renderCommandEncoderWithDescriptor: -> (nil)
+   computeCommandEncoder -> <AGXG16XFamilyComputeContext_mtlnext>
+   compute encoder label              -> (nil)
+   compute encoder commandBuffer      -> <AGXG16XFamilyCommandBuffer_mtlnext>
+   compute pushDebugGroup: answered
+   compute popDebugGroup: answered
+
+endEncoding on each encoder that exists, then endCommandBuffer
+   compute endEncoding answered
+   endCommandBuffer answered
+   status at the end                  -> not a member of AGXG16XFamilyCommandBuffer_mtlnext
+
+and the queue's commit: measured next, in a process of its own
+   NOT ASKED HERE - Metal is not fork-safe, so a child forked from this process would
+       answer a question about the fork. See chain-commit.sh.

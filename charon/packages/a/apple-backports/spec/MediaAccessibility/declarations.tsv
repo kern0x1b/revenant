@@ -1,0 +1,96 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@kMACaptionAppearanceSettingsChangedNotification	-			const CFStringRef	-	-	-	-	389878dd18091f92	-
+typedef	c:@T@MACaptionAppearanceDomain	-			enum MACaptionAppearanceDomain	-	-	-	-	4100255991cdc202	-
+enum	c:@E@MACaptionAppearanceDomain	-			CFIndex	-	-	ios=7.0/-/-/0	-	ea4131064cc91054	-
+enumconst	c:@E@MACaptionAppearanceDomain@kMACaptionAppearanceDomainDefault	MACaptionAppearanceDomain			-	-	-	ios=7.0/-/-/0	-	be3c40822b637d55	0
+enumconst	c:@E@MACaptionAppearanceDomain@kMACaptionAppearanceDomainUser	MACaptionAppearanceDomain			-	-	-	ios=7.0/-/-/0	-	af7de1ac22a2ff6c	1
+typedef	c:@T@MACaptionAppearanceDisplayType	-			enum MACaptionAppearanceDisplayType	-	-	-	-	9beb4c057e5dc6f5	-
+enum	c:@E@MACaptionAppearanceDisplayType	-			CFIndex	-	-	ios=7.0/-/-/0	-	38762d9bb2bcabb1	-
+enumconst	c:@E@MACaptionAppearanceDisplayType@kMACaptionAppearanceDisplayTypeForcedOnly	MACaptionAppearanceDisplayType			-	-	-	ios=7.0/-/-/0	-	3772cfde9eb641d2	0
+enumconst	c:@E@MACaptionAppearanceDisplayType@kMACaptionAppearanceDisplayTypeAutomatic	MACaptionAppearanceDisplayType			-	-	-	ios=7.0/-/-/0	-	7d6e052031795780	1
+enumconst	c:@E@MACaptionAppearanceDisplayType@kMACaptionAppearanceDisplayTypeAlwaysOn	MACaptionAppearanceDisplayType			-	-	-	ios=7.0/-/-/0	-	694b34c3dd110f38	2
+typedef	c:@T@MACaptionAppearanceBehavior	-			enum MACaptionAppearanceBehavior	-	-	-	-	c1e18f74b64aa08f	-
+enum	c:@E@MACaptionAppearanceBehavior	-			CFIndex	-	-	ios=7.0/-/-/0	-	f8aab8fe8d58eabe	-
+enumconst	c:@E@MACaptionAppearanceBehavior@kMACaptionAppearanceBehaviorUseValue	MACaptionAppearanceBehavior			-	-	-	ios=7.0/-/-/0	-	c051c139e0e8c6c4	0
+enumconst	c:@E@MACaptionAppearanceBehavior@kMACaptionAppearanceBehaviorUseContentIfAvailable	MACaptionAppearanceBehavior			-	-	-	ios=7.0/-/-/0	-	bc9ae25bf1ad3dc8	1
+typedef	c:@T@MACaptionAppearanceFontStyle	-			enum MACaptionAppearanceFontStyle	-	-	-	-	09c979a9636edbab	-
+enum	c:@E@MACaptionAppearanceFontStyle	-			CFIndex	-	-	ios=7.0/-/-/0	-	afc1d9f19655c6fa	-
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleDefault	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	f8e6956d1b242924	0
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleMonospacedWithSerif	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	2520db0c9325596a	1
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleProportionalWithSerif	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	fd3f55296a5f12e6	2
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleMonospacedWithoutSerif	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	96ab85f81497ec84	3
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleProportionalWithoutSerif	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	3e90f20cb64102c7	4
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleCasual	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	1f2a481487525241	5
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleCursive	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	c13facb6d11c75e6	6
+enumconst	c:@E@MACaptionAppearanceFontStyle@kMACaptionAppearanceFontStyleSmallCapital	MACaptionAppearanceFontStyle			-	-	-	ios=7.0/-/-/0	-	248f730642914041	7
+typedef	c:@T@MACaptionAppearanceTextEdgeStyle	-			enum MACaptionAppearanceTextEdgeStyle	-	-	-	-	553733f5af8c0f95	-
+enum	c:@E@MACaptionAppearanceTextEdgeStyle	-			CFIndex	-	-	ios=7.0/-/-/0	-	e2f19d7f44b4b0c7	-
+enumconst	c:@E@MACaptionAppearanceTextEdgeStyle@kMACaptionAppearanceTextEdgeStyleUndefined	MACaptionAppearanceTextEdgeStyle			-	-	-	ios=7.0/-/-/0	-	fe93a27bfdddd2b3	0
+enumconst	c:@E@MACaptionAppearanceTextEdgeStyle@kMACaptionAppearanceTextEdgeStyleNone	MACaptionAppearanceTextEdgeStyle			-	-	-	ios=7.0/-/-/0	-	19c55ef1b3463341	1
+enumconst	c:@E@MACaptionAppearanceTextEdgeStyle@kMACaptionAppearanceTextEdgeStyleRaised	MACaptionAppearanceTextEdgeStyle			-	-	-	ios=7.0/-/-/0	-	5041c80b51ae8296	2
+enumconst	c:@E@MACaptionAppearanceTextEdgeStyle@kMACaptionAppearanceTextEdgeStyleDepressed	MACaptionAppearanceTextEdgeStyle			-	-	-	ios=7.0/-/-/0	-	dc547e161bc5036c	3
+enumconst	c:@E@MACaptionAppearanceTextEdgeStyle@kMACaptionAppearanceTextEdgeStyleUniform	MACaptionAppearanceTextEdgeStyle			-	-	-	ios=7.0/-/-/0	-	375443c99a25e4e3	4
+enumconst	c:@E@MACaptionAppearanceTextEdgeStyle@kMACaptionAppearanceTextEdgeStyleDropShadow	MACaptionAppearanceTextEdgeStyle			-	-	-	ios=7.0/-/-/0	-	57404e00301bf881	5
+var	c:@MAMediaCharacteristicDescribesMusicAndSoundForAccessibility	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	cad266c3776f3ed1	-
+var	c:@MAMediaCharacteristicTranscribesSpokenDialogForAccessibility	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	c9de8641ee71339e	-
+function	c:@F@MACaptionAppearanceDidDisplayCaptions	-			void (CFArrayRef)	CFArrayRef strings	-	-	-	82a15758e5095c56	-
+function	c:@F@MACaptionAppearanceAddSelectedLanguage	-			_Bool (MACaptionAppearanceDomain, CFStringRef)	MACaptionAppearanceDomain domain | CFStringRef language	-	ios=7.0/-/-/0	-	326f28ec6e4a6736	-
+function	c:@F@MACaptionAppearanceCopySelectedLanguages	-			CFArrayRef (MACaptionAppearanceDomain)	MACaptionAppearanceDomain domain	-	ios=7.0/-/-/0	-	88a5a51e4a97dec1	-
+function	c:@F@MACaptionAppearanceGetDisplayType	-			MACaptionAppearanceDisplayType (MACaptionAppearanceDomain)	MACaptionAppearanceDomain domain	-	ios=7.0/-/-/0	-	b669974240e09c55	-
+function	c:@F@MACaptionAppearanceSetDisplayType	-			void (MACaptionAppearanceDomain, MACaptionAppearanceDisplayType)	MACaptionAppearanceDomain domain | MACaptionAppearanceDisplayType displayType	-	ios=7.0/-/-/0	-	f548885b8613960b	-
+function	c:@F@MACaptionAppearanceCopyPreferredCaptioningMediaCharacteristics	-			CFArrayRef (MACaptionAppearanceDomain)	MACaptionAppearanceDomain domain	-	ios=7.0/-/-/0	-	ffdc3d7a16d62aa5	-
+function	c:@F@MACaptionAppearanceIsCustomized	-			_Bool (MACaptionAppearanceDomain)	MACaptionAppearanceDomain domain	-	ios=18.0/-/-/0	-	ef2b43270c33b6ee	-
+function	c:@F@MACaptionAppearanceCopyForegroundColor	-			CGColorRef (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	306cf567031d8c31	-
+function	c:@F@MACaptionAppearanceCopyBackgroundColor	-			CGColorRef (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	b80f11387745b152	-
+function	c:@F@MACaptionAppearanceCopyWindowColor	-			CGColorRef (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	cf068b2fc225d221	-
+function	c:@F@MACaptionAppearanceGetForegroundOpacity	-			CGFloat (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	1630ec616c80177b	-
+function	c:@F@MACaptionAppearanceGetBackgroundOpacity	-			CGFloat (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	bd783b8d9a4f18f5	-
+function	c:@F@MACaptionAppearanceGetWindowOpacity	-			CGFloat (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	d8cb1ce6ca1673a4	-
+function	c:@F@MACaptionAppearanceGetWindowRoundedCornerRadius	-			CGFloat (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	6eff483cd541708d	-
+function	c:@F@MACaptionAppearanceCopyFontDescriptorForStyle	-			CTFontDescriptorRef (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *, MACaptionAppearanceFontStyle)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior | MACaptionAppearanceFontStyle fontStyle	-	ios=7.0/-/-/0	-	cdafb9af44d7935f	-
+function	c:@F@MACaptionAppearanceGetRelativeCharacterSize	-			CGFloat (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	0a3991030a6e4837	-
+function	c:@F@MACaptionAppearanceGetTextEdgeStyle	-			MACaptionAppearanceTextEdgeStyle (MACaptionAppearanceDomain, MACaptionAppearanceBehavior *)	MACaptionAppearanceDomain domain | MACaptionAppearanceBehavior * behavior	-	ios=7.0/-/-/0	-	49736658f8557834	-
+function	c:@F@MACaptionAppearanceCopyProfileIDs	-			CFArrayRef (void)	-	-	ios=26.0/-/-/0	-	457a49a072803631	-
+function	c:@F@MACaptionAppearanceSetActiveProfileID	-			void (CFStringRef)	CFStringRef profileID	-	ios=26.0/-/-/0	-	2ab57c9de367d9b7	-
+function	c:@F@MACaptionAppearanceCopyActiveProfileID	-			CFStringRef (void)	-	-	ios=26.0/-/-/0	-	c40ee85649aeb0fe	-
+function	c:@F@MACaptionAppearanceCopyProfileName	-			CFStringRef (CFStringRef)	CFStringRef profileID	-	ios=26.0/-/-/0	-	b2d43827df2caa27	-
+function	c:@F@MACaptionAppearanceExecuteBlockForProfileID	-			void (CFStringRef, void (^)(void))	CFStringRef profileID | void (^)(void) aBlock	-	ios=26.0/-/-/0	-	5a33219a035190d6	-
+var	c:@kMAAudibleMediaSettingsChangedNotification	-			const CFStringRef	-	-	-	-	ae10ceaee74182b8	-
+var	c:@MAMediaCharacteristicDescribesVideoForAccessibility	-			const CFStringRef	-	-	ios=8.0/-/-/0	-	6c05db8e7263f217	-
+function	c:@F@MAAudibleMediaCopyPreferredCharacteristics	-			CFArrayRef (void)	-	-	ios=8.0/-/-/0	-	305eb3108093af52	-
+function	c:@F@MAImageCaptioningCopyCaption	-			CFStringRef (CFURLRef, CFErrorRef  _Nullable *)	CFURLRef url | CFErrorRef  _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	fe9b9fde63c49e40	-
+function	c:@F@MAImageCaptioningSetCaption	-			_Bool (CFURLRef, CFStringRef, CFErrorRef  _Nullable *)	CFURLRef url | CFStringRef string | CFErrorRef  _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	01398bd18c22123d	-
+function	c:@F@MAImageCaptioningCopyMetadataTagPath	-			CFStringRef (void)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	173ab2c956919fe6	-
+function	c:@F@MADimFlashingLightsEnabled	-			_Bool (void)	-	-	ios=16.4/-/-/0	-	9b14905c69f96493	-
+var	c:@kMADimFlashingLightsChangedNotification	-			const CFStringRef	-	-	ios=16.4/-/-/0	-	caf2f4e0b49d8500	-
+interface	c:objc(cs)MAFlashingLightsProcessorResult	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	a5023764e952d61a	-
+super	-	MAFlashingLightsProcessorResult	NSObject		-	-	-	-	-	eb060e86fe979c1e	-
+property	c:objc(cs)MAFlashingLightsProcessorResult(py)surfaceProcessed	-			BOOL	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	ca4d7a3b710cf13c	-
+property	c:objc(cs)MAFlashingLightsProcessorResult(py)mitigationLevel	-			float	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	d596d28f796fcf56	-
+property	c:objc(cs)MAFlashingLightsProcessorResult(py)intensityLevel	-			float	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	c3e0ccdb0215dbaa	-
+typedef	c:@T@MAFlashingLightsProcessorOptionKey	-			NSString *	-	-	-	-	7d5b21bd006cbb47	-
+interface	c:objc(cs)MAFlashingLightsProcessor	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	46bfe2cebd36bfb3	-
+super	-	MAFlashingLightsProcessor	NSObject		-	-	-	-	-	c771764b4b57b538	-
+method	c:objc(cs)MAFlashingLightsProcessor(im)canProcessSurface:	-			BOOL	IOSurfaceRef surface	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	1a6dffafdcebf10a	-
+method	c:objc(cs)MAFlashingLightsProcessor(im)processSurface:outSurface:timestamp:options:	-			MAFlashingLightsProcessorResult *	IOSurfaceRef inSurface | IOSurfaceRef outSurface | CFAbsoluteTime timestamp | NSDictionary<MAFlashingLightsProcessorOptionKey,id> * options	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	6b9f3bf6424df3c8	-
+var	c:@MAMusicHapticsManagerActiveStatusDidChangeNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	adbf74a9c39bdaac	-
+interface	c:objc(cs)MAMusicHapticsManager	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	45621a3a432bc75b	-
+super	-	MAMusicHapticsManager	NSObject		-	-	-	-	-	06c9c64db37ea88f	-
+property	c:objc(cs)MAMusicHapticsManager(cpy)sharedManager	-			MAMusicHapticsManager *	-	readonly,nonatomic,class	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	bfd9b460ef595a27	-
+property	c:objc(cs)MAMusicHapticsManager(py)isActive	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	ec52ce45d141e0fc	-
+method	c:objc(cs)MAMusicHapticsManager(im)checkHapticTrackAvailabilityForMediaMatchingCode:completionHandler:	-			void	NSString * internationalStandardRecordingCode | void (^)(BOOL) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	e2c4b41d826685aa	-
+method	c:objc(cs)MAMusicHapticsManager(im)addStatusObserver:	-			id<NSCopying>	void (^)(NSString * _Nonnull, BOOL) statusHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	a39f54126711dc61	-
+method	c:objc(cs)MAMusicHapticsManager(im)removeStatusObserver:	-			void	id<NSCopying> registrationToken	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	deac9cdbf9abfff3	-
+method	c:objc(cs)MAMusicHapticsManager(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	7bc54739311d8cd9	-
+method	c:objc(cs)MAMusicHapticsManager(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	893dff5345a3a1f4	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@CFArrayRef	-			const struct __CFArray *	-	-	-	-	d3655b482ae0664e	-
+typedef	c:@T@CGColorRef	-			struct CGColor *	-	-	-	-	6d1707fde3455599	-
+typedef	c:@T@CGFloat	-			double	-	-	-	-	29e11a71cfda882e	-
+typedef	c:@T@CTFontDescriptorRef	-			const struct __CTFontDescriptor *	-	-	-	-	7e9603ab43f9052a	-
+typedef	c:@T@CFURLRef	-			const struct __CFURL *	-	-	-	-	0ca832288ff2133f	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@IOSurfaceRef	-			struct __IOSurface *	-	-	-	-	b3d7dabcf5bf59d2	-
+typedef	c:@T@CFAbsoluteTime	-			CFTimeInterval	-	-	-	-	28db4ad74a7edc7f	-
+typedef	c:@T@CFTimeInterval	-			double	-	-	-	-	11d627848397cf44	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-

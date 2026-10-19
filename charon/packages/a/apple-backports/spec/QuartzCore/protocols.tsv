@@ -1,0 +1,12 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+CAAnimationDelegate	10.0	sdk16 body		NSObject	-	-	-	-	-	-
+CAAnimationDelegate	10.0	sdk16 body		NSObject	optional	method	yes	animationDidStart:	- (void)animationDidStart:(CAAnimation * _Nonnull)anim;	yes
+CAAnimationDelegate	10.0	sdk16 body		NSObject	optional	method	yes	animationDidStop:finished:	- (void)animationDidStop:(CAAnimation * _Nonnull)anim finished:(BOOL)flag;	yes
+CALayerDelegate	10.0	sdk16 body		NSObject	-	-	-	-	-	-
+CALayerDelegate	10.0	sdk16 body		NSObject	optional	method	yes	displayLayer:	- (void)displayLayer:(CALayer * _Nonnull)layer;	yes
+CALayerDelegate	10.0	sdk16 body		NSObject	optional	method	yes	drawLayer:inContext:	- (void)drawLayer:(CALayer * _Nonnull)layer inContext:(CGContextRef _Nonnull)ctx;	yes
+CALayerDelegate	10.0	sdk16 body		NSObject	optional	method	yes	layerWillDraw:	- (void)layerWillDraw:(CALayer * _Nonnull)layer API_AVAILABLE(ios(10.0));	yes
+CALayerDelegate	10.0	sdk16 body		NSObject	optional	method	yes	layoutSublayersOfLayer:	- (void)layoutSublayersOfLayer:(CALayer * _Nonnull)layer;	yes
+CALayerDelegate	10.0	sdk16 body		NSObject	optional	method	yes	actionForLayer:forKey:	- (id<CAAction> _Nullable)actionForLayer:(CALayer * _Nonnull)layer forKey:(NSString * _Nonnull)event;	yes
+CAMetalDisplayLinkDelegate	17.0	transcribed			-	-	-	-	-	-
+CAMetalDisplayLinkDelegate	17.0	transcribed			required	method	yes	metalDisplayLink:needsUpdate:	- (void)metalDisplayLink:(CAMetalDisplayLink * _Nonnull)link needsUpdate:(CAMetalDisplayLinkUpdate * _Nonnull)update;	-

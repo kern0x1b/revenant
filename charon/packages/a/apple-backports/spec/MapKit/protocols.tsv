@@ -1,0 +1,47 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+MKGeoJSONObject	13.0	sdk16 body		NSObject	-	-	-	-	-	-
+MKLocalSearchCompleterDelegate	9.3	sdk16 body		NSObject	-	-	-	-	-	-
+MKLocalSearchCompleterDelegate	9.3	sdk16 body		NSObject	optional	method	yes	completerDidUpdateResults:	- (void)completerDidUpdateResults:(MKLocalSearchCompleter * _Nonnull)completer;	yes
+MKLocalSearchCompleterDelegate	9.3	sdk16 body		NSObject	optional	method	yes	completer:didFailWithError:	- (void)completer:(MKLocalSearchCompleter * _Nonnull)completer didFailWithError:(NSError * _Nonnull)error;	yes
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	lookAroundViewControllerWillUpdateScene:	- (void)lookAroundViewControllerWillUpdateScene:(MKLookAroundViewController * _Nonnull)viewController;	yes
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	lookAroundViewControllerDidUpdateScene:	- (void)lookAroundViewControllerDidUpdateScene:(MKLookAroundViewController * _Nonnull)viewController;	yes
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	lookAroundViewControllerWillPresentFullScreen:	- (void)lookAroundViewControllerWillPresentFullScreen:(MKLookAroundViewController * _Nonnull)viewController;	yes
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	lookAroundViewControllerDidPresentFullScreen:	- (void)lookAroundViewControllerDidPresentFullScreen:(MKLookAroundViewController * _Nonnull)viewController;	yes
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	lookAroundViewControllerWillDismissFullScreen:	- (void)lookAroundViewControllerWillDismissFullScreen:(MKLookAroundViewController * _Nonnull)viewController;	yes
+MKLookAroundViewControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	lookAroundViewControllerDidDismissFullScreen:	- (void)lookAroundViewControllerDidDismissFullScreen:(MKLookAroundViewController * _Nonnull)viewController;	yes
+MKMapItemDetailViewControllerDelegate	18.0	transcribed		NSObject	-	-	-	-	-	-
+MKMapItemDetailViewControllerDelegate	18.0	transcribed		NSObject	required	method	yes	mapItemDetailViewControllerDidFinish:	- (void)mapItemDetailViewControllerDidFinish:(MKMapItemDetailViewController * _Nonnull)detailViewController;	-
+MKMapViewDelegate	7.0	sdk16 body		NSObject	-	-	-	-	-	-
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:regionWillChangeAnimated:	- (void)mapView:(MKMapView * _Nonnull)mapView regionWillChangeAnimated:(BOOL)animated;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:regionDidChangeAnimated:	- (void)mapView:(MKMapView * _Nonnull)mapView regionDidChangeAnimated:(BOOL)animated;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewDidChangeVisibleRegion:	- (void)mapViewDidChangeVisibleRegion:(MKMapView * _Nonnull)mapView API_AVAILABLE(ios(11));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewWillStartLoadingMap:	- (void)mapViewWillStartLoadingMap:(MKMapView * _Nonnull)mapView;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewDidFinishLoadingMap:	- (void)mapViewDidFinishLoadingMap:(MKMapView * _Nonnull)mapView;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewDidFailLoadingMap:withError:	- (void)mapViewDidFailLoadingMap:(MKMapView * _Nonnull)mapView withError:(NSError * _Nonnull)error;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewWillStartRenderingMap:	- (void)mapViewWillStartRenderingMap:(MKMapView * _Nonnull)mapView API_AVAILABLE(ios(7.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewDidFinishRenderingMap:fullyRendered:	- (void)mapViewDidFinishRenderingMap:(MKMapView * _Nonnull)mapView fullyRendered:(BOOL)fullyRendered API_AVAILABLE(ios(7.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:viewForAnnotation:	- (MKAnnotationView * _Nullable)mapView:(MKMapView * _Nonnull)mapView viewForAnnotation:(id<MKAnnotation>  _Nonnull)annotation;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didAddAnnotationViews:	- (void)mapView:(MKMapView * _Nonnull)mapView didAddAnnotationViews:(NSArray<MKAnnotationView *> * _Nonnull)views;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:annotationView:calloutAccessoryControlTapped:	- (void)mapView:(MKMapView * _Nonnull)mapView annotationView:(MKAnnotationView * _Nonnull)view calloutAccessoryControlTapped:(UIControl * _Nonnull)control;	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didSelectAnnotationView:	- (void)mapView:(MKMapView * _Nonnull)mapView didSelectAnnotationView:(MKAnnotationView * _Nonnull)view API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didDeselectAnnotationView:	- (void)mapView:(MKMapView * _Nonnull)mapView didDeselectAnnotationView:(MKAnnotationView * _Nonnull)view API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didSelectAnnotation:	- (void)mapView:(MKMapView * _Nonnull)mapView didSelectAnnotation:(id<MKAnnotation>  _Nonnull)annotation API_AVAILABLE(ios(16.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didDeselectAnnotation:	- (void)mapView:(MKMapView * _Nonnull)mapView didDeselectAnnotation:(id<MKAnnotation>  _Nonnull)annotation API_AVAILABLE(ios(16.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:selectionAccessoryForAnnotation:	- (MKSelectionAccessory * _Nullable)mapView:(MKMapView * _Nonnull)mapView selectionAccessoryForAnnotation:(id<MKAnnotation>  _Nonnull)annotation API_AVAILABLE(ios(18.0));	no
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewWillStartLocatingUser:	- (void)mapViewWillStartLocatingUser:(MKMapView * _Nonnull)mapView API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapViewDidStopLocatingUser:	- (void)mapViewDidStopLocatingUser:(MKMapView * _Nonnull)mapView API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didUpdateUserLocation:	- (void)mapView:(MKMapView * _Nonnull)mapView didUpdateUserLocation:(MKUserLocation * _Nonnull)userLocation API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didFailToLocateUserWithError:	- (void)mapView:(MKMapView * _Nonnull)mapView didFailToLocateUserWithError:(NSError * _Nonnull)error API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:annotationView:didChangeDragState:fromOldState:	- (void)mapView:(MKMapView * _Nonnull)mapView annotationView:(MKAnnotationView * _Nonnull)view didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotationViewDragState)oldState API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didChangeUserTrackingMode:animated:	- (void)mapView:(MKMapView * _Nonnull)mapView didChangeUserTrackingMode:(MKUserTrackingMode)mode animated:(BOOL)animated API_AVAILABLE(ios(5.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:rendererForOverlay:	- (MKOverlayRenderer * _Nonnull)mapView:(MKMapView * _Nonnull)mapView rendererForOverlay:(id<MKOverlay>  _Nonnull)overlay API_AVAILABLE(ios(7.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didAddOverlayRenderers:	- (void)mapView:(MKMapView * _Nonnull)mapView didAddOverlayRenderers:(NSArray<MKOverlayRenderer *> * _Nonnull)renderers API_AVAILABLE(ios(7.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:viewForOverlay:	- (MKOverlayView * _Nonnull)mapView:(MKMapView * _Nonnull)mapView viewForOverlay:(id<MKOverlay>  _Nonnull)overlay API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:didAddOverlayViews:	- (void)mapView:(MKMapView * _Nonnull)mapView didAddOverlayViews:(NSArray * _Nonnull)overlayViews API_AVAILABLE(ios(4.0));	yes
+MKMapViewDelegate	7.0	sdk16 body		NSObject	optional	method	yes	mapView:clusterAnnotationForMemberAnnotations:	- (MKClusterAnnotation * _Nonnull)mapView:(MKMapView * _Nonnull)mapView clusterAnnotationForMemberAnnotations:(NSArray<id<MKAnnotation>> * _Nonnull)memberAnnotations API_AVAILABLE(ios(11.0));	yes
+MKOverlay	7.0	sdk16 body		MKAnnotation	-	-	-	-	-	-
+MKOverlay	7.0	sdk16 body		MKAnnotation	required	property	no	coordinate	@property (nonatomic, readonly) CLLocationCoordinate2D coordinate;	yes
+MKOverlay	7.0	sdk16 body		MKAnnotation	required	property	no	boundingMapRect	@property (nonatomic, readonly) MKMapRect boundingMapRect;	yes
+MKOverlay	7.0	sdk16 body		MKAnnotation	optional	method	yes	intersectsMapRect:	- (BOOL)intersectsMapRect:(MKMapRect)mapRect;	yes
+MKOverlay	7.0	sdk16 body		MKAnnotation	optional	method	yes	canReplaceMapContent	- (BOOL)canReplaceMapContent API_AVAILABLE(ios(7.0));	yes

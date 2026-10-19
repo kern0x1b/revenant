@@ -1,0 +1,63 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_MarketplaceKit_UIKit	swift-class	c:@M@_MarketplaceKit_UIKit@objc(cs)ActionButton	-	ActionButton	-	-	-	ios=17.4	-	ea0631242cc5fece
+_MarketplaceKit_UIKit	swift-enum	s:21_MarketplaceKit_UIKit12ActionButtonC0D0O	ActionButton	Action	-	-	-	-	-	bb6fea00425eda08
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0D0O12batchInstallyAeA05BatchG13ConfigurationVcAEmF	ActionButton.Action	batchInstall	-	-	-	-	-	aee2c03c1e3bb728
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0D0O6deleteyAEs6UInt64VcAEmF	ActionButton.Action	delete	-	-	-	-	-	f7b2d4580a21f7c4
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0D0O7installyAeA20InstallConfigurationVcAEmF	ActionButton.Action	install	-	-	-	-	-	7d642f3dfd474745
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0D0O6launchyAEs6UInt64VcAEmF	ActionButton.Action	launch	-	-	-	-	-	59a9c399bb48e687
+_MarketplaceKit_UIKit	swift-enum	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO	ActionButton	ButtonImagePlacement	-	-	-	-	-	647f4d13713e8154
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO3topyA2EmF	ActionButton.ButtonImagePlacement	top	-	-	-	-	-	42d9a7d74e47f636
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO7leadingyA2EmF	ActionButton.ButtonImagePlacement	leading	-	-	-	-	-	75cd8a9e6451fb49
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO6bottomyA2EmF	ActionButton.ButtonImagePlacement	bottom	-	-	-	-	-	8541892aad16ff1f
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO8trailingyA2EmF	ActionButton.ButtonImagePlacement	trailing	-	-	-	-	-	59ec958bd2142e9c
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO8rawValueAESgSi_tcfc	ActionButton.ButtonImagePlacement	init(rawValue:)	-	-	_MarketplaceKit_UIKit.ActionButton.ButtonImagePlacement? | Swift.Int	-	-	fdb51910e1837d62
+_MarketplaceKit_UIKit	swift-typealias	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO8RawValuea	ActionButton.ButtonImagePlacement	RawValue	-	-	-	ios=17.4	-	43bd38b2d5d7f8f7
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC0E14ImagePlacementO8rawValueSivp	ActionButton.ButtonImagePlacement	rawValue	-	Swift.Int	-	-	-	ff6d45fbb5611551
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC6actionAC0D0Ovp	ActionButton	action	-	_MarketplaceKit_UIKit.ActionButton.Action	-	-	-	b0bc3335b5ee2415
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit12ActionButtonC6actionA2C0D0O_tcfc	ActionButton	init(action:)	-	-	_MarketplaceKit_UIKit.ActionButton | _MarketplaceKit_UIKit.ActionButton.Action	-	-	ed66d8fff05e112e
+_MarketplaceKit_UIKit	swift-property	c:@M@_MarketplaceKit_UIKit@objc(cs)ActionButton(py)highlighted	ActionButton	isHighlighted	-	Swift.Bool	-	-	-	0863a70e2d4bb71b
+_MarketplaceKit_UIKit	swift-property	c:@M@_MarketplaceKit_UIKit@objc(cs)ActionButton(py)enabled	ActionButton	isEnabled	-	Swift.Bool	-	-	-	79beecd1cad9a396
+_MarketplaceKit_UIKit	swift-property	c:@M@_MarketplaceKit_UIKit@objc(cs)ActionButton(py)backgroundColor	ActionButton	backgroundColor	-	UIKit.UIColor?	-	-	-	f2e56a34ddecc893
+_MarketplaceKit_UIKit	swift-property	c:@M@_MarketplaceKit_UIKit@objc(cs)ActionButton(py)tintColor	ActionButton	tintColor	-	UIKit.UIColor!	-	-	-	19e35f37d1da692b
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC5labelSSvp	ActionButton	label	-	Swift.String	-	-	-	1d88bd00241bbeed
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC9imageNameSSSgvp	ActionButton	imageName	-	Swift.String?	-	-	-	1d153cc160059764
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC14imagePlacementAC0e5ImageG0Ovp	ActionButton	imagePlacement	-	_MarketplaceKit_UIKit.ActionButton.ButtonImagePlacement	-	-	-	c1f9403b29695406
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC4sizeSo6CGSizeVvp	ActionButton	size	-	CoreFoundation.CGSize	-	-	-	0c5ffd721c661cfa
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC8fontSize14CoreFoundation7CGFloatVvp	ActionButton	fontSize	-	CoreGraphics.CGFloat	-	-	-	823f95c515774a3c
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC12cornerRadius14CoreFoundation7CGFloatVvp	ActionButton	cornerRadius	-	CoreGraphics.CGFloat	-	-	-	c6aaf5bb1e76560b
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC11borderWidth14CoreFoundation7CGFloatVvp	ActionButton	borderWidth	-	CoreGraphics.CGFloat	-	-	-	b4e0d408c88b3f6d
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit12ActionButtonC11borderColorSo7UIColorCvp	ActionButton	borderColor	-	UIKit.UIColor	-	-	-	068eb821b01f8025
+_MarketplaceKit_UIKit	swift-enum	s:21_MarketplaceKit_UIKit0A13DisplayOptionO	-	MarketplaceDisplayOption	-	-	-	ios=17.4	-	88e5258eecc153f1
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit0A13DisplayOptionO11productPageyACs6UInt64V_AFSgtcACmF	MarketplaceDisplayOption	productPage	-	-	-	-	-	4cdc381373a2648b
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit0A13DisplayOptionO13searchResultsyACSS_tcACmF	MarketplaceDisplayOption	searchResults	-	-	-	-	-	a8ed5a5d3f6bb53e
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit0A13DisplayOptionO14authenticationyACSS_tcACmF	MarketplaceDisplayOption	authentication	-	-	-	-	-	83044ccd19b8823b
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit0A13DisplayOptionO6encode2toys7Encoder_p_tKF	MarketplaceDisplayOption	encode(to:)	-	()	any Swift.Encoder	-	-	cbc7b15d7af4d6e2
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit0A13DisplayOptionO4fromACs7Decoder_p_tKcfc	MarketplaceDisplayOption	init(from:)	-	-	_MarketplaceKit_UIKit.MarketplaceDisplayOption | any Swift.Decoder	-	-	3998cec62624bf84
+_MarketplaceKit_UIKit	swift-protocol	s:21_MarketplaceKit_UIKit0A13SceneDelegateP	-	MarketplaceSceneDelegate	-	-	-	ios=17.4	-	9da95c5123aed061
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit0A13SceneDelegateP5scene_14askedToDisplayySo08UIWindowD0C_AA0aI6OptionOtF	MarketplaceSceneDelegate	scene(_:askedToDisplay:)	-	()	UIKit.UIWindowScene | _MarketplaceKit_UIKit.MarketplaceDisplayOption	-	-	871de78a79bfaa7e
+_MarketplaceKit_UIKit	swift-enum	s:21_MarketplaceKit_UIKit25InstallConfirmationResultO	-	InstallConfirmationResult	-	-	-	ios=17.4	-	b06e87a5587c67e6
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit25InstallConfirmationResultO6cancelyA2CmF	InstallConfirmationResult	cancel	-	-	-	-	-	8edc6e48f46335d1
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit25InstallConfirmationResultO9confirmedyACSS_So9LAContextCSgtcACmF	InstallConfirmationResult	confirmed	-	-	-	-	-	cfc7c790c2c662a7
+_MarketplaceKit_UIKit	swift-struct	s:21_MarketplaceKit_UIKit20InstallConfigurationV	-	InstallConfiguration	-	-	-	ios=17.4	-	95254adf9810fb1b
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit20InstallConfigurationV7installAA0D8MetadataVvp	InstallConfiguration	install	-	_MarketplaceKit_UIKit.InstallMetadata	-	-	-	9790dbac8835294e
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit20InstallConfigurationV07confirmD0AA0D18ConfirmationResultOyYaYbcvp	InstallConfiguration	confirmInstall	-	() async -> _MarketplaceKit_UIKit.InstallConfirmationResult	-	-	-	fb681a74dc055e8d
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit20InstallConfigurationV7install07confirmD0AcA0D8MetadataV_AA0D18ConfirmationResultOyYaYbctcfc	InstallConfiguration	init(install:confirmInstall:)	-	-	_MarketplaceKit_UIKit.InstallConfiguration | _MarketplaceKit_UIKit.InstallMetadata | () async -> _MarketplaceKit_UIKit.InstallConfirmationResult	-	-	a58dfdb4a728b038
+_MarketplaceKit_UIKit	swift-struct	s:21_MarketplaceKit_UIKit15InstallMetadataV	-	InstallMetadata	-	-	-	ios=17.4	-	3d7a332be37f8b95
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit15InstallMetadataV7accountSSvp	InstallMetadata	account	-	Swift.String	-	-	-	b01d21fd200ceb8c
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit15InstallMetadataV11appleItemIDs6UInt64Vvp	InstallMetadata	appleItemID	-	MarketplaceKit.AppleItemID	-	-	-	5a09a3969da96dce
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit15InstallMetadataV30alternativeDistributionPackage10Foundation3URLVvp	InstallMetadata	alternativeDistributionPackage	-	Foundation.URL	-	-	-	679b93237795b25a
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit15InstallMetadataV8isUpdateSbvp	InstallMetadata	isUpdate	-	Swift.Bool	-	-	-	bdcd58f575734fe4
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit15InstallMetadataV11appShareURL10Foundation0H0VSgvp	InstallMetadata	appShareURL	-	Foundation.URL?	-	ios=18.0	-	3a5cf2338ec715b2
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit15InstallMetadataV19requestAgeExceptionSbvp	InstallMetadata	requestAgeException	-	Swift.Bool	-	ios=26.1	-	ef9c589f76abce12
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit15InstallMetadataV7account11appleItemID30alternativeDistributionPackage8isUpdateACSS_s6UInt64V10Foundation3URLVSbtcfc	InstallMetadata	init(account:appleItemID:alternativeDistributionPackage:isUpdate:)	-	-	_MarketplaceKit_UIKit.InstallMetadata | Swift.String | MarketplaceKit.AppleItemID | Foundation.URL | Swift.Bool	-	-	d7d94a5b3ced76ff
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit15InstallMetadataV7account11appleItemID30alternativeDistributionPackage8isUpdate11appShareURL19requestAgeExceptionACSS_s6UInt64V10Foundation0Q0VSbANSgSbtcfc	InstallMetadata	init(account:appleItemID:alternativeDistributionPackage:isUpdate:appShareURL:requestAgeException:)	-	-	_MarketplaceKit_UIKit.InstallMetadata | Swift.String | MarketplaceKit.AppleItemID | Foundation.URL | Swift.Bool | Foundation.URL? | Swift.Bool	ios=26.1	-	ea93ff502b2b68c1
+_MarketplaceKit_UIKit	swift-enum	s:21_MarketplaceKit_UIKit30BatchInstallConfirmationResultO	-	BatchInstallConfirmationResult	-	-	-	ios=17.4	-	9643b215a26efc0c
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit30BatchInstallConfirmationResultO6cancelyA2CmF	BatchInstallConfirmationResult	cancel	-	-	-	-	-	d7b5311a904a2b5c
+_MarketplaceKit_UIKit	swift-constant	s:21_MarketplaceKit_UIKit30BatchInstallConfirmationResultO9confirmedyACSDys6UInt64VSSG_So9LAContextCSgtcACmF	BatchInstallConfirmationResult	confirmed	-	-	-	-	-	7691d6f71dfac9e3
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit30BatchInstallConfirmationResultO2eeoiySbAC_ACtFZ	BatchInstallConfirmationResult	==(_:_:)	+	Swift.Bool	_MarketplaceKit_UIKit.BatchInstallConfirmationResult | _MarketplaceKit_UIKit.BatchInstallConfirmationResult	-	-	6adba231c0a1ec74
+_MarketplaceKit_UIKit	swift-struct	s:21_MarketplaceKit_UIKit25BatchInstallConfigurationV	-	BatchInstallConfiguration	-	-	-	ios=17.4	-	b795e1c2edc04281
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit25BatchInstallConfigurationV8installsSayAA0E8MetadataVGvp	BatchInstallConfiguration	installs	-	[_MarketplaceKit_UIKit.InstallMetadata]	-	-	-	6fad0bbae12088a8
+_MarketplaceKit_UIKit	swift-property	s:21_MarketplaceKit_UIKit25BatchInstallConfigurationV07confirmE0AA0dE18ConfirmationResultOyYaYbcvp	BatchInstallConfiguration	confirmInstall	-	() async -> _MarketplaceKit_UIKit.BatchInstallConfirmationResult	-	-	-	1b7716320efd2eaf
+_MarketplaceKit_UIKit	swift-method	s:21_MarketplaceKit_UIKit25BatchInstallConfigurationV8installs07confirmE0ACSayAA0E8MetadataVG_AA0dE18ConfirmationResultOyYaYbctcfc	BatchInstallConfiguration	init(installs:confirmInstall:)	-	-	_MarketplaceKit_UIKit.BatchInstallConfiguration | [_MarketplaceKit_UIKit.InstallMetadata] | () async -> _MarketplaceKit_UIKit.BatchInstallConfirmationResult	-	-	bec4c2c917fcb149
+_MarketplaceKit_UIKit	swift-class	c:objc(cs)UISceneConnectionOptions	-	ConnectionOptions	-	-	-	ios=13.0	-	695dcbf5bba23393
+_MarketplaceKit_UIKit	swift-property	s:So24UISceneConnectionOptionsC21_MarketplaceKit_UIKitE24marketplaceDisplayOptionAC0dhI0OSgvp	ConnectionOptions	marketplaceDisplayOption	-	_MarketplaceKit_UIKit.MarketplaceDisplayOption?	-	-	-	22aefa4e449babf0

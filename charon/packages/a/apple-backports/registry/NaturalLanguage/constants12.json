@@ -1,0 +1,385 @@
+{
+ "framework": "NaturalLanguage",
+ "entries": [
+  {
+     "api": "NLTagAdjective",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Adjective, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagAdverb",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Adverb, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagClassifier",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Classifier, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagCloseParenthesis",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag CloseParenthesis, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagCloseQuote",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag CloseQuote, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagConjunction",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Conjunction, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagDash",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Dash, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagDeterminer",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Determiner, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagIdiom",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Idiom, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagInterjection",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Interjection, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagNoun",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Noun, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagNumber",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Number, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOpenParenthesis",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag OpenParenthesis, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOpenQuote",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag OpenQuote, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOrganizationName",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag OrganizationName, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOther",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Other, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOtherPunctuation",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Punctuation, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOtherWhitespace",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Whitespace, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagOtherWord",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag OtherWord, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagParagraphBreak",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag ParagraphBreak, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagParticle",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Particle, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagPersonalName",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag PersonalName, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagPlaceName",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag PlaceName, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagPreposition",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Preposition, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagPronoun",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Pronoun, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagPunctuation",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Punctuation, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeLanguage",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme Language, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeLemma",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme Lemma, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeLexicalClass",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme LexicalClass, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeNameType",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme NameType, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeNameTypeOrLexicalClass",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme NameTypeOrLexicalClass, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeScript",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme Script, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSchemeTokenType",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme TokenType, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagSentenceTerminator",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag SentenceTerminator, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagVerb",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Verb, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagWhitespace",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Whitespace, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagWord",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag Word, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLTagWordJoiner",
+     "kind": "constant",
+     "introduced": "12.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag WordJoiner, the string NLTagger answers -tagAtIndex:characterAtIndex:scheme: with for that tag under its own scheme, and the value a caller compares a read tag against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  }
+ ]
+}

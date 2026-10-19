@@ -1,0 +1,148 @@
+{
+  "framework": "Network",
+  "entries": [
+    {
+      "api": "nw_browser_create()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the factory of a browser: an object that browses for the services a browse descriptor names, over the parameters it is given",
+      "effect": "the browser holds the descriptor and the parameters and copies both back: -nw_browser_copy_browse_descriptor answers the descriptor that was given and -nw_browser_copy_parameters the parameters, and a caller that gave none gets the empty parameters object the header says is created internally (Network/nw12-browser.m:596)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:79-84, for the factory and its two copy calls; the browse and the resolve over the release's own DNS-SD are listed with their export measurements, and with what each release's own symbol takes, in facts/Network/NWBrowser.md"
+    },
+    {
+      "api": "nw_browser_copy_browse_descriptor()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the descriptor the browser browses for: the type and the domain, or the application service name",
+      "effect": "the descriptor the browser was created with, so a caller reads back the type it browses for (Network/nw16-browser.m:45)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:214-225"
+    },
+    {
+      "api": "nw_browser_copy_parameters()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the parameters the browser runs with: what it is told about the interfaces it may use",
+      "effect": "the parameters the browser was created with, and the empty parameters object when the caller gave none (Network/nw16-browser.m:50)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:196-212, whose second paragraph says an empty parameters object is created internally when the caller has none"
+    },
+    {
+      "api": "nw_browser_set_queue()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the queue every handler of the browser runs on, which the header says must be set before the browser is started",
+      "effect": "the queue is where the DNS-SD references are driven and where the state and the results handlers are called; a browser started with no queue does nothing at all, which is what the header says of a program that forgets one (Network/nw16-browser.m:30)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:87-98"
+    },
+    {
+      "api": "nw_browser_set_state_changed_handler()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the handler called when the browser changes state",
+      "effect": "waiting when the browser is started, ready once its browse is running, failed with the DNS error that stopped it, and cancelled last; a state is not repeated and no handler runs after the cancel (Network/nw16-browser.m:35)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:163-181"
+    },
+    {
+      "api": "nw_browser_set_browse_results_changed_handler()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the handler called when a browse result is added, changes or is removed",
+      "effect": "one call per change, with the old and the new result, and batch_complete true on the last call of a batch of answers (Network/nw16-browser.m:40)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:129-160"
+    },
+    {
+      "api": "nw_browser_start()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "what starts the browse",
+      "effect": "the browse for the type in the domain, asked with the release's own DNSServiceBrowse, begins on the browser's own queue, the path monitor that supplies the interface objects starts with it, and no handler of the browser runs before the call has returned to its caller; a browser started twice is the same browse and the second start says nothing (Network/nw16-browser.m:55)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:183-194; the browse - the release's own entry point for one, and the measurement that a PTR record query is answered by nothing on a live link - is in facts/Network/NWBrowser.md"
+    },
+    {
+      "api": "nw_browser_cancel()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "what stops the browse",
+      "effect": "the browse and every resolve are released, the path monitor is cancelled, both handlers are dropped and the state handler is called once with cancelled; nothing is called after it (Network/nw12-browser.m:613)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browser.h:119-127"
+    },
+    {
+      "api": "nw_browse_result_copy_endpoint()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the endpoint a browse result connects to: for a Bonjour service, a Bonjour service endpoint with the instance, the type, the domain and its record",
+      "effect": "the endpoint of the result, which carries no port and so answers 0 for it: that is what Apple's own browse result for the same service answers on the same link in the same second (tests/backports/host/network-browser prints endpoint.port 0 on both sides), and what the header of nw_endpoint_get_port says for an endpoint that is not a host or address endpoint; the port the service publishes belongs to the service, and a result is reported once its resolve has answered so that the record is there (Network/nw16-browser.m:64)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browse_result.h:104-116; the resolve the record comes through is the release's own, listed in facts/Network/NWBrowser.md"
+    },
+    {
+      "api": "nw_browse_result_copy_txt_record_object()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the TXT record a browse result carries, as an object",
+      "effect": "the record the service advertised, when the browse descriptor asked for one, and nothing at all when it did not - which is what the header says of a browse result with no associated record (Network/nw16-browser.m:70)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browse_result.h:119-132; the record is parsed by nw_txt_record_create_with_bytes, the library's own iOS 13 call"
+    },
+    {
+      "api": "nw_browse_result_get_interfaces_count()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "how many interfaces the service was found on",
+      "effect": "the number of interface objects the result holds, which is one per interface index the browse named and the path monitor has an object for (Network/nw16-browser.m:76)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browse_result.h:135-148; where the interface objects come from is in facts/Network/NWBrowser.md"
+    },
+    {
+      "api": "nw_browse_result_enumerate_interfaces()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "each interface the service was found on, until the block says stop",
+      "effect": "the same objects the count names, in the order the browse reported the interfaces, and the enumeration stops where the block answers false (Network/nw16-browser.m:82)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browse_result.h:151-167"
+    },
+    {
+      "api": "nw_browse_result_get_changes()",
+      "kind": "function",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "what changed between an old and a new browse result, as the bits the header names",
+      "effect": "result_added for an empty old result, result_removed for an empty new one, and otherwise the union of the interfaces the new result has that the old did not and the ones it lost, with txt_record_changed when the records differ and identical when nothing differs; two empty results are invalid (Network/nw16-browser.m:97)",
+      "facts": "facts/Network/NWBrowser.md",
+      "source": "SDK 26.2, browse_result.h:47-101, for the enumeration of the bits and each bit's own wording"
+    }
+  ]
+}

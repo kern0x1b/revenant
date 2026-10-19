@@ -1,0 +1,165 @@
+{
+  "framework": "Network",
+  "entries": [
+    {
+      "api": "nw_privacy_context_add_proxy()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a proxy the names of this context may be sent through",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_privacy_context_clear_proxies()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "no proxy for the names of this context",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_add_excluded_domain()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a domain that does not go through the proxy",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_add_match_domain()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a domain that does go through the proxy",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_clear_excluded_domains()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "no domain is kept out of the proxy",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_clear_match_domains()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "no domain goes through the proxy",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_create_http_connect()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a proxy a connection is sent through with HTTP CONNECT",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_create_oblivious_http()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a proxy a connection is sent through with oblivious HTTP",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_create_relay()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a proxy a connection is sent through with a relay",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_create_socksv5()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a proxy a connection is sent through with SOCKSv5",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_enumerate_excluded_domains()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "each domain kept out of the proxy",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own implementation, and tests/backports/host/network-proxy, which calls the add and the clear of a domain (20 checks) and stops short of the two enumerators: this harness traps on them (EXC_BREAKPOINT inside objc_opt_respondsToSelector) and the same sequence in a program linking the same objects does not - measured, not diagnosed"
+    },
+    {
+      "api": "nw_proxy_config_enumerate_match_domains()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "each domain that goes through the proxy",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own implementation, and tests/backports/host/network-proxy, which calls the add and the clear of a domain (20 checks) and stops short of the two enumerators: this harness traps on them (EXC_BREAKPOINT inside objc_opt_respondsToSelector) and the same sequence in a program linking the same objects does not - measured, not diagnosed"
+    },
+    {
+      "api": "nw_proxy_config_get_failover_allowed()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether a connection may go direct when the proxy cannot be used",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_proxy_config_set_failover_allowed()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether a connection may go direct when the proxy cannot be used",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_relay_hop_add_additional_http_header_field()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a header field a relay hop carries",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    },
+    {
+      "api": "nw_relay_hop_create()",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "one hop of a relay, over HTTP/3 or HTTP/2",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own checks in tests/backports/host/network-proxy (20 checks): every call of the family is asked what its effect says it answers. It is not a host differential, and the reason is measured - the host's own Network cannot be driven through this family in this build: it answers the five factories and then traps with EXC_BREAKPOINT inside objc_opt_respondsToSelector at two different points of a run"
+    }
+  ]
+}

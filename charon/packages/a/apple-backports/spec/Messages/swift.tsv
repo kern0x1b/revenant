@@ -1,0 +1,35 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+Messages	swift-enum	s:8Messages24MSCriticalMessagingErrorO	-	MSCriticalMessagingError	-	-	-	ios=18.2	-	c9892d863c010a41
+Messages	swift-constant	s:8Messages24MSCriticalMessagingErrorO7unknownyA2CmF	MSCriticalMessagingError	unknown	-	-	-	-	-	680577bea1cb025e
+Messages	swift-constant	s:8Messages24MSCriticalMessagingErrorO28invalidAuthenticationRequestyA2CmF	MSCriticalMessagingError	invalidAuthenticationRequest	-	-	-	-	-	f6c98422d568eb82
+Messages	swift-constant	s:8Messages24MSCriticalMessagingErrorO12notSupportedyA2CmF	MSCriticalMessagingError	notSupported	-	-	-	-	-	7d57cf43c5329861
+Messages	swift-constant	s:8Messages24MSCriticalMessagingErrorO13notAuthorizedyA2CmF	MSCriticalMessagingError	notAuthorized	-	-	-	-	-	e455b7147a982b0e
+Messages	swift-constant	s:8Messages24MSCriticalMessagingErrorO10sendFailedyA2CmF	MSCriticalMessagingError	sendFailed	-	-	-	-	-	440d2b273c7990de
+Messages	swift-method	s:8Messages24MSCriticalMessagingErrorO8rawValueACSgSi_tcfc	MSCriticalMessagingError	init(rawValue:)	-	-	Messages.MSCriticalMessagingError? | Swift.Int	-	-	cfe0bb3bc22e4941
+Messages	swift-typealias	s:8Messages24MSCriticalMessagingErrorO8RawValuea	MSCriticalMessagingError	RawValue	-	-	-	ios=18.2	-	8c4c0133e2f717be
+Messages	swift-property	s:8Messages24MSCriticalMessagingErrorO8rawValueSivp	MSCriticalMessagingError	rawValue	-	Swift.Int	-	-	-	124ddabaa3f44996
+Messages	swift-property	s:8Messages24MSCriticalMessagingErrorO16errorDescriptionSSSgvp	MSCriticalMessagingError	errorDescription	-	Swift.String?	-	-	-	3c37fe75fb75aae2
+Messages	swift-property	s:8Messages24MSCriticalMessagingErrorO11errorDomainSSvpZ	MSCriticalMessagingError	errorDomain	+	Swift.String	-	-	-	b658a8da43e0d2ab
+Messages	swift-property	s:8Messages24MSCriticalMessagingErrorO9errorCodeSivp	MSCriticalMessagingError	errorCode	-	Swift.Int	-	-	-	88edfbe2f1c75e5e
+Messages	swift-enum	s:8Messages38MSCriticalMessagingAuthorizationStatusO	-	MSCriticalMessagingAuthorizationStatus	-	-	-	ios=18.2	-	77ddf15795935ebc
+Messages	swift-constant	s:8Messages38MSCriticalMessagingAuthorizationStatusO7unknownyA2CmF	MSCriticalMessagingAuthorizationStatus	unknown	-	-	-	-	-	515f64ef66808f1a
+Messages	swift-constant	s:8Messages38MSCriticalMessagingAuthorizationStatusO6deniedyA2CmF	MSCriticalMessagingAuthorizationStatus	denied	-	-	-	-	-	9415b1077daf824d
+Messages	swift-constant	s:8Messages38MSCriticalMessagingAuthorizationStatusO8approvedyA2CmF	MSCriticalMessagingAuthorizationStatus	approved	-	-	-	-	-	664080dece697873
+Messages	swift-method	s:8Messages38MSCriticalMessagingAuthorizationStatusO8rawValueACSgSi_tcfc	MSCriticalMessagingAuthorizationStatus	init(rawValue:)	-	-	Messages.MSCriticalMessagingAuthorizationStatus? | Swift.Int	-	-	dc7e06b46b14c393
+Messages	swift-typealias	s:8Messages38MSCriticalMessagingAuthorizationStatusO8RawValuea	MSCriticalMessagingAuthorizationStatus	RawValue	-	-	-	ios=18.2	-	563ab733843cb788
+Messages	swift-property	s:8Messages38MSCriticalMessagingAuthorizationStatusO8rawValueSivp	MSCriticalMessagingAuthorizationStatus	rawValue	-	Swift.Int	-	-	-	831b0f8387d11807
+Messages	swift-struct	s:8Messages11MSRecipientV	-	MSRecipient	-	-	-	ios=18.2	-	88e4df51e9ad6525
+Messages	swift-property	s:8Messages11MSRecipientV11phoneNumberSSvp	MSRecipient	phoneNumber	-	Swift.String	-	-	-	5eceff2c24b1b088
+Messages	swift-method	s:8Messages11MSRecipientV11phoneNumberACSS_tcfc	MSRecipient	init(phoneNumber:)	-	-	Messages.MSRecipient | Swift.String	-	-	9fbf4256dcc14110
+Messages	swift-method	s:8Messages11MSRecipientV2eeoiySbAC_ACtFZ	MSRecipient	==(_:_:)	+	Swift.Bool	Messages.MSRecipient | Messages.MSRecipient	-	-	c95cf73897ec8b36
+Messages	swift-method	s:8Messages11MSRecipientV4hash4intoys6HasherVz_tF	MSRecipient	hash(into:)	-	()	Swift.Hasher	-	-	fd06ec3d2a2f6a2f
+Messages	swift-property	s:8Messages11MSRecipientV9hashValueSivp	MSRecipient	hashValue	-	Swift.Int	-	-	-	a42d1321bb0d200a
+Messages	swift-struct	s:8Messages17MSCriticalMessageV	-	MSCriticalMessage	-	-	-	ios=18.2	-	324dda2e03c24bfa
+Messages	swift-property	s:8Messages17MSCriticalMessageV11messageTextSSvp	MSCriticalMessage	messageText	-	Swift.String	-	-	-	c82cc45c399e3534
+Messages	swift-method	s:8Messages17MSCriticalMessageV11messageTextACSS_tcfc	MSCriticalMessage	init(messageText:)	-	-	Messages.MSCriticalMessage | Swift.String	-	-	89d5749fd89909c7
+Messages	swift-class	c:@M@Messages@objc(cs)MSCriticalSMSMessenger	-	MSCriticalSMSMessenger	-	-	-	ios=18.2	-	7caf1c0735f2527b
+Messages	swift-method	c:@M@Messages@objc(cs)MSCriticalSMSMessenger(im)init	MSCriticalSMSMessenger	init()	-	-	Messages.MSCriticalSMSMessenger	-	-	edc941e690831eda
+Messages	swift-method	s:8Messages22MSCriticalSMSMessengerC20requestAuthorization3forSDyAA11MSRecipientVAA0b9MessagingE6StatusOGSayAGG_tYaKF	MSCriticalSMSMessenger	requestAuthorization(for:)	-	[Messages.MSRecipient : Messages.MSCriticalMessagingAuthorizationStatus]	[Messages.MSRecipient]	-	-	e33f0493252d4167
+Messages	swift-method	s:8Messages22MSCriticalSMSMessengerC24checkAuthorizationStatus3forSDyAA11MSRecipientVAA0b9MessagingeF0OGSayAGG_tYaKF	MSCriticalSMSMessenger	checkAuthorizationStatus(for:)	-	[Messages.MSRecipient : Messages.MSCriticalMessagingAuthorizationStatus]	[Messages.MSRecipient]	-	-	7ebe8c18e3129ff5
+Messages	swift-method	s:8Messages22MSCriticalSMSMessengerC4send_2toSbAA0B7MessageV_AA11MSRecipientVtYaKF	MSCriticalSMSMessenger	send(_:to:)	-	Swift.Bool	Messages.MSCriticalMessage | Messages.MSRecipient	-	-	696f6298398cc8f8
+Messages	swift-property	s:8Messages22MSCriticalSMSMessengerC34maximumCriticalMessagingRecipientsSivp	MSCriticalSMSMessenger	maximumCriticalMessagingRecipients	-	Swift.Int	-	-	-	17f4c1a8eeb2b5cd

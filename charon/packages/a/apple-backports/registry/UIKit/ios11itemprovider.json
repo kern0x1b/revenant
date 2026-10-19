@@ -1,0 +1,60 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "+[UIImage readableTypeIdentifiersForItemProvider]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIImage has no item provider support; carried as iOS 12 has it",
+      "effect": "answers com.apple.uikit.image, public.png, public.tiff, com.compuserve.gif and public.jpeg, in that order",
+      "facts": "facts/UIKit/UIImageItemProvider.md",
+      "source": "UIKitCore of the arm64 shared cache of iOS 12.0, the methods at 0x1accbdc3c, 0x1accbe0a4, 0x1accbdce8 and 0x1accbe130; tests/backports/device/phpicker.m for the reading of an image through a provider"
+    },
+    {
+      "api": "+[UIImage writableTypeIdentifiersForItemProvider]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIImage has no item provider support; carried as iOS 12 has it",
+      "effect": "answers com.apple.uikit.image, public.png and public.jpeg",
+      "facts": "facts/UIKit/UIImageItemProvider.md",
+      "source": "UIKitCore of the arm64 shared cache of iOS 12.0, the methods at 0x1accbdc3c, 0x1accbe0a4, 0x1accbdce8 and 0x1accbe130; tests/backports/device/phpicker.m for the reading of an image through a provider"
+    },
+    {
+      "api": "-[UIImage writableTypeIdentifiersForItemProvider]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIImage has no item provider support; carried as iOS 12 has it",
+      "effect": "answers the same three as the class",
+      "facts": "facts/UIKit/UIImageItemProvider.md",
+      "source": "UIKitCore of the arm64 shared cache of iOS 12.0, the methods at 0x1accbdc3c, 0x1accbe0a4, 0x1accbdce8 and 0x1accbe130; tests/backports/device/phpicker.m for the reading of an image through a provider"
+    },
+    {
+      "api": "+[UIImage objectWithItemProviderData:typeIdentifier:error:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIImage has no item provider support; carried over -initWithData: and NSKeyedUnarchiver",
+      "effect": "an image from the data of one of the four image types or of the archive, nil for data that is no image and for any other type",
+      "facts": "facts/UIKit/UIImageItemProvider.md",
+      "source": "UIKitCore of the arm64 shared cache of iOS 12.0, the methods at 0x1accbdc3c, 0x1accbe0a4, 0x1accbdce8 and 0x1accbe130; tests/backports/device/phpicker.m for the reading of an image through a provider"
+    },
+    {
+      "api": "-[UIImage loadDataWithTypeIdentifier:forItemProviderCompletionHandler:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIImage has no item provider support; carried over the release's PNG and JPEG representations",
+      "effect": "calls the handler at once with the PNG, the highest quality JPEG or the archive of the image, and no progress",
+      "facts": "facts/UIKit/UIImageItemProvider.md",
+      "source": "UIKitCore of the arm64 shared cache of iOS 12.0, the methods at 0x1accbdc3c, 0x1accbe0a4, 0x1accbdce8 and 0x1accbe130; tests/backports/device/phpicker.m for the reading of an image through a provider"
+    }
+  ]
+}

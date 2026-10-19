@@ -1,0 +1,5 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+ILMessageFilterCapabilitiesQueryHandling	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+ILMessageFilterCapabilitiesQueryHandling	16.0	sdk16 body		NSObject	required	method	yes	handleCapabilitiesQueryRequest:context:completion:	- (void)handleCapabilitiesQueryRequest:(ILMessageFilterCapabilitiesQueryRequest * _Nonnull)capabilitiesQueryRequest context:(ILMessageFilterExtensionContext * _Nonnull)context completion:(void (^ _Nonnull)(ILMessageFilterCapabilitiesQueryResponse * _Nonnull))completion;	yes
+ILMessageFilterQueryHandling	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+ILMessageFilterQueryHandling	11.0	sdk16 body		NSObject	required	method	yes	handleQueryRequest:context:completion:	- (void)handleQueryRequest:(ILMessageFilterQueryRequest * _Nonnull)queryRequest context:(ILMessageFilterExtensionContext * _Nonnull)context completion:(void (^ _Nonnull)(ILMessageFilterQueryResponse * _Nonnull))completion;	yes

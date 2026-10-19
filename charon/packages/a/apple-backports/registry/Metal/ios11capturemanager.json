@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLCaptureManager",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the Tier 2 verdict on Metal/MetalKit: the class and its capture scopes are tooling objects, not GPU work; capturing a trace is what genuinely needs a backend this port does not have",
+      "effect": "sharedCaptureManager gives a real singleton; newCaptureScopeWithDevice:/newCaptureScopeWithCommandQueue: give a real object conforming to MTLCaptureScope whose beginScope/endScope are no-ops; the deprecated startCaptureWithDevice:/WithCommandQueue:/WithScope: are no-ops and stopCapture is a no-op; isCapturing always answers NO",
+      "facts": "facts/Metal/CaptureManager.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLCaptureScope",
+      "kind": "protocol",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port ships CharonMTLCaptureScope, which conforms to this protocol; the earlier reason quoted CharonMetalProtocols.h:51:35, a build error about MTLAllocation that the header no longer produces and that line no longer contains - the header compiles with the library's own flags and does not name MTLAllocation at all",
+      "effect": "every member of the protocol is defined by CharonMTLCaptureScope, measured by tests/backports/host/protocol-conformance.sh against the AST: the protocol's members and the class's own definitions compared selector by selector",
+      "source": "the header of iOS 16.4 for the contract",
+      "facts": "facts/Metal/Absent.md"
+    }
+  ]
+}

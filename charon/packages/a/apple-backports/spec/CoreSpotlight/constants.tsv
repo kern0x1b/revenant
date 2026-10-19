@@ -1,0 +1,12 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	CSActionIdentifier	-	CSActionIdentifier	15.0	NSString * const	API_AVAILABLE(ios(15.0)) API_UNAVAILABLE(macos, tvos)	d707c6ee9ec981e1	found	CoreSpotlightActionIdentifier	CoreSpotlightActionIdentifier	ios-26.2-cache	-	exported	ns	-
+constant	CSMailboxArchive	-	CSMailboxArchive	9.0	NSString * const	NS_AVAILABLE(10_11, 9_0)	9caffaca333e6112	found	mailbox.archive	mailbox.archive	ios-26.2-cache	-	exported	ns	-
+constant	CSMailboxDrafts	-	CSMailboxDrafts	9.0	NSString * const	NS_AVAILABLE(10_11, 9_0)	ca66dee0b1596712	found	mailbox.drafts	mailbox.drafts	ios-26.2-cache	-	exported	ns	-
+constant	CSMailboxInbox	-	CSMailboxInbox	9.0	NSString * const	NS_AVAILABLE(10_11, 9_0)	e1488db3d28dc6ff	found	mailbox.inbox	mailbox.inbox	ios-26.2-cache	-	exported	ns	-
+constant	CSMailboxJunk	-	CSMailboxJunk	9.0	NSString * const	NS_AVAILABLE(10_11, 9_0)	97d5dcb7b46cf467	found	mailbox.junk	mailbox.junk	ios-26.2-cache	-	exported	ns	-
+constant	CSMailboxSent	-	CSMailboxSent	9.0	NSString * const	NS_AVAILABLE(10_11, 9_0)	f59aee807b55ea29	found	mailbox.sent	mailbox.sent	ios-26.2-cache	-	exported	ns	-
+constant	CSMailboxTrash	-	CSMailboxTrash	9.0	NSString * const	NS_AVAILABLE(10_11, 9_0)	3fdf6435807370d2	found	mailbox.trash	mailbox.trash	ios-26.2-cache	-	exported	ns	-
+constant	CSQueryContinuationActionType	-	CSQueryContinuationActionType	10.0	NSString * const	CS_AVAILABLE(10_13, 10_0)	84bf20b03f693564	found	com.apple.corespotlightquerycontinuation	com.apple.corespotlightquerycontinuation	ios-26.2-cache	-	exported	ns	-
+constant	CSSearchQueryErrorDomain	-	CSSearchQueryErrorDomain	10.0	NSErrorDomain const	API_AVAILABLE(macos(10.13), ios(10.0))	7833d882561f10c7	found	CSSearchQueryErrorDomain	CSSearchQueryErrorDomain	ios-26.2-cache	-	exported	ns	-
+constant	CSSearchQueryString	-	CSSearchQueryString	10.0	NSString * const	CS_AVAILABLE(10_13, 10_0)	6e75dd2e4410e72e	found	kCSSearchQueryString	kCSSearchQueryString	ios-26.2-cache	-	exported	ns	-
+constant	CSSuggestionHighlightAttributeName	-	CSSuggestionHighlightAttributeName	16.0	NSAttributedStringKey const	API_AVAILABLE(macos(13.0), ios(16.0))	539cb819c69aebeb	found	CSSuggestionHighlightAttribute	CSSuggestionHighlightAttribute	ios-26.2-cache	-	exported	ns	-

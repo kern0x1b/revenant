@@ -1,0 +1,296 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@S@objc_class	-			-	-	-	-	-	4949ce2c3b72e404	-
+typedef	c:@T@Class	-			struct objc_class *	-	-	-	-	b241e581ba75a7e2	-
+struct	c:@S@objc_object	-			-	-	-	-	-	a8052f2ed0a29bf3	-
+field	c:@S@objc_object@FI@isa	objc_object			Class	-	-	*deprecated	-	5353ce9c2658830e	-
+typedef	c:@T@id	-			struct objc_object *	-	-	-	-	c007e55038b77dea	-
+struct	c:@S@objc_selector	-			-	-	-	-	-	cc783c3dc17ccd40	-
+typedef	c:@T@SEL	-			struct objc_selector *	-	-	-	-	9ad08619b06e9c8b	-
+typedef	c:@T@IMP	-			void (*)(void)	-	-	-	-	22e716e3fae19529	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+struct	c:@S@_malloc_zone_t	-			-	-	-	-	-	1d3760bae43bc8c3	-
+typedef	c:@T@objc_zone_t	-			struct _malloc_zone_t *	-	-	-	-	ac69b9c7059403f6	-
+function	c:@F@sel_getName	-			const char * (SEL)	SEL sel	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5f2cbbe043c5046a	-
+function	c:@F@sel_registerName	-			SEL (const char *)	const char * str	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	f2f16e5e406b67a5	-
+function	c:@F@object_getClassName	-			const char * (id)	id obj	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	743b461acebe95cc	-
+function	c:@F@object_getIndexedIvars	-			void * (id)	id obj	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4a47fd88bd22bf3c	-
+function	c:@F@sel_isMapped	-			BOOL (SEL)	SEL sel	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	62209ac8abe4a337	-
+function	c:@F@sel_getUid	-			SEL (const char *)	const char * str	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	ed9383869be8dbc5	-
+typedef	c:@T@objc_objectptr_t	-			const void *	-	-	-	-	b6b1dd43d25ee47e	-
+function	c:@F@objc_retainedObject	-			id (objc_objectptr_t)	objc_objectptr_t obj	-	*unavailable	unavailable: use CFBridgingRelease() or a (__bridge_transfer id) cast instead	3d444cd491f1b659	-
+function	c:@F@objc_unretainedObject	-			id (objc_objectptr_t)	objc_objectptr_t obj	-	*unavailable	unavailable: use a (__bridge id) cast instead	08eed4462487ea21	-
+function	c:@F@objc_unretainedPointer	-			objc_objectptr_t (id)	id obj	-	*unavailable	unavailable: use a __bridge cast instead	6b2295f1d1a38272	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+protocol	c:objc(pl)NSObject	-			-	-	-	-	-	228ad4a1532ee5a7	-
+method	c:objc(pl)NSObject(im)isEqual:	-			BOOL	id object	-	-	-	143508947c19845d	-
+property	c:objc(pl)NSObject(py)hash	-			NSUInteger	-	readonly	-	-	d279d703a376c88e	-
+property	c:objc(pl)NSObject(py)superclass	-			Class	-	readonly	-	-	190abaaf1e023607	-
+method	c:objc(pl)NSObject(im)class	-			Class	-	-	swift=-/-/-/1	-	1a8d5302a5af61ab	-
+method	c:objc(pl)NSObject(im)self	-			instancetype	-	-	-	-	9036cf0da9b2b909	-
+method	c:objc(pl)NSObject(im)performSelector:	-			id	SEL aSelector	-	-	-	ddebb754977f2907	-
+method	c:objc(pl)NSObject(im)performSelector:withObject:	-			id	SEL aSelector | id object	-	-	-	ed53dcbcf698e99e	-
+method	c:objc(pl)NSObject(im)performSelector:withObject:withObject:	-			id	SEL aSelector | id object1 | id object2	-	-	-	7cbb40a74389dab2	-
+method	c:objc(pl)NSObject(im)isProxy	-			BOOL	-	-	-	-	38750ad936ec8d78	-
+method	c:objc(pl)NSObject(im)isKindOfClass:	-			BOOL	Class aClass	-	-	-	d917bb20cd91999f	-
+method	c:objc(pl)NSObject(im)isMemberOfClass:	-			BOOL	Class aClass	-	-	-	f05f4005e1693745	-
+method	c:objc(pl)NSObject(im)conformsToProtocol:	-			BOOL	Protocol * aProtocol	-	-	-	456e71c092590de0	-
+method	c:objc(pl)NSObject(im)respondsToSelector:	-			BOOL	SEL aSelector	-	-	-	883ed0c53d284b05	-
+method	c:objc(pl)NSObject(im)retain	-			instancetype	-	-	-	-	eae55263c91bb624	-
+method	c:objc(pl)NSObject(im)release	-			void	-	-	-	-	dd7931cb792b5a5f	-
+method	c:objc(pl)NSObject(im)autorelease	-			instancetype	-	-	-	-	0b143e75367768cb	-
+method	c:objc(pl)NSObject(im)retainCount	-			NSUInteger	-	-	-	-	bba87a3fc007b2fe	-
+method	c:objc(pl)NSObject(im)zone	-			struct _NSZone *	-	-	-	-	3921b5a9c2003c13	-
+property	c:objc(pl)NSObject(py)description	-			NSString *	-	readonly,copy	-	-	fa98967588a06857	-
+property	c:objc(pl)NSObject(py)debugDescription	-			NSString *	-	readonly,copy	-	-	14e746c5ec964cc4	-
+struct	c:@S@_NSZone	-			-	-	-	-	-	323535d91123fb7f	-
+interface	c:objc(cs)NSObject	-			-	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	aa7f9d9ce98f42c3	-
+conforms	c:objc(cs)NSObject	NSObject	NSObject		-	-	-	-	-	d579f6dbb147228f	-
+method	c:objc(cs)NSObject(cm)load	-			void	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	f0e97379d20aad78	-
+method	c:objc(cs)NSObject(cm)initialize	-			void	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	d73a64867186ed5b	-
+method	c:objc(cs)NSObject(im)init	-			instancetype	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	76f767ee483788b0	-
+method	c:objc(cs)NSObject(cm)new	-			instancetype	-	-	swift=-/-/-/1	-	9ebf9735b14ae745	-
+method	c:objc(cs)NSObject(cm)allocWithZone:	-			instancetype	struct _NSZone * zone	-	swift=-/-/-/1	-	8194fa41b07ad33f	-
+method	c:objc(cs)NSObject(cm)alloc	-			instancetype	-	-	swift=-/-/-/1	-	5fa40a7dfad62c68	-
+method	c:objc(cs)NSObject(im)dealloc	-			void	-	-	swift=-/-/-/1	-	7fa5d0dc6f8626ae	-
+method	c:objc(cs)NSObject(im)finalize	-			void	-	-	*deprecated ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	deprecated: Objective-C garbage collection is no longer supported	afa62b4d8da0d02f	-
+method	c:objc(cs)NSObject(im)copy	-			id	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	e237c8e1d962710c	-
+method	c:objc(cs)NSObject(im)mutableCopy	-			id	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	bfa7a25bb96bc9c3	-
+method	c:objc(cs)NSObject(cm)copyWithZone:	-			id	struct _NSZone * zone	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	ecf4589272fddf5a	-
+method	c:objc(cs)NSObject(cm)mutableCopyWithZone:	-			id	struct _NSZone * zone	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	03da4c70a2c3a4a5	-
+method	c:objc(cs)NSObject(cm)instancesRespondToSelector:	-			BOOL	SEL aSelector	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c8ee95588bc43656	-
+method	c:objc(cs)NSObject(cm)conformsToProtocol:	-			BOOL	Protocol * protocol	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	455e2a61a069ae39	-
+method	c:objc(cs)NSObject(im)methodForSelector:	-			IMP	SEL aSelector	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	7f73f9dd17fc683a	-
+method	c:objc(cs)NSObject(cm)instanceMethodForSelector:	-			IMP	SEL aSelector	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	d02271d1684c6e1c	-
+method	c:objc(cs)NSObject(im)doesNotRecognizeSelector:	-			void	SEL aSelector	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	b6eb1e377f78f419	-
+method	c:objc(cs)NSObject(im)forwardingTargetForSelector:	-			id	SEL aSelector	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	571ae4111f851838	-
+method	c:objc(cs)NSObject(im)forwardInvocation:	-			void	NSInvocation * anInvocation	-	swift=-/-/-/1	-	6232f7b7e8212cfa	-
+method	c:objc(cs)NSObject(im)methodSignatureForSelector:	-			NSMethodSignature *	SEL aSelector	-	swift=-/-/-/1	-	14b98ecc1e44d391	-
+method	c:objc(cs)NSObject(cm)instanceMethodSignatureForSelector:	-			NSMethodSignature *	SEL aSelector	-	swift=-/-/-/1	-	88dec3d75da1cbdb	-
+method	c:objc(cs)NSObject(im)allowsWeakReference	-			BOOL	-	-	*unavailable ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	3a1b75a9749924e3	-
+method	c:objc(cs)NSObject(im)retainWeakReference	-			BOOL	-	-	*unavailable ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a9264d09c0e2ef19	-
+method	c:objc(cs)NSObject(cm)isSubclassOfClass:	-			BOOL	Class aClass	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5b9e06c0e7c1fd45	-
+method	c:objc(cs)NSObject(cm)resolveClassMethod:	-			BOOL	SEL sel	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	091cd1138b7e3550	-
+method	c:objc(cs)NSObject(cm)resolveInstanceMethod:	-			BOOL	SEL sel	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4c476ab2577c5852	-
+method	c:objc(cs)NSObject(cm)hash	-			NSUInteger	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4823289c410a461f	-
+method	c:objc(cs)NSObject(cm)superclass	-			Class	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4cd6741d76023a83	-
+method	c:objc(cs)NSObject(cm)class	-			Class	-	-	swift=-/-/-/1	-	bf0f92ff1e6cbac6	-
+method	c:objc(cs)NSObject(cm)description	-			NSString *	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	1fd2e89ceada6698	-
+method	c:objc(cs)NSObject(cm)debugDescription	-			NSString *	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	2a265e7f5ea8e67d	-
+struct	c:@S@objc_method	-			-	-	-	-	-	c6622d5df905c84a	-
+typedef	c:@T@Method	-			struct objc_method *	-	-	-	-	987e31b803d79fce	-
+struct	c:@S@objc_ivar	-			-	-	-	-	-	627ac562bdaccf7c	-
+typedef	c:@T@Ivar	-			struct objc_ivar *	-	-	-	-	a81ca24e077ff472	-
+struct	c:@S@objc_category	-			-	-	-	-	-	1be8cf11815742cd	-
+typedef	c:@T@Category	-			struct objc_category *	-	-	-	-	008ddee466ce72fd	-
+struct	c:@S@objc_property	-			-	-	-	-	-	d77af3bd3de43810	-
+typedef	c:@T@objc_property_t	-			struct objc_property *	-	-	-	-	81be7f85900e33d4	-
+struct	c:@S@objc_method_description	-			-	-	-	-	-	a65302d76e730b28	-
+field	c:@S@objc_method_description@FI@name	objc_method_description			SEL	-	-	-	-	2ec46e1c18eed374	-
+field	c:@S@objc_method_description@FI@types	objc_method_description			char *	-	-	-	-	de6da723f28a9261	-
+struct	c:@SA@objc_property_attribute_t	-			-	-	-	-	-	8199faa59e15c945	-
+field	c:@SA@objc_property_attribute_t@FI@name	objc_property_attribute_t			const char *	-	-	-	-	956f0bfeb3c13613	-
+field	c:@SA@objc_property_attribute_t@FI@value	objc_property_attribute_t			const char *	-	-	-	-	92e5aa67b023532b	-
+typedef	c:@T@objc_property_attribute_t	-			struct objc_property_attribute_t	-	-	-	-	f052c9c5afb4a284	-
+struct	c:@S@mach_header	-			-	-	-	-	-	67d1c2115d9002cf	-
+function	c:@F@object_copy	-			id (id, size_t)	id obj | size_t size	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	768af12e6c19768f	-
+function	c:@F@object_dispose	-			id (id)	id obj	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	e8ef167db4f96911	-
+function	c:@F@object_getClass	-			Class (id)	id obj	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	99ff55f0ddccdcb8	-
+function	c:@F@object_setClass	-			Class (id, Class)	id obj | Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	00caf936b0862ee7	-
+function	c:@F@object_isClass	-			BOOL (id)	id obj	-	ios=8.0/-/-/0,macos=10.10/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	b8d23cc0b4dae5fe	-
+function	c:@F@object_getIvar	-			id (id, Ivar)	id obj | Ivar ivar	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a6f31fb8502c4d0b	-
+function	c:@F@object_setIvar	-			void (id, Ivar, id)	id obj | Ivar ivar | id value	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	891859d7b246948f	-
+function	c:@F@object_setIvarWithStrongDefault	-			void (id, Ivar, id)	id obj | Ivar ivar | id value	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c435742ea1833bf3	-
+function	c:@F@object_setInstanceVariable	-			Ivar (id, const char *, void *)	id obj | const char * name | void * value	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	cb4e7f58be2d21e3	-
+function	c:@F@object_setInstanceVariableWithStrongDefault	-			Ivar (id, const char *, void *)	id obj | const char * name | void * value	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f79284a5a87c028a	-
+function	c:@F@object_getInstanceVariable	-			Ivar (id, const char *, void * _Nullable *)	id obj | const char * name | void * _Nullable * outValue	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	b7be88ede22c4622	-
+function	c:@F@objc_getClass	-			id (const char *)	const char * name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	ac3304b41b599f8d	-
+function	c:@F@objc_getMetaClass	-			id (const char *)	const char * name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	e69af8abcfb1c2c9	-
+function	c:@F@objc_lookUpClass	-			Class (const char *)	const char * name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	16457ee171e77aba	-
+function	c:@F@objc_getRequiredClass	-			Class (const char *)	const char * name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c0e6f423c53c43bf	-
+function	c:@F@objc_getClassList	-			int (Class  _Nonnull *, int)	Class  _Nonnull * buffer | int bufferCount	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9c79f52d9ae14f74	-
+function	c:@F@objc_copyClassList	-			Class  _Nonnull * (unsigned int *)	unsigned int * outCount	-	ios=3.1/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a159075c51e9ecd0	-
+function	c:@F@objc_enumerateClasses	-			void (const void *, const char *, Protocol *, Class, void (^)(Class _Nonnull, BOOL * _Nonnull))	const void * image | const char * namePrefix | Protocol * conformingTo | Class subclassing | void (^)(Class _Nonnull, BOOL * _Nonnull) block	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	a6edd471322b968c	-
+function	c:@F@class_getName	-			const char * (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	56739058da129e29	-
+function	c:@F@class_isMetaClass	-			BOOL (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4a11d1c09f150eae	-
+function	c:@F@class_getSuperclass	-			Class (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	467be4c64247cfa4	-
+function	c:@F@class_setSuperclass	-			Class (Class, Class)	Class cls | Class newSuper	-	ios=2.0/2.0/-/0,macos=10.5/10.5/-/0,tvos=9.0/9.0/-/0,watchos=1.0/1.0/-/0	-	cfe338ef741146b1	-
+function	c:@F@class_getVersion	-			int (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	eefa380d66e53420	-
+function	c:@F@class_setVersion	-			void (Class, int)	Class cls | int version	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	f60de7b21b239556	-
+function	c:@F@class_getInstanceSize	-			size_t (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	3042a8e30a8d3e52	-
+function	c:@F@class_getInstanceVariable	-			Ivar (Class, const char *)	Class cls | const char * name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	0f5843f455724672	-
+function	c:@F@class_getClassVariable	-			Ivar (Class, const char *)	Class cls | const char * name	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5ba7efadccf90c36	-
+function	c:@F@class_copyIvarList	-			Ivar  _Nonnull * (Class, unsigned int *)	Class cls | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	41e26af8e58633bc	-
+function	c:@F@class_getInstanceMethod	-			Method (Class, SEL)	Class cls | SEL name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	63f2160dd06961d8	-
+function	c:@F@class_getClassMethod	-			Method (Class, SEL)	Class cls | SEL name	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5b1344ef9b24cf67	-
+function	c:@F@class_getMethodImplementation	-			IMP (Class, SEL)	Class cls | SEL name	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	38d408bcc81bced3	-
+function	c:@F@class_getMethodImplementation_stret	-			IMP (Class, SEL)	Class cls | SEL name	-	*unavailable ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	unavailable: not available in arm64	3cdc19fa1c1424a6	-
+function	c:@F@class_respondsToSelector	-			BOOL (Class, SEL)	Class cls | SEL sel	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	bbee1be0d49be84b	-
+function	c:@F@class_copyMethodList	-			Method  _Nonnull * (Class, unsigned int *)	Class cls | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	104d80d7acf9c745	-
+function	c:@F@class_conformsToProtocol	-			BOOL (Class, Protocol *)	Class cls | Protocol * protocol	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	8de8bf411e6bee24	-
+function	c:@F@class_copyProtocolList	-			Protocol * _Nonnull * (Class, unsigned int *)	Class cls | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9897d6c3f3fb889a	-
+function	c:@F@class_getProperty	-			objc_property_t (Class, const char *)	Class cls | const char * name	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	f60a143d03bfd85e	-
+function	c:@F@class_copyPropertyList	-			objc_property_t  _Nonnull * (Class, unsigned int *)	Class cls | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	cf5c96589a5176c2	-
+function	c:@F@class_getIvarLayout	-			const uint8_t * (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	265335f2eb0287c3	-
+function	c:@F@class_getWeakIvarLayout	-			const uint8_t * (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4bd58ad0a56c1e4a	-
+function	c:@F@class_addMethod	-			BOOL (Class, SEL, IMP, const char *)	Class cls | SEL name | IMP imp | const char * types	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9ee20368eae66415	-
+function	c:@F@class_replaceMethod	-			IMP (Class, SEL, IMP, const char *)	Class cls | SEL name | IMP imp | const char * types	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9b00370f86e9a4a1	-
+function	c:@F@class_addIvar	-			BOOL (Class, const char *, size_t, uint8_t, const char *)	Class cls | const char * name | size_t size | uint8_t alignment | const char * types	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c2ea1ef4831b9abf	-
+function	c:@F@class_addProtocol	-			BOOL (Class, Protocol *)	Class cls | Protocol * protocol	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c93badc5214a4484	-
+function	c:@F@class_addProperty	-			BOOL (Class, const char *, const objc_property_attribute_t *, unsigned int)	Class cls | const char * name | const objc_property_attribute_t * attributes | unsigned int attributeCount	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	61afff4dd36e149e	-
+function	c:@F@class_replaceProperty	-			void (Class, const char *, const objc_property_attribute_t *, unsigned int)	Class cls | const char * name | const objc_property_attribute_t * attributes | unsigned int attributeCount	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9a25d3f7ae8ee562	-
+function	c:@F@class_setIvarLayout	-			void (Class, const uint8_t *)	Class cls | const uint8_t * layout	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	841c8641d2c02ef0	-
+function	c:@F@class_setWeakIvarLayout	-			void (Class, const uint8_t *)	Class cls | const uint8_t * layout	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	1997df36788bc56a	-
+function	c:@F@objc_getFutureClass	-			Class (const char *)	const char * name	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	611b94447a7923fd	-
+function	c:@F@class_createInstance	-			id (Class, size_t)	Class cls | size_t extraBytes	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9ad6fe24cd73ce7c	-
+function	c:@F@objc_constructInstance	-			id (Class, void *)	Class cls | void * bytes	-	ios=3.0/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	63f68e8751bd8aee	-
+function	c:@F@objc_destructInstance	-			void * (id)	id obj	-	ios=3.0/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	eea124fe2d12b0b5	-
+function	c:@F@objc_allocateClassPair	-			Class (Class, const char *, size_t)	Class superclass | const char * name | size_t extraBytes	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4e6b198d6620c3ec	-
+function	c:@F@objc_registerClassPair	-			void (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	2072eb0541190841	-
+function	c:@F@objc_duplicateClass	-			Class (Class, const char *, size_t)	Class original | const char * name | size_t extraBytes	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	56e61ba490e43a4f	-
+function	c:@F@objc_disposeClassPair	-			void (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	8f665278e68c11b2	-
+function	c:@F@method_getName	-			SEL (Method)	Method m	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c68eaef977fb405d	-
+function	c:@F@method_getImplementation	-			IMP (Method)	Method m	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	6cf50b444a2b5183	-
+function	c:@F@method_getTypeEncoding	-			const char * (Method)	Method m	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	e6b05cdaa7f5cc6a	-
+function	c:@F@method_getNumberOfArguments	-			unsigned int (Method)	Method m	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4dc42d47631f2d1c	-
+function	c:@F@method_copyReturnType	-			char * (Method)	Method m	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	ab6bf92d2bc28b71	-
+function	c:@F@method_copyArgumentType	-			char * (Method, unsigned int)	Method m | unsigned int index	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	95d9f4ba91dbae20	-
+function	c:@F@method_getReturnType	-			void (Method, char *, size_t)	Method m | char * dst | size_t dst_len	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	1542e22c734ffaf6	-
+function	c:@F@method_getArgumentType	-			void (Method, unsigned int, char *, size_t)	Method m | unsigned int index | char * dst | size_t dst_len	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5b9f12928eb9f1f3	-
+function	c:@F@method_getDescription	-			struct objc_method_description * (Method)	Method m	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	2f4765663a7d6926	-
+function	c:@F@method_setImplementation	-			IMP (Method, IMP)	Method m | IMP imp	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	16214ba7c4222c82	-
+function	c:@F@method_exchangeImplementations	-			void (Method, Method)	Method m1 | Method m2	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	46a7f20116fc3ed5	-
+function	c:@F@ivar_getName	-			const char * (Ivar)	Ivar v	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	cfaf07b9280ad59a	-
+function	c:@F@ivar_getTypeEncoding	-			const char * (Ivar)	Ivar v	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	1183ce549b6fe5e0	-
+function	c:@F@ivar_getOffset	-			ptrdiff_t (Ivar)	Ivar v	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	f6c06b8c5d96633a	-
+function	c:@F@property_getName	-			const char * (objc_property_t)	objc_property_t property	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	d6d101026e845679	-
+function	c:@F@property_getAttributes	-			const char * (objc_property_t)	objc_property_t property	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c4bb1db13f383f41	-
+function	c:@F@property_copyAttributeList	-			objc_property_attribute_t * (objc_property_t, unsigned int *)	objc_property_t property | unsigned int * outCount	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	b4fa3a30f002cd17	-
+function	c:@F@property_copyAttributeValue	-			char * (objc_property_t, const char *)	objc_property_t property | const char * attributeName	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	fcf33f5b698f0a80	-
+function	c:@F@objc_getProtocol	-			Protocol * (const char *)	const char * name	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	cfe2e0462dc62d02	-
+function	c:@F@objc_copyProtocolList	-			Protocol * _Nonnull * (unsigned int *)	unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	0611e98b1d45f1b3	-
+function	c:@F@protocol_conformsToProtocol	-			BOOL (Protocol *, Protocol *)	Protocol * proto | Protocol * other	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	6429d356025a9c54	-
+function	c:@F@protocol_isEqual	-			BOOL (Protocol *, Protocol *)	Protocol * proto | Protocol * other	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	ea3da85f247904f5	-
+function	c:@F@protocol_getName	-			const char * (Protocol *)	Protocol * proto	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	aec0a0e32e97ff6c	-
+function	c:@F@protocol_getMethodDescription	-			struct objc_method_description (Protocol *, SEL, BOOL, BOOL)	Protocol * proto | SEL aSel | BOOL isRequiredMethod | BOOL isInstanceMethod	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	412fb56e8c6e4065	-
+function	c:@F@protocol_copyMethodDescriptionList	-			struct objc_method_description * (Protocol *, BOOL, BOOL, unsigned int *)	Protocol * proto | BOOL isRequiredMethod | BOOL isInstanceMethod | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5a965585b8682c5e	-
+function	c:@F@protocol_getProperty	-			objc_property_t (Protocol *, const char *, BOOL, BOOL)	Protocol * proto | const char * name | BOOL isRequiredProperty | BOOL isInstanceProperty	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	79fc607cbadd278a	-
+function	c:@F@protocol_copyPropertyList	-			objc_property_t  _Nonnull * (Protocol *, unsigned int *)	Protocol * proto | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a36466f1d415f748	-
+function	c:@F@protocol_copyPropertyList2	-			objc_property_t  _Nonnull * (Protocol *, unsigned int *, BOOL, BOOL)	Protocol * proto | unsigned int * outCount | BOOL isRequiredProperty | BOOL isInstanceProperty	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	4d902d242d4dc333	-
+function	c:@F@protocol_copyProtocolList	-			Protocol * _Nonnull * (Protocol *, unsigned int *)	Protocol * proto | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	66f513aa0424f025	-
+function	c:@F@objc_allocateProtocol	-			Protocol * (const char *)	const char * name	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	d663ae56c96f47db	-
+function	c:@F@objc_registerProtocol	-			void (Protocol *)	Protocol * proto	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	46324f3bb9b16516	-
+function	c:@F@protocol_addMethodDescription	-			void (Protocol *, SEL, const char *, BOOL, BOOL)	Protocol * proto | SEL name | const char * types | BOOL isRequiredMethod | BOOL isInstanceMethod	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	3f186f616abb6c48	-
+function	c:@F@protocol_addProtocol	-			void (Protocol *, Protocol *)	Protocol * proto | Protocol * addition	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	1d753da7126f193e	-
+function	c:@F@protocol_addProperty	-			void (Protocol *, const char *, const objc_property_attribute_t *, unsigned int, BOOL, BOOL)	Protocol * proto | const char * name | const objc_property_attribute_t * attributes | unsigned int attributeCount | BOOL isRequiredProperty | BOOL isInstanceProperty	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	bf0b61924f81092b	-
+function	c:@F@objc_copyImageNames	-			const char * _Nonnull * (unsigned int *)	unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	57e0abafca0ba49d	-
+function	c:@F@class_getImageName	-			const char * (Class)	Class cls	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	c71e046c141bd3d6	-
+function	c:@F@objc_copyClassNamesForImage	-			const char * _Nonnull * (const char *, unsigned int *)	const char * image | unsigned int * outCount	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9ac51a4a864f0778	-
+function	c:@F@sel_isEqual	-			BOOL (SEL, SEL)	SEL lhs | SEL rhs	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a083cb2d86256d5b	-
+function	c:@F@objc_enumerationMutation	-			void (id)	id obj	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	dadf233c062fbce4	-
+function	c:@F@objc_setEnumerationMutationHandler	-			void (void (*)(id _Nonnull))	void (*)(id _Nonnull) handler	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	7a8f70eb6fada705	-
+function	c:@F@objc_setForwardHandler	-			void (void *, void *)	void * fwd | void * fwd_stret	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	5089f593f1b99d25	-
+function	c:@F@imp_implementationWithBlock	-			IMP (id)	id block	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4fc9aa367198d0af	-
+function	c:@F@imp_getBlock	-			id (IMP)	IMP anImp	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9c776e98044a9501	-
+function	c:@F@imp_removeBlock	-			BOOL (IMP)	IMP anImp	-	ios=4.3/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	75e13c15552349a7	-
+function	c:@F@objc_loadWeak	-			id (id  _Nullable *)	id  _Nullable * location	-	ios=5.0/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	797aeca23af8ca4c	-
+function	c:@F@objc_storeWeak	-			id (id  _Nullable *, id)	id  _Nullable * location | id obj	-	ios=5.0/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	7bcf9fbffb60734d	-
+typedef	c:@T@objc_AssociationPolicy	-			enum objc_AssociationPolicy	-	-	-	-	498d7e7bdd7a909d	-
+enum	c:@E@objc_AssociationPolicy	-			uintptr_t	-	-	-	-	886cc8d47e1f154d	-
+enumconst	c:@E@objc_AssociationPolicy@OBJC_ASSOCIATION_ASSIGN	objc_AssociationPolicy			-	-	-	-	-	3b1e45e346e170d4	0
+enumconst	c:@E@objc_AssociationPolicy@OBJC_ASSOCIATION_RETAIN_NONATOMIC	objc_AssociationPolicy			-	-	-	-	-	f106e812f697556e	1
+enumconst	c:@E@objc_AssociationPolicy@OBJC_ASSOCIATION_COPY_NONATOMIC	objc_AssociationPolicy			-	-	-	-	-	1063e3ff22f63e8f	3
+enumconst	c:@E@objc_AssociationPolicy@OBJC_ASSOCIATION_RETAIN	objc_AssociationPolicy			-	-	-	-	-	d2dfbb146348c3c1	769
+enumconst	c:@E@objc_AssociationPolicy@OBJC_ASSOCIATION_COPY	objc_AssociationPolicy			-	-	-	-	-	51d05416add39741	771
+function	c:@F@objc_setAssociatedObject	-			void (id, const void *, id, objc_AssociationPolicy)	id object | const void * key | id value | objc_AssociationPolicy policy	-	ios=3.1/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	9638a8db23d4531c	-
+function	c:@F@objc_getAssociatedObject	-			id (id, const void *)	id object | const void * key	-	ios=3.1/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a74d8200d1faa98b	-
+function	c:@F@objc_removeAssociatedObjects	-			void (id)	id object	-	ios=3.1/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	410f03777c301dd4	-
+typedef	c:@T@objc_hook_getImageName	-			BOOL (*)(Class _Nonnull, const char * _Nullable * _Nonnull)	-	-	-	-	8d595d8e8eaa42ee	-
+function	c:@F@objc_setHook_getImageName	-			void (objc_hook_getImageName, objc_hook_getImageName  _Nullable *)	objc_hook_getImageName newValue | objc_hook_getImageName  _Nullable * outOldValue	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	25b1dc3e7236e715	-
+typedef	c:@T@objc_hook_getClass	-			BOOL (*)(const char * _Nonnull, Class  _Nullable * _Nonnull)	-	-	-	-	d6485c02158bc1b6	-
+function	c:@F@objc_setHook_getClass	-			void (objc_hook_getClass, objc_hook_getClass  _Nullable *)	objc_hook_getClass newValue | objc_hook_getClass  _Nullable * outOldValue	-	ios=12.2/-/-/0,macos=10.14.4/-/-/0,tvos=12.2/-/-/0,watchos=5.2/-/-/0	-	788433e8142fd687	-
+typedef	c:@T@objc_func_loadImage	-			void (*)(const struct mach_header * _Nonnull)	-	-	-	-	58edf3670ac984d0	-
+function	c:@F@objc_addLoadImageFunc	-			void (objc_func_loadImage)	objc_func_loadImage func	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	7f606ea4415e12d4	-
+typedef	c:@T@objc_hook_lazyClassNamer	-			const char * _Nullable (*)(Class _Nonnull)	-	-	-	-	37280f9d037ac939	-
+function	c:@F@objc_setHook_lazyClassNamer	-			void (objc_hook_lazyClassNamer, objc_hook_lazyClassNamer  _Nonnull *)	objc_hook_lazyClassNamer newValue | objc_hook_lazyClassNamer  _Nonnull * oldOutValue	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	842147fe19b7ca62	-
+typedef	c:@T@_objc_swiftMetadataInitializer	-			Class  _Nullable (*)(Class _Nonnull, void * _Nullable)	-	-	-	-	2c3494d3b3992dc9	-
+function	c:@F@_objc_realizeClassFromSwift	-			Class (Class, void *)	Class cls | void * previously	-	ios=12.2/-/-/0,macos=10.14.4/-/-/0,tvos=12.2/-/-/0,watchos=5.2/-/-/0	-	579baafcd912eaa7	-
+struct	c:@S@objc_method_list	-			-	-	-	-	-	cecc4d6ae179808e	-
+function	c:@F@_objc_flush_caches	-			void (Class)	Class cls	-	ios=2.0/2.0/-/0,macos=10.0/10.5/-/0,tvos=9.0/9.0/-/0,watchos=1.0/1.0/-/0	-	d21cc25f53c4bc32	-
+function	c:@F@class_lookupMethod	-			IMP (Class, SEL)	Class cls | SEL sel	-	ios=2.0/2.0/-/0,macos=10.0/10.5/-/0,tvos=9.0/9.0/-/0,watchos=1.0/1.0/-/0	-	ddd8e563c846c9c0	-
+function	c:@F@class_respondsToMethod	-			BOOL (Class, SEL)	Class cls | SEL sel	-	ios=2.0/2.0/-/0,macos=10.0/10.5/-/0,tvos=9.0/9.0/-/0,watchos=1.0/1.0/-/0	-	55047831bdb541ee	-
+function	c:@F@object_copyFromZone	-			id (id, size_t, __unused void *)	id anObject | size_t nBytes | __unused void * zone	-	ios=-/-/-/1,macos=10.0/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	afba1c9ed1c54ea5	-
+function	c:@F@class_createInstanceFromZone	-			id (Class, size_t, __unused void *)	Class  | size_t idxIvars | __unused void * zone	-	ios=-/-/-/1,macos=10.0/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b0bfd626f69c320e	-
+struct	c:@S@objc_super	-			-	-	-	-	-	4e2aafbc13e41b7b	-
+field	c:@S@objc_super@FI@receiver	objc_super			id	-	-	-	-	b5c703d01606e137	-
+field	c:@S@objc_super@FI@super_class	objc_super			Class	-	-	-	-	e139a349d1faa28d	-
+function	c:@F@objc_msgSend	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	4d4ec7603109d81e	-
+function	c:@F@objc_msgSendSuper	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	902bf8e9f6b9255d	-
+function	c:@F@objc_msgSend_stret	-			void (void)	-	-	*unavailable ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	unavailable: not available in arm64	e27062f11a905914	-
+function	c:@F@objc_msgSendSuper_stret	-			void (void)	-	-	*unavailable ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	unavailable: not available in arm64	1773c44072efbabc	-
+function	c:@F@method_invoke	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	a46e41047c2e3557	-
+function	c:@F@method_invoke_stret	-			void (void)	-	-	*unavailable ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	unavailable: not available in arm64	b832f322fe6dfcdf	-
+function	c:@F@_objc_msgForward	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	fab5c55473a2b582	-
+function	c:@F@_objc_msgForward_stret	-			void (void)	-	-	*unavailable ios=3.0/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	unavailable: not available in arm64	0a7bcf1d116b8f43	-
+enum	c:@Ea@OBJC_RATIO_COLLECTION	-	-		unsigned int	-	-	-	-	e39fd5bf7c6a4fd8	-
+enumconst	c:@Ea@OBJC_RATIO_COLLECTION@OBJC_RATIO_COLLECTION	-			-	-	-	-	-	e627a60eb196b56b	0
+enumconst	c:@Ea@OBJC_RATIO_COLLECTION@OBJC_GENERATIONAL_COLLECTION	-			-	-	-	-	-	88ea24861b95a1f1	1
+enumconst	c:@Ea@OBJC_RATIO_COLLECTION@OBJC_FULL_COLLECTION	-			-	-	-	-	-	c01043d890bce91e	2
+enumconst	c:@Ea@OBJC_RATIO_COLLECTION@OBJC_EXHAUSTIVE_COLLECTION	-			-	-	-	-	-	1f9940e39867931d	3
+enumconst	c:@Ea@OBJC_RATIO_COLLECTION@OBJC_COLLECT_IF_NEEDED	-			-	-	-	-	-	62b0e4841738632b	8
+enumconst	c:@Ea@OBJC_RATIO_COLLECTION@OBJC_WAIT_UNTIL_DONE	-			-	-	-	-	-	f5bdf0d0561bd2db	16
+enum	c:@Ea@OBJC_CLEAR_RESIDENT_STACK	-	-		unsigned int	-	-	-	-	2b121d02004c1e1b	-
+enumconst	c:@Ea@OBJC_CLEAR_RESIDENT_STACK@OBJC_CLEAR_RESIDENT_STACK	-			-	-	-	-	-	a5a6352693933da9	1
+function	c:@F@objc_collect	-			void (unsigned long)	unsigned long options	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	bdc053f5f7806db1	-
+function	c:@F@objc_collectingEnabled	-			BOOL (void)	-	-	*deprecated	deprecated: it always returns NO. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	5fca2d42165c7e22	-
+function	c:@F@objc_setCollectionThreshold	-			void (size_t)	size_t threshold	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	a9a19049c10d3b79	-
+function	c:@F@objc_setCollectionRatio	-			void (size_t)	size_t ratio	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	994ec6ac9648142c	-
+function	c:@F@objc_startCollectorThread	-			void (void)	-	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	d63f468fe53de368	-
+function	c:@F@objc_atomicCompareAndSwapPtr	-			BOOL (id, id, volatile id *)	id predicate | id replacement | volatile id * objectLocation	-	*deprecated	deprecated: use OSAtomicCompareAndSwapPtr instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	6609a269cd0889e4	-
+function	c:@F@objc_atomicCompareAndSwapPtrBarrier	-			BOOL (id, id, volatile id *)	id predicate | id replacement | volatile id * objectLocation	-	*deprecated	deprecated: use OSAtomicCompareAndSwapPtrBarrier instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	219267063200a82e	-
+function	c:@F@objc_atomicCompareAndSwapGlobal	-			BOOL (id, id, volatile id *)	id predicate | id replacement | volatile id * objectLocation	-	*deprecated	deprecated: use OSAtomicCompareAndSwapPtr instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	18faa28137fbe961	-
+function	c:@F@objc_atomicCompareAndSwapGlobalBarrier	-			BOOL (id, id, volatile id *)	id predicate | id replacement | volatile id * objectLocation	-	*deprecated	deprecated: use OSAtomicCompareAndSwapPtrBarrier instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	a6a0792dac09942c	-
+function	c:@F@objc_atomicCompareAndSwapInstanceVariable	-			BOOL (id, id, volatile id *)	id predicate | id replacement | volatile id * objectLocation	-	*deprecated	deprecated: use OSAtomicCompareAndSwapPtr instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	2b77e97a563a9c26	-
+function	c:@F@objc_atomicCompareAndSwapInstanceVariableBarrier	-			BOOL (id, id, volatile id *)	id predicate | id replacement | volatile id * objectLocation	-	*deprecated	deprecated: use OSAtomicCompareAndSwapPtrBarrier instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	e196fbd5902283bb	-
+function	c:@F@objc_assign_strongCast	-			id (id, id *)	id val | id * dest	-	*deprecated	deprecated: use a simple assignment instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	fce92d97142b598a	-
+function	c:@F@objc_assign_global	-			id (id, id *)	id val | id * dest	-	*deprecated	deprecated: use a simple assignment instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	02828882b9f67a45	-
+function	c:@F@objc_assign_threadlocal	-			id (id, id *)	id val | id * dest	-	*deprecated	deprecated: use a simple assignment instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	1ffcc21ff8538197	-
+function	c:@F@objc_assign_ivar	-			id (id, id, ptrdiff_t)	id val | id dest | ptrdiff_t offset	-	*deprecated	deprecated: use a simple assignment instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	a9bf7e6027100801	-
+function	c:@F@objc_read_weak	-			id (id *)	id * location	-	*deprecated	deprecated: use a simple read instead, or convert to zeroing __weak. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	cd5a5cce9009eac2	-
+function	c:@F@objc_assign_weak	-			id (id, id *)	id value | id * location	-	*deprecated	deprecated: use a simple assignment instead, or convert to zeroing __weak. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	8fcba9e1b7e70fb0	-
+function	c:@F@objc_memmove_collectable	-			void * (void *, const void *, size_t)	void * dst | const void * src | size_t size	-	*deprecated	deprecated: use memmove instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	eace3238238ac1fb	-
+function	c:@F@objc_finalizeOnMainThread	-			void (Class)	Class cls	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	4a53a7c93a9e5a19	-
+function	c:@F@objc_is_finalized	-			BOOL (void *)	void * ptr	-	*deprecated	deprecated: it always returns NO. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	f3700eb2e0ec02da	-
+function	c:@F@objc_clear_stack	-			void (unsigned long)	unsigned long options	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	63cfccdc97236bb3	-
+function	c:@F@objc_collecting_enabled	-			BOOL (void)	-	-	*deprecated	deprecated: it always returns NO. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	5a97be6f9cf19b23	-
+function	c:@F@objc_set_collection_threshold	-			void (size_t)	size_t threshold	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	7311d243701bbe29	-
+function	c:@F@objc_set_collection_ratio	-			void (size_t)	size_t ratio	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	2c0d61b34d6e7be5	-
+function	c:@F@objc_start_collector_thread	-			void (void)	-	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	4d228e14d2f156ae	-
+function	c:@F@objc_allocate_object	-			id (Class, int)	Class cls | int extra	-	*deprecated	deprecated: use class_createInstance instead. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	fcb78e589b369909	-
+function	c:@F@objc_registerThreadWithCollector	-			void (void)	-	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	605682a23b14e4ca	-
+function	c:@F@objc_unregisterThreadWithCollector	-			void (void)	-	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	345471a6e9d18789	-
+function	c:@F@objc_assertRegisteredThreadWithCollector	-			void (void)	-	-	*deprecated	deprecated: it does nothing. Define OBJC_SILENCE_GC_DEPRECATIONS=1 to temporarily silence this diagnostic.	d5098ac429b48b67	-
+typedef	c:@T@objc_exception_preprocessor	-			id  _Nonnull (*)(id _Nonnull)	-	-	-	-	3fec6c1a5391fad6	-
+typedef	c:@T@objc_exception_matcher	-			int (*)(Class _Nonnull, id _Nonnull)	-	-	-	-	aa089641bef8e58e	-
+typedef	c:@T@objc_uncaught_exception_handler	-			void (*)(id _Null_unspecified)	-	-	-	-	3e720c2a67bdbfba	-
+typedef	c:@T@objc_exception_handler	-			void (*)(id _Nullable, void * _Nullable)	-	-	-	-	6e885d4265cb142f	-
+function	c:@F@objc_exception_throw	-			void (id)	id exception	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	15100c7a85bc7abf	-
+function	c:@F@objc_exception_rethrow	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	ebcb8bc590af9166	-
+function	c:@F@objc_begin_catch	-			id (void *)	void * exc_buf	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	96cc45e724e5fba8	-
+function	c:@F@objc_end_catch	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	fc5a889c8bcf0079	-
+function	c:@F@objc_terminate	-			void (void)	-	-	ios=6.0/-/-/0,macos=10.8/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	525405f413c1508b	-
+function	c:@F@objc_setExceptionPreprocessor	-			objc_exception_preprocessor (objc_exception_preprocessor)	objc_exception_preprocessor fn	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	e7648877a5b23527	-
+function	c:@F@objc_setExceptionMatcher	-			objc_exception_matcher (objc_exception_matcher)	objc_exception_matcher fn	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	bd305c5d82798e8a	-
+function	c:@F@objc_setUncaughtExceptionHandler	-			objc_uncaught_exception_handler (objc_uncaught_exception_handler)	objc_uncaught_exception_handler fn	-	ios=2.0/-/-/0,macos=10.5/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	331b80b8e6974d69	-
+function	c:@F@objc_addExceptionHandler	-			uintptr_t (objc_exception_handler, void *)	objc_exception_handler fn | void * context	-	ios=-/-/-/1,macos=10.5/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	96c7a6d52f29b0c2	-
+function	c:@F@objc_removeExceptionHandler	-			void (uintptr_t)	uintptr_t token	-	ios=-/-/-/1,macos=10.5/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a59ffd8fd54bcca5	-
+function	c:@F@objc_sync_enter	-			int (id)	id obj	-	ios=2.0/-/-/0,macos=10.3/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	09bbc5e063809b3d	-
+function	c:@F@objc_sync_exit	-			int (id)	id obj	-	ios=2.0/-/-/0,macos=10.3/-/-/0,tvos=9.0/-/-/0,watchos=1.0/-/-/0	-	b22088e87b8cfc9b	-
+enum	c:@Ea@OBJC_SYNC_SUCCESS	-	-		int	-	-	-	-	4565e7fe932a0a8d	-
+enumconst	c:@Ea@OBJC_SYNC_SUCCESS@OBJC_SYNC_SUCCESS	-			-	-	-	-	-	11191c1b3893a1a6	0
+enumconst	c:@Ea@OBJC_SYNC_SUCCESS@OBJC_SYNC_NOT_OWNING_THREAD_ERROR	-			-	-	-	-	-	8853de556ddcbcc6	-1
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@ptrdiff_t	-			long	-	-	-	-	cbb87dabc6faece5	-
+typedef	c:@T@uintptr_t	-			unsigned long	-	-	-	-	d45bca13aaee37a2	-

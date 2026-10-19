@@ -1,0 +1,302 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVAssetDownloadTaskMediaSelectionPrefersMultichannelKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVAssetDownloadTaskMediaSelectionPrefersMultichannelKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVAssetDownloadTaskPrefersHDRKey",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVAssetDownloadTaskPrefersHDRKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVAssetDownloadTaskPrefersLosslessAudioKey",
+      "kind": "constant",
+      "introduced": "14.5",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVAssetDownloadTaskPrefersLosslessAudioKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVFragmentedMovieContainsMovieFragmentsDidChangeNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVFragmentedMovieContainsMovieFragmentsDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVFragmentedMovieDurationDidChangeNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVFragmentedMovieDurationDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVFragmentedMovieTrackSegmentsDidChangeNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVFragmentedMovieTrackSegmentsDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVFragmentedMovieTrackTimeRangeDidChangeNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVFragmentedMovieTrackTimeRangeDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVFragmentedMovieWasDefragmentedNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVFragmentedMovieWasDefragmentedNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVMediaCharacteristicContainsAlphaChannel",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"public.contains-alpha-channel\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVMediaCharacteristicContainsHDRVideo",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"public.contains-hdr-video\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVMediaCharacteristicIsOriginalContent",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"public.original-content\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVMovieReferenceRestrictionsKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVMovieReferenceRestrictionsKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVMovieShouldSupportAliasDataReferencesKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVMovieShouldSupportAliasDataReferencesKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerEligibleForHDRPlaybackDidChangeNotification",
+      "kind": "constant",
+      "introduced": "13.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVPlayerEligibleForHDRPlaybackDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerInterstitialEventMonitorCurrentEventDidChangeNotification",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"CurrentEventDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerInterstitialEventMonitorEventsDidChangeNotification",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"EventsDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerItemRecommendedTimeOffsetFromLiveDidChangeNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVPlayerItemRecommendedTimeOffsetFromLiveDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerItemTimeJumpedOriginatingParticipantKey",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVPlayerItemTimeJumpedOriginatingParticipantKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVSampleBufferDisplayLayerOutputObscuredDueToInsufficientExternalProtectionDidChangeNotification",
+      "kind": "constant",
+      "introduced": "14.5",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVSampleBufferDisplayLayerOutputObscuredDueToInsufficientExternalProtectionDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVSampleBufferDisplayLayerRequiresFlushToResumeDecodingDidChangeNotification",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVSampleBufferDisplayLayerRequiresFlushToResumeDecodingDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVURLAssetAllowsConstrainedNetworkAccessKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVURLAssetAllowsConstrainedNetworkAccessKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVURLAssetAllowsExpensiveNetworkAccessKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVURLAssetAllowsExpensiveNetworkAccessKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVURLAssetHTTPUserAgentKey",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVURLAssetHTTPUserAgentKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVURLAssetPrimarySessionIdentifierKey",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVURLAssetPrimarySessionIdentifierKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVURLAssetURLRequestAttributionKey",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AVURLAssetURLRequestAttributionKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVVideoAppleProRAWBitDepthKey",
+      "kind": "constant",
+      "introduced": "14.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the first HELD RUNG that exports this name is 16.0, and no earlier held rung does, so on a band from 16.0 up the release's own symbol answers and carrying it is the band's; introduced is that rung rather than Apple's later header annotation because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"AppleProRAWBitDepthKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Package: $identifier
+Name: $name
+Architecture: iphoneos-arm
+Description: $name, a LaunchDaemon
+Maintainer: $maintainer
+Author: $maintainer
+Section: System

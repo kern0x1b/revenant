@@ -1,0 +1,19 @@
+tag                      HOST           xor_lo         xor_hi         xor_all        mul31          mul33          fnv32          fnv64          dict          
+invalid   0/0            242338807774   0              0              0              0              0              1768495365     9808874869469701221 3              0             
+vide      mvid/OSType    930912231118   453840134      1835297123     453840134      16105181533215981563 12748373734686021029 3594965908     3615307735033577268 3              5273351107576669909
+sint 7    trak/SInt64    175247075667   1953653103     1953653096     1953653103     18017612854055330894 6609776467575852444 1726151603     842178663243468979 3              18581050327   
+flags 3   flgs/Flags     175254150787   1885960288     1885960291     1885960288     7487244835969991025 6015031806701250335 679349740      7113537089599567052 3              7963307283    
+float 1.5 trak/Float64   175196967445   1953653103     1267360111     1267360111     18043021138363444699 6660318275760486669 3478659490     3886436539124624642 3              8248342717529063424
+float 0.0 trak/Float64   175247284034   1953653103     1953653103     1953653103     18043021138363436948 6660318275760478422 4038584995     3848124056447181347 3              0             
+
+self-check: does the candidate separate the pair that differs only in data type and value?
+  host 175247075667 vs 175196967445 -> distinguished
+  xor_lo       COLLIDES   (invalid 0, sint7 1953653103)
+  xor_hi       distinguishes all 6   (invalid 0, sint7 1953653096)
+  xor_all      COLLIDES   (invalid 0, sint7 1953653103)
+  mul31        distinguishes all 6   (invalid 0, sint7 18017612854055330894)
+  mul33        distinguishes all 6   (invalid 0, sint7 6609776467575852444)
+  fnv32        distinguishes all 6   (invalid 1768495365, sint7 1726151603)
+  fnv64        distinguishes all 6   (invalid 9808874869469701221, sint7 842178663243468979)
+  cfhash_dict  COLLIDES   (invalid 3, sint7 3)
+  cfhash_num   COLLIDES   (invalid 0, sint7 18581050327)

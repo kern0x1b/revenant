@@ -1,0 +1,33 @@
+set_project("systemprobe")
+set_version("0.0.1")
+-- The armv7 probe of swift-system: the installed module SystemPackage (libswiftSystem.dylib) run on the iOS 6.1.3 emulator, with
+-- the same source built for the host (main.swift). Run from this folder:
+--   xmake f -p iphoneos -a armv7 -y && xmake build -y systemprobe && xmake emulate -d iPhone4,1 -r 6.1.3 install
+--   xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/systemprobe /tmp
+-- The package exports its module folder (CHARON_SWIFT_MODULES) and its dylib link, so `import SystemPackage` and the link
+-- come from the package, not from this file. The runtime and its backports are the configuration the package is built against.
+local root = path.join(os.scriptdir(), "../../../../..")
+add_repositories("charon " .. root)
+add_addons("charon v0.8.17")
+add_requires("charon@swift-system", {alias = "swift-system"})
+add_requires("charon@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+add_requires("charon@apple-backports", {alias = "apple-backports", configs = {coredata = true}})
+add_requires("charon@libcxx", {alias = "libcxx"})
+add_requires("charon@apple-compat", {alias = "apple-compat"})
+set_config("apple_minimum", "6.1.3")
+set_config("apple_backports", "coredata")
+includes("@addon/charon/apple-ios")
+includes("@addon/charon/emulate")
+set_allowedplats("iphoneos")
+set_allowedarchs("iphoneos|armv7")
+set_defaultplat("iphoneos")
+set_defaultarchs("iphoneos|armv7")
+
+target("systemprobe")
+    add_rules("@addon/charon/daemon", "@addon/charon/swift")
+    add_files("main.swift")
+    add_packages("swift-system", "swift-runtime", "apple-backports", "libcxx", "apple-compat")
+    set_values("charon.version", "1.0")
+    set_values("charon.control", "control")
+    -- The program carries the libraries it links.
+    set_values("charon.libraries", "swift-system", "apple-backports")

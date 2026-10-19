@@ -1,0 +1,1 @@
+            double y = CharonMPSApplyNeuron(MPSCNNNeuronTypeNone, sum, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));  // MUTATION: the neuron is skipped

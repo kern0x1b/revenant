@@ -1,0 +1,49 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeErrorKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no held rung this port can see exports this name, so the port carries it on every band: the fifteen held caches were searched for its own exported symbol and none has it",
+      "effect": "answers the string the framework itself answers for this name, \"AssetListResponseStatusDidChangeErrorKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeEventKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no held rung this port can see exports this name, so the port carries it on every band: the fifteen held caches were searched for its own exported symbol and none has it",
+      "effect": "answers the string the framework itself answers for this name, \"AssetListResponseStatusDidChangeEventKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeNotification",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no held rung this port can see exports this name, so the port carries it on every band: the fifteen held caches were searched for its own exported symbol and none has it",
+      "effect": "answers the string the framework itself answers for this name, \"AssetListResponseStatusDidChangeNotification\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    },
+    {
+      "api": "AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeStatusKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no held rung this port can see exports this name, so the port carries it on every band: the fifteen held caches were searched for its own exported symbol and none has it",
+      "effect": "answers the string the framework itself answers for this name, \"AssetListResponseStatusDidChangeStatusKey\" - a notification a caller observes or a key it writes into a userInfo dictionary",
+      "facts": "facts/AVFoundation/AVFoundationNotificationKeys.md",
+      "source": "whether any held rung already exports it: a direct dump of the exports of every held cache with tools/corpus/dump-cache.lua - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e) - searched for this name's own symbol, with _NSFileSize planted as a control, which answers 4.3 on this set; and the value, text and bytes: the differential in tests/backports/host/avf-notifications, which reads the table out of two builds and diffs them"
+    }
+  ]
+}

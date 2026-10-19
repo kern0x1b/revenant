@@ -1,0 +1,16 @@
+{
+ "framework": "ARKit",
+ "entries": [
+  {
+   "api": "ARPlaneAnchor.classificationSupported",
+   "kind": "property",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Configurations.md",
+   "reason": "carried, and the getter is the header's own: ARPlaneAnchor.h:93 declares `@property (class, nonatomic, readonly, getter=isClassificationSupported) BOOL classificationSupported API_AVAILABLE(ios(12.0))`, so the selector is +isClassificationSupported and there is no +classificationSupported to look for. The ledger row's own reason ('neither -classificationSupported nor -setClassificationSupported: is an instance or a class selector') names the property, not the getter, and the release's class method list settles which one it is: ARPlaneAnchor's has two entries and one of them is +isClassificationSupported. The port answers NO (ARKit/ARAnchor.m), and NO is what the hardware gives: a plane's classification - floor, wall, table, ceiling, window, door - is read out of a depth sensor's geometry, and this device has neither TrueDepth nor LiDAR, which is the same reason the same file answers ARPlaneClassificationNone for -classification and ARPlaneClassificationStatusUnknown for -classificationStatus. Controls of the read: the class list resolves and prints its two entries with their implementation addresses, so a read that found nothing would print none",
+   "effect": "NO, which is what a device without a depth sensor answers; the call reaches a method the class itself carries, as it does on the release",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARPlaneAnchor: instance list 0x1af218400 of 33 twelve-byte entries and class list 0x1af2183c8 of 2 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsSecureCoding at 0x1af14f4fc and +isClassificationSupported at 0x1af14f89c. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "BLASSetThreading()",
+      "kind": "function",
+      "introduced": "18.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the model is per thread, as the header says, so it is kept in thread-local storage and a thread that has set none answers the model a thread starts with; nothing in the library reads that key, so the model is stored and read back and does not change how the release's own cblas_* and LAPACK thread",
+      "effect": "0 for a model the library has, -1 for one it has not, and the setting is then left as it was; the model is per thread and a thread that has set none is BLAS_THREADING_MULTI_THREADED. It is a value the port stores and reads back: it does not change how BLAS and LAPACK run, and that is a difference from the header, which documents the call as setting the model those libraries use. Measured on the host, where the call is equally without an effect on the library: four threads inside cblas_sgemm and the process has 15 threads with BLAS_THREADING_MULTI_THREADED and 15 with BLAS_THREADING_SINGLE_THREADED. Measured on the release, which has no model to set: no cache below 18.0 exports an entry point that sets a BLAS threading model, and the one the port calls arrived with the API in 18.0",
+      "facts": "facts/Accelerate/BLASThreading.md",
+      "source": "the host's own Accelerate, measured for the default a thread starts with, for a set and for a refused value, and measured for the thread count the library uses with each model; the 18.0 cache, which names both functions where no earlier cache the port holds does, and the absence of any such entry point below it; the enumeration and the two prototypes of the host's vecLib/thread_api.h, read from that header and not from the build SDK, which has no such header"
+    },
+    {
+      "api": "BLASGetThreading()",
+      "kind": "function",
+      "introduced": "18.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the setting is thread-local, as the header says, so it is kept in thread-local storage and a thread that has set none answers the model a thread starts with",
+      "effect": "the calling thread's model, BLAS_THREADING_MULTI_THREADED for a thread that has set none; it reads the value BLASSetThreading stored and nothing else, and like that call it does not change how BLAS and LAPACK run - see the effect of BLASSetThreading() and facts/Accelerate/BLASThreading.md",
+      "facts": "facts/Accelerate/BLASThreading.md",
+      "source": "the host's own Accelerate, measured for the default a thread starts with, for a set and for a refused value, and measured for the thread count the library uses with each model; the 18.0 cache, which names both functions where no earlier cache the port holds does, and the absence of any such entry point below it; the enumeration and the two prototypes of the host's vecLib/thread_api.h, read from that header and not from the build SDK, which has no such header"
+    }
+  ]
+}

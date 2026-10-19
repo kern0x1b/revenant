@@ -1,0 +1,4 @@
+framework module Broken [system] {
+  umbrella header "Broken.h"
+  export *
+}

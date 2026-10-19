@@ -1,0 +1,16 @@
+the five the port carries now, by convention:
+  MPMediaItemPropertyIsExplicit          isExplicit
+  MPMediaItemPropertyHasProtectedAsset   hasProtectedAsset
+  MPMediaItemPropertyDateAdded           dateAdded
+  MPMediaItemPropertyPlaybackStoreID     playbackStoreID
+  MPMediaItemPropertyIsPreorder          isPreorder
+the ones 6.1.3 already had, as the witness:
+  MPMediaItemPropertyTitle               title
+  MPMediaItemPropertyAlbumTitle          albumTitle
+  MPMediaItemPropertyIsCompilation       isCompilation
+  MPMediaItemPropertyIsCloudItem         isCloudItem
+  MPMediaItemPropertyAlbumTrackCount     albumTrackCount
+  MPMediaItemPropertyAlbumTrackNumber    albumTrackNumber
+  MPMediaItemPropertyDiscNumber          discNumber
+  MPMediaItemPropertyComments            comments
+  MPMediaItemPropertyAssetURL            assetURL

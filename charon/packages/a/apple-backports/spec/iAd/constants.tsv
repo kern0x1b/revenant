@@ -1,0 +1,2 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	ADClientErrorDomain	-	ADClientErrorDomain	7.1	NSString * const	-	518f29ba1778782a	found	ADClientErrorDomain	-	ios-26.2-cache (no host value)	-	exported	ns	-

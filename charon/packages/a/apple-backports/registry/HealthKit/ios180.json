@@ -1,0 +1,192 @@
+{
+  "framework": "HealthKit",
+  "entries": [
+    {
+      "api": "HKCategoryTypeIdentifierBleedingAfterPregnancy",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKCategoryTypeIdentifierBleedingAfterPregnancy, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKCategoryTypeIdentifierBleedingDuringPregnancy",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKCategoryTypeIdentifierBleedingDuringPregnancy, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKCategoryTypeIdentifierSleepApneaEvent",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKCategoryTypeIdentifierSleepApneaEvent, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKDataTypeIdentifierStateOfMind",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKDataTypeStateOfMind, which is NOT the constant's own name - a value written from the name would be wrong for this one",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKPredicateKeyPathWorkoutEffortRelationship",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKObject.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string ratingOfExertionAssociation, which is NOT the constant's own name - a value written from the name would be wrong for this one",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKObject.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierCrossCountrySkiingSpeed",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierCrossCountrySkiingSpeed, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierDistanceCrossCountrySkiing",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierDistanceCrossCountrySkiing, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierDistancePaddleSports",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierDistancePaddleSports, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierDistanceRowing",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierDistanceRowing, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierDistanceSkatingSports",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierDistanceSkatingSports, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierEstimatedWorkoutEffortScore",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierEstimatedWorkoutEffortScore, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierPaddleSportsSpeed",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierPaddleSportsSpeed, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierRowingSpeed",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierRowingSpeed, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierWorkoutEffortScore",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierWorkoutEffortScore, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKScoredAssessmentTypeIdentifierGAD7",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKScoredAssessmentTypeIdentifierGAD7, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKScoredAssessmentTypeIdentifierPHQ9",
+      "kind": "constant",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The release is also where the held ladder measures the symbol as first exported by this release, so the object that defines it is HKConstants180.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKScoredAssessmentTypeIdentifierPHQ9, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    }
+  ]
+}

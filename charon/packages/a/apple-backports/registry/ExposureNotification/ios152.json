@@ -1,0 +1,15 @@
+{
+ "framework": "ExposureNotification",
+ "entries": [
+  {
+     "api": "ENExposureWindow.variantOfConcernType",
+     "kind": "property",
+     "introduced": "15.2",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from -- variantOfConcernType",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  }
+ ]
+}

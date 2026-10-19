@@ -1,0 +1,47 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+ObjectiveC	swift-struct	s:10ObjectiveC8ObjCBoolV	-	ObjCBool	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	e0661e6b779d47f4
+ObjectiveC	swift-method	s:10ObjectiveC8ObjCBoolVyACSbcfc	ObjCBool	init(_:)	-	-	ObjectiveC.ObjCBool | Swift.Bool	-	-	21d0631f09c0c2dc
+ObjectiveC	swift-property	s:10ObjectiveC8ObjCBoolV9boolValueSbvp	ObjCBool	boolValue	-	Swift.Bool	-	-	-	73e03aa8d4991bf8
+ObjectiveC	swift-method	s:10ObjectiveC8ObjCBoolV14booleanLiteralACSb_tcfc	ObjCBool	init(booleanLiteral:)	-	-	ObjectiveC.ObjCBool | Swift.Bool	-	-	d5b80bfae53fa757
+ObjectiveC	swift-typealias	s:10ObjectiveC8ObjCBoolV18BooleanLiteralTypea	ObjCBool	BooleanLiteralType	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	7844a6622b979cd6
+ObjectiveC	swift-property	s:10ObjectiveC8ObjCBoolV12customMirrors0E0Vvp	ObjCBool	customMirror	-	Swift.Mirror	-	-	-	ea92f7cbecdb4e45
+ObjectiveC	swift-property	s:10ObjectiveC8ObjCBoolV11descriptionSSvp	ObjCBool	description	-	Swift.String	-	-	-	225c355608445c4a
+ObjectiveC	swift-struct	s:10ObjectiveC8SelectorV	-	Selector	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	ab3ba0b5ba50e682
+ObjectiveC	swift-method	s:10ObjectiveC8SelectorVyACSScfc	Selector	init(_:)	-	-	ObjectiveC.Selector | Swift.String	-	-	e7c2a7333b132327
+ObjectiveC	swift-method	s:10ObjectiveC8SelectorV13stringLiteralACSS_tcfc	Selector	init(stringLiteral:)	-	-	ObjectiveC.Selector | Swift.String	-	-	d50b94549cd5c99c
+ObjectiveC	swift-typealias	s:10ObjectiveC8SelectorV34ExtendedGraphemeClusterLiteralTypea	Selector	ExtendedGraphemeClusterLiteralType	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	1dfbb0a366b9addd
+ObjectiveC	swift-typealias	s:10ObjectiveC8SelectorV17StringLiteralTypea	Selector	StringLiteralType	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	5db8fa509807e5ce
+ObjectiveC	swift-typealias	s:10ObjectiveC8SelectorV24UnicodeScalarLiteralTypea	Selector	UnicodeScalarLiteralType	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	bd4c77c422fa7c86
+ObjectiveC	swift-method	s:10ObjectiveC8SelectorV2eeoiySbAC_ACtFZ	Selector	==(_:_:)	+	Swift.Bool	ObjectiveC.Selector | ObjectiveC.Selector	-	-	1956eca71cdfbf6d
+ObjectiveC	swift-method	s:10ObjectiveC8SelectorV4hash4intoys6HasherVz_tF	Selector	hash(into:)	-	()	Swift.Hasher	-	-	8741cb1515da856f
+ObjectiveC	swift-property	s:10ObjectiveC8SelectorV9hashValueSivp	Selector	hashValue	-	Swift.Int	-	-	-	3db9abdc887a0de1
+ObjectiveC	swift-property	s:10ObjectiveC8SelectorV11descriptionSSvp	Selector	description	-	Swift.String	-	-	-	7e7335eba52be074
+ObjectiveC	swift-property	s:10ObjectiveC8SelectorV12customMirrors0D0Vvp	Selector	customMirror	-	Swift.Mirror	-	-	-	3632eba58c511c98
+ObjectiveC	swift-struct	s:10ObjectiveC6NSZoneV	-	NSZone	-	-	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	d8266b8390b7a072
+ObjectiveC	swift-function	s:10ObjectiveC15autoreleasepool8invokingq_q_yxYKXE_txYKs5ErrorRzRi__r0_lF	-	autoreleasepool(invoking:)	-	Result	() throws(E) -> Result	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	e6ef4766cf22059b
+ObjectiveC	swift-enum	s:10ObjectiveC20ObjCEnumerationImageO	-	ObjCEnumerationImage	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	04fffaef3d02c4cd
+ObjectiveC	swift-constant	s:10ObjectiveC20ObjCEnumerationImageO14dynamicClassesyA2CmF	ObjCEnumerationImage	dynamicClasses	-	-	-	-	-	d192b61ffc176e91
+ObjectiveC	swift-constant	s:10ObjectiveC20ObjCEnumerationImageO5imageyACSVcACmF	ObjCEnumerationImage	image	-	-	-	-	-	45d723793665b31b
+ObjectiveC	swift-constant	s:10ObjectiveC20ObjCEnumerationImageO10machHeaderyACSVcACmF	ObjCEnumerationImage	machHeader	-	-	-	-	-	8fdff7a51a66a248
+ObjectiveC	swift-struct	s:10ObjectiveC13ObjCClassListV	-	ObjCClassList	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	f172fc603647e472
+ObjectiveC	swift-typealias	s:10ObjectiveC13ObjCClassListV7Elementa	ObjCClassList	Element	-	-	-	-	-	1a882fd8913d5cd0
+ObjectiveC	swift-class	s:10ObjectiveC13ObjCClassListV8IteratorC	ObjCClassList	Iterator	-	-	-	-	-	9cfe2b2769b57d97
+ObjectiveC	swift-method	s:10ObjectiveC13ObjCClassListV8IteratorC4nextyXlXpSgyF	ObjCClassList.Iterator	next()	-	Swift.AnyClass?	-	-	-	85b6e730214603c4
+ObjectiveC	swift-typealias	s:10ObjectiveC13ObjCClassListV8IteratorC7Elementa	ObjCClassList.Iterator	Element	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	989f69b3165e330b
+ObjectiveC	swift-method	s:10ObjectiveC13ObjCClassListV12makeIteratorAC0F0CyF	ObjCClassList	makeIterator()	-	ObjectiveC.ObjCClassList.Iterator	-	-	-	eae9277fac5cd556
+ObjectiveC	swift-function	s:10ObjectiveC21objc_enumerateClasses9fromImage18matchingNamePrefix12conformingTo11subclassingAA13ObjCClassListVAA0m12CEnumerationF0O_SSSgSo8ProtocolCSgyXlXpSgtF	-	objc_enumerateClasses(fromImage:matchingNamePrefix:conformingTo:subclassing:)	-	ObjectiveC.ObjCClassList	ObjectiveC.ObjCEnumerationImage | Swift.String? | ObjectiveC.`Protocol`? | Swift.AnyClass?	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	3c8641996c4e36df
+ObjectiveC	swift-class	c:objc(cs)NSObject	-	NSObject	-	-	-	ios=2.0	-	20d9b7bbf07a4ca9
+ObjectiveC	swift-method	s:So8NSObjectC10ObjectiveCE2eeoiySbAB_ABtFZ	NSObject	==(_:_:)	+	Swift.Bool	ObjectiveC.NSObject | ObjectiveC.NSObject	-	-	e8e350b35c5857ed
+ObjectiveC	swift-property	s:So8NSObjectC10ObjectiveCE9hashValueSivp	NSObject	hashValue	-	Swift.Int	-	-	-	0b8621da72fd74d2
+ObjectiveC	swift-method	s:So8NSObjectC10ObjectiveCE4hash4intoys6HasherVz_tF	NSObject	hash(into:)	-	()	Swift.Hasher	-	-	50dca88de18a24ec
+ObjectiveC	swift-property	s:10ObjectiveC8ObjCBoolV6_valueSbvp	ObjCBool	_value	-	Swift.Bool	-	-	-	8cd700690894c87d
+ObjectiveC	swift-function	s:10ObjectiveC22_convertBoolToObjCBoolyAA0eF0VSbF	-	_convertBoolToObjCBool(_:)	-	ObjectiveC.ObjCBool	Swift.Bool	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	ad22884c9c094fdb
+ObjectiveC	swift-function	s:10ObjectiveC22_convertObjCBoolToBoolySbAA0cD0VF	-	_convertObjCBoolToBool(_:)	-	Swift.Bool	ObjectiveC.ObjCBool	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	1e112b6c04327e77
+ObjectiveC	swift-property	s:10ObjectiveC8SelectorV3ptrs13OpaquePointerVvp	Selector	ptr	-	Swift.OpaquePointer	-	-	-	be4b9dddbf4195e2
+ObjectiveC	swift-property	s:10ObjectiveC6NSZoneV7pointers13OpaquePointerVvp	NSZone	pointer	-	Swift.OpaquePointer	-	-	-	e344202a824a2491
+ObjectiveC	swift-function	s:10ObjectiveC20_autoreleasePoolPushSvyF	-	_autoreleasePoolPush()	-	Swift.UnsafeMutableRawPointer	-	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	6def87b0720dd654
+ObjectiveC	swift-function	s:10ObjectiveC19_autoreleasePoolPopyySvF	-	_autoreleasePoolPop(_:)	-	()	Swift.UnsafeMutableRawPointer	ios=1.0,macos=10.0,tvos=1.0,watchos=1.0	-	a7e8963dbefc2ad0
+ObjectiveC	swift-struct	s:SS	-	String	-	-	-	-	-	f84a462e2f558793
+ObjectiveC	swift-method	s:SS10ObjectiveCE4_selSSAA8SelectorV_tcfc	String	init(_sel:)	-	-	Swift.String | ObjectiveC.Selector	-	-	ea32682d2bf9e326
+ObjectiveC	swift-method	s:So8NSObjectC10ObjectiveCE13_rawHashValue4seedS2i_tF	NSObject	_rawHashValue(seed:)	-	Swift.Int	Swift.Int	-	-	32e7bc5a64b6ca1e
+ObjectiveC	swift-property	s:So8NSObjectC10ObjectiveCE16_cVarArgEncodingSaySiGvp	NSObject	_cVarArgEncoding	-	[Swift.Int]	-	-	-	46591cb423e820a6

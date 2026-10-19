@@ -1,0 +1,4 @@
+framework module FixtureUmbrella [system] {
+  umbrella header "FixtureUmbrella.h"
+  export *
+}

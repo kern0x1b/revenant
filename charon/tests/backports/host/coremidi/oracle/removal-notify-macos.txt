@@ -1,0 +1,33 @@
+== destination (MIDIDestinationCreateWithBlock)
+    notify: ObjectAdded (id 2) on main thread, inCall=0, parentType -1 (Other) parent 0, childType 3 (Destination) child 30502943
+    notify: SetupChanged (id 1) on main thread, inCall=0
+    created dest ref 30502943, UniqueID -976030404 (status 0)
+    MARK before MIDISendEventList to live destination (control, before dispose) (block calls so far 0)
+    MARK after MIDISendEventList returned 0
+    read block called (packets 1)
+    block calls during send and settle: 1
+    MARK before MIDIEndpointDispose(dest)
+    MARK after MIDIEndpointDispose(dest) returned 0
+    notify: ObjectRemoved (id 3) on main thread, inCall=0, parentType -1 (Other) parent 0, childType 3 (Destination) child 30502943
+    notify: SetupChanged (id 1) on main thread, inCall=0
+    liveness dest ref 30502943: MIDIObjectGetIntegerProperty(UniqueID) status -50, value 0
+    MARK before MIDISendEventList to disposed destination (block calls so far 1)
+    MARK after MIDISendEventList returned 0
+    block calls during send and settle: 0
+== input port (MIDIInputPortCreateWithBlock)
+    liveness live input port (control) ref 30502944: MIDIObjectGetIntegerProperty(UniqueID) status -10835, value 0
+    liveness live output port (control) ref 30502942: MIDIObjectGetIntegerProperty(UniqueID) status -10835, value 0
+    liveness never-created ref (control) ref 74565: MIDIObjectGetIntegerProperty(UniqueID) status -50, value 0
+    MARK before MIDIPortDispose(port)
+    MARK after MIDIPortDispose(port) returned 0
+    liveness input port ref 30502944: MIDIObjectGetIntegerProperty(UniqueID) status -50, value 0
+== virtual source (MIDISourceCreate)
+    notify: ObjectAdded (id 2) on main thread, inCall=0, parentType -1 (Other) parent 0, childType 2 (Source) child 30502945
+    notify: SetupChanged (id 1) on main thread, inCall=0
+    created source ref 30502945, UniqueID 693695008 (status 0)
+    MARK before MIDIEndpointDispose(src)
+    MARK after MIDIEndpointDispose(src) returned 0
+    notify: ObjectRemoved (id 3) on main thread, inCall=0, parentType -1 (Other) parent 0, childType 2 (Source) child 30502945
+    notify: SetupChanged (id 1) on main thread, inCall=0
+    liveness source ref 30502945: MIDIObjectGetIntegerProperty(UniqueID) status -50, value 0
+== done, client disposed

@@ -1,0 +1,16 @@
+{
+ "framework": "Foundation",
+ "entries": [
+  {
+   "api": "NSRelativeDateTimeFormatter",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/Foundation/NSRelativeDateTimeFormatter.md",
+   "reason": "the phrases are English whatever the language of the device, and the numbers go through the locale's number formatter",
+   "effect": "a device in another language reads the English phrase with its own digits",
+   "source": "the host's own Foundation, through the differential of tests/backports/host/uikit2 (relativedatetimeformatter) and the recorded cases of tests/backports/host/relativedatetime"
+  }
+ ]
+}

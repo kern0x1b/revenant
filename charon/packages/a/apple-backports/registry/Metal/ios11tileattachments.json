@@ -1,0 +1,60 @@
+{
+ "framework": "Metal",
+ "entries": [
+  {
+   "api": "-[MTLTileRenderPipelineColorAttachmentDescriptorArray objectAtIndexedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the colour attachments of a tile render pipeline by index: eight slots, measured against Apple's own array, a write that copies and a nil at a legal index that empties the slot",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class; nothing in this port reads a descriptor made here, because it vends no Metal 4 command queue, command buffer or pipeline state, and each row's reason names that half (facts/Metal/Descriptors26.md)",
+   "source": "SDK 26.2, Metal, MTLRenderPipeline.h:541 and :549; and the port's own behaviour, measured against Apple's own objects by tests/backports/host/metal-census/descriptors26.sh",
+   "facts": "facts/Metal/Descriptors26.md"
+  },
+  {
+   "api": "-[MTLTileRenderPipelineColorAttachmentDescriptorArray setObject:atIndexedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the colour attachments of a tile render pipeline by index: eight slots, measured against Apple's own array, a write that copies and a nil at a legal index that empties the slot",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class; nothing in this port reads a descriptor made here, because it vends no Metal 4 command queue, command buffer or pipeline state, and each row's reason names that half (facts/Metal/Descriptors26.md)",
+   "source": "SDK 26.2, Metal, MTLRenderPipeline.h:541 and :549; and the port's own behaviour, measured against Apple's own objects by tests/backports/host/metal-census/descriptors26.sh",
+   "facts": "facts/Metal/Descriptors26.md"
+  },
+  {
+   "api": "MTLTileRenderPipelineColorAttachmentDescriptor.pixelFormat",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one colour attachment of a tile render pipeline, whose whole declaration is one property, the pixel format, defaulting to MTLPixelFormatInvalid",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class; nothing in this port reads a descriptor made here, because it vends no Metal 4 command queue, command buffer or pipeline state, and each row's reason names that half (facts/Metal/Descriptors26.md)",
+   "source": "SDK 26.2, Metal, MTLRenderPipeline.h:541 and :549; and the port's own behaviour, measured against Apple's own objects by tests/backports/host/metal-census/descriptors26.sh",
+   "facts": "facts/Metal/Descriptors26.md"
+  },
+  {
+   "api": "MTLTileRenderPipelineColorAttachmentDescriptor",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one colour attachment of a tile render pipeline, carried by Metal/MTLTileRenderPipelineAttachments11.m with the header's one member and NSCopying; it keeps NSObject's identity equality, as Apple's class does (measured: Apple's defines no -isEqual: of its own)",
+   "effect": "the class is there and answers what Apple's does for the members the header declares; nothing in this port reads a descriptor made here, because it vends no Metal 4 command queue, command buffer or pipeline state (facts/Metal/Descriptors26.md)",
+   "source": "SDK 26.2, Metal, MTLRenderPipeline.h:541 and :549; and the port's own behaviour, measured against Apple's own objects by tests/backports/host/metal-census/descriptors26.sh",
+   "facts": "facts/Metal/Descriptors26.md"
+  },
+  {
+   "api": "MTLTileRenderPipelineColorAttachmentDescriptorArray",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the eight colour attachment slots of a tile render pipeline, carried by Metal/MTLTileRenderPipelineAttachments11.m with the header's two indexed members and nothing else",
+   "effect": "the class is there and answers what Apple's does for the members the header declares; nothing in this port reads a descriptor made here, because it vends no Metal 4 command queue, command buffer or pipeline state (facts/Metal/Descriptors26.md)",
+   "source": "SDK 26.2, Metal, MTLRenderPipeline.h:541 and :549; and the port's own behaviour, measured against Apple's own objects by tests/backports/host/metal-census/descriptors26.sh",
+   "facts": "facts/Metal/Descriptors26.md"
+  }
+ ]
+}

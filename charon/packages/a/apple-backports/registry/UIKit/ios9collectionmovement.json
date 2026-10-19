@@ -1,0 +1,85 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UICollectionViewLayout targetIndexPathForInteractivelyMovingItem:withPosition:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the index path it was asked about: the base layout has no opinion about where an item at that point would land, and the collection view asks its delegate after this, so a layout that arranges its items otherwise answers something else and that stands, and a delegate still has the last word",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (plain.targetIndexPath, flow.targetIndexPath)"
+    },
+    {
+      "api": "-[UICollectionViewLayout layoutAttributesForInteractivelyMovingItemAtIndexPath:withTargetPosition:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "nil: the base layout has no attributes of its own, so it has none to move and none to give; UICollectionViewFlowLayout, which has them, places the item at the point with no size and above every other element",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (plain.movingAttributes.* answer nil, flow.movingAttributes.* the cell at the point)"
+    },
+    {
+      "api": "-[UICollectionViewFlowLayout layoutAttributesForInteractivelyMovingItemAtIndexPath:withTargetPosition:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a cell with no size whose centre is the point the item is being dragged to and whose zIndex is NSIntegerMax, so the item follows the finger and is never behind another element; the size is the point's own and not the cell's laid out size, because the cell is being carried by the finger rather than placed in the grid",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (flow.movingAttributes.*, where the base layout's answer is nil)"
+    },
+    {
+      "api": "-[UICollectionViewLayout invalidationContextForInteractivelyMovingItems:withTargetPosition:previousIndexPaths:previousPosition:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a context of the layout's own invalidationContextClass carrying the index paths it was given and the point the movement is at, and invalidating no item index path of its own and not everything",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (the movingContext cases for both the base layout and the flow layout)"
+    },
+    {
+      "api": "-[UICollectionViewLayout invalidationContextForEndingInteractiveMovementOfItemsToFinalIndexPaths:previousIndexPaths:movementCancelled:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a context of the layout's own invalidationContextClass carrying the index paths the movement ended at and came from, and the origin as its point, because a movement that has ended is at no point in particular; whether it was called off is the caller's to act on and the context does not say",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (the endingContext cases, where the point is the origin on both layouts)"
+    },
+    {
+      "api": "UICollectionViewLayoutInvalidationContext.previousIndexPathsForInteractivelyMovingItems",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the index paths the moving items were at before the invalidation, as they were given, and nil for a context built for anything else",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (the movingContext.previous and boundsContext.previous cases)"
+    },
+    {
+      "api": "UICollectionViewLayoutInvalidationContext.targetIndexPathsForInteractivelyMovingItems",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the index paths the moving items are at after the invalidation, as they were given, and nil for a context built for anything else",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (the movingContext.target and boundsContext.target cases)"
+    },
+    {
+      "api": "UICollectionViewLayoutInvalidationContext.interactiveMovementTarget",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the point the movement is at, which is the target position a movement in progress is given and the origin for a movement that has ended, and the origin for a context built for anything else",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectionmovement (the movingContext.point, endingContext.point and boundsContext.point cases)"
+    }
+  ]
+}

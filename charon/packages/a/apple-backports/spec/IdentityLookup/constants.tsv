@@ -1,0 +1,2 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	ILMessageFilterErrorDomain	-	ILMessageFilterErrorDomain	11.0	NSErrorDomain const	API_AVAILABLE(ios(11.0), macCatalyst(13.0)) API_UNAVAILABLE( tvos) API_UNAVAILABLE(macos, watchos)	fbf00218195e22a6	found	com.apple.IdentityLookup.error.messagefilter	com.apple.IdentityLookup.error.messagefilter	ios-26.2-cache	-	exported	ns	-

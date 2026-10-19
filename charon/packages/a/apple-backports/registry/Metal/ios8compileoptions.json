@@ -1,0 +1,16 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLCompileOptions",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the Tier 2 verdict on Metal/MetalKit (coordination/corpus, 2026-09-23): a descriptor object needs no GPU driver to exist and hold the values it is given, and this port's own -[CharonMetalDevice newLibraryWithSource:options:error:] already accepts one and already honestly refuses to compile Metal Shading Language source at runtime - the descriptor plugs into a seam that was already named, not a new promise of compilation",
+      "effect": "fastMathEnabled defaults to YES as the header documents; preprocessorMacros, languageVersion and the rest hold what is set and read it back; nothing reads them, since the only consumer, newLibraryWithSource:options:error:, refuses before it would",
+      "facts": "facts/Metal/CompileOptions.md",
+      "source": "the header of iOS 16.4 for the contract; CharonMetalDevice.m's own newLibraryWithSource:options:error:, which already exists and already refuses"
+    }
+  ]
+}

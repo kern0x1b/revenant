@@ -1,0 +1,14 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "-[NSDateFormatter setLocalizedDateFormatFromTemplate:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSDateFormatterLocalizedTemplate.md",
+      "source": "the host's own UIKit/Foundation under Mac Catalyst through tests/backports/host/tail1, and tests/backports/device/tail1.m on iOS 6"
+    }
+  ]
+}

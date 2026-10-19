@@ -1,0 +1,3383 @@
+diff -ruN a/Sources/Crypto/AEADs/AES/GCM/BoringSSL/AES-GCM_boring.swift x/Sources/Crypto/AEADs/AES/GCM/BoringSSL/AES-GCM_boring.swift
+--- a/Sources/Crypto/AEADs/AES/GCM/BoringSSL/AES-GCM_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/AEADs/AES/GCM/BoringSSL/AES-GCM_boring.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum OpenSSLAESGCMImpl {
+     @inlinable
+     static func seal<Plaintext: DataProtocol, AuthenticatedData: DataProtocol>(
+diff -ruN a/Sources/Crypto/AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift x/Sources/Crypto/AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift
+--- a/Sources/Crypto/AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/AEADs/ChachaPoly/BoringSSL/ChaChaPoly_boring.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLAEAD {
+     /// Seal a given message.
+     func seal<Plaintext: DataProtocol, Nonce: ContiguousBytes, AuthenticatedData: DataProtocol>(
+@@ -117,7 +117,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum OpenSSLChaChaPolyImpl {
+     static func encrypt<M: DataProtocol, AD: DataProtocol>(
+         key: SymmetricKey,
+diff -ruN a/Sources/Crypto/CryptoError_boring.swift x/Sources/Crypto/CryptoError_boring.swift
+--- a/Sources/Crypto/CryptoError_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/CryptoError_boring.swift	2026-10-14 13:41:02
+@@ -12,7 +12,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
++@available(iOS 6.1.3, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
+ public typealias CryptoError = CryptoKitError
+-@available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
++@available(iOS 6.1.3, macOS 11, tvOS 14, watchOS 7, *)
+ public typealias CryptoASN1Error = CryptoKitASN1Error
+diff -ruN a/Sources/Crypto/Digests/BoringSSL/Digest_boring.swift x/Sources/Crypto/Digests/BoringSSL/Digest_boring.swift
+--- a/Sources/Crypto/Digests/BoringSSL/Digest_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Digests/BoringSSL/Digest_boring.swift	2026-10-14 13:41:02
+@@ -20,10 +20,10 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol HashFunctionImplementationDetails: HashFunction where Digest: DigestPrivate {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedHashFunction: HashFunctionImplementationDetails {
+     associatedtype Context
+     static var digestSize: Int { get }
+@@ -32,7 +32,7 @@
+     static func finalize(_ context: inout Context, digest: UnsafeMutableRawBufferPointer) -> Bool
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Insecure.MD5: BoringSSLBackedHashFunction {
+     static var digestSize: Int {
+         Int(MD5_DIGEST_LENGTH)
+@@ -56,7 +56,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Insecure.SHA1: BoringSSLBackedHashFunction {
+     static var digestSize: Int {
+         Int(SHA_DIGEST_LENGTH)
+@@ -80,7 +80,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SHA256: BoringSSLBackedHashFunction {
+     static var digestSize: Int {
+         Int(SHA256_DIGEST_LENGTH)
+@@ -104,7 +104,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SHA384: BoringSSLBackedHashFunction {
+     static var digestSize: Int {
+         Int(SHA384_DIGEST_LENGTH)
+@@ -128,7 +128,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SHA512: BoringSSLBackedHashFunction {
+     static var digestSize: Int {
+         Int(SHA512_DIGEST_LENGTH)
+@@ -152,7 +152,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLDigestImpl<H: BoringSSLBackedHashFunction>: @unchecked Sendable {
+     private var context: DigestContext<H>
+ 
+@@ -172,7 +172,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private final class DigestContext<H: BoringSSLBackedHashFunction> {
+     private var context: H.Context
+ 
+diff -ruN a/Sources/Crypto/Digests/XKCP/Digest_xkcp.swift x/Sources/Crypto/Digests/XKCP/Digest_xkcp.swift
+--- a/Sources/Crypto/Digests/XKCP/Digest_xkcp.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Digests/XKCP/Digest_xkcp.swift	2026-10-14 13:41:02
+@@ -22,7 +22,7 @@
+ @_implementationOnly import CXKCPShims
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol XKCPBackedHashFunction: HashFunctionImplementationDetails {
+     associatedtype Context
+     static var digestSize: Int { get }
+@@ -31,7 +31,7 @@
+     static func finalize(_ context: inout Context, digest: UnsafeMutableRawBufferPointer) -> Bool
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SHA3_256: XKCPBackedHashFunction {
+     static var digestSize: Int { 32 }
+ 
+@@ -54,7 +54,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SHA3_384: XKCPBackedHashFunction {
+     static var digestSize: Int { 48 }
+ 
+@@ -77,7 +77,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SHA3_512: XKCPBackedHashFunction {
+     static var digestSize: Int { 64 }
+ 
+@@ -100,7 +100,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct XKCPDigestImpl<H: XKCPBackedHashFunction>: @unchecked Sendable {
+     private var context: XKCPDigestContext<H>
+ 
+@@ -120,7 +120,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private final class XKCPDigestContext<H: XKCPBackedHashFunction> {
+     private var context: H.Context
+ 
+diff -ruN a/Sources/Crypto/KEM/BoringSSL/MLKEM_boring.swift x/Sources/Crypto/KEM/BoringSSL/MLKEM_boring.swift
+--- a/Sources/Crypto/KEM/BoringSSL/MLKEM_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/KEM/BoringSSL/MLKEM_boring.swift	2026-10-14 13:41:02
+@@ -30,10 +30,10 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768 {
+     /// A ML-KEM-768 private key.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct InternalPrivateKey: @unchecked Sendable, KEMPrivateKey {
+         private var backing: Backing
+ 
+@@ -177,10 +177,10 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768 {
+     /// A ML-KEM-768 public key.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct InternalPublicKey: @unchecked Sendable, KEMPublicKey {
+         private var backing: Backing
+ 
+@@ -293,16 +293,16 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768 {
+     /// The size of the encapsulated shared secret in bytes.
+     private static let ciphertextByteCount = Int(MLKEM768_CIPHERTEXT_BYTES)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024 {
+     /// A ML-KEM-1024 private key.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct InternalPrivateKey: @unchecked Sendable, KEMPrivateKey {
+         private var backing: Backing
+ 
+@@ -446,10 +446,10 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024 {
+     /// A ML-KEM-1024 public key.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct InternalPublicKey: @unchecked Sendable, KEMPublicKey {
+         private var backing: Backing
+ 
+@@ -562,13 +562,13 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024 {
+     /// The size of the encapsulated shared secret in bytes.
+     private static let ciphertextByteCount = Int(MLKEM1024_CIPHERTEXT_BYTES)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum MLKEM {
+     /// The size of the seed in bytes.
+     static let seedByteCount = 64
+diff -ruN a/Sources/Crypto/KEM/BoringSSL/MLKEM_wrapper.swift x/Sources/Crypto/KEM/BoringSSL/MLKEM_wrapper.swift
+--- a/Sources/Crypto/KEM/BoringSSL/MLKEM_wrapper.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/KEM/BoringSSL/MLKEM_wrapper.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLKEMPrivateKey: Sendable {
+     associatedtype InteriorPublicKey: BoringSSLBackedMLKEMPublicKey
+ 
+@@ -47,14 +47,14 @@
+     var integrityCheckedRepresentation: Data { get }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLBackedMLKEMPrivateKey {
+     func decapsulate<Bytes: DataProtocol>(encapsulated: Bytes) throws -> SymmetricKey {
+         try self.decapsulate(encapsulated)
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLKEMPublicKey: Sendable {
+     init<Bytes: DataProtocol>(rawRepresentation: Bytes) throws
+ 
+@@ -65,12 +65,12 @@
+     func encapsulateWithSeed(_ encapSeed: Data) throws -> KEM.EncapsulationResult
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLKEMOuterPublicKey: Sendable {
+     init(rawRepresentation: Data) throws
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLKEMParameters {
+     associatedtype BackingPrivateKey: BoringSSLBackedMLKEMPrivateKey
+     where BackingPrivateKey.InteriorPublicKey == BackingPublicKey
+@@ -78,16 +78,16 @@
+     associatedtype PublicKey: BoringSSLBackedMLKEMOuterPublicKey
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768: BoringSSLBackedMLKEMParameters {
+     typealias BackingPrivateKey = MLKEM768.InternalPrivateKey
+     typealias BackingPublicKey = MLKEM768.InternalPublicKey
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768.PublicKey: BoringSSLBackedMLKEMOuterPublicKey {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768.InternalPrivateKey: BoringSSLBackedMLKEMPrivateKey {
+     static func generatePrivateKey() throws -> Self {
+         .generate()
+@@ -133,23 +133,23 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM768.InternalPublicKey: BoringSSLBackedMLKEMPublicKey {
+     func encapsulateWithSeed(_ encapSeed: Data) throws -> KEM.EncapsulationResult {
+         fatalError()
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024: BoringSSLBackedMLKEMParameters {
+     typealias BackingPrivateKey = MLKEM1024.InternalPrivateKey
+     typealias BackingPublicKey = MLKEM1024.InternalPublicKey
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024.PublicKey: BoringSSLBackedMLKEMOuterPublicKey {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024.InternalPrivateKey: BoringSSLBackedMLKEMPrivateKey {
+     static func generatePrivateKey() throws -> Self {
+         .generate()
+@@ -195,14 +195,14 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLKEM1024.InternalPublicKey: BoringSSLBackedMLKEMPublicKey {
+     func encapsulateWithSeed(_ encapSeed: Data) throws -> KEM.EncapsulationResult {
+         fatalError()
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLMLKEMPublicKeyImpl<Parameters: BoringSSLBackedMLKEMParameters>: BoringSSLBackedMLKEMPublicKey, Sendable {
+     private var backing: Parameters.BackingPublicKey
+ 
+@@ -227,7 +227,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLMLKEMPrivateKeyImpl<Parameters: BoringSSLBackedMLKEMParameters>: BoringSSLBackedMLKEMPrivateKey, Sendable
+ {
+     typealias InteriorPublicKey = OpenSSLMLKEMPublicKeyImpl<Parameters>
+diff -ruN a/Sources/Crypto/KEM/BoringSSL/XWing_boring.swift x/Sources/Crypto/KEM/BoringSSL/XWing_boring.swift
+--- a/Sources/Crypto/KEM/BoringSSL/XWing_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/KEM/BoringSSL/XWing_boring.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLXWingPublicKeyImpl: Sendable {
+     private var publicKeyBytes: Data
+ 
+@@ -88,7 +88,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLXWingPrivateKeyImpl: Sendable {
+     private var backing: Backing
+ 
+@@ -129,9 +129,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension OpenSSLXWingPrivateKeyImpl {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     final class Backing: @unchecked Sendable {
+         private var privateKey: XWING_private_key
+ 
+diff -ruN a/Sources/Crypto/Key Agreement/BoringSSL/ECDH_boring.swift x/Sources/Crypto/Key Agreement/BoringSSL/ECDH_boring.swift
+--- a/Sources/Crypto/Key Agreement/BoringSSL/ECDH_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Key Agreement/BoringSSL/ECDH_boring.swift	2026-10-14 13:41:02
+@@ -20,7 +20,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P256.KeyAgreement.PrivateKey {
+     internal func openSSLSharedSecretFromKeyAgreement(
+         with publicKeyShare: P256.KeyAgreement.PublicKey
+@@ -30,7 +30,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P384.KeyAgreement.PrivateKey {
+     internal func openSSLSharedSecretFromKeyAgreement(
+         with publicKeyShare: P384.KeyAgreement.PublicKey
+@@ -40,7 +40,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P521.KeyAgreement.PrivateKey {
+     internal func openSSLSharedSecretFromKeyAgreement(
+         with publicKeyShare: P521.KeyAgreement.PublicKey
+diff -ruN a/Sources/Crypto/Key Wrapping/BoringSSL/AESWrap_boring.swift x/Sources/Crypto/Key Wrapping/BoringSSL/AESWrap_boring.swift
+--- a/Sources/Crypto/Key Wrapping/BoringSSL/AESWrap_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Key Wrapping/BoringSSL/AESWrap_boring.swift	2026-10-14 13:41:02
+@@ -25,7 +25,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum BoringSSLAESWRAPImpl {
+     static func wrap(key: SymmetricKey, keyToWrap: SymmetricKey) throws -> Data {
+         // There's a flat 8-byte overhead to AES KeyWrap.
+@@ -98,9 +98,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SymmetricKey {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     fileprivate enum AESKeyMode {
+         case encrypting
+         case decrypting
+diff -ruN a/Sources/Crypto/Keys/EC/BoringSSL/Ed25519_boring.swift x/Sources/Crypto/Keys/EC/BoringSSL/Ed25519_boring.swift
+--- a/Sources/Crypto/Keys/EC/BoringSSL/Ed25519_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Keys/EC/BoringSSL/Ed25519_boring.swift	2026-10-14 13:41:02
+@@ -26,10 +26,10 @@
+ #endif
+ 
+ // For signing and verifying, we use BoringSSL's Ed25519, not the X25519 stuff.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Curve25519.Signing {
+     @usableFromInline
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct OpenSSLCurve25519PrivateKeyImpl: Sendable {
+         var _privateKey: SecureBytes
+         @usableFromInline var _publicKey: [UInt8]
+@@ -101,7 +101,7 @@
+     }
+ 
+     @usableFromInline
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct OpenSSLCurve25519PublicKeyImpl: Sendable {
+         @usableFromInline
+         var keyBytes: [UInt8]
+diff -ruN a/Sources/Crypto/Keys/EC/BoringSSL/NISTCurvesKeys_boring.swift x/Sources/Crypto/Keys/EC/BoringSSL/NISTCurvesKeys_boring.swift
+--- a/Sources/Crypto/Keys/EC/BoringSSL/NISTCurvesKeys_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Keys/EC/BoringSSL/NISTCurvesKeys_boring.swift	2026-10-14 13:41:02
+@@ -27,13 +27,13 @@
+ #endif
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol OpenSSLSupportedNISTCurve {
+     @inlinable
+     static var group: BoringSSLEllipticCurveGroup { get }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension OpenSSLSupportedNISTCurve {
+     @inlinable
+     static var coordinateByteCount: Int {
+@@ -41,26 +41,26 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P256: OpenSSLSupportedNISTCurve {
+     @usableFromInline
+     static let group = try! BoringSSLEllipticCurveGroup(.p256)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P384: OpenSSLSupportedNISTCurve {
+     @usableFromInline
+     static let group = try! BoringSSLEllipticCurveGroup(.p384)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P521: OpenSSLSupportedNISTCurve {
+     @usableFromInline
+     static let group = try! BoringSSLEllipticCurveGroup(.p521)
+ }
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLNISTCurvePrivateKeyImpl<Curve: OpenSSLSupportedNISTCurve>: Sendable {
+     @usableFromInline
+     var key: BoringSSLECPrivateKeyWrapper<Curve>
+@@ -95,7 +95,7 @@
+ }
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLNISTCurvePublicKeyImpl<Curve: OpenSSLSupportedNISTCurve>: Sendable {
+     @usableFromInline
+     var key: BoringSSLECPublicKeyWrapper<Curve>
+@@ -145,7 +145,7 @@
+ /// A simple wrapper for an EC_KEY pointer for a private key. This manages the lifetime of that pointer and
+ /// allows some helper operations.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ final class BoringSSLECPrivateKeyWrapper<Curve: OpenSSLSupportedNISTCurve>: @unchecked Sendable {
+     @usableFromInline
+     let key: OpaquePointer
+@@ -350,7 +350,7 @@
+ /// A simple wrapper for an EC_KEY pointer for a public key. This manages the lifetime of that pointer and
+ /// allows some helper operations.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ final class BoringSSLECPublicKeyWrapper<Curve: OpenSSLSupportedNISTCurve>: @unchecked Sendable {
+     @usableFromInline
+     let key: OpaquePointer
+@@ -586,7 +586,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ContiguousBytes {
+     func readx963PrivateNumbers() throws -> (
+         x: ArbitraryPrecisionInteger, y: ArbitraryPrecisionInteger, k: ArbitraryPrecisionInteger
+@@ -656,26 +656,26 @@
+ }
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ func readRawPublicNumbers(
+     copyingBytes bytesPtr: UnsafeRawBufferPointer
+ ) throws -> (
+     x: ArbitraryPrecisionInteger, y: ArbitraryPrecisionInteger
+ ) {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let stride = bytesPtr.count / 2
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     var offset = 0
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let xPointer = UnsafeRawBufferPointer(rebasing: bytesPtr[offset..<(offset + stride)])
+     offset += stride
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let yPointer = UnsafeRawBufferPointer(rebasing: bytesPtr[offset..<(offset + stride)])
+ 
+     // We cannot handle allocation errors, so we check for fatal error.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let x = try ArbitraryPrecisionInteger(bytes: xPointer)
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let y = try ArbitraryPrecisionInteger(bytes: yPointer)
+ 
+     return (x: x, y: y)
+@@ -686,7 +686,7 @@
+ /// The check is defined in https://tools.ietf.org/id/draft-jivsov-ecc-compact-05.html#rfc.section.4.2.1. Specifically, a
+ /// point is compact representable if its y coordinate is the smaller of min(y, p-y) where p is the prime of the base field.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ func _isCompactRepresentable(
+     group: BoringSSLEllipticCurveGroup,
+     publicKeyPoint: EllipticCurvePoint
+@@ -694,11 +694,11 @@
+     // We have three try!s here: any of those failing is the result of an allocation error, and we cannot recover from
+     // those.
+     let (_, y) = try! publicKeyPoint.affineCoordinates(group: group)
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let p = group.weierstrassCoefficients.field
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let context = try! FiniteFieldArithmeticContext(fieldSize: p)
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let newY = try! context.subtract(y, from: p)
+ 
+     // The point is compact representable if y is less than or equal to newY.
+diff -ruN a/Sources/Crypto/Keys/EC/BoringSSL/X25519Keys_boring.swift x/Sources/Crypto/Keys/EC/BoringSSL/X25519Keys_boring.swift
+--- a/Sources/Crypto/Keys/EC/BoringSSL/X25519Keys_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Keys/EC/BoringSSL/X25519Keys_boring.swift	2026-10-14 13:41:02
+@@ -25,13 +25,13 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Curve25519.KeyAgreement {
+     @usableFromInline
+     static let keySizeBytes = 32
+ 
+     @usableFromInline
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct OpenSSLCurve25519PublicKeyImpl: Sendable {
+         @usableFromInline
+         var keyBytes: [UInt8]
+@@ -59,7 +59,7 @@
+     }
+ 
+     @usableFromInline
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct OpenSSLCurve25519PrivateKeyImpl: Sendable {
+         var key: SecureBytes
+ 
+diff -ruN a/Sources/Crypto/Signatures/BoringSSL/ECDSASignature_boring.swift x/Sources/Crypto/Signatures/BoringSSL/ECDSASignature_boring.swift
+--- a/Sources/Crypto/Signatures/BoringSSL/ECDSASignature_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Signatures/BoringSSL/ECDSASignature_boring.swift	2026-10-14 13:41:02
+@@ -27,7 +27,7 @@
+ #endif
+ 
+ /// A wrapper around BoringSSL's ECDSA_SIG with some lifetime management.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ final class ECDSASignature {
+     private var _baseSig: UnsafeMutablePointer<ECDSA_SIG>
+ 
+diff -ruN a/Sources/Crypto/Signatures/BoringSSL/ECDSA_boring.swift x/Sources/Crypto/Signatures/BoringSSL/ECDSA_boring.swift
+--- a/Sources/Crypto/Signatures/BoringSSL/ECDSA_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Signatures/BoringSSL/ECDSA_boring.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Data {
+     init<D: DataProtocol, Curve: OpenSSLSupportedNISTCurve>(
+         derSignature derBytes: D,
+@@ -67,7 +67,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P256.Signing.PrivateKey {
+     func openSSLSignature<D: Digest>(for digest: D) throws -> P256.Signing.ECDSASignature {
+         let baseSignature = try self.impl.key.sign(digest: digest)
+@@ -75,7 +75,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P256.Signing.PublicKey {
+     func openSSLIsValidSignature<D: Digest>(
+         _ signature: P256.Signing.ECDSASignature,
+@@ -93,7 +93,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P384.Signing.PrivateKey {
+     func openSSLSignature<D: Digest>(for digest: D) throws -> P384.Signing.ECDSASignature {
+         let baseSignature = try self.impl.key.sign(digest: digest)
+@@ -101,7 +101,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P384.Signing.PublicKey {
+     func openSSLIsValidSignature<D: Digest>(
+         _ signature: P384.Signing.ECDSASignature,
+@@ -119,7 +119,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P521.Signing.PrivateKey {
+     func openSSLSignature<D: Digest>(for digest: D) throws -> P521.Signing.ECDSASignature {
+         let baseSignature = try self.impl.key.sign(digest: digest)
+@@ -127,7 +127,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P521.Signing.PublicKey {
+     func openSSLIsValidSignature<D: Digest>(
+         _ signature: P521.Signing.ECDSASignature,
+diff -ruN a/Sources/Crypto/Signatures/BoringSSL/EdDSA_boring.swift x/Sources/Crypto/Signatures/BoringSSL/EdDSA_boring.swift
+--- a/Sources/Crypto/Signatures/BoringSSL/EdDSA_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Signatures/BoringSSL/EdDSA_boring.swift	2026-10-14 13:41:02
+@@ -25,7 +25,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Curve25519.Signing.PublicKey {
+     // We do this to enable inlinability on these methods.
+     @usableFromInline
+@@ -104,7 +104,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Curve25519.Signing.PrivateKey {
+     @inlinable
+     func openSSLSignature<D: DataProtocol>(for data: D) throws -> Data {
+diff -ruN a/Sources/Crypto/Signatures/BoringSSL/MLDSA_boring.swift x/Sources/Crypto/Signatures/BoringSSL/MLDSA_boring.swift
+--- a/Sources/Crypto/Signatures/BoringSSL/MLDSA_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Signatures/BoringSSL/MLDSA_boring.swift	2026-10-14 13:41:02
+@@ -30,7 +30,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA65 {
+     /// A ML-DSA-65 private key.
+     struct InternalPrivateKey: @unchecked Sendable {
+@@ -187,7 +187,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA65 {
+     /// A ML-DSA-65 public key.
+     struct InternalPublicKey: @unchecked Sendable {
+@@ -326,13 +326,13 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA65 {
+     /// The size of the signature in bytes.
+     private static let signatureByteCount = Int(MLDSA65_SIGNATURE_BYTES)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA87 {
+     /// A ML-DSA-87 private key.
+     struct InternalPrivateKey: @unchecked Sendable {
+@@ -489,7 +489,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA87 {
+     /// A ML-DSA-87 public key.
+     struct InternalPublicKey: @unchecked Sendable {
+@@ -628,7 +628,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA87 {
+     /// The size of the signature in bytes.
+     private static let signatureByteCount = Int(MLDSA87_SIGNATURE_BYTES)
+diff -ruN a/Sources/Crypto/Signatures/BoringSSL/MLDSA_wrapper.swift x/Sources/Crypto/Signatures/BoringSSL/MLDSA_wrapper.swift
+--- a/Sources/Crypto/Signatures/BoringSSL/MLDSA_wrapper.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Signatures/BoringSSL/MLDSA_wrapper.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLDSAPrivateKey: Sendable {
+     associatedtype AssociatedPublicKey: BoringSSLBackedMLDSAPublicKey
+ 
+@@ -43,7 +43,7 @@
+     var seedRepresentation: Data { get }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLDSAPublicKey: Sendable {
+     init<D: DataProtocol>(rawRepresentation: D) throws
+ 
+@@ -54,38 +54,38 @@
+     var rawRepresentation: Data { get }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol BoringSSLBackedMLDSAParameters {
+     associatedtype BackingPrivateKey: BoringSSLBackedMLDSAPrivateKey
+     where BackingPrivateKey.AssociatedPublicKey == BackingPublicKey
+     associatedtype BackingPublicKey: BoringSSLBackedMLDSAPublicKey
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA65: BoringSSLBackedMLDSAParameters {
+     typealias BackingPrivateKey = MLDSA65.InternalPrivateKey
+     typealias BackingPublicKey = MLDSA65.InternalPublicKey
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA87: BoringSSLBackedMLDSAParameters {
+     typealias BackingPrivateKey = MLDSA87.InternalPrivateKey
+     typealias BackingPublicKey = MLDSA87.InternalPublicKey
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA65.InternalPrivateKey: BoringSSLBackedMLDSAPrivateKey {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA65.InternalPublicKey: BoringSSLBackedMLDSAPublicKey {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA87.InternalPrivateKey: BoringSSLBackedMLDSAPrivateKey {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MLDSA87.InternalPublicKey: BoringSSLBackedMLDSAPublicKey {}
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLMLDSAPrivateKeyImpl<Parameters: BoringSSLBackedMLDSAParameters> {
+     private var backing: Parameters.BackingPrivateKey
+     private let publicKeyHash: SHA3_256Digest
+@@ -143,7 +143,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLMLDSAPublicKeyImpl<Parameters: BoringSSLBackedMLDSAParameters> {
+     private var backing: Parameters.BackingPublicKey
+ 
+diff -ruN a/Sources/Crypto/Util/BoringSSL/CryptoKitErrors_boring.swift x/Sources/Crypto/Util/BoringSSL/CryptoKitErrors_boring.swift
+--- a/Sources/Crypto/Util/BoringSSL/CryptoKitErrors_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Util/BoringSSL/CryptoKitErrors_boring.swift	2026-10-14 13:41:02
+@@ -20,7 +20,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension CryptoKitError {
+     /// A helper function that packs the value of `ERR_get_error` into the internal error field.
+     @usableFromInline
+diff -ruN a/Sources/Crypto/Util/BoringSSL/Optional+withUnsafeBytes_boring.swift x/Sources/Crypto/Util/BoringSSL/Optional+withUnsafeBytes_boring.swift
+--- a/Sources/Crypto/Util/BoringSSL/Optional+withUnsafeBytes_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Util/BoringSSL/Optional+withUnsafeBytes_boring.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Optional where Wrapped: DataProtocol {
+     func withUnsafeBytes<ReturnValue>(_ body: (UnsafeRawBufferPointer) throws -> ReturnValue) rethrows -> ReturnValue {
+         if let self {
+diff -ruN a/Sources/Crypto/Util/BoringSSL/RNG_boring.swift x/Sources/Crypto/Util/BoringSSL/RNG_boring.swift
+--- a/Sources/Crypto/Util/BoringSSL/RNG_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Util/BoringSSL/RNG_boring.swift	2026-10-14 13:41:02
+@@ -15,7 +15,7 @@
+ @_exported import CryptoKit
+ #else
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension UnsafeMutableRawBufferPointer {
+     func initializeWithRandomBytes(count: Int) {
+         guard count > 0 else {
+@@ -43,7 +43,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MutableRawSpan {
+     #if swift(<6.3)
+     @_lifetime(self: copy self)
+@@ -53,7 +53,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension OutputRawSpan {
+     #if swift(<6.3)
+     @_lifetime(self: copy self)
+diff -ruN a/Sources/Crypto/Util/BoringSSL/SafeCompare_boring.swift x/Sources/Crypto/Util/BoringSSL/SafeCompare_boring.swift
+--- a/Sources/Crypto/Util/BoringSSL/SafeCompare_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Util/BoringSSL/SafeCompare_boring.swift	2026-10-14 13:41:02
+@@ -20,7 +20,7 @@
+ /// This function performs a safe comparison between two buffers of bytes. It exists as a temporary shim until we refactor
+ /// some of the usage sites to pass better data structures to us.
+ @inlinable
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal func openSSLSafeCompare<LHS: ContiguousBytes, RHS: ContiguousBytes>(
+     _ lhs: LHS,
+     _ rhs: RHS
+@@ -36,7 +36,7 @@
+ 
+ /// A straightforward constant-time comparison function for any two collections of bytes.
+ @inlinable
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal func constantTimeCompare<LHS: Collection, RHS: Collection>(_ lhs: LHS, _ rhs: RHS) -> Bool
+ where LHS.Element == UInt8, RHS.Element == UInt8 {
+     guard lhs.count == rhs.count else {
+diff -ruN a/Sources/Crypto/Util/BoringSSL/Zeroization_boring.swift x/Sources/Crypto/Util/BoringSSL/Zeroization_boring.swift
+--- a/Sources/Crypto/Util/BoringSSL/Zeroization_boring.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Util/BoringSSL/Zeroization_boring.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias errno_t = CInt
+ 
+ // This is a Swift wrapper for the libc function that does not exist on Linux. We shim it via a call to OPENSSL_cleanse.
+diff -ruN a/Sources/Crypto/Util/BoringSSL/_CryptoModuleAnchor.swift x/Sources/Crypto/Util/BoringSSL/_CryptoModuleAnchor.swift
+--- a/Sources/Crypto/Util/BoringSSL/_CryptoModuleAnchor.swift	2026-10-14 13:37:19
++++ x/Sources/Crypto/Util/BoringSSL/_CryptoModuleAnchor.swift	2026-10-14 13:41:02
+@@ -22,5 +22,5 @@
+ // See: https://github.com/apple/swift-crypto/issues/435
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal func _cryptoModuleAnchor() {}
+diff -ruN a/Sources/CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift x/Sources/CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift
+--- a/Sources/CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/AEAD/BoringSSLAEAD.swift	2026-10-14 13:41:02
+@@ -25,7 +25,7 @@
+ #endif
+ 
+ /// An abstraction over a BoringSSL AEAD
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public enum BoringSSLAEAD {
+     /// The supported AEAD ciphers for BoringSSL.
+     case aes128gcm
+@@ -36,11 +36,11 @@
+     case chacha20
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLAEAD {
+     // Arguably this class is excessive, but it's probably better for this API to be as safe as possible
+     // rather than rely on defer statements for our cleanup.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public final class AEADContext {
+         private var context: EVP_AEAD_CTX
+ 
+@@ -76,7 +76,7 @@
+ 
+ // MARK: - Sealing
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLAEAD.AEADContext {
+     /// The main entry point for sealing data. Covers the full gamut of types, including discontiguous data types. This must be inlinable.
+     public func seal<
+@@ -243,7 +243,7 @@
+ 
+ // MARK: - Opening
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLAEAD.AEADContext {
+     /// The main entry point for opening data. Covers the full gamut of types, including discontiguous data types. This must be inlinable.
+     @inlinable
+@@ -460,7 +460,7 @@
+ 
+ // MARK: - Supported ciphers
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLAEAD {
+     var boringSSLCipher: OpaquePointer {
+         switch self {
+diff -ruN a/Sources/CryptoBoringWrapper/CryptoKitErrors_boring.swift x/Sources/CryptoBoringWrapper/CryptoKitErrors_boring.swift
+--- a/Sources/CryptoBoringWrapper/CryptoKitErrors_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/CryptoKitErrors_boring.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public enum CryptoBoringWrapperError: Error {
+     /// The key size is incorrect.
+     case incorrectKeySize
+@@ -37,7 +37,7 @@
+     case invalidParameter
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension CryptoBoringWrapperError {
+     /// A helper function that packs the value of `ERR_get_error` into the internal error field.
+     @usableFromInline
+diff -ruN a/Sources/CryptoBoringWrapper/EC/EllipticCurve.swift x/Sources/CryptoBoringWrapper/EC/EllipticCurve.swift
+--- a/Sources/CryptoBoringWrapper/EC/EllipticCurve.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/EC/EllipticCurve.swift	2026-10-14 13:41:02
+@@ -20,7 +20,7 @@
+ /// A wrapper around BoringSSL's EC_GROUP object that handles reference counting and
+ /// liveness.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ package final class BoringSSLEllipticCurveGroup: @unchecked Sendable {
+     @usableFromInline var _group: OpaquePointer
+ 
+@@ -49,7 +49,7 @@
+ 
+ // MARK: - Helpers
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLEllipticCurveGroup {
+     @usableFromInline
+     package var coordinateByteCount: Int {
+@@ -106,10 +106,10 @@
+ 
+ // MARK: - CurveName
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLEllipticCurveGroup {
+     @usableFromInline
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     package enum CurveName {
+         case p256
+         case p384
+@@ -131,7 +131,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLEllipticCurveGroup.CurveName {
+     @usableFromInline
+     var baseNID: CInt {
+diff -ruN a/Sources/CryptoBoringWrapper/EC/EllipticCurvePoint.swift x/Sources/CryptoBoringWrapper/EC/EllipticCurvePoint.swift
+--- a/Sources/CryptoBoringWrapper/EC/EllipticCurvePoint.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/EC/EllipticCurvePoint.swift	2026-10-14 13:41:02
+@@ -27,7 +27,7 @@
+ 
+ /// A wrapper around BoringSSL's EC_POINT with some lifetime management and value semantics.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ package struct EllipticCurvePoint: @unchecked Sendable {
+     @usableFromInline
+     var backing: Backing
+@@ -375,7 +375,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension EllipticCurvePoint {
+     @usableFromInline
+     final class Backing {
+@@ -628,7 +628,7 @@
+ 
+ // MARK: - Helpers
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension EllipticCurvePoint.Backing {
+     @inlinable
+     package func withPointPointer<T>(_ body: (OpaquePointer) throws -> T) rethrows -> T {
+@@ -665,7 +665,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension EllipticCurvePoint {
+     @inlinable
+     package func withPointPointer<T>(_ body: (OpaquePointer) throws -> T) rethrows -> T {
+diff -ruN a/Sources/CryptoBoringWrapper/Util/ArbitraryPrecisionInteger.swift x/Sources/CryptoBoringWrapper/Util/ArbitraryPrecisionInteger.swift
+--- a/Sources/CryptoBoringWrapper/Util/ArbitraryPrecisionInteger.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/Util/ArbitraryPrecisionInteger.swift	2026-10-14 13:41:02
+@@ -27,7 +27,7 @@
+ /// A wrapper around the OpenSSL BIGNUM object that is appropriately lifetime managed,
+ /// and that provides better Swift types for this object.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ package struct ArbitraryPrecisionInteger: @unchecked Sendable {
+     private var _backing: BackingStorage
+ 
+@@ -53,9 +53,9 @@
+ 
+ // MARK: - BackingStorage
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     fileprivate final class BackingStorage {
+         private var _backing: BIGNUM
+ 
+@@ -99,7 +99,7 @@
+ 
+ // MARK: - Extra initializers
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger {
+     @usableFromInline
+     package init<Bytes: ContiguousBytes>(bytes: Bytes) throws {
+@@ -115,7 +115,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger.BackingStorage {
+     convenience init<Bytes: ContiguousBytes>(bytes: Bytes) throws {
+         self.init()
+@@ -152,7 +152,7 @@
+ 
+ // MARK: - Pointer helpers
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger {
+     package func withUnsafeBignumPointer<T>(
+         _ body: (UnsafePointer<BIGNUM>) throws -> T
+@@ -174,7 +174,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger.BackingStorage {
+     func withUnsafeBignumPointer<T>(_ body: (UnsafePointer<BIGNUM>) throws -> T) rethrows -> T {
+         try body(&self._backing)
+@@ -191,7 +191,7 @@
+ 
+ // MARK: - Other helpers
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger {
+     @usableFromInline static func _compare(
+         lhs: ArbitraryPrecisionInteger,
+@@ -264,7 +264,7 @@
+ 
+ // MARK: - Equatable
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: Equatable {
+     @inlinable
+     package static func == (lhs: ArbitraryPrecisionInteger, rhs: ArbitraryPrecisionInteger) -> Bool {
+@@ -274,7 +274,7 @@
+ 
+ // MARK: - Comparable
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: Comparable {
+     @inlinable
+     package static func < (lhs: ArbitraryPrecisionInteger, rhs: ArbitraryPrecisionInteger) -> Bool {
+@@ -299,12 +299,12 @@
+ 
+ // MARK: - ExpressibleByIntegerLiteral
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: ExpressibleByIntegerLiteral {}
+ 
+ // MARK: - AdditiveArithmetic
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: AdditiveArithmetic {
+     @inlinable
+     package static var zero: ArbitraryPrecisionInteger {
+@@ -376,7 +376,7 @@
+ 
+ // MARK: - Numeric
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: Numeric {
+     @usableFromInline
+     package typealias Magnitude = Self
+@@ -439,7 +439,7 @@
+ 
+ // MARK: - Modular arithmetic
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger {
+     @usableFromInline
+     package func modulo(
+@@ -570,7 +570,7 @@
+ 
+ // MARK: - SignedNumeric
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: SignedNumeric {
+     @usableFromInline
+     package mutating func negate() {
+@@ -584,7 +584,7 @@
+ 
+ // MARK: - Other arithmetic operations
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger {
+     @usableFromInline
+     package var trailingZeroBitCount: Int32 {
+@@ -694,7 +694,7 @@
+ 
+ // MARK: - Serializing
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Data {
+     /// Serializes an ArbitraryPrecisionInteger padded out to a certain minimum size.
+     @usableFromInline
+@@ -733,7 +733,7 @@
+ 
+ // MARK: - Printing
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ArbitraryPrecisionInteger: CustomDebugStringConvertible {
+     @usableFromInline
+     package var debugDescription: String {
+diff -ruN a/Sources/CryptoBoringWrapper/Util/Data+Span.swift x/Sources/CryptoBoringWrapper/Util/Data+Span.swift
+--- a/Sources/CryptoBoringWrapper/Util/Data+Span.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/Util/Data+Span.swift	2026-10-14 13:41:02
+@@ -19,7 +19,7 @@
+ #endif
+ extension Data {
+     /// Copy the raw bytes from the given span into a new Data instance.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     init(copying bytes: RawSpan) {
+         if bytes.byteCount == 0 {
+             self = Data()
+@@ -36,7 +36,7 @@
+     }
+ 
+     /// Append the contents of the given span to this Data instance.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     mutating func append(contentsOf bytes: RawSpan) {
+         bytes.withUnsafeBytes { buffer in
+             self.append(contentsOf: buffer)
+diff -ruN a/Sources/CryptoBoringWrapper/Util/FiniteFieldArithmeticContext.swift x/Sources/CryptoBoringWrapper/Util/FiniteFieldArithmeticContext.swift
+--- a/Sources/CryptoBoringWrapper/Util/FiniteFieldArithmeticContext.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/Util/FiniteFieldArithmeticContext.swift	2026-10-14 13:41:02
+@@ -36,7 +36,7 @@
+ /// Annoyingly, because of the way we have implemented ArbitraryPrecisionInteger, we can't actually use these temporary bignums
+ /// ourselves.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ package final class FiniteFieldArithmeticContext: @unchecked Sendable {
+     private let fieldSize: ArbitraryPrecisionInteger
+     package let bnCtx: OpaquePointer
+@@ -59,7 +59,7 @@
+ 
+ // MARK: - Arithmetic operations
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension FiniteFieldArithmeticContext {
+     @usableFromInline
+     package func residue(_ x: ArbitraryPrecisionInteger) throws -> ArbitraryPrecisionInteger {
+diff -ruN a/Sources/CryptoBoringWrapper/Util/RandomBytes.swift x/Sources/CryptoBoringWrapper/Util/RandomBytes.swift
+--- a/Sources/CryptoBoringWrapper/Util/RandomBytes.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoBoringWrapper/Util/RandomBytes.swift	2026-10-14 13:41:02
+@@ -12,7 +12,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension UnsafeMutableRawBufferPointer {
+     @inlinable
+     package func initializeWithRandomBytes(count: Int) {
+@@ -45,7 +45,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension OutputRawSpan {
+     #if swift(<6.3)
+     @_lifetime(self: copy self)
+@@ -59,7 +59,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SystemRandomNumberGenerator {
+     @inlinable
+     package static func randomBytes(count: Int) -> [UInt8] {
+diff -ruN a/Sources/CryptoExtras/AES/AES_CBC.swift x/Sources/CryptoExtras/AES/AES_CBC.swift
+--- a/Sources/CryptoExtras/AES/AES_CBC.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/AES_CBC.swift	2026-10-14 13:41:02
+@@ -19,11 +19,11 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES {
+     /// The Advanced Encryption Standard (AES) Cipher Block Chaining (CBC) cipher
+     /// suite.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum _CBC {
+         /// Encrypts data using AES-CBC.
+         ///
+@@ -75,10 +75,10 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES._CBC {
+     /// An initialization vector.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct IV: Sendable, Sequence {
+         // AES CBC uses a 128-bit IV.
+         @usableFromInline
+diff -ruN a/Sources/CryptoExtras/AES/AES_CFB.swift x/Sources/CryptoExtras/AES/AES_CFB.swift
+--- a/Sources/CryptoExtras/AES/AES_CFB.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/AES_CFB.swift	2026-10-14 13:41:02
+@@ -20,12 +20,12 @@
+ #endif
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias AESCFBImpl = OpenSSLAESCFBImpl
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum _CFB {
+         @inlinable
+         public static func encrypt<Plaintext: DataProtocol>(
+@@ -49,9 +49,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES._CFB {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct IV: Sendable {
+         // AES CFB uses a 128-bit IV.
+         private var ivBytes: (UInt64, UInt64)
+diff -ruN a/Sources/CryptoExtras/AES/AES_CTR.swift x/Sources/CryptoExtras/AES/AES_CTR.swift
+--- a/Sources/CryptoExtras/AES/AES_CTR.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/AES_CTR.swift	2026-10-14 13:41:02
+@@ -20,13 +20,13 @@
+ #endif
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias AESCTRImpl = OpenSSLAESCTRImpl
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES {
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum _CTR {
+         @inlinable
+         public static func encrypt<Plaintext: DataProtocol>(
+@@ -50,9 +50,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES._CTR {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Nonce: Sendable {
+         // AES CTR uses a 128-bit counter. It's most usual to use a 96-bit nonce
+         // and a 32-bit counter at the end, so we support that specific mode of
+diff -ruN a/Sources/CryptoExtras/AES/AES_GCM_SIV.swift x/Sources/CryptoExtras/AES/AES_GCM_SIV.swift
+--- a/Sources/CryptoExtras/AES/AES_GCM_SIV.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/AES_GCM_SIV.swift	2026-10-14 13:41:02
+@@ -26,10 +26,10 @@
+ #endif
+ 
+ /// Types associated with the AES GCM SIV algorithm
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES.GCM {
+     /// AES in GCM SIV mode with 128-bit tags.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum _SIV {
+         static let tagByteCount = 16
+         static let nonceByteCount = 12
+@@ -87,9 +87,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES.GCM._SIV {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Nonce: Sendable, ContiguousBytes, Sequence {
+         let bytes: Data
+ 
+@@ -123,9 +123,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES.GCM._SIV {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct SealedBox: Sendable {
+         /// The combined representation ( nonce || ciphertext || tag)
+         public let combined: Data
+diff -ruN a/Sources/CryptoExtras/AES/Block Function.swift x/Sources/CryptoExtras/AES/Block Function.swift
+--- a/Sources/CryptoExtras/AES/Block Function.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/Block Function.swift	2026-10-14 13:41:02
+@@ -25,7 +25,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension AES {
+     private static let blockSize = 128 / 8
+ 
+@@ -86,7 +86,7 @@
+         }
+     }
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     enum Permutation {
+         case forward
+         case backward
+@@ -113,7 +113,7 @@
+         }
+     }
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct Block {
+         typealias BlockBytes = (
+             UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
+diff -ruN a/Sources/CryptoExtras/AES/BoringSSL/AES_CBC_boring.swift x/Sources/CryptoExtras/AES/BoringSSL/AES_CBC_boring.swift
+--- a/Sources/CryptoExtras/AES/BoringSSL/AES_CBC_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/BoringSSL/AES_CBC_boring.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ @usableFromInline
+ enum OpenSSLAESCBCImpl {
+     private static let blockSize = 16
+@@ -150,7 +150,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Data {
+     /// Removes PKCS#7 padding in constant time with respect to the padding bytes.
+     fileprivate func removingPKCS7PaddingConstantTime(blockSize: Int = 16) throws -> Data {
+@@ -186,7 +186,7 @@
+ }
+ 
+ /// Returns `0xFFFFFFFF` if `lhs <= rhs`, otherwise `0`, without a data-dependent branch.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private func constantTimeLessThanOrEqual(_ lhs: UInt8, _ rhs: UInt8) -> UInt32 {
+     // `lhs - rhs - 1` is negative iff `lhs <= rhs`; propagate its sign bit across the word.
+     let difference = Int32(lhs) - Int32(rhs) - 1
+diff -ruN a/Sources/CryptoExtras/AES/BoringSSL/AES_CFB_boring.swift x/Sources/CryptoExtras/AES/BoringSSL/AES_CFB_boring.swift
+--- a/Sources/CryptoExtras/AES/BoringSSL/AES_CFB_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/BoringSSL/AES_CFB_boring.swift	2026-10-14 13:41:02
+@@ -27,7 +27,7 @@
+ #endif
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum OpenSSLAESCFBImpl {
+     @usableFromInline
+     enum Mode {
+diff -ruN a/Sources/CryptoExtras/AES/BoringSSL/AES_CTR_boring.swift x/Sources/CryptoExtras/AES/BoringSSL/AES_CTR_boring.swift
+--- a/Sources/CryptoExtras/AES/BoringSSL/AES_CTR_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/BoringSSL/AES_CTR_boring.swift	2026-10-14 13:41:02
+@@ -27,7 +27,7 @@
+ #endif
+ 
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum OpenSSLAESCTRImpl {
+     @inlinable
+     static func encrypt<Plaintext: ContiguousBytes>(
+diff -ruN a/Sources/CryptoExtras/AES/BoringSSL/AES_GCM_SIV_boring.swift x/Sources/CryptoExtras/AES/BoringSSL/AES_GCM_SIV_boring.swift
+--- a/Sources/CryptoExtras/AES/BoringSSL/AES_GCM_SIV_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/BoringSSL/AES_GCM_SIV_boring.swift	2026-10-14 13:41:02
+@@ -29,7 +29,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLAEAD {
+     /// Seal a given message.
+     func seal<Plaintext: DataProtocol, Nonce: ContiguousBytes, AuthenticatedData: DataProtocol>(
+@@ -66,7 +66,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum OpenSSLAESGCMSIVImpl {
+     @inlinable
+     static func seal<Plaintext: DataProtocol, AuthenticatedData: DataProtocol>(
+diff -ruN a/Sources/CryptoExtras/AES/CMAC.swift x/Sources/CryptoExtras/AES/CMAC.swift
+--- a/Sources/CryptoExtras/AES/CMAC.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/AES/CMAC.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ import Foundation
+ #endif
+ 
+-@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
++@available(iOS 6.1.3, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
+ extension AES {
+     /// A cipher-based message authentication code.
+     ///
+@@ -117,7 +117,7 @@
+     }
+ }
+ 
+-@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
++@available(iOS 6.1.3, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
+ extension AES.CMAC {
+     /// A cipher-based message authentication code.
+     public struct MAC: MessageAuthenticationCode {
+@@ -144,7 +144,7 @@
+     }
+ }
+ 
+-@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
++@available(iOS 6.1.3, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
+ extension AES.CMAC {
+     fileprivate final class Backing {
+         private let key: SymmetricKey
+@@ -203,7 +203,7 @@
+     }
+ }
+ 
+-@available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
++@available(iOS 6.1.3, macOS 10.15, watchOS 6.0, tvOS 13.0, *)
+ extension SymmetricKey {
+     fileprivate var aesEVP: OpaquePointer {
+         switch self.bitCount {
+diff -ruN a/Sources/CryptoExtras/ARC/ARC+API.swift x/Sources/CryptoExtras/ARC/ARC+API.swift
+--- a/Sources/CryptoExtras/ARC/ARC+API.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARC+API.swift	2026-10-14 13:41:02
+@@ -19,7 +19,7 @@
+ #endif
+ 
+ // MARK: - P256 + ARC(P-256)
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256 {
+     /// Anonymous Rate-Limited Credentials (ARC).
+     ///
+@@ -35,7 +35,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256._ARCV1 {
+     /// The server secrets used to issue and verify credentials.
+     public struct PrivateKey: Sendable {
+@@ -252,7 +252,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256._ARCV1.PublicKey {
+     internal func prepareCredentialRequest<D: DataProtocol>(
+         requestContext: D,
+@@ -289,7 +289,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256._ARCV1.PrivateKey {
+     internal func issue(
+         _ credentialRequest: P256._ARCV1.CredentialRequest,
+@@ -305,7 +305,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256._ARCV1.PublicKey {
+     /// Create a credential from the issuer response.
+     public func finalize(
+@@ -317,7 +317,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256._ARCV1.Credential {
+     internal mutating func makePresentation<D: DataProtocol>(
+         context: D,
+@@ -362,7 +362,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P256._ARCV1.PrivateKey {
+     /// Verify a presentation is valid for a given attribute.
+     ///
+@@ -398,7 +398,7 @@
+ }
+ 
+ // MARK: - P384 + ARC(P-384)
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384 {
+     /// Anonymous Rate-Limited Credentials (ARC).
+@@ -415,7 +415,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384._ARCV1 {
+     /// The server secrets used to issue and verify credentials.
+@@ -633,7 +633,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384._ARCV1.PublicKey {
+     internal func prepareCredentialRequest<D: DataProtocol>(
+@@ -671,7 +671,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384._ARCV1.PrivateKey {
+     internal func issue(
+@@ -688,7 +688,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384._ARCV1.PublicKey {
+     /// Create a credential from the issuer response.
+@@ -701,7 +701,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384._ARCV1.Credential {
+     internal mutating func makePresentation<D: DataProtocol>(
+@@ -747,7 +747,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ @available(*, deprecated, message: "ARC(P-384) has been removed from the IETF draft; use ARC(P-256) instead.")
+ extension P384._ARCV1.PrivateKey {
+     /// Verify a presentation is valid for a given attribute.
+diff -ruN a/Sources/CryptoExtras/ARC/ARC.swift x/Sources/CryptoExtras/ARC/ARC.swift
+--- a/Sources/CryptoExtras/ARC/ARC.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARC.swift	2026-10-14 13:41:02
+@@ -20,10 +20,10 @@
+ 
+ /// Anonymous Rate-Limited Credentials (ARC) using the CMZ14 MACGGM construction, as defined in
+ /// https://chris-wood.github.io/draft-arc/draft-yun-cfrg-arc.html
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ enum ARC {}
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     enum Errors: Error {
+         case invalidProof
+diff -ruN a/Sources/CryptoExtras/ARC/ARCCredential.swift x/Sources/CryptoExtras/ARC/ARCCredential.swift
+--- a/Sources/CryptoExtras/ARC/ARCCredential.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCCredential.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     struct Credential<H2G: HashToGroup> {
+         typealias Group = H2G.G
+diff -ruN a/Sources/CryptoExtras/ARC/ARCEncoding.swift x/Sources/CryptoExtras/ARC/ARCEncoding.swift
+--- a/Sources/CryptoExtras/ARC/ARCEncoding.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCEncoding.swift	2026-10-14 13:41:02
+@@ -18,12 +18,12 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ typealias ARCP256 = HashToCurveImpl<P256>
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ typealias ARCP384 = HashToCurveImpl<P384>
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC.CredentialRequest {
+     static func getScalarCount() -> Int { return 5 }
+     static func getSerializedByteCount(_ ciphersuite: ARC.Ciphersuite<H2G>) -> Int {
+@@ -53,7 +53,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC.CredentialResponse {
+     static func getScalarCount() -> Int { return 8 }
+     static func getSerializedByteCount(_ ciphersuite: ARC.Ciphersuite<H2G>) -> Int {
+@@ -94,7 +94,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC.Presentation {
+     static func getScalarCount() -> Int { return 5 }
+     static func getPointCount() -> Int { return 4 }
+@@ -131,7 +131,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC.ServerPublicKey {
+     static func getSerializedByteCount(_ ciphersuite: ARC.Ciphersuite<H2G>) -> Int {
+         return 3 * ciphersuite.pointByteCount
+@@ -162,7 +162,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension Proof {
+     func serialize(ciphersuite: ARC.Ciphersuite<H2G>) -> Data {
+         let scalarCount = self.responses.count + 1
+@@ -201,7 +201,7 @@
+ 
+ // Serialize a ARC credential, to save and restore client state.
+ // This will only be called client-side, and never be sent over the wire.
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC.Credential {
+     static func getScalarCount() -> Int { return 1 }
+     static func getPointCount() -> Int { return 5 }
+@@ -249,7 +249,7 @@
+ 
+ // Serialize a ARC PresentationState, to help save and restore a credential.
+ // This will only be called client-side, and never be sent over the wire.
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC.PresentationState {
+     func serialize() throws -> Data {
+         let encoder = PropertyListEncoder()
+diff -ruN a/Sources/CryptoExtras/ARC/ARCPrecredential.swift x/Sources/CryptoExtras/ARC/ARCPrecredential.swift
+--- a/Sources/CryptoExtras/ARC/ARCPrecredential.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCPrecredential.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     struct ClientSecrets<Scalar: GroupScalar> {
+         let m1: Scalar // secret at request and verification
+diff -ruN a/Sources/CryptoExtras/ARC/ARCPresentation.swift x/Sources/CryptoExtras/ARC/ARCPresentation.swift
+--- a/Sources/CryptoExtras/ARC/ARCPresentation.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCPresentation.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     /// Presentation consists of a commitment to a MACGGC evaluation over two attributes,
+     /// a commitment to one of the attributes, a tag and its public inputs (presentationContext, nonce),
+diff -ruN a/Sources/CryptoExtras/ARC/ARCRequest.swift x/Sources/CryptoExtras/ARC/ARCRequest.swift
+--- a/Sources/CryptoExtras/ARC/ARCRequest.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCRequest.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     /// CredentialRequest consists of encryptions of the two client attributes, in the form of Pedersen commitments,
+     /// along with a zero-knowledge proof of the following statements:
+diff -ruN a/Sources/CryptoExtras/ARC/ARCResponse.swift x/Sources/CryptoExtras/ARC/ARCResponse.swift
+--- a/Sources/CryptoExtras/ARC/ARCResponse.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCResponse.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     /// CredentialResponse consists of a MACGGM evaluation over a Pedersen commitment to a private attribute,
+     /// along with the corresponding proof that it was calculated correctly over the expected key commitments:
+diff -ruN a/Sources/CryptoExtras/ARC/ARCServer.swift x/Sources/CryptoExtras/ARC/ARCServer.swift
+--- a/Sources/CryptoExtras/ARC/ARCServer.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ARC/ARCServer.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension ARC {
+     struct ServerPrivateKey<Scalar: GroupScalar> {
+         let x0: Scalar
+diff -ruN a/Sources/CryptoExtras/ChaCha20CTR/BoringSSL/ChaCha20CTR_boring.swift x/Sources/CryptoExtras/ChaCha20CTR/BoringSSL/ChaCha20CTR_boring.swift
+--- a/Sources/CryptoExtras/ChaCha20CTR/BoringSSL/ChaCha20CTR_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ChaCha20CTR/BoringSSL/ChaCha20CTR_boring.swift	2026-10-14 13:41:02
+@@ -27,7 +27,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum OpenSSLChaCha20CTRImpl {
+     static func encrypt<M: DataProtocol, N: ContiguousBytes>(
+         key: SymmetricKey,
+diff -ruN a/Sources/CryptoExtras/ChaCha20CTR/ChaCha20CTR.swift x/Sources/CryptoExtras/ChaCha20CTR/ChaCha20CTR.swift
+--- a/Sources/CryptoExtras/ChaCha20CTR/ChaCha20CTR.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ChaCha20CTR/ChaCha20CTR.swift	2026-10-14 13:41:02
+@@ -25,13 +25,13 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias ChaCha20CTRImpl = OpenSSLChaCha20CTRImpl
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Insecure {
+     /// ChaCha20-CTR with 96-bit nonces and a 32 bit counter.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum ChaCha20CTR {
+         static let keyBitsCount = 256
+         static let nonceByteCount = 12
+@@ -60,9 +60,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Insecure.ChaCha20CTR {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Nonce: Sendable, ContiguousBytes, Sequence {
+         let bytes: Data
+ 
+@@ -95,7 +95,7 @@
+         }
+     }
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Counter: Sendable, ContiguousBytes {
+         let counter: UInt32
+ 
+diff -ruN a/Sources/CryptoExtras/Digests/BoringSSL/BoringSSLSHA512256Context.swift x/Sources/CryptoExtras/Digests/BoringSSL/BoringSSLSHA512256Context.swift
+--- a/Sources/CryptoExtras/Digests/BoringSSL/BoringSSLSHA512256Context.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Digests/BoringSSL/BoringSSLSHA512256Context.swift	2026-10-14 13:41:02
+@@ -24,7 +24,7 @@
+ import Darwin
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ final class BoringSSLSHA512256Context {
+     private var context: SHA512_CTX
+ 
+diff -ruN a/Sources/CryptoExtras/Digests/SHA512256.swift x/Sources/CryptoExtras/Digests/SHA512256.swift
+--- a/Sources/CryptoExtras/Digests/SHA512256.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Digests/SHA512256.swift	2026-10-14 13:41:02
+@@ -28,7 +28,7 @@
+ /// in memory, you can compute the digest iteratively by creating a new hash
+ /// instance, calling the ``update(data:)`` method repeatedly with blocks of
+ /// data, and then calling the ``finalize()`` method to get the result.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public struct SHA512256: HashFunction, @unchecked Sendable {
+     /// The number of bytes that represents the hash function's internal state.
+     public static var blockByteCount: Int {
+diff -ruN a/Sources/CryptoExtras/Digests/SHA512256Digest.swift x/Sources/CryptoExtras/Digests/SHA512256Digest.swift
+--- a/Sources/CryptoExtras/Digests/SHA512256Digest.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Digests/SHA512256Digest.swift	2026-10-14 13:41:02
+@@ -14,7 +14,7 @@
+ 
+ /// The output of a Secure Hashing Algorithm 2 (SHA-2) hash with a 256-bit digest
+ /// using the SHA-512/256 variant.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public struct SHA512256Digest: Digest {
+     let bytes: (UInt64, UInt64, UInt64, UInt64)
+ 
+diff -ruN a/Sources/CryptoExtras/EC/Curve25519+PEM.swift x/Sources/CryptoExtras/EC/Curve25519+PEM.swift
+--- a/Sources/CryptoExtras/EC/Curve25519+PEM.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/EC/Curve25519+PEM.swift	2026-10-14 13:41:02
+@@ -21,7 +21,7 @@
+ import Foundation
+ #endif
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension Curve25519.Signing.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key.
+     public var derRepresentation: Data {
+@@ -60,7 +60,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension Curve25519.Signing.PublicKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the public key.
+     public var derRepresentation: Data {
+@@ -102,7 +102,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension Curve25519.KeyAgreement.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key.
+     public var derRepresentation: Data {
+@@ -142,7 +142,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension Curve25519.KeyAgreement.PublicKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the public key.
+     public var derRepresentation: Data {
+diff -ruN a/Sources/CryptoExtras/EC/PKCS8DERRepresentation.swift x/Sources/CryptoExtras/EC/PKCS8DERRepresentation.swift
+--- a/Sources/CryptoExtras/EC/PKCS8DERRepresentation.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/EC/PKCS8DERRepresentation.swift	2026-10-14 13:41:02
+@@ -21,7 +21,7 @@
+ import Foundation
+ #endif
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension Curve25519.Signing.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key in PKCS#8 format.
+     public var pkcs8DERRepresentation: Data {
+@@ -29,7 +29,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension Curve25519.KeyAgreement.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key in PKCS#8 format.
+     public var pkcs8DERRepresentation: Data {
+@@ -37,7 +37,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension P256.Signing.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key in PKCS#8 format.
+     ///
+@@ -48,7 +48,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension P384.Signing.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key in PKCS#8 format.
+     ///
+@@ -59,7 +59,7 @@
+     }
+ }
+ 
+-@available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
++@available(iOS 6.1.3, macOS 11.0, watchOS 7.0, tvOS 14.0, *)
+ extension P521.Signing.PrivateKey {
+     /// A Distinguished Encoding Rules (DER) encoded representation of the private key in PKCS#8 format.
+     ///
+diff -ruN a/Sources/CryptoExtras/EC/PKCS8PrivateKey.swift x/Sources/CryptoExtras/EC/PKCS8PrivateKey.swift
+--- a/Sources/CryptoExtras/EC/PKCS8PrivateKey.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/EC/PKCS8PrivateKey.swift	2026-10-14 13:41:02
+@@ -15,7 +15,7 @@
+ import Crypto
+ import SwiftASN1
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ASN1 {
+     // A PKCS#8 private key is one of two formats, depending on the version:
+     //
+@@ -36,7 +36,7 @@
+     // Attributes ::= SET OF Attribute
+     //
+     // We disregard the attributes because we don't support them anyway.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct PKCS8PrivateKey: DERImplicitlyTaggable {
+         static var defaultIdentifier: ASN1Identifier {
+             .sequence
+diff -ruN a/Sources/CryptoExtras/EC/RFC8410AlgorithmIdentifier.swift x/Sources/CryptoExtras/EC/RFC8410AlgorithmIdentifier.swift
+--- a/Sources/CryptoExtras/EC/RFC8410AlgorithmIdentifier.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/EC/RFC8410AlgorithmIdentifier.swift	2026-10-14 13:41:02
+@@ -14,9 +14,9 @@
+ 
+ import SwiftASN1
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ASN1 {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct RFC8410AlgorithmIdentifier: DERImplicitlyTaggable, Hashable {
+         static var defaultIdentifier: ASN1Identifier {
+             .sequence
+@@ -62,7 +62,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ASN1.RFC8410AlgorithmIdentifier {
+     static let x25519 = ASN1.RFC8410AlgorithmIdentifier(algorithm: .AlgorithmIdentifier.idX25519, parameters: nil)
+ 
+diff -ruN a/Sources/CryptoExtras/ECToolbox/BoringSSL/ECToolbox_boring.swift x/Sources/CryptoExtras/ECToolbox/BoringSSL/ECToolbox_boring.swift
+--- a/Sources/CryptoExtras/ECToolbox/BoringSSL/ECToolbox_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ECToolbox/BoringSSL/ECToolbox_boring.swift	2026-10-14 13:41:02
+@@ -24,7 +24,7 @@
+ /// support ECToolbox. It is (re-)defined here because its counterpart in the Crypto module is only conditionally
+ /// compiled on _non-Darwin_ platforms, but we implement ECToolbox on both Darwin and non-Darwin platforms.
+ @usableFromInline
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol OpenSSLSupportedNISTCurve {
+     associatedtype H: HashFunction
+ 
+@@ -50,7 +50,7 @@
+ }
+ 
+ /// NOTE: This conformance applies to this type from the Crypto module even if it comes from the SDK.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P256: OpenSSLSupportedNISTCurve {
+     @usableFromInline
+     typealias H = SHA256
+@@ -84,7 +84,7 @@
+ }
+ 
+ /// NOTE: This conformance applies to this type from the Crypto module even if it comes from the SDK.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P384: OpenSSLSupportedNISTCurve {
+     @usableFromInline
+     typealias H = SHA384
+@@ -118,7 +118,7 @@
+ }
+ 
+ /// NOTE: This conformance applies to this type from the Crypto module even if it comes from the SDK.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P521: OpenSSLSupportedNISTCurve {
+     @usableFromInline
+     typealias H = SHA512
+@@ -151,7 +151,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLGroupScalar<C: OpenSSLSupportedNISTCurve>: GroupScalar, CustomStringConvertible {
+     var openSSLScalar: ArbitraryPrecisionInteger
+ 
+@@ -220,7 +220,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLCurvePoint<C: OpenSSLSupportedNISTCurve>: GroupElement {
+     var ecPoint: EllipticCurvePoint
+     typealias Scalar = OpenSSLGroupScalar<C>
+@@ -266,14 +266,14 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension OpenSSLCurvePoint {
+     var compressedRepresentation: Data {
+         try! self.ecPoint.x962Representation(compressed: true, on: C.group, context: C.__ffac)
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension OpenSSLCurvePoint: OPRFGroupElement {
+     init(oprfRepresentation data: Data) throws {
+         guard data.count == C.compressedx962PointByteCount else {
+@@ -286,7 +286,7 @@
+     var oprfRepresentation: Data { self.compressedRepresentation }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct OpenSSLGroup<C: OpenSSLSupportedNISTCurve>: Group {
+     typealias Element = OpenSSLCurvePoint<C>
+ 
+@@ -296,7 +296,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ struct OpenSSLHashToCurve<C: OpenSSLSupportedNISTCurve>: HashToGroup {
+     typealias H = C.H
+     typealias GE = OpenSSLCurvePoint<C>
+diff -ruN a/Sources/CryptoExtras/ECToolbox/ECToolbox.swift x/Sources/CryptoExtras/ECToolbox/ECToolbox.swift
+--- a/Sources/CryptoExtras/ECToolbox/ECToolbox.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ECToolbox/ECToolbox.swift	2026-10-14 13:41:02
+@@ -18,15 +18,15 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias SupportedCurveDetailsImpl = OpenSSLSupportedNISTCurve
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias GroupImpl = OpenSSLGroup
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ typealias HashToCurveImpl = OpenSSLHashToCurve
+ 
+ /// A prime-order group
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol Group {
+     /// Group element
+     associatedtype Element: GroupElement
+@@ -38,7 +38,7 @@
+     static var cofactor: Int { get }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol HashToGroup {
+     associatedtype H: HashFunction
+     associatedtype G: Group where G.Element: OPRFGroupElement
+@@ -47,7 +47,7 @@
+     static func hashToGroup(_ data: Data, domainSeparationString: Data) -> G.Element
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol GroupScalar: Sendable {
+     init(bytes: Data, reductionIsModOrder: Bool) throws
+ 
+@@ -70,7 +70,7 @@
+     static func == (left: Self, right: Self) -> Bool
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol GroupElement: Sendable {
+     associatedtype Scalar: GroupScalar
+ 
+diff -ruN a/Sources/CryptoExtras/H2G/HashToField.swift x/Sources/CryptoExtras/H2G/HashToField.swift
+--- a/Sources/CryptoExtras/H2G/HashToField.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/H2G/HashToField.swift	2026-10-14 13:41:02
+@@ -31,7 +31,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Data {
+     static func ^ (left: Data, right: Data) -> Data {
+         precondition(left.count == right.count)
+@@ -44,13 +44,13 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum Hash2FieldErrors: Error {
+     case outputSizeIsTooLarge
+ }
+ 
+ /// HashToField hashes a byte string msg of arbitrary length into one or more elements of a finite field
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ struct HashToField<C: SupportedCurveDetailsImpl> {
+     static func expandMessageXMD(_ msg: Data, DST: Data, outputByteCount L: Int) throws -> Data {
+         typealias H = C.H
+diff -ruN a/Sources/CryptoExtras/Key Derivation/KDF.swift x/Sources/CryptoExtras/Key Derivation/KDF.swift
+--- a/Sources/CryptoExtras/Key Derivation/KDF.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Key Derivation/KDF.swift	2026-10-14 13:41:02
+@@ -19,7 +19,7 @@
+ #endif
+ 
+ /// A container for Key Detivation Function algorithms.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public enum KDF: Sendable {
+     /// A container for older, cryptographically insecure algorithms.
+     ///
+diff -ruN a/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_boring.swift x/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_boring.swift
+--- a/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_boring.swift	2026-10-14 13:41:02
+@@ -26,7 +26,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal struct BoringSSLPBKDF2 {
+     /// Derives a secure key using the provided hash function, passphrase and salt.
+     ///
+@@ -74,7 +74,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension KDF.Insecure.PBKDF2.HashFunction {
+     var digest: OpaquePointer {
+         switch self {
+diff -ruN a/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_commoncrypto.swift x/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_commoncrypto.swift
+--- a/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_commoncrypto.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Key Derivation/PBKDF2/BoringSSL/PBKDF2_commoncrypto.swift	2026-10-14 13:41:02
+@@ -22,7 +22,7 @@
+ #if canImport(CommonCrypto)
+ @_implementationOnly import CommonCrypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal struct CommonCryptoPBKDF2 {
+     /// Derives a secure key using the provided hash function, passphrase and salt.
+     ///
+@@ -71,7 +71,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension KDF.Insecure.PBKDF2.HashFunction {
+     var ccHash: CCPBKDFAlgorithm {
+         switch self {
+diff -ruN a/Sources/CryptoExtras/Key Derivation/PBKDF2/PBKDF2.swift x/Sources/CryptoExtras/Key Derivation/PBKDF2/PBKDF2.swift
+--- a/Sources/CryptoExtras/Key Derivation/PBKDF2/PBKDF2.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Key Derivation/PBKDF2/PBKDF2.swift	2026-10-14 13:41:02
+@@ -19,17 +19,17 @@
+ #endif
+ 
+ #if canImport(CommonCrypto)
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPBKDF2 = CommonCryptoPBKDF2
+ #else
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPBKDF2 = BoringSSLPBKDF2
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension KDF.Insecure {
+     /// An implementation of PBKDF2 key derivation function.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PBKDF2: Sendable {
+         /// Derives a symmetric key using the PBKDF2 algorithm.
+         ///
+diff -ruN a/Sources/CryptoExtras/Key Derivation/Scrypt/BoringSSL/Scrypt_boring.swift x/Sources/CryptoExtras/Key Derivation/Scrypt/BoringSSL/Scrypt_boring.swift
+--- a/Sources/CryptoExtras/Key Derivation/Scrypt/BoringSSL/Scrypt_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Key Derivation/Scrypt/BoringSSL/Scrypt_boring.swift	2026-10-14 13:41:02
+@@ -46,21 +46,21 @@
+ #if os(Windows)
+ import WinSDK
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private func getPageSize() -> Int {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     var info = SYSTEM_INFO()
+     GetSystemInfo(&info)
+     return Int(info.dwPageSize)
+ }
+ #else
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private func getPageSize() -> Int {
+     Int(sysconf(Int32(_SC_PAGESIZE)))
+ }
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal struct BoringSSLScrypt {
+     /// Derives a secure key using the provided passphrase and salt.
+     ///
+diff -ruN a/Sources/CryptoExtras/Key Derivation/Scrypt/Scrypt.swift x/Sources/CryptoExtras/Key Derivation/Scrypt/Scrypt.swift
+--- a/Sources/CryptoExtras/Key Derivation/Scrypt/Scrypt.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Key Derivation/Scrypt/Scrypt.swift	2026-10-14 13:41:02
+@@ -18,13 +18,13 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingScrypt = BoringSSLScrypt
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension KDF {
+     /// An implementation of scrypt key derivation function.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum Scrypt: Sendable {
+         /// Derives a symmetric key using the scrypt algorithm.
+         ///
+diff -ruN a/Sources/CryptoExtras/OPRFs/OPRF.swift x/Sources/CryptoExtras/OPRFs/OPRF.swift
+--- a/Sources/CryptoExtras/OPRFs/OPRF.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/OPRFs/OPRF.swift	2026-10-14 13:41:02
+@@ -20,10 +20,10 @@
+ 
+ /// (Verifiable Partly-)Oblivious Pseudorandom Functions
+ /// https://cfrg.github.io/draft-irtf-cfrg-voprf/draft-irtf-cfrg-voprf.html
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ enum OPRF {}
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension OPRF {
+     enum Errors: Error {
+         case invalidProof
+@@ -34,13 +34,13 @@
+ }
+ 
+ /// Defines the IETF Serializations for OPRFs
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol OPRFGroupElement: GroupElement {
+     init(oprfRepresentation: Data) throws
+     var oprfRepresentation: Data { get }
+ }
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension OPRF {
+     static func oprfVersion(v8CompatibilityMode: Bool) -> String {
+         if v8CompatibilityMode {
+diff -ruN a/Sources/CryptoExtras/OPRFs/OPRFClient.swift x/Sources/CryptoExtras/OPRFs/OPRFClient.swift
+--- a/Sources/CryptoExtras/OPRFs/OPRFClient.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/OPRFs/OPRFClient.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension OPRF {
+     struct Client<H2G: HashToGroup> {
+         let mode: Mode
+diff -ruN a/Sources/CryptoExtras/OPRFs/OPRFServer.swift x/Sources/CryptoExtras/OPRFs/OPRFServer.swift
+--- a/Sources/CryptoExtras/OPRFs/OPRFServer.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/OPRFs/OPRFServer.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension OPRF {
+     struct Server<H2G: HashToGroup> {
+         typealias G = H2G.G
+diff -ruN a/Sources/CryptoExtras/OPRFs/VOPRF+API.swift x/Sources/CryptoExtras/OPRFs/VOPRF+API.swift
+--- a/Sources/CryptoExtras/OPRFs/VOPRF+API.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/OPRFs/VOPRF+API.swift	2026-10-14 13:41:02
+@@ -19,14 +19,14 @@
+ #endif
+ 
+ // MARK: - P384 + VPORF (P384-SHA384)
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension P384 {
+     /// A mechanism to compute the output of a pseudorandom without the client learning the secret or the server
+     /// learning the input using the P384-SHA384 Verifiable Oblivious Pseudorandom Function (VOPRF).
+     ///
+     /// - Seealso: [RFC 9497: VOPRF Protocol](https://www.rfc-editor.org/rfc/rfc9497.html#name-voprf-protocol).
+     /// - Seealso: [RFC 9497: OPRF(P-384, SHA-384)](https://www.rfc-editor.org/rfc/rfc9497.html#name-oprfp-384-sha-384).
+-    @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++    @available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+     public enum _VOPRF {
+         typealias H2G = HashToCurveImpl<P384>
+         typealias Ciphersuite = OPRF.Ciphersuite<H2G>
+@@ -201,7 +201,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P384._VOPRF {
+     /// A blinding value, used to blind an input.
+     ///
+@@ -364,7 +364,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P384._VOPRF.PublicKey {
+     internal func blind<D: DataProtocol>(_ input: D, with fixedBlind: P384._VOPRF.H2G.G.Scalar) throws -> P384._VOPRF.BlindedInput {
+         let input = Data(input)
+@@ -405,7 +405,7 @@
+     }
+ }
+ 
+-@available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
++@available(iOS 6.1.3, macOS 13.0, watchOS 9.0, tvOS 16.0, macCatalyst 16.0, visionOS 2.0, *)
+ extension P384._VOPRF.PrivateKey {
+     static var hashToGroupDST: Data {
+         Data("HashToGroup-".utf8) + OPRF.setupContext(mode: .verifiable, suite: P384._VOPRF.ciphersuite, v8CompatibilityMode: false)
+diff -ruN a/Sources/CryptoExtras/OPRFs/VOPRFClient.swift x/Sources/CryptoExtras/OPRFs/VOPRFClient.swift
+--- a/Sources/CryptoExtras/OPRFs/VOPRFClient.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/OPRFs/VOPRFClient.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension OPRF {
+     struct VerifiableClient<H2G: HashToGroup> {
+         fileprivate let client: OPRF.Client<H2G>
+diff -ruN a/Sources/CryptoExtras/OPRFs/VOPRFServer.swift x/Sources/CryptoExtras/OPRFs/VOPRFServer.swift
+--- a/Sources/CryptoExtras/OPRFs/VOPRFServer.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/OPRFs/VOPRFServer.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13.2, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
++@available(macOS 10.15, iOS 6.1.3, tvOS 13.2, watchOS 6.1, macCatalyst 13.2, visionOS 1.2, *)
+ extension OPRF {
+     struct VerifiableServer<H2G: HashToGroup> {
+         typealias G = H2G.G
+diff -ruN a/Sources/CryptoExtras/RSA/BoringSSLPassphraseCallbackManager.swift x/Sources/CryptoExtras/RSA/BoringSSLPassphraseCallbackManager.swift
+--- a/Sources/CryptoExtras/RSA/BoringSSLPassphraseCallbackManager.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/RSA/BoringSSLPassphraseCallbackManager.swift	2026-10-14 13:41:02
+@@ -33,7 +33,7 @@
+ 
+ /// This class exists primarily to work around the fact that Swift does not let us stuff
+ /// a closure into an `Unmanaged`. Instead, we use this object to keep hold of it.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ final class BoringSSLPassphraseCallbackManager<Bytes: Collection>: CallbackManagerProtocol
+ where Bytes.Element == UInt8 {
+     private let userCallback: _RSA.Signing.PrivateKey.PassphraseCallback<Bytes>
+diff -ruN a/Sources/CryptoExtras/RSA/RSA+BlindSigning.swift x/Sources/CryptoExtras/RSA/RSA+BlindSigning.swift
+--- a/Sources/CryptoExtras/RSA/RSA+BlindSigning.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/RSA/RSA+BlindSigning.swift	2026-10-14 13:41:02
+@@ -20,20 +20,20 @@
+ import CryptoBoringWrapper
+ 
+ // NOTE: RSABSSA API is implemented using BoringSSL on all platforms.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPublicKey = BoringSSLRSAPublicKey
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPrivateKey = BoringSSLRSAPrivateKey
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum BlindSigning {}
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PublicKey<H: HashFunction>: Sendable {
+         public typealias Parameters = _RSA.BlindSigning.Parameters<H>
+ 
+@@ -148,9 +148,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PrivateKey<H: HashFunction>: Sendable {
+         public typealias Parameters = _RSA.BlindSigning.Parameters<H>
+ 
+@@ -298,9 +298,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct BlindSignature: Sendable, ContiguousBytes {
+         public var rawRepresentation: Data
+ 
+@@ -318,7 +318,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning {
+     /// Parameters used in the blind signing protocol.
+     ///
+@@ -328,7 +328,7 @@
+     /// The RECOMMENDED variants are RSABSSA-SHA384-PSS-Randomized or RSABSSA-SHA384-PSSZERO-Randomized.
+     ///
+     /// - Seealso: [RFC 9474: RSABSSA Variants](https://www.rfc-editor.org/rfc/rfc9474.html#name-rsabssa-variants).
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Parameters<H: HashFunction>: Sendable {
+         enum Padding { case PSS, PSSZERO }
+         var padding: Padding
+@@ -345,7 +345,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning.Parameters where H == SHA384 {
+     /// RSABSSA-SHA384-PSS-Randomized
+     ///
+@@ -395,12 +395,12 @@
+     public static let RSABSSA_SHA384_PSSZERO_Deterministic = Self<SHA384>(padding: .PSSZERO, preparation: .identity)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning {
+     /// An input ready to be blinded, possibly prepended with random bytes.
+     ///
+     /// Users cannot create values of this type manually; it is created and returned by the prepare operation.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PreparedMessage {
+         var rawRepresentation: Data
+     }
+@@ -408,7 +408,7 @@
+     /// The blinding inverse for a blinded message, used to unblind a blind signature.
+     ///
+     /// Users cannot create values of this type manually; it is created and returned by the blind operation.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct BlindingInverse {
+         var rawRepresentation: Data
+     }
+@@ -416,7 +416,7 @@
+     /// The blinded message and its blinding inverse for unblinding its blind signature.
+     ///
+     /// Users cannot create values of this type manually; it is created and returned by the blind operation.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct BlindingResult {
+         /// Blinded message to be sent to the issuer.
+         public var blindedMessage: Data
+@@ -426,7 +426,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning.PrivateKey {
+     /// Generate a blind signature with the given key for a blinded message.
+     ///
+@@ -440,7 +440,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning.PublicKey {
+     /// Prepare a message to be signed using the blind signing protocol.
+     ///
+@@ -507,14 +507,14 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.BlindSigning {
+     /// Errors defined in the RSA Blind Signatures protocol.
+     ///
+     /// - NOTE: This type does not conform to `Swift.Error`, it is used to construct a `CryptoError`.
+     ///
+     /// - Seealso: [RFC 9474: Errors](https://www.rfc-editor.org/rfc/rfc9474.html#name-errors).
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     enum ProtocolError {
+         case messageTooLong
+         case encodingError
+@@ -526,7 +526,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension CryptoKitError {
+     /// Map an error from the RSA Blind Signatures protocol to a CryptoError.
+     init(_ error: _RSA.BlindSigning.ProtocolError) {
+diff -ruN a/Sources/CryptoExtras/RSA/RSA.swift x/Sources/CryptoExtras/RSA/RSA.swift
+--- a/Sources/CryptoExtras/RSA/RSA.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/RSA/RSA.swift	2026-10-14 13:41:02
+@@ -20,9 +20,9 @@
+ import CryptoBoringWrapper
+ import SwiftASN1
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPublicKey = BoringSSLRSAPublicKey
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPrivateKey = BoringSSLRSAPrivateKey
+ 
+ /// Types associated with the RSA algorithm
+@@ -35,20 +35,20 @@
+ /// When rolling out new cryptosystems, users should avoid RSA and use ECDSA or edDSA instead. RSA
+ /// support is provided for interoperability with legacy systems.
+ @_documentation(visibility: public)
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public enum _RSA { }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum Signing { }
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public enum Encryption { }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PublicKey: Sendable {
+         public struct Primitives: Sendable, Hashable {
+             public var modulus: Data
+@@ -158,9 +158,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PrivateKey: Sendable {
+         private var backing: BackingPrivateKey
+ 
+@@ -340,9 +340,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct RSASignature: Sendable, ContiguousBytes {
+         public var rawRepresentation: Data
+ 
+@@ -360,9 +360,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Padding: Sendable {
+         internal enum Backing {
+             case pkcs1v1_5
+@@ -398,7 +398,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing.PrivateKey {
+     ///  Generates an RSA signature with the given key using the default padding.
+     ///
+@@ -447,7 +447,7 @@
+     }
+  }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing.PublicKey {
+     /// Verifies an RSA signature with the given padding over a given digest using the default padding.
+     ///
+@@ -500,9 +500,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Signing {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct KeySize: Sendable {
+         public let bitCount: Int
+ 
+@@ -526,10 +526,10 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Encryption {
+     /// Identical to ``_RSA/Signing/PublicKey``.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PublicKey {
+         public struct Primitives: Sendable, Hashable {
+             public var modulus: Data
+@@ -611,7 +611,7 @@
+     }
+     
+     /// Identical to ``_RSA/Signing/PrivateKey``.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct PrivateKey {
+         private var backing: BackingPrivateKey
+ 
+@@ -722,9 +722,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Encryption {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     public struct Padding: Sendable {
+         internal enum Backing {
+             case _weakAndInsecure_pkcs1v1_5
+@@ -755,7 +755,7 @@
+         public static let PKCS1_OAEP_SHA256 = Self(.pkcs1_oaep(.sha256))
+     }
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     internal enum Digest {
+         case sha1
+         case sha256
+@@ -770,7 +770,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Encryption.PrivateKey {
+     /// Decrypt a message encrypted with this key's public key and using the specified padding mode.
+     ///
+@@ -781,7 +781,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA.Encryption.PublicKey {
+     /// Return the maximum amount of data in bytes this key can encrypt in a single operation when using
+     /// the specified padding mode.
+@@ -815,7 +815,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA {
+     static let PKCS1KeyType = "RSA PRIVATE KEY"
+ 
+@@ -826,7 +826,7 @@
+     static let SPKIPublicKeyType = "PUBLIC KEY"
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension _RSA {
+     static func extractPrimeFactors(
+         n: ArbitraryPrecisionInteger, 
+diff -ruN a/Sources/CryptoExtras/RSA/RSA_boring.swift x/Sources/CryptoExtras/RSA/RSA_boring.swift
+--- a/Sources/CryptoExtras/RSA/RSA_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/RSA/RSA_boring.swift	2026-10-14 13:41:02
+@@ -41,7 +41,7 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal struct BoringSSLRSAPublicKey: Sendable {
+     private var backing: Backing
+ 
+@@ -94,7 +94,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal struct BoringSSLRSAPrivateKey: Sendable {
+     private var backing: Backing
+ 
+@@ -160,7 +160,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLRSAPrivateKey {
+     internal func signature<D: Digest>(
+         for digest: D,
+@@ -184,7 +184,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLRSAPublicKey {
+     func isValidSignature<D: Digest>(
+         _ signature: _RSA.Signing.RSASignature,
+@@ -220,9 +220,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLRSAPublicKey {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     fileprivate final class Backing: @unchecked Sendable {
+         private let pointer: OpaquePointer
+ 
+@@ -586,9 +586,9 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension BoringSSLRSAPrivateKey {
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     fileprivate final class Backing: @unchecked Sendable {
+         private let pointer: OpaquePointer
+ 
+@@ -1057,7 +1057,7 @@
+ }
+ 
+ /// This namespace enum just provides helper functions for some of the steps outlined in the RFC.
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum BlindSigningHelpers {
+     fileprivate static func RSASSAPSSVerify<H: HashFunction>(
+         rsaPublicKey: OpaquePointer!,
+diff -ruN a/Sources/CryptoExtras/Util/BoringSSL/Zeroization_boring.swift x/Sources/CryptoExtras/Util/BoringSSL/Zeroization_boring.swift
+--- a/Sources/CryptoExtras/Util/BoringSSL/Zeroization_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/BoringSSL/Zeroization_boring.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ typealias errno_t = CInt
+ 
+ // This is a Swift wrapper for the libc function that does not exist on Linux. We shim it via a call to OPENSSL_cleanse.
+diff -ruN a/Sources/CryptoExtras/Util/BoringSSLHelpers.swift x/Sources/CryptoExtras/Util/BoringSSLHelpers.swift
+--- a/Sources/CryptoExtras/Util/BoringSSLHelpers.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/BoringSSLHelpers.swift	2026-10-14 13:41:02
+@@ -25,7 +25,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ internal enum BIOHelper {
+     static func withReadOnlyMemoryBIO<ReturnValue>(
+         wrapping pointer: UnsafeRawBufferPointer, _ block: (OpaquePointer) throws -> ReturnValue
+@@ -59,7 +59,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Data {
+     init(copyingMemoryBIO bio: OpaquePointer) throws {
+         var innerPointer: UnsafePointer<UInt8>? = nil
+@@ -73,7 +73,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension String {
+     init(copyingUTF8MemoryBIO bio: OpaquePointer) throws {
+         var innerPointer: UnsafePointer<UInt8>? = nil
+@@ -87,7 +87,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension FixedWidthInteger {
+     func withBignumPointer<ReturnType>(_ block: (UnsafeMutablePointer<BIGNUM>) throws -> ReturnType) rethrows -> ReturnType {
+         precondition(self.bitWidth <= UInt.bitWidth)
+diff -ruN a/Sources/CryptoExtras/Util/CryptoKitErrors_boring.swift x/Sources/CryptoExtras/Util/CryptoKitErrors_boring.swift
+--- a/Sources/CryptoExtras/Util/CryptoKitErrors_boring.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/CryptoKitErrors_boring.swift	2026-10-14 13:41:02
+@@ -20,7 +20,7 @@
+ @_implementationOnly import CCryptoBoringSSL
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension CryptoKitError {
+     /// A helper function that packs the value of `ERR_get_error` into the internal error field.
+     @usableFromInline
+diff -ruN a/Sources/CryptoExtras/Util/DigestType.swift x/Sources/CryptoExtras/Util/DigestType.swift
+--- a/Sources/CryptoExtras/Util/DigestType.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/DigestType.swift	2026-10-14 13:41:02
+@@ -20,7 +20,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct DigestType: @unchecked Sendable {
+     let dispatchTable: OpaquePointer
+ 
+diff -ruN a/Sources/CryptoExtras/Util/Error.swift x/Sources/CryptoExtras/Util/Error.swift
+--- a/Sources/CryptoExtras/Util/Error.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/Error.swift	2026-10-14 13:41:02
+@@ -12,7 +12,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ public enum _CryptoRSAError: Error {
+     case invalidPEMDocument
+ }
+diff -ruN a/Sources/CryptoExtras/Util/I2OSP.swift x/Sources/CryptoExtras/Util/I2OSP.swift
+--- a/Sources/CryptoExtras/Util/I2OSP.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/I2OSP.swift	2026-10-14 13:41:02
+@@ -30,16 +30,16 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ func I2OSP(value: Int, outputByteCount: Int) -> Data {
+     precondition(outputByteCount > 0, "Cannot I2OSP with no output length.")
+     precondition(value >= 0, "I2OSP requires a non-null value.")
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     let requiredBytes = Int(ceil(log2(Double(max(value, 1) + 1)) / 8))
+     precondition(outputByteCount >= requiredBytes)
+ 
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     var data = Data(repeating: 0, count: outputByteCount)
+ 
+     for i in (outputByteCount - requiredBytes)...(outputByteCount - 1) {
+diff -ruN a/Sources/CryptoExtras/Util/PEMDocument.swift x/Sources/CryptoExtras/Util/PEMDocument.swift
+--- a/Sources/CryptoExtras/Util/PEMDocument.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/PEMDocument.swift	2026-10-14 13:41:02
+@@ -18,10 +18,10 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum ASN1 {
+     /// A PEM document is some data, and a discriminator type that is used to advertise the content.
+-    @available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++    @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+     struct PEMDocument {
+         private static let lineLength = 64
+ 
+@@ -90,7 +90,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Substring {
+     fileprivate var pemStartDiscriminator: String? {
+         return self.pemDiscriminator(expectedPrefix: "-----BEGIN ", expectedSuffix: "-----")
+diff -ruN a/Sources/CryptoExtras/Util/PrettyBytes.swift x/Sources/CryptoExtras/Util/PrettyBytes.swift
+--- a/Sources/CryptoExtras/Util/PrettyBytes.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/PrettyBytes.swift	2026-10-14 13:41:02
+@@ -17,23 +17,23 @@
+ import Foundation
+ #endif
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum ByteHexEncodingErrors: Error {
+     case incorrectHexValue
+     case incorrectString
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ let charA = UInt8(UnicodeScalar("a").value)
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ let char0 = UInt8(UnicodeScalar("0").value)
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private func itoh(_ value: UInt8) -> UInt8 {
+     return (value > 9) ? (charA + value - 10) : (char0 + value)
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ private func htoi(_ value: UInt8) throws -> UInt8 {
+     switch value {
+     case char0...char0 + 9:
+@@ -45,7 +45,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension DataProtocol {
+     var hexString: String {
+         let hexLen = self.count * 2
+@@ -64,14 +64,14 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension MutableDataProtocol {
+     mutating func appendByte(_ byte: UInt64) {
+         withUnsafePointer(to: byte.littleEndian, { self.append(contentsOf: UnsafeRawBufferPointer(start: $0, count: 8)) })
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Data {
+     init(hexString: String) throws {
+         self.init()
+@@ -91,7 +91,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension Array where Element == UInt8 {
+     init(hexString: String) throws {
+         self.init()
+diff -ruN a/Sources/CryptoExtras/Util/SubjectPublicKeyInfo.swift x/Sources/CryptoExtras/Util/SubjectPublicKeyInfo.swift
+--- a/Sources/CryptoExtras/Util/SubjectPublicKeyInfo.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/Util/SubjectPublicKeyInfo.swift	2026-10-14 13:41:02
+@@ -14,7 +14,7 @@
+ 
+ import SwiftASN1
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct SubjectPublicKeyInfo: DERImplicitlyTaggable, Hashable {
+     static var defaultIdentifier: ASN1Identifier {
+         .sequence
+@@ -57,7 +57,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct RFC5480AlgorithmIdentifier: DERImplicitlyTaggable, Hashable {
+     static var defaultIdentifier: ASN1Identifier {
+         .sequence
+@@ -106,7 +106,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension SubjectPublicKeyInfo {
+     static func stripRsaPssParameters(derEncoded: [UInt8]) throws -> [UInt8] {
+         guard var spki = try? SubjectPublicKeyInfo(derEncoded: derEncoded),
+@@ -126,7 +126,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension RFC5480AlgorithmIdentifier {
+     static let ed25519 = RFC5480AlgorithmIdentifier(algorithm: .AlgorithmIdentifier.idEd25519, parameters: nil)
+ 
+diff -ruN a/Sources/CryptoExtras/ZKPs/DLEQ.swift x/Sources/CryptoExtras/ZKPs/DLEQ.swift
+--- a/Sources/CryptoExtras/ZKPs/DLEQ.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ZKPs/DLEQ.swift	2026-10-14 13:41:02
+@@ -19,7 +19,7 @@
+ import Crypto
+ 
+ /// A DLEQ Proof as described in https://cfrg.github.io/draft-irtf-cfrg-voprf/draft-irtf-cfrg-voprf.html#name-generateproof
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct DLEQProof<GS: GroupScalar> {
+     var c: GS
+     var s: GS
+@@ -32,7 +32,7 @@
+ 
+ // Discrete Log Equivalence Proof
+ // Proves that for a value kept secret k, the relation between B=k*A and D=k*C is such that log_A(B)==log_C(D)
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct DLEQ<H2G: HashToGroup> {
+     typealias GE = H2G.G.Element
+     
+diff -ruN a/Sources/CryptoExtras/ZKPs/Prover.swift x/Sources/CryptoExtras/ZKPs/Prover.swift
+--- a/Sources/CryptoExtras/ZKPs/Prover.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ZKPs/Prover.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct Prover<H2G: HashToGroup>: ProofParticipant {
+     typealias Group = H2G.G
+     var label: String
+diff -ruN a/Sources/CryptoExtras/ZKPs/Verifier.swift x/Sources/CryptoExtras/ZKPs/Verifier.swift
+--- a/Sources/CryptoExtras/ZKPs/Verifier.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ZKPs/Verifier.swift	2026-10-14 13:41:02
+@@ -18,7 +18,7 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct Verifier<H2G: HashToGroup>: ProofParticipant {
+     typealias Group = H2G.G
+     var label: String
+diff -ruN a/Sources/CryptoExtras/ZKPs/ZKPToolbox.swift x/Sources/CryptoExtras/ZKPs/ZKPToolbox.swift
+--- a/Sources/CryptoExtras/ZKPs/ZKPToolbox.swift	2026-10-14 13:37:19
++++ x/Sources/CryptoExtras/ZKPs/ZKPToolbox.swift	2026-10-14 13:41:02
+@@ -18,17 +18,17 @@
+ #endif
+ import Crypto
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct ScalarVar {
+     var index: Int
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct PointVar {
+     var index: Int
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum ZKPErrors: Error {
+     case invalidVariableAllocation
+     case invalidInputLength
+@@ -37,7 +37,7 @@
+ 
+ // A Schnorr proof, which stores the challenge instead of 
+ // commitments to the prover's randomness (blindedPoints).
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct Proof<H2G: HashToGroup> {
+     typealias Group = H2G.G
+     public let challenge: Group.Scalar
+@@ -63,7 +63,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ protocol ProofParticipant {
+     associatedtype Point: GroupElement
+     var label: String { get }
+@@ -73,7 +73,7 @@
+     var constraints: [(PointVar, [(ScalarVar, PointVar)])] { get set }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ProofParticipant {
+     mutating func constrain(result: PointVar, linearCombination: [(ScalarVar, PointVar)]) {
+         self.constraints.append((result, linearCombination))
+diff -ruN a/Sources/crypto-shasum/main.swift x/Sources/crypto-shasum/main.swift
+--- a/Sources/crypto-shasum/main.swift	2026-10-14 13:37:19
++++ x/Sources/crypto-shasum/main.swift	2026-10-14 13:41:02
+@@ -22,7 +22,7 @@
+   -a, --algorithm   256 (default), 384, 512
+ """
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ enum SupportedHashFunction {
+     case sha256
+     case sha384
+@@ -89,7 +89,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ func processInputs(_ handles: [String: FileHandle], algorithm: SupportedHashFunction) {
+     for (name, fh) in handles {
+         let result = algorithm.hashLoop(from: fh)
+@@ -97,7 +97,7 @@
+     }
+ }
+ 
+-@available(macOS 10.15, iOS 13, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
++@available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ func main() {
+     var arguments = CommandLine.arguments.dropFirst()
+     var algorithm = SupportedHashFunction.sha256  // Default to sha256

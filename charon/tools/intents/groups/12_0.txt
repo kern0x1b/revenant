@@ -1,0 +1,17 @@
+INDailyRoutineRelevanceProvider
+INDateRelevanceProvider
+INDefaultCardTemplate
+INLocationRelevanceProvider
+INMediaItem
+INMessageLinkMetadata
+INObject
+INPlayMediaIntent
+INPlayMediaIntentResponse
+INRelevanceProvider
+INRelevantShortcut
+INRelevantShortcutStore
+INShortcut
+INTimeIntervalResolutionResult
+INUpcomingMediaManager
+INVoiceShortcut
+INVoiceShortcutCenter

@@ -1,0 +1,16 @@
+{
+  "framework": "CoreGraphics",
+  "entries": [
+    {
+      "api": "CGColorCreateCopyByMatchingToColorSpace()",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 28 of the frameworks demand table, LOAD-FAIL for telegram and utm; CoreGraphics of 6.1.3 exports the colour transform the function wraps (CGColorTransformCreate and CGColorTransformConvertColor, on the armv7 cache ladder since 3.1.3) without a header",
+      "effect": "the colour converted by the release's own CGColorTransform to the target space with the intent, owned by the caller; the colour itself, retained, when it already is in that calibrated space; NULL for a NULL space or colour or a pattern space. On 6.1.3 a device colour goes to device grey by the release's luma weights (0.30, 0.59, 0.11), as its own drawing does",
+      "facts": "facts/CoreGraphics/ColorMatching.md",
+      "source": "the host's CoreGraphics, which the port is held against by tests/backports/host/cgmatch; an iPad 2 on 6.1.3 for the release's transform; the armv7 cache ladder, which first exports the function at 9.0"
+    }
+  ]
+}

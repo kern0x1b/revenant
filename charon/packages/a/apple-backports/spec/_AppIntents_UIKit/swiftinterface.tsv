@@ -1,0 +1,26 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_AppIntents_UIKit	method	DisplayRepresentation.Image.init?(systemName:tintColor:symbolConfiguration:)	16.0				container
+_AppIntents_UIKit	class	ShortcutsUIButton	16.0				own
+_AppIntents_UIKit	property	ShortcutsUIButton.style	16.0				container
+_AppIntents_UIKit	method	ShortcutsUIButton.init(style:)	16.0				container
+_AppIntents_UIKit	method	ShortcutsUIButton.sizeThatFits(_:)	16.0				container
+_AppIntents_UIKit	method	ShortcutsUIButton.addTarget(_:action:for:)	16.0				container
+_AppIntents_UIKit	protocol	AppIntentSceneDelegate	26.0				own
+_AppIntents_UIKit	method	AppIntentSceneDelegate.scene(_:willPerformAppIntent:)	26.0				container
+_AppIntents_UIKit	property	UIScene.ConnectionOptions.appIntent	26.0				container
+_AppIntents_UIKit	protocol	UISceneAppIntent	26.0				own
+_AppIntents_UIKit	method	UISceneAppIntent.performNavigation(forScene:)	26.0				container
+_AppIntents_UIKit	property	UISceneAppIntent.uiScene	26.0				container
+_AppIntents_UIKit	method	UISceneAppIntent.performNavigation(forScene:)	26.0				container
+_AppIntents_UIKit	method	UISceneAppIntent.perform()	26.0				container
+_AppIntents_UIKit	property	UISceneAppIntent.contentIdentifier	26.0				container
+_AppIntents_UIKit	method	UISceneAppIntent.perform()	26.0				container
+_AppIntents_UIKit	class	SiriTipUIView	16.0				own
+_AppIntents_UIKit	property	SiriTipUIView.style	16.0				container
+_AppIntents_UIKit	property	SiriTipUIView.isPresented	16.0				container
+_AppIntents_UIKit	property	SiriTipUIView.allowsDismissal	16.0				container
+_AppIntents_UIKit	method	SiriTipUIView.init(style:)	16.0				container
+_AppIntents_UIKit	property	SiriTipUIView.intrinsicContentSize	16.0				container
+_AppIntents_UIKit	method	SiriTipUIView.sizeThatFits(_:)	16.0				container
+_AppIntents_UIKit	method	SiriTipUIView.didMoveToWindow()	16.0				container
+_AppIntents_UIKit	method	SiriTipUIView.setIntent(intent:)	16.0				container

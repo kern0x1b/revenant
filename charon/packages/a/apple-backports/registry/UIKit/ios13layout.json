@@ -1,0 +1,237 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "NSCollectionLayoutDimension",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "one of a fraction of the width, a fraction of the height, an absolute length or an estimate; raises for a value that is not finite, copies to a new object and is equal by kind and value",
+      "facts": "facts/UIKit/NSCollectionLayoutDimension.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSize",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a width dimension and a height dimension, printed as the host prints them; a nil dimension is an absolute zero",
+      "facts": "facts/UIKit/NSCollectionLayoutDimension.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSpacing",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a fixed length or a flexible minimum; any value is kept",
+      "facts": "facts/UIKit/NSCollectionLayoutDimension.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutEdgeSpacing",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the four optional spacings of an item's edges, printed with the outsets the host prints",
+      "facts": "facts/UIKit/NSCollectionLayoutDimension.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutAnchor",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "edges of a rectangle and an absolute or fractional offset, with the anchor point the edges give",
+      "facts": "facts/UIKit/NSCollectionLayoutDimension.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutGroupCustomItem",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a frame and a z index a custom group answers with, relative to the group's corner",
+      "facts": "facts/UIKit/NSCollectionLayoutDimension.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutItem",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a size, content insets, edge spacing and supplementary items, copied and compared as the host's are; an item that fills a group is placed by the layout",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutGroup",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "horizontal, vertical or custom, with subitems, an inter-item spacing and supplementary items; a group that repeats a subitem for a count is one subitem sized by the count",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSupplementaryItem",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a view of an element kind tied by two anchors to an item or a group, of z index 1 by default",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutBoundarySupplementaryItem",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a supplementary item at an edge or corner of a section or of the layout, that extends the boundary and may be pinned to the visible bounds",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutDecorationItem",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a background view of an element kind, as large as its section less its insets, behind the cells",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSection",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a group repeated for the items of a section, with content insets, spacing between groups, boundary and decoration items",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "UICollectionViewCompositionalLayoutConfiguration",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the scroll direction, the space between sections and the boundary items of the whole layout, copied with the layout that takes it",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "UICollectionViewCompositionalLayout",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has UICollectionViewLayout, so the layout is written on it; sections that scroll the other way are moved by the port itself (a pan recognizer on the collection view) and estimated dimensions are measured through preferredLayoutAttributesFittingAttributes, as a self-sizing flow layout does",
+      "effect": "a UICollectionViewLayout that solves the section, or the section of each index the provider is given, into frames for cells, supplementary views and decoration views, as the host's solver does; sections that scroll the other way scroll, and items and boundary items of estimated size are measured",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutEnvironment",
+      "kind": "protocol",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "what a section provider and a custom group's provider are given: a container and the collection view's trait collection, adopted by an object of the port's own",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutContainer",
+      "kind": "protocol",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the size, the insets and the size less the insets of what a provider is laying out, adopted by an object of the port's own",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutVisibleItem",
+      "kind": "protocol",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the objects the invalidation handler of a section that scrolls the other way is given: frame, bounds, center, alpha, zIndex, hidden, transform, transform3D, name, index path and element category and kind, kept from call to call, and what the handler sets is shown",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups), and by tests/backports/device/compositional.m on the release; the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSection.orthogonalScrollingBehavior",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the section scrolls sideways on its own inside the collection view, driven by a pan recognizer on the collection view, in all five behaviors, with the snapping, offset range and layout the host's private scroll view has, held to the host at scripted offsets; the section's cells are not clipped to its frame",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups), and by tests/backports/device/compositional.m on the release; the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSection.visibleItemsInvalidationHandler",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "called when the layout is solved and at every change of the section's offset, with the visible items, the offset and the environment; what it sets on the items is shown",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups), and by tests/backports/device/compositional.m on the release; the header of SDK 16.4"
+    },
+    {
+      "api": "+[NSCollectionLayoutDimension estimatedDimension:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the layout measures the displayed cell (its constraints, its -sizeThatFits: or its -preferredLayoutAttributesFittingAttributes:) and the header or footer, and lays the item out at the size it asks for, as the host does; a view that cannot size itself keeps the estimate",
+      "facts": "facts/UIKit/UICollectionViewCompositionalLayout.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups), and by tests/backports/device/compositional.m on the release; the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSCollectionLayoutGroup visualDescription]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "the header calls it an ASCII rendering of the group's items for debugging and does not give its layout; the host's text for several groups is not measured yet, so the port cannot match it",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/UIKit/NSCollectionLayoutItem.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "NSCollectionLayoutSection.contentInsetsReference",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "which edges across the scroll direction a section keeps clear of: none, the safe area, the layout margins or, as the port has no readable content guide, the layout margins again; automatic follows the layout",
+      "facts": "facts/UIKit/NSCollectionLayoutContentInsetsReference.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    },
+    {
+      "api": "UICollectionViewCompositionalLayoutConfiguration.contentInsetsReference",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the same, for every section that refers to automatic; it starts at the safe area, as the header says",
+      "facts": "facts/UIKit/NSCollectionLayoutContentInsetsReference.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the layoutvalues, compositionallayout, orthogonal and sizedlayout groups); the header of SDK 16.4"
+    }
+  ]
+}

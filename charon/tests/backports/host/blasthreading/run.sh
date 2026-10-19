@@ -1,0 +1,35 @@
+#!/bin/sh
+# The port's BLASThreading18.m held against the host's own Accelerate, case by case: the four answers the
+# API gives, compared one by one, and then a measurement of whether the model changes how the library
+# threads - which is the part no answer can show and the part the facts file states.
+set -eu
+here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+build=${BLASTHREADING_BUILD:-$(runs_folder charon-blasthreading-host)}
+rm -rf "$build"
+mkdir -p "$build"
+
+# Every API name the object defines is renamed in the port's own translation unit, so this one can hold
+# the port's answers and the host's side by side. The names come from the port's registry, not from a list
+# kept here, so a name added to the library is renamed too.
+renames=""
+for name in $(python3 - "$here" <<'PY'
+import json, os, sys
+registry = os.path.join(sys.argv[1], "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
+for entry in json.load(open(os.path.join(registry, "ios18blasthreading.json")))["entries"]:
+    if entry["kind"] == "function":
+        print(entry["api"].rstrip("()"))
+PY
+); do
+    renames="$renames -D$name=charon_host_$name"
+done
+
+xcrun clang -fobjc-arc -w $renames -c "$ACCELERATE/BLASThreading18.m" -o "$build/BLASThreading18.o"
+xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations \
+    "$here/differential.m" "$build/BLASThreading18.o" \
+    -framework Foundation -framework Accelerate -o "$build/differential"
+"$build/differential" > "$build/log" 2>&1 && result=0 || result=$?
+grep -v '^ok ' "$build/log" || true
+echo "log=$build/log"
+exit $result

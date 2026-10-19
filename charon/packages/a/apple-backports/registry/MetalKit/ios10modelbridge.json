@@ -1,0 +1,27 @@
+{
+  "framework": "MetalKit",
+  "entries": [
+    {
+      "api": "MTKMetalVertexDescriptorFromModelIOWithError()",
+      "kind": "function",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "measured before writing code, per the coordinator's instruction: the function only touches MDLVertexDescriptor, a plain layout-description object with no dependency on ModelIO's asset importer, so it carries the descriptor types this pass builds (registry/ModelIO/ios9.json) rather than the real wall, MDLAsset/MDLMesh file import",
+      "effect": "converts a real MDLVertexDescriptor's attributes and layouts to a real MTLVertexDescriptor, mapping the vertex formats this port's own MTLVertexDescriptor/CharonMetal pipeline already understands (float/int/uint 1-4 components, the four normalized 8/16-bit packed formats, half2/3/4); an attribute whose Model I/O format has no Metal equivalent this port maps answers an NSError in MTKModelErrorDomain naming the attribute index, not a silent wrong answer",
+      "facts": "facts/MetalKit/ModelBridge.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTKModelIOVertexDescriptorFromMetalWithError()",
+      "kind": "function",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the inverse conversion, the same measured boundary",
+      "effect": "converts a real MTLVertexDescriptor's attributes and layouts to a real MDLVertexDescriptor, the same format mapping in reverse; an unmapped format answers the same kind of NSError, not a silent wrong answer",
+      "facts": "facts/MetalKit/ModelBridge.md",
+      "source": "the header of iOS 16.4 for the contract"
+    }
+  ]
+}

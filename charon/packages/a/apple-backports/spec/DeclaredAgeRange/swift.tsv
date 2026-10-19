@@ -1,0 +1,44 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+DeclaredAgeRange	swift-struct	s:16DeclaredAgeRange0bC7ServiceV	-	AgeRangeService	-	-	-	ios=26.0,macos=26.0	-	18e9ba5879199b93
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV6sharedACvpZ	AgeRangeService	shared	+	DeclaredAgeRange.AgeRangeService	-	-	-	222a3fe8feb2e326
+DeclaredAgeRange	swift-enum	s:16DeclaredAgeRange0bC7ServiceV5ErrorO	AgeRangeService	Error	-	-	-	-	-	1c41a5d6ed9a5eb0
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV5ErrorO12notAvailableyA2EmF	AgeRangeService.Error	notAvailable	-	-	-	-	-	9f7cb821f80c19e5
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV5ErrorO14invalidRequestyA2EmF	AgeRangeService.Error	invalidRequest	-	-	-	-	-	7c694d12435bb6e5
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0bC7ServiceV5ErrorO2eeoiySbAE_AEtFZ	AgeRangeService.Error	==(_:_:)	+	Swift.Bool	DeclaredAgeRange.AgeRangeService.Error | DeclaredAgeRange.AgeRangeService.Error	-	-	4e2b9f14d8c6e9f2
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0bC7ServiceV5ErrorO4hash4intoys6HasherVz_tF	AgeRangeService.Error	hash(into:)	-	()	Swift.Hasher	-	-	3851c4fc86f5c469
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV5ErrorO9hashValueSivp	AgeRangeService.Error	hashValue	-	Swift.Int	-	-	-	7cb121a161184761
+DeclaredAgeRange	swift-enum	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO	AgeRangeService	AgeRangeDeclaration	-	-	-	-	-	5b3ea5a6cc9f0545
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO04selfA0yA2EmF	AgeRangeService.AgeRangeDeclaration	selfDeclared	-	-	-	-	-	fe8ff9b52a2bb949
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO08guardianA0yA2EmF	AgeRangeService.AgeRangeDeclaration	guardianDeclared	-	-	-	-	-	1c3b53cd7ca7e849
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO20checkedByOtherMethodyA2EmF	AgeRangeService.AgeRangeDeclaration	checkedByOtherMethod	-	-	-	ios=26.2,macos=26.2	-	207f2a5521852422
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO28guardianCheckedByOtherMethodyA2EmF	AgeRangeService.AgeRangeDeclaration	guardianCheckedByOtherMethod	-	-	-	ios=26.2,macos=26.2	-	fea804a70d12df7f
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO19governmentIDCheckedyA2EmF	AgeRangeService.AgeRangeDeclaration	governmentIDChecked	-	-	-	ios=26.2,macos=26.2	-	c5e0980d1d1ec8bf
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO27guardianGovernmentIDCheckedyA2EmF	AgeRangeService.AgeRangeDeclaration	guardianGovernmentIDChecked	-	-	-	ios=26.2,macos=26.2	-	f0b4b456ffa9ebaa
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO14paymentCheckedyA2EmF	AgeRangeService.AgeRangeDeclaration	paymentChecked	-	-	-	ios=26.2,macos=26.2	-	b6383142552fff34
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO22guardianPaymentCheckedyA2EmF	AgeRangeService.AgeRangeDeclaration	guardianPaymentChecked	-	-	-	ios=26.2,macos=26.2	-	aa7d6b76602fffc4
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO2eeoiySbAE_AEtFZ	AgeRangeService.AgeRangeDeclaration	==(_:_:)	+	Swift.Bool	DeclaredAgeRange.AgeRangeService.AgeRangeDeclaration | DeclaredAgeRange.AgeRangeService.AgeRangeDeclaration	-	-	91ff492ad59e2a23
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO4hash4intoys6HasherVz_tF	AgeRangeService.AgeRangeDeclaration	hash(into:)	-	()	Swift.Hasher	-	-	565032a45b5090c0
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV0bC11DeclarationO9hashValueSivp	AgeRangeService.AgeRangeDeclaration	hashValue	-	Swift.Int	-	-	-	6dac9d4ee7db4b13
+DeclaredAgeRange	swift-struct	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV	AgeRangeService	ParentalControls	-	-	-	-	-	7fe25516f9c226f9
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV8rawValueSivp	AgeRangeService.ParentalControls	rawValue	-	Swift.Int	-	-	-	886520658aa2a7b0
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV19communicationLimitsAEvpZ	AgeRangeService.ParentalControls	communicationLimits	+	DeclaredAgeRange.AgeRangeService.ParentalControls	-	-	-	dd93eeb86daaae53
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV36significantAppChangeApprovalRequiredAEvpZ	AgeRangeService.ParentalControls	significantAppChangeApprovalRequired	+	DeclaredAgeRange.AgeRangeService.ParentalControls	-	-	-	fca3eabea755378a
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV8rawValueAESi_tcfc	AgeRangeService.ParentalControls	init(rawValue:)	-	-	DeclaredAgeRange.AgeRangeService.ParentalControls | Swift.Int	-	-	5f31b282466bd242
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV11descriptionSSvp	AgeRangeService.ParentalControls	description	-	Swift.String	-	-	-	4ddedd0f96f1f3c5
+DeclaredAgeRange	swift-typealias	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV19ArrayLiteralElementa	AgeRangeService.ParentalControls	ArrayLiteralElement	-	-	-	ios=26.0,macos=26.0	-	13cb4f8a041fff74
+DeclaredAgeRange	swift-typealias	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV7Elementa	AgeRangeService.ParentalControls	Element	-	-	-	ios=26.0,macos=26.0	-	9c49c7283f676204
+DeclaredAgeRange	swift-typealias	s:16DeclaredAgeRange0bC7ServiceV16ParentalControlsV8RawValuea	AgeRangeService.ParentalControls	RawValue	-	-	-	ios=26.0,macos=26.0	-	065414b68a44eff9
+DeclaredAgeRange	swift-struct	s:16DeclaredAgeRange0bC7ServiceV0bC0V	AgeRangeService	AgeRange	-	-	-	-	-	292c80d7b8ffe011
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV0bC0V10lowerBoundSiSgvp	AgeRangeService.AgeRange	lowerBound	-	Swift.Int?	-	-	-	d986443b6788320e
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV0bC0V10upperBoundSiSgvp	AgeRangeService.AgeRange	upperBound	-	Swift.Int?	-	-	-	5c555aab54736e3e
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV0bC0V03ageC11DeclarationAC0bcF0OSgvp	AgeRangeService.AgeRange	ageRangeDeclaration	-	DeclaredAgeRange.AgeRangeService.AgeRangeDeclaration?	-	-	-	b6ede7037da63e3b
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV0bC0V22activeParentalControlsAC0fG0Vvp	AgeRangeService.AgeRange	activeParentalControls	-	DeclaredAgeRange.AgeRangeService.ParentalControls	-	-	-	245fdba8ce9797d3
+DeclaredAgeRange	swift-enum	s:16DeclaredAgeRange0bC7ServiceV8ResponseO	AgeRangeService	Response	-	-	-	-	-	05f9fd9835f1c38d
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV8ResponseO15declinedSharingyA2EmF	AgeRangeService.Response	declinedSharing	-	-	-	-	-	7e1b0860a910616f
+DeclaredAgeRange	swift-constant	s:16DeclaredAgeRange0bC7ServiceV8ResponseO7sharingyAeC0bC0V_tcAEmF	AgeRangeService.Response	sharing	-	-	-	-	-	8fcf34465ae93925
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0bC7ServiceV07requestbC08ageGates__2inAC8ResponseOSi_SiSgAISo16UIViewControllerCtYaKF	AgeRangeService	requestAgeRange(ageGates:_:_:in:)	-	DeclaredAgeRange.AgeRangeService.Response	Swift.Int | Swift.Int? | Swift.Int? | UIKit.UIViewController	-	-	a2bbcafc2b57a522
+DeclaredAgeRange	swift-property	s:16DeclaredAgeRange0bC7ServiceV013isEligibleForB8FeaturesSbvp	AgeRangeService	isEligibleForAgeFeatures	-	Swift.Bool	-	ios=26.2,macos=26.2	-	32a62c4659b27057
+DeclaredAgeRange	swift-struct	s:16DeclaredAgeRange0abC6ActionV	-	DeclaredAgeRangeAction	-	-	-	ios=26.0,macos=26.0	-	4701727bdf109e80
+DeclaredAgeRange	swift-method	s:16DeclaredAgeRange0abC6ActionV14callAsFunction8ageGates__AA0bC7ServiceV8ResponseOSi_SiSgAJtYaKF	DeclaredAgeRangeAction	callAsFunction(ageGates:_:_:)	-	DeclaredAgeRange.AgeRangeService.Response	Swift.Int | Swift.Int? | Swift.Int?	-	-	92baf48e60d2b70c
+DeclaredAgeRange	swift-struct	s:7SwiftUI17EnvironmentValuesV	-	EnvironmentValues	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	61d076f6895cbf5f
+DeclaredAgeRange	swift-property	s:7SwiftUI17EnvironmentValuesV16DeclaredAgeRangeE07requestfG0AD0efG6ActionVvp	EnvironmentValues	requestAgeRange	-	DeclaredAgeRange.DeclaredAgeRangeAction	-	-	-	3d44890d5ad81920

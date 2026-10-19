@@ -1,0 +1,325 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+XPC	swift-class	c:objc(cs)OS_xpc_listener	-	OS_xpc_listener	-	-	-	-	-	282982c53a24aaab
+XPC	swift-protocol	c:objc(pl)OS_xpc_object	-	OS_xpc_object	-	-	-	-	-	2f83ee0a394c1b39
+XPC	swift-class	c:objc(cs)OS_xpc_session	-	OS_xpc_session	-	-	-	-	-	a4c5c302f0f4a73f
+XPC	swift-constant	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_CHECK_IN	-	XPC_ACTIVITY_STATE_CHECK_IN	-	Swift.Int	-	-	-	975131e99c6fe1ab
+XPC	swift-constant	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_CONTINUE	-	XPC_ACTIVITY_STATE_CONTINUE	-	Swift.Int	-	-	-	ab374535710faf9a
+XPC	swift-constant	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_DEFER	-	XPC_ACTIVITY_STATE_DEFER	-	Swift.Int	-	-	-	05c78526b1087a6b
+XPC	swift-constant	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_DONE	-	XPC_ACTIVITY_STATE_DONE	-	Swift.Int	-	-	-	3d3c9ee4a21d787c
+XPC	swift-constant	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_RUN	-	XPC_ACTIVITY_STATE_RUN	-	Swift.Int	-	-	-	4702535917f8bde1
+XPC	swift-constant	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_WAIT	-	XPC_ACTIVITY_STATE_WAIT	-	Swift.Int	-	-	-	df7344af3494c7f9
+XPC	swift-constant	c:@_xpc_bool_false	-	_xpc_bool_false	-	_	-	ios=5.0	-	96a8ef3af0536cd9
+XPC	swift-constant	c:@_xpc_bool_true	-	_xpc_bool_true	-	_	-	ios=5.0	-	5e92a7e5a1894926
+XPC	swift-constant	c:@_xpc_error_connection_interrupted	-	_xpc_error_connection_interrupted	-	_	-	ios=5.0	-	f8f773734d7db905
+XPC	swift-constant	c:@_xpc_error_connection_invalid	-	_xpc_error_connection_invalid	-	_	-	ios=5.0	-	b434619164b19f92
+XPC	swift-constant	c:@_xpc_error_key_description	-	_xpc_error_key_description	-	Swift.UnsafePointer<Swift.CChar>	-	ios=5.0	-	7fe91a65e5ba8c62
+XPC	swift-constant	c:@_xpc_error_peer_code_signing_requirement	-	_xpc_error_peer_code_signing_requirement	-	_	-	-	-	386b373714d9e947
+XPC	swift-constant	c:@_xpc_error_termination_imminent	-	_xpc_error_termination_imminent	-	_	-	ios=5.0	-	e02950e9f1ada19e
+XPC	swift-constant	c:@_xpc_event_key_name	-	_xpc_event_key_name	-	Swift.UnsafePointer<Swift.CChar>	-	ios=5.0	-	e989a6f0e2ea440c
+XPC	swift-function	c:@F@_xpc_object_validate	-	_xpc_object_validate(_:)	-	Swift.Void	XPC.xpc_object_t	-	-	aee20e24c5493f95
+XPC	swift-constant	c:@_xpc_type_array	-	_xpc_type_array	-	_	-	ios=5.0	-	ce5806d7a14c3114
+XPC	swift-constant	c:@_xpc_type_bool	-	_xpc_type_bool	-	_	-	ios=5.0	-	eee871f0d0fd948c
+XPC	swift-constant	c:@_xpc_type_connection	-	_xpc_type_connection	-	_	-	ios=5.0	-	b00f0765beb64674
+XPC	swift-constant	c:@_xpc_type_data	-	_xpc_type_data	-	_	-	ios=5.0	-	e3d18eaa123ecbc8
+XPC	swift-constant	c:@_xpc_type_date	-	_xpc_type_date	-	_	-	ios=5.0	-	20d739f187450742
+XPC	swift-constant	c:@_xpc_type_dictionary	-	_xpc_type_dictionary	-	_	-	ios=5.0	-	4104c20b170a2022
+XPC	swift-constant	c:@_xpc_type_double	-	_xpc_type_double	-	_	-	ios=5.0	-	6b0e6372ec9232bc
+XPC	swift-constant	c:@_xpc_type_endpoint	-	_xpc_type_endpoint	-	_	-	ios=5.0	-	d7291b97c6eb31d0
+XPC	swift-constant	c:@_xpc_type_error	-	_xpc_type_error	-	_	-	ios=5.0	-	f02e51ad4fb925bc
+XPC	swift-constant	c:@_xpc_type_fd	-	_xpc_type_fd	-	_	-	ios=5.0	-	e983c4244b72a5c6
+XPC	swift-constant	c:@_xpc_type_int64	-	_xpc_type_int64	-	_	-	ios=5.0	-	ce2ef4372d291422
+XPC	swift-constant	c:@_xpc_type_null	-	_xpc_type_null	-	_	-	ios=5.0	-	10f84495a85b5070
+XPC	swift-constant	c:@_xpc_type_rich_error	-	_xpc_type_rich_error	-	_	-	-	-	0f84de64c3e95c19
+XPC	swift-constant	c:@_xpc_type_session	-	_xpc_type_session	-	_	-	-	-	e20900db7749f56c
+XPC	swift-constant	c:@_xpc_type_shmem	-	_xpc_type_shmem	-	_	-	ios=5.0	-	27ecb2305eaa9df4
+XPC	swift-constant	c:@_xpc_type_string	-	_xpc_type_string	-	_	-	ios=5.0	-	a2a1882275802b66
+XPC	swift-constant	c:@_xpc_type_uint64	-	_xpc_type_uint64	-	_	-	ios=5.0	-	2e7b57cb5825bb6a
+XPC	swift-constant	c:@_xpc_type_uuid	-	_xpc_type_uuid	-	_	-	ios=5.0	-	167cc61a46ef92b9
+XPC	swift-typealias	c:@T@xpc_activity_handler_t	-	xpc_activity_handler_t	-	-	-	-	-	ad6f24e2c57c9d79
+XPC	swift-typealias	c:@T@xpc_activity_state_t	-	xpc_activity_state_t	-	-	-	-	-	023bafd8ab61083b
+XPC	swift-typealias	c:@T@xpc_activity_t	-	xpc_activity_t	-	-	-	-	-	8be0ccb784feaaf3
+XPC	swift-function	c:@F@xpc_array_append_value	-	xpc_array_append_value(_:_:)	-	Swift.Void	XPC.xpc_object_t | XPC.xpc_object_t	ios=5.0	-	f15b38c11ff97cb3
+XPC	swift-typealias	c:@T@xpc_array_applier_t	-	xpc_array_applier_t	-	-	-	-	-	1e9be6e68476bc66
+XPC	swift-function	c:@F@xpc_array_apply	-	xpc_array_apply(_:_:)	-	Swift.Bool	XPC.xpc_object_t | (Swift.Int, XPC.xpc_object_t) -> Swift.Bool	ios=5.0	-	d01f4ae2ec4b9d5f
+XPC	swift-function	c:@F@xpc_array_create	-	xpc_array_create(_:_:)	-	XPC.xpc_object_t	Swift.UnsafePointer<XPC.xpc_object_t>? | Swift.Int	ios=5.0	-	a8897a7508937241
+XPC	swift-function	c:@F@xpc_array_create_connection	-	xpc_array_create_connection(_:_:)	-	XPC.xpc_connection_t?	XPC.xpc_object_t | Swift.Int	ios=5.0	-	96e4fe9b47aeb553
+XPC	swift-function	c:@F@xpc_array_create_empty	-	xpc_array_create_empty()	-	XPC.xpc_object_t	-	ios=14.0	-	71d9a2d9a045e905
+XPC	swift-function	c:@F@xpc_array_dup_fd	-	xpc_array_dup_fd(_:_:)	-	Swift.Int32	XPC.xpc_object_t | Swift.Int	ios=5.0	-	dafbcb4e30f4e020
+XPC	swift-function	c:@F@xpc_array_get_array	-	xpc_array_get_array(_:_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t | Swift.Int	ios=9.0	-	e0ffbbcca40e70a5
+XPC	swift-function	c:@F@xpc_array_get_bool	-	xpc_array_get_bool(_:_:)	-	Swift.Bool	XPC.xpc_object_t | Swift.Int	ios=5.0	-	d9286b878869424e
+XPC	swift-function	c:@F@xpc_array_get_count	-	xpc_array_get_count(_:)	-	Swift.Int	XPC.xpc_object_t	ios=5.0	-	55fb81721c2b49f9
+XPC	swift-function	c:@F@xpc_array_get_data	-	xpc_array_get_data(_:_:_:)	-	Swift.UnsafeRawPointer?	XPC.xpc_object_t | Swift.Int | Swift.UnsafeMutablePointer<Swift.Int>?	ios=5.0	-	81cd9ab5d9b0aea1
+XPC	swift-function	c:@F@xpc_array_get_date	-	xpc_array_get_date(_:_:)	-	Swift.Int64	XPC.xpc_object_t | Swift.Int	ios=5.0	-	aa5d42c9ac88330f
+XPC	swift-function	c:@F@xpc_array_get_dictionary	-	xpc_array_get_dictionary(_:_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t | Swift.Int	ios=9.0	-	b5757130a28aabb8
+XPC	swift-function	c:@F@xpc_array_get_double	-	xpc_array_get_double(_:_:)	-	Swift.Double	XPC.xpc_object_t | Swift.Int	ios=5.0	-	7fc73031a6a3cc2c
+XPC	swift-function	c:@F@xpc_array_get_int64	-	xpc_array_get_int64(_:_:)	-	Swift.Int64	XPC.xpc_object_t | Swift.Int	ios=5.0	-	82e5698a901fdbab
+XPC	swift-function	c:@F@xpc_array_get_string	-	xpc_array_get_string(_:_:)	-	Swift.UnsafePointer<Swift.CChar>?	XPC.xpc_object_t | Swift.Int	ios=5.0	-	2373031d26457422
+XPC	swift-function	c:@F@xpc_array_get_uint64	-	xpc_array_get_uint64(_:_:)	-	Swift.UInt64	XPC.xpc_object_t | Swift.Int	ios=5.0	-	1aa9baff34b8021c
+XPC	swift-function	c:@F@xpc_array_get_uuid	-	xpc_array_get_uuid(_:_:)	-	Swift.UnsafePointer<Swift.UInt8>?	XPC.xpc_object_t | Swift.Int	ios=5.0	-	6cb5ea9fff33ccb1
+XPC	swift-function	c:@F@xpc_array_get_value	-	xpc_array_get_value(_:_:)	-	XPC.xpc_object_t	XPC.xpc_object_t | Swift.Int	ios=5.0	-	252b3c7a1aaa085b
+XPC	swift-function	c:@F@xpc_array_set_bool	-	xpc_array_set_bool(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.Bool	ios=5.0	-	cc7c044b8fa2aa84
+XPC	swift-function	c:@F@xpc_array_set_connection	-	xpc_array_set_connection(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | XPC.xpc_connection_t	ios=5.0	-	7df7b74bf132f4ff
+XPC	swift-function	c:@F@xpc_array_set_data	-	xpc_array_set_data(_:_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.UnsafeRawPointer | Swift.Int	ios=5.0	-	69066cdad695f4bb
+XPC	swift-function	c:@F@xpc_array_set_date	-	xpc_array_set_date(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.Int64	ios=5.0	-	d6ad781ba5839847
+XPC	swift-function	c:@F@xpc_array_set_double	-	xpc_array_set_double(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.Double	ios=5.0	-	01da4352635eccc4
+XPC	swift-function	c:@F@xpc_array_set_fd	-	xpc_array_set_fd(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.Int32	ios=5.0	-	5c88601a5de58a7f
+XPC	swift-function	c:@F@xpc_array_set_int64	-	xpc_array_set_int64(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.Int64	ios=5.0	-	390e7d461230b0d9
+XPC	swift-function	c:@F@xpc_array_set_string	-	xpc_array_set_string(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	b9dab641b16a0cf1
+XPC	swift-function	c:@F@xpc_array_set_uint64	-	xpc_array_set_uint64(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.UInt64	ios=5.0	-	55d93fa8439bc02f
+XPC	swift-function	c:@F@xpc_array_set_uuid	-	xpc_array_set_uuid(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | Swift.UnsafePointer<Swift.UInt8>	ios=5.0	-	8158e649301daeef
+XPC	swift-function	c:@F@xpc_array_set_value	-	xpc_array_set_value(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.Int | XPC.xpc_object_t	ios=5.0	-	5c6d4a710b725640
+XPC	swift-function	c:@F@xpc_bool_create	-	xpc_bool_create(_:)	-	XPC.xpc_object_t	Swift.Bool	ios=5.0	-	3d8f359c056f9bf6
+XPC	swift-function	c:@F@xpc_bool_get_value	-	xpc_bool_get_value(_:)	-	Swift.Bool	XPC.xpc_object_t	ios=5.0	-	12242b47a0335490
+XPC	swift-function	c:@F@xpc_connection_activate	-	xpc_connection_activate(_:)	-	Swift.Void	XPC.xpc_connection_t	ios=10.0	-	0794f4317b97c547
+XPC	swift-function	c:@F@xpc_connection_cancel	-	xpc_connection_cancel(_:)	-	Swift.Void	XPC.xpc_connection_t	ios=5.0	-	8a8568baa1ce85cf
+XPC	swift-function	c:@F@xpc_connection_copy_invalidation_reason	-	xpc_connection_copy_invalidation_reason(_:)	-	Swift.UnsafeMutablePointer<Swift.CChar>?	XPC.xpc_connection_t	ios=15.0	-	afc5ada77ef5b1a2
+XPC	swift-function	c:@F@xpc_connection_create	-	xpc_connection_create(_:_:)	-	XPC.xpc_connection_t	Swift.UnsafePointer<Swift.CChar>? | Dispatch.dispatch_queue_t?	ios=5.0	-	8d5560d4ea5afd3b
+XPC	swift-function	c:@F@xpc_connection_create_from_endpoint	-	xpc_connection_create_from_endpoint(_:)	-	XPC.xpc_connection_t	XPC.xpc_endpoint_t	ios=5.0	-	640cb41bf5f4f0d1
+XPC	swift-function	c:@F@xpc_connection_get_context	-	xpc_connection_get_context(_:)	-	Swift.UnsafeMutableRawPointer?	XPC.xpc_connection_t	ios=5.0	-	3ef7fa8fa21a2860
+XPC	swift-function	c:@F@xpc_connection_get_egid	-	xpc_connection_get_egid(_:)	-	_DarwinFoundation2.gid_t	XPC.xpc_connection_t	ios=5.0	-	8f6392421896aded
+XPC	swift-function	c:@F@xpc_connection_get_euid	-	xpc_connection_get_euid(_:)	-	_DarwinFoundation2.uid_t	XPC.xpc_connection_t	ios=5.0	-	cde1d446f215527c
+XPC	swift-function	c:@F@xpc_connection_get_name	-	xpc_connection_get_name(_:)	-	Swift.UnsafePointer<Swift.CChar>?	XPC.xpc_connection_t	ios=5.0	-	664b677ab27c67da
+XPC	swift-typealias	c:@T@xpc_connection_handler_t	-	xpc_connection_handler_t	-	-	-	-	-	778ba6f4ebca75ae
+XPC	swift-function	c:@F@xpc_connection_resume	-	xpc_connection_resume(_:)	-	Swift.Void	XPC.xpc_connection_t	ios=5.0	-	428cb518ecc02494
+XPC	swift-function	c:@F@xpc_connection_send_barrier	-	xpc_connection_send_barrier(_:_:)	-	Swift.Void	XPC.xpc_connection_t | () -> Swift.Void	ios=5.0	-	97fca2805cc08d74
+XPC	swift-function	c:@F@xpc_connection_send_message	-	xpc_connection_send_message(_:_:)	-	Swift.Void	XPC.xpc_connection_t | XPC.xpc_object_t	ios=5.0	-	54b78bf2749a686f
+XPC	swift-function	c:@F@xpc_connection_send_message_with_reply	-	xpc_connection_send_message_with_reply(_:_:_:_:)	-	Swift.Void	XPC.xpc_connection_t | XPC.xpc_object_t | Dispatch.dispatch_queue_t? | (XPC.xpc_object_t) -> Swift.Void	ios=5.0	-	7a30e3c035eb089e
+XPC	swift-function	c:@F@xpc_connection_send_message_with_reply_sync	-	xpc_connection_send_message_with_reply_sync(_:_:)	-	XPC.xpc_object_t	XPC.xpc_connection_t | XPC.xpc_object_t	ios=5.0	-	369641b22adddf23
+XPC	swift-function	c:@F@xpc_connection_set_context	-	xpc_connection_set_context(_:_:)	-	Swift.Void	XPC.xpc_connection_t | Swift.UnsafeMutableRawPointer?	ios=5.0	-	042c58355c9fe652
+XPC	swift-function	c:@F@xpc_connection_set_event_handler	-	xpc_connection_set_event_handler(_:_:)	-	Swift.Void	XPC.xpc_connection_t | (XPC.xpc_object_t) -> Swift.Void	ios=5.0	-	6324d25fc33c24fb
+XPC	swift-function	c:@F@xpc_connection_set_finalizer_f	-	xpc_connection_set_finalizer_f(_:_:)	-	Swift.Void	XPC.xpc_connection_t | XPC.xpc_finalizer_t?	ios=5.0	-	16c7da18b230f541
+XPC	swift-function	c:@F@xpc_connection_set_peer_entitlement_exists_requirement	-	xpc_connection_set_peer_entitlement_exists_requirement(_:_:)	-	Swift.Int32	XPC.xpc_connection_t | Swift.UnsafePointer<Swift.CChar>	ios=17.4	-	d3738ffb60275a68
+XPC	swift-function	c:@F@xpc_connection_set_peer_entitlement_matches_value_requirement	-	xpc_connection_set_peer_entitlement_matches_value_requirement(_:_:_:)	-	Swift.Int32	XPC.xpc_connection_t | Swift.UnsafePointer<Swift.CChar> | XPC.xpc_object_t	ios=17.4	-	6c6d9feb26ac5cd5
+XPC	swift-function	c:@F@xpc_connection_set_peer_lightweight_code_requirement	-	xpc_connection_set_peer_lightweight_code_requirement(_:_:)	-	Swift.Int32	XPC.xpc_connection_t | XPC.xpc_object_t	ios=17.4	-	7d5c1a8b68aa4ac5
+XPC	swift-function	c:@F@xpc_connection_set_peer_platform_identity_requirement	-	xpc_connection_set_peer_platform_identity_requirement(_:_:)	-	Swift.Int32	XPC.xpc_connection_t | Swift.UnsafePointer<Swift.CChar>?	ios=17.4	-	16f9e9ce5b2b0466
+XPC	swift-function	c:@F@xpc_connection_set_peer_team_identity_requirement	-	xpc_connection_set_peer_team_identity_requirement(_:_:)	-	Swift.Int32	XPC.xpc_connection_t | Swift.UnsafePointer<Swift.CChar>?	ios=17.4	-	aabc36d9798fa230
+XPC	swift-function	c:@F@xpc_connection_set_target_queue	-	xpc_connection_set_target_queue(_:_:)	-	Swift.Void	XPC.xpc_connection_t | Dispatch.dispatch_queue_t?	ios=5.0	-	6cd9ddbda3fcd6da
+XPC	swift-function	c:@F@xpc_connection_suspend	-	xpc_connection_suspend(_:)	-	Swift.Void	XPC.xpc_connection_t	ios=5.0	-	50dcc1aea16d998d
+XPC	swift-typealias	c:@T@xpc_connection_t	-	xpc_connection_t	-	-	-	-	-	27012278768f9d7f
+XPC	swift-function	c:@F@xpc_copy	-	xpc_copy(_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t	ios=5.0	-	1b473e961b39124a
+XPC	swift-function	c:@F@xpc_copy_description	-	xpc_copy_description(_:)	-	Swift.UnsafeMutablePointer<Swift.CChar>	XPC.xpc_object_t	ios=5.0	-	38f054f5eb25d829
+XPC	swift-function	c:@F@xpc_data_create	-	xpc_data_create(_:_:)	-	XPC.xpc_object_t	Swift.UnsafeRawPointer? | Swift.Int	ios=5.0	-	51fb8f59406d38ed
+XPC	swift-function	c:@F@xpc_data_create_with_dispatch_data	-	xpc_data_create_with_dispatch_data(_:)	-	XPC.xpc_object_t	Dispatch.dispatch_data_t	ios=5.0	-	4e174495b657e145
+XPC	swift-function	c:@F@xpc_data_get_bytes	-	xpc_data_get_bytes(_:_:_:_:)	-	Swift.Int	XPC.xpc_object_t | Swift.UnsafeMutableRawPointer | Swift.Int | Swift.Int	ios=5.0	-	49fca80d6e5c0bcf
+XPC	swift-function	c:@F@xpc_data_get_bytes_ptr	-	xpc_data_get_bytes_ptr(_:)	-	Swift.UnsafeRawPointer?	XPC.xpc_object_t	ios=5.0	-	40cc0dde99b6ad80
+XPC	swift-function	c:@F@xpc_data_get_length	-	xpc_data_get_length(_:)	-	Swift.Int	XPC.xpc_object_t	ios=5.0	-	de5ea896c559d890
+XPC	swift-function	c:@F@xpc_date_create	-	xpc_date_create(_:)	-	XPC.xpc_object_t	Swift.Int64	ios=5.0	-	0fcb8b9bd45b3697
+XPC	swift-function	c:@F@xpc_date_create_from_current	-	xpc_date_create_from_current()	-	XPC.xpc_object_t	-	ios=5.0	-	1a5a47676e531376
+XPC	swift-function	c:@F@xpc_date_get_value	-	xpc_date_get_value(_:)	-	Swift.Int64	XPC.xpc_object_t	ios=5.0	-	61e5063a776ecdb2
+XPC	swift-function	c:@F@xpc_debugger_api_misuse_info	-	xpc_debugger_api_misuse_info()	-	Swift.UnsafePointer<Swift.CChar>!	-	-	-	fe1ff111daab9f9b
+XPC	swift-typealias	c:@T@xpc_dictionary_applier_t	-	xpc_dictionary_applier_t	-	-	-	-	-	7561a7e1c9dc12ac
+XPC	swift-function	c:@F@xpc_dictionary_apply	-	xpc_dictionary_apply(_:_:)	-	Swift.Bool	XPC.xpc_object_t | (Swift.UnsafePointer<Swift.CChar>, XPC.xpc_object_t) -> Swift.Bool	ios=5.0	-	f5f35aff749f4993
+XPC	swift-function	c:@F@xpc_dictionary_copy_mach_send	-	xpc_dictionary_copy_mach_send(_:_:)	-	_DarwinFoundation2.mach_port_t	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	e7b77a3a742bf672
+XPC	swift-function	c:@F@xpc_dictionary_create	-	xpc_dictionary_create(_:_:_:)	-	XPC.xpc_object_t	Swift.UnsafePointer<Swift.UnsafePointer<Swift.CChar>>? | Swift.UnsafePointer<XPC.xpc_object_t?>? | Swift.Int	ios=5.0	-	790d369cda90265c
+XPC	swift-function	c:@F@xpc_dictionary_create_connection	-	xpc_dictionary_create_connection(_:_:)	-	XPC.xpc_connection_t?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	6d36942ae1bf585f
+XPC	swift-function	c:@F@xpc_dictionary_create_empty	-	xpc_dictionary_create_empty()	-	XPC.xpc_object_t	-	ios=14.0	-	c762d3be0bf9a579
+XPC	swift-function	c:@F@xpc_dictionary_create_reply	-	xpc_dictionary_create_reply(_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t	ios=5.0	-	8407251443486282
+XPC	swift-function	c:@F@xpc_dictionary_dup_fd	-	xpc_dictionary_dup_fd(_:_:)	-	Swift.Int32	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	d97fb2d084d38122
+XPC	swift-function	c:@F@xpc_dictionary_get_array	-	xpc_dictionary_get_array(_:_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=9.0	-	06161b31dfea193b
+XPC	swift-function	c:@F@xpc_dictionary_get_bool	-	xpc_dictionary_get_bool(_:_:)	-	Swift.Bool	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	827be1ab7f36cf26
+XPC	swift-function	c:@F@xpc_dictionary_get_count	-	xpc_dictionary_get_count(_:)	-	Swift.Int	XPC.xpc_object_t	ios=5.0	-	be1130f7d090b525
+XPC	swift-function	c:@F@xpc_dictionary_get_data	-	xpc_dictionary_get_data(_:_:_:)	-	Swift.UnsafeRawPointer?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.UnsafeMutablePointer<Swift.Int>?	ios=5.0	-	8f313d53a84667d0
+XPC	swift-function	c:@F@xpc_dictionary_get_date	-	xpc_dictionary_get_date(_:_:)	-	Swift.Int64	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	f1ff75f46415bc7d
+XPC	swift-function	c:@F@xpc_dictionary_get_dictionary	-	xpc_dictionary_get_dictionary(_:_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=9.0	-	77ac54966bfe2fd5
+XPC	swift-function	c:@F@xpc_dictionary_get_double	-	xpc_dictionary_get_double(_:_:)	-	Swift.Double	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	cbe3d48a1340de20
+XPC	swift-function	c:@F@xpc_dictionary_get_int64	-	xpc_dictionary_get_int64(_:_:)	-	Swift.Int64	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	dcee7cf4ee936a82
+XPC	swift-function	c:@F@xpc_dictionary_get_remote_connection	-	xpc_dictionary_get_remote_connection(_:)	-	XPC.xpc_connection_t?	XPC.xpc_object_t	ios=5.0	-	5c4970b07d6fea9e
+XPC	swift-function	c:@F@xpc_dictionary_get_string	-	xpc_dictionary_get_string(_:_:)	-	Swift.UnsafePointer<Swift.CChar>?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	0e9fea160719aa7c
+XPC	swift-function	c:@F@xpc_dictionary_get_uint64	-	xpc_dictionary_get_uint64(_:_:)	-	Swift.UInt64	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	3e58fa0beefe8dcd
+XPC	swift-function	c:@F@xpc_dictionary_get_uuid	-	xpc_dictionary_get_uuid(_:_:)	-	Swift.UnsafePointer<Swift.UInt8>?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	90c07a92aac318e1
+XPC	swift-function	c:@F@xpc_dictionary_get_value	-	xpc_dictionary_get_value(_:_:)	-	XPC.xpc_object_t?	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	198da95b202f9ecc
+XPC	swift-function	c:@F@xpc_dictionary_set_bool	-	xpc_dictionary_set_bool(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.Bool	ios=5.0	-	9577b3fb44c9bd11
+XPC	swift-function	c:@F@xpc_dictionary_set_connection	-	xpc_dictionary_set_connection(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | XPC.xpc_connection_t	ios=5.0	-	b2cd4ec8454f2230
+XPC	swift-function	c:@F@xpc_dictionary_set_data	-	xpc_dictionary_set_data(_:_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.UnsafeRawPointer | Swift.Int	ios=5.0	-	e593b1c6f4db7802
+XPC	swift-function	c:@F@xpc_dictionary_set_date	-	xpc_dictionary_set_date(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.Int64	ios=5.0	-	f1d4f18b614a959b
+XPC	swift-function	c:@F@xpc_dictionary_set_double	-	xpc_dictionary_set_double(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.Double	ios=5.0	-	4fc5cf4d935f26ba
+XPC	swift-function	c:@F@xpc_dictionary_set_fd	-	xpc_dictionary_set_fd(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.Int32	ios=5.0	-	213a54cbc037d8d5
+XPC	swift-function	c:@F@xpc_dictionary_set_int64	-	xpc_dictionary_set_int64(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.Int64	ios=5.0	-	c54752cac05c3d9c
+XPC	swift-function	c:@F@xpc_dictionary_set_mach_send	-	xpc_dictionary_set_mach_send(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | _DarwinFoundation2.mach_port_t	ios=5.0	-	e9357ca980ba948c
+XPC	swift-function	c:@F@xpc_dictionary_set_string	-	xpc_dictionary_set_string(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	354fc2dd88918e1d
+XPC	swift-function	c:@F@xpc_dictionary_set_uint64	-	xpc_dictionary_set_uint64(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.UInt64	ios=5.0	-	fd01f985990768ef
+XPC	swift-function	c:@F@xpc_dictionary_set_uuid	-	xpc_dictionary_set_uuid(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | Swift.UnsafePointer<Swift.UInt8>	ios=5.0	-	9bd6e70df8febaa2
+XPC	swift-function	c:@F@xpc_dictionary_set_value	-	xpc_dictionary_set_value(_:_:_:)	-	Swift.Void	XPC.xpc_object_t | Swift.UnsafePointer<Swift.CChar> | XPC.xpc_object_t?	ios=5.0	-	6453fcf05881ba23
+XPC	swift-function	c:@F@xpc_double_create	-	xpc_double_create(_:)	-	XPC.xpc_object_t	Swift.Double	ios=5.0	-	d2511f8ae80cd828
+XPC	swift-function	c:@F@xpc_double_get_value	-	xpc_double_get_value(_:)	-	Swift.Double	XPC.xpc_object_t	ios=5.0	-	2ff690f2634cca4f
+XPC	swift-function	c:@F@xpc_endpoint_create	-	xpc_endpoint_create(_:)	-	XPC.xpc_endpoint_t	XPC.xpc_connection_t	ios=5.0	-	2ca8662999fa688d
+XPC	swift-typealias	c:@T@xpc_endpoint_t	-	xpc_endpoint_t	-	-	-	-	-	16cf37fa154a9887
+XPC	swift-function	c:@F@xpc_equal	-	xpc_equal(_:_:)	-	Swift.Bool	XPC.xpc_object_t | XPC.xpc_object_t	ios=5.0	-	b0851a502a8a1d04
+XPC	swift-function	c:@F@xpc_fd_create	-	xpc_fd_create(_:)	-	XPC.xpc_object_t?	Swift.Int32	ios=5.0	-	3c3f09cec24dd4da
+XPC	swift-function	c:@F@xpc_fd_dup	-	xpc_fd_dup(_:)	-	Swift.Int32	XPC.xpc_object_t	ios=5.0	-	b381406bbaff8a9a
+XPC	swift-typealias	c:@T@xpc_finalizer_t	-	xpc_finalizer_t	-	-	-	-	-	d601dae73c208ff4
+XPC	swift-function	c:@F@xpc_get_type	-	xpc_get_type(_:)	-	XPC.xpc_type_t	XPC.xpc_object_t	ios=5.0	-	9e4f1f96bc38f81a
+XPC	swift-typealias	c:@T@xpc_handler_t	-	xpc_handler_t	-	-	-	-	-	b1cf91dc71e68f39
+XPC	swift-function	c:@F@xpc_hash	-	xpc_hash(_:)	-	Swift.Int	XPC.xpc_object_t	ios=5.0	-	972cc5408616dcd7
+XPC	swift-function	c:@F@xpc_int64_create	-	xpc_int64_create(_:)	-	XPC.xpc_object_t	Swift.Int64	ios=5.0	-	22a1d81e3fa0ff96
+XPC	swift-function	c:@F@xpc_int64_get_value	-	xpc_int64_get_value(_:)	-	Swift.Int64	XPC.xpc_object_t	ios=5.0	-	e627d55e688b4bfb
+XPC	swift-typealias	c:@T@xpc_listener_incoming_session_handler_t	-	xpc_listener_incoming_session_handler_t	-	-	-	-	-	9274fdf53b7bcc58
+XPC	swift-typealias	c:@T@xpc_listener_t	-	xpc_listener_t	-	-	-	-	-	4c16aea2706abe72
+XPC	swift-function	c:@F@xpc_null_create	-	xpc_null_create()	-	XPC.xpc_object_t	-	ios=5.0	-	967ddb013e1ff829
+XPC	swift-typealias	c:@T@xpc_object_t	-	xpc_object_t	-	-	-	-	-	a1609b7e1bdfc5c8
+XPC	swift-typealias	c:@T@xpc_peer_requirement_t	-	xpc_peer_requirement_t	-	-	-	-	-	d2d6c4adb1377eb4
+XPC	swift-function	c:@F@xpc_rich_error_can_retry	-	xpc_rich_error_can_retry(_:)	-	Swift.Bool	XPC.xpc_rich_error_t	-	-	814e79fe1546d694
+XPC	swift-function	c:@F@xpc_rich_error_copy_description	-	xpc_rich_error_copy_description(_:)	-	Swift.UnsafeMutablePointer<Swift.CChar>?	XPC.xpc_rich_error_t	-	-	b3c7947153091e5f
+XPC	swift-typealias	c:@T@xpc_rich_error_t	-	xpc_rich_error_t	-	-	-	-	-	bf906237a7f1605a
+XPC	swift-typealias	c:@T@xpc_session_t	-	xpc_session_t	-	-	-	-	-	f08b3f4ed1cc6ed2
+XPC	swift-function	c:@F@xpc_shmem_create	-	xpc_shmem_create(_:_:)	-	XPC.xpc_object_t	Swift.UnsafeMutableRawPointer | Swift.Int	ios=5.0	-	0c64e244fd7c4c49
+XPC	swift-function	c:@F@xpc_shmem_map	-	xpc_shmem_map(_:_:)	-	Swift.Int	XPC.xpc_object_t | Swift.UnsafeMutablePointer<Swift.UnsafeMutableRawPointer?>	ios=5.0	-	97a1355f4f399a03
+XPC	swift-function	c:@F@xpc_string_create	-	xpc_string_create(_:)	-	XPC.xpc_object_t	Swift.UnsafePointer<Swift.CChar>	ios=5.0	-	3c6f7f33b174b92e
+XPC	swift-function	c:@F@xpc_string_create_with_format_and_arguments	-	xpc_string_create_with_format_and_arguments(_:_:)	-	XPC.xpc_object_t	Swift.UnsafePointer<Swift.CChar> | Swift.CVaListPointer	ios=5.0	-	fe9b0914dc1b1d96
+XPC	swift-function	c:@F@xpc_string_get_length	-	xpc_string_get_length(_:)	-	Swift.Int	XPC.xpc_object_t	ios=5.0	-	88c5d7fda4d0b1e6
+XPC	swift-function	c:@F@xpc_string_get_string_ptr	-	xpc_string_get_string_ptr(_:)	-	Swift.UnsafePointer<Swift.CChar>?	XPC.xpc_object_t	ios=5.0	-	7a9f5b52e8b7171c
+XPC	swift-function	c:@F@xpc_type_get_name	-	xpc_type_get_name(_:)	-	Swift.UnsafePointer<Swift.CChar>	XPC.xpc_type_t	ios=13.0	-	ddc71b47f4308a48
+XPC	swift-typealias	c:@T@xpc_type_t	-	xpc_type_t	-	-	-	-	-	aabb62a47a05ad15
+XPC	swift-function	c:@F@xpc_uint64_create	-	xpc_uint64_create(_:)	-	XPC.xpc_object_t	Swift.UInt64	ios=5.0	-	f425af2bf9b3b101
+XPC	swift-function	c:@F@xpc_uint64_get_value	-	xpc_uint64_get_value(_:)	-	Swift.UInt64	XPC.xpc_object_t	ios=5.0	-	9257b9d956d7d8a9
+XPC	swift-function	c:@F@xpc_uuid_create	-	xpc_uuid_create(_:)	-	XPC.xpc_object_t	Swift.UnsafePointer<Swift.UInt8>	ios=5.0	-	2f9b5fea6304bb4d
+XPC	swift-function	c:@F@xpc_uuid_get_bytes	-	xpc_uuid_get_bytes(_:)	-	Swift.UnsafePointer<Swift.UInt8>?	XPC.xpc_object_t	ios=5.0	-	e155cbfdfc52d73d
+XPC	swift-class	s:3XPC10XPCSessionC	-	XPCSession	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	64192bd580624750
+XPC	swift-struct	s:3XPC10XPCSessionC21InitializationOptionsV	XPCSession	InitializationOptions	-	-	-	-	-	37c223e16d0f1633
+XPC	swift-property	s:3XPC10XPCSessionC21InitializationOptionsV8rawValues6UInt64Vvp	XPCSession.InitializationOptions	rawValue	-	Swift.UInt64	-	-	-	2106084f6458e786
+XPC	swift-method	s:3XPC10XPCSessionC21InitializationOptionsV8rawValueAEs6UInt64V_tcfc	XPCSession.InitializationOptions	init(rawValue:)	-	-	XPC.XPCSession.InitializationOptions | Swift.UInt64	-	-	fc19021de759b5c4
+XPC	swift-property	s:3XPC10XPCSessionC21InitializationOptionsV4noneAEvpZ	XPCSession.InitializationOptions	none	+	XPC.XPCSession.InitializationOptions	-	-	-	ec98d67e4ead45b2
+XPC	swift-property	s:3XPC10XPCSessionC21InitializationOptionsV8inactiveAEvpZ	XPCSession.InitializationOptions	inactive	+	XPC.XPCSession.InitializationOptions	-	-	-	141ac7fa870dee85
+XPC	swift-property	s:3XPC10XPCSessionC21InitializationOptionsV10privilegedAEvpZ	XPCSession.InitializationOptions	privileged	+	XPC.XPCSession.InitializationOptions	-	-	-	e039f49f804eec03
+XPC	swift-typealias	s:3XPC10XPCSessionC21InitializationOptionsV19ArrayLiteralElementa	XPCSession.InitializationOptions	ArrayLiteralElement	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d56e64e5570e2e78
+XPC	swift-typealias	s:3XPC10XPCSessionC21InitializationOptionsV7Elementa	XPCSession.InitializationOptions	Element	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	9f6b46385f2ef429
+XPC	swift-typealias	s:3XPC10XPCSessionC21InitializationOptionsV8RawValuea	XPCSession.InitializationOptions	RawValue	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	ca4d59aaea37cb9e
+XPC	swift-method	s:3XPC10XPCSessionC25setIncomingMessageHandleryyAA13XPCDictionaryVSgAFcF	XPCSession	setIncomingMessageHandler(_:)	-	()	(XPC.XPCDictionary) -> XPC.XPCDictionary?	-	-	41d8177f5d93892d
+XPC	swift-method	s:3XPC10XPCSessionC25setIncomingMessageHandleryySE_pSgxcSeRzlF	XPCSession	setIncomingMessageHandler(_:)	-	()	(Message) -> (any Swift.Encodable)?	-	-	d95d29fd8c0a895a
+XPC	swift-method	s:3XPC10XPCSessionC25setIncomingMessageHandleryySE_pSgAA011XPCReceivedE0VcF	XPCSession	setIncomingMessageHandler(_:)	-	()	(XPC.XPCReceivedMessage) -> (any Swift.Encodable)?	-	-	1bdc8a424d4e1949
+XPC	swift-method	s:3XPC10XPCSessionC22setCancellationHandleryyyAA12XPCRichErrorVcF	XPCSession	setCancellationHandler(_:)	-	()	(XPC.XPCRichError) -> Swift.Void	-	-	0328f073e7b8d97b
+XPC	swift-method	s:3XPC10XPCSessionC14setTargetQueueyySo17OS_dispatch_queueCF	XPCSession	setTargetQueue(_:)	-	()	Dispatch.DispatchQueue	-	-	a0a93f1ae8a22b28
+XPC	swift-method	s:3XPC10XPCSessionC8activateyyKF	XPCSession	activate()	-	()	-	-	-	b0425d6b2d66d55b
+XPC	swift-method	s:3XPC10XPCSessionC6cancel6reasonySS_tF	XPCSession	cancel(reason:)	-	()	Swift.String	-	-	db871cc684ff7275
+XPC	swift-method	s:3XPC10XPCSessionC4send7messageyAA13XPCDictionaryV_tKF	XPCSession	send(message:)	-	()	XPC.XPCDictionary	-	-	4e8af9bcff1bba57
+XPC	swift-method	s:3XPC10XPCSessionC4sendyyxKSERzlF	XPCSession	send(_:)	-	()	Message	-	-	c00ae38f5c05d330
+XPC	swift-method	s:3XPC10XPCSessionC8sendSync7messageAA13XPCDictionaryVAG_tKF	XPCSession	sendSync(message:)	-	XPC.XPCDictionary	XPC.XPCDictionary	-	-	b0771f7dfdce9df4
+XPC	swift-method	s:3XPC10XPCSessionC8sendSyncyq_xKSERzSeR_r0_lF	XPCSession	sendSync(_:)	-	Reply	Message	-	-	e8c499b4f94cc91b
+XPC	swift-method	s:3XPC10XPCSessionC8sendSyncyAA18XPCReceivedMessageVxKSERzlF	XPCSession	sendSync(_:)	-	XPC.XPCReceivedMessage	Message	-	-	4044d607e676fc48
+XPC	swift-method	s:3XPC10XPCSessionC4send7message12replyHandleryAA13XPCDictionaryV_ys6ResultOyAhA12XPCRichErrorVGctF	XPCSession	send(message:replyHandler:)	-	()	XPC.XPCDictionary | (Swift.Result<XPC.XPCDictionary, XPC.XPCRichError>) -> Swift.Void	-	-	d687ae15a800cffa
+XPC	swift-method	s:3XPC10XPCSessionC4send_12replyHandleryx_ys6ResultOyq_s5Error_pGctKSERzSeR_r0_lF	XPCSession	send(_:replyHandler:)	-	()	Message | (Swift.Result<Reply, any Swift.Error>) -> Swift.Void	-	-	f365489605ef1ff9
+XPC	swift-method	s:3XPC10XPCSessionC4send_12replyHandleryx_ys6ResultOyAA18XPCReceivedMessageVAA12XPCRichErrorVGctKSERzlF	XPCSession	send(_:replyHandler:)	-	()	Message | (Swift.Result<XPC.XPCReceivedMessage, XPC.XPCRichError>) -> Swift.Void	-	-	a0295e691f9a4cf5
+XPC	swift-property	s:3XPC10XPCSessionC16debugDescriptionSSvp	XPCSession	debugDescription	-	Swift.String	-	-	-	6ab44f6e42460d3a
+XPC	swift-struct	s:3XPC8XPCArrayV	-	XPCArray	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	f68da8f4b1e0701a
+XPC	swift-method	s:3XPC8XPCArrayVyACSo13OS_xpc_object_pcfc	XPCArray	init(_:)	-	-	XPC.XPCArray | XPC.xpc_object_t	-	-	b238088573dd33ab
+XPC	swift-method	s:3XPC8XPCArrayVACycfc	XPCArray	init()	-	-	XPC.XPCArray	-	-	81b4ab1b83f8f8bd
+XPC	swift-method	s:3XPC8XPCArrayV25withUnsafeUnderlyingArrayyxxSo13OS_xpc_object_pKXEKlF	XPCArray	withUnsafeUnderlyingArray(_:)	-	ReturnType	(XPC.xpc_object_t) throws -> ReturnType	-	-	18b831603690fd96
+XPC	swift-method	s:3XPC8XPCArrayV_2asxSgSi_xmtcSzRzluip	XPCArray	subscript(_:as:)	-	T?	Swift.Int | T.Type	-	-	bf64cd6a39c312c2
+XPC	swift-method	s:3XPC8XPCArrayVyxSgSicSZRzluip	XPCArray	subscript(_:)	-	T?	Swift.Int	-	-	07e9a8bb9d46901b
+XPC	swift-method	s:3XPC8XPCArrayVyxSgSicSURzluip	XPCArray	subscript(_:)	-	T?	Swift.Int	-	-	1eadced06f0c23e6
+XPC	swift-method	s:3XPC8XPCArrayV_2asxSgSi_xmtcSBRzluip	XPCArray	subscript(_:as:)	-	T?	Swift.Int | T.Type	-	-	5a5e3f80279526fb
+XPC	swift-method	s:3XPC8XPCArrayVyxSgSicSBRzluip	XPCArray	subscript(_:)	-	T?	Swift.Int	-	-	3aecd8364098a18f
+XPC	swift-method	s:3XPC8XPCArrayV_2as7defaultxSi_xmxyXKtcSBRzluip	XPCArray	subscript(_:as:default:)	-	T	Swift.Int | T.Type | () -> T	-	-	5b0621bb56cf688e
+XPC	swift-method	s:3XPC8XPCArrayV_2asSbSgSi_Sbmtcip	XPCArray	subscript(_:as:)	-	Swift.Bool?	Swift.Int | Swift.Bool.Type	-	-	7a8d5b405871c702
+XPC	swift-method	s:3XPC8XPCArrayVySbSgSicip	XPCArray	subscript(_:)	-	Swift.Bool?	Swift.Int	-	-	f5ded6c550cc14aa
+XPC	swift-method	s:3XPC8XPCArrayV_2as7defaultSbSi_SbmSbyXKtcip	XPCArray	subscript(_:as:default:)	-	Swift.Bool	Swift.Int | Swift.Bool.Type | () -> Swift.Bool	-	-	6f395cf3659ad759
+XPC	swift-method	s:3XPC8XPCArrayV_2asAA13XPCDictionaryVSgSi_AFmtcip	XPCArray	subscript(_:as:)	-	XPC.XPCDictionary?	Swift.Int | XPC.XPCDictionary.Type	-	-	48fbeb0a3352df4b
+XPC	swift-method	s:3XPC8XPCArrayVyAA13XPCDictionaryVSgSicip	XPCArray	subscript(_:)	-	XPC.XPCDictionary?	Swift.Int	-	-	54eb9cb684233f4d
+XPC	swift-method	s:3XPC8XPCArrayV_2asSo13OS_xpc_object_pSgSi_SoAE_pXptcip	XPCArray	subscript(_:as:)	-	XPC.xpc_object_t?	Swift.Int | any XPC.OS_xpc_object.Type	-	-	b6b07ee462a2207b
+XPC	swift-method	s:3XPC8XPCArrayV_2asSo13OS_xpc_object_pSgSi_s13OpaquePointerVtcip	XPCArray	subscript(_:as:)	-	XPC.xpc_object_t?	Swift.Int | XPC.xpc_type_t	-	-	813e5e67dc408d04
+XPC	swift-method	s:3XPC8XPCArrayVySo13OS_xpc_object_pSgSicip	XPCArray	subscript(_:)	-	XPC.xpc_object_t?	Swift.Int	-	-	52e0985593022d2b
+XPC	swift-method	s:3XPC8XPCArrayV_2asSSSgSi_SSmtcip	XPCArray	subscript(_:as:)	-	Swift.String?	Swift.Int | Swift.String.Type	-	-	6e7b62c511fa4e70
+XPC	swift-method	s:3XPC8XPCArrayVySSSgSicip	XPCArray	subscript(_:)	-	Swift.String?	Swift.Int	-	-	45737e816a35263f
+XPC	swift-method	s:3XPC8XPCArrayV4copy4intoyAC_tF	XPCArray	copy(into:)	-	()	XPC.XPCArray	-	-	6fad4ae1ebe802fe
+XPC	swift-property	s:3XPC8XPCArrayV7isEmptySbvp	XPCArray	isEmpty	-	Swift.Bool	-	-	-	04248722871de6e9
+XPC	swift-property	s:3XPC8XPCArrayV5countSivp	XPCArray	count	-	Swift.Int	-	-	-	596bbda0f253b117
+XPC	swift-method	s:3XPC8XPCArrayV7forEachyyySi_So13OS_xpc_object_ptKXEKF	XPCArray	forEach(_:)	-	()	(Swift.Int, XPC.xpc_object_t) throws -> Swift.Void	-	-	fcc3bffe7ed48a66
+XPC	swift-typealias	s:3XPC8XPCArrayV14IndexValuePaira	XPCArray	IndexValuePair	-	-	-	-	-	260fc117f77d274b
+XPC	swift-method	s:3XPC8XPCArrayV7forEachyyySi5index_So13OS_xpc_object_p5valuet_tKXEKF	XPCArray	forEach(_:)	-	()	(XPC.XPCArray.IndexValuePair) throws -> Swift.Void	-	-	7270b51dae3bd686
+XPC	swift-method	s:3XPC8XPCArrayV3mapySayxGxSi5index_So13OS_xpc_object_p5valuet_tKXEKlF	XPCArray	map(_:)	-	[ReturnType]	(XPC.XPCArray.IndexValuePair) throws -> ReturnType	-	-	aed9ce6b135d4be1
+XPC	swift-method	s:3XPC8XPCArrayV2eeoiySbAC_ACtFZ	XPCArray	==(_:_:)	+	Swift.Bool	XPC.XPCArray | XPC.XPCArray	-	-	f415488b8e9ddce7
+XPC	swift-method	s:3XPC8XPCArrayV4hash4intoys6HasherVz_tF	XPCArray	hash(into:)	-	()	Swift.Hasher	-	-	cf8800aca76be941
+XPC	swift-property	s:3XPC8XPCArrayV9hashValueSivp	XPCArray	hashValue	-	Swift.Int	-	-	-	3981228491628381
+XPC	swift-property	s:3XPC8XPCArrayV16debugDescriptionSSvp	XPCArray	debugDescription	-	Swift.String	-	-	-	414de5b955ce297a
+XPC	swift-struct	s:3XPC12XPCRichErrorV	-	XPCRichError	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0953fdfc5773a975
+XPC	swift-property	s:3XPC12XPCRichErrorV8canRetrySbvp	XPCRichError	canRetry	-	Swift.Bool	-	-	-	8ecd4b467c7303d8
+XPC	swift-property	s:3XPC12XPCRichErrorV16debugDescriptionSSvp	XPCRichError	debugDescription	-	Swift.String	-	-	-	3afb802cb1077694
+XPC	swift-constant	s:3XPC0A16_TYPE_CONNECTIONs13OpaquePointerVvp	-	XPC_TYPE_CONNECTION	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	b04b78e347e3e2e8
+XPC	swift-constant	s:3XPC0A14_TYPE_ENDPOINTs13OpaquePointerVvp	-	XPC_TYPE_ENDPOINT	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	9c4b11a5eb62cbc3
+XPC	swift-constant	s:3XPC0A10_TYPE_NULLs13OpaquePointerVvp	-	XPC_TYPE_NULL	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	a9586e718be4b85a
+XPC	swift-constant	s:3XPC0A10_TYPE_BOOLs13OpaquePointerVvp	-	XPC_TYPE_BOOL	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	01e58bfd688459f2
+XPC	swift-constant	s:3XPC0A11_TYPE_INT64s13OpaquePointerVvp	-	XPC_TYPE_INT64	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	b4b139478e7d3d7b
+XPC	swift-constant	s:3XPC0A12_TYPE_UINT64s13OpaquePointerVvp	-	XPC_TYPE_UINT64	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	f14d21d22cce9894
+XPC	swift-constant	s:3XPC0A12_TYPE_DOUBLEs13OpaquePointerVvp	-	XPC_TYPE_DOUBLE	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	b42f5250e65a2f1b
+XPC	swift-constant	s:3XPC0A10_TYPE_DATEs13OpaquePointerVvp	-	XPC_TYPE_DATE	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	b0757e69b3352dad
+XPC	swift-constant	s:3XPC0A10_TYPE_DATAs13OpaquePointerVvp	-	XPC_TYPE_DATA	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	c323759debc8bf09
+XPC	swift-constant	s:3XPC0A12_TYPE_STRINGs13OpaquePointerVvp	-	XPC_TYPE_STRING	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	b7185a72037816a3
+XPC	swift-constant	s:3XPC0A10_TYPE_UUIDs13OpaquePointerVvp	-	XPC_TYPE_UUID	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	b50611dc01f6003c
+XPC	swift-constant	s:3XPC0A8_TYPE_FDs13OpaquePointerVvp	-	XPC_TYPE_FD	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	bd629fe61a8fa729
+XPC	swift-constant	s:3XPC0A11_TYPE_SHMEMs13OpaquePointerVvp	-	XPC_TYPE_SHMEM	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	fd557f8e81abf596
+XPC	swift-constant	s:3XPC0A11_TYPE_ARRAYs13OpaquePointerVvp	-	XPC_TYPE_ARRAY	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	4ba63e1786e7ef8b
+XPC	swift-constant	s:3XPC0A16_TYPE_DICTIONARYs13OpaquePointerVvp	-	XPC_TYPE_DICTIONARY	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	546868db1339d612
+XPC	swift-constant	s:3XPC0A11_TYPE_ERRORs13OpaquePointerVvp	-	XPC_TYPE_ERROR	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	6eb1f29845ea7655
+XPC	swift-constant	s:3XPC0A14_TYPE_ACTIVITYs13OpaquePointerVvp	-	XPC_TYPE_ACTIVITY	-	XPC.xpc_type_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	7c12a645a1a2e49d
+XPC	swift-constant	s:3XPC0A16_TYPE_RICH_ERRORs13OpaquePointerVvp	-	XPC_TYPE_RICH_ERROR	-	XPC.xpc_type_t	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	25a51a3f30765a96
+XPC	swift-constant	s:3XPC0A22_ERROR_KEY_DESCRIPTIONSPys4Int8VGvp	-	XPC_ERROR_KEY_DESCRIPTION	-	Swift.UnsafePointer<Swift.CChar>	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	8fbe799736993faa
+XPC	swift-constant	s:3XPC0A15_EVENT_KEY_NAMESPys4Int8VGvp	-	XPC_EVENT_KEY_NAME	-	Swift.UnsafePointer<Swift.CChar>	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	9a626f5d1274119d
+XPC	swift-constant	s:3XPC0A10_BOOL_TRUESo13OS_xpc_object_pvp	-	XPC_BOOL_TRUE	-	XPC.xpc_object_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	e474397bc1874eba
+XPC	swift-constant	s:3XPC0A11_BOOL_FALSESo13OS_xpc_object_pvp	-	XPC_BOOL_FALSE	-	XPC.xpc_object_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	0722eab278a96608
+XPC	swift-constant	s:3XPC0A13_ARRAY_APPENDSivp	-	XPC_ARRAY_APPEND	-	_Builtin_stddef.size_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	441e22160d86bc60
+XPC	swift-constant	s:3XPC0A29_ERROR_CONNECTION_INTERRUPTEDSo13OS_xpc_object_pvp	-	XPC_ERROR_CONNECTION_INTERRUPTED	-	XPC.xpc_object_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	e45350450d787cba
+XPC	swift-constant	s:3XPC0A25_ERROR_CONNECTION_INVALIDSo13OS_xpc_object_pvp	-	XPC_ERROR_CONNECTION_INVALID	-	XPC.xpc_object_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	23e89fc4910758c2
+XPC	swift-constant	s:3XPC0A27_ERROR_TERMINATION_IMMINENTSo13OS_xpc_object_pvp	-	XPC_ERROR_TERMINATION_IMMINENT	-	XPC.xpc_object_t	-	ios=8.0,macos=10.10,tvos=9.0,watchos=2.0	-	e7176241054e5254
+XPC	swift-constant	s:3XPC0A36_ERROR_PEER_CODE_SIGNING_REQUIREMENTSo13OS_xpc_object_pvp	-	XPC_ERROR_PEER_CODE_SIGNING_REQUIREMENT	-	XPC.xpc_object_t	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	aef1045ec0df3ae0
+XPC	swift-struct	s:3XPC13XPCDictionaryV	-	XPCDictionary	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	cfd7ff2c5ef1d4e3
+XPC	swift-method	s:3XPC13XPCDictionaryVyACSo13OS_xpc_object_pcfc	XPCDictionary	init(_:)	-	-	XPC.XPCDictionary | XPC.xpc_object_t	-	-	f6edb70a79fd2318
+XPC	swift-method	s:3XPC13XPCDictionaryVACycfc	XPCDictionary	init()	-	-	XPC.XPCDictionary	-	-	7da3f4209de4eb27
+XPC	swift-method	s:3XPC13XPCDictionaryV30withUnsafeUnderlyingDictionaryyxxSo13OS_xpc_object_pKXEKlF	XPCDictionary	withUnsafeUnderlyingDictionary(_:)	-	ReturnType	(XPC.xpc_object_t) throws -> ReturnType	-	-	b1e22cb957ee0721
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asxSgSS_xmtcSzRzluip	XPCDictionary	subscript(_:as:)	-	T?	Swift.String | T.Type	-	-	ad8868b43c6fbfa2
+XPC	swift-method	s:3XPC13XPCDictionaryVyxSgSScSZRzluip	XPCDictionary	subscript(_:)	-	T?	Swift.String	-	-	87cec690148a79a3
+XPC	swift-method	s:3XPC13XPCDictionaryVyxSgSScSURzluip	XPCDictionary	subscript(_:)	-	T?	Swift.String	-	-	33975d1b68c553ad
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asxSgSS_xmtcSBRzluip	XPCDictionary	subscript(_:as:)	-	T?	Swift.String | T.Type	-	-	21014b0b329b7372
+XPC	swift-method	s:3XPC13XPCDictionaryVyxSgSScSBRzluip	XPCDictionary	subscript(_:)	-	T?	Swift.String	-	-	e7f84672e60bb291
+XPC	swift-method	s:3XPC13XPCDictionaryV_2as7defaultxSS_xmxyXKtcSBRzluip	XPCDictionary	subscript(_:as:default:)	-	T	Swift.String | T.Type | () -> T	-	-	85f2ba12d36019e6
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asSbSgSS_Sbmtcip	XPCDictionary	subscript(_:as:)	-	Swift.Bool?	Swift.String | Swift.Bool.Type	-	-	d5950100063210b5
+XPC	swift-method	s:3XPC13XPCDictionaryVySbSgSScip	XPCDictionary	subscript(_:)	-	Swift.Bool?	Swift.String	-	-	9cd1e09a3af08ddb
+XPC	swift-method	s:3XPC13XPCDictionaryV_2as7defaultSbSS_SbmSbyXKtcip	XPCDictionary	subscript(_:as:default:)	-	Swift.Bool	Swift.String | Swift.Bool.Type | () -> Swift.Bool	-	-	b0dceb71c6595ccd
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asACSgSS_ACmtcip	XPCDictionary	subscript(_:as:)	-	XPC.XPCDictionary?	Swift.String | XPC.XPCDictionary.Type	-	-	6ff949ebeac955d0
+XPC	swift-method	s:3XPC13XPCDictionaryVyACSgSScip	XPCDictionary	subscript(_:)	-	XPC.XPCDictionary?	Swift.String	-	-	62a468dadfecaa88
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asSo13OS_xpc_object_pSgSS_SoAE_pXptcip	XPCDictionary	subscript(_:as:)	-	XPC.xpc_object_t?	Swift.String | any XPC.OS_xpc_object.Type	-	-	34c1a93fbf052bd0
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asSo13OS_xpc_object_pSgSS_s13OpaquePointerVtcip	XPCDictionary	subscript(_:as:)	-	XPC.xpc_object_t?	Swift.String | XPC.xpc_type_t	-	-	8972a98bf80ab1f9
+XPC	swift-method	s:3XPC13XPCDictionaryVySo13OS_xpc_object_pSgSScip	XPCDictionary	subscript(_:)	-	XPC.xpc_object_t?	Swift.String	-	-	cd4a5108d1ab1a04
+XPC	swift-method	s:3XPC13XPCDictionaryV_2asSSSgSS_SSmtcip	XPCDictionary	subscript(_:as:)	-	Swift.String?	Swift.String | Swift.String.Type	-	-	90e0d002184201ae
+XPC	swift-method	s:3XPC13XPCDictionaryVySSSgSScip	XPCDictionary	subscript(_:)	-	Swift.String?	Swift.String	-	-	80616fdb4d8ea733
+XPC	swift-method	s:3XPC13XPCDictionaryV4copy4intoyAC_tF	XPCDictionary	copy(into:)	-	()	XPC.XPCDictionary	-	-	51bdfdb855bf3b37
+XPC	swift-method	s:3XPC13XPCDictionaryV11removeValue6forKeySo13OS_xpc_object_pSgSS_tF	XPCDictionary	removeValue(forKey:)	-	XPC.xpc_object_t?	Swift.String	-	-	b95daa09efad2729
+XPC	swift-property	s:3XPC13XPCDictionaryV7isEmptySbvp	XPCDictionary	isEmpty	-	Swift.Bool	-	-	-	05fd1c37214d402e
+XPC	swift-property	s:3XPC13XPCDictionaryV5countSivp	XPCDictionary	count	-	Swift.Int	-	-	-	fefb31eed46e6643
+XPC	swift-method	s:3XPC13XPCDictionaryV7forEachyyySS_So13OS_xpc_object_ptKXEKF	XPCDictionary	forEach(_:)	-	()	(Swift.String, XPC.xpc_object_t) throws -> Swift.Void	-	-	ad7039fd729e73b0
+XPC	swift-typealias	s:3XPC13XPCDictionaryV12KeyValuePaira	XPCDictionary	KeyValuePair	-	-	-	-	-	eda2292d3f9f2f74
+XPC	swift-method	s:3XPC13XPCDictionaryV7forEachyyySS3key_So13OS_xpc_object_p5valuet_tKXEKF	XPCDictionary	forEach(_:)	-	()	(XPC.XPCDictionary.KeyValuePair) throws -> Swift.Void	-	-	6b9e00130b17d52c
+XPC	swift-method	s:3XPC13XPCDictionaryV3mapySayxGxSS3key_So13OS_xpc_object_p5valuet_tKXEKlF	XPCDictionary	map(_:)	-	[ReturnType]	(XPC.XPCDictionary.KeyValuePair) throws -> ReturnType	-	-	3d3183b0b173daa2
+XPC	swift-property	s:3XPC13XPCDictionaryV4keysSaySSGvp	XPCDictionary	keys	-	[Swift.String]	-	-	-	86f25b5abe1161ef
+XPC	swift-property	s:3XPC13XPCDictionaryV6valuesSaySo13OS_xpc_object_pGvp	XPCDictionary	values	-	[XPC.xpc_object_t]	-	-	-	2878693b2296feef
+XPC	swift-method	s:3XPC13XPCDictionaryV5replyyyACF	XPCDictionary	reply(_:)	-	()	XPC.XPCDictionary	-	-	952aee9c65dda9f4
+XPC	swift-method	s:3XPC13XPCDictionaryV2eeoiySbAC_ACtFZ	XPCDictionary	==(_:_:)	+	Swift.Bool	XPC.XPCDictionary | XPC.XPCDictionary	-	-	5cf66313d512d7d2
+XPC	swift-method	s:3XPC13XPCDictionaryV4hash4intoys6HasherVz_tF	XPCDictionary	hash(into:)	-	()	Swift.Hasher	-	-	1ee4545c2b35c698
+XPC	swift-property	s:3XPC13XPCDictionaryV9hashValueSivp	XPCDictionary	hashValue	-	Swift.Int	-	-	-	7f2087bd9bd8af25
+XPC	swift-property	s:3XPC13XPCDictionaryV16debugDescriptionSSvp	XPCDictionary	debugDescription	-	Swift.String	-	-	-	d21dc4db9a55387b
+XPC	swift-class	s:3XPC11XPCListenerC	-	XPCListener	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1f781b32a0772f4a
+XPC	swift-class	s:3XPC11XPCListenerC22IncomingSessionRequestC	XPCListener	IncomingSessionRequest	-	-	-	-	-	b461dc9345fae33a
+XPC	swift-struct	s:3XPC11XPCListenerC22IncomingSessionRequestC8DecisionV	XPCListener.IncomingSessionRequest	Decision	-	-	-	-	-	6a990a747c703df8
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6accept22incomingMessageHandler012cancellationI0AE8DecisionVAA13XPCDictionaryVSgALc_yAA12XPCRichErrorVcSgtF	XPCListener.IncomingSessionRequest	accept(incomingMessageHandler:cancellationHandler:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	(XPC.XPCDictionary) -> XPC.XPCDictionary? | ((XPC.XPCRichError) -> Swift.Void)?	-	-	3ca185018fd19d29
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6accept22incomingMessageHandler012cancellationI0AE8DecisionVSE_pSgxc_yAA12XPCRichErrorVcSgtSeRzlF	XPCListener.IncomingSessionRequest	accept(incomingMessageHandler:cancellationHandler:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	(Message) -> (any Swift.Encodable)? | ((XPC.XPCRichError) -> Swift.Void)?	-	-	7c097f50591109b2
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6accept22incomingMessageHandler012cancellationI0AE8DecisionVSE_pSgAA011XPCReceivedH0Vc_yAA12XPCRichErrorVcSgtF	XPCListener.IncomingSessionRequest	accept(incomingMessageHandler:cancellationHandler:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	(XPC.XPCReceivedMessage) -> (any Swift.Encodable)? | ((XPC.XPCRichError) -> Swift.Void)?	-	-	e63e9da86106b099
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6accept22incomingMessageHandler012cancellationI0AE8DecisionV_AA10XPCSessionCtAA13XPCDictionaryVSgANc_yAA12XPCRichErrorVcSgtF	XPCListener.IncomingSessionRequest	accept(incomingMessageHandler:cancellationHandler:)	-	(XPC.XPCListener.IncomingSessionRequest.Decision, XPC.XPCSession)	(XPC.XPCDictionary) -> XPC.XPCDictionary? | ((XPC.XPCRichError) -> Swift.Void)?	-	-	db971a6d2f969432
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6accept22incomingMessageHandler012cancellationI0AE8DecisionV_AA10XPCSessionCtSE_pSgxc_yAA12XPCRichErrorVcSgtSeRzlF	XPCListener.IncomingSessionRequest	accept(incomingMessageHandler:cancellationHandler:)	-	(XPC.XPCListener.IncomingSessionRequest.Decision, XPC.XPCSession)	(Message) -> (any Swift.Encodable)? | ((XPC.XPCRichError) -> Swift.Void)?	-	-	d9c824694a9f0947
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6accept22incomingMessageHandler012cancellationI0AE8DecisionV_AA10XPCSessionCtSE_pSgAA011XPCReceivedH0Vc_yAA12XPCRichErrorVcSgtF	XPCListener.IncomingSessionRequest	accept(incomingMessageHandler:cancellationHandler:)	-	(XPC.XPCListener.IncomingSessionRequest.Decision, XPC.XPCSession)	(XPC.XPCReceivedMessage) -> (any Swift.Encodable)? | ((XPC.XPCRichError) -> Swift.Void)?	-	-	e0c9ff043d134ee5
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6acceptyAE8DecisionVxAA10XPCSessionCXEAA14XPCPeerHandlerRzAA13XPCDictionaryV5InputRtzAM6OutputRtzlF	XPCListener.IncomingSessionRequest	accept(_:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	(XPC.XPCSession) -> Handler	-	-	4921825f6c7a7a3f
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6acceptyAE8DecisionVxAA10XPCSessionCXEAA14XPCPeerHandlerRzSe5InputRpzSE_p6OutputRtzlF	XPCListener.IncomingSessionRequest	accept(_:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	(XPC.XPCSession) -> Handler	-	-	8ac441326ba707f4
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6acceptyAE8DecisionVxAA10XPCSessionCXEAA14XPCPeerHandlerRzAA18XPCReceivedMessageV5InputRtzSE_p6OutputRtzlF	XPCListener.IncomingSessionRequest	accept(_:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	(XPC.XPCSession) -> Handler	-	-	2420f3412bad5c67
+XPC	swift-method	s:3XPC11XPCListenerC22IncomingSessionRequestC6reject6reasonAE8DecisionVSS_tF	XPCListener.IncomingSessionRequest	reject(reason:)	-	XPC.XPCListener.IncomingSessionRequest.Decision	Swift.String	-	-	cd1e26ba935d7a2a
+XPC	swift-protocol	s:3XPC14XPCPeerHandlerP	-	XPCPeerHandler	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2bbf9b7d488887cb
+XPC	swift-method	s:3XPC14XPCPeerHandlerP21handleIncomingRequesty6OutputQzSg5InputQzF	XPCPeerHandler	handleIncomingRequest(_:)	-	Self.Output?	Self.Input	-	-	cd90f65e41aea053
+XPC	swift-method	s:3XPC14XPCPeerHandlerP18handleCancellation5erroryAA12XPCRichErrorV_tF	XPCPeerHandler	handleCancellation(error:)	-	()	XPC.XPCRichError	-	-	8068a482543233c3
+XPC	swift-method	s:3XPC14XPCPeerHandlerPAAE18handleCancellation5erroryAA12XPCRichErrorV_tF	XPCPeerHandler	handleCancellation(error:)	-	()	XPC.XPCRichError	-	-	182842bb4dbfa838
+XPC	swift-struct	s:3XPC18XPCReceivedMessageV	-	XPCReceivedMessage	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4212c8e67d5dce8f
+XPC	swift-method	s:3XPC18XPCReceivedMessageV6decode2asxxm_tKSeRzlF	XPCReceivedMessage	decode(as:)	-	T	T.Type	-	-	810ffe9860f5aa4b
+XPC	swift-method	s:3XPC18XPCReceivedMessageV5replyyyxSERzlF	XPCReceivedMessage	reply(_:)	-	()	Message	-	-	ab3c08c46c852cf8
+XPC	swift-method	s:3XPC18XPCReceivedMessageV12handoffReply2to_SE_pSgSo17OS_dispatch_queueC_yyctF	XPCReceivedMessage	handoffReply(to:_:)	-	(any Swift.Encodable)?	Dispatch.DispatchQueue | () -> Swift.Void	-	-	d888db8b23b8f970
+XPC	swift-property	s:3XPC18XPCReceivedMessageV12expectsReplySbvp	XPCReceivedMessage	expectsReply	-	Swift.Bool	-	-	-	297cc2e875d0ee0a
+XPC	swift-property	s:3XPC18XPCReceivedMessageV6isSyncSbvp	XPCReceivedMessage	isSync	-	Swift.Bool	-	-	-	f995d42726dbd61e
+XPC	swift-constant	c:@macro@IPHONE_SIMULATOR_HOST_MIN_VERSION_REQUIRED	-	IPHONE_SIMULATOR_HOST_MIN_VERSION_REQUIRED	-	Swift.Int32	-	-	-	d3e4733bc655a6a5
+XPC	swift-constant	c:@macro@XPC_API_VERSION	-	XPC_API_VERSION	-	Swift.Int32	-	-	-	f8328ccf37934b7a
+XPC	swift-constant	c:@macro@XPC_CONNECTION_MACH_SERVICE_LISTENER	-	XPC_CONNECTION_MACH_SERVICE_LISTENER	-	Swift.Int32	-	-	-	c0e161828b8d2891
+XPC	swift-constant	c:@macro@XPC_CONNECTION_MACH_SERVICE_PRIVILEGED	-	XPC_CONNECTION_MACH_SERVICE_PRIVILEGED	-	Swift.Int32	-	-	-	eda59c1edd4446e4

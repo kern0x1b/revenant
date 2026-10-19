@@ -1,0 +1,28 @@
+=== orders: 78 pairs, both argument orders
+     0 mismatches  (0 forward, 78 reversed)  order category-dataType-value category signed
+     2 mismatches  (2 forward, 76 reversed)  order category-value-dataType category signed
+    12 mismatches  (12 forward, 66 reversed)  memcmp of category-dataType-value fields big-endian
+    12 mismatches  (12 forward, 66 reversed)  memcmp of category-dataType-value fields little-endian
+    12 mismatches  (12 forward, 66 reversed)  order category-dataType-value category unsigned
+    14 mismatches  (14 forward, 64 reversed)  memcmp of category-value-dataType fields big-endian
+    14 mismatches  (14 forward, 64 reversed)  order category-value-dataType category unsigned
+    15 mismatches  (15 forward, 63 reversed)  memcmp of category-value-dataType fields little-endian
+    18 mismatches  (18 forward, 60 reversed)  order value-category-dataType category signed
+    21 mismatches  (21 forward, 57 reversed)  order dataType-category-value category signed
+    22 mismatches  (22 forward, 56 reversed)  order value-dataType-category category signed
+    23 mismatches  (23 forward, 55 reversed)  memcmp of value-category-dataType fields big-endian
+    23 mismatches  (23 forward, 55 reversed)  order dataType-value-category category signed
+    23 mismatches  (23 forward, 55 reversed)  order value-category-dataType category unsigned
+    25 mismatches  (25 forward, 53 reversed)  memcmp of dataType-category-value fields big-endian
+    25 mismatches  (25 forward, 53 reversed)  memcmp of dataType-category-value fields little-endian
+    25 mismatches  (25 forward, 53 reversed)  memcmp of value-dataType-category fields big-endian
+    25 mismatches  (25 forward, 53 reversed)  order dataType-category-value category unsigned
+    25 mismatches  (25 forward, 53 reversed)  order value-dataType-category category unsigned
+    26 mismatches  (26 forward, 52 reversed)  memcmp of dataType-value-category fields big-endian
+    26 mismatches  (26 forward, 52 reversed)  memcmp of dataType-value-category fields little-endian
+    26 mismatches  (26 forward, 52 reversed)  memcmp of value-category-dataType fields little-endian
+    26 mismatches  (26 forward, 52 reversed)  order dataType-value-category category unsigned
+    28 mismatches  (28 forward, 50 reversed)  memcmp of value-dataType-category fields little-endian
+
+zero-mismatch candidates: 1
+  order category-dataType-value category signed

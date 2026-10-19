@@ -1,0 +1,25 @@
+--- a/Sources/CryptoExtras/Digests/BoringSSL/BoringSSLSHA512256Context.swift
++++ b/Sources/CryptoExtras/Digests/BoringSSL/BoringSSLSHA512256Context.swift
+@@ -22,6 +22,7 @@
+ 
+ #if canImport(Darwin)
+ import Darwin
++import CharonCompat
+ #endif
+ 
+ @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+@@ -76,12 +77,12 @@
+ extension UnsafeMutablePointer {
+     fileprivate func zeroize() {
+         let size = MemoryLayout.size(ofValue: Pointee.self)
+-        memset_s(self, size, 0, size)
++        charon_memset_s(self, size, 0, size)
+     }
+ }
+ 
+ extension UnsafeMutableRawBufferPointer {
+     fileprivate func zeroize() {
+-        memset_s(self.baseAddress!, self.count, 0, self.count)
++        charon_memset_s(self.baseAddress!, self.count, 0, self.count)
+     }
+ }

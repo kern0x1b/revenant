@@ -1,0 +1,10 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+CNContactPickerDelegate	9.0	sdk16 body		NSObject	-	-	-	-	-	-
+CNContactPickerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactPickerDidCancel:	- (void)contactPickerDidCancel:(CNContactPickerViewController * _Nonnull)picker;	yes
+CNContactPickerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactPicker:didSelectContact:	- (void)contactPicker:(CNContactPickerViewController * _Nonnull)picker didSelectContact:(CNContact * _Nonnull)contact;	yes
+CNContactPickerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactPicker:didSelectContactProperty:	- (void)contactPicker:(CNContactPickerViewController * _Nonnull)picker didSelectContactProperty:(CNContactProperty * _Nonnull)contactProperty;	yes
+CNContactPickerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactPicker:didSelectContacts:	- (void)contactPicker:(CNContactPickerViewController * _Nonnull)picker didSelectContacts:(NSArray<CNContact *> * _Nonnull)contacts;	yes
+CNContactPickerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactPicker:didSelectContactProperties:	- (void)contactPicker:(CNContactPickerViewController * _Nonnull)picker didSelectContactProperties:(NSArray<CNContactProperty *> * _Nonnull)contactProperties;	yes
+CNContactViewControllerDelegate	9.0	sdk16 body		NSObject	-	-	-	-	-	-
+CNContactViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactViewController:shouldPerformDefaultActionForContactProperty:	- (BOOL)contactViewController:(CNContactViewController * _Nonnull)viewController shouldPerformDefaultActionForContactProperty:(CNContactProperty * _Nonnull)property;	yes
+CNContactViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	contactViewController:didCompleteWithContact:	- (void)contactViewController:(CNContactViewController * _Nonnull)viewController didCompleteWithContact:(CNContact * _Nullable)contact;	yes

@@ -1,0 +1,11 @@
+patches:
+  2.1.5-procursus7+23.gaf86971:
+  - patch_description: OpenSSL 4 makes ASN1_STRING opaque and returns const certificate
+      names; encode the attribute into its own buffer and take the names as const,
+      which OpenSSL 3 accepts too
+    patch_file: patches/openssl-4-const-and-opaque-strings.patch
+    patch_type: portability
+sources:
+  2.1.5-procursus7+23.gaf86971:
+    sha256: 26be4e97a9c0bf608e1b7b301bf1e51cdb77e6069bf20981f615923cc080b1b1
+    url: https://github.com/ProcursusTeam/ldid/archive/af86971ae72ec3ed3d0a699107c4e882324c941b.tar.gz

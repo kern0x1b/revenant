@@ -1,0 +1,445 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSPresentationIntentAttributeName",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "maximum": "15.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 16.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSProgressFileOperationKindDuplicating",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "maximum": "15.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 16.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSReplacementIndexAttributeName",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "maximum": "15.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 16.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSStreamNetworkServiceTypeCallSignaling",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSThumbnail1024x1024SizeKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLAddedToDirectoryDateKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLCanonicalPathKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLCredentialStorageRemoveSynchronizableCredentials",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 7.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLDirectoryEntryCountKey",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "maximum": "17.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 18.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLDocumentIdentifierKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileIdentifierKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "maximum": "16.4",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 18.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileProtectionComplete",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileProtectionCompleteUnlessOpen",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileProtectionCompleteUntilFirstUserAuthentication",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileProtectionCompleteWhenUserInactive",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "maximum": "17.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 18.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileProtectionKey",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLFileProtectionNone",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLGenerationIdentifierKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLIsApplicationKey",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLThumbnailDictionaryKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousItemContainerDisplayNameKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousItemDownloadRequestedKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousItemIsSharedKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemCurrentUserPermissionsKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemCurrentUserRoleKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemMostRecentEditorNameComponentsKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemOwnerNameComponentsKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemPermissionsReadOnly",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemPermissionsReadWrite",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemRoleOwner",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLUbiquitousSharedItemRoleParticipant",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 8.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeIsEncryptedKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeIsRootFileSystemKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeMountFromLocationKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "maximum": "16.4",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 18.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeSubtypeKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "maximum": "16.4",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 18.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeSupportsCompressionKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeSupportsExclusiveRenamingKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeSupportsFileCloningKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeSupportsSwapRenamingKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 10.0.1 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSURLVolumeTypeNameKey",
+      "kind": "constant",
+      "introduced": "16.4",
+      "minimum": "6.0",
+      "maximum": "16.4",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 18.0 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSUbiquitousUserDefaultsCompletedInitialSyncNotification",
+      "kind": "constant",
+      "introduced": "9.3",
+      "minimum": "6.0",
+      "maximum": "9.3",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSUbiquitousUserDefaultsDidChangeAccountsNotification",
+      "kind": "constant",
+      "introduced": "9.3",
+      "minimum": "6.0",
+      "maximum": "9.3",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSUbiquitousUserDefaultsNoCloudAccountNotification",
+      "kind": "constant",
+      "introduced": "9.3",
+      "minimum": "6.0",
+      "maximum": "9.3",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    },
+    {
+      "api": "NSUserDefaultsSizeLimitExceededNotification",
+      "kind": "constant",
+      "introduced": "9.3",
+      "minimum": "6.0",
+      "maximum": "9.3",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers; the value read out of the 9.3 cache, through tools/corpus/cache-value.lua over the project's own cache reader"
+    }
+  ]
+}

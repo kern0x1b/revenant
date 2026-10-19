@@ -1,0 +1,505 @@
+{
+  "framework": "Network",
+  "entries": [
+    {
+      "api": "nw_data_transfer_report_get_path_radio_type()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "which radio the data went over",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_framer_copy_options()",
+      "kind": "function",
+      "introduced": "15.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a copy of the options of a framer",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own framer objects, read: the definitions, their equality, the options and their object values, and a message's own values are compared with the host's own Network in tests/backports/host/network-objects, which is also where the options differential names them. The framer's ENGINE - parse_input, parse_output, deliver_input, deliver_input_no_copy, the three writes, pass_through, mark_ready, mark_failed_with_error, schedule_wakeup, async, the handlers, prepend_application_protocol and the endpoint/parameter/options copies - is NOT compared and not measured: those calls need a framer object, which only a connection makes, and no differential in the tree puts a framer in a stack. The engine is implemented and read, not verified (facts/Network/NWObjects.md)"
+    },
+    {
+      "api": "nw_framer_options_copy_object_value()",
+      "kind": "function",
+      "introduced": "15.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "an object a framer's options carry, by name",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_framer_options_set_object_value()",
+      "kind": "function",
+      "introduced": "15.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "an object a framer's options carry, by name",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_group_descriptor_create_multiplex()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a group of connections that send to the remote endpoints it names",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_parameters_create_quic()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "parameters of a connection over QUIC, running the caller's block with the QUIC options",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_parameters_get_attribution()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether what a connection carries was chosen by the developer or by the person using it",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_parameters_set_attribution()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether what a connection carries was chosen by the developer or by the person using it",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_protocol_copy_quic_definition()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the definition of QUIC",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_protocol_metadata_is_quic()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether quic",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_protocol_options_is_quic()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether quic",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_add_tls_application_protocol()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "adds tls application protocol",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_copy_sec_protocol_metadata()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the Security.framework metadata of a QUIC message",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_copy_sec_protocol_options()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the Security.framework options of the QUIC of a connection",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_create_options()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the options of the QUIC of a connection",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_application_error()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting application error",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_application_error_reason()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting application error reason",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_idle_timeout()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting idle timeout",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_initial_max_data()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting initial max data",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_initial_max_stream_data_bidirectional_local()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting initial max stream data bidirectional local",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_initial_max_stream_data_bidirectional_remote()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting initial max stream data bidirectional remote",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_initial_max_stream_data_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting initial max stream data unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_initial_max_streams_bidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting initial max streams bidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_initial_max_streams_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting initial max streams unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_keepalive_interval()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting keepalive interval",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_local_max_streams_bidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting local max streams bidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_local_max_streams_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting local max streams unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_max_udp_payload_size()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting max udp payload size",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_remote_idle_timeout()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting remote idle timeout",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_remote_max_streams_bidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting remote max streams bidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_remote_max_streams_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting remote max streams unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_stream_application_error()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting stream application error",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_stream_id()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting stream id",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_stream_is_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting stream is unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_get_stream_type()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the QUIC setting stream type",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_application_error()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting application error",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_idle_timeout()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting idle timeout",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_initial_max_data()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting initial max data",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_initial_max_stream_data_bidirectional_local()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting initial max stream data bidirectional local",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_initial_max_stream_data_bidirectional_remote()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting initial max stream data bidirectional remote",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_initial_max_stream_data_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting initial max stream data unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_initial_max_streams_bidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting initial max streams bidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_initial_max_streams_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting initial max streams unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_keepalive_interval()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting keepalive interval",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_local_max_streams_bidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting local max streams bidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_local_max_streams_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting local max streams unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_max_udp_payload_size()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting max udp payload size",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_stream_application_error()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting stream application error",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_quic_set_stream_is_unidirectional()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "sets the QUIC setting stream is unidirectional",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_tcp_options_set_multipath_force_version()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the TCP options set multipath force version",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    }
+  ]
+}

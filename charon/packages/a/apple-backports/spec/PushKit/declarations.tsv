@@ -1,0 +1,28 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@PKPushType	-			NSString *	-	-	-	-	2677ba8d9f2b4f94	-
+interface	c:objc(cs)PKPushCredentials	-			-	-	-	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	11c2d07df19293b0	-
+super	-	PKPushCredentials	NSObject		-	-	-	-	-	66e0a671ee80512f	-
+property	c:objc(cs)PKPushCredentials(py)type	-			PKPushType	-	readonly,copy	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	791373f5da84ffbe	-
+property	c:objc(cs)PKPushCredentials(py)token	-			NSData *	-	readonly,copy	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	f62f602bd3914875	-
+interface	c:objc(cs)PKPushPayload	-			-	-	-	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	0bc6a70863d31a53	-
+super	-	PKPushPayload	NSObject		-	-	-	-	-	e8f3ec3b52f02a66	-
+property	c:objc(cs)PKPushPayload(py)type	-			PKPushType	-	readonly,copy	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	3cc767a4306904cd	-
+property	c:objc(cs)PKPushPayload(py)dictionaryPayload	-			NSDictionary *	-	readonly,copy	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	09e150d0081ece18	-
+var	c:@PKPushTypeVoIP	-			const PKPushType	-	-	ios=9.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=9.0/-/-/0,xros=1.0/-/-/0	-	a988b5e6cb42c6f5	-
+var	c:@PKPushTypeComplication	-			const PKPushType	-	-	ios=9.0/13.0/-/0,maccatalyst=9.0/13.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=6.0/-/-/0,xros=-/-/-/1	-	b8d153c10ed4d346	-
+var	c:@PKPushTypeFileProvider	-			const PKPushType	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/-/-/0	-	e7facb9fc7782692	-
+interface	c:objc(cs)PKPushRegistry	-			-	-	-	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	795ae5dae6af4899	-
+super	-	PKPushRegistry	NSObject		-	-	-	-	-	5f7dbb4ee4306e19	-
+property	c:objc(cs)PKPushRegistry(py)delegate	-			id<PKPushRegistryDelegate>	-	weak	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	9a700422f7936fbe	-
+property	c:objc(cs)PKPushRegistry(py)desiredPushTypes	-			NSSet<PKPushType> *	-	copy	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	12e2f05a4ad3c0bd	-
+method	c:objc(cs)PKPushRegistry(im)pushTokenForType:	-			NSData *	PKPushType type	-	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	791c6c6787ca275d	-
+method	c:objc(cs)PKPushRegistry(im)initWithQueue:	-			instancetype	dispatch_queue_t queue	-	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	7c6a98245ff396b9	-
+method	c:objc(cs)PKPushRegistry(im)init	-			instancetype	-	-	*unavailable ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	48131efb135d92e5	-
+protocol	c:objc(pl)PKPushRegistryDelegate	-			-	-	-	-	deprecated: Use -pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void(^)(void))completion instead	fe2bf6a14a87bda5	-
+conforms	c:objc(pl)PKPushRegistryDelegate	PKPushRegistryDelegate	NSObject		-	-	-	-	-	456733b797511f4c	-
+method	c:objc(pl)PKPushRegistryDelegate(im)pushRegistry:didUpdatePushCredentials:forType:	-			void	PKPushRegistry * registry | PKPushCredentials * pushCredentials | PKPushType type	-	-	-	19212649506cf788	-
+method	c:objc(pl)PKPushRegistryDelegate(im)pushRegistry:didReceiveIncomingPushWithPayload:forType:	-			void	PKPushRegistry * registry | PKPushPayload * payload | PKPushType type	optional	ios=8.0/11.0/-/0,maccatalyst=8.0/11.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use -pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void(^)(void))completion instead	5f32944940957149	-
+method	c:objc(pl)PKPushRegistryDelegate(im)pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:	-			void	PKPushRegistry * registry | PKPushPayload * payload | PKPushType type | void (^)(void) completion	optional	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	0bc96aadbc7d9e3d	-
+method	c:objc(pl)PKPushRegistryDelegate(im)pushRegistry:didInvalidatePushTokenForType:	-			void	PKPushRegistry * registry | PKPushType type	optional	-	-	131fc4fe357b13b5	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-

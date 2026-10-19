@@ -1,0 +1,49 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptionDimensionMake",
+      "kind": "function",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; the caption geometry types arrived at iOS 18 and a caller that names one of their constructors links against this",
+      "effect": "the dimension whose value and units are the two arguments, unchanged - which is the whole of what the header says it makes, and what the host's own symbol returns for every combination asked of it (five values including 0, 1, 42.5, 100 and -3.25, against each of the three AVCaptionUnitsType values)",
+      "facts": "facts/AVFoundation/Functions.md",
+      "source": "this machine's own AVFoundation, called through tests/backports/host/avf-globals/functions.m over that spread of arguments with the port's definition in the same binary under a charon_host_ name and both answers compared; the header of the SDK 26.2 for the type's own layout, transcribed into CharonAVFoundationCaption18.h"
+    },
+    {
+      "api": "AVCaptionPointMake",
+      "kind": "function",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; the caption geometry types arrived at iOS 18 and a caller that names one of their constructors links against this",
+      "effect": "the point whose x and y are the two arguments, each carried whole with its own units - measured against the host's own symbol over three mixed-unit pairs",
+      "facts": "facts/AVFoundation/Functions.md",
+      "source": "this machine's own AVFoundation, called through tests/backports/host/avf-globals/functions.m with the port's definition in the same binary under a charon_host_ name and both answers compared; the header of the SDK 26.2 for the type's own layout, transcribed into CharonAVFoundationCaption18.h"
+    },
+    {
+      "api": "AVCaptionSizeMake",
+      "kind": "function",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; the caption geometry types arrived at iOS 18 and a caller that names one of their constructors links against this",
+      "effect": "the size whose width and height are the two arguments, each carried whole with its own units - measured against the host's own symbol over three mixed-unit pairs",
+      "facts": "facts/AVFoundation/Functions.md",
+      "source": "this machine's own AVFoundation, called through tests/backports/host/avf-globals/functions.m with the port's definition in the same binary under a charon_host_ name and both answers compared; the header of the SDK 26.2 for the type's own layout, transcribed into CharonAVFoundationCaption18.h"
+    },
+    {
+      "api": "AVCaptureReactionSystemImageNameForType",
+      "kind": "function",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 does not export the name; the reaction effects arrived at iOS 17 and the table of SF Symbol names behind this lookup is Apple's own",
+      "effect": "the SF Symbol name for the reaction type handed in, one of balloon.2.fill, party.popper.fill, fireworks, heart.fill, laser.burst, cloud.rain.fill, hand.thumbsup.fill and hand.thumbsdown.fill, each read out of the host's own function by calling it with the reaction type the port carries; a reaction type this port does not carry answers nil, which is what the host answers for a string it has never heard of (measured on both sides, not assumed)",
+      "facts": "facts/AVFoundation/Functions.md",
+      "source": "this machine's own AVFoundation, called once per reaction type through tests/backports/host/avf-globals/functions.m with the port's definition in the same binary under a charon_host_ name and both answers compared; the header of the SDK 26.2 for the type. The release this object is placed in is measured, not annotated: tools/symbol-first-release.lua puts it at 18.0, though the header calls it iOS 17.0, because the ladder holds no cache between 12.0 and 16.0"
+    }
+  ]
+}

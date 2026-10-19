@@ -1,0 +1,393 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@CoreSpotlightVersionNumber	-			double	-	-	-	-	1658697510aee9d5	-
+var	c:@CoreSpotlightVersionString	-			const unsigned char[]	-	-	-	-	f4ced69639316023	-
+interface	c:objc(cs)CSPerson	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	b1e601003b4ef185	-
+super	-	CSPerson	NSObject		-	-	-	-	-	00f261476be63b4c	-
+conforms	c:objc(cs)CSPerson	CSPerson	NSSecureCoding		-	-	-	-	-	230725f2735e894d	-
+conforms	c:objc(cs)CSPerson	CSPerson	NSCopying		-	-	-	-	-	71802c5a3da751cc	-
+method	c:objc(cs)CSPerson(im)initWithDisplayName:handles:handleIdentifier:	-			instancetype	NSString * displayName | NSArray<NSString *> * handles | NSString * handleIdentifier	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	b02f69381910090c	-
+property	c:objc(cs)CSPerson(py)displayName	-			NSString *	-	readonly	ios=9.0/-/-/0,tvos=-/-/-/1	-	6ce0b37d33b8a0e2	-
+property	c:objc(cs)CSPerson(py)handles	-			NSArray<NSString *> *	-	readonly	ios=9.0/-/-/0,tvos=-/-/-/1	-	8a8f52d80b78911d	-
+property	c:objc(cs)CSPerson(py)handleIdentifier	-			NSString *	-	readonly	ios=9.0/-/-/0,tvos=-/-/-/1	-	519cfbe9b8fd63e2	-
+property	c:objc(cs)CSPerson(py)contactIdentifier	-			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	245570f958a59193	-
+interface	c:objc(cs)CSSearchableItemAttributeSet	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	deprecated: Use initWithContentType instead	3989df428f675dec	-
+super	-	CSSearchableItemAttributeSet	NSObject		-	-	-	-	-	7c4368db8e322ba8	-
+conforms	c:objc(cs)CSSearchableItemAttributeSet	CSSearchableItemAttributeSet	NSCopying		-	-	-	-	-	00de52f5dbbaa70b	-
+conforms	c:objc(cs)CSSearchableItemAttributeSet	CSSearchableItemAttributeSet	NSSecureCoding		-	-	-	-	-	bd73973cddfeabfb	-
+method	c:objc(cs)CSSearchableItemAttributeSet(im)initWithItemContentType:	-			instancetype	NSString * itemContentType	-	ios=9.0/100000/-/0,macos=10.13/100000/-/0,tvos=-/-/-/1	deprecated: Use initWithContentType instead	5d088dffade91a1d	-
+method	c:objc(cs)CSSearchableItemAttributeSet(im)initWithContentType:	-			instancetype	UTType * contentType	-	ios=14.0/-/-/0,tvos=-/-/-/1	-	56ae85f61830338d	-
+interface	c:objc(cs)CSLocalizedString	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	cbba9c0d3b5b7d14	-
+super	-	CSLocalizedString	NSString		-	-	-	-	-	ccd8bdb9633e5449	-
+method	c:objc(cs)CSLocalizedString(im)initWithLocalizedStrings:	-			instancetype	NSDictionary * localizedStrings	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	de189888441833ff	-
+method	c:objc(cs)CSLocalizedString(im)localizedString	-			NSString *	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	ec8907dab030b128	-
+interface	c:objc(cs)CSCustomAttributeKey	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	bab2984e08cf028f	-
+super	-	CSCustomAttributeKey	NSObject		-	-	-	-	-	62a57cad815625a9	-
+conforms	c:objc(cs)CSCustomAttributeKey	CSCustomAttributeKey	NSCopying		-	-	-	-	-	bf741d12e7e11e37	-
+conforms	c:objc(cs)CSCustomAttributeKey	CSCustomAttributeKey	NSSecureCoding		-	-	-	-	-	c445a2052a08e8ab	-
+method	c:objc(cs)CSCustomAttributeKey(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0,tvos=-/-/-/1	-	cee80b6a8b639e4d	-
+method	c:objc(cs)CSCustomAttributeKey(im)initWithKeyName:	-			instancetype	NSString * keyName	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	1b98a5d3184b004c	-
+method	c:objc(cs)CSCustomAttributeKey(im)initWithKeyName:searchable:searchableByDefault:unique:multiValued:	-			instancetype	NSString * keyName | BOOL searchable | BOOL searchableByDefault | BOOL unique | BOOL multiValued	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	230762a859192c90	-
+property	c:objc(cs)CSCustomAttributeKey(py)keyName	-			NSString *	-	readonly	ios=9.0/-/-/0,tvos=-/-/-/1	-	ec74e8c16d597630	-
+property	c:objc(cs)CSCustomAttributeKey(py)searchable	-			BOOL	-	readonly,getter=isSearchable	ios=9.0/-/-/0,tvos=-/-/-/1	-	3d7b5b9d6dbba0d5	-
+property	c:objc(cs)CSCustomAttributeKey(py)searchableByDefault	-			BOOL	-	readonly,getter=isSearchableByDefault	ios=9.0/-/-/0,tvos=-/-/-/1	-	6fdd5fa000bd733d	-
+property	c:objc(cs)CSCustomAttributeKey(py)unique	-			BOOL	-	readonly,getter=isUnique	ios=9.0/-/-/0,tvos=-/-/-/1	-	87cb4bbace3b0e25	-
+property	c:objc(cs)CSCustomAttributeKey(py)multiValued	-			BOOL	-	readonly,getter=isMultiValued	ios=9.0/-/-/0,tvos=-/-/-/1	-	59b8d00d84ed084c	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSCustomAttributes	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	7569ac617478eaf3	-
+method	c:objc(cs)CSSearchableItemAttributeSet(im)setValue:forCustomKey:	CSCustomAttributes			void	id<NSSecureCoding> value | CSCustomAttributeKey * key	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	f6e9908366d48b29	-
+method	c:objc(cs)CSSearchableItemAttributeSet(im)valueForCustomKey:	CSCustomAttributes			id<NSSecureCoding>	CSCustomAttributeKey * key	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	e6826a1f2507d72e	-
+category	c:objc(cy)NSUserActivity@CSSearchableItemAttributeSet	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	07c0af9a0ea79c94	-
+property	c:objc(cs)NSUserActivity(py)contentAttributeSet	CSSearchableItemAttributeSet			CSSearchableItemAttributeSet *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	d148c783f99b5b30	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSGeneral	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	621602e2745ed5ad	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)displayName	CSGeneral			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	d643194a9b413913	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)alternateNames	CSGeneral			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	8bdde805fdeb4504	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)path	CSGeneral			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	f9349a51b28ad9e4	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentURL	CSGeneral			NSURL *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	9c8bad287b1b7f34	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)thumbnailURL	CSGeneral			NSURL *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	d5a58ab7de219ccd	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)thumbnailData	CSGeneral			NSData *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	699dee3e23125dec	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)darkThumbnailURL	CSGeneral			NSURL *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	29039d1f112c4e83	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)relatedUniqueIdentifier	CSGeneral			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	2440f2e3324b5224	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)weakRelatedUniqueIdentifier	CSGeneral			NSString *	-	copy	ios=10.0/-/-/0,tvos=-/-/-/1	-	bafca710a02c5a2e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)metadataModificationDate	CSGeneral			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	8cd7fc08e57d3c48	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentType	CSGeneral			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	d8205f9f65ab263b	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentTypeTree	CSGeneral			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	9fab23dd0ccfe137	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)keywords	CSGeneral			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	af75d5b783cb7d6c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)title	CSGeneral			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	ba66f0d4e8c907f5	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)version	CSGeneral			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	a98f0e819c8eefeb	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)userCreated	CSGeneral			NSNumber *	-	strong,getter=isUserCreated	ios=11.0/-/-/0,tvos=-/-/-/1	-	8a946fbcdd99509e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)userOwned	CSGeneral			NSNumber *	-	strong,getter=isUserOwned	ios=11.0/-/-/0,tvos=-/-/-/1	-	8e7c009fc5b7143a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)userCurated	CSGeneral			NSNumber *	-	strong,getter=isUserCurated	ios=11.0/-/-/0,tvos=-/-/-/1	-	d3cc1772fcb93d7d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)rankingHint	CSGeneral			NSNumber *	-	strong	ios=11.0/-/-/0,tvos=-/-/-/1	-	976d7cb8992d5c01	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)domainIdentifier	CSGeneral			NSString *	-	copy	ios=10.0/-/-/0,tvos=-/-/-/1	-	02471e48aa746ddf	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSActionExtras	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	c42ba7655aceccc8	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)supportsPhoneCall	CSActionExtras			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	055fc767da8047ae	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)supportsNavigation	CSActionExtras			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	7cd5c8e23443f8c9	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)actionIdentifiers	CSActionExtras			NSArray<NSString *> *	-	copy	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1	-	91410742cd62697a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)sharedItemContentType	CSActionExtras			UTType *	-	copy	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1	-	3fd84d7463e2f6b8	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSContainment	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	2caa15a2e06a24b9	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)containerTitle	CSContainment			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	81ee1145c11ee36d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)containerDisplayName	CSContainment			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1cb2a523b725ae71	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)containerIdentifier	CSContainment			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	a7e9464934aff53f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)containerOrder	CSContainment			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	f2f287530707dd21	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSItemProvider	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	f45477d0d2448ce0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)providerDataTypeIdentifiers	CSItemProvider			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,tvos=-/-/-/1	-	0542171f3e827c74	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)providerFileTypeIdentifiers	CSItemProvider			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,tvos=-/-/-/1	-	a62d1af456b3452c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)providerInPlaceFileTypeIdentifiers	CSItemProvider			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,tvos=-/-/-/1	-	d9873a081808848b	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSDocuments	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	dea9482df0707c9d	-
+method	c:objc(cs)CSSearchableItemAttributeSet(im)moveFrom:	CSDocuments			void	CSSearchableItemAttributeSet * sourceAttributeSet	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	9bfda8a5b8575bf5	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)subject	CSDocuments			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4ddf295815190437	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)theme	CSDocuments			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	7f813319e6f68287	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentDescription	CSDocuments			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	8aef9d68f57e71f4	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)identifier	CSDocuments			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	bbe1a63ab67487a2	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)audiences	CSDocuments			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	ade443d057c6daf6	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)fileSize	CSDocuments			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	4c20b94683865054	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)pageCount	CSDocuments			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	a184c59b979dfa77	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)pageWidth	CSDocuments			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	e22759bd5dd54450	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)pageHeight	CSDocuments			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	9aff03bf597c4bfd	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)securityMethod	CSDocuments			NSString *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	8fcdd151128e1146	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)creator	CSDocuments			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	0b46dc1a748af488	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)encodingApplications	CSDocuments			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	6942166abbcfad4c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)kind	CSDocuments			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	f288a758318c8827	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)fontNames	CSDocuments			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	8ef5b9837a67d21a	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSEvents	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	00ec7ef2ff04a8cc	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)dueDate	CSEvents			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	139037fdc0abb371	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)completionDate	CSEvents			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	7cf6e543041d9d9b	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)startDate	CSEvents			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	795a67c647d32174	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)endDate	CSEvents			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	ef37b199f006c270	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)importantDates	CSEvents			NSArray<NSDate *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	9efed41033edd3fc	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)allDay	CSEvents			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	fa73922beb3afcd1	-
+var	c:@CSMailboxInbox	-			NSString *const	-	-	ios=9.0/-/-/0	-	0b86467056712179	-
+var	c:@CSMailboxDrafts	-			NSString *const	-	-	ios=9.0/-/-/0	-	9b7e818b378d7a20	-
+var	c:@CSMailboxSent	-			NSString *const	-	-	ios=9.0/-/-/0	-	9a1238541141b5e6	-
+var	c:@CSMailboxJunk	-			NSString *const	-	-	ios=9.0/-/-/0	-	bf399ead4877868e	-
+var	c:@CSMailboxTrash	-			NSString *const	-	-	ios=9.0/-/-/0	-	27b1b8008fd8e94c	-
+var	c:@CSMailboxArchive	-			NSString *const	-	-	ios=9.0/-/-/0	-	e5b22f4af9460280	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSMessaging	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	fbaab04590b7da4b	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)accountIdentifier	CSMessaging			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	ac0773eddd55641a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)accountHandles	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	e9e8851e5fbe9cfc	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)HTMLContentData	CSMessaging			NSData *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	10becdcd5d650682	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)textContent	CSMessaging			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1b9624cb6124f998	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)authors	CSMessaging			NSArray<CSPerson *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	0ba614a291f1b832	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)primaryRecipients	CSMessaging			NSArray<CSPerson *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	664a0b89b31c73a4	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)additionalRecipients	CSMessaging			NSArray<CSPerson *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	3baa8d61160cb37e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)hiddenAdditionalRecipients	CSMessaging			NSArray<CSPerson *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1a6b77b575df29b7	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)emailHeaders	CSMessaging			NSDictionary<NSString *,NSArray *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	0d26b0e11a5501a5	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)mailboxIdentifiers	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	cc0f7c48da525104	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)authorNames	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	a6f39fb6f412a23d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)recipientNames	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	e135ed7b230978cc	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)authorEmailAddresses	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	7a23baf23d10a425	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)recipientEmailAddresses	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	b981b2b8b093857a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)authorAddresses	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1aee50366c98deae	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)recipientAddresses	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	8d2fc0cce2417674	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)phoneNumbers	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	c2e6e41e21c43657	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)emailAddresses	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	0d9a4f322920971f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)instantMessageAddresses	CSMessaging			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	94db3d923fc2feb0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)likelyJunk	CSMessaging			NSNumber *	-	strong,nonatomic,getter=isLikelyJunk	ios=9.0/-/-/0,tvos=-/-/-/1	-	3e97e97512efcca9	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)isPriority	CSMessaging			NSNumber *	-	readonly,strong,nonatomic	ios=18.4/-/-/0	-	d4ece4cf850d714c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)textContentSummary	CSMessaging			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0	-	7792f7362840ce6a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)transcribedTextContent	CSMessaging			NSString *	-	strong,nonatomic	ios=18.4/-/-/0	-	c5b22f74a3c0a422	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSMedia	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	00435d1c04ff2c5f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)editors	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	24cdb5e81f565221	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)participants	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	3b46124b3405d906	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)projects	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	97a45ca27c70cc64	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)downloadedDate	CSMedia			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	ce8c6757363d4e12	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentSources	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	3074eb98db0eb357	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)comment	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4dff682aeb59ae8a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)copyright	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4eecc006e93987da	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)lastUsedDate	CSMedia			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	efaf20c8981a5ff5	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentCreationDate	CSMedia			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	0874018e69b0e3a9	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentModificationDate	CSMedia			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	8fd062663fd390dd	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)addedDate	CSMedia			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	ac36bbe1d2b59be8	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)duration	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	75872d736d6ed340	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contactKeywords	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	f833eeb711bffc42	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)codecs	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	a9787c0e1e3a6e2d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)mediaTypes	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	0ae7e5202ffc4584	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)streamable	CSMedia			NSNumber *	-	strong,getter=isStreamable	ios=9.0/-/-/0,tvos=-/-/-/1	-	d338174d7409518c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)totalBitRate	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	044aed1fbaa47d77	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)videoBitRate	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	136e54ea0ef2b2a0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)audioBitRate	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	a5ca7207fc1fae99	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)deliveryType	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	6e44dde27b2c308b	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)organizations	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	42c7ef6ef9d7907b	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)role	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4198fd253481c1aa	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)languages	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	9c7fe7580dce0f07	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)rights	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	555e7356a2783207	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)publishers	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	7074ad48f80a56d1	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contributors	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4ecde654b30a4f81	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)coverage	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	464bd9f90d63e02e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)rating	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	83fc34e0759284c7	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)ratingDescription	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	0fbcecdf70232a3d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)playCount	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	dbac7f5886b63b7d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)information	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	03a3e7d2a17fd92e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)director	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	42cca45cc1fff49a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)producer	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	8142c3da4df592e9	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)genre	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	f62914b5d4cfdb04	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)performers	CSMedia			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	ed2bf981de67f5fc	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)originalFormat	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4bf9417fc6c89426	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)originalSource	CSMedia			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	13ad42c21b134acf	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)local	CSMedia			NSNumber *	-	strong,getter=isLocal	ios=9.0/-/-/0,tvos=-/-/-/1	-	7ab943842aab0ed0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)contentRating	CSMedia			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	2e9e6c0e1cfe3e3c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)URL	CSMedia			NSURL *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	7171d06571b4725a	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSMusic	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	a84ba092067a240d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)audioSampleRate	CSMusic			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	8616755cab353656	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)audioChannelCount	CSMusic			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	db383c1b82802a5c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)tempo	CSMusic			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	639d267329666dc2	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)keySignature	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	99fad5e3e038fc11	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)timeSignature	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	b0a80c3c52668217	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)audioEncodingApplication	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	75e8b6c581a91a79	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)composer	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	90a90d696c2cf39f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)lyricist	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	6918e058e7bc310f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)album	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	2fc3abb9e30f06d6	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)artist	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	59b281e187800170	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)audioTrackNumber	CSMusic			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	72c22e293e01ab86	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)recordingDate	CSMusic			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	c71fbc63a06ce400	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)musicalGenre	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	bb6260661cd2e9f8	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)generalMIDISequence	CSMusic			NSNumber *	-	strong,getter=isGeneralMIDISequence	ios=9.0/-/-/0,tvos=-/-/-/1	-	fccc5f3a8fbc3ddc	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)musicalInstrumentCategory	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	4c7271bfe591c03e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)musicalInstrumentName	CSMusic			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	34e211c6dd5215e3	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSImages	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	a2ba744655c92d38	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)pixelHeight	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	3b2fe7fdba68927c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)pixelWidth	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	74046d51a2e25465	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)pixelCount	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	9b72d1b6641d9abd	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)colorSpace	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	192b8b7b440be7c0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)bitsPerSample	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	c1b552c5e2ce8c92	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)flashOn	CSImages			NSNumber *	-	strong,getter=isFlashOn	ios=9.0/-/-/0,tvos=-/-/-/1	-	1479ecc775cddb3f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)focalLength	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	70f00e2c878af211	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)focalLength35mm	CSImages			NSNumber *	-	strong,getter=isFocalLength35mm	ios=9.0/-/-/0,tvos=-/-/-/1	-	694286c4e17bcf48	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)acquisitionMake	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	053bfc5652f7a846	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)acquisitionModel	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	6df2e579364d0f5f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)cameraOwner	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	950ecaf9941bee4f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)lensModel	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	c81628fb9af7887d	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)ISOSpeed	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	727e2fc7f4ea4a70	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)orientation	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	fd67ad5023170aeb	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)layerNames	CSImages			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	8628a5594f858f16	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)whiteBalance	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	7aa08cef2266f19f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)aperture	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	e7192eee79225b27	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)profileName	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	7dfe5ef929cb8555	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)resolutionWidthDPI	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	7cb0b0d17f2fcc56	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)resolutionHeightDPI	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	a9ed581ff8cbfe2e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)exposureMode	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	4e179427bde0aded	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)exposureTime	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	41f3d77e76632060	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)EXIFVersion	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	9c48259e590db83b	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)EXIFGPSVersion	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1394c22016076999	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)hasAlphaChannel	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	78500f83fc979a4f	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)redEyeOn	CSImages			NSNumber *	-	strong,getter=isRedEyeOn	ios=9.0/-/-/0,tvos=-/-/-/1	-	10b0781cfdecfc8c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)meteringMode	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	b963f3b03b44dc30	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)maxAperture	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	59f7f89d422392c0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)fNumber	CSImages			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	e9c3276731279209	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)exposureProgram	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	a67efd428beac1ae	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)exposureTimeString	CSImages			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	6b33715dd4f20f11	-
+category	c:objc(cy)CSSearchableItemAttributeSet@CSPlaces	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	654f4326aa2cb6ac	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)headline	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	f43af5da2ec13ae3	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)instructions	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	c69e3c3d194d9d88	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)thoroughfare	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	94f1bceb1b7d8029	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)subThoroughfare	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	d803fcd2349b1049	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)postalCode	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1c39b53f9f06d9cb	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)city	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	3b343f9bdd597672	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)stateOrProvince	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	96f3b07aebb6cf63	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)country	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	c764a6bc5d62494c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)fullyFormattedAddress	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	e37ccda554f510be	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)altitude	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	58fcabbb544f5c7c	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)latitude	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	272f4fdbe1c18a3a	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)longitude	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	c6ea8254015800c5	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)speed	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	7d33c730ada49f0e	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)timestamp	CSPlaces			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	6566179816642d50	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)imageDirection	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	04026c125e2c3af0	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)namedLocation	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1a96891307117a50	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSTrack	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	426bb19c42354762	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSStatus	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	08efbdb3132b63ef	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSMeasureMode	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	b151d9e360390a24	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDOP	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	726ccdfac3b45267	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSMapDatum	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	521041fb3ccf4fb4	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDestLatitude	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	d088b65ffc51e3bf	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDestLongitude	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	5178f15b81938645	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDestBearing	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	a7ae57873d265139	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDestDistance	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	5a2e9cf1b81aecc5	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSProcessingMethod	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	a32e784a4de03b09	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSAreaInformation	CSPlaces			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	b75b27d0e6a5cd08	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDateStamp	CSPlaces			NSDate *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	afd67ce376968994	-
+property	c:objc(cs)CSSearchableItemAttributeSet(py)GPSDifferental	CSPlaces			NSNumber *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	0453a5557e1d76d3	-
+interface	c:objc(cs)CSImportExtension	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1	-	5d0c865b0554f413	-
+super	-	CSImportExtension	NSObject		-	-	-	-	-	83cd59bef4d6d944	-
+conforms	c:objc(cs)CSImportExtension	CSImportExtension	NSExtensionRequestHandling		-	-	-	-	-	999c36074f4089d7	-
+method	c:objc(cs)CSImportExtension(im)updateAttributes:forFileAtURL:error:	-			BOOL	CSSearchableItemAttributeSet * attributes | NSURL * contentURL | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1	-	13430e3da18ebbc0	-
+var	c:@CSSearchableItemActionType	-			NSString *const	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	6fcdd23b29e432b3	-
+var	c:@CSSearchableItemActivityIdentifier	-			NSString *const	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	6a8c690d4cdf0cc3	-
+var	c:@CSActionIdentifier	-			NSString *const	-	-	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1	-	9c75f43ab74d1ba1	-
+var	c:@CSQueryContinuationActionType	-			NSString *const	-	-	ios=10.0/-/-/0,tvos=-/-/-/1	-	17e643069866e8b6	-
+var	c:@CSSearchQueryString	-			NSString *const	-	-	ios=10.0/-/-/0,tvos=-/-/-/1	-	7d065fe5f05619bc	-
+typedef	c:@T@CSSearchableItemUpdateListenerOptions	-			enum CSSearchableItemUpdateListenerOptions	-	-	-	-	e155354a0531fa53	-
+enum	c:@E@CSSearchableItemUpdateListenerOptions	-			NSUInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0	-	1eeeb29ae33544d4	-
+enumconst	c:@E@CSSearchableItemUpdateListenerOptions@CSSearchableItemUpdateListenerOptionDefault	CSSearchableItemUpdateListenerOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0	-	53ed735cd4b6dd62	0
+enumconst	c:@E@CSSearchableItemUpdateListenerOptions@CSSearchableItemUpdateListenerOptionSummarization	CSSearchableItemUpdateListenerOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0	-	498b7ab2969f2d8e	2
+enumconst	c:@E@CSSearchableItemUpdateListenerOptions@CSSearchableItemUpdateListenerOptionPriority	CSSearchableItemUpdateListenerOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0	-	dea473a92cef1a4d	4
+interface	c:objc(cs)CSSearchableItem	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	6ac98596ebf1e7c8	-
+super	-	CSSearchableItem	NSObject		-	-	-	-	-	3544bdf3e3c54190	-
+conforms	c:objc(cs)CSSearchableItem	CSSearchableItem	NSSecureCoding		-	-	-	-	-	c6c5fb5f90b0eb99	-
+conforms	c:objc(cs)CSSearchableItem	CSSearchableItem	NSCopying		-	-	-	-	-	d19bf4fe8725fc3c	-
+method	c:objc(cs)CSSearchableItem(im)initWithUniqueIdentifier:domainIdentifier:attributeSet:	-			instancetype	NSString * uniqueIdentifier | NSString * domainIdentifier | CSSearchableItemAttributeSet * attributeSet	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	7af544941df915c4	-
+method	c:objc(cs)CSSearchableItem(im)compareByRank:	-			NSComparisonResult	CSSearchableItem * other	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	048ea8260abc3dce	-
+property	c:objc(cs)CSSearchableItem(py)uniqueIdentifier	-			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	2aeb7f48cd8455e9	-
+property	c:objc(cs)CSSearchableItem(py)domainIdentifier	-			NSString *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	1d3760fb6f8b7313	-
+property	c:objc(cs)CSSearchableItem(py)expirationDate	-			NSDate *	-	copy	ios=9.0/-/-/0,tvos=-/-/-/1	-	fa1fd4e2e9d776c1	-
+property	c:objc(cs)CSSearchableItem(py)attributeSet	-			CSSearchableItemAttributeSet *	-	strong	ios=9.0/-/-/0,tvos=-/-/-/1	-	d0abf5eef6b7080f	-
+property	c:objc(cs)CSSearchableItem(py)isUpdate	-			BOOL	-	assign	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1	-	1e659e90906e6097	-
+property	c:objc(cs)CSSearchableItem(py)updateListenerOptions	-			CSSearchableItemUpdateListenerOptions	-	assign	ios=18.4/-/-/0	-	62da63eecd4866e5	-
+var	c:@CSIndexErrorDomain	-			NSString *const	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	8f4016ac383e3719	-
+typedef	c:@T@CSIndexErrorCode	-			enum CSIndexErrorCode	-	-	-	-	d5163f6264a1e2e0	-
+enum	c:@E@CSIndexErrorCode	-			NSInteger	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	b461d097ebc0cc20	-
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeUnknownError	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	5bb059dd934664b1	-1
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeIndexUnavailableError	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	a3759d3132cd2057	-1000
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeInvalidItemError	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	38bd951582d5ec99	-1001
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeInvalidClientStateError	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	02e190859963b5fc	-1002
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeRemoteConnectionError	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	0cefce057bf51b28	-1003
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeQuotaExceeded	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	3148d80c23217646	-1004
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeIndexingUnsupported	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	a74afdaf8ab39e93	-1005
+enumconst	c:@E@CSIndexErrorCode@CSIndexErrorCodeMismatchedClientState	CSIndexErrorCode			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	d36a417b18cf9400	-1006
+interface	c:objc(cs)CSSearchableIndex	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	0ee7ab5d7376fce5	-
+super	-	CSSearchableIndex	NSObject		-	-	-	-	-	ffe0540f788cfda1	-
+property	c:objc(cs)CSSearchableIndex(py)indexDelegate	-			id<CSSearchableIndexDelegate>	-	weak	ios=9.0/-/-/0,tvos=-/-/-/1	-	c08cef09a249540b	-
+method	c:objc(cs)CSSearchableIndex(cm)isIndexingAvailable	-			BOOL	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	698709643e431beb	-
+method	c:objc(cs)CSSearchableIndex(cm)defaultSearchableIndex	-			instancetype	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	d6b2502e1f3cdcb9	-
+method	c:objc(cs)CSSearchableIndex(im)initWithName:	-			instancetype	NSString * name	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	fae6075c577fca7f	-
+method	c:objc(cs)CSSearchableIndex(im)initWithName:protectionClass:	-			instancetype	NSString * name | NSFileProtectionType protectionClass	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	459cdc85424c25d3	-
+method	c:objc(cs)CSSearchableIndex(im)indexSearchableItems:completionHandler:	-			void	NSArray<CSSearchableItem *> * items | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	d4e97bdd437add56	-
+method	c:objc(cs)CSSearchableIndex(im)deleteSearchableItemsWithIdentifiers:completionHandler:	-			void	NSArray<NSString *> * identifiers | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	0d0c2200f07bf160	-
+method	c:objc(cs)CSSearchableIndex(im)deleteSearchableItemsWithDomainIdentifiers:completionHandler:	-			void	NSArray<NSString *> * domainIdentifiers | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	1c27589f6dbda3d4	-
+method	c:objc(cs)CSSearchableIndex(im)deleteAllSearchableItemsWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	99a67972f36e77dc	-
+category	c:objc(cy)CSSearchableIndex@CSOptionalBatching	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	7e66d24c1680def5	-
+method	c:objc(cs)CSSearchableIndex(im)beginIndexBatch	CSOptionalBatching			void	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	35ebd1158b57fe5a	-
+method	c:objc(cs)CSSearchableIndex(im)endIndexBatchWithExpectedClientState:newClientState:completionHandler:	CSOptionalBatching			void	NSData * expectedClientState | NSData * newClientState | void (^)(NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	ce88b2433e629ea9	-
+method	c:objc(cs)CSSearchableIndex(im)endIndexBatchWithClientState:completionHandler:	CSOptionalBatching			void	NSData * clientState | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	38affe192cd26075	-
+method	c:objc(cs)CSSearchableIndex(im)fetchLastClientStateWithCompletionHandler:	CSOptionalBatching			void	void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	79e6632c781a4833	-
+category	c:objc(cy)CSSearchableIndex@CSExternalProvider	-			-	-	-	macos=13/-/-/0	-	3ac8bc2e37eee7e8	-
+method	c:objc(cs)CSSearchableIndex(im)fetchDataForBundleIdentifier:itemIdentifier:contentType:completionHandler:	CSExternalProvider			void	NSString * bundleIdentifier | NSString * itemIdentifier | UTType * contentType | void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	macos=13/-/-/0	-	8debc012f4fda69c	-
+category	c:objc(cy)CSSearchableIndex@CSOptionalBatchingWithExpectedState	-			-	-	-	ios=17.0/-/-/0,tvos=-/-/-/1	-	0303ff45d88b3c99	-
+protocol	c:objc(pl)CSSearchableIndexDelegate	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	08660fea13fda16e	-
+conforms	c:objc(pl)CSSearchableIndexDelegate	CSSearchableIndexDelegate	NSObject		-	-	-	-	-	a6f0637196e64aac	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)searchableIndex:reindexAllSearchableItemsWithAcknowledgementHandler:	-			void	CSSearchableIndex * searchableIndex | void (^)(void) acknowledgementHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	7535f5e5e4daad8b	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)searchableIndex:reindexSearchableItemsWithIdentifiers:acknowledgementHandler:	-			void	CSSearchableIndex * searchableIndex | NSArray<NSString *> * identifiers | void (^)(void) acknowledgementHandler	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	ede8da12e554a0f8	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)searchableIndexDidThrottle:	-			void	CSSearchableIndex * searchableIndex	optional	ios=9.0/-/-/0,tvos=-/-/-/1	-	92ab4fcc0095225b	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)searchableIndexDidFinishThrottle:	-			void	CSSearchableIndex * searchableIndex	optional	ios=9.0/-/-/0,tvos=-/-/-/1	-	20b52228c201051f	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)dataForSearchableIndex:itemIdentifier:typeIdentifier:error:	-			NSData *	CSSearchableIndex * searchableIndex | NSString * itemIdentifier | NSString * typeIdentifier | NSError * _Nullable * outError	optional	ios=11.0/-/-/0,tvos=-/-/-/1	-	d87d9dc3ea80bc1d	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)fileURLForSearchableIndex:itemIdentifier:typeIdentifier:inPlace:error:	-			NSURL *	CSSearchableIndex * searchableIndex | NSString * itemIdentifier | NSString * typeIdentifier | BOOL inPlace | NSError * _Nullable * outError	optional	ios=11.0/-/-/0,tvos=-/-/-/1	-	17ce2225477937fc	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)searchableItemsForIdentifiers:searchableItemsHandler:	-			void	NSArray<NSString *> * identifiers | void (^)(NSArray<CSSearchableItem *> * _Nonnull) searchableItemsHandler	optional	ios=18.4/-/-/0	-	bc50936617a8d2d5	-
+method	c:objc(pl)CSSearchableIndexDelegate(im)searchableItemsDidUpdate:	-			void	NSArray<CSSearchableItem *> * items	optional	ios=18.4/-/-/0	-	a8130839c6ee172f	-
+interface	c:objc(cs)CSIndexExtensionRequestHandler	-			-	-	-	ios=9.0/-/-/0,tvos=-/-/-/1	-	763e928da9902871	-
+super	-	CSIndexExtensionRequestHandler	NSObject		-	-	-	-	-	cbffbbde5e96da1c	-
+conforms	c:objc(cs)CSIndexExtensionRequestHandler	CSIndexExtensionRequestHandler	NSExtensionRequestHandling		-	-	-	-	-	0ae6b667b7b9f8a9	-
+conforms	c:objc(cs)CSIndexExtensionRequestHandler	CSIndexExtensionRequestHandler	CSSearchableIndexDelegate		-	-	-	-	-	ad37e1d80736aef9	-
+var	c:@CSSearchQueryErrorDomain	-			const NSErrorDomain	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	c315b244b58543f1	-
+typedef	c:@T@CSSearchQueryErrorCode	-			enum CSSearchQueryErrorCode	-	-	-	-	a4f1b01bd0b1975c	-
+enum	c:@E@CSSearchQueryErrorCode	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	3c0d739380f76410	-
+enumconst	c:@E@CSSearchQueryErrorCode@CSSearchQueryErrorCodeUnknown	CSSearchQueryErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	352cd6645cf9a534	-2000
+enumconst	c:@E@CSSearchQueryErrorCode@CSSearchQueryErrorCodeIndexUnreachable	CSSearchQueryErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	0da03898f1a6287b	-2001
+enumconst	c:@E@CSSearchQueryErrorCode@CSSearchQueryErrorCodeInvalidQuery	CSSearchQueryErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	efc1087d2e3e77b7	-2002
+enumconst	c:@E@CSSearchQueryErrorCode@CSSearchQueryErrorCodeCancelled	CSSearchQueryErrorCode			-	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	4dd04ebd64191fb0	-2003
+typedef	c:@T@CSSearchQuerySourceOptions	-			enum CSSearchQuerySourceOptions	-	-	-	-	864244510eed9aa8	-
+enum	c:@E@CSSearchQuerySourceOptions	-			NSUInteger	-	-	macos=13/-/-/0	-	f632b80312753d6a	-
+enumconst	c:@E@CSSearchQuerySourceOptions@CSSearchQuerySourceOptionDefault	CSSearchQuerySourceOptions			-	-	-	macos=13/-/-/0	-	6315e12fa3bf9ad9	0
+enumconst	c:@E@CSSearchQuerySourceOptions@CSSearchQuerySourceOptionAllowMail	CSSearchQuerySourceOptions			-	-	-	macos=13/-/-/0	-	0a0aa7cf9f7e1d81	1
+interface	c:objc(cs)CSSearchQueryContext	-			-	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	c6629b7f174a9a4d	-
+super	-	CSSearchQueryContext	NSObject		-	-	-	-	-	ade743b602f98fde	-
+conforms	c:objc(cs)CSSearchQueryContext	CSSearchQueryContext	NSSecureCoding		-	-	-	-	-	8ce67873044c95c2	-
+conforms	c:objc(cs)CSSearchQueryContext	CSSearchQueryContext	NSCopying		-	-	-	-	-	e5e560610b33565e	-
+property	c:objc(cs)CSSearchQueryContext(py)fetchAttributes	-			NSArray<NSString *> *	-	strong,nonatomic	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	2e1e1397003a2ed6	-
+property	c:objc(cs)CSSearchQueryContext(py)filterQueries	-			NSArray<NSString *> *	-	copy,nonatomic	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	fc20eac40adf57ea	-
+property	c:objc(cs)CSSearchQueryContext(py)keyboardLanguage	-			NSString *	-	strong,nonatomic	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	0708cfb9521fde87	-
+property	c:objc(cs)CSSearchQueryContext(py)sourceOptions	-			CSSearchQuerySourceOptions	-	assign,nonatomic	macos=13/-/-/0	-	b3e3bb9f1ad351fc	-
+interface	c:objc(cs)CSSearchQuery	-			-	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	393772093c7c7172	-
+super	-	CSSearchQuery	NSObject		-	-	-	-	-	982c321bfabf9b6f	-
+method	c:objc(cs)CSSearchQuery(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	9555b8b2d043f93c	-
+method	c:objc(cs)CSSearchQuery(im)initWithQueryString:queryContext:	-			instancetype	NSString * queryString | CSSearchQueryContext * queryContext	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	05af2dda8ba255c2	-
+method	c:objc(cs)CSSearchQuery(im)initWithQueryString:attributes:	-			instancetype	NSString * queryString | NSArray<NSString *> * attributes	-	ios=10.0/16.0/-/0	-	0c6fcdcac88bb727	-
+property	c:objc(cs)CSSearchQuery(py)cancelled	-			BOOL	-	readonly,getter=isCancelled	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	ed603ab27b267b38	-
+property	c:objc(cs)CSSearchQuery(py)foundItemCount	-			NSUInteger	-	readonly	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	1627131ebef01247	-
+property	c:objc(cs)CSSearchQuery(py)foundItemsHandler	-			void (^)(NSArray<CSSearchableItem *> * _Nonnull)	-	copy	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	fd03665a8e4ef70b	-
+property	c:objc(cs)CSSearchQuery(py)completionHandler	-			void (^)(NSError * _Nullable)	-	copy	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	2752525e22578491	-
+property	c:objc(cs)CSSearchQuery(py)protectionClasses	-			NSArray<NSFileProtectionType> *	-	copy	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	d72d83a0c5e2d02c	-
+method	c:objc(cs)CSSearchQuery(im)start	-			void	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	1f51c883547e77e7	-
+method	c:objc(cs)CSSearchQuery(im)cancel	-			void	-	-	ios=10.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1	-	4a7286516157f720	-
+var	c:@CSSuggestionHighlightAttributeName	-			const NSAttributedStringKey	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	7b7e3d4e1fed0e47	-
+typedef	c:@T@CSSuggestionKind	-			enum CSSuggestionKind	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	6898e8ced1b26b5d	-
+enum	c:@E@CSSuggestionKind	-			NSInteger	-	-	-	-	21c0abfb0828762b	-
+enumconst	c:@E@CSSuggestionKind@CSSuggestionKindNone	CSSuggestionKind			-	-	-	-	-	a7d7376204efd231	0
+enumconst	c:@E@CSSuggestionKind@CSSuggestionKindCustom	CSSuggestionKind			-	-	-	-	-	20a5ac33f02700a4	1
+enumconst	c:@E@CSSuggestionKind@CSSuggestionKindDefault	CSSuggestionKind			-	-	-	-	-	8ec7dd3c40c6a800	2
+interface	c:objc(cs)CSSuggestion	-			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	02c64fd7fdffd5a2	-
+super	-	CSSuggestion	NSObject		-	-	-	-	-	0a78a63033b7fd05	-
+conforms	c:objc(cs)CSSuggestion	CSSuggestion	NSSecureCoding		-	-	-	-	-	429136b4f0a3f973	-
+conforms	c:objc(cs)CSSuggestion	CSSuggestion	NSCopying		-	-	-	-	-	fef5ce53b555a0b8	-
+property	c:objc(cs)CSSuggestion(py)localizedAttributedSuggestion	-			NSAttributedString *	-	readonly,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	71a0bb73d3b7dfdc	-
+property	c:objc(cs)CSSuggestion(py)suggestionKind	-			CSSuggestionKind	-	readonly,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	88f1d11d3ae67344	-
+method	c:objc(cs)CSSuggestion(im)compareByRank:	-			NSComparisonResult	CSSuggestion * other	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	1517b0729d281a1d	-
+method	c:objc(cs)CSSuggestion(im)compare:	-			NSComparisonResult	CSSuggestion * other	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	09b335b92edf4eae	-
+typedef	c:@T@CSUserInteraction	-			enum CSUserInteraction	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1	-	c895df8234603389	-
+enum	c:@E@CSUserInteraction	-			NSInteger	-	-	-	-	df04c098eea23174	-
+enumconst	c:@E@CSUserInteraction@CSUserInteractionSelect	CSUserInteraction			-	-	-	-	-	ae51380cf74c2d6a	0
+enumconst	c:@E@CSUserInteraction@CSUserInteractionDefault	CSUserInteraction			-	-	-	-	-	d2f299ab74cf83d1	0
+enumconst	c:@E@CSUserInteraction@CSUserInteractionFocus	CSUserInteraction			-	-	-	-	-	044f5bdf3a1b2df5	1
+interface	c:objc(cs)CSUserQueryContext	-			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	9d3668b28c3000a2	-
+super	-	CSUserQueryContext	CSSearchQueryContext		-	-	-	-	-	0d5a7ea1fc77d444	-
+method	c:objc(cs)CSUserQueryContext(cm)userQueryContext	-			CSUserQueryContext *	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	6622bcbc01486934	-
+method	c:objc(cs)CSUserQueryContext(cm)userQueryContextWithCurrentSuggestion:	-			CSUserQueryContext *	CSSuggestion * currentSuggestion	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	7a5e005877456b3d	-
+property	c:objc(cs)CSUserQueryContext(py)enableRankedResults	-			BOOL	-	assign,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	893ad088ac39fc80	-
+property	c:objc(cs)CSUserQueryContext(py)disableSemanticSearch	-			BOOL	-	assign,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0	-	8a75d31a216a21c5	-
+property	c:objc(cs)CSUserQueryContext(py)maxResultCount	-			NSInteger	-	assign,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	482e123b9c5f91c3	-
+property	c:objc(cs)CSUserQueryContext(py)maxSuggestionCount	-			NSInteger	-	assign,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	0939d3af3118401d	-
+property	c:objc(cs)CSUserQueryContext(py)maxRankedResultCount	-			NSInteger	-	assign,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0	-	936a07501765d794	-
+interface	c:objc(cs)CSUserQuery	-			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	479c55922d3e69a4	-
+super	-	CSUserQuery	CSSearchQuery		-	-	-	-	-	73865e61a4da3a7d	-
+method	c:objc(cs)CSUserQuery(cm)prepare	-			void	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	e0e707969b8fe231	-
+method	c:objc(cs)CSUserQuery(cm)prepareProtectionClasses:	-			void	NSArray<NSFileProtectionType> * protectionClasses	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	25c966826b6e29af	-
+method	c:objc(cs)CSUserQuery(im)initWithUserQueryString:userQueryContext:	-			instancetype	NSString * userQueryString | CSUserQueryContext * userQueryContext	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	f547fcc614fa8c37	-
+property	c:objc(cs)CSUserQuery(py)foundSuggestionCount	-			NSInteger	-	readonly	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	135f61f527ef5a05	-
+property	c:objc(cs)CSUserQuery(py)foundSuggestionsHandler	-			void (^)(NSArray<CSSuggestion *> * _Nonnull)	-	copy	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	d9247bc8214a2645	-
+method	c:objc(cs)CSUserQuery(im)userEngagedWithItem:visibleItems:userInteractionType:	-			void	CSSearchableItem * item | NSArray<CSSearchableItem *> * visibleItems | CSUserInteraction userInteractionType	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	f89d9799e3313ca1	-
+method	c:objc(cs)CSUserQuery(im)userEngagedWithSuggestion:visibleSuggestions:userInteractionType:	-			void	CSSuggestion * suggestion | NSArray<CSSuggestion *> * visibleSuggestions | CSUserInteraction userInteractionType	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	3dde7945c4a911b4	-
+method	c:objc(cs)CSUserQuery(im)start	-			void	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	6c81a1de31ec8df0	-
+method	c:objc(cs)CSUserQuery(im)cancel	-			void	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1	-	d15ea286b97d649c	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSComparisonResult	-			enum NSComparisonResult	-	-	-	-	98996b4daed97d3d	-
+typedef	c:@T@NSFileProtectionType	-			NSString *	-	-	-	-	74b0c9336506f842	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-

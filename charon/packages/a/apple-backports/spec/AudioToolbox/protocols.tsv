@@ -1,0 +1,4 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+AUMessageChannel	16.0	sdk16 body			-	-	-	-	-	-
+AUMessageChannel	16.0	sdk16 body			optional	method	yes	callAudioUnit:	- (NSDictionary * _Nonnull)callAudioUnit:(NSDictionary * _Nonnull)message;	yes
+AUMessageChannel	16.0	sdk16 body			optional	property	no	callHostBlock	@property (nonatomic, readwrite, copy) CallHostBlock _Nullable callHostBlock;	yes

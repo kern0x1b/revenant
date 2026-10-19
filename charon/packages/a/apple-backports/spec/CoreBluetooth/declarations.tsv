@@ -1,0 +1,339 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@CBAdvertisementDataLocalNameKey	-			NSString *const	-	-	-	-	0203140e817e16d6	-
+var	c:@CBAdvertisementDataTxPowerLevelKey	-			NSString *const	-	-	-	-	6994c3d185bf156a	-
+var	c:@CBAdvertisementDataServiceUUIDsKey	-			NSString *const	-	-	-	-	7baf844dc1678d67	-
+var	c:@CBAdvertisementDataServiceDataKey	-			NSString *const	-	-	-	-	26a148e42c381c71	-
+var	c:@CBAdvertisementDataManufacturerDataKey	-			NSString *const	-	-	-	-	e64c5dd629c7760a	-
+var	c:@CBAdvertisementDataOverflowServiceUUIDsKey	-			NSString *const	-	-	ios=6.0/-/-/0	-	6f2474f3a4ae23a3	-
+var	c:@CBAdvertisementDataIsConnectable	-			NSString *const	-	-	ios=7.0/-/-/0	-	4cc2f5bca047cacc	-
+var	c:@CBAdvertisementDataSolicitedServiceUUIDsKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	070c606b033c1fd7	-
+var	c:@CBCentralManagerOptionShowPowerAlertKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	83adb87302145aee	-
+var	c:@CBCentralManagerOptionRestoreIdentifierKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	68bda63ce384eca6	-
+var	c:@CBCentralManagerOptionDeviceAccessForMedia	-			NSString *const	-	-	ios=16.0/-/-/0	-	d39ba90f7175b286	-
+var	c:@CBCentralManagerScanOptionAllowDuplicatesKey	-			NSString *const	-	-	-	-	f865386110e4fe42	-
+var	c:@CBCentralManagerScanOptionSolicitedServiceUUIDsKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	28d3de6f0a2f6a89	-
+var	c:@CBConnectPeripheralOptionNotifyOnConnectionKey	-			NSString *const	-	-	ios=6.0/-/-/0	-	8a5b0d313c039070	-
+var	c:@CBConnectPeripheralOptionNotifyOnDisconnectionKey	-			NSString *const	-	-	-	-	f574f6761061c299	-
+var	c:@CBConnectPeripheralOptionNotifyOnNotificationKey	-			NSString *const	-	-	ios=6.0/-/-/0	-	a34272cdd39cbedb	-
+var	c:@CBConnectPeripheralOptionStartDelayKey	-			NSString *const	-	-	ios=6.0/-/-/0	-	e8b0bce10b4738f3	-
+var	c:@CBConnectPeripheralOptionEnableTransportBridgingKey	-			NSString *const	-	-	ios=13.0/-/-/0	-	c77668cf9ed198fa	-
+var	c:@CBConnectPeripheralOptionRequiresANCS	-			NSString *const	-	-	ios=13.0/-/-/0	-	52f049bf728b4884	-
+var	c:@CBCentralManagerRestoredStatePeripheralsKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	352292903f99bb8a	-
+var	c:@CBCentralManagerRestoredStateScanServicesKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	099657bfdc90253f	-
+var	c:@CBCentralManagerRestoredStateScanOptionsKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	c26ba9f0e72a85c7	-
+typedef	c:@T@CBConnectionEventMatchingOption	-			NSString *	-	-	-	-	ba2fa3df8de076ff	-
+var	c:@CBConnectionEventMatchingOptionServiceUUIDs	-			const CBConnectionEventMatchingOption	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	c2c60d90eda0f22c	-
+var	c:@CBConnectionEventMatchingOptionPeripheralUUIDs	-			const CBConnectionEventMatchingOption	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	f4f5421d7192c75a	-
+var	c:@CBConnectPeripheralOptionEnableAutoReconnect	-			NSString *const	-	-	ios=17.0/-/-/0	-	447642565aeb129b	-
+interface	c:objc(cs)CBManager	-			-	-	-	ios=10.0/-/-/0	deprecated: Use CBManager.authorization instead	11ae0a3f2eedd5ef	-
+super	-	CBManager	NSObject		-	-	-	-	-	7a1a3c9b2fead8b1	-
+method	c:objc(cs)CBManager(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0	-	5cbe21ba1a757765	-
+property	c:objc(cs)CBManager(py)state	-			CBManagerState	-	readonly,assign,nonatomic	ios=10.0/-/-/0	-	84fa50f294704dfa	-
+property	c:objc(cs)CBManager(py)authorization	-			CBManagerAuthorization	-	readonly,assign,nonatomic	ios=13.0/13.1/-/0	-	6e929a82b5cc92ee	-
+property	c:objc(cs)CBManager(cpy)authorization	-			CBManagerAuthorization	-	readonly,assign,nonatomic,class	ios=13.1/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	70e14fe019ec8dbe	-
+typedef	c:@T@CBManagerState	-			enum CBManagerState	-	-	-	-	e4f4556056c5cfd0	-
+enum	c:@E@CBManagerState	-			NSInteger	-	-	ios=10.0/-/-/0	-	9fb8f6d5fdd7a695	-
+enumconst	c:@E@CBManagerState@CBManagerStateUnknown	CBManagerState			-	-	-	ios=10.0/-/-/0	-	3c64a61bea88f307	0
+enumconst	c:@E@CBManagerState@CBManagerStateResetting	CBManagerState			-	-	-	ios=10.0/-/-/0	-	629306920d96266b	1
+enumconst	c:@E@CBManagerState@CBManagerStateUnsupported	CBManagerState			-	-	-	ios=10.0/-/-/0	-	0fa98215aabd299d	2
+enumconst	c:@E@CBManagerState@CBManagerStateUnauthorized	CBManagerState			-	-	-	ios=10.0/-/-/0	-	1fc92fbe1671afec	3
+enumconst	c:@E@CBManagerState@CBManagerStatePoweredOff	CBManagerState			-	-	-	ios=10.0/-/-/0	-	c3d17dcef89aece6	4
+enumconst	c:@E@CBManagerState@CBManagerStatePoweredOn	CBManagerState			-	-	-	ios=10.0/-/-/0	-	082333978b531e83	5
+typedef	c:@T@CBManagerAuthorization	-			enum CBManagerAuthorization	-	-	-	-	90bdb0dd873ac7a2	-
+enum	c:@E@CBManagerAuthorization	-			NSInteger	-	-	ios=13.0/-/-/0	-	5b088b1e8f7a1d04	-
+enumconst	c:@E@CBManagerAuthorization@CBManagerAuthorizationNotDetermined	CBManagerAuthorization			-	-	-	ios=13.0/-/-/0	-	a123dbb24742f8e0	0
+enumconst	c:@E@CBManagerAuthorization@CBManagerAuthorizationRestricted	CBManagerAuthorization			-	-	-	ios=13.0/-/-/0	-	7fd8445454c4d72c	1
+enumconst	c:@E@CBManagerAuthorization@CBManagerAuthorizationDenied	CBManagerAuthorization			-	-	-	ios=13.0/-/-/0	-	7010c0bfc01999b9	2
+enumconst	c:@E@CBManagerAuthorization@CBManagerAuthorizationAllowedAlways	CBManagerAuthorization			-	-	-	ios=13.0/-/-/0	-	89202146594d82cd	3
+typedef	c:@T@CBCentralManagerState	-			enum CBCentralManagerState	-	-	-	-	7860dda67b9d0ca7	-
+enum	c:@E@CBCentralManagerState	-			NSInteger	-	-	ios=5.0/10.0/-/0	-	1b09ee25d64c00e8	-
+enumconst	c:@E@CBCentralManagerState@CBCentralManagerStateUnknown	CBCentralManagerState			-	-	-	ios=5.0/10.0/-/0	-	4e6e4054af340a00	0
+enumconst	c:@E@CBCentralManagerState@CBCentralManagerStateResetting	CBCentralManagerState			-	-	-	ios=5.0/10.0/-/0	-	4da9fc633ac55077	1
+enumconst	c:@E@CBCentralManagerState@CBCentralManagerStateUnsupported	CBCentralManagerState			-	-	-	ios=5.0/10.0/-/0	-	62bb8095b442b281	2
+enumconst	c:@E@CBCentralManagerState@CBCentralManagerStateUnauthorized	CBCentralManagerState			-	-	-	ios=5.0/10.0/-/0	-	d56c30117b85cddc	3
+enumconst	c:@E@CBCentralManagerState@CBCentralManagerStatePoweredOff	CBCentralManagerState			-	-	-	ios=5.0/10.0/-/0	-	87f916a4277b788b	4
+enumconst	c:@E@CBCentralManagerState@CBCentralManagerStatePoweredOn	CBCentralManagerState			-	-	-	ios=5.0/10.0/-/0	-	deff2e8f503ef174	5
+typedef	c:@T@CBConnectionEvent	-			enum CBConnectionEvent	-	-	-	-	c1f2db49efbe4567	-
+enum	c:@E@CBConnectionEvent	-			NSInteger	-	-	-	-	2a1f8cea5b365755	-
+enumconst	c:@E@CBConnectionEvent@CBConnectionEventPeerDisconnected	CBConnectionEvent			-	-	-	-	-	b652c19a9a1c6889	0
+enumconst	c:@E@CBConnectionEvent@CBConnectionEventPeerConnected	CBConnectionEvent			-	-	-	-	-	089974ffce567d91	1
+typedef	c:@T@CBCentralManagerFeature	-			enum CBCentralManagerFeature	-	-	-	-	bd49f485572777a7	-
+enum	c:@E@CBCentralManagerFeature	-			NSUInteger	-	-	-	-	96ed0e251cd74a36	-
+enumconst	c:@E@CBCentralManagerFeature@CBCentralManagerFeatureExtendedScanAndConnect	CBCentralManagerFeature			-	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	3a0a68a200c3e0a1	1
+interface	c:objc(cs)CBCentralManager	-			-	-	-	ios=5.0/-/-/0	-	d856c76c1aa8b761	-
+super	-	CBCentralManager	CBManager		-	-	-	-	-	7cc8778e52cdf4b5	-
+property	c:objc(cs)CBCentralManager(py)delegate	-			id<CBCentralManagerDelegate>	-	weak,nonatomic	ios=5.0/-/-/0	-	3ae8e524f505b7a3	-
+property	c:objc(cs)CBCentralManager(py)isScanning	-			BOOL	-	readonly,assign,nonatomic	ios=9.0/-/-/0	-	e5da837ae76f2105	-
+method	c:objc(cs)CBCentralManager(cm)supportsFeatures:	-			BOOL	CBCentralManagerFeature features	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	1962c944fea4038f	-
+method	c:objc(cs)CBCentralManager(im)init	-			instancetype	-	-	ios=5.0/-/-/0	-	9a0e5c71fda02c7e	-
+method	c:objc(cs)CBCentralManager(im)initWithDelegate:queue:	-			instancetype	id<CBCentralManagerDelegate> delegate | dispatch_queue_t queue	-	ios=5.0/-/-/0	-	5dc96bd6eb15aaba	-
+method	c:objc(cs)CBCentralManager(im)initWithDelegate:queue:options:	-			instancetype	id<CBCentralManagerDelegate> delegate | dispatch_queue_t queue | NSDictionary<NSString *,id> * options	-	ios=7.0/-/-/0	-	82011e1de0deca65	-
+method	c:objc(cs)CBCentralManager(im)retrievePeripheralsWithIdentifiers:	-			NSArray<CBPeripheral *> *	NSArray<NSUUID *> * identifiers	-	ios=7.0/-/-/0	-	bb1b0a8d3ddd3427	-
+method	c:objc(cs)CBCentralManager(im)retrieveConnectedPeripheralsWithServices:	-			NSArray<CBPeripheral *> *	NSArray<CBUUID *> * serviceUUIDs	-	ios=7.0/-/-/0	-	2c60f53ff3e2a159	-
+method	c:objc(cs)CBCentralManager(im)scanForPeripheralsWithServices:options:	-			void	NSArray<CBUUID *> * serviceUUIDs | NSDictionary<NSString *,id> * options	-	ios=5.0/-/-/0	-	c87cd9a2b51ae904	-
+method	c:objc(cs)CBCentralManager(im)stopScan	-			void	-	-	ios=5.0/-/-/0	-	0aae99c58218ca87	-
+method	c:objc(cs)CBCentralManager(im)connectPeripheral:options:	-			void	CBPeripheral * peripheral | NSDictionary<NSString *,id> * options	-	ios=5.0/-/-/0	-	8d61fae51c372bb4	-
+method	c:objc(cs)CBCentralManager(im)cancelPeripheralConnection:	-			void	CBPeripheral * peripheral	-	ios=5.0/-/-/0	-	1c9d1e188808433f	-
+method	c:objc(cs)CBCentralManager(im)registerForConnectionEventsWithOptions:	-			void	NSDictionary<CBConnectionEventMatchingOption,id> * options	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	2541f584b68195d7	-
+protocol	c:objc(pl)CBCentralManagerDelegate	-			-	-	-	-	-	bf98c89ee01b906e	-
+conforms	c:objc(pl)CBCentralManagerDelegate	CBCentralManagerDelegate	NSObject		-	-	-	-	-	faa34b9fb2eba7a9	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManagerDidUpdateState:	-			void	CBCentralManager * central	-	-	-	de030d48fd87f1ea	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:willRestoreState:	-			void	CBCentralManager * central | NSDictionary<NSString *,id> * dict	optional	-	-	2ccd33f9034297c7	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:didDiscoverPeripheral:advertisementData:RSSI:	-			void	CBCentralManager * central | CBPeripheral * peripheral | NSDictionary<NSString *,id> * advertisementData | NSNumber * RSSI	optional	-	-	5315886bd8222b19	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:didConnectPeripheral:	-			void	CBCentralManager * central | CBPeripheral * peripheral	optional	-	-	73ab088ba16d79e0	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:didFailToConnectPeripheral:error:	-			void	CBCentralManager * central | CBPeripheral * peripheral | NSError * error	optional	-	-	09816b7892879e33	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:didDisconnectPeripheral:error:	-			void	CBCentralManager * central | CBPeripheral * peripheral | NSError * error	optional	-	-	87b3a3ac4f70a637	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:didDisconnectPeripheral:timestamp:isReconnecting:error:	-			void	CBCentralManager * central | CBPeripheral * peripheral | CFAbsoluteTime timestamp | BOOL isReconnecting | NSError * error	optional	-	-	240e3242adaa9fc1	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:connectionEventDidOccur:forPeripheral:	-			void	CBCentralManager * central | CBConnectionEvent event | CBPeripheral * peripheral	optional	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	72e9f0a84801ced8	-
+method	c:objc(pl)CBCentralManagerDelegate(im)centralManager:didUpdateANCSAuthorizationForPeripheral:	-			void	CBCentralManager * central | CBPeripheral * peripheral	optional	ios=13.0/-/-/0	-	203164023eedef92	-
+var	c:@CBErrorDomain	-			NSString *const	-	-	-	-	8b3314e45ef7c7f5	-
+typedef	c:@T@CBError	-			enum CBError	-	-	-	-	ace7905eaf59ae5b	-
+enum	c:@E@CBError	-			NSInteger	-	-	-	-	d53bda73f85f7634	-
+enumconst	c:@E@CBError@CBErrorUnknown	CBError			-	-	-	-	-	fae0c2c10d493a76	0
+enumconst	c:@E@CBError@CBErrorInvalidParameters	CBError			-	-	-	ios=6.0/-/-/0	-	afa4a664f2e394ec	1
+enumconst	c:@E@CBError@CBErrorInvalidHandle	CBError			-	-	-	ios=6.0/-/-/0	-	b2c5119623e876a6	2
+enumconst	c:@E@CBError@CBErrorNotConnected	CBError			-	-	-	ios=6.0/-/-/0	-	6cdec5ced38b511f	3
+enumconst	c:@E@CBError@CBErrorOutOfSpace	CBError			-	-	-	ios=6.0/-/-/0	-	0c201613197c8ac2	4
+enumconst	c:@E@CBError@CBErrorOperationCancelled	CBError			-	-	-	ios=6.0/-/-/0	-	876d70035fcec119	5
+enumconst	c:@E@CBError@CBErrorConnectionTimeout	CBError			-	-	-	ios=6.0/-/-/0	-	afd5c029f46855b4	6
+enumconst	c:@E@CBError@CBErrorPeripheralDisconnected	CBError			-	-	-	ios=6.0/-/-/0	-	e143a13f715bbb3f	7
+enumconst	c:@E@CBError@CBErrorUUIDNotAllowed	CBError			-	-	-	ios=6.0/-/-/0	-	bc45f8e8ceff8b30	8
+enumconst	c:@E@CBError@CBErrorAlreadyAdvertising	CBError			-	-	-	ios=6.0/-/-/0	-	1b08fdab188a0acc	9
+enumconst	c:@E@CBError@CBErrorConnectionFailed	CBError			-	-	-	ios=7.1/-/-/0	-	e3b7a6a779016ac3	10
+enumconst	c:@E@CBError@CBErrorConnectionLimitReached	CBError			-	-	-	ios=9.0/-/-/0	-	579fdf8966004bf8	11
+enumconst	c:@E@CBError@CBErrorUnkownDevice	CBError			-	-	-	ios=9.0/13.0/-/0	-	1241a47814e9a664	12
+enumconst	c:@E@CBError@CBErrorUnknownDevice	CBError			-	-	-	ios=12.0/-/-/0	-	8581413c26d72108	12
+enumconst	c:@E@CBError@CBErrorOperationNotSupported	CBError			-	-	-	ios=12.0/-/-/0	-	b39e7aba077e1b12	13
+enumconst	c:@E@CBError@CBErrorPeerRemovedPairingInformation	CBError			-	-	-	ios=13.4/-/-/0	-	573b5cd7f0f753a3	14
+enumconst	c:@E@CBError@CBErrorEncryptionTimedOut	CBError			-	-	-	ios=13.4/-/-/0	-	1c577b691df784ca	15
+enumconst	c:@E@CBError@CBErrorTooManyLEPairedDevices	CBError			-	-	-	ios=14.0/-/-/0	-	947d53c64ce6be95	16
+enumconst	c:@E@CBError@CBErrorLeGattExceededBackgroundNotificationLimit	CBError			-	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=9.0/-/-/0	-	2f826b6c79cba142	17
+enumconst	c:@E@CBError@CBErrorLeGattNearBackgroundNotificationLimit	CBError			-	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=9.0/-/-/0	-	f7c38829c1168ee8	18
+var	c:@CBATTErrorDomain	-			NSString *const	-	-	-	-	e714fbe33302950e	-
+typedef	c:@T@CBATTError	-			enum CBATTError	-	-	-	-	965985cd21d92722	-
+enum	c:@E@CBATTError	-			NSInteger	-	-	-	-	ad02e1e686b4d699	-
+enumconst	c:@E@CBATTError@CBATTErrorSuccess	CBATTError			-	-	-	ios=6.0/-/-/0	-	3d3086b918ea5430	0
+enumconst	c:@E@CBATTError@CBATTErrorInvalidHandle	CBATTError			-	-	-	-	-	bcef9737f265595d	1
+enumconst	c:@E@CBATTError@CBATTErrorReadNotPermitted	CBATTError			-	-	-	-	-	98c67749f0d2f077	2
+enumconst	c:@E@CBATTError@CBATTErrorWriteNotPermitted	CBATTError			-	-	-	-	-	fef14b098fa5b4d5	3
+enumconst	c:@E@CBATTError@CBATTErrorInvalidPdu	CBATTError			-	-	-	-	-	4e308d2d45279e97	4
+enumconst	c:@E@CBATTError@CBATTErrorInsufficientAuthentication	CBATTError			-	-	-	-	-	94c80865b0b7c985	5
+enumconst	c:@E@CBATTError@CBATTErrorRequestNotSupported	CBATTError			-	-	-	-	-	8d40b1464e6d0169	6
+enumconst	c:@E@CBATTError@CBATTErrorInvalidOffset	CBATTError			-	-	-	-	-	109f9c3d072abc6a	7
+enumconst	c:@E@CBATTError@CBATTErrorInsufficientAuthorization	CBATTError			-	-	-	-	-	ba48f0b4bec8bc9d	8
+enumconst	c:@E@CBATTError@CBATTErrorPrepareQueueFull	CBATTError			-	-	-	-	-	c8029a9b8f78e3ea	9
+enumconst	c:@E@CBATTError@CBATTErrorAttributeNotFound	CBATTError			-	-	-	-	-	4a0d9547b468bed8	10
+enumconst	c:@E@CBATTError@CBATTErrorAttributeNotLong	CBATTError			-	-	-	-	-	174a229b089c9a8f	11
+enumconst	c:@E@CBATTError@CBATTErrorInsufficientEncryptionKeySize	CBATTError			-	-	-	-	-	af97b43c80b77fb4	12
+enumconst	c:@E@CBATTError@CBATTErrorInvalidAttributeValueLength	CBATTError			-	-	-	-	-	550549ce467b4d74	13
+enumconst	c:@E@CBATTError@CBATTErrorUnlikelyError	CBATTError			-	-	-	-	-	0b67926ca49c6b90	14
+enumconst	c:@E@CBATTError@CBATTErrorInsufficientEncryption	CBATTError			-	-	-	-	-	be1f85a4a3753ab2	15
+enumconst	c:@E@CBATTError@CBATTErrorUnsupportedGroupType	CBATTError			-	-	-	-	-	904b94dc6e4764c6	16
+enumconst	c:@E@CBATTError@CBATTErrorInsufficientResources	CBATTError			-	-	-	-	-	117e6c8d836eebd5	17
+interface	c:objc(cs)CBPeer	-			-	-	-	ios=8.0/-/-/0	-	4a0d285dceb55d3a	-
+super	-	CBPeer	NSObject		-	-	-	-	-	8b967225489afe20	-
+conforms	c:objc(cs)CBPeer	CBPeer	NSCopying		-	-	-	-	-	1423a9208420c912	-
+method	c:objc(cs)CBPeer(im)init	-			instancetype	-	-	*unavailable ios=8.0/-/-/0	-	921183a528373d7e	-
+property	c:objc(cs)CBPeer(py)identifier	-			NSUUID *	-	readonly,nonatomic	ios=7.0/-/-/0	-	a153747865edd709	-
+typedef	c:@T@CBL2CAPPSM	-			uint16_t	-	-	-	-	76eb511688773b9c	-
+interface	c:objc(cs)CBL2CAPChannel	-			-	-	-	ios=11.0/-/-/0	-	ab0b19ec20acc240	-
+super	-	CBL2CAPChannel	NSObject		-	-	-	-	-	7b47d09069c8a999	-
+property	c:objc(cs)CBL2CAPChannel(py)peer	-			CBPeer *	-	readonly,nonatomic	ios=11.0/-/-/0	-	3cd157d04198cf7e	-
+property	c:objc(cs)CBL2CAPChannel(py)inputStream	-			NSInputStream *	-	readonly,nonatomic	ios=11.0/-/-/0	-	a0c70d0593aa3bcf	-
+property	c:objc(cs)CBL2CAPChannel(py)outputStream	-			NSOutputStream *	-	readonly,nonatomic	ios=11.0/-/-/0	-	34b140991bea546e	-
+property	c:objc(cs)CBL2CAPChannel(py)PSM	-			CBL2CAPPSM	-	readonly,nonatomic	ios=11.0/-/-/0	-	2d62885555842757	-
+var	c:@CBPeripheralManagerOptionShowPowerAlertKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	b9c34ea0ff69e71d	-
+var	c:@CBPeripheralManagerOptionRestoreIdentifierKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	c7965b1ec3318106	-
+var	c:@CBPeripheralManagerRestoredStateServicesKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	ab7db3e3e503db18	-
+var	c:@CBPeripheralManagerRestoredStateAdvertisementDataKey	-			NSString *const	-	-	ios=7.0/-/-/0	-	9ef30f65664ab7e3	-
+typedef	c:@T@CBPeripheralManagerAuthorizationStatus	-			enum CBPeripheralManagerAuthorizationStatus	-	-	-	-	60a3e2765dcfc7a2	-
+enum	c:@E@CBPeripheralManagerAuthorizationStatus	-			NSInteger	-	-	ios=7.0/13.0/-/0	-	6ab1f7571a04a45d	-
+enumconst	c:@E@CBPeripheralManagerAuthorizationStatus@CBPeripheralManagerAuthorizationStatusNotDetermined	CBPeripheralManagerAuthorizationStatus			-	-	-	ios=7.0/13.0/-/0	-	6d20da251e5a3ac7	0
+enumconst	c:@E@CBPeripheralManagerAuthorizationStatus@CBPeripheralManagerAuthorizationStatusRestricted	CBPeripheralManagerAuthorizationStatus			-	-	-	ios=7.0/13.0/-/0	-	6c16e603afeb9ae7	1
+enumconst	c:@E@CBPeripheralManagerAuthorizationStatus@CBPeripheralManagerAuthorizationStatusDenied	CBPeripheralManagerAuthorizationStatus			-	-	-	ios=7.0/13.0/-/0	-	9a6906420dbf7de2	2
+enumconst	c:@E@CBPeripheralManagerAuthorizationStatus@CBPeripheralManagerAuthorizationStatusAuthorized	CBPeripheralManagerAuthorizationStatus			-	-	-	ios=7.0/13.0/-/0	-	0547ea8573b1f87c	3
+typedef	c:@T@CBPeripheralManagerState	-			enum CBPeripheralManagerState	-	-	-	-	256795fe9df2b60c	-
+enum	c:@E@CBPeripheralManagerState	-			NSInteger	-	-	ios=6.0/10.0/-/0	-	869c1a45674b3762	-
+enumconst	c:@E@CBPeripheralManagerState@CBPeripheralManagerStateUnknown	CBPeripheralManagerState			-	-	-	ios=6.0/10.0/-/0	-	46fd5e98bf10ad3e	0
+enumconst	c:@E@CBPeripheralManagerState@CBPeripheralManagerStateResetting	CBPeripheralManagerState			-	-	-	ios=6.0/10.0/-/0	-	fbc5ae7d364aa8e9	1
+enumconst	c:@E@CBPeripheralManagerState@CBPeripheralManagerStateUnsupported	CBPeripheralManagerState			-	-	-	ios=6.0/10.0/-/0	-	66c938b4ae7739cb	2
+enumconst	c:@E@CBPeripheralManagerState@CBPeripheralManagerStateUnauthorized	CBPeripheralManagerState			-	-	-	ios=6.0/10.0/-/0	-	dbb4c81f83630a06	3
+enumconst	c:@E@CBPeripheralManagerState@CBPeripheralManagerStatePoweredOff	CBPeripheralManagerState			-	-	-	ios=6.0/10.0/-/0	-	1d5a7f17e02772f3	4
+enumconst	c:@E@CBPeripheralManagerState@CBPeripheralManagerStatePoweredOn	CBPeripheralManagerState			-	-	-	ios=6.0/10.0/-/0	-	23de624d02a9283c	5
+typedef	c:@T@CBPeripheralManagerConnectionLatency	-			enum CBPeripheralManagerConnectionLatency	-	-	-	-	79f51e6b6ef2225e	-
+enum	c:@E@CBPeripheralManagerConnectionLatency	-			NSInteger	-	-	ios=6.0/-/-/0	-	2981c9b337f92684	-
+enumconst	c:@E@CBPeripheralManagerConnectionLatency@CBPeripheralManagerConnectionLatencyLow	CBPeripheralManagerConnectionLatency			-	-	-	ios=6.0/-/-/0	-	42839bb8ce55d597	0
+enumconst	c:@E@CBPeripheralManagerConnectionLatency@CBPeripheralManagerConnectionLatencyMedium	CBPeripheralManagerConnectionLatency			-	-	-	ios=6.0/-/-/0	-	c84808020154a0dc	1
+enumconst	c:@E@CBPeripheralManagerConnectionLatency@CBPeripheralManagerConnectionLatencyHigh	CBPeripheralManagerConnectionLatency			-	-	-	ios=6.0/-/-/0	-	04870a9e7a67a294	2
+interface	c:objc(cs)CBPeripheralManager	-			-	-	-	ios=6.0/-/-/0	-	c2824df9726bf6f0	-
+super	-	CBPeripheralManager	CBManager		-	-	-	-	-	566159a89d259f5d	-
+property	c:objc(cs)CBPeripheralManager(py)delegate	-			id<CBPeripheralManagerDelegate>	-	weak,nonatomic	ios=6.0/-/-/0	-	a63c7043d2ce9817	-
+property	c:objc(cs)CBPeripheralManager(py)isAdvertising	-			BOOL	-	readonly,assign,nonatomic	ios=6.0/-/-/0	-	a7e2233759965f9d	-
+method	c:objc(cs)CBPeripheralManager(cm)authorizationStatus	-			CBPeripheralManagerAuthorizationStatus	-	-	ios=7.0/13.0/-/0	-	237e38d4e237756f	-
+method	c:objc(cs)CBPeripheralManager(im)init	-			instancetype	-	-	ios=6.0/-/-/0	-	20d6ecd27dbc4a63	-
+method	c:objc(cs)CBPeripheralManager(im)initWithDelegate:queue:	-			instancetype	id<CBPeripheralManagerDelegate> delegate | dispatch_queue_t queue	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	35b115b35c9066a7	-
+method	c:objc(cs)CBPeripheralManager(im)initWithDelegate:queue:options:	-			instancetype	id<CBPeripheralManagerDelegate> delegate | dispatch_queue_t queue | NSDictionary<NSString *,id> * options	-	ios=7.0/-/-/0,macos=10.9/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f3657e18dc3b3dc4	-
+method	c:objc(cs)CBPeripheralManager(im)startAdvertising:	-			void	NSDictionary<NSString *,id> * advertisementData	-	ios=6.0/-/-/0	-	da219542bc5b54d6	-
+method	c:objc(cs)CBPeripheralManager(im)stopAdvertising	-			void	-	-	ios=6.0/-/-/0	-	5cd9e08819b8e0c8	-
+method	c:objc(cs)CBPeripheralManager(im)setDesiredConnectionLatency:forCentral:	-			void	CBPeripheralManagerConnectionLatency latency | CBCentral * central	-	ios=6.0/-/-/0	-	b4cc8d65c1f53cf3	-
+method	c:objc(cs)CBPeripheralManager(im)addService:	-			void	CBMutableService * service	-	ios=6.0/-/-/0	-	65e9e1068d7114ad	-
+method	c:objc(cs)CBPeripheralManager(im)removeService:	-			void	CBMutableService * service	-	ios=6.0/-/-/0	-	965d48fdb10fd374	-
+method	c:objc(cs)CBPeripheralManager(im)removeAllServices	-			void	-	-	ios=6.0/-/-/0	-	6af869ec7229f983	-
+method	c:objc(cs)CBPeripheralManager(im)respondToRequest:withResult:	-			void	CBATTRequest * request | CBATTError result	-	ios=6.0/-/-/0	-	226c191d10897153	-
+method	c:objc(cs)CBPeripheralManager(im)updateValue:forCharacteristic:onSubscribedCentrals:	-			BOOL	NSData * value | CBMutableCharacteristic * characteristic | NSArray<CBCentral *> * centrals	-	ios=6.0/-/-/0	-	da041b2847401b77	-
+method	c:objc(cs)CBPeripheralManager(im)publishL2CAPChannelWithEncryption:	-			void	BOOL encryptionRequired	-	ios=11.0/-/-/0	-	274db7a3c37b3465	-
+method	c:objc(cs)CBPeripheralManager(im)unpublishL2CAPChannel:	-			void	CBL2CAPPSM PSM	-	ios=11.0/-/-/0	-	adf574ffe0a9cbb3	-
+protocol	c:objc(pl)CBPeripheralManagerDelegate	-			-	-	-	-	-	9445bedba0ac69e3	-
+conforms	c:objc(pl)CBPeripheralManagerDelegate	CBPeripheralManagerDelegate	NSObject		-	-	-	-	-	36acf38c79170aea	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManagerDidUpdateState:	-			void	CBPeripheralManager * peripheral	-	-	-	e9c38c6cdd896140	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:willRestoreState:	-			void	CBPeripheralManager * peripheral | NSDictionary<NSString *,id> * dict	optional	-	-	626e323ef2dd2104	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManagerDidStartAdvertising:error:	-			void	CBPeripheralManager * peripheral | NSError * error	optional	-	-	4171e9c39868e481	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:didAddService:error:	-			void	CBPeripheralManager * peripheral | CBService * service | NSError * error	optional	-	-	7c968c0444275805	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:central:didSubscribeToCharacteristic:	-			void	CBPeripheralManager * peripheral | CBCentral * central | CBCharacteristic * characteristic	optional	-	-	fbd27b46c07f986f	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:central:didUnsubscribeFromCharacteristic:	-			void	CBPeripheralManager * peripheral | CBCentral * central | CBCharacteristic * characteristic	optional	-	-	9567fb7ec4ed36c4	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:didReceiveReadRequest:	-			void	CBPeripheralManager * peripheral | CBATTRequest * request	optional	-	-	ed2153d8f34c826d	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:didReceiveWriteRequests:	-			void	CBPeripheralManager * peripheral | NSArray<CBATTRequest *> * requests	optional	-	-	290d228bf62a8274	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManagerIsReadyToUpdateSubscribers:	-			void	CBPeripheralManager * peripheral	optional	-	-	b65b5d0b207a5ad1	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:didPublishL2CAPChannel:error:	-			void	CBPeripheralManager * peripheral | CBL2CAPPSM PSM | NSError * error	optional	-	-	1b81bb8e11f2916d	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:didUnpublishL2CAPChannel:error:	-			void	CBPeripheralManager * peripheral | CBL2CAPPSM PSM | NSError * error	optional	-	-	ac4e011f0e7d2491	-
+method	c:objc(pl)CBPeripheralManagerDelegate(im)peripheralManager:didOpenL2CAPChannel:error:	-			void	CBPeripheralManager * peripheral | CBL2CAPChannel * channel | NSError * error	optional	-	-	1b22520ea1fdf0eb	-
+typedef	c:@T@CBPeripheralState	-			enum CBPeripheralState	-	-	-	-	30b2dbab26a3c3f9	-
+enum	c:@E@CBPeripheralState	-			NSInteger	-	-	ios=7.0/-/-/0	-	946552d52cef2bd3	-
+enumconst	c:@E@CBPeripheralState@CBPeripheralStateDisconnected	CBPeripheralState			-	-	-	ios=7.0/-/-/0	-	9a45727edb49bfed	0
+enumconst	c:@E@CBPeripheralState@CBPeripheralStateConnecting	CBPeripheralState			-	-	-	ios=7.0/-/-/0	-	222bc3c256276381	1
+enumconst	c:@E@CBPeripheralState@CBPeripheralStateConnected	CBPeripheralState			-	-	-	ios=7.0/-/-/0	-	ef15a1ab4d2802d0	2
+enumconst	c:@E@CBPeripheralState@CBPeripheralStateDisconnecting	CBPeripheralState			-	-	-	ios=9.0/-/-/0	-	5a96b8f81fcc4eb3	3
+typedef	c:@T@CBCharacteristicWriteType	-			enum CBCharacteristicWriteType	-	-	-	-	7fbac696089ebeab	-
+enum	c:@E@CBCharacteristicWriteType	-			NSInteger	-	-	-	-	a72d11b51507e37f	-
+enumconst	c:@E@CBCharacteristicWriteType@CBCharacteristicWriteWithResponse	CBCharacteristicWriteType			-	-	-	-	-	95fc0bedd6142c16	0
+enumconst	c:@E@CBCharacteristicWriteType@CBCharacteristicWriteWithoutResponse	CBCharacteristicWriteType			-	-	-	-	-	bb419ba2167606bd	1
+interface	c:objc(cs)CBPeripheral	-			-	-	-	ios=5.0/-/-/0	-	c312d6c8eae20f0a	-
+super	-	CBPeripheral	CBPeer		-	-	-	-	-	5cd29280eb30a0ed	-
+property	c:objc(cs)CBPeripheral(py)delegate	-			id<CBPeripheralDelegate>	-	weak,nonatomic	ios=5.0/-/-/0	-	6182d7ed2899728b	-
+property	c:objc(cs)CBPeripheral(py)name	-			NSString *	-	readonly,retain	ios=5.0/-/-/0	-	828c3865caf38c6c	-
+property	c:objc(cs)CBPeripheral(py)RSSI	-			NSNumber *	-	readonly,retain	ios=5.0/8.0/-/0	-	d0f01b44af7c402d	-
+property	c:objc(cs)CBPeripheral(py)state	-			CBPeripheralState	-	readonly	ios=5.0/-/-/0	-	67f09a8941062d97	-
+property	c:objc(cs)CBPeripheral(py)services	-			NSArray<CBService *> *	-	readonly,retain	ios=5.0/-/-/0	-	65ef260b29a6036e	-
+property	c:objc(cs)CBPeripheral(py)canSendWriteWithoutResponse	-			BOOL	-	readonly	ios=11.0/-/-/0	-	4416d1efa4b77d3b	-
+property	c:objc(cs)CBPeripheral(py)ancsAuthorized	-			BOOL	-	readonly	ios=13.0/-/-/0	-	dcea746c844001d7	-
+method	c:objc(cs)CBPeripheral(im)readRSSI	-			void	-	-	ios=5.0/-/-/0	-	97510404139e80d4	-
+method	c:objc(cs)CBPeripheral(im)discoverServices:	-			void	NSArray<CBUUID *> * serviceUUIDs	-	ios=5.0/-/-/0	-	6bf9a6d5bd418a53	-
+method	c:objc(cs)CBPeripheral(im)discoverIncludedServices:forService:	-			void	NSArray<CBUUID *> * includedServiceUUIDs | CBService * service	-	ios=5.0/-/-/0	-	33d93cc9d0cd9197	-
+method	c:objc(cs)CBPeripheral(im)discoverCharacteristics:forService:	-			void	NSArray<CBUUID *> * characteristicUUIDs | CBService * service	-	ios=5.0/-/-/0	-	d78e6718f306b8dc	-
+method	c:objc(cs)CBPeripheral(im)readValueForCharacteristic:	-			void	CBCharacteristic * characteristic	-	ios=5.0/-/-/0	-	ad106fd706e3041c	-
+method	c:objc(cs)CBPeripheral(im)maximumWriteValueLengthForType:	-			NSUInteger	CBCharacteristicWriteType type	-	ios=9.0/-/-/0	-	666618410eff8abc	-
+method	c:objc(cs)CBPeripheral(im)writeValue:forCharacteristic:type:	-			void	NSData * data | CBCharacteristic * characteristic | CBCharacteristicWriteType type	-	ios=5.0/-/-/0	-	643168d86eb385fb	-
+method	c:objc(cs)CBPeripheral(im)setNotifyValue:forCharacteristic:	-			void	BOOL enabled | CBCharacteristic * characteristic	-	ios=5.0/-/-/0	-	9c3c2c734ab36556	-
+method	c:objc(cs)CBPeripheral(im)discoverDescriptorsForCharacteristic:	-			void	CBCharacteristic * characteristic	-	ios=5.0/-/-/0	-	a38e37e642629fb9	-
+method	c:objc(cs)CBPeripheral(im)readValueForDescriptor:	-			void	CBDescriptor * descriptor	-	ios=5.0/-/-/0	-	6bc1307e68e3da9d	-
+method	c:objc(cs)CBPeripheral(im)writeValue:forDescriptor:	-			void	NSData * data | CBDescriptor * descriptor	-	ios=5.0/-/-/0	-	3c21fbbfbfdc5022	-
+method	c:objc(cs)CBPeripheral(im)openL2CAPChannel:	-			void	CBL2CAPPSM PSM	-	ios=11.0/-/-/0	-	25559b30dfaf4fa8	-
+protocol	c:objc(pl)CBPeripheralDelegate	-			-	-	-	-	-	efec2f71be8565a8	-
+conforms	c:objc(pl)CBPeripheralDelegate	CBPeripheralDelegate	NSObject		-	-	-	-	-	f84bfd0b29e3f28e	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheralDidUpdateName:	-			void	CBPeripheral * peripheral	optional	ios=6.0/-/-/0	-	1b53d0b4115e11de	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didModifyServices:	-			void	CBPeripheral * peripheral | NSArray<CBService *> * invalidatedServices	optional	ios=7.0/-/-/0	-	24ccb1a354ba991b	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheralDidUpdateRSSI:error:	-			void	CBPeripheral * peripheral | NSError * error	optional	ios=5.0/8.0/-/0	-	3476c4ac38bc6518	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didReadRSSI:error:	-			void	CBPeripheral * peripheral | NSNumber * RSSI | NSError * error	optional	ios=8.0/-/-/0	-	51481411621ecade	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didDiscoverServices:	-			void	CBPeripheral * peripheral | NSError * error	optional	-	-	8b591484f9500bfa	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didDiscoverIncludedServicesForService:error:	-			void	CBPeripheral * peripheral | CBService * service | NSError * error	optional	-	-	3e549313e7c2a0ac	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didDiscoverCharacteristicsForService:error:	-			void	CBPeripheral * peripheral | CBService * service | NSError * error	optional	-	-	d72e912022a06f37	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didUpdateValueForCharacteristic:error:	-			void	CBPeripheral * peripheral | CBCharacteristic * characteristic | NSError * error	optional	-	-	32d1f38658787030	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didWriteValueForCharacteristic:error:	-			void	CBPeripheral * peripheral | CBCharacteristic * characteristic | NSError * error	optional	-	-	7dce3c3aecf09916	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didUpdateNotificationStateForCharacteristic:error:	-			void	CBPeripheral * peripheral | CBCharacteristic * characteristic | NSError * error	optional	-	-	202e504f3389f613	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didDiscoverDescriptorsForCharacteristic:error:	-			void	CBPeripheral * peripheral | CBCharacteristic * characteristic | NSError * error	optional	-	-	63793aa0dbcbc2ec	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didUpdateValueForDescriptor:error:	-			void	CBPeripheral * peripheral | CBDescriptor * descriptor | NSError * error	optional	-	-	ccb439fed52a31c8	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didWriteValueForDescriptor:error:	-			void	CBPeripheral * peripheral | CBDescriptor * descriptor | NSError * error	optional	-	-	5f8caac9a75ac224	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheralIsReadyToSendWriteWithoutResponse:	-			void	CBPeripheral * peripheral	optional	-	-	aa67fdc0db79f46c	-
+method	c:objc(pl)CBPeripheralDelegate(im)peripheral:didOpenL2CAPChannel:error:	-			void	CBPeripheral * peripheral | CBL2CAPChannel * channel | NSError * error	optional	-	-	34f32b29b6cc0d9e	-
+interface	c:objc(cs)CBCentral	-			-	-	-	ios=6.0/-/-/0	-	1448a20948482cd5	-
+super	-	CBCentral	CBPeer		-	-	-	-	-	31a891ff88c24c74	-
+property	c:objc(cs)CBCentral(py)maximumUpdateValueLength	-			NSUInteger	-	readonly,nonatomic	ios=6.0/-/-/0	-	5488d1b9df5a9df4	-
+interface	c:objc(cs)CBAttribute	-			-	-	-	ios=8.0/-/-/0	-	2d74d8b16f56ccb8	-
+super	-	CBAttribute	NSObject		-	-	-	-	-	df5efe58b629551a	-
+method	c:objc(cs)CBAttribute(im)init	-			instancetype	-	-	*unavailable ios=8.0/-/-/0	-	1ec5f08163667ccc	-
+property	c:objc(cs)CBAttribute(py)UUID	-			CBUUID *	-	readonly,nonatomic	ios=8.0/-/-/0	-	20b6ca3788fba250	-
+interface	c:objc(cs)CBService	-			-	-	-	ios=5.0/-/-/0	-	2c64b147490457cc	-
+super	-	CBService	CBAttribute		-	-	-	-	-	40e11cea2bf9a891	-
+property	c:objc(cs)CBService(py)peripheral	-			CBPeripheral *	-	readonly,weak,nonatomic	ios=5.0/-/-/0	-	9cface4f1f55068f	-
+property	c:objc(cs)CBService(py)isPrimary	-			BOOL	-	readonly,nonatomic	ios=5.0/-/-/0	-	a82db924d66a74d7	-
+property	c:objc(cs)CBService(py)includedServices	-			NSArray<CBService *> *	-	readonly,retain	ios=5.0/-/-/0	-	a588d3c9990ee124	-
+property	c:objc(cs)CBService(py)characteristics	-			NSArray<CBCharacteristic *> *	-	readonly,retain	ios=5.0/-/-/0	-	bfb7682e202ef72b	-
+interface	c:objc(cs)CBMutableService	-			-	-	-	ios=6.0/-/-/0	-	8dfa2caac55f16e8	-
+super	-	CBMutableService	CBService		-	-	-	-	-	e5403699893ee24e	-
+property	c:objc(cs)CBMutableService(py)includedServices	-			NSArray<CBService *> *	-	retain	ios=6.0/-/-/0	-	c31926fcc96c789c	-
+property	c:objc(cs)CBMutableService(py)characteristics	-			NSArray<CBCharacteristic *> *	-	retain	ios=6.0/-/-/0	-	febe8828a2747b83	-
+method	c:objc(cs)CBMutableService(im)initWithType:primary:	-			instancetype	CBUUID * UUID | BOOL isPrimary	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cfb43acf8c1165ff	-
+typedef	c:@T@CBCharacteristicProperties	-			enum CBCharacteristicProperties	-	-	-	-	2df83b9701603256	-
+enum	c:@E@CBCharacteristicProperties	-			NSUInteger	-	-	-	-	5dd680dd03c80e8f	-
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyBroadcast	CBCharacteristicProperties			-	-	-	-	-	13847f33860dd93c	1
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyRead	CBCharacteristicProperties			-	-	-	-	-	679b00225c7e05c0	2
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyWriteWithoutResponse	CBCharacteristicProperties			-	-	-	-	-	1eea38c20a80e1b2	4
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyWrite	CBCharacteristicProperties			-	-	-	-	-	097b084d54933599	8
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyNotify	CBCharacteristicProperties			-	-	-	-	-	9eae9a273847be81	16
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyIndicate	CBCharacteristicProperties			-	-	-	-	-	ba5be94817282119	32
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyAuthenticatedSignedWrites	CBCharacteristicProperties			-	-	-	-	-	a216ef08af50360b	64
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyExtendedProperties	CBCharacteristicProperties			-	-	-	-	-	545f781045203c0d	128
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyNotifyEncryptionRequired	CBCharacteristicProperties			-	-	-	ios=6.0/-/-/0	-	2253bca70bdf29e5	256
+enumconst	c:@E@CBCharacteristicProperties@CBCharacteristicPropertyIndicateEncryptionRequired	CBCharacteristicProperties			-	-	-	ios=6.0/-/-/0	-	6f7f897dd9935e0a	512
+interface	c:objc(cs)CBCharacteristic	-			-	-	-	ios=5.0/-/-/0	-	90385135e17bda46	-
+super	-	CBCharacteristic	CBAttribute		-	-	-	-	-	5a3bc5afa6dcbae3	-
+property	c:objc(cs)CBCharacteristic(py)service	-			CBService *	-	readonly,weak,nonatomic	ios=5.0/-/-/0	-	41eecca32b1906b8	-
+property	c:objc(cs)CBCharacteristic(py)properties	-			CBCharacteristicProperties	-	readonly,nonatomic	ios=5.0/-/-/0	-	f54ac0330bb5ec5b	-
+property	c:objc(cs)CBCharacteristic(py)value	-			NSData *	-	readonly,retain	ios=5.0/-/-/0	-	ab492f007372310b	-
+property	c:objc(cs)CBCharacteristic(py)descriptors	-			NSArray<CBDescriptor *> *	-	readonly,retain	ios=5.0/-/-/0	-	6bdebe1dc89e2a43	-
+property	c:objc(cs)CBCharacteristic(py)isBroadcasted	-			BOOL	-	readonly	ios=5.0/8.0/-/0	-	6d066fb19eeeb7a4	-
+property	c:objc(cs)CBCharacteristic(py)isNotifying	-			BOOL	-	readonly	ios=5.0/-/-/0	-	faa36e5d515242d8	-
+typedef	c:@T@CBAttributePermissions	-			enum CBAttributePermissions	-	-	-	-	95ca902d4e8a96a4	-
+enum	c:@E@CBAttributePermissions	-			NSUInteger	-	-	ios=6.0/-/-/0	-	97a47ec5f76f504e	-
+enumconst	c:@E@CBAttributePermissions@CBAttributePermissionsReadable	CBAttributePermissions			-	-	-	ios=6.0/-/-/0	-	cd25e83f3446f792	1
+enumconst	c:@E@CBAttributePermissions@CBAttributePermissionsWriteable	CBAttributePermissions			-	-	-	ios=6.0/-/-/0	-	aab90c8a95e9af2c	2
+enumconst	c:@E@CBAttributePermissions@CBAttributePermissionsReadEncryptionRequired	CBAttributePermissions			-	-	-	ios=6.0/-/-/0	-	52606d6abe06607f	4
+enumconst	c:@E@CBAttributePermissions@CBAttributePermissionsWriteEncryptionRequired	CBAttributePermissions			-	-	-	ios=6.0/-/-/0	-	146bc7c5731164a5	8
+interface	c:objc(cs)CBMutableCharacteristic	-			-	-	-	ios=6.0/-/-/0	-	759165f3667e3dcf	-
+super	-	CBMutableCharacteristic	CBCharacteristic		-	-	-	-	-	4e5d97587c2038de	-
+property	c:objc(cs)CBMutableCharacteristic(py)permissions	-			CBAttributePermissions	-	assign,nonatomic	ios=6.0/-/-/0	-	2b2dc6807788d29e	-
+property	c:objc(cs)CBMutableCharacteristic(py)subscribedCentrals	-			NSArray<CBCentral *> *	-	readonly,retain	ios=7.0/-/-/0	-	15b3647b6b23f38e	-
+property	c:objc(cs)CBMutableCharacteristic(py)properties	-			CBCharacteristicProperties	-	assign,nonatomic	ios=6.0/-/-/0	-	64f5ed14e7063b31	-
+property	c:objc(cs)CBMutableCharacteristic(py)value	-			NSData *	-	retain	ios=6.0/-/-/0	-	8a6e6449bdf6fa76	-
+property	c:objc(cs)CBMutableCharacteristic(py)descriptors	-			NSArray<CBDescriptor *> *	-	retain	ios=6.0/-/-/0	-	010c207e3643068e	-
+method	c:objc(cs)CBMutableCharacteristic(im)initWithType:properties:value:permissions:	-			instancetype	CBUUID * UUID | CBCharacteristicProperties properties | NSData * value | CBAttributePermissions permissions	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e27f9ca5dba5c969	-
+interface	c:objc(cs)CBDescriptor	-			-	-	-	ios=5.0/-/-/0	-	0237d037da39db26	-
+super	-	CBDescriptor	CBAttribute		-	-	-	-	-	20ded706d63701b3	-
+property	c:objc(cs)CBDescriptor(py)characteristic	-			CBCharacteristic *	-	readonly,weak,nonatomic	ios=5.0/-/-/0	-	0421b592103ed4f3	-
+property	c:objc(cs)CBDescriptor(py)value	-			id	-	readonly,retain	ios=5.0/-/-/0	-	5061a6b0218978dd	-
+interface	c:objc(cs)CBMutableDescriptor	-			-	-	-	ios=6.0/-/-/0	-	808f64e424dfa1e3	-
+super	-	CBMutableDescriptor	CBDescriptor		-	-	-	-	-	7275343de20ef1de	-
+method	c:objc(cs)CBMutableDescriptor(im)initWithType:value:	-			instancetype	CBUUID * UUID | id value	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0f20d2e96c364b19	-
+var	c:@CBUUIDCharacteristicExtendedPropertiesString	-			NSString *const	-	-	-	-	c3cc5f036cb7889e	-
+var	c:@CBUUIDCharacteristicUserDescriptionString	-			NSString *const	-	-	-	-	5a25308bdf98f53e	-
+var	c:@CBUUIDClientCharacteristicConfigurationString	-			NSString *const	-	-	-	-	7405ac43a0713b3e	-
+var	c:@CBUUIDServerCharacteristicConfigurationString	-			NSString *const	-	-	-	-	9a942e7c65d024eb	-
+var	c:@CBUUIDCharacteristicFormatString	-			NSString *const	-	-	-	-	f403d4b12cf7f2c1	-
+var	c:@CBUUIDCharacteristicAggregateFormatString	-			NSString *const	-	-	-	-	bb419bbc8a3842df	-
+var	c:@CBUUIDCharacteristicValidRangeString	-			NSString *const	-	-	-	-	dbd3b11bfbe49fe2	-
+var	c:@CBUUIDCharacteristicObservationScheduleString	-			NSString *const	-	-	-	-	bebe154a81fe46ea	-
+var	c:@CBUUIDL2CAPPSMCharacteristicString	-			NSString *const	-	-	ios=11.0/-/-/0	-	c1b54196e5e437d9	-
+interface	c:objc(cs)CBUUID	-			-	-	-	ios=5.0/-/-/0	-	1ade1536986adf2d	-
+super	-	CBUUID	NSObject		-	-	-	-	-	0d17cb7597f4363f	-
+conforms	c:objc(cs)CBUUID	CBUUID	NSCopying		-	-	-	-	-	0c0e3c0c3e8d1f3f	-
+property	c:objc(cs)CBUUID(py)data	-			NSData *	-	readonly,nonatomic	ios=5.0/-/-/0	-	ead18baa715b6a0f	-
+property	c:objc(cs)CBUUID(py)UUIDString	-			NSString *	-	readonly,nonatomic	ios=7.1/-/-/0	-	8bdf7916ee64b888	-
+method	c:objc(cs)CBUUID(cm)UUIDWithString:	-			CBUUID *	NSString * theString	-	ios=5.0/-/-/0	-	dc49c2e137331620	-
+method	c:objc(cs)CBUUID(cm)UUIDWithData:	-			CBUUID *	NSData * theData	-	ios=5.0/-/-/0	-	840b5fc66db927fc	-
+method	c:objc(cs)CBUUID(cm)UUIDWithCFUUID:	-			CBUUID *	CFUUIDRef theUUID	-	ios=5.0/9.0/-/0	-	7ac11b2d6539d456	-
+method	c:objc(cs)CBUUID(cm)UUIDWithNSUUID:	-			CBUUID *	NSUUID * theUUID	-	ios=7.0/-/-/0	-	371bf21b3f5566af	-
+interface	c:objc(cs)CBATTRequest	-			-	-	-	ios=6.0/-/-/0	-	5cf168c87582da61	-
+super	-	CBATTRequest	NSObject		-	-	-	-	-	5f9d4646bf84b0e4	-
+method	c:objc(cs)CBATTRequest(im)init	-			instancetype	-	-	*unavailable ios=6.0/-/-/0	-	8979d23938e39cd9	-
+property	c:objc(cs)CBATTRequest(py)central	-			CBCentral *	-	readonly,nonatomic	ios=6.0/-/-/0	-	aac5ad4f2e764f34	-
+property	c:objc(cs)CBATTRequest(py)characteristic	-			CBCharacteristic *	-	readonly,nonatomic	ios=6.0/-/-/0	-	a484e6d1c2b860d8	-
+property	c:objc(cs)CBATTRequest(py)offset	-			NSUInteger	-	readonly,nonatomic	ios=6.0/-/-/0	-	eb06df4ecc05c0aa	-
+property	c:objc(cs)CBATTRequest(py)value	-			NSData *	-	copy	ios=6.0/-/-/0	-	945361e8be9d5aa5	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@CFAbsoluteTime	-			CFTimeInterval	-	-	-	-	28db4ad74a7edc7f	-
+typedef	c:@T@CFTimeInterval	-			double	-	-	-	-	11d627848397cf44	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@CFUUIDRef	-			const struct __CFUUID *	-	-	-	-	4bfe0d61060a2df4	-

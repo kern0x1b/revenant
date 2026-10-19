@@ -1,0 +1,13 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "-[NSUUID compare:]",
+      "kind": "method",
+      "introduced": "15.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUUIDCompare.md",
+      "source": "Foundation 16.0 arm64e, -[NSUUID compare:] at 0x18179d164"
+    }
+  ]
+}

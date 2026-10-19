@@ -1,0 +1,38 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVMetadataMachineReadableCodeObject",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 6 of coordination/corpus/crash-demand-top.tsv, LOAD-FAIL for telegram and provenance: a hard, non-weak reference to the class name kills the application at launch. AVMetadataObject, its real superclass, is already on this release (AVMetadataFaceObject ships with 6.1.3's own face detection), so this is an ordinary subclass of a real class, not a bridge - confirmed no name collision against the armv7 shared cache of 6.1.3 with apple.objc.inventory() before writing a line",
+      "effect": "a real, instantiable subclass of AVMetadataObject with its own stringValue and corners; AVCaptureMetadataOutput, the class that would produce one from a live camera feed, does not exist on this release and is not part of this row - what this closes is the compile-time reference that was killing the process, not live barcode capture",
+      "facts": "facts/AVFoundation/AVMetadataMachineReadableCodeObject.md",
+      "source": "SDK 16.4, AVFoundation/AVMetadataObject.h"
+    },
+    {
+      "api": "AVMetadataMachineReadableCodeObject.stringValue",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a real stored property this port's own initializer sets, not inherited from AVFoundation's private capture pipeline",
+      "effect": "answers exactly what -initWithStringValue:corners: was given, nil by default",
+      "facts": "facts/AVFoundation/AVMetadataMachineReadableCodeObject.md",
+      "source": "see AVMetadataMachineReadableCodeObject"
+    },
+    {
+      "api": "AVMetadataMachineReadableCodeObject.corners",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a real stored property this port's own initializer sets, not inherited from AVFoundation's private capture pipeline",
+      "effect": "answers exactly what -initWithStringValue:corners: was given, an empty array by default",
+      "facts": "facts/AVFoundation/AVMetadataMachineReadableCodeObject.md",
+      "source": "see AVMetadataMachineReadableCodeObject"
+    }
+  ]
+}

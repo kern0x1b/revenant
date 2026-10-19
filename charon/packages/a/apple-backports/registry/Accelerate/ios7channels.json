@@ -1,0 +1,60 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImagePermuteChannels_ARGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a four-channel reorder whose whole of work is where each run lands; Conversion.h states the copy as `result[i] = srcPixel[permuteMap[i]]` and the port is that loop",
+      "effect": "for each destination pixel its run i is the source's run permuteMap[i], sixteen bits at a time and the values unmoved, over dest->width of dest->height rows; the whole source pixel is read before any of it is written, so the call is correct in place and over the map 3,2,1,0 the header names; a map value above 3 is kvImageInvalidParameter and a NULL map is kvImageNullPointerArgument; the flag set is measured per function and this one takes `kvImageDoNotTile` (0x10) and `kvImageGetTempBufferSize` (0x80) and refuses every other bit of the word with kvImageUnknownFlagsBit; a NULL buffer is kvImageNullPointerArgument where the release answers it and the port's own refusal where the release dies on it, a destination larger than the source is kvImageRoiLargerThanInputBuffer, GetTempBufferSize does no work and answers zero, and a value outside the range the header names for it is kvImageInvalidParameter",
+      "facts": "facts/Accelerate/vImageChannels.md",
+      "source": "the header of iOS 16.4 (Conversion.h) for the contract, the copyMask bit order and the return codes it names; the host's own vImage, held against the port case by case by tests/backports/host/vimagechannels, which computes the expected destination from that contract before asking the host, compares every byte of every row including the bytes neither side may write, and surveys the whole flag word and a table of copyMask values for every function of the family; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImagePermuteChannelsWithMaskedInsert_ARGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the permute above and the overwrite fused, so each channel can be set to its own value; the header gives both halves and the port follows them in one pass",
+      "effect": "as the permute, and where the copyMask bit for channel i is SET - the mask is 0x8 alpha, 0x4 red, 0x2 green, 0x1 blue, tested from the top bit down, and a set bit copies the given pixel in, which is what the header's own pseudocode and its parameter comment both say and what the host answers - that run is the given pixel's run i instead. **The copyMask has no range**, whatever the header's \"kvImageInvalidParameter when copyMask > 0x0F\" says: measured over twelve values from 0x00 to 0xFF the host answers kvImageNoError for every one and writes the same bytes above 0x0F as for 0x0F, so the bits outside the four are carried and ignored; the flag set is measured per function and this one takes `kvImageDoNotTile` (0x10) and `kvImageGetTempBufferSize` (0x80) and refuses every other bit of the word with kvImageUnknownFlagsBit; a NULL buffer is kvImageNullPointerArgument where the release answers it and the port's own refusal where the release dies on it, a destination larger than the source is kvImageRoiLargerThanInputBuffer, GetTempBufferSize does no work and answers zero, and a value outside the range the header names for it is kvImageInvalidParameter",
+      "facts": "facts/Accelerate/vImageChannels.md",
+      "source": "the header of iOS 16.4 (Conversion.h) for the contract, the copyMask bit order and the return codes it names; the host's own vImage, held against the port case by case by tests/backports/host/vimagechannels, which computes the expected destination from that contract before asking the host, compares every byte of every row including the bytes neither side may write, and surveys the whole flag word and a table of copyMask values for every function of the family; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImagePermuteChannelsWithMaskedInsert_ARGB8888()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same fused permute and overwrite over four eight-bit channels",
+      "effect": "as the sixteen-bit masked insert with runs of one byte, so a signed or a float channel would be carried through unchanged, which is what the header says of a channel move; a copyMask has no range, as above; the flag set is measured per function and this one takes `kvImageDoNotTile` (0x10) and `kvImageGetTempBufferSize` (0x80) and refuses every other bit of the word with kvImageUnknownFlagsBit; a NULL buffer is kvImageNullPointerArgument where the release answers it and the port's own refusal where the release dies on it, a destination larger than the source is kvImageRoiLargerThanInputBuffer, GetTempBufferSize does no work and answers zero, and a value outside the range the header names for it is kvImageInvalidParameter",
+      "facts": "facts/Accelerate/vImageChannels.md",
+      "source": "the header of iOS 16.4 (Conversion.h) for the contract, the copyMask bit order and the return codes it names; the host's own vImage, held against the port case by case by tests/backports/host/vimagechannels, which computes the expected destination from that contract before asking the host, compares every byte of every row including the bytes neither side may write, and surveys the whole flag word and a table of copyMask values for every function of the family; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImagePermuteChannelsWithMaskedInsert_ARGBFFFF()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same fused permute and overwrite over four thirty-two-bit channels",
+      "effect": "as the sixteen-bit masked insert with runs of four bytes, so a channel that is a NaN keeps its payload; a copyMask has no range, as above; the flag set is measured per function and this one takes `kvImageDoNotTile` (0x10) and `kvImageGetTempBufferSize` (0x80) and refuses every other bit of the word with kvImageUnknownFlagsBit; a NULL buffer is kvImageNullPointerArgument where the release answers it and the port's own refusal where the release dies on it, a destination larger than the source is kvImageRoiLargerThanInputBuffer, GetTempBufferSize does no work and answers zero, and a value outside the range the header names for it is kvImageInvalidParameter",
+      "facts": "facts/Accelerate/vImageChannels.md",
+      "source": "the header of iOS 16.4 (Conversion.h) for the contract, the copyMask bit order and the return codes it names; the host's own vImage, held against the port case by case by tests/backports/host/vimagechannels, which computes the expected destination from that contract before asking the host, compares every byte of every row including the bytes neither side may write, and surveys the whole flag word and a table of copyMask values for every function of the family; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageOverwriteChannelsWithPixel_ARGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "every destination pixel takes the given pixel's runs except the ones the mask clears; measured over all sixteen masks, with copyMask 0 the host conserves every run of the source and with 0x8 it writes the pixel's alpha and conserves the rest, so the bit is set for the pixel and not for the source",
+      "effect": "for each destination pixel and each channel, the given pixel's run where the copyMask bit for that channel is set and the source's own run where it is clear; a source and a destination on one buffer work, because the source pixel is read whole before anything of it is written; **a copyMask has no range**, as above; it takes every one of the thirty-two flag bits and has no flag refusal at all, where its header lists two flags and nothing else; **a NULL destination is a refusal here, where the host's own process ends on SIGSEGV** and the port answers kvImageNullPointerArgument; a NULL buffer is kvImageNullPointerArgument where the release answers it and the port's own refusal where the release dies on it, a destination larger than the source is kvImageRoiLargerThanInputBuffer, GetTempBufferSize does no work and answers zero, and a value outside the range the header names for it is kvImageInvalidParameter",
+      "facts": "facts/Accelerate/vImageChannels.md",
+      "source": "the header of iOS 16.4 (Conversion.h) for the contract, the copyMask bit order and the return codes it names; the host's own vImage, held against the port case by case by tests/backports/host/vimagechannels, which computes the expected destination from that contract before asking the host, compares every byte of every row including the bytes neither side may write, and surveys the whole flag word and a table of copyMask values for every function of the family; the release's own armv7 caches, which say which release first exports each name"
+    }
+  ]
+}

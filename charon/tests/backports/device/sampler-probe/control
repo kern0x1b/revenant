@@ -1,0 +1,7 @@
+Package: org.charon.samplerprobe
+Name: Charon sampler probe
+Architecture: iphoneos-arm
+Description: Whether the release carries the Apple sampler as an audio component, which is a registration and not an export
+Maintainer: charon
+Author: charon
+Section: Development

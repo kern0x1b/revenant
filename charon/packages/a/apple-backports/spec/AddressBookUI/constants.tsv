@@ -1,0 +1,24 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	ABPersonBirthdayProperty	-	ABPersonBirthdayProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	8bf6a58916f4c531	found	birthday	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonDatesProperty	-	ABPersonDatesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	a0649cae7739bb16	found	dates	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonDepartmentNameProperty	-	ABPersonDepartmentNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	e6af186d0bad2a36	found	departmentName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonEmailAddressesProperty	-	ABPersonEmailAddressesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	efddb43df2afcc8b	found	emailAddresses	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonFamilyNameProperty	-	ABPersonFamilyNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	3f2d73516629880d	found	familyName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonGivenNameProperty	-	ABPersonGivenNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	397d84eead30be1d	found	givenName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonInstantMessageAddressesProperty	-	ABPersonInstantMessageAddressesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	11b15969daf1ac16	found	instantMessageAddresses	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonJobTitleProperty	-	ABPersonJobTitleProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	8d83ac040ae2afdc	found	jobTitle	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonMiddleNameProperty	-	ABPersonMiddleNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	7202db0e70911085	found	middleName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonNamePrefixProperty	-	ABPersonNamePrefixProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	87d3470848f301f7	found	namePrefix	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonNameSuffixProperty	-	ABPersonNameSuffixProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	fbbcfb697c955bb5	found	nameSuffix	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonNicknameProperty	-	ABPersonNicknameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	3b7dae4c7784d242	found	nickname	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonNoteProperty	-	ABPersonNoteProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	855b0031e59c2cbb	found	note	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonOrganizationNameProperty	-	ABPersonOrganizationNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	52ccdecbd967a87b	found	organizationName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonPhoneNumbersProperty	-	ABPersonPhoneNumbersProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	c4df9794478fd69f	found	phoneNumbers	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonPhoneticFamilyNameProperty	-	ABPersonPhoneticFamilyNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	bb626edbb3c7d7ce	found	phoneticFamilyName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonPhoneticGivenNameProperty	-	ABPersonPhoneticGivenNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	e331396b13b28543	found	phoneticGivenName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonPhoneticMiddleNameProperty	-	ABPersonPhoneticMiddleNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	cecaa99fd8aacfbd	found	phoneticMiddleName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonPostalAddressesProperty	-	ABPersonPostalAddressesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	f9da2cdb3bfe8e74	found	postalAddresses	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonPreviousFamilyNameProperty	-	ABPersonPreviousFamilyNameProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	e9aed6e11e399a06	found	previousFamilyName	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonRelatedNamesProperty	-	ABPersonRelatedNamesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	9065ef125a9bcebb	found	relatedNames	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonSocialProfilesProperty	-	ABPersonSocialProfilesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	b5c4882a207fbd1a	found	socialProfiles	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	ABPersonUrlAddressesProperty	-	ABPersonUrlAddressesProperty	8.0	NSString * const	NS_AVAILABLE_IOS(8_0)	d35f47d96f2a3bb7	found	urlAddresses	-	ios-26.2-cache (no host value)	-	exported	ns	-

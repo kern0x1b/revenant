@@ -1,0 +1,154 @@
+-- The protocol headers of a framework (Charon<F>Protocols.h): the declarations the generated protocol sources and the folder's own
+-- sources import. Written from the snapshot's protocol rows (protocols.tsv: each protocol's bases, introduced release and members)
+-- and the declaration table (spec/protocol-headers.tsv), one row per line of a header, in order:
+--
+--   line     a line the snapshot does not hold (an import, a @class or typedef line, an #if guard), kept as written in value;
+--   forward  a protocol the header declares (@protocol X;);
+--   body     a protocol the header defines from the snapshot, with API_AVAILABLE at its introduced release; the members'
+--            nullability is taken out, as the transcriber wrote them;
+--   bare     a body without the API_AVAILABLE line;
+--   body-keep, bare-keep
+--            a body whose members keep the nullability the snapshot holds (the committed header writes it so);
+--   replace  a member of the body above, by its selector (value), written as decl instead of the snapshot's member;
+--   insert   a member of the body above that the snapshot does not hold, written as decl after the member named by value
+--            (an empty value puts it first).
+--
+-- The prose of each header is in facts/<F>/protocol-headers.md, not in the header.
+
+local tsv = import("tsv", {anonymous = true})
+local protocols = import("protocols", {anonymous = true})
+local files = import("files", {anonymous = true})
+
+-- The words a declaration carries for nullability, which a body's members do not write (NS_ASSUME_NONNULL or the header's own
+-- macros give the default) unless the body is a keep kind.
+local NULLABILITY = {"_Nonnull", "_Nullable", "_Null_unspecified", "nullable", "nonnull"}
+
+local BODY_KINDS = {body = {api = true, keep = false}, bare = {api = false, keep = false},
+                    ["body-keep"] = {api = true, keep = true}, ["bare-keep"] = {api = false, keep = true}}
+
+-- The declaration table of the package, spec/protocol-headers.tsv.
+local function table_path(tree)
+    return path.join(tree, "packages", "a", "apple-backports", "spec", "protocol-headers.tsv")
+end
+
+-- The rows of a framework's header in file order: each {kind, value, decl}.
+function rows(tree, fw)
+    local text = files.read_text(table_path(tree))
+    local out = {}
+    if not text then
+        return out
+    end
+    for _, row in ipairs(tsv.records(text)) do
+        if row.framework == fw then
+            table.insert(out, {kind = row.kind, value = row.value, decl = row.decl or ""})
+        end
+    end
+    return out
+end
+
+-- A member's declaration with its nullability taken out and its spacing normalized (the committed headers' form).
+function member_text(decl)
+    local text = decl
+    for _, word in ipairs(NULLABILITY) do
+        text = string.gsub(text, "%f[%w_]" .. word .. "%f[^%w_]", "")
+    end
+    text = string.gsub(text, "%s+", " ")
+    text = string.gsub(text, "%s+([%);,])", "%1")
+    text = string.gsub(text, "%(%s+", "(")
+    text = string.gsub(text, "^%s+", "")
+    return text
+end
+
+-- The base list of a protocol: its bases as the snapshot holds them (comma-separated), or NSObject when it has none.
+local function bases_text(bases)
+    if bases == nil or bases == "" or bases == "-" then
+        return "NSObject"
+    end
+    return (string.gsub(bases, ",", ", "))
+end
+
+-- The lines of one protocol body. overrides: the replace rows by selector and the insert rows by the selector they follow ("" first).
+local function body_lines(name, record, kind, overrides)
+    local out = {}
+    if BODY_KINDS[kind].api then
+        table.insert(out, "API_AVAILABLE(ios(" .. record.introduced .. "))")
+    end
+    table.insert(out, "@protocol " .. name .. " <" .. bases_text(record.bases) .. ">")
+    local section = "required"
+    local function emit(member_section, text)
+        if member_section ~= section then
+            table.insert(out, "@" .. member_section)
+            section = member_section
+        end
+        table.insert(out, text)
+    end
+    local function member(text)
+        return BODY_KINDS[kind].keep and text or member_text(text)
+    end
+    for _, extra in ipairs(overrides.inserts[""] or {}) do
+        emit(record.members[1] and record.members[1].section or section, extra)
+    end
+    for _, m in ipairs(record.members) do
+        local replaced = overrides.replaces[m.selector]
+        emit(m.section, replaced or member(m.decl))
+        for _, extra in ipairs(overrides.inserts[m.selector] or {}) do
+            emit(m.section, extra)
+        end
+    end
+    table.insert(out, "@end")
+    table.insert(out, "")
+    return out
+end
+
+-- The text of a framework's protocol header, or nil when the table has no rows for the framework.
+function header_text(tree, fw)
+    local decl_rows = rows(tree, fw)
+    if #decl_rows == 0 then
+        return nil
+    end
+    local records = protocols.records(tree, fw)
+    local lines = {
+        "// Charon" .. fw .. "Protocols.h: generated by xmake l tools/gen.lua protocols from spec/" .. fw .. "/protocols.tsv and",
+        "// spec/protocol-headers.tsv. Do not edit; the prose of this header is in facts/" .. fw .. "/protocol-headers.md.",
+    }
+    local index = 0
+    while index < #decl_rows do
+        index = index + 1
+        local row = decl_rows[index]
+        if row.kind == "line" then
+            table.insert(lines, row.value)
+        elseif row.kind == "forward" then
+            table.insert(lines, "@protocol " .. row.value .. ";")
+            table.insert(lines, "")
+        elseif BODY_KINDS[row.kind] then
+            local record = records[row.value]
+            assert(record ~= nil, fw .. ": the header defines " .. row.value .. ", which the snapshot does not hold")
+            local overrides = {replaces = {}, inserts = {}}
+            while index + 1 <= #decl_rows and (decl_rows[index + 1].kind == "replace" or decl_rows[index + 1].kind == "insert") do
+                index = index + 1
+                local over = decl_rows[index]
+                if over.kind == "replace" then
+                    overrides.replaces[over.value] = over.decl
+                else
+                    overrides.inserts[over.value] = overrides.inserts[over.value] or {}
+                    table.insert(overrides.inserts[over.value], over.decl)
+                end
+            end
+            for _, line in ipairs(body_lines(row.value, record, row.kind, overrides)) do
+                table.insert(lines, line)
+            end
+        else
+            error(fw .. ": unknown declaration kind " .. tostring(row.kind) .. " (replace and insert belong to the body above)")
+        end
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+-- The generated header of a framework: name -> text, empty when the framework has no header in the table.
+function protocol_header_files(tree, fw)
+    local text = header_text(tree, fw)
+    if text == nil then
+        return {}
+    end
+    return {["Charon" .. fw .. "Protocols.h"] = text}
+end

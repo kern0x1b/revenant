@@ -1,0 +1,241 @@
+responds	init 1	get 1
+case	daily, interval 2, no end
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 3
+  recurrenceRule.interval	number 2
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+case	daily, interval 1, five times
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 3
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+case	weekly, interval 1, no days, no end
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+case	weekly, Monday only
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=2 weekdayOrdinal=0
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 0
+case	weekly, Friday only
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=6 weekdayOrdinal=0
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 6, weekNumber 0
+case	weekly, Monday and Friday, five times
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=2 weekdayOrdinal=0
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 0
+case	weekly, Friday and Monday, in that order
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=6 weekdayOrdinal=0
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 6, weekNumber 0
+case	weekly, Monday with week number 2
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=2 weekdayOrdinal=2
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 2
+case	weekly, no days, five times
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+case	monthly, interval 1, no end
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 5
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+case	yearly, interval 1, no end
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 6
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+case	daily, Monday given
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 3
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=2 weekdayOrdinal=0
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 0
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 0
+case	monthly, Monday given
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 5
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=2 weekdayOrdinal=0
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 2
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 0
+case	weekly, Monday, last of the month
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 4
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=2 weekdayOrdinal=-1
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber -1
+case	monthly, Friday, the second
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 5
+  recurrenceRule.interval	number 1
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	weekday=6 weekdayOrdinal=2
+  endDateComponents	nil
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 2
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 6, weekNumber 2
+case	nil rule
+  range.recurrenceRule	INRecurrenceRule
+  recurrenceRule.frequency	number 3
+  recurrenceRule.interval	number 0
+  recurrenceRule.weeklyRecurrenceDays	number 0
+  startDateComponents	nil
+  endDateComponents	nil
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+intents case	minute, interval 1
+  recurrenceRule.frequency	number 1
+  EKRecurrenceRule	nil
+intents case	hourly, interval 1
+  recurrenceRule.frequency	number 2
+  EKRecurrenceRule	nil
+intents case	daily, interval 1, made by the Intents rule
+  recurrenceRule.frequency	number 3
+  EKRecurrenceRule raises	NSInvalidArgumentException
+    reason	Invalid day number
+started case	daily, interval 1, starts on Monday
+  startDateComponents	weekday=2
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 0
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 0
+started case	weekly, interval 2, starts on Friday
+  startDateComponents	weekday=6
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 1
+    interval	number 2
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 6, weekNumber 0
+started case	monthly, interval 1, starts on Monday
+  startDateComponents	weekday=2
+  EKRecurrenceRule	EKRecurrenceRule
+  EKRecurrenceRule is the object given	NO
+    frequency	number 2
+    interval	number 1
+    daysOfTheWeek	array 1
+    daysOfTheMonth	nil
+    recurrenceEnd	nil
+    day	weekday 2, weekNumber 0
+plain range	INDateComponentsRange
+  plain EKRecurrenceRule	nil

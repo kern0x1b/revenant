@@ -1,0 +1,16 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLHeapDescriptor.sparsePageSize",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the page size of a sparse heap, and this port carries no sparse heap: -newHeapWithDescriptor: refuses one, saying why, because a sparse heap maps its pages in on demand and there is no page mapping to do on a device where a heap is already all of its memory",
+      "effect": "the page size the application set, read back, and never used, because no heap this port makes is sparse (facts/Metal/Heaps.md)",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    }
+  ]
+}

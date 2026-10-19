@@ -1,0 +1,132 @@
+diff --git a/stdlib/public/Darwin/Foundation/Data.swift b/stdlib/public/Darwin/Foundation/Data.swift
+--- a/stdlib/public/Darwin/Foundation/Data.swift
++++ b/stdlib/public/Darwin/Foundation/Data.swift
+@@ -43,6 +43,7 @@
+ @_exported import Foundation // Clang module
+ @_implementationOnly import _SwiftFoundationOverlayShims
+ @_implementationOnly import _SwiftCoreFoundationOverlayShims
++import Builtin
+ 
+ internal func __NSDataIsCompact(_ data: NSData) -> Bool {
+     if #available(OSX 10.10, iOS 8.0, tvOS 9.0, watchOS 2.0, *) {
+@@ -638,6 +639,7 @@
+ }
+ 
+ @frozen
++@_addressableForDependencies
+ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessCollection, MutableCollection, RangeReplaceableCollection, MutableDataProtocol, ContiguousBytes, Sendable {
+     public typealias ReferenceType = NSData
+ 
+@@ -2223,7 +2225,98 @@
+     public mutating func withUnsafeMutableBytes<ResultType>(_ body: (UnsafeMutableRawBufferPointer) throws -> ResultType) rethrows -> ResultType {
+         return try _representation.withUnsafeMutableBytes(body)
+     }
+-    
++
++    // MARK: - Span accessors
++
++    // The four accessors below take their names, types, attributes and lifetime annotations from the SDK's Foundation
++    // interface (iPhoneOS 26.2: the signatures and the attributes of Data's span accessors, as declared in its
++    // AddressableTypes branch). Only those declarations are the SDK's; the bodies are this overlay's, read from its own
++    // representation by the two helpers after them. The inline case is at the address of self; the slice and large cases
++    // read the storage they hold. None carries @available: the port's floor is 6.1.3, so they are not forwarded to the OS.
++
++    /// A read-only view of the value's bytes, valid while the value is borrowed.
++    @_alwaysEmitIntoClient
++    public var bytes: RawSpan {
++        @_lifetime(borrow self)
++        get {
++            let inlineAddress = UnsafeRawPointer(Builtin.addressOfBorrow(self))
++            let buffer = _contiguousBytes(inlineAddress: inlineAddress)
++            let span = RawSpan(_unsafeBytes: buffer)
++            return _overrideLifetime(span, borrowing: self)
++        }
++    }
++
++    /// A read-only view of the value's bytes as `UInt8` elements, valid while the value is borrowed.
++    @_alwaysEmitIntoClient
++    public var span: Span<UInt8> {
++        @_lifetime(borrow self)
++        get {
++            let raw = bytes
++            let span = raw._unsafeView(as: UInt8.self)
++            return _overrideLifetime(span, borrowing: self)
++        }
++    }
++
++    /// A writable view of the value's bytes, valid while the value is mutably borrowed. The value is made unique first.
++    @_alwaysEmitIntoClient
++    public var mutableBytes: MutableRawSpan {
++        @_lifetime(&self)
++        mutating get {
++            let inlineAddress = UnsafeRawPointer(Builtin.addressOfBorrow(self))
++            let buffer = _uniqueContiguousBytes(inlineAddress: inlineAddress)
++            let span = MutableRawSpan(_unsafeBytes: buffer)
++            return _overrideLifetime(span, mutating: &self)
++        }
++    }
++
++    /// A writable view of the value's bytes as `UInt8` elements, valid while the value is mutably borrowed. The value is made unique first.
++    @_alwaysEmitIntoClient
++    public var mutableSpan: MutableSpan<UInt8> {
++        @_lifetime(&self)
++        mutating get {
++            let inlineAddress = UnsafeRawPointer(Builtin.addressOfBorrow(self))
++            let buffer = _uniqueContiguousBytes(inlineAddress: inlineAddress)
++            let span = MutableSpan<UInt8>(_unsafeBytes: buffer)
++            return _overrideLifetime(span, mutating: &self)
++        }
++    }
++
++    /// The value's bytes as one buffer. `inlineAddress` is the address of self, which the inline case reads from.
++    @usableFromInline
++    internal func _contiguousBytes(inlineAddress: UnsafeRawPointer) -> UnsafeRawBufferPointer {
++        switch _representation {
++        case .empty:
++            return UnsafeRawBufferPointer(start: nil, count: 0)
++        case .inline(let inlineData):
++            return UnsafeRawBufferPointer(start: inlineAddress, count: inlineData.count)
++        case .slice(let slice):
++            let start = slice.storage.bytes?.advanced(by: slice.range.lowerBound)
++            return UnsafeRawBufferPointer(start: start, count: slice.range.count)
++        case .large(let slice):
++            let start = slice.storage.bytes?.advanced(by: slice.range.lowerBound)
++            return UnsafeRawBufferPointer(start: start, count: slice.range.count)
++        }
++    }
++
++    /// The value's bytes as one writable buffer. A shared slice or large value is copied first, as the overlay's other
++    /// mutating paths do, so that a write reaches this value and no other.
++    @usableFromInline
++    internal mutating func _uniqueContiguousBytes(inlineAddress: UnsafeRawPointer) -> UnsafeMutableRawBufferPointer {
++        switch _representation {
++        case .empty, .inline:
++            break
++        case .slice(var slice):
++            _representation = .empty
++            slice.ensureUniqueReference()
++            _representation = .slice(slice)
++        case .large(var slice):
++            _representation = .empty
++            slice.ensureUniqueReference()
++            _representation = .large(slice)
++        }
++        return UnsafeMutableRawBufferPointer(mutating: _contiguousBytes(inlineAddress: inlineAddress))
++    }
++
+     // MARK: -
+     // MARK: Copy Bytes
+     
+@@ -2746,12 +2839,6 @@
+         set { fatalError() }
+     }
+     
+-    @available(*, unavailable, message: "use withUnsafeBytes instead")
+-    public var bytes: UnsafeRawPointer { fatalError() }
+-    
+-    @available(*, unavailable, message: "use withUnsafeMutableBytes instead")
+-    public var mutableBytes: UnsafeMutableRawPointer { fatalError() }
+-    
+     /// Returns `true` if the two `Data` arguments are equal.
+     @inlinable // This is @inlinable as emission into clients is safe -- the concept of equality on Data will not change.
+     public static func ==(d1 : Data, d2 : Data) -> Bool {

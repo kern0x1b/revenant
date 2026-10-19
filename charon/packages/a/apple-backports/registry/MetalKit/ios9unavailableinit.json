@@ -1,0 +1,50 @@
+{
+ "framework": "MetalKit",
+ "entries": [
+  {
+   "api": "-[MTKMesh init]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MetalKit, MTKModel.h:188; and Apple's own MetalKit, measured with class_getInstanceMethod and a nonsense-class control on tests/backports/host/metal-census; the port's own class measured by tests/backports/host/metalkit-init/run.sh",
+   "facts": "facts/MetalKit/TextureLoader.md"
+  },
+  {
+   "api": "-[MTKSubmesh init]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MetalKit, MTKModel.h:128; and Apple's own MetalKit, measured; the port's own class measured by tests/backports/host/metalkit-init/run.sh",
+   "facts": "facts/MetalKit/TextureLoader.md"
+  },
+  {
+   "api": "-[MTKMeshBuffer init]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MetalKit, MTKModel.h:71; and Apple's own MetalKit, measured; the port's own class measured by tests/backports/host/metalkit-init/run.sh",
+   "facts": "facts/MetalKit/TextureLoader.md"
+  },
+  {
+   "api": "-[MTKMeshBufferAllocator init]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MetalKit, MTKModel.h:42; and Apple's own MetalKit, measured; the port's own class measured by tests/backports/host/metalkit-init/run.sh",
+   "facts": "facts/MetalKit/TextureLoader.md"
+  },
+  {
+   "api": "-[MTKTextureLoader init]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MetalKit, MTKTextureLoader.h:154; and Apple's own MetalKit, measured; the port's own class measured by tests/backports/host/metalkit-init/run.sh",
+   "facts": "facts/MetalKit/TextureLoader.md"
+  }
+ ]
+}

@@ -1,0 +1,141 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)MTKView	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	8e9997528906f00d	-
+super	-	MTKView	UIView		-	-	-	-	-	6ebe91740eadd1c6	-
+conforms	c:objc(cs)MTKView	MTKView	NSCoding		-	-	-	-	-	59b6401bf2306038	-
+conforms	c:objc(cs)MTKView	MTKView	CALayerDelegate		-	-	-	-	-	0a177ec484c1faeb	-
+method	c:objc(cs)MTKView(im)initWithFrame:device:	-			instancetype	CGRect frameRect | id<MTLDevice> device	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	b8de2dc4305e0224	-
+method	c:objc(cs)MTKView(im)initWithCoder:	-			instancetype	NSCoder * coder	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	7232f63ee2855d52	-
+property	c:objc(cs)MTKView(py)delegate	-			id<MTKViewDelegate>	-	weak,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	8386c4e540494c58	-
+property	c:objc(cs)MTKView(py)device	-			id<MTLDevice>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	668b0bf62124e65e	-
+property	c:objc(cs)MTKView(py)currentDrawable	-			id<CAMetalDrawable>	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	a3d5bf820f4dee7e	-
+property	c:objc(cs)MTKView(py)framebufferOnly	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	48acbab7a5a775d3	-
+property	c:objc(cs)MTKView(py)depthStencilAttachmentTextureUsage	-			MTLTextureUsage	-	nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0	-	9aab6a4513f11422	-
+property	c:objc(cs)MTKView(py)multisampleColorAttachmentTextureUsage	-			MTLTextureUsage	-	nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0	-	b03489c4b84f3ded	-
+property	c:objc(cs)MTKView(py)presentsWithTransaction	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	c6bf0f2a6abfb855	-
+property	c:objc(cs)MTKView(py)colorPixelFormat	-			MTLPixelFormat	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	e46a3628503a32bf	-
+property	c:objc(cs)MTKView(py)depthStencilPixelFormat	-			MTLPixelFormat	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	3f7b254d0ba7eb00	-
+property	c:objc(cs)MTKView(py)depthStencilStorageMode	-			MTLStorageMode	-	nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0	-	1c08dfa53b8b27be	-
+property	c:objc(cs)MTKView(py)sampleCount	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	463ebe340d3bdf26	-
+property	c:objc(cs)MTKView(py)clearColor	-			MTLClearColor	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	21eb814a201bbdad	-
+property	c:objc(cs)MTKView(py)clearDepth	-			double	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	520dbfbb547f6a97	-
+property	c:objc(cs)MTKView(py)clearStencil	-			uint32_t	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	e377f5a2af71956c	-
+property	c:objc(cs)MTKView(py)depthStencilTexture	-			id<MTLTexture>	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	faa7991a95b49aa9	-
+property	c:objc(cs)MTKView(py)multisampleColorTexture	-			id<MTLTexture>	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	f91b61823aaa553a	-
+method	c:objc(cs)MTKView(im)releaseDrawables	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	60b248c81c8032fb	-
+property	c:objc(cs)MTKView(py)currentRenderPassDescriptor	-			MTLRenderPassDescriptor *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	ccf37770eef3bc10	-
+property	c:objc(cs)MTKView(py)currentMTL4RenderPassDescriptor	-			MTL4RenderPassDescriptor *	-	readonly,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0	-	25c38b6d16d580e1	-
+property	c:objc(cs)MTKView(py)preferredFramesPerSecond	-			NSInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	f095a24fa22e924f	-
+property	c:objc(cs)MTKView(py)enableSetNeedsDisplay	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	2f6de1a9cd7e9a2b	-
+property	c:objc(cs)MTKView(py)autoResizeDrawable	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	c693c6f1df010aab	-
+property	c:objc(cs)MTKView(py)drawableSize	-			CGSize	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	03b81b12b1faca44	-
+property	c:objc(cs)MTKView(py)preferredDrawableSize	-			CGSize	-	readonly,nonatomic	macos=10.15/-/-/0	-	85e86d4c88ad4986	-
+property	c:objc(cs)MTKView(py)preferredDevice	-			id<MTLDevice>	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0	-	4f1df05fee14b6e3	-
+property	c:objc(cs)MTKView(py)paused	-			BOOL	-	nonatomic,getter=isPaused	ios=9.0/-/-/0,macos=10.11/-/-/0	-	b1697533e387f14e	-
+property	c:objc(cs)MTKView(py)colorspace	-			CGColorSpaceRef	-	nonatomic	ios=-/-/-/1	-	d9896fd976a1d386	-
+method	c:objc(cs)MTKView(im)draw	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	5ca7d45d3e03fb53	-
+protocol	c:objc(pl)MTKViewDelegate	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	46b138503b2cb5ef	-
+conforms	c:objc(pl)MTKViewDelegate	MTKViewDelegate	NSObject		-	-	-	-	-	920cb436c1a9b8f5	-
+method	c:objc(pl)MTKViewDelegate(im)mtkView:drawableSizeWillChange:	-			void	MTKView * view | CGSize size	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	9e779ed532119bd0	-
+method	c:objc(pl)MTKViewDelegate(im)drawInMTKView:	-			void	MTKView * view	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	69547788e3db64b2	-
+typedef	c:@T@MTKTextureLoaderError	-			NSString *	-	-	-	-	1adc5bd09ece6b11	-
+var	c:@MTKTextureLoaderErrorDomain	-			const MTKTextureLoaderError	-	-	ios=9.0/-/-/0	-	945677baf455f8ea	-
+var	c:@MTKTextureLoaderErrorKey	-			const MTKTextureLoaderError	-	-	ios=9.0/-/-/0	-	59c56a43b812fe52	-
+typedef	c:@T@MTKTextureLoaderOption	-			NSString *	-	-	-	-	875baa6f8b7592db	-
+var	c:@MTKTextureLoaderOptionAllocateMipmaps	-			const MTKTextureLoaderOption	-	-	ios=9.0/-/-/0	-	e6e5335e1e63640c	-
+var	c:@MTKTextureLoaderOptionGenerateMipmaps	-			const MTKTextureLoaderOption	-	-	ios=10.0/-/-/0	-	f0f9025b5b59de42	-
+var	c:@MTKTextureLoaderOptionSRGB	-			const MTKTextureLoaderOption	-	-	ios=9.0/-/-/0	-	1ca80c61f968fec8	-
+var	c:@MTKTextureLoaderOptionTextureUsage	-			const MTKTextureLoaderOption	-	-	ios=9.0/-/-/0	-	4b52b53dcf8ec927	-
+var	c:@MTKTextureLoaderOptionTextureCPUCacheMode	-			const MTKTextureLoaderOption	-	-	ios=9.0/-/-/0	-	95d54780bb706f57	-
+var	c:@MTKTextureLoaderOptionTextureStorageMode	-			const MTKTextureLoaderOption	-	-	ios=10.0/-/-/0	-	f0b49bfc20df5b24	-
+typedef	c:@T@MTKTextureLoaderCubeLayout	-			NSString *	-	-	-	-	589e9eabb1f59c0f	-
+var	c:@MTKTextureLoaderOptionCubeLayout	-			const MTKTextureLoaderOption	-	-	ios=10.0/-/-/0	-	9ce55b512b2d2e2f	-
+var	c:@MTKTextureLoaderCubeLayoutVertical	-			const MTKTextureLoaderCubeLayout	-	-	ios=10.0/-/-/0	-	30737522ab650156	-
+typedef	c:@T@MTKTextureLoaderOrigin	-			NSString *	-	-	-	-	d8b0794d8c66585c	-
+var	c:@MTKTextureLoaderOptionOrigin	-			const MTKTextureLoaderOption	-	-	ios=10.0/-/-/0	-	ca31f958956770ed	-
+var	c:@MTKTextureLoaderOriginTopLeft	-			const MTKTextureLoaderOrigin	-	-	ios=10.0/-/-/0	-	10a22e0e28cd3c8f	-
+var	c:@MTKTextureLoaderOriginBottomLeft	-			const MTKTextureLoaderOrigin	-	-	ios=10.0/-/-/0	-	3f49fc2a093c9cce	-
+var	c:@MTKTextureLoaderOriginFlippedVertically	-			const MTKTextureLoaderOrigin	-	-	ios=10.0/-/-/0	-	23d6c816ee6d2392	-
+var	c:@MTKTextureLoaderOptionLoadAsArray	-			const MTKTextureLoaderOption	-	-	ios=17.0/-/-/0	-	2fc27a88259f100e	-
+typedef	c:@T@MTKTextureLoaderCallback	-			void ((^))(id<MTLTexture>, NSError *)	-	-	-	-	b669e3e3e8c82546	-
+typedef	c:@T@MTKTextureLoaderArrayCallback	-			void ((^))(NSArray<id<MTLTexture>> *, NSError *)	-	-	ios=10.0/-/-/0	-	eb82cc6a8d8357a1	-
+interface	c:objc(cs)MTKTextureLoader	-			-	-	-	ios=9.0/-/-/0	-	32417773eeeeef1e	-
+super	-	MTKTextureLoader	NSObject		-	-	-	-	-	d1d060bc7b6a09d6	-
+property	c:objc(cs)MTKTextureLoader(py)device	-			id<MTLDevice>	-	readonly,nonatomic	ios=9.0/-/-/0	-	a83b03d4b93162f3	-
+method	c:objc(cs)MTKTextureLoader(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0	-	9166eff4268fffd9	-
+method	c:objc(cs)MTKTextureLoader(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=9.0/-/-/0	-	2eb6acd8df89da58	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithContentsOfURL:options:completionHandler:	-			void	NSURL * URL | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderCallback completionHandler	-	ios=9.0/-/-/0	-	eb597488d15b1649	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithName:scaleFactor:bundle:options:completionHandler:	-			void	NSString * name | CGFloat scaleFactor | NSBundle * bundle | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderCallback completionHandler	-	ios=10.0/-/-/0	-	8614338d12584c9d	-
+method	c:objc(cs)MTKTextureLoader(im)newTexturesWithContentsOfURLs:options:completionHandler:	-			void	NSArray<NSURL *> * URLs | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderArrayCallback completionHandler	-	ios=10.0/-/-/0	-	c50fa439913bd3e3	-
+method	c:objc(cs)MTKTextureLoader(im)newTexturesWithNames:scaleFactor:bundle:options:completionHandler:	-			void	NSArray<NSString *> * names | CGFloat scaleFactor | NSBundle * bundle | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderArrayCallback completionHandler	-	ios=10.0/-/-/0	-	bd114d09c40ae6e9	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithData:options:completionHandler:	-			void	NSData * data | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderCallback completionHandler	-	ios=9.0/-/-/0	-	8f0b3280bea6821a	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithCGImage:options:completionHandler:	-			void	CGImageRef cgImage | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderCallback completionHandler	-	ios=9.0/-/-/0	-	53d2836ad29980bf	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithMDLTexture:options:completionHandler:	-			void	MDLTexture * texture | NSDictionary<MTKTextureLoaderOption,id> * options | MTKTextureLoaderCallback completionHandler	-	ios=10.0/-/-/0	-	ce935bc1e70ca0a9	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithContentsOfURL:options:error:	-			id<MTLTexture>	NSURL * URL | NSDictionary<MTKTextureLoaderOption,id> * options | NSError * _Nullable * error	-	ios=9.0/-/-/0	-	9be610124ca0ae34	-
+method	c:objc(cs)MTKTextureLoader(im)newTexturesWithContentsOfURLs:options:error:	-			NSArray<id<MTLTexture>> *	NSArray<NSURL *> * URLs | NSDictionary<MTKTextureLoaderOption,id> * options | NSError * _Nullable * error	-	ios=10.0/-/-/0	-	38ec9bf6b3d6f7e5	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithData:options:error:	-			id<MTLTexture>	NSData * data | NSDictionary<MTKTextureLoaderOption,id> * options | NSError * _Nullable * error	-	ios=9.0/-/-/0	-	3d89fbe2835762e3	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithCGImage:options:error:	-			id<MTLTexture>	CGImageRef cgImage | NSDictionary<MTKTextureLoaderOption,id> * options | NSError * _Nullable * error	-	ios=9.0/-/-/0	-	3acd0745e9a7a439	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithMDLTexture:options:error:	-			id<MTLTexture>	MDLTexture * texture | NSDictionary<MTKTextureLoaderOption,id> * options | NSError * _Nullable * error	-	ios=10.0/-/-/0	-	bd75df921ce6fd38	-
+method	c:objc(cs)MTKTextureLoader(im)newTextureWithName:scaleFactor:bundle:options:error:	-			id<MTLTexture>	NSString * name | CGFloat scaleFactor | NSBundle * bundle | NSDictionary<MTKTextureLoaderOption,id> * options | NSError * _Nullable * error	-	ios=10.0/-/-/0	-	97df9562aaad6e61	-
+typedef	c:@T@MTKModelError	-			NSString *	-	-	-	-	8e56db31a5bcb3d4	-
+var	c:@MTKModelErrorDomain	-			const MTKModelError	-	-	ios=9.0/-/-/0	-	2e79293d12c1d80c	-
+var	c:@MTKModelErrorKey	-			const MTKModelError	-	-	ios=9.0/-/-/0	-	021d64449dcded57	-
+interface	c:objc(cs)MTKMeshBufferAllocator	-			-	-	-	ios=9.0/-/-/0	-	81cad56d1f43aa85	-
+super	-	MTKMeshBufferAllocator	NSObject		-	-	-	-	-	877de4e48b0be025	-
+conforms	c:objc(cs)MTKMeshBufferAllocator	MTKMeshBufferAllocator	MDLMeshBufferAllocator		-	-	-	-	-	e64e97e660e7eec2	-
+method	c:objc(cs)MTKMeshBufferAllocator(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0	-	bf4c7dfa10ae1977	-
+method	c:objc(cs)MTKMeshBufferAllocator(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=9.0/-/-/0	-	a417d3886bd61bbb	-
+property	c:objc(cs)MTKMeshBufferAllocator(py)device	-			id<MTLDevice>	-	readonly,nonatomic	ios=9.0/-/-/0	-	f9e9bdcce30a2615	-
+interface	c:objc(cs)MTKMeshBuffer	-			-	-	-	ios=9.0/-/-/0	-	e5a3d33accf6abe7	-
+super	-	MTKMeshBuffer	NSObject		-	-	-	-	-	c4bbd3fc460f1528	-
+conforms	c:objc(cs)MTKMeshBuffer	MTKMeshBuffer	MDLMeshBuffer		-	-	-	-	-	3093fa64d9870326	-
+conforms	c:objc(cs)MTKMeshBuffer	MTKMeshBuffer	MDLNamed		-	-	-	-	-	e5af591c81c559a4	-
+method	c:objc(cs)MTKMeshBuffer(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0	-	f74e7cc30eb509f0	-
+property	c:objc(cs)MTKMeshBuffer(py)length	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0	-	1707a2477363d950	-
+property	c:objc(cs)MTKMeshBuffer(py)allocator	-			MTKMeshBufferAllocator *	-	readonly,nonatomic	ios=9.0/-/-/0	-	bec023053d7430bc	-
+property	c:objc(cs)MTKMeshBuffer(py)zone	-			id<MDLMeshBufferZone>	-	readonly,nonatomic	ios=9.0/-/-/0	-	69fd9f42494ae6b0	-
+property	c:objc(cs)MTKMeshBuffer(py)buffer	-			id<MTLBuffer>	-	readonly,nonatomic	ios=9.0/-/-/0	-	df5bed41bd58dce5	-
+property	c:objc(cs)MTKMeshBuffer(py)offset	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0	-	fc8fc67e640bd77e	-
+property	c:objc(cs)MTKMeshBuffer(py)type	-			MDLMeshBufferType	-	readonly,nonatomic	ios=9.0/-/-/0	-	3e543e83dc3f393e	-
+interface	c:objc(cs)MTKSubmesh	-			-	-	-	ios=9.0/-/-/0	-	2b4c8bf5eaad3352	-
+super	-	MTKSubmesh	NSObject		-	-	-	-	-	6a364ea1884ec363	-
+method	c:objc(cs)MTKSubmesh(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0	-	c357dd8ba5a7eadc	-
+property	c:objc(cs)MTKSubmesh(py)primitiveType	-			MTLPrimitiveType	-	readonly,nonatomic	ios=9.0/-/-/0	-	3bb0a4f4e9509946	-
+property	c:objc(cs)MTKSubmesh(py)indexType	-			MTLIndexType	-	readonly,nonatomic	ios=9.0/-/-/0	-	294858db303ad6cd	-
+property	c:objc(cs)MTKSubmesh(py)indexBuffer	-			MTKMeshBuffer *	-	readonly,nonatomic	ios=9.0/-/-/0	-	f051d6ba216d279d	-
+property	c:objc(cs)MTKSubmesh(py)indexCount	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0	-	e12d5db22f929c65	-
+property	c:objc(cs)MTKSubmesh(py)mesh	-			MTKMesh *	-	readonly,weak,nonatomic	ios=9.0/-/-/0	-	d7e80b5c49b2ef34	-
+property	c:objc(cs)MTKSubmesh(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0	-	c88f0c522e8f7fb7	-
+interface	c:objc(cs)MTKMesh	-			-	-	-	ios=9.0/-/-/0	-	a622095ef024ef5e	-
+super	-	MTKMesh	NSObject		-	-	-	-	-	2fd368fa4f91dc13	-
+method	c:objc(cs)MTKMesh(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0	-	6a852d5758727a67	-
+method	c:objc(cs)MTKMesh(im)initWithMesh:device:error:	-			instancetype	MDLMesh * mesh | id<MTLDevice> device | NSError * _Nullable * error	-	ios=9.0/-/-/0	-	5b59a321d969cd1c	-
+method	c:objc(cs)MTKMesh(cm)newMeshesFromAsset:device:sourceMeshes:error:	-			NSArray<MTKMesh *> *	MDLAsset * asset | id<MTLDevice> device | NSArray<MDLMesh *> * _Nullable * sourceMeshes | NSError * _Nullable * error	-	ios=9.0/-/-/0	-	412aebac52b5e1ea	-
+property	c:objc(cs)MTKMesh(py)vertexBuffers	-			NSArray<MTKMeshBuffer *> *	-	readonly,nonatomic	ios=9.0/-/-/0	-	4940dde9c540cbf8	-
+property	c:objc(cs)MTKMesh(py)vertexDescriptor	-			MDLVertexDescriptor *	-	readonly,nonatomic	ios=9.0/-/-/0	-	2a79246c5014ff91	-
+property	c:objc(cs)MTKMesh(py)submeshes	-			NSArray<MTKSubmesh *> *	-	readonly,nonatomic	ios=9.0/-/-/0	-	811d1926fc949e3c	-
+property	c:objc(cs)MTKMesh(py)vertexCount	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0	-	3918e147299cdbbc	-
+property	c:objc(cs)MTKMesh(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0	-	35eff9ba43ad73e2	-
+function	c:@F@MTKModelIOVertexDescriptorFromMetal	-			MDLVertexDescriptor * (MTLVertexDescriptor *)	MTLVertexDescriptor * metalDescriptor	-	ios=9.0/-/-/0	-	f4ec9d0da20eeb53	-
+function	c:@F@MTKModelIOVertexDescriptorFromMetalWithError	-			MDLVertexDescriptor * (MTLVertexDescriptor *, NSError * _Nullable *)	MTLVertexDescriptor * metalDescriptor | NSError * _Nullable * error	-	ios=10.0/-/-/0	-	6229137c1ec2585b	-
+function	c:@F@MTKMetalVertexDescriptorFromModelIO	-			MTLVertexDescriptor * (MDLVertexDescriptor *)	MDLVertexDescriptor * modelIODescriptor	-	ios=9.0/-/-/0	-	7dcb78d4e40cb12a	-
+function	c:@F@MTKMetalVertexDescriptorFromModelIOWithError	-			MTLVertexDescriptor * (MDLVertexDescriptor *, NSError * _Nullable *)	MDLVertexDescriptor * modelIODescriptor | NSError * _Nullable * error	-	ios=10.0/-/-/0	-	06129f66e6aec488	-
+function	c:@F@MTKModelIOVertexFormatFromMetal	-			MDLVertexFormat (MTLVertexFormat)	MTLVertexFormat vertexFormat	-	ios=9.0/-/-/0	-	954bbab7bf7da1b2	-
+function	c:@F@MTKMetalVertexFormatFromModelIO	-			MTLVertexFormat (MDLVertexFormat)	MDLVertexFormat vertexFormat	-	ios=9.0/-/-/0	-	1db75beb09dd79ea	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@CGRect	-			struct CGRect	-	-	-	-	57cc4af4879304a9	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@MTLTextureUsage	-			enum MTLTextureUsage	-	-	-	-	736694021e0b9993	-
+typedef	c:@T@MTLPixelFormat	-			enum MTLPixelFormat	-	-	-	-	40f56ebf564ac2ed	-
+typedef	c:@T@MTLStorageMode	-			enum MTLStorageMode	-	-	-	-	c00b57d0e67328ac	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@MTLClearColor	-			struct MTLClearColor	-	-	-	-	b9627096d19769c8	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@CGFloat	-			double	-	-	-	-	29e11a71cfda882e	-
+typedef	c:@T@CGImageRef	-			struct CGImage *	-	-	-	-	61e7c30be1f5f379	-
+typedef	c:@T@MDLMeshBufferType	-			enum MDLMeshBufferType	-	-	-	-	c0f20e0c2d1e798f	-
+typedef	c:@T@MTLPrimitiveType	-			enum MTLPrimitiveType	-	-	-	-	e11053f98c1ee700	-
+typedef	c:@T@MTLIndexType	-			enum MTLIndexType	-	-	-	-	e5810218de3b006d	-
+typedef	c:@T@MDLVertexFormat	-			enum MDLVertexFormat	-	-	-	-	5ea8b3c177d1e86c	-
+typedef	c:@T@MTLVertexFormat	-			enum MTLVertexFormat	-	-	-	-	fc053f5ab90a486c	-

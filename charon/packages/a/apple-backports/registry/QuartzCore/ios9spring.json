@@ -1,0 +1,27 @@
+{
+  "framework": "QuartzCore",
+  "entries": [
+    {
+      "api": "CASpringAnimation.initialVelocity",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 already carries CASpringAnimation with velocity/setVelocity:, and iOS 9's accessors of this name are one tail call to those; the port forwards the same way",
+      "effect": "is the velocity the release's own class keeps, so a value set through either name reads back through both",
+      "facts": "facts/QuartzCore/CASpringAnimation.md",
+      "source": "the armv7 shared caches of iOS 6.0, 6.1.3, 7.0.1, 8.0, 9.0 and the armv7s cache of 10.3.4 for which release has the members and for their type encodings; the arm64 shared cache of iOS 12.0, disassembled, where initialVelocity sends velocity and setInitialVelocity: sends setVelocity:; the host's own QuartzCore for the differential"
+    },
+    {
+      "api": "CASpringAnimation.settlingDuration",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 9 answers it with durationForEpsilon: and 0.001, which iOS 6 has not got; the port carries that computation",
+      "effect": "the time the spring takes to come to rest within 0.001: the closed form below critical damping, and above it the system's own walk in steps of 0.1 second over a critically damped spring; a spring that cannot settle answers MAXFLOAT",
+      "facts": "facts/QuartzCore/CASpringAnimation.md",
+      "source": "the arm64 shared cache of iOS 12.0, disassembled, for the epsilon, the step and both branches; the host's own QuartzCore, compared over 32 named springs and 4000 random ones in tests/backports/host/spring"
+    }
+  ]
+}

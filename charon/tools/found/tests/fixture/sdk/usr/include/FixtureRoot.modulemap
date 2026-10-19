@@ -1,0 +1,4 @@
+module FixtureRoot [system] {
+  header "FixtureRoot.h"
+  export *
+}

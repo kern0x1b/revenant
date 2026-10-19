@@ -1,0 +1,2 @@
+#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@nested_value	-			int (void)	-	-	-	-	2b373b2bf23a5ed5	-

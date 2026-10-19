@@ -1,0 +1,240 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@ALboolean	-			char	-	-	-	-	d15d0fe59482d663	-
+typedef	c:@T@ALchar	-			char	-	-	-	-	98c632996ac5ea22	-
+typedef	c:@T@ALbyte	-			char	-	-	-	-	6550fc6879ef187c	-
+typedef	c:@T@ALubyte	-			unsigned char	-	-	-	-	27031d53fe71c13c	-
+typedef	c:@T@ALshort	-			short	-	-	-	-	e74984553dda7855	-
+typedef	c:@T@ALushort	-			unsigned short	-	-	-	-	0d227bab96d54eb5	-
+typedef	c:@T@ALint	-			int	-	-	-	-	bb2add6e37657579	-
+typedef	c:@T@ALuint	-			unsigned int	-	-	-	-	43e1cb781bc2906b	-
+typedef	c:@T@ALsizei	-			int	-	-	-	-	d62d9a8b98d72fad	-
+typedef	c:@T@ALenum	-			int	-	-	-	-	724e1e67b81f5858	-
+typedef	c:@T@ALfloat	-			float	-	-	-	-	36c947295c811c3a	-
+typedef	c:@T@ALdouble	-			double	-	-	-	-	9295691fbf474e9a	-
+typedef	c:@T@ALvoid	-			void	-	-	-	-	d73edb1785e23368	-
+function	c:@F@alEnable	-			void (ALenum)	ALenum capability	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	077aba8c27561bcd	-
+function	c:@F@alDisable	-			void (ALenum)	ALenum capability	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	8b9122b61f155852	-
+function	c:@F@alIsEnabled	-			ALboolean (ALenum)	ALenum capability	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	7e9c454d408d15eb	-
+function	c:@F@alGetString	-			const ALchar * (ALenum)	ALenum param	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	4b1607bc7324c497	-
+function	c:@F@alGetBooleanv	-			void (ALenum, ALboolean *)	ALenum param | ALboolean * data	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	8414b3c31209e0bc	-
+function	c:@F@alGetIntegerv	-			void (ALenum, ALint *)	ALenum param | ALint * data	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	75679f7af1e5c622	-
+function	c:@F@alGetFloatv	-			void (ALenum, ALfloat *)	ALenum param | ALfloat * data	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	1ae686019bc443c2	-
+function	c:@F@alGetDoublev	-			void (ALenum, ALdouble *)	ALenum param | ALdouble * data	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	cb038c9bed7acd6d	-
+function	c:@F@alGetBoolean	-			ALboolean (ALenum)	ALenum param	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	3c6758abea424a2b	-
+function	c:@F@alGetInteger	-			ALint (ALenum)	ALenum param	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	47368592739e1380	-
+function	c:@F@alGetFloat	-			ALfloat (ALenum)	ALenum param	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	75b84c1028db3fca	-
+function	c:@F@alGetDouble	-			ALdouble (ALenum)	ALenum param	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	089fb1a1e7c2c03b	-
+function	c:@F@alGetError	-			ALenum (void)	-	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	ca7c565ed98ae508	-
+function	c:@F@alIsExtensionPresent	-			ALboolean (const ALchar *)	const ALchar * extname	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	4072fd257a519961	-
+function	c:@F@alGetProcAddress	-			void * (const ALchar *)	const ALchar * fname	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	d725dfb1be772ec3	-
+function	c:@F@alGetEnumValue	-			ALenum (const ALchar *)	const ALchar * ename	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	2d7c10fafb33be94	-
+function	c:@F@alListenerf	-			void (ALenum, ALfloat)	ALenum param | ALfloat value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	e086f0c9b9487fcf	-
+function	c:@F@alListener3f	-			void (ALenum, ALfloat, ALfloat, ALfloat)	ALenum param | ALfloat value1 | ALfloat value2 | ALfloat value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	f2390d291dedd32a	-
+function	c:@F@alListenerfv	-			void (ALenum, const ALfloat *)	ALenum param | const ALfloat * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	e654e34fc44df348	-
+function	c:@F@alListeneri	-			void (ALenum, ALint)	ALenum param | ALint value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	c48c78afa2fb8440	-
+function	c:@F@alListener3i	-			void (ALenum, ALint, ALint, ALint)	ALenum param | ALint value1 | ALint value2 | ALint value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	8ec392f1c424c484	-
+function	c:@F@alListeneriv	-			void (ALenum, const ALint *)	ALenum param | const ALint * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	b8912dbf9aaf2e1d	-
+function	c:@F@alGetListenerf	-			void (ALenum, ALfloat *)	ALenum param | ALfloat * value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	901ba1fa0b28f1d6	-
+function	c:@F@alGetListener3f	-			void (ALenum, ALfloat *, ALfloat *, ALfloat *)	ALenum param | ALfloat * value1 | ALfloat * value2 | ALfloat * value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	b0fa85fb4f89881b	-
+function	c:@F@alGetListenerfv	-			void (ALenum, ALfloat *)	ALenum param | ALfloat * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	578d16c4c7eb7fe3	-
+function	c:@F@alGetListeneri	-			void (ALenum, ALint *)	ALenum param | ALint * value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	0829ce84b43b988a	-
+function	c:@F@alGetListener3i	-			void (ALenum, ALint *, ALint *, ALint *)	ALenum param | ALint * value1 | ALint * value2 | ALint * value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	f72fcbe24367aceb	-
+function	c:@F@alGetListeneriv	-			void (ALenum, ALint *)	ALenum param | ALint * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	5d638388ff38ec48	-
+function	c:@F@alGenSources	-			void (ALsizei, ALuint *)	ALsizei n | ALuint * sources	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	dd9dd692f98275bd	-
+function	c:@F@alDeleteSources	-			void (ALsizei, const ALuint *)	ALsizei n | const ALuint * sources	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	c23b2530f1670f9c	-
+function	c:@F@alIsSource	-			ALboolean (ALuint)	ALuint sid	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	6e94158ddae48f91	-
+function	c:@F@alSourcef	-			void (ALuint, ALenum, ALfloat)	ALuint sid | ALenum param | ALfloat value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	169be4d9abbf8520	-
+function	c:@F@alSource3f	-			void (ALuint, ALenum, ALfloat, ALfloat, ALfloat)	ALuint sid | ALenum param | ALfloat value1 | ALfloat value2 | ALfloat value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	a38b030797e28c31	-
+function	c:@F@alSourcefv	-			void (ALuint, ALenum, const ALfloat *)	ALuint sid | ALenum param | const ALfloat * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	8152b8642f81a73b	-
+function	c:@F@alSourcei	-			void (ALuint, ALenum, ALint)	ALuint sid | ALenum param | ALint value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	861ecf2e233f7d22	-
+function	c:@F@alSource3i	-			void (ALuint, ALenum, ALint, ALint, ALint)	ALuint sid | ALenum param | ALint value1 | ALint value2 | ALint value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	504159407a3821ea	-
+function	c:@F@alSourceiv	-			void (ALuint, ALenum, const ALint *)	ALuint sid | ALenum param | const ALint * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	af6c0756a9090bb0	-
+function	c:@F@alGetSourcef	-			void (ALuint, ALenum, ALfloat *)	ALuint sid | ALenum param | ALfloat * value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	fe01c8793637c760	-
+function	c:@F@alGetSource3f	-			void (ALuint, ALenum, ALfloat *, ALfloat *, ALfloat *)	ALuint sid | ALenum param | ALfloat * value1 | ALfloat * value2 | ALfloat * value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	109314d97757e895	-
+function	c:@F@alGetSourcefv	-			void (ALuint, ALenum, ALfloat *)	ALuint sid | ALenum param | ALfloat * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	68d50b5d4e1e8293	-
+function	c:@F@alGetSourcei	-			void (ALuint, ALenum, ALint *)	ALuint sid | ALenum param | ALint * value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	46be8fa2200a0373	-
+function	c:@F@alGetSource3i	-			void (ALuint, ALenum, ALint *, ALint *, ALint *)	ALuint sid | ALenum param | ALint * value1 | ALint * value2 | ALint * value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	27c75a9433562430	-
+function	c:@F@alGetSourceiv	-			void (ALuint, ALenum, ALint *)	ALuint sid | ALenum param | ALint * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	4acdb1039ad7373d	-
+function	c:@F@alSourcePlayv	-			void (ALsizei, const ALuint *)	ALsizei ns | const ALuint * sids	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	9a97d5b57834d49e	-
+function	c:@F@alSourceStopv	-			void (ALsizei, const ALuint *)	ALsizei ns | const ALuint * sids	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	f53704440c5e4d84	-
+function	c:@F@alSourceRewindv	-			void (ALsizei, const ALuint *)	ALsizei ns | const ALuint * sids	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	b5b6d56d41dcc325	-
+function	c:@F@alSourcePausev	-			void (ALsizei, const ALuint *)	ALsizei ns | const ALuint * sids	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	b03f5380b2180347	-
+function	c:@F@alSourcePlay	-			void (ALuint)	ALuint sid	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	1932cfd8ffcdcc19	-
+function	c:@F@alSourceStop	-			void (ALuint)	ALuint sid	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	4fdb8f6a858af8cd	-
+function	c:@F@alSourceRewind	-			void (ALuint)	ALuint sid	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	8e174804f8e6346d	-
+function	c:@F@alSourcePause	-			void (ALuint)	ALuint sid	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	76be5d44fef9732b	-
+function	c:@F@alSourceQueueBuffers	-			void (ALuint, ALsizei, const ALuint *)	ALuint sid | ALsizei numEntries | const ALuint * bids	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	d039681f39308339	-
+function	c:@F@alSourceUnqueueBuffers	-			void (ALuint, ALsizei, ALuint *)	ALuint sid | ALsizei numEntries | ALuint * bids	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	6046d87aded90d43	-
+function	c:@F@alGenBuffers	-			void (ALsizei, ALuint *)	ALsizei n | ALuint * buffers	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	69a6a237e358045f	-
+function	c:@F@alDeleteBuffers	-			void (ALsizei, const ALuint *)	ALsizei n | const ALuint * buffers	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	49d762f003daacf7	-
+function	c:@F@alIsBuffer	-			ALboolean (ALuint)	ALuint bid	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	bdd6f2087bd38d6a	-
+function	c:@F@alBufferData	-			void (ALuint, ALenum, const ALvoid *, ALsizei, ALsizei)	ALuint bid | ALenum format | const ALvoid * data | ALsizei size | ALsizei freq	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	ea6963b4b4623585	-
+function	c:@F@alBufferf	-			void (ALuint, ALenum, ALfloat)	ALuint bid | ALenum param | ALfloat value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	7864e0fa06fc39b6	-
+function	c:@F@alBuffer3f	-			void (ALuint, ALenum, ALfloat, ALfloat, ALfloat)	ALuint bid | ALenum param | ALfloat value1 | ALfloat value2 | ALfloat value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	f348327b1077fc63	-
+function	c:@F@alBufferfv	-			void (ALuint, ALenum, const ALfloat *)	ALuint bid | ALenum param | const ALfloat * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	8fa9a756b424e9d4	-
+function	c:@F@alBufferi	-			void (ALuint, ALenum, ALint)	ALuint bid | ALenum param | ALint value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	5ed62f683fa4d74d	-
+function	c:@F@alBuffer3i	-			void (ALuint, ALenum, ALint, ALint, ALint)	ALuint bid | ALenum param | ALint value1 | ALint value2 | ALint value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	bc7082f1e01bfa8f	-
+function	c:@F@alBufferiv	-			void (ALuint, ALenum, const ALint *)	ALuint bid | ALenum param | const ALint * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	83a324dcca8853f6	-
+function	c:@F@alGetBufferf	-			void (ALuint, ALenum, ALfloat *)	ALuint bid | ALenum param | ALfloat * value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	a8bd4d35d4217082	-
+function	c:@F@alGetBuffer3f	-			void (ALuint, ALenum, ALfloat *, ALfloat *, ALfloat *)	ALuint bid | ALenum param | ALfloat * value1 | ALfloat * value2 | ALfloat * value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	f3d05e5e98d0e64c	-
+function	c:@F@alGetBufferfv	-			void (ALuint, ALenum, ALfloat *)	ALuint bid | ALenum param | ALfloat * values	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	29cac9d019ea7b15	-
+function	c:@F@alGetBufferi	-			void (ALuint, ALenum, ALint *)	ALuint bid | ALenum param | ALint * value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	6d1f72c9ec1b7f89	-
+function	c:@F@alGetBuffer3i	-			void (ALuint, ALenum, ALint *, ALint *, ALint *)	ALuint bid | ALenum param | ALint * value1 | ALint * value2 | ALint * value3	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	488f7eba2ced12e6	-
+function	c:@F@alGetBufferiv	-			void (ALuint, ALenum, ALint *)	ALuint bid | ALenum param | ALint * values	-	-	deprecated: OpenAL is deprecated in favor of AVAudioEngine	9205c9d332938814	-
+function	c:@F@alDopplerFactor	-			void (ALfloat)	ALfloat value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	338fc7a59b5de38f	-
+function	c:@F@alDopplerVelocity	-			void (ALfloat)	ALfloat value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	da7ce8dc7f9cc5d9	-
+function	c:@F@alSpeedOfSound	-			void (ALfloat)	ALfloat value	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	c61c02e68d112db4	-
+function	c:@F@alDistanceModel	-			void (ALenum)	ALenum distanceModel	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated in favor of AVAudioEngine	1baeba1222509ebb	-
+typedef	c:@T@LPALENABLE	-			void (*)(ALenum)	-	-	-	-	7bd9e17baeeb24ee	-
+typedef	c:@T@LPALDISABLE	-			void (*)(ALenum)	-	-	-	-	63e1b87af4feeae9	-
+typedef	c:@T@LPALISENABLED	-			ALboolean (*)(ALenum)	-	-	-	-	ddc79ce3f89837b8	-
+typedef	c:@T@LPALGETSTRING	-			const ALchar *(*)(ALenum)	-	-	-	-	058f392f97e2f4e5	-
+typedef	c:@T@LPALGETBOOLEANV	-			void (*)(ALenum, ALboolean *)	-	-	-	-	17393ad54abbf959	-
+typedef	c:@T@LPALGETINTEGERV	-			void (*)(ALenum, ALint *)	-	-	-	-	079436ea9b9f6cf2	-
+typedef	c:@T@LPALGETFLOATV	-			void (*)(ALenum, ALfloat *)	-	-	-	-	d621f3a8e479515f	-
+typedef	c:@T@LPALGETDOUBLEV	-			void (*)(ALenum, ALdouble *)	-	-	-	-	bb8944ffa8dd5da4	-
+typedef	c:@T@LPALGETBOOLEAN	-			ALboolean (*)(ALenum)	-	-	-	-	0e1f30f917fdc59c	-
+typedef	c:@T@LPALGETINTEGER	-			ALint (*)(ALenum)	-	-	-	-	f649c1e0ca7b7cde	-
+typedef	c:@T@LPALGETFLOAT	-			ALfloat (*)(ALenum)	-	-	-	-	f442560be6e9bf13	-
+typedef	c:@T@LPALGETDOUBLE	-			ALdouble (*)(ALenum)	-	-	-	-	bab44e75b3f23fbb	-
+typedef	c:@T@LPALGETERROR	-			ALenum (*)(void)	-	-	-	-	b73ae57c6302c033	-
+typedef	c:@T@LPALISEXTENSIONPRESENT	-			ALboolean (*)(const ALchar *)	-	-	-	-	5fb1065194eb1712	-
+typedef	c:@T@LPALGETPROCADDRESS	-			void *(*)(const ALchar *)	-	-	-	-	b1d427e688aab565	-
+typedef	c:@T@LPALGETENUMVALUE	-			ALenum (*)(const ALchar *)	-	-	-	-	196e6d8f735ac213	-
+typedef	c:@T@LPALLISTENERF	-			void (*)(ALenum, ALfloat)	-	-	-	-	c3d35bdace4ef788	-
+typedef	c:@T@LPALLISTENER3F	-			void (*)(ALenum, ALfloat, ALfloat, ALfloat)	-	-	-	-	060fd6b3af78df4f	-
+typedef	c:@T@LPALLISTENERFV	-			void (*)(ALenum, const ALfloat *)	-	-	-	-	6d91159081992e1c	-
+typedef	c:@T@LPALLISTENERI	-			void (*)(ALenum, ALint)	-	-	-	-	7e6247a7d18d0a7d	-
+typedef	c:@T@LPALLISTENER3I	-			void (*)(ALenum, ALint, ALint, ALint)	-	-	-	-	6a03f586228f7c8f	-
+typedef	c:@T@LPALLISTENERIV	-			void (*)(ALenum, const ALint *)	-	-	-	-	322b56ab3eb3a30d	-
+typedef	c:@T@LPALGETLISTENERF	-			void (*)(ALenum, ALfloat *)	-	-	-	-	a49df0d9ed1660bf	-
+typedef	c:@T@LPALGETLISTENER3F	-			void (*)(ALenum, ALfloat *, ALfloat *, ALfloat *)	-	-	-	-	d919b8c9407c4041	-
+typedef	c:@T@LPALGETLISTENERFV	-			void (*)(ALenum, ALfloat *)	-	-	-	-	78a380adf7fa0641	-
+typedef	c:@T@LPALGETLISTENERI	-			void (*)(ALenum, ALint *)	-	-	-	-	b33ce74c19af9069	-
+typedef	c:@T@LPALGETLISTENER3I	-			void (*)(ALenum, ALint *, ALint *, ALint *)	-	-	-	-	726322763e8cca7c	-
+typedef	c:@T@LPALGETLISTENERIV	-			void (*)(ALenum, ALint *)	-	-	-	-	ff0cb31f48aa1fdc	-
+typedef	c:@T@LPALGENSOURCES	-			void (*)(ALsizei, ALuint *)	-	-	-	-	1e7d1bf909387e94	-
+typedef	c:@T@LPALDELETESOURCES	-			void (*)(ALsizei, const ALuint *)	-	-	-	-	cac0937bae5ccb13	-
+typedef	c:@T@LPALISSOURCE	-			ALboolean (*)(ALuint)	-	-	-	-	db8cf8df0ac1baba	-
+typedef	c:@T@LPALSOURCEF	-			void (*)(ALuint, ALenum, ALfloat)	-	-	-	-	27313f1d9cd9a89a	-
+typedef	c:@T@LPALSOURCE3F	-			void (*)(ALuint, ALenum, ALfloat, ALfloat, ALfloat)	-	-	-	-	479d0c850adb48a5	-
+typedef	c:@T@LPALSOURCEFV	-			void (*)(ALuint, ALenum, const ALfloat *)	-	-	-	-	f1ba08f09b53032c	-
+typedef	c:@T@LPALSOURCEI	-			void (*)(ALuint, ALenum, ALint)	-	-	-	-	8e0cf3c121149778	-
+typedef	c:@T@LPALSOURCE3I	-			void (*)(ALuint, ALenum, ALint, ALint, ALint)	-	-	-	-	b0a5b8a18f732338	-
+typedef	c:@T@LPALSOURCEIV	-			void (*)(ALuint, ALenum, const ALint *)	-	-	-	-	a35714bd1bce3302	-
+typedef	c:@T@LPALGETSOURCEF	-			void (*)(ALuint, ALenum, ALfloat *)	-	-	-	-	4c9794dddd705a0c	-
+typedef	c:@T@LPALGETSOURCE3F	-			void (*)(ALuint, ALenum, ALfloat *, ALfloat *, ALfloat *)	-	-	-	-	eff008985c5fff6a	-
+typedef	c:@T@LPALGETSOURCEFV	-			void (*)(ALuint, ALenum, ALfloat *)	-	-	-	-	7d7d32eb242cb6ff	-
+typedef	c:@T@LPALGETSOURCEI	-			void (*)(ALuint, ALenum, ALint *)	-	-	-	-	ea2db5e6ab75759e	-
+typedef	c:@T@LPALGETSOURCE3I	-			void (*)(ALuint, ALenum, ALint *, ALint *, ALint *)	-	-	-	-	5c5a48468ac78af0	-
+typedef	c:@T@LPALGETSOURCEIV	-			void (*)(ALuint, ALenum, ALint *)	-	-	-	-	7aaa4e4b97e2354a	-
+typedef	c:@T@LPALSOURCEPLAYV	-			void (*)(ALsizei, const ALuint *)	-	-	-	-	89defdc36737ab0f	-
+typedef	c:@T@LPALSOURCESTOPV	-			void (*)(ALsizei, const ALuint *)	-	-	-	-	b6483d32909099db	-
+typedef	c:@T@LPALSOURCEREWINDV	-			void (*)(ALsizei, const ALuint *)	-	-	-	-	507a710a7bb94539	-
+typedef	c:@T@LPALSOURCEPAUSEV	-			void (*)(ALsizei, const ALuint *)	-	-	-	-	b63e9a9d82fcfe97	-
+typedef	c:@T@LPALSOURCEPLAY	-			void (*)(ALuint)	-	-	-	-	7feb0efaca0e501c	-
+typedef	c:@T@LPALSOURCESTOP	-			void (*)(ALuint)	-	-	-	-	c8d32d2af710e1e2	-
+typedef	c:@T@LPALSOURCEREWIND	-			void (*)(ALuint)	-	-	-	-	fbf08918e0da50db	-
+typedef	c:@T@LPALSOURCEPAUSE	-			void (*)(ALuint)	-	-	-	-	7ab03ed30d163a26	-
+typedef	c:@T@LPALSOURCEQUEUEBUFFERS	-			void (*)(ALuint, ALsizei, const ALuint *)	-	-	-	-	2b9d871154f5b80e	-
+typedef	c:@T@LPALSOURCEUNQUEUEBUFFERS	-			void (*)(ALuint, ALsizei, ALuint *)	-	-	-	-	93fdb7045f4e685b	-
+typedef	c:@T@LPALGENBUFFERS	-			void (*)(ALsizei, ALuint *)	-	-	-	-	7fa837df74f5679c	-
+typedef	c:@T@LPALDELETEBUFFERS	-			void (*)(ALsizei, const ALuint *)	-	-	-	-	c279ef2e08193f0c	-
+typedef	c:@T@LPALISBUFFER	-			ALboolean (*)(ALuint)	-	-	-	-	d907c993a156654d	-
+typedef	c:@T@LPALBUFFERDATA	-			void (*)(ALuint, ALenum, const ALvoid *, ALsizei, ALsizei)	-	-	-	-	8c1d2e7bb40e3d66	-
+typedef	c:@T@LPALBUFFERF	-			void (*)(ALuint, ALenum, ALfloat)	-	-	-	-	e6e272b3aca4f89f	-
+typedef	c:@T@LPALBUFFER3F	-			void (*)(ALuint, ALenum, ALfloat, ALfloat, ALfloat)	-	-	-	-	2ecdc316916590f4	-
+typedef	c:@T@LPALBUFFERFV	-			void (*)(ALuint, ALenum, const ALfloat *)	-	-	-	-	bc3662713a414e24	-
+typedef	c:@T@LPALBUFFERI	-			void (*)(ALuint, ALenum, ALint)	-	-	-	-	49a7c5fdef26636a	-
+typedef	c:@T@LPALBUFFER3I	-			void (*)(ALuint, ALenum, ALint, ALint, ALint)	-	-	-	-	452e737955458b15	-
+typedef	c:@T@LPALBUFFERIV	-			void (*)(ALuint, ALenum, const ALint *)	-	-	-	-	cdc23cd5f3f1e48d	-
+typedef	c:@T@LPALGETBUFFERF	-			void (*)(ALuint, ALenum, ALfloat *)	-	-	-	-	9937242daa1cac7b	-
+typedef	c:@T@LPALGETBUFFER3F	-			void (*)(ALuint, ALenum, ALfloat *, ALfloat *, ALfloat *)	-	-	-	-	855feb1d1a4d8749	-
+typedef	c:@T@LPALGETBUFFERFV	-			void (*)(ALuint, ALenum, ALfloat *)	-	-	-	-	3e070abb3fba664f	-
+typedef	c:@T@LPALGETBUFFERI	-			void (*)(ALuint, ALenum, ALint *)	-	-	-	-	8b6815b9c5a79cf8	-
+typedef	c:@T@LPALGETBUFFER3I	-			void (*)(ALuint, ALenum, ALint *, ALint *, ALint *)	-	-	-	-	30c3fd323bac499f	-
+typedef	c:@T@LPALGETBUFFERIV	-			void (*)(ALuint, ALenum, ALint *)	-	-	-	-	6682b3c106f241ca	-
+typedef	c:@T@LPALDOPPLERFACTOR	-			void (*)(ALfloat)	-	-	-	-	38eeeefeedb98035	-
+typedef	c:@T@LPALDOPPLERVELOCITY	-			void (*)(ALfloat)	-	-	-	-	846c6e2dddc6d223	-
+typedef	c:@T@LPALSPEEDOFSOUND	-			void (*)(ALfloat)	-	-	-	-	b0b412b64405d494	-
+typedef	c:@T@LPALDISTANCEMODEL	-			void (*)(ALenum)	-	-	-	-	b63640d96dd49bb8	-
+struct	c:@S@ALCdevice_struct	-			-	-	-	-	-	764412a6bb241d6f	-
+typedef	c:@T@ALCdevice	-			struct ALCdevice_struct	-	-	-	-	f46ff72d65d3a55e	-
+struct	c:@S@ALCcontext_struct	-			-	-	-	-	-	ed4a2d7d2f165a25	-
+typedef	c:@T@ALCcontext	-			struct ALCcontext_struct	-	-	-	-	ebd179e6f8c78094	-
+typedef	c:@T@ALCboolean	-			char	-	-	-	-	0ba21c775627a644	-
+typedef	c:@T@ALCchar	-			char	-	-	-	-	e87e67f49bb6db84	-
+typedef	c:@T@ALCbyte	-			char	-	-	-	-	9fa170f7dbb34ce7	-
+typedef	c:@T@ALCubyte	-			unsigned char	-	-	-	-	eb66c2040bdc70a3	-
+typedef	c:@T@ALCshort	-			short	-	-	-	-	e25b0bf419bf086f	-
+typedef	c:@T@ALCushort	-			unsigned short	-	-	-	-	5c055eea486968ed	-
+typedef	c:@T@ALCint	-			int	-	-	-	-	c8c27132bbe0f0f3	-
+typedef	c:@T@ALCuint	-			unsigned int	-	-	-	-	31f789054330056c	-
+typedef	c:@T@ALCsizei	-			int	-	-	-	-	7af716e2797b62c8	-
+typedef	c:@T@ALCenum	-			int	-	-	-	-	001a41c8eff8ff78	-
+typedef	c:@T@ALCfloat	-			float	-	-	-	-	b34cfa542f69b108	-
+typedef	c:@T@ALCdouble	-			double	-	-	-	-	685ed663d2e192ae	-
+typedef	c:@T@ALCvoid	-			void	-	-	-	-	fe5791b12cfecd06	-
+function	c:@F@alcCreateContext	-			ALCcontext * (ALCdevice *, const ALCint *)	ALCdevice * device | const ALCint * attrlist	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	a4ef3b6003efc074	-
+function	c:@F@alcMakeContextCurrent	-			ALCboolean (ALCcontext *)	ALCcontext * context	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	aad6f87f700ed349	-
+function	c:@F@alcProcessContext	-			void (ALCcontext *)	ALCcontext * context	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	3585c98149466cf2	-
+function	c:@F@alcSuspendContext	-			void (ALCcontext *)	ALCcontext * context	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	38a8151866dead09	-
+function	c:@F@alcDestroyContext	-			void (ALCcontext *)	ALCcontext * context	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	955c7ede281bd6ec	-
+function	c:@F@alcGetCurrentContext	-			ALCcontext * (void)	-	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	2b99aa9082f94253	-
+function	c:@F@alcGetContextsDevice	-			ALCdevice * (ALCcontext *)	ALCcontext * context	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	f5620933e0269dca	-
+function	c:@F@alcOpenDevice	-			ALCdevice * (const ALCchar *)	const ALCchar * devicename	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	7fea69ecc850be6f	-
+function	c:@F@alcCloseDevice	-			ALCboolean (ALCdevice *)	ALCdevice * device	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	772bf02372e5a71f	-
+function	c:@F@alcGetError	-			ALCenum (ALCdevice *)	ALCdevice * device	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	8cd36d82b12368aa	-
+function	c:@F@alcIsExtensionPresent	-			ALCboolean (ALCdevice *, const ALCchar *)	ALCdevice * device | const ALCchar * extname	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	9db42853263d8bf5	-
+function	c:@F@alcGetProcAddress	-			void * (ALCdevice *, const ALCchar *)	ALCdevice * device | const ALCchar * funcname	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	b857cfa1739456b3	-
+function	c:@F@alcGetEnumValue	-			ALCenum (ALCdevice *, const ALCchar *)	ALCdevice * device | const ALCchar * enumname	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	3eb2dcc8e3afa583	-
+function	c:@F@alcGetString	-			const ALCchar * (ALCdevice *, ALCenum)	ALCdevice * device | ALCenum param	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	e06f5a55debdd7e9	-
+function	c:@F@alcGetIntegerv	-			void (ALCdevice *, ALCenum, ALCsizei, ALCint *)	ALCdevice * device | ALCenum param | ALCsizei size | ALCint * data	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	b3f05ca609433697	-
+function	c:@F@alcCaptureOpenDevice	-			ALCdevice * (const ALCchar *, ALCuint, ALCenum, ALCsizei)	const ALCchar * devicename | ALCuint frequency | ALCenum format | ALCsizei buffersize	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	8ac01ca14a23be25	-
+function	c:@F@alcCaptureCloseDevice	-			ALCboolean (ALCdevice *)	ALCdevice * device	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	db1ed35880c8044b	-
+function	c:@F@alcCaptureStart	-			void (ALCdevice *)	ALCdevice * device	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	85c46875a59400ed	-
+function	c:@F@alcCaptureStop	-			void (ALCdevice *)	ALCdevice * device	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	db45a49be19f8e77	-
+function	c:@F@alcCaptureSamples	-			void (ALCdevice *, ALCvoid *, ALCsizei)	ALCdevice * device | ALCvoid * buffer | ALCsizei samples	-	ios=2.0/13.0/-/0,macos=10.4/10.15/-/0	deprecated: OpenAL is deprecated	8244afd8c2ccf8b0	-
+typedef	c:@T@LPALCCREATECONTEXT	-			ALCcontext *(*)(ALCdevice *, const ALCint *)	-	-	-	-	edcb864aa867368c	-
+typedef	c:@T@LPALCMAKECONTEXTCURRENT	-			ALCboolean (*)(ALCcontext *)	-	-	-	-	0f6210e48ab6f4c5	-
+typedef	c:@T@LPALCPROCESSCONTEXT	-			void (*)(ALCcontext *)	-	-	-	-	0e52d8a00017f9a1	-
+typedef	c:@T@LPALCSUSPENDCONTEXT	-			void (*)(ALCcontext *)	-	-	-	-	76e886b16297d97b	-
+typedef	c:@T@LPALCDESTROYCONTEXT	-			void (*)(ALCcontext *)	-	-	-	-	cb4fc60bef1642f7	-
+typedef	c:@T@LPALCGETCURRENTCONTEXT	-			ALCcontext *(*)(void)	-	-	-	-	920dcdd18656792e	-
+typedef	c:@T@LPALCGETCONTEXTSDEVICE	-			ALCdevice *(*)(ALCcontext *)	-	-	-	-	f2b4265832dffc7c	-
+typedef	c:@T@LPALCOPENDEVICE	-			ALCdevice *(*)(const ALCchar *)	-	-	-	-	015db41f43eb5187	-
+typedef	c:@T@LPALCCLOSEDEVICE	-			ALCboolean (*)(ALCdevice *)	-	-	-	-	5c147e66d080597b	-
+typedef	c:@T@LPALCGETERROR	-			ALCenum (*)(ALCdevice *)	-	-	-	-	ca2f3926facd8529	-
+typedef	c:@T@LPALCISEXTENSIONPRESENT	-			ALCboolean (*)(ALCdevice *, const ALCchar *)	-	-	-	-	b28ce63376fb1439	-
+typedef	c:@T@LPALCGETPROCADDRESS	-			void *(*)(ALCdevice *, const ALCchar *)	-	-	-	-	ab60b53aef10c88c	-
+typedef	c:@T@LPALCGETENUMVALUE	-			ALCenum (*)(ALCdevice *, const ALCchar *)	-	-	-	-	fa71721f19b8323a	-
+typedef	c:@T@LPALCGETSTRING	-			const ALCchar *(*)(ALCdevice *, ALCenum)	-	-	-	-	ede0ae738d2a71e0	-
+typedef	c:@T@LPALCGETINTEGERV	-			void (*)(ALCdevice *, ALCenum, ALCsizei, ALCint *)	-	-	-	-	d740886d43a243d2	-
+typedef	c:@T@LPALCCAPTUREOPENDEVICE	-			ALCdevice *(*)(const ALCchar *, ALCuint, ALCenum, ALCsizei)	-	-	-	-	421abff20f9b2963	-
+typedef	c:@T@LPALCCAPTURECLOSEDEVICE	-			ALCboolean (*)(ALCdevice *)	-	-	-	-	9098d49e4c19c4d5	-
+typedef	c:@T@LPALCCAPTURESTART	-			void (*)(ALCdevice *)	-	-	-	-	73418b8ec93c2594	-
+typedef	c:@T@LPALCCAPTURESTOP	-			void (*)(ALCdevice *)	-	-	-	-	1e063b670b0a464c	-
+typedef	c:@T@LPALCCAPTURESAMPLES	-			void (*)(ALCdevice *, ALCvoid *, ALCsizei)	-	-	-	-	547be60bd94bfff0	-
+typedef	c:@T@alBufferDataStaticProcPtr	-			ALvoid (*)(ALint, ALenum, const ALvoid * _Nonnull, ALsizei, ALsizei)	-	-	-	-	0d2a921efe6c2bd8	-
+typedef	c:@T@alcMacOSXRenderingQualityProcPtr	-			ALvoid (*)(ALint)	-	-	-	-	9813bb5931bc065c	-
+typedef	c:@T@alMacOSXRenderChannelCountProcPtr	-			ALvoid (*)(ALint)	-	-	-	-	92ddcd371d0a4a10	-
+typedef	c:@T@alcMacOSXMixerMaxiumumBussesProcPtr	-			ALvoid (*)(ALint)	-	-	-	-	4b992cdb4d9b8439	-
+typedef	c:@T@alcMacOSXMixerOutputRateProcPtr	-			ALvoid (*)(ALdouble)	-	-	-	-	c2ed442b23d6a209	-
+typedef	c:@T@alcMacOSXGetRenderingQualityProcPtr	-			ALint (*)(void)	-	-	-	-	be8efe3bfe7b5593	-
+typedef	c:@T@alMacOSXGetRenderChannelCountProcPtr	-			ALint (*)(void)	-	-	-	-	07bc56173db75f8c	-
+typedef	c:@T@alcMacOSXGetMixerMaxiumumBussesProcPtr	-			ALint (*)(void)	-	-	-	-	e8afab2403385c41	-
+typedef	c:@T@alcMacOSXGetMixerOutputRateProcPtr	-			ALdouble (*)(void)	-	-	-	-	5a32b9e07e1591c4	-
+typedef	c:@T@alSourceRenderingQualityProcPtr	-			ALvoid (*)(ALuint, ALint)	-	-	-	-	43f793b593ce408f	-
+typedef	c:@T@alSourceGetRenderingQualityProcPtr	-			ALint (*)(ALuint)	-	-	-	-	f7690ba0fa795247	-
+typedef	c:@T@alSourceNotificationProc	-			ALvoid (*)(ALuint, ALuint, ALvoid * _Nullable)	-	-	-	-	065030ca1e82f2de	-
+typedef	c:@T@alSourceAddNotificationProcPtr	-			ALenum (*)(ALuint, ALuint, alSourceNotificationProc _Nonnull, ALvoid * _Nullable)	-	-	-	-	c82b724c0a10be14	-
+typedef	c:@T@alSourceRemoveNotificationProcPtr	-			ALvoid (*)(ALuint, ALuint, alSourceNotificationProc _Nonnull, ALvoid * _Nullable)	-	-	-	-	1224b3cfd47b0cc2	-
+typedef	c:@T@alcASAGetSourceProcPtr	-			ALenum (*)(ALuint, ALuint, ALvoid * _Nonnull, ALuint * _Nonnull)	-	-	-	-	ad398dc41fb79b86	-
+typedef	c:@T@alcASASetSourceProcPtr	-			ALenum (*)(ALuint, ALuint, ALvoid * _Nonnull, ALuint)	-	-	-	-	6e40ba2d25dd5c2f	-
+typedef	c:@T@alcASAGetListenerProcPtr	-			ALenum (*)(ALuint, ALvoid * _Nonnull, ALuint * _Nonnull)	-	-	-	-	b276439d16fc7382	-
+typedef	c:@T@alcASASetListenerProcPtr	-			ALenum (*)(ALuint, ALvoid * _Nonnull, ALuint)	-	-	-	-	d07579873ccc1532	-
+typedef	c:@T@alcOutputCapturerPrepareProcPtr	-			ALvoid (*)(ALCuint, ALCenum, ALCsizei)	-	-	-	-	f8143551d1b0753b	-
+typedef	c:@T@alcOutputCapturerStartProcPtr	-			ALvoid (*)(void)	-	-	-	-	afc50246e36dc2cd	-
+typedef	c:@T@alcOutputCapturerStopProcPtr	-			ALvoid (*)(void)	-	-	-	-	15abab51e5d8569b	-
+typedef	c:@T@alcOutputCapturerAvailableSamplesProcPtr	-			ALint (*)(void)	-	-	-	-	a58793b55efbba60	-
+typedef	c:@T@alcOutputCapturerSamplesProcPtr	-			ALvoid (*)(ALCvoid * _Nonnull, ALCsizei)	-	-	-	-	e7febfc0e67cf855	-

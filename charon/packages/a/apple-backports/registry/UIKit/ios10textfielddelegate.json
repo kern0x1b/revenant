@@ -1,0 +1,14 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UITextFieldDelegate textFieldDidEndEditing:reason:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITextFieldEndEditingReason.md",
+      "source": "tests/backports/device/textfieldreason.m on iOS 6 with the field really edited, against the header of the SDK 16.4 and the behaviour of iOS 10, which sends the method with the reason instead of textFieldDidEndEditing: to a delegate that has it; the port's own object is packages/a/apple-backports/UIKit/UITextField+EndEditingReason.m, a category on UITextField that sends it with the reason instead of -textFieldDidEndEditing: to a delegate that has this one and not that one. The owner is a @protocol, so the method is one the application's own delegate implements and what this port owes is the asking"
+    }
+  ]
+}

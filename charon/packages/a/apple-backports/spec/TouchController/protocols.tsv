@@ -1,0 +1,17 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+TCControl	26.0	transcribed		NSObject,TCControlLayout	-	-	-	-	-	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	property	no	label	@property (nonatomic, readonly, strong) TCControlLabel * _Nonnull label;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	property	no	colliderShape	@property (nonatomic, readonly, assign, unsafe_unretained) TCColliderShape colliderShape;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	property	no	pressed	@property (nonatomic, readonly, assign, unsafe_unretained, getter=isPressed) BOOL pressed;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	property	no	enabled	@property (nonatomic, readwrite, assign, unsafe_unretained, getter=isEnabled) BOOL enabled;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	method	yes	handleTouchBeganAtPoint:	- (void)handleTouchBeganAtPoint:(CGPoint)point;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	method	yes	handleTouchMovedAtPoint:	- (void)handleTouchMovedAtPoint:(CGPoint)point;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	required	method	yes	handleTouchEndedAtPoint:	- (void)handleTouchEndedAtPoint:(CGPoint)point;	-
+TCControl	26.0	transcribed		NSObject,TCControlLayout	optional	property	no	highlightDuration	@property (nonatomic, readwrite, assign, unsafe_unretained) NSTimeInterval highlightDuration;	-
+TCControlLayout	26.0	transcribed		NSObject	-	-	-	-	-	-
+TCControlLayout	26.0	transcribed		NSObject	required	property	no	anchor	@property (nonatomic, readwrite, assign, unsafe_unretained) TCControlLayoutAnchor anchor;	-
+TCControlLayout	26.0	transcribed		NSObject	required	property	no	anchorCoordinateSystem	@property (nonatomic, readwrite, assign, unsafe_unretained) TCControlLayoutAnchorCoordinateSystem anchorCoordinateSystem;	-
+TCControlLayout	26.0	transcribed		NSObject	required	property	no	offset	@property (nonatomic, readwrite, assign, unsafe_unretained) CGPoint offset;	-
+TCControlLayout	26.0	transcribed		NSObject	required	property	no	zIndex	@property (nonatomic, readwrite, assign, unsafe_unretained) NSInteger zIndex;	-
+TCControlLayout	26.0	transcribed		NSObject	required	property	no	size	@property (nonatomic, readwrite, assign, unsafe_unretained) CGSize size;	-
+TCControlLayout	26.0	transcribed		NSObject	required	property	no	position	@property (nonatomic, readonly, assign, unsafe_unretained) CGPoint position;	-

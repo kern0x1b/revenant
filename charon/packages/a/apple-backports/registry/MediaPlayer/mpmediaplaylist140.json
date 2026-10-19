@@ -1,0 +1,16 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPMediaPlaylist.cloudGlobalID",
+   "kind": "property",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPMediaPlaylist.h, @property (nonatomic, readonly, nullable) NSString *cloudGlobalID MP_API(ios(14.0))",
+   "reason": "the release carries the accessor this is a convenience over and not the convenience: read with tools/mach32_methods.py from the armv7 cache of 6.1.3 (MediaPlayer image at 0x31fe3000), MPMediaPlaylist has 15 own instance methods and 3 own class methods and -valueForProperty: is among its own list; all 41 of the image's categories were read WITH THE CLASS EACH ONE EXTENDS, resolved through the category's own class pointer, and none extends MPMediaPlaylist, so nothing here can clobber the release's accessor and nothing in the release clobbers this one. -aSelectorNoFrameworkHas is absent as the control. The per-cache selector list does not decide a member - objectForKeyedSubscript: is on one line of it because a collection class declares it - which is the trap facts/MediaPlayer/MPMediaItem.md:105 records for albumTrackNumber. The KEY is Apple's and was read: MediaPlayerConstants82.m carries MPMediaPlaylistPropertyCloudGlobalID = \"cloudGlobalID\", and MPMediaPlaylist.h is the reason this row is in its own object - it declares the KEY at MP_API(ios(9.0)) and the PROPERTY at MP_API(ios(14.0)), and facts/MediaPlayer/MediaPlayerConstants.md:4 records the key as measured at 8.2, one release earlier than the header's own token",
+   "effect": "the value the release stores under Apple's key, and nil when that value is not an NSString. On 6.1.3 that is nil, and nil is the CORRECT answer and not a stub: a global ID is the identifier a playlist has in the user's iCloud account, and 6.1.3 has no iCloud music library - the release's own 15 methods are initWithPersistentID: (a local persistent ID), -items, -count, -persistentID, -valueForProperty:, -playlistAttributes, -mediaTypes, -representativeItem, -existsInLibrary, -isEqual:, -encodeWithCoder:, -initWithCoder: and the artwork loader, and the image's cloud classes are an app's own download cache. On a release with an account to name it, the same code answers the ID",
+   "facts": "facts/MediaPlayer/MediaEntityAndPlaylist.md"
+  }
+ ]
+}

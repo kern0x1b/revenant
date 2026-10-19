@@ -1,0 +1,182 @@
+{
+  "framework": "GameplayKit",
+  "note": "The state machine and its states: sixteen rows for the two classes, every one of them iOS 9 API and every one of them logic over the states a caller hands the machine.",
+  "entries": [
+    {
+      "api": "+[GKState state]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "+[GKStateMachine stateMachineWithStates:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKState didEnterWithPreviousState:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKState init]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKState isValidNextState:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKState updateWithDeltaTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKState willExitWithNextState:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKStateMachine canEnterState:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKStateMachine enterState:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKStateMachine initWithStates:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKStateMachine stateForClass:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "-[GKStateMachine updateWithDeltaTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "GKState",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "GKState.stateMachine",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "GKStateMachine",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    },
+    {
+      "api": "GKStateMachine.currentState",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a state and the machine that runs it are logic over the states the machine was given, and need nothing of the device",
+      "facts": "facts/GameplayKit/StateMachine.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the machine's own rules are the host's: -init and +new raise GKInitNotAllowedException rather than building a machine with no states, a plain state allows every transition and a fresh machine can enter anything, a transition tells the state leaving before the state arriving, a class the machine holds no state of leaves it with none, and -stateForClass: is an exact match on the class of the states it was built with"
+    }
+  ]
+}

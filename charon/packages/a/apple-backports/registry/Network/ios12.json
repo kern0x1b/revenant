@@ -1,0 +1,205 @@
+{
+  "framework": "Network",
+  "entries": [
+    {
+      "api": "nw_path_monitor_create()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a monitor of the network the device is on",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_monitor_create_with_type()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a monitor that reports only paths over one type of interface",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_monitor_set_update_handler()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the block called with the path",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_monitor_set_cancel_handler()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the block called when the monitor is cancelled",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_monitor_set_queue()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the queue every call is made on",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_monitor_start()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "starts reporting: the path at once, and again when it changes",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_monitor_cancel()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "stops reporting and calls the cancel handler once",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_get_status()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "satisfied, unsatisfied or satisfiable",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_enumerate_interfaces()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the interfaces the path uses",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_is_equal()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether two paths are the same",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_is_expensive()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether the path is over a cellular connection",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_has_ipv4()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether the path has an IPv4 address",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_has_ipv6()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether the path has an IPv6 address",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_has_dns()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether the path has a name server",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_uses_interface_type()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether an interface of the type is used",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_interface_get_type()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "other, Wi-Fi, cellular, wired or loopback",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_interface_get_name()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the name of the interface, en0 for Wi-Fi",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_interface_get_index()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the index of the interface",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_copy_effective_local_endpoint()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "NULL: the path of a monitor has no endpoint",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    },
+    {
+      "api": "nw_path_copy_effective_remote_endpoint()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "NULL: the path of a monitor has no endpoint",
+      "facts": "facts/Network/NWPathMonitor.md",
+      "source": "the host's Network, compared with the port over every call of the path monitor - initial and repeated start, the queue of each call, cancelling at once and twice, typed and prohibited monitors, the path each reports (tests/backports/host/network, 20 checks) - and an iPad 2 running 6.1.3 with its Wi-Fi taken away and put back (tests/backports/device/nwpath.m)"
+    }
+  ]
+}

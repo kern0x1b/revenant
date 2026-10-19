@@ -1,0 +1,791 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@_OSSwapInt16	-			__uint16_t (__uint16_t)	__uint16_t _data	-	-	-	fa4cb4b0e6ffdab9	-
+function	c:@F@_OSSwapInt32	-			__uint32_t (__uint32_t)	__uint32_t _data	-	-	-	e6a4c6db6267b72a	-
+function	c:@F@_OSSwapInt64	-			__uint64_t (__uint64_t)	__uint64_t _data	-	-	-	166bab6473c32c1b	-
+typedef	c:@T@malloc_type_id_t	-			unsigned long long	-	-	-	-	51a750cad32829b4	-
+function	c:@F@malloc_type_malloc	-			void * (size_t, malloc_type_id_t)	size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	edf6570f5704b607	-
+function	c:@F@malloc_type_calloc	-			void * (size_t, size_t, malloc_type_id_t)	size_t count | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	fe7588e6fb0115dd	-
+function	c:@F@malloc_type_free	-			void (void *, malloc_type_id_t)	void * ptr | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	5ea07a4b79724fc7	-
+function	c:@F@malloc_type_realloc	-			void * (void *, size_t, malloc_type_id_t)	void * ptr | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	8a5a4690cc76e0d8	-
+function	c:@F@malloc_type_valloc	-			void * (size_t, malloc_type_id_t)	size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	db7f17867100c4c8	-
+function	c:@F@malloc_type_aligned_alloc	-			void * (size_t, size_t, malloc_type_id_t)	size_t alignment | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	022e78d376b6bb17	-
+function	c:@F@malloc_type_posix_memalign	-			int (void **, size_t, size_t, malloc_type_id_t)	void ** memptr | size_t alignment | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	575a7dcb2605e6a6	-
+typedef	c:@T@malloc_zone_t	-			struct _malloc_zone_t	-	-	-	-	3e8c35ab13399e52	-
+function	c:@F@malloc_type_zone_malloc	-			void * (malloc_zone_t *, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	af8eb28ff8c02e8b	-
+function	c:@F@malloc_type_zone_calloc	-			void * (malloc_zone_t *, size_t, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t count | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	a081b773d8763f57	-
+function	c:@F@malloc_type_zone_free	-			void (malloc_zone_t *, void *, malloc_type_id_t)	malloc_zone_t * zone | void * ptr | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	71b6cb55b165ae9c	-
+function	c:@F@malloc_type_zone_realloc	-			void * (malloc_zone_t *, void *, size_t, malloc_type_id_t)	malloc_zone_t * zone | void * ptr | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	42ca9785891caa90	-
+function	c:@F@malloc_type_zone_valloc	-			void * (malloc_zone_t *, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	7d048d04f7f29b71	-
+function	c:@F@malloc_type_zone_memalign	-			void * (malloc_zone_t *, size_t, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t alignment | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	135c7f689a642bcc	-
+function	c:@F@malloc	-			void * (unsigned long)	size_t __size	-	-	-	494f3200949083a6	-
+function	c:@F@calloc	-			void * (unsigned long, unsigned long)	size_t __count | size_t __size	-	-	-	65d57b5bf9c3d020	-
+function	c:@F@free	-			void (void *)	void * 	-	-	-	44d4baf6d4e69cb7	-
+function	c:@F@realloc	-			void * (void *, unsigned long)	void * __ptr | size_t __size	-	-	-	5de542f8195cfea5	-
+function	c:@F@reallocf	-			void * (void *, size_t)	void * __ptr | size_t __size	-	-	-	604eb86b8ed8ca40	-
+function	c:@F@valloc	-			void * (size_t)	size_t __size	-	-	-	6cd05af621b2fc06	-
+function	c:@F@aligned_alloc	-			void * (unsigned long, unsigned long)	size_t __alignment | size_t __size	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	a8e3312df40e5e98	-
+function	c:@F@posix_memalign	-			int (void **, size_t, size_t)	void ** __memptr | size_t __alignment | size_t __size	-	ios=3.0/-/-/0	-	15ea740640269ffe	-
+typedef	c:@T@au_id_t	-			uid_t	-	-	-	-	78d4a6aa97ffca01	-
+typedef	c:@T@au_asid_t	-			pid_t	-	-	-	-	53cc1ed22edbbb3e	-
+typedef	c:@T@au_event_t	-			u_int16_t	-	-	-	-	2a596399eeaf2aee	-
+typedef	c:@T@au_emod_t	-			u_int16_t	-	-	-	-	6e4a9e6f3962328e	-
+typedef	c:@T@au_class_t	-			u_int32_t	-	-	-	-	8d6e53e9a655a41e	-
+typedef	c:@T@au_asflgs_t	-			u_int64_t	-	-	-	-	7c5bfebfbeb4bbbd	-
+typedef	c:@T@au_ctlmode_t	-			unsigned char	-	-	-	-	32e0002593ce24eb	-
+struct	c:@S@au_tid	-			-	-	-	-	-	f8691fd524c10294	-
+field	c:@S@au_tid@FI@port	au_tid			dev_t	-	-	-	-	c01c0d2bf06fe934	-
+field	c:@S@au_tid@FI@machine	au_tid			u_int32_t	-	-	-	-	4bdcdad67b043925	-
+typedef	c:@T@au_tid_t	-			struct au_tid	-	-	-	-	02b371223d74c3cb	-
+struct	c:@S@au_tid_addr	-			-	-	-	-	-	18406ac53b3b17e5	-
+field	c:@S@au_tid_addr@FI@at_port	au_tid_addr			dev_t	-	-	-	-	92982d43badd1094	-
+field	c:@S@au_tid_addr@FI@at_type	au_tid_addr			u_int32_t	-	-	-	-	4c253d928c3c21a0	-
+field	c:@S@au_tid_addr@FI@at_addr	au_tid_addr			u_int32_t[4]	-	-	-	-	54c2a7b38d3358d3	-
+typedef	c:@T@au_tid_addr_t	-			struct au_tid_addr	-	-	-	-	3a8231834e36d41a	-
+struct	c:@S@au_mask	-			-	-	-	-	-	4421b1b1db65fcda	-
+field	c:@S@au_mask@FI@am_success	au_mask			unsigned int	-	-	-	-	cdfed6a028d21810	-
+field	c:@S@au_mask@FI@am_failure	au_mask			unsigned int	-	-	-	-	17ea27ac22d6e187	-
+typedef	c:@T@au_mask_t	-			struct au_mask	-	-	-	-	8a8bf2d8950a0d47	-
+struct	c:@S@auditinfo	-			-	-	-	-	-	4db9f2291da66aaa	-
+field	c:@S@auditinfo@FI@ai_auid	auditinfo			au_id_t	-	-	-	-	9692e6ac80b1f063	-
+field	c:@S@auditinfo@FI@ai_mask	auditinfo			au_mask_t	-	-	-	-	d66076f64ccaeaa7	-
+field	c:@S@auditinfo@FI@ai_termid	auditinfo			au_tid_t	-	-	-	-	2e0addacd44ead29	-
+field	c:@S@auditinfo@FI@ai_asid	auditinfo			au_asid_t	-	-	-	-	c8c3a837885206b0	-
+typedef	c:@T@auditinfo_t	-			struct auditinfo	-	-	-	-	2199aeb09b8892e6	-
+struct	c:@S@auditinfo_addr	-			-	-	-	-	-	5f1ad6368c49a852	-
+field	c:@S@auditinfo_addr@FI@ai_auid	auditinfo_addr			au_id_t	-	-	-	-	d74981bcbb69dd65	-
+field	c:@S@auditinfo_addr@FI@ai_mask	auditinfo_addr			au_mask_t	-	-	-	-	82563fa36bca44eb	-
+field	c:@S@auditinfo_addr@FI@ai_termid	auditinfo_addr			au_tid_addr_t	-	-	-	-	333e6dbbc6998b9f	-
+field	c:@S@auditinfo_addr@FI@ai_asid	auditinfo_addr			au_asid_t	-	-	-	-	c7df4146f6ed488e	-
+field	c:@S@auditinfo_addr@FI@ai_flags	auditinfo_addr			au_asflgs_t	-	-	-	-	53ebf1e191796cb7	-
+typedef	c:@T@auditinfo_addr_t	-			struct auditinfo_addr	-	-	-	-	08ef51224c52bedf	-
+struct	c:@S@auditpinfo	-			-	-	-	-	-	2de961dafe075073	-
+field	c:@S@auditpinfo@FI@ap_pid	auditpinfo			pid_t	-	-	-	-	6d9013e285328ac8	-
+field	c:@S@auditpinfo@FI@ap_auid	auditpinfo			au_id_t	-	-	-	-	ea19b35adadfd09a	-
+field	c:@S@auditpinfo@FI@ap_mask	auditpinfo			au_mask_t	-	-	-	-	bb2240b2154c45a5	-
+field	c:@S@auditpinfo@FI@ap_termid	auditpinfo			au_tid_t	-	-	-	-	3723e0594141ac65	-
+field	c:@S@auditpinfo@FI@ap_asid	auditpinfo			au_asid_t	-	-	-	-	0b4a897e262570e6	-
+typedef	c:@T@auditpinfo_t	-			struct auditpinfo	-	-	-	-	906eb3c514775029	-
+struct	c:@S@auditpinfo_addr	-			-	-	-	-	-	93ef43550f089a2c	-
+field	c:@S@auditpinfo_addr@FI@ap_pid	auditpinfo_addr			pid_t	-	-	-	-	99c5898ae7fdf6c5	-
+field	c:@S@auditpinfo_addr@FI@ap_auid	auditpinfo_addr			au_id_t	-	-	-	-	fda573dc228f70ac	-
+field	c:@S@auditpinfo_addr@FI@ap_mask	auditpinfo_addr			au_mask_t	-	-	-	-	f9b69a1ee778c562	-
+field	c:@S@auditpinfo_addr@FI@ap_termid	auditpinfo_addr			au_tid_addr_t	-	-	-	-	b7ac8b9fa4063333	-
+field	c:@S@auditpinfo_addr@FI@ap_asid	auditpinfo_addr			au_asid_t	-	-	-	-	2cc022d6d6fc4752	-
+field	c:@S@auditpinfo_addr@FI@ap_flags	auditpinfo_addr			au_asflgs_t	-	-	-	-	1d273390364b1693	-
+typedef	c:@T@auditpinfo_addr_t	-			struct auditpinfo_addr	-	-	-	-	3bb3f0842ead4d21	-
+struct	c:@S@au_session	-			-	-	-	-	-	49daca886f305d28	-
+field	c:@S@au_session@FI@as_aia_p	au_session			auditinfo_addr_t *	-	-	-	-	9172614c07d3636a	-
+field	c:@S@au_session@FI@as_mask	au_session			au_mask_t	-	-	-	-	c2a9c9fbf36e2df2	-
+typedef	c:@T@au_session_t	-			struct au_session	-	-	-	-	280bd1ad4de613a8	-
+struct	c:@S@au_expire_after	-			-	-	-	-	-	18ece639a8549df4	-
+field	c:@S@au_expire_after@FI@age	au_expire_after			time_t	-	-	-	-	5a19600831643d94	-
+field	c:@S@au_expire_after@FI@size	au_expire_after			size_t	-	-	-	-	2631ffef12d6cc83	-
+field	c:@S@au_expire_after@FI@op_type	au_expire_after			unsigned char	-	-	-	-	bf2e87ff639c755f	-
+typedef	c:@T@au_expire_after_t	-			struct au_expire_after	-	-	-	-	cc654a5aeeff3680	-
+struct	c:@S@au_token	-			-	-	-	-	-	7f3a2688a862f226	-
+typedef	c:@T@token_t	-			struct au_token	-	-	-	-	9c9143f39ac4df5c	-
+struct	c:@S@au_qctrl	-			-	-	-	-	-	1180e6e5fdb49903	-
+field	c:@S@au_qctrl@FI@aq_hiwater	au_qctrl			int	-	-	-	-	abab0ed38615e510	-
+field	c:@S@au_qctrl@FI@aq_lowater	au_qctrl			int	-	-	-	-	c967728285d9b25e	-
+field	c:@S@au_qctrl@FI@aq_bufsz	au_qctrl			int	-	-	-	-	a4cfaa320563c986	-
+field	c:@S@au_qctrl@FI@aq_delay	au_qctrl			int	-	-	-	-	0f153e0cac5097e8	-
+field	c:@S@au_qctrl@FI@aq_minfree	au_qctrl			int	-	-	-	-	dd7fd6a1d4cf3000	-
+typedef	c:@T@au_qctrl_t	-			struct au_qctrl	-	-	-	-	1b776554ba2a2668	-
+struct	c:@S@audit_stat	-			-	-	-	-	-	dbe559cc6aad3621	-
+field	c:@S@audit_stat@FI@as_version	audit_stat			unsigned int	-	-	-	-	5e4cd8d89dbe4d28	-
+field	c:@S@audit_stat@FI@as_numevent	audit_stat			unsigned int	-	-	-	-	84b33e2b9ca82f4e	-
+field	c:@S@audit_stat@FI@as_generated	audit_stat			int	-	-	-	-	9fe9107394c81e71	-
+field	c:@S@audit_stat@FI@as_nonattrib	audit_stat			int	-	-	-	-	08f78176d50ce004	-
+field	c:@S@audit_stat@FI@as_kernel	audit_stat			int	-	-	-	-	6088c2c9620558d8	-
+field	c:@S@audit_stat@FI@as_audit	audit_stat			int	-	-	-	-	b07817d90cf7352d	-
+field	c:@S@audit_stat@FI@as_auditctl	audit_stat			int	-	-	-	-	75f677984f399286	-
+field	c:@S@audit_stat@FI@as_enqueue	audit_stat			int	-	-	-	-	ffe87ca6582c4d81	-
+field	c:@S@audit_stat@FI@as_written	audit_stat			int	-	-	-	-	efe011b014e86306	-
+field	c:@S@audit_stat@FI@as_wblocked	audit_stat			int	-	-	-	-	95c435dc9382ca49	-
+field	c:@S@audit_stat@FI@as_rblocked	audit_stat			int	-	-	-	-	85742432778c7e7e	-
+field	c:@S@audit_stat@FI@as_dropped	audit_stat			int	-	-	-	-	503ac8b74cad35c2	-
+field	c:@S@audit_stat@FI@as_totalsize	audit_stat			int	-	-	-	-	782a22bb82a122a1	-
+field	c:@S@audit_stat@FI@as_memused	audit_stat			unsigned int	-	-	-	-	a167830d7aaaf41e	-
+typedef	c:@T@au_stat_t	-			struct audit_stat	-	-	-	-	05b6c87702fe1b41	-
+struct	c:@S@audit_fstat	-			-	-	-	-	-	ed8813adc338058f	-
+field	c:@S@audit_fstat@FI@af_filesz	audit_fstat			u_int64_t	-	-	-	-	f7cd69581d75648f	-
+field	c:@S@audit_fstat@FI@af_currsz	audit_fstat			u_int64_t	-	-	-	-	56fd4139e10f77b6	-
+typedef	c:@T@au_fstat_t	-			struct audit_fstat	-	-	-	-	242d32fa31c9a02b	-
+struct	c:@S@au_evclass_map	-			-	-	-	-	-	3759b7dfdee7a44e	-
+field	c:@S@au_evclass_map@FI@ec_number	au_evclass_map			au_event_t	-	-	-	-	070b9b365b4cc202	-
+field	c:@S@au_evclass_map@FI@ec_class	au_evclass_map			au_class_t	-	-	-	-	32d882b667429974	-
+typedef	c:@T@au_evclass_map_t	-			struct au_evclass_map	-	-	-	-	3f0716a5fde0834b	-
+enum	c:@E@audit_session_flags	-			unsigned int	-	-	-	-	23a0bdfae233a393	-
+enumconst	c:@E@audit_session_flags@AU_SESSION_FLAG_IS_INITIAL	audit_session_flags			-	-	-	-	-	a17b4ca91cc52855	1
+enumconst	c:@E@audit_session_flags@AU_SESSION_FLAG_HAS_GRAPHIC_ACCESS	audit_session_flags			-	-	-	-	-	0f1f79563fd71487	16
+enumconst	c:@E@audit_session_flags@AU_SESSION_FLAG_HAS_TTY	audit_session_flags			-	-	-	-	-	8c7b2e40d6ec67d9	32
+enumconst	c:@E@audit_session_flags@AU_SESSION_FLAG_IS_REMOTE	audit_session_flags			-	-	-	-	-	7a29f58646b60630	4096
+enumconst	c:@E@audit_session_flags@AU_SESSION_FLAG_HAS_CONSOLE_ACCESS	audit_session_flags			-	-	-	-	-	bfe919045babc34f	8192
+enumconst	c:@E@audit_session_flags@AU_SESSION_FLAG_HAS_AUTHENTICATED	audit_session_flags			-	-	-	-	-	658e93357cc4fbd7	16384
+function	c:@F@audit	-			int (const void *, int)	const void *  | int 	-	macos=10.4/11.0/-/0	-	41c44c9a94b23f9d	-
+function	c:@F@auditon	-			int (int, void *, int)	int  | void *  | int 	-	macos=10.4/11.0/-/0	-	0ebe30bf910f4778	-
+function	c:@F@auditctl	-			int (const char *)	const char * 	-	macos=10.4/11.0/-/0	-	a23f3cd21be5e1bd	-
+function	c:@F@getauid	-			int (au_id_t *)	au_id_t * 	-	-	-	6d7fc025627f598d	-
+function	c:@F@setauid	-			int (const au_id_t *)	const au_id_t * 	-	-	-	4916c0786d117987	-
+function	c:@F@getaudit_addr	-			int (struct auditinfo_addr *, int)	struct auditinfo_addr *  | int 	-	-	-	a00c14437f9130d7	-
+function	c:@F@setaudit_addr	-			int (const struct auditinfo_addr *, int)	const struct auditinfo_addr *  | int 	-	-	-	ed15f5d8d0274a30	-
+function	c:@F@getaudit	-			int (struct auditinfo *)	struct auditinfo * 	-	ios=2.0/6.0/-/0	-	2e65ccb177f1e1b9	-
+function	c:@F@setaudit	-			int (const struct auditinfo *)	const struct auditinfo * 	-	ios=2.0/6.0/-/0	-	39672ab945ae560a	-
+function	c:@F@audit_session_self	-			mach_port_name_t (void)	-	-	-	-	4c389cb0a1512a27	-
+function	c:@F@audit_session_join	-			au_asid_t (mach_port_name_t)	mach_port_name_t port	-	-	-	c07cc62566578733	-
+function	c:@F@audit_session_port	-			int (au_asid_t, mach_port_name_t *)	au_asid_t asid | mach_port_name_t * portname	-	-	-	c4eda806c349a901	-
+typedef	c:@T@os_function_t	-			void (*)(void * _Nullable)	-	-	-	-	f51984428741919d	-
+typedef	c:@T@os_block_t	-			void ((^))(void)	-	-	-	-	e40bd475d3141bb6	-
+typedef	c:@T@bitstr_t	-			unsigned char	-	-	-	-	6008a6f5e80f4577	-
+function	c:@F@_NSGetArgv	-			char *** (void)	-	-	-	-	d9cb5ef51f9e4dd3	-
+function	c:@F@_NSGetArgc	-			int * (void)	-	-	-	-	4bd30696721465c1	-
+function	c:@F@_NSGetEnviron	-			char *** (void)	-	-	-	-	058d4c40a5986e7e	-
+function	c:@F@_NSGetProgname	-			char ** (void)	-	-	-	-	e815bd2bee515fc9	-
+struct	c:@S@mach_header_64	-			-	-	-	-	-	b90a862aeb212142	-
+function	c:@F@_NSGetMachExecuteHeader	-			struct mach_header_64 * (void)	-	-	-	-	adddf6b105071d85	-
+struct	c:@SA@FTS	-			-	-	-	-	-	39727c5e6eff5541	-
+field	c:@SA@FTS@FI@fts_cur	FTS			struct _ftsent *	-	-	-	-	2722da1813edec93	-
+field	c:@SA@FTS@FI@fts_child	FTS			struct _ftsent *	-	-	-	-	9a951eaec42919e0	-
+field	c:@SA@FTS@FI@fts_array	FTS			struct _ftsent **	-	-	-	-	11882edb743e830b	-
+field	c:@SA@FTS@FI@fts_dev	FTS			dev_t	-	-	-	-	d14bf06a42d02115	-
+field	c:@SA@FTS@FI@fts_path	FTS			char *	-	-	-	-	063592e035a5f1a7	-
+field	c:@SA@FTS@FI@fts_rfd	FTS			int	-	-	-	-	4cb983c23caa62f0	-
+field	c:@SA@FTS@FI@fts_pathlen	FTS			int	-	-	-	-	0c8abe9e5a558dff	-
+field	c:@SA@FTS@FI@fts_nitems	FTS			int	-	-	-	-	2ff7820f964fe0a7	-
+union	c:@SA@FTS@Ua	-	-		-	-	-	-	-	300093c0f288e3b3	-
+field	c:@SA@FTS@Ua@FI@fts_compar	-			int (*)()	-	-	-	-	12adcf9e8d979628	-
+field	c:@SA@FTS@Ua@FI@fts_compar_b	-			int (^)()	-	-	-	-	f51f480765df6015	-
+field	c:@SA@FTS@FI@fts_options	FTS			int	-	-	-	-	491cb0c47439e11f	-
+typedef	c:@T@FTS	-			struct FTS	-	-	-	-	1866e2b03a1ed7ed	-
+struct	c:@S@_ftsent	-			-	-	-	-	-	ba7f03cf765b92ab	-
+field	c:@S@_ftsent@FI@fts_cycle	_ftsent			struct _ftsent *	-	-	-	-	bd2955ca3598fa2c	-
+field	c:@S@_ftsent@FI@fts_parent	_ftsent			struct _ftsent *	-	-	-	-	99c0a96019564b89	-
+field	c:@S@_ftsent@FI@fts_link	_ftsent			struct _ftsent *	-	-	-	-	5180e8c6afd8ca21	-
+field	c:@S@_ftsent@FI@fts_number	_ftsent			long	-	-	-	-	cf3b638197df81b3	-
+field	c:@S@_ftsent@FI@fts_pointer	_ftsent			void *	-	-	-	-	94ae67e1801e0c0d	-
+field	c:@S@_ftsent@FI@fts_accpath	_ftsent			char *	-	-	-	-	f6af93200b4a9ada	-
+field	c:@S@_ftsent@FI@fts_path	_ftsent			char *	-	-	-	-	6ec9bba71d6cc3f2	-
+field	c:@S@_ftsent@FI@fts_errno	_ftsent			int	-	-	-	-	91eb2f4ef7b5f8d2	-
+field	c:@S@_ftsent@FI@fts_symfd	_ftsent			int	-	-	-	-	351f4fd3857100d4	-
+field	c:@S@_ftsent@FI@fts_pathlen	_ftsent			unsigned short	-	-	-	-	12be93ea7fbbfb4c	-
+field	c:@S@_ftsent@FI@fts_namelen	_ftsent			unsigned short	-	-	-	-	cd76bcd33876835e	-
+field	c:@S@_ftsent@FI@fts_ino	_ftsent			ino_t	-	-	-	-	7805ffc0d0a5df01	-
+field	c:@S@_ftsent@FI@fts_dev	_ftsent			dev_t	-	-	-	-	bc1f29f637258aa6	-
+field	c:@S@_ftsent@FI@fts_nlink	_ftsent			nlink_t	-	-	-	-	054d645e8152ccf6	-
+field	c:@S@_ftsent@FI@fts_level	_ftsent			short	-	-	-	-	9c39d3ead594e75b	-
+field	c:@S@_ftsent@FI@fts_info	_ftsent			unsigned short	-	-	-	-	75c2846df272b2de	-
+field	c:@S@_ftsent@FI@fts_flags	_ftsent			unsigned short	-	-	-	-	ce0d1bdd790fbf76	-
+field	c:@S@_ftsent@FI@fts_instr	_ftsent			unsigned short	-	-	-	-	c4b745b6dd3fc3ef	-
+struct	c:@S@stat	-			-	-	-	-	-	d766aa93a51246b8	-
+field	c:@S@_ftsent@FI@fts_statp	_ftsent			struct stat *	-	-	-	-	56838cfdda4f72af	-
+field	c:@S@_ftsent@FI@fts_name	_ftsent			char[1]	-	-	-	-	2d6ca29ddb81e995	-
+typedef	c:@T@FTSENT	-			struct _ftsent	-	-	-	-	503a66ba15962c88	-
+function	c:@F@fts_children	-			FTSENT * (FTS *, int)	FTS *  | int 	-	-	-	18b2792a980b2237	-
+function	c:@F@fts_close	-			int (FTS *)	FTS * 	-	-	-	d5f127c01f13698b	-
+function	c:@F@fts_open	-			FTS * (char *const *, int, int (*)(const FTSENT **, const FTSENT **))	char *const *  | int  | int (*)(const FTSENT **, const FTSENT **) 	-	-	-	d3f013beb1f3a9ca	-
+function	c:@F@fts_open_b	-			FTS * (char *const *, int, int (^)(const FTSENT **, const FTSENT **))	char *const *  | int  | int (^)(const FTSENT **, const FTSENT **) 	-	ios=3.2/-/-/0	-	b88878055b46a539	-
+function	c:@F@fts_read	-			FTSENT * (FTS *)	FTS * 	-	-	-	19033dabe3df0787	-
+function	c:@F@fts_set	-			int (FTS *, FTSENT *, int)	FTS *  | FTSENT *  | int 	-	-	-	eaac019228421fc1	-
+struct	c:@S@option	-			-	-	-	-	-	bb005a506ca99a07	-
+field	c:@S@option@FI@name	option			const char *	-	-	-	-	3213933add0c4294	-
+field	c:@S@option@FI@has_arg	option			int	-	-	-	-	4c53154da5aea891	-
+field	c:@S@option@FI@flag	option			int *	-	-	-	-	e2b858106de8da3f	-
+field	c:@S@option@FI@val	option			int	-	-	-	-	fbd8894f7215afe3	-
+function	c:@F@getopt_long	-			int (int, char *const *, const char *, const struct option *, int *)	int __argc | char *const *  | const char *  | const struct option *  | int * 	-	-	-	4d6d5fecfbfa6924	-
+function	c:@F@getopt_long_only	-			int (int, char *const *, const char *, const struct option *, int *)	int __argc | char *const *  | const char *  | const struct option *  | int * 	-	-	-	ae7ec1fba455dd24	-
+function	c:@F@getopt	-			int (int, const char *const[], const char *)	int __argc | const char *const[]  | const char * 	-	-	-	6b926e05b23f97b8	-
+var	c:@optarg	-			char *	-	-	-	-	4d85b51b25d40cf3	-
+var	c:@optind	-			int	-	-	-	-	cedf47bafd868b61	-
+var	c:@opterr	-			int	-	-	-	-	9f0775815f1a0f37	-
+var	c:@optopt	-			int	-	-	-	-	9791aff48536965e	-
+var	c:@optreset	-			int	-	-	-	-	8c663e09d50da36a	-
+typedef	c:@T@UInt8	-			unsigned char	-	-	-	-	a9ef2eddf94d7e81	-
+typedef	c:@T@SInt8	-			signed char	-	-	-	-	d4686dd34cd8283f	-
+typedef	c:@T@UInt16	-			unsigned short	-	-	-	-	89acd83db7a94864	-
+typedef	c:@T@SInt16	-			short	-	-	-	-	3eec647098d9543c	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+struct	c:@S@wide	-			-	-	-	-	-	dc338aa38da8f01b	-
+field	c:@S@wide@FI@lo	wide			UInt32	-	-	-	-	b42aeb34ea3ae512	-
+field	c:@S@wide@FI@hi	wide			SInt32	-	-	-	-	933c81d76dd64733	-
+typedef	c:@T@wide	-			struct wide	-	-	-	-	32e0b9b7cf93b136	-
+struct	c:@S@UnsignedWide	-			-	-	-	-	-	a36d077fed338a44	-
+field	c:@S@UnsignedWide@FI@lo	UnsignedWide			UInt32	-	-	-	-	92242cdeee8eb679	-
+field	c:@S@UnsignedWide@FI@hi	UnsignedWide			UInt32	-	-	-	-	c01ccd1f82e5c13b	-
+typedef	c:@T@UnsignedWide	-			struct UnsignedWide	-	-	-	-	2a380b4d75ee0487	-
+typedef	c:@T@SInt64	-			long long	-	-	-	-	4a13131456fbd4c5	-
+typedef	c:@T@UInt64	-			unsigned long long	-	-	-	-	b41c42eb5e2605ba	-
+typedef	c:@T@Fixed	-			SInt32	-	-	-	-	19c8622dfca32d2c	-
+typedef	c:@T@FixedPtr	-			Fixed *	-	-	-	-	22ffc08f387f5ef4	-
+typedef	c:@T@Fract	-			SInt32	-	-	-	-	b2f1fff1bd7581bd	-
+typedef	c:@T@FractPtr	-			Fract *	-	-	-	-	08fc28230a117421	-
+typedef	c:@T@UnsignedFixed	-			UInt32	-	-	-	-	9e1a217ad3df9cf8	-
+typedef	c:@T@UnsignedFixedPtr	-			UnsignedFixed *	-	-	-	-	d3ebff0b24fd4150	-
+typedef	c:@T@ShortFixed	-			short	-	-	-	-	25d33680d6b91cd6	-
+typedef	c:@T@ShortFixedPtr	-			ShortFixed *	-	-	-	-	3c8832025574881a	-
+typedef	c:@T@Float32	-			float	-	-	-	-	a7e06278f3a06d05	-
+typedef	c:@T@Float64	-			double	-	-	-	-	9076708dddf40870	-
+struct	c:@S@Float80	-			-	-	-	-	-	8c3d79f2daa2ea72	-
+field	c:@S@Float80@FI@exp	Float80			SInt16	-	-	-	-	4a7997ecf12342ae	-
+field	c:@S@Float80@FI@man	Float80			UInt16[4]	-	-	-	-	ac03f4992d853aed	-
+typedef	c:@T@Float80	-			struct Float80	-	-	-	-	f205ef888befaac8	-
+struct	c:@S@Float96	-			-	-	-	-	-	e01b52d1a47bf1af	-
+field	c:@S@Float96@FI@exp	Float96			SInt16[2]	-	-	-	-	7ad5ea431a59acf8	-
+field	c:@S@Float96@FI@man	Float96			UInt16[4]	-	-	-	-	c4dcfda54564625d	-
+typedef	c:@T@Float96	-			struct Float96	-	-	-	-	77486f6b0546028c	-
+struct	c:@S@Float32Point	-			-	-	-	-	-	6bbb73ca75b99ad3	-
+field	c:@S@Float32Point@FI@x	Float32Point			Float32	-	-	-	-	b548bf52f42e1359	-
+field	c:@S@Float32Point@FI@y	Float32Point			Float32	-	-	-	-	0e2b95a99c446ed6	-
+typedef	c:@T@Float32Point	-			struct Float32Point	-	-	-	-	4f73698433ff33c9	-
+typedef	c:@T@Ptr	-			char *	-	-	-	-	e11459ee98bf50f7	-
+typedef	c:@T@Handle	-			Ptr *	-	-	-	-	767f6fa2dee09cef	-
+typedef	c:@T@Size	-			long	-	-	-	-	9a9c678231b2a974	-
+typedef	c:@T@OSErr	-			SInt16	-	-	-	-	14eb35c1b03cb1cf	-
+typedef	c:@T@OSStatus	-			SInt32	-	-	-	-	c9d4cae3c2778a27	-
+typedef	c:@T@LogicalAddress	-			void *	-	-	-	-	5f9fd8bd0ece362d	-
+typedef	c:@T@ConstLogicalAddress	-			const void *	-	-	-	-	608ba711bff91d52	-
+typedef	c:@T@PhysicalAddress	-			void *	-	-	-	-	ca13ebca69f62ea2	-
+typedef	c:@T@BytePtr	-			UInt8 *	-	-	-	-	49f85a073b61ad37	-
+typedef	c:@T@ByteCount	-			unsigned long	-	-	-	-	92f839e17ecc01e5	-
+typedef	c:@T@ByteOffset	-			unsigned long	-	-	-	-	f1afc81c06519e05	-
+typedef	c:@T@Duration	-			SInt32	-	-	-	-	a6147da6423c57e9	-
+typedef	c:@T@AbsoluteTime	-			UnsignedWide	-	-	-	-	bc36fd01427a6043	-
+typedef	c:@T@OptionBits	-			UInt32	-	-	-	-	4fed8030b708cd62	-
+typedef	c:@T@ItemCount	-			unsigned long	-	-	-	-	13c8ece98084342d	-
+typedef	c:@T@PBVersion	-			UInt32	-	-	-	-	192ebc20d0e01111	-
+typedef	c:@T@ScriptCode	-			SInt16	-	-	-	-	dd35ad2505f5d050	-
+typedef	c:@T@LangCode	-			SInt16	-	-	-	-	a8cd6a062e1a2f2e	-
+typedef	c:@T@RegionCode	-			SInt16	-	-	-	-	ae31dc30786d413c	-
+typedef	c:@T@FourCharCode	-			UInt32	-	-	-	-	a0f4e71a4dbfcb9b	-
+typedef	c:@T@OSType	-			FourCharCode	-	-	-	-	01d4dcaaf78349ee	-
+typedef	c:@T@ResType	-			FourCharCode	-	-	-	-	a8e53a887401fbc3	-
+typedef	c:@T@OSTypePtr	-			OSType *	-	-	-	-	1dc889f2cf700f07	-
+typedef	c:@T@ResTypePtr	-			ResType *	-	-	-	-	73c227a958289c4a	-
+typedef	c:@T@Boolean	-			unsigned char	-	-	-	-	693cf733304c39d9	-
+typedef	c:@T@ProcPtr	-			long (*)(void)	-	-	-	-	d232aa1504822778	-
+typedef	c:@T@Register68kProcPtr	-			void (*)(void)	-	-	-	-	a659f73c124f38d1	-
+typedef	c:@T@UniversalProcPtr	-			ProcPtr	-	-	-	-	29484c8b17f40641	-
+typedef	c:@T@ProcHandle	-			ProcPtr *	-	-	-	-	b888769acfbe494c	-
+typedef	c:@T@UniversalProcHandle	-			UniversalProcPtr *	-	-	-	-	20c9bbfc212d929a	-
+typedef	c:@T@PRefCon	-			void *	-	-	-	-	417f11cf3cb00219	-
+typedef	c:@T@URefCon	-			void *	-	-	-	-	b3e04d45f93aa719	-
+typedef	c:@T@SRefCon	-			void *	-	-	-	-	5a5c96b19fdf17d2	-
+enum	c:@Ea@noErr	-	-		unsigned int	-	-	-	-	f2bc99a86668252f	-
+enumconst	c:@Ea@noErr@noErr	-			-	-	-	-	-	571d7f6e9a24e381	0
+enum	c:@Ea@kNilOptions	-	-		unsigned int	-	-	-	-	d304c5e8f12e2a47	-
+enumconst	c:@Ea@kNilOptions@kNilOptions	-			-	-	-	-	-	b4ab033b469ce916	0
+enum	c:@Ea@kVariableLengthArray	-	-		unsigned int	-	-	-	-	7215584e4f36b40e	-
+enumconst	c:@Ea@kVariableLengthArray@kVariableLengthArray	-			-	-	-	*deprecated	-	0c66338eab157822	1
+enum	c:@Ea@kUnknownType	-	-		unsigned int	-	-	-	-	629b5c76508a82b6	-
+enumconst	c:@Ea@kUnknownType@kUnknownType	-			-	-	-	-	-	e3351252797ad436	1061109567
+typedef	c:@T@UnicodeScalarValue	-			UInt32	-	-	-	-	f2fb2201f023d705	-
+typedef	c:@T@UTF32Char	-			UInt32	-	-	-	-	abbc698dd840f1c4	-
+typedef	c:@T@UniChar	-			UInt16	-	-	-	-	2b0687e238bdd241	-
+typedef	c:@T@UTF16Char	-			UInt16	-	-	-	-	2e41f20b56ac8838	-
+typedef	c:@T@UTF8Char	-			UInt8	-	-	-	-	596d7e1154dce76e	-
+typedef	c:@T@UniCharPtr	-			UniChar *	-	-	-	-	28d86b8d9e9b9912	-
+typedef	c:@T@UniCharCount	-			unsigned long	-	-	-	-	be4adc0edecf746b	-
+typedef	c:@T@UniCharCountPtr	-			UniCharCount *	-	-	-	-	6e1ab842298b08dc	-
+typedef	c:@T@Str255	-			unsigned char[256]	-	-	-	-	11d29f6cb91257a2	-
+typedef	c:@T@Str63	-			unsigned char[64]	-	-	-	-	b3e9f6ba1ae990b2	-
+typedef	c:@T@Str32	-			unsigned char[33]	-	-	-	-	43db62ad05bc30dd	-
+typedef	c:@T@Str31	-			unsigned char[32]	-	-	-	-	e4fc003e863ec6de	-
+typedef	c:@T@Str27	-			unsigned char[28]	-	-	-	-	c20f17dab6c1002a	-
+typedef	c:@T@Str15	-			unsigned char[16]	-	-	-	-	f1fb4b9145ad8f02	-
+typedef	c:@T@Str32Field	-			unsigned char[34]	-	-	-	-	66bfab0f4ec98bc8	-
+typedef	c:@T@StrFileName	-			Str63	-	-	-	-	e5e31bc29e88b9eb	-
+typedef	c:@T@StringPtr	-			unsigned char *	-	-	-	-	bf38975115449fdc	-
+typedef	c:@T@StringHandle	-			StringPtr *	-	-	-	-	926429367f3179b5	-
+typedef	c:@T@ConstStringPtr	-			const unsigned char *	-	-	-	-	55d9f10e0e71dec3	-
+typedef	c:@T@ConstStr255Param	-			const unsigned char *	-	-	-	-	164eda4689626ba7	-
+typedef	c:@T@ConstStr63Param	-			const unsigned char *	-	-	-	-	fff15122f33ed9a9	-
+typedef	c:@T@ConstStr32Param	-			const unsigned char *	-	-	-	-	c7073f4814f96bc5	-
+typedef	c:@T@ConstStr31Param	-			const unsigned char *	-	-	-	-	d39b14bc289d49ff	-
+typedef	c:@T@ConstStr27Param	-			const unsigned char *	-	-	-	-	d4b67dfea3203932	-
+typedef	c:@T@ConstStr15Param	-			const unsigned char *	-	-	-	-	8f6190b295a00509	-
+typedef	c:@T@ConstStrFileNameParam	-			ConstStr63Param	-	-	-	-	d46b862aa4a5533a	-
+struct	c:@S@ProcessSerialNumber	-			-	-	-	-	-	1deb464522840c7a	-
+field	c:@S@ProcessSerialNumber@FI@highLongOfPSN	ProcessSerialNumber			UInt32	-	-	-	-	5bac016af87c2e3e	-
+field	c:@S@ProcessSerialNumber@FI@lowLongOfPSN	ProcessSerialNumber			UInt32	-	-	-	-	aa047426e921f376	-
+typedef	c:@T@ProcessSerialNumber	-			struct ProcessSerialNumber	-	-	-	-	030207e871c6f793	-
+typedef	c:@T@ProcessSerialNumberPtr	-			ProcessSerialNumber *	-	-	-	-	af0b36830db8c79f	-
+struct	c:@S@Point	-			-	-	-	-	-	a6e6fb77d091abed	-
+field	c:@S@Point@FI@v	Point			short	-	-	-	-	026aed6a9ed379c4	-
+field	c:@S@Point@FI@h	Point			short	-	-	-	-	4551ce3616c7c006	-
+typedef	c:@T@Point	-			struct Point	-	-	-	-	215a7e22d3298a49	-
+typedef	c:@T@PointPtr	-			Point *	-	-	-	-	02abefdbd5ca5b85	-
+struct	c:@S@Rect	-			-	-	-	-	-	e1a96e9649e76079	-
+field	c:@S@Rect@FI@top	Rect			short	-	-	-	-	482977f9c44b2c58	-
+field	c:@S@Rect@FI@left	Rect			short	-	-	-	-	c6acf8c376ed6e58	-
+field	c:@S@Rect@FI@bottom	Rect			short	-	-	-	-	26111f96a2765893	-
+field	c:@S@Rect@FI@right	Rect			short	-	-	-	-	1b86ce9b331abc5e	-
+typedef	c:@T@Rect	-			struct Rect	-	-	-	-	4c921b4e5b28bed5	-
+typedef	c:@T@RectPtr	-			Rect *	-	-	-	-	36875cb778f37362	-
+struct	c:@S@FixedPoint	-			-	-	-	-	-	6c2fd1266439942c	-
+field	c:@S@FixedPoint@FI@x	FixedPoint			Fixed	-	-	-	-	14f33740ab3fbcd3	-
+field	c:@S@FixedPoint@FI@y	FixedPoint			Fixed	-	-	-	-	a95c2836e2e3259b	-
+typedef	c:@T@FixedPoint	-			struct FixedPoint	-	-	-	-	fda65867620e33e9	-
+struct	c:@S@FixedRect	-			-	-	-	-	-	a959d9258aee5204	-
+field	c:@S@FixedRect@FI@left	FixedRect			Fixed	-	-	-	-	fbd66d615e12060b	-
+field	c:@S@FixedRect@FI@top	FixedRect			Fixed	-	-	-	-	e17e208651d2018d	-
+field	c:@S@FixedRect@FI@right	FixedRect			Fixed	-	-	-	-	42a52f383cc09a8c	-
+field	c:@S@FixedRect@FI@bottom	FixedRect			Fixed	-	-	-	-	c732752dd11a0a9a	-
+typedef	c:@T@FixedRect	-			struct FixedRect	-	-	-	-	3c772d8a07e0d927	-
+typedef	c:@T@CharParameter	-			short	-	-	-	-	a4762fa6ae34fb63	-
+enum	c:@Ea@normal	-	-		unsigned int	-	-	-	-	9388ea9cf55320c0	-
+enumconst	c:@Ea@normal@normal	-			-	-	-	-	-	34c874f27175d9fe	0
+enumconst	c:@Ea@normal@bold	-			-	-	-	-	-	cd750d8caf2469a9	1
+enumconst	c:@Ea@normal@italic	-			-	-	-	-	-	4a06b416e737d08e	2
+enumconst	c:@Ea@normal@underline	-			-	-	-	-	-	1d2a92ba421022e8	4
+enumconst	c:@Ea@normal@outline	-			-	-	-	-	-	b1069fc189e33a5c	8
+enumconst	c:@Ea@normal@shadow	-			-	-	-	-	-	5890896ca9522e13	16
+enumconst	c:@Ea@normal@condense	-			-	-	-	-	-	90ddcfa17949423f	32
+enumconst	c:@Ea@normal@extend	-			-	-	-	-	-	4b72d59fb48c341a	64
+typedef	c:@T@Style	-			unsigned char	-	-	-	-	937f00f408844724	-
+typedef	c:@T@StyleParameter	-			short	-	-	-	-	ca3c0d852820136c	-
+typedef	c:@T@StyleField	-			Style	-	-	-	-	a024cf9e0bcb7589	-
+typedef	c:@T@TimeValue	-			SInt32	-	-	-	-	8fedaada91b0ab08	-
+typedef	c:@T@TimeScale	-			SInt32	-	-	-	-	e7030ee82761d5bf	-
+typedef	c:@T@CompTimeValue	-			wide	-	-	-	-	e43f5b46c12ed6c6	-
+typedef	c:@T@TimeValue64	-			SInt64	-	-	-	-	9b631d8dcd1e0559	-
+struct	c:@S@TimeBaseRecord	-			-	-	-	-	-	041573f420a450e5	-
+typedef	c:@T@TimeBase	-			struct TimeBaseRecord *	-	-	-	-	d59d321c9a2ce7cb	-
+struct	c:@S@TimeRecord	-			-	-	-	-	-	ca44aaa12d7e6a6f	-
+field	c:@S@TimeRecord@FI@value	TimeRecord			CompTimeValue	-	-	-	-	00e892531010b28e	-
+field	c:@S@TimeRecord@FI@scale	TimeRecord			TimeScale	-	-	-	-	f0d46ddf82eb4e25	-
+field	c:@S@TimeRecord@FI@base	TimeRecord			TimeBase	-	-	-	-	c9d7d514777576a9	-
+typedef	c:@T@TimeRecord	-			struct TimeRecord	-	-	-	-	e44e9af039943c8a	-
+struct	c:@S@NumVersion	-			-	-	-	-	-	0754ab0fcf621ca3	-
+field	c:@S@NumVersion@FI@nonRelRev	NumVersion			UInt8	-	-	-	-	b1bb235da96e1a38	-
+field	c:@S@NumVersion@FI@stage	NumVersion			UInt8	-	-	-	-	b062c2269c990554	-
+field	c:@S@NumVersion@FI@minorAndBugRev	NumVersion			UInt8	-	-	-	-	fb62c6ec200c4e99	-
+field	c:@S@NumVersion@FI@majorRev	NumVersion			UInt8	-	-	-	-	8946d20026acc076	-
+typedef	c:@T@NumVersion	-			struct NumVersion	-	-	-	-	15d0ce3b76d1bd97	-
+enum	c:@Ea@developStage	-	-		unsigned int	-	-	-	-	4cb3f4f5902c142e	-
+enumconst	c:@Ea@developStage@developStage	-			-	-	-	-	-	871f84e7c9e2b1d9	32
+enumconst	c:@Ea@developStage@alphaStage	-			-	-	-	-	-	b862e04b14da9e26	64
+enumconst	c:@Ea@developStage@betaStage	-			-	-	-	-	-	9c288122576d03a5	96
+enumconst	c:@Ea@developStage@finalStage	-			-	-	-	-	-	06e33715d924c0a2	128
+union	c:@U@NumVersionVariant	-			-	-	-	-	-	1c1ef4d998147e43	-
+field	c:@U@NumVersionVariant@FI@parts	NumVersionVariant			NumVersion	-	-	-	-	1d6b2502c87042f4	-
+field	c:@U@NumVersionVariant@FI@whole	NumVersionVariant			UInt32	-	-	-	-	f1a224c9ec147716	-
+typedef	c:@T@NumVersionVariant	-			union NumVersionVariant	-	-	-	-	37824d9bbe44cedd	-
+typedef	c:@T@NumVersionVariantPtr	-			NumVersionVariant *	-	-	-	-	d66e78cb67b9cde2	-
+typedef	c:@T@NumVersionVariantHandle	-			NumVersionVariantPtr *	-	-	-	-	65c123de5eb824a1	-
+struct	c:@S@VersRec	-			-	-	-	-	-	2bedeb33ccceebc6	-
+field	c:@S@VersRec@FI@numericVersion	VersRec			NumVersion	-	-	-	-	9e42dfe9d5e7d30f	-
+field	c:@S@VersRec@FI@countryCode	VersRec			short	-	-	-	-	fb6c9f9c9a3d1253	-
+field	c:@S@VersRec@FI@shortVersion	VersRec			Str255	-	-	-	-	f3e46e0541432acd	-
+field	c:@S@VersRec@FI@reserved	VersRec			Str255	-	-	-	-	738909e7fc63b07d	-
+typedef	c:@T@VersRec	-			struct VersRec	-	-	-	-	ac2b57ecc900d477	-
+typedef	c:@T@VersRecPtr	-			VersRec *	-	-	-	-	5c84bf6587ec876e	-
+typedef	c:@T@VersRecHndl	-			VersRecPtr *	-	-	-	-	7688c9fa52f02893	-
+typedef	c:@T@Byte	-			UInt8	-	-	-	-	44100adc069c5789	-
+typedef	c:@T@SignedByte	-			SInt8	-	-	-	-	cc006a49968807ed	-
+typedef	c:@T@WidePtr	-			wide *	-	-	-	-	96d97baabf8bc625	-
+typedef	c:@T@UnsignedWidePtr	-			UnsignedWide *	-	-	-	-	be29d931b95973d5	-
+typedef	c:@T@extended80	-			Float80	-	-	-	-	83e3c40352508543	-
+typedef	c:@T@extended96	-			Float96	-	-	-	-	27f474782f8acd42	-
+typedef	c:@T@VHSelect	-			SInt8	-	-	-	-	6284e13910778d35	-
+function	c:@F@Debugger	-			void (void)	-	-	ios=-/-/-/1	-	eaf460fa59341a31	-
+function	c:@F@DebugStr	-			void (ConstStr255Param)	ConstStr255Param debuggerMsg	-	ios=-/-/-/1	-	80e68d68eb37123f	-
+function	c:@F@SysBreak	-			void (void)	-	-	ios=-/-/-/1	-	0cc73047b01cd9dd	-
+function	c:@F@SysBreakStr	-			void (ConstStr255Param)	ConstStr255Param debuggerMsg	-	ios=-/-/-/1	-	15e6c6ec4adf52fa	-
+function	c:@F@SysBreakFunc	-			void (ConstStr255Param)	ConstStr255Param debuggerMsg	-	ios=-/-/-/1	-	cec97699ffdfeeb9	-
+struct	c:@S@_OSUnalignedU16	-			-	-	-	-	-	ab64c0b291b49e4c	-
+field	c:@S@_OSUnalignedU16@FI@__val	_OSUnalignedU16			volatile uint16_t	-	-	-	-	e7186f5cc13a9709	-
+struct	c:@S@_OSUnalignedU32	-			-	-	-	-	-	1ff4264e8767dbf6	-
+field	c:@S@_OSUnalignedU32@FI@__val	_OSUnalignedU32			volatile uint32_t	-	-	-	-	b58d5931af0597b0	-
+struct	c:@S@_OSUnalignedU64	-			-	-	-	-	-	9c6aaca6c8133d1f	-
+field	c:@S@_OSUnalignedU64@FI@__val	_OSUnalignedU64			volatile uint64_t	-	-	-	-	9eec1f7010aaed6a	-
+function	c:@F@OSReadSwapInt16	-			uint16_t (const volatile void *, uintptr_t)	const volatile void * _base | uintptr_t _offset	-	-	-	7bcda1f484afdebc	-
+function	c:@F@OSReadSwapInt32	-			uint32_t (const volatile void *, uintptr_t)	const volatile void * _base | uintptr_t _offset	-	-	-	3cd1967284cdb628	-
+function	c:@F@OSReadSwapInt64	-			uint64_t (const volatile void *, uintptr_t)	const volatile void * _base | uintptr_t _offset	-	-	-	a63387691249d1a3	-
+function	c:@F@OSWriteSwapInt16	-			void (volatile void *, uintptr_t, uint16_t)	volatile void * _base | uintptr_t _offset | uint16_t _data	-	-	-	0d676c0d5fa00db6	-
+function	c:@F@OSWriteSwapInt32	-			void (volatile void *, uintptr_t, uint32_t)	volatile void * _base | uintptr_t _offset | uint32_t _data	-	-	-	a06102bd28819796	-
+function	c:@F@OSWriteSwapInt64	-			void (volatile void *, uintptr_t, uint64_t)	volatile void * _base | uintptr_t _offset | uint64_t _data	-	-	-	dc231df3e4c0dff6	-
+enum	c:@Ea@OSUnknownByteOrder	-	-		unsigned int	-	-	-	-	e6437624cdc4e47f	-
+enumconst	c:@Ea@OSUnknownByteOrder@OSUnknownByteOrder	-			-	-	-	-	-	d9693162f5bb7ab9	0
+enumconst	c:@Ea@OSUnknownByteOrder@OSLittleEndian	-			-	-	-	-	-	3eba7ded70f51ce6	1
+enumconst	c:@Ea@OSUnknownByteOrder@OSBigEndian	-			-	-	-	-	-	d5d58db9944c3653	2
+function	c:@F@OSHostByteOrder	-			int32_t (void)	-	-	-	-	dcfa0b2d9b2538db	-
+function	c:@F@_OSReadInt16	-			uint16_t (const volatile void *, uintptr_t)	const volatile void * base | uintptr_t byteOffset	-	-	-	75c573a4ff318f04	-
+function	c:@F@_OSReadInt32	-			uint32_t (const volatile void *, uintptr_t)	const volatile void * base | uintptr_t byteOffset	-	-	-	ec3bbf7ec737afc2	-
+function	c:@F@_OSReadInt64	-			uint64_t (const volatile void *, uintptr_t)	const volatile void * base | uintptr_t byteOffset	-	-	-	027d59d842cd0c10	-
+function	c:@F@_OSWriteInt16	-			void (volatile void *, uintptr_t, uint16_t)	volatile void * base | uintptr_t byteOffset | uint16_t data	-	-	-	b46b67af69c4fa20	-
+function	c:@F@_OSWriteInt32	-			void (volatile void *, uintptr_t, uint32_t)	volatile void * base | uintptr_t byteOffset | uint32_t data	-	-	-	742ad51307e03912	-
+function	c:@F@_OSWriteInt64	-			void (volatile void *, uintptr_t, uint64_t)	volatile void * base | uintptr_t byteOffset | uint64_t data	-	-	-	552fa8da3404b848	-
+typedef	c:@T@OSAtomic_int64_aligned64_t	-			int64_t	-	-	-	-	b5ee7f8fb2146c22	-
+function	c:@F@OSAtomicAdd32	-			int32_t (int32_t, volatile int32_t *)	int32_t __theAmount | volatile int32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	2d529bd7f45f2e37	-
+function	c:@F@OSAtomicAdd32Barrier	-			int32_t (int32_t, volatile int32_t *)	int32_t __theAmount | volatile int32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	6b4a712bdc80afdb	-
+function	c:@F@OSAtomicIncrement32	-			int32_t (volatile int32_t *)	volatile int32_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	ea44a6facc33ed6a	-
+function	c:@F@OSAtomicIncrement32Barrier	-			int32_t (volatile int32_t *)	volatile int32_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	e230f24cd86b1ea2	-
+function	c:@F@OSAtomicDecrement32	-			int32_t (volatile int32_t *)	volatile int32_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	f87f645e2cdb97d6	-
+function	c:@F@OSAtomicDecrement32Barrier	-			int32_t (volatile int32_t *)	volatile int32_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	f66c8c5b2491b839	-
+function	c:@F@OSAtomicAdd64	-			int64_t (int64_t, volatile OSAtomic_int64_aligned64_t *)	int64_t __theAmount | volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	06cc18451fc4e43e	-
+function	c:@F@OSAtomicAdd64Barrier	-			int64_t (int64_t, volatile OSAtomic_int64_aligned64_t *)	int64_t __theAmount | volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	47ee8596591a14c6	-
+function	c:@F@OSAtomicIncrement64	-			int64_t (volatile OSAtomic_int64_aligned64_t *)	volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	abdeef592ff7d624	-
+function	c:@F@OSAtomicIncrement64Barrier	-			int64_t (volatile OSAtomic_int64_aligned64_t *)	volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	2b1a403ba486168d	-
+function	c:@F@OSAtomicDecrement64	-			int64_t (volatile OSAtomic_int64_aligned64_t *)	volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	d113899ebce991c9	-
+function	c:@F@OSAtomicDecrement64Barrier	-			int64_t (volatile OSAtomic_int64_aligned64_t *)	volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=7.1/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	f1127c9ef56696a2	-
+function	c:@F@OSAtomicOr32	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	8c1498d2fe917446	-
+function	c:@F@OSAtomicOr32Barrier	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	6b3d310c5c2fdaa8	-
+function	c:@F@OSAtomicOr32Orig	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	0966cb2f542669c5	-
+function	c:@F@OSAtomicOr32OrigBarrier	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	202018a71421b0d4	-
+function	c:@F@OSAtomicAnd32	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	35546a97a275bb89	-
+function	c:@F@OSAtomicAnd32Barrier	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	74f4de20270b6f1a	-
+function	c:@F@OSAtomicAnd32Orig	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	f9f09625b84c91ee	-
+function	c:@F@OSAtomicAnd32OrigBarrier	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	a74bc1610d1a7a64	-
+function	c:@F@OSAtomicXor32	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	1d261ddc612330cc	-
+function	c:@F@OSAtomicXor32Barrier	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	83017c8ae6df0351	-
+function	c:@F@OSAtomicXor32Orig	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	4aac13ba206ac735	-
+function	c:@F@OSAtomicXor32OrigBarrier	-			int32_t (uint32_t, volatile uint32_t *)	uint32_t __theMask | volatile uint32_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	755013a5d2a90cbe	-
+function	c:@F@OSAtomicCompareAndSwap32	-			_Bool (int32_t, int32_t, volatile int32_t *)	int32_t __oldValue | int32_t __newValue | volatile int32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	9efd64afbdd39985	-
+function	c:@F@OSAtomicCompareAndSwap32Barrier	-			_Bool (int32_t, int32_t, volatile int32_t *)	int32_t __oldValue | int32_t __newValue | volatile int32_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	37f8e7ad9eff110b	-
+function	c:@F@OSAtomicCompareAndSwapPtr	-			_Bool (void *, void *, void *volatile *)	void * __oldValue | void * __newValue | void *volatile * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	464d3e091886ca0d	-
+function	c:@F@OSAtomicCompareAndSwapPtrBarrier	-			_Bool (void *, void *, void *volatile *)	void * __oldValue | void * __newValue | void *volatile * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	5563aecbfb90bad7	-
+function	c:@F@OSAtomicCompareAndSwapInt	-			_Bool (int, int, volatile int *)	int __oldValue | int __newValue | volatile int * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	8eb61b57198cdb4e	-
+function	c:@F@OSAtomicCompareAndSwapIntBarrier	-			_Bool (int, int, volatile int *)	int __oldValue | int __newValue | volatile int * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	83cb13594a8522a5	-
+function	c:@F@OSAtomicCompareAndSwapLong	-			_Bool (long, long, volatile long *)	long __oldValue | long __newValue | volatile long * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	9fb2f077d5b1489b	-
+function	c:@F@OSAtomicCompareAndSwapLongBarrier	-			_Bool (long, long, volatile long *)	long __oldValue | long __newValue | volatile long * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	c626e90f5842aa63	-
+function	c:@F@OSAtomicCompareAndSwap64	-			_Bool (int64_t, int64_t, volatile OSAtomic_int64_aligned64_t *)	int64_t __oldValue | int64_t __newValue | volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	f556326faae53fcb	-
+function	c:@F@OSAtomicCompareAndSwap64Barrier	-			_Bool (int64_t, int64_t, volatile OSAtomic_int64_aligned64_t *)	int64_t __oldValue | int64_t __newValue | volatile OSAtomic_int64_aligned64_t * __theValue	-	ios=3.2/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	bcabd29ff37a2514	-
+function	c:@F@OSAtomicTestAndSet	-			_Bool (uint32_t, volatile void *)	uint32_t __n | volatile void * __theAddress	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	3dd1b651bd43851e	-
+function	c:@F@OSAtomicTestAndSetBarrier	-			_Bool (uint32_t, volatile void *)	uint32_t __n | volatile void * __theAddress	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	d736e8887ab3b3cf	-
+function	c:@F@OSAtomicTestAndClear	-			_Bool (uint32_t, volatile void *)	uint32_t __n | volatile void * __theAddress	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	e372e2e478539ea9	-
+function	c:@F@OSAtomicTestAndClearBarrier	-			_Bool (uint32_t, volatile void *)	uint32_t __n | volatile void * __theAddress	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	a41890849b1eb6b7	-
+function	c:@F@OSMemoryBarrier	-			void (void)	-	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	4158de77d2a665f7	-
+typedef	c:@T@OSSpinLock	-			int32_t	-	-	ios=-/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	eb56f4f9d5e61cd6	-
+function	c:@F@OSSpinLockTry	-			_Bool (volatile OSSpinLock *)	volatile OSSpinLock * __lock	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	1f57f9a0d3e68124	-
+function	c:@F@OSSpinLockLock	-			void (volatile OSSpinLock *)	volatile OSSpinLock * __lock	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	c1a33a4f2856e288	-
+function	c:@F@OSSpinLockUnlock	-			void (volatile OSSpinLock *)	volatile OSSpinLock * __lock	-	ios=2.0/10.0/-/0,macos=-/10.12/-/0,tvos=-/10.0/-/0,watchos=-/3.0/-/0	-	410792c2ae4bcbe3	-
+struct	c:@S@OSAtomicQueue.h@1547	-	-		-	-	-	-	-	4652e5617c39a373	-
+field	c:@S@OSAtomicQueue.h@1547@FI@opaque1	-			void *	-	-	-	-	dff4421a5babe747	-
+field	c:@S@OSAtomicQueue.h@1547@FI@opaque2	-			long	-	-	-	-	1885c564d39ea792	-
+typedef	c:@T@OSQueueHead	-			volatile struct (unnamed)	-	-	-	-	85cd495d13841d85	-
+function	c:@F@OSAtomicEnqueue	-			void (OSQueueHead *, void *, size_t)	OSQueueHead * __list | void * __new | size_t __offset	-	ios=4.0/-/-/0	-	7edafeb3b76f6ef7	-
+function	c:@F@OSAtomicDequeue	-			void * (OSQueueHead *, size_t)	OSQueueHead * __list | size_t __offset	-	ios=4.0/-/-/0	-	185f36cd7f8d071b	-
+enum	c:@EA@os_clockid_t	-			uint32_t	-	-	-	-	d5a0e2047a1f413a	-
+enumconst	c:@EA@os_clockid_t@OS_CLOCK_MACH_ABSOLUTE_TIME	os_clockid_t			-	-	-	-	-	13fbbb7f49263a32	32
+typedef	c:@T@os_clockid_t	-			enum os_clockid_t	-	-	-	-	f68d0accf7de6c82	-
+struct	c:@S@os_unfair_lock_s	-			-	-	-	-	-	4edbf5e270dba3e1	-
+field	c:@S@os_unfair_lock_s@FI@_os_unfair_lock_opaque	os_unfair_lock_s			uint32_t	-	-	-	-	57ffb91da2c9de78	-
+typedef	c:@T@os_unfair_lock	-			struct os_unfair_lock_s	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	18013bd2a27d5e69	-
+typedef	c:@T@os_unfair_lock_t	-			struct os_unfair_lock_s *	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	07f14c728b52515f	-
+function	c:@F@os_unfair_lock_lock	-			void (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b9db125bda5758a6	-
+function	c:@F@os_unfair_lock_trylock	-			_Bool (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1bff8c92d9d6d8d2	-
+function	c:@F@os_unfair_lock_unlock	-			void (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	2cfbbf3f09475bc4	-
+function	c:@F@os_unfair_lock_assert_owner	-			void (const os_unfair_lock *)	const os_unfair_lock * lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c5c83a5d87e9e027	-
+function	c:@F@os_unfair_lock_assert_not_owner	-			void (const os_unfair_lock *)	const os_unfair_lock * lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a2a2dd9176b75ed4	-
+enum	c:@EA@os_unfair_lock_flags_t	-			uint32_t	-	-	-	-	367d0f7c1f6032a2	-
+enumconst	c:@EA@os_unfair_lock_flags_t@OS_UNFAIR_LOCK_FLAG_NONE	os_unfair_lock_flags_t			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,swift=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	e70ee85e80733c29	0
+enumconst	c:@EA@os_unfair_lock_flags_t@OS_UNFAIR_LOCK_FLAG_ADAPTIVE_SPIN	os_unfair_lock_flags_t			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,swift=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	24247e9726837880	262144
+typedef	c:@T@os_unfair_lock_flags_t	-			enum os_unfair_lock_flags_t	-	-	-	-	4f3bc6a04c3559ee	-
+function	c:@F@os_unfair_lock_lock_with_flags	-			void (os_unfair_lock_t, os_unfair_lock_flags_t)	os_unfair_lock_t lock | os_unfair_lock_flags_t flags	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	3b6d7f180a322936	-
+function	c:@F@os_proc_available_memory	-			size_t (void)	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	37f1bc3bc9ce15f7	-
+enum	c:@EA@malloc_zone_malloc_options_t	-			uint64_t	-	-	-	-	29d3f3b6f9cf451e	-
+enumconst	c:@EA@malloc_zone_malloc_options_t@MALLOC_ZONE_MALLOC_OPTION_NONE	malloc_zone_malloc_options_t			-	-	-	-	-	ede08eeea0b1a8d7	0
+enumconst	c:@EA@malloc_zone_malloc_options_t@MALLOC_ZONE_MALLOC_OPTION_CLEAR	malloc_zone_malloc_options_t			-	-	-	-	-	7eb080ee2eaf51ae	1
+enumconst	c:@EA@malloc_zone_malloc_options_t@MALLOC_ZONE_MALLOC_OPTION_CANONICAL_TAG	malloc_zone_malloc_options_t			-	-	-	-	-	c768fb3dcdf38624	2
+typedef	c:@T@malloc_zone_malloc_options_t	-			enum malloc_zone_malloc_options_t	-	-	-	-	2aeb3d364a8eee4a	-
+function	c:@F@malloc_type_zone_malloc_with_options	-			void * (malloc_zone_t *, size_t, size_t, malloc_type_id_t, malloc_zone_malloc_options_t)	malloc_zone_t * zone | size_t alignment | size_t size | malloc_type_id_t type_id | malloc_zone_malloc_options_t opts	-	driverkit=25.0/-/-/0,ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	c3f9acb93ebd0b39	-
+struct	c:@S@_malloc_zone_t	-			-	-	-	-	-	1d3760bae43bc8c3	-
+field	c:@S@_malloc_zone_t@FI@reserved1	_malloc_zone_t			void *	-	-	-	-	e6aed4463dc2baf0	-
+field	c:@S@_malloc_zone_t@FI@reserved2	_malloc_zone_t			void *	-	-	-	-	9f5be3b87d67680d	-
+field	c:@S@_malloc_zone_t@FI@size	_malloc_zone_t			size_t (*)(struct _malloc_zone_t *, const void *)	-	-	-	-	036f8fa90378860e	-
+field	c:@S@_malloc_zone_t@FI@malloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t)	-	-	-	-	00ee0e8ca42004b5	-
+field	c:@S@_malloc_zone_t@FI@calloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, size_t)	-	-	-	-	bb687d3a5a6ec855	-
+field	c:@S@_malloc_zone_t@FI@valloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t)	-	-	-	-	9ffed80bbe962696	-
+field	c:@S@_malloc_zone_t@FI@free	_malloc_zone_t			void (*)(struct _malloc_zone_t *, void *)	-	-	-	-	6e313adb1e7f1362	-
+field	c:@S@_malloc_zone_t@FI@realloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, void *, size_t)	-	-	-	-	3edfad1bf76ca501	-
+field	c:@S@_malloc_zone_t@FI@destroy	_malloc_zone_t			void (*)(struct _malloc_zone_t *)	-	-	-	-	166628d448504337	-
+field	c:@S@_malloc_zone_t@FI@zone_name	_malloc_zone_t			const char *	-	-	-	-	dc8e6d788e1feeec	-
+field	c:@S@_malloc_zone_t@FI@batch_malloc	_malloc_zone_t			unsigned int (*)(struct _malloc_zone_t *, size_t, void **, unsigned int)	-	-	-	-	4d638861a081497a	-
+field	c:@S@_malloc_zone_t@FI@batch_free	_malloc_zone_t			void (*)(struct _malloc_zone_t *, void **, unsigned int)	-	-	-	-	1563d0aaf5c76471	-
+field	c:@S@_malloc_zone_t@FI@introspect	_malloc_zone_t			struct malloc_introspection_t *	-	-	-	-	d73e85b535e46dc8	-
+field	c:@S@_malloc_zone_t@FI@version	_malloc_zone_t			unsigned int	-	-	-	-	c839c625401513d8	-
+field	c:@S@_malloc_zone_t@FI@memalign	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, size_t)	-	-	-	-	c4a1e27af82dd5b8	-
+field	c:@S@_malloc_zone_t@FI@free_definite_size	_malloc_zone_t			void (*)(struct _malloc_zone_t *, void *, size_t)	-	-	-	-	e580f59b161ab3f4	-
+field	c:@S@_malloc_zone_t@FI@pressure_relief	_malloc_zone_t			size_t (*)(struct _malloc_zone_t *, size_t)	-	-	-	-	c10f336da9201156	-
+field	c:@S@_malloc_zone_t@FI@claimed_address	_malloc_zone_t			boolean_t (*)(struct _malloc_zone_t *, void *)	-	-	-	-	72b4fcdd87e628c7	-
+field	c:@S@_malloc_zone_t@FI@try_free_default	_malloc_zone_t			void (*)(struct _malloc_zone_t *, void *)	-	-	-	-	e70f34429ef92494	-
+field	c:@S@_malloc_zone_t@FI@malloc_with_options	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, size_t, uint64_t)	-	-	-	-	b949e3dba4d53f34	-
+field	c:@S@_malloc_zone_t@FI@malloc_type_malloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, malloc_type_id_t)	-	-	-	-	f939f6bc8b5b4b62	-
+field	c:@S@_malloc_zone_t@FI@malloc_type_calloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, size_t, malloc_type_id_t)	-	-	-	-	d7530fab29c5c869	-
+field	c:@S@_malloc_zone_t@FI@malloc_type_realloc	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, void *, size_t, malloc_type_id_t)	-	-	-	-	5030964b339ad1a7	-
+field	c:@S@_malloc_zone_t@FI@malloc_type_memalign	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, size_t, malloc_type_id_t)	-	-	-	-	4cc524e1be4ecbb5	-
+field	c:@S@_malloc_zone_t@FI@malloc_type_malloc_with_options	_malloc_zone_t			void *(*)(struct _malloc_zone_t *, size_t, size_t, uint64_t, malloc_type_id_t)	-	-	-	-	595d7f6284441bfd	-
+enum	c:@EA@malloc_type_callsite_flags_v0_t	-			unsigned int	-	-	-	-	74a2c0ee16775eb8	-
+enumconst	c:@EA@malloc_type_callsite_flags_v0_t@MALLOC_TYPE_CALLSITE_FLAGS_V0_NONE	malloc_type_callsite_flags_v0_t			-	-	-	-	-	cbb1b27fe3659378	0
+enumconst	c:@EA@malloc_type_callsite_flags_v0_t@MALLOC_TYPE_CALLSITE_FLAGS_V0_FIXED_SIZE	malloc_type_callsite_flags_v0_t			-	-	-	-	-	517fe9df49837c1d	1
+enumconst	c:@EA@malloc_type_callsite_flags_v0_t@MALLOC_TYPE_CALLSITE_FLAGS_V0_ARRAY	malloc_type_callsite_flags_v0_t			-	-	-	-	-	9c7d74c843a1a12c	2
+typedef	c:@T@malloc_type_callsite_flags_v0_t	-			enum malloc_type_callsite_flags_v0_t	-	-	-	-	a6959309a1f04a26	-
+enum	c:@EA@malloc_type_kind_v0_t	-			unsigned int	-	-	-	-	d6a3e119f4b61fa5	-
+enumconst	c:@EA@malloc_type_kind_v0_t@MALLOC_TYPE_KIND_V0_OTHER	malloc_type_kind_v0_t			-	-	-	-	-	529612b9f2e21fa2	0
+enumconst	c:@EA@malloc_type_kind_v0_t@MALLOC_TYPE_KIND_V0_OBJC	malloc_type_kind_v0_t			-	-	-	-	-	605d8358c7876530	1
+enumconst	c:@EA@malloc_type_kind_v0_t@MALLOC_TYPE_KIND_V0_SWIFT	malloc_type_kind_v0_t			-	-	-	-	-	c9359710c2d5be90	2
+enumconst	c:@EA@malloc_type_kind_v0_t@MALLOC_TYPE_KIND_V0_CXX	malloc_type_kind_v0_t			-	-	-	-	-	12612e80a04bb4b4	3
+typedef	c:@T@malloc_type_kind_v0_t	-			enum malloc_type_kind_v0_t	-	-	-	-	b7a155ad6823c263	-
+struct	c:@SA@malloc_type_layout_semantics_v0_t	-			-	-	-	-	-	2b7689ce3caf6442	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@contains_data_pointer	malloc_type_layout_semantics_v0_t			_Bool	-	-	-	-	64dd5c2c8427fcd2	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@contains_struct_pointer	malloc_type_layout_semantics_v0_t			_Bool	-	-	-	-	a9f6b2103f198c27	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@contains_immutable_pointer	malloc_type_layout_semantics_v0_t			_Bool	-	-	-	-	e698d9432b8e350d	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@contains_anonymous_pointer	malloc_type_layout_semantics_v0_t			_Bool	-	-	-	-	0c6083a76f62dda0	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@is_reference_counted	malloc_type_layout_semantics_v0_t			_Bool	-	-	-	-	c77859b6ce4ed39d	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@reserved_0	malloc_type_layout_semantics_v0_t			uint16_t	-	-	-	-	31a6e8dc6a36ae1a	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@contains_generic_data	malloc_type_layout_semantics_v0_t			_Bool	-	-	-	-	20fcf1646d3b7a01	-
+field	c:@SA@malloc_type_layout_semantics_v0_t@FI@reserved_1	malloc_type_layout_semantics_v0_t			uint16_t	-	-	-	-	f920ed0c8af6ed0e	-
+typedef	c:@T@malloc_type_layout_semantics_v0_t	-			struct malloc_type_layout_semantics_v0_t	-	-	-	-	efc2cf26711068e5	-
+struct	c:@SA@malloc_type_summary_v0_t	-			-	-	-	-	-	339f477d3d7fa9b0	-
+field	c:@SA@malloc_type_summary_v0_t@FI@version	malloc_type_summary_v0_t			uint32_t	-	-	-	-	fcebcddb2a7fbe15	-
+field	c:@SA@malloc_type_summary_v0_t@FI@reserved_0	malloc_type_summary_v0_t			uint32_t	-	-	-	-	19f8ae1ee5094142	-
+field	c:@SA@malloc_type_summary_v0_t@FI@callsite_flags	malloc_type_summary_v0_t			malloc_type_callsite_flags_v0_t	-	-	-	-	f3fbddc1ec1d817f	-
+field	c:@SA@malloc_type_summary_v0_t@FI@type_kind	malloc_type_summary_v0_t			malloc_type_kind_v0_t	-	-	-	-	71c984babbe95979	-
+field	c:@SA@malloc_type_summary_v0_t@FI@reserved_1	malloc_type_summary_v0_t			uint32_t	-	-	-	-	ef07d654cd31b191	-
+field	c:@SA@malloc_type_summary_v0_t@FI@layout_semantics	malloc_type_summary_v0_t			malloc_type_layout_semantics_v0_t	-	-	-	-	7e81260de708d3ad	-
+typedef	c:@T@malloc_type_summary_v0_t	-			struct malloc_type_summary_v0_t	-	-	-	-	0897a4c43d5edbfd	-
+union	c:@UA@malloc_type_descriptor_v0_t	-			-	-	-	-	-	4e80a46d4dbe9fb0	-
+struct	c:@UA@malloc_type_descriptor_v0_t@Sa	-	-		-	-	-	-	-	a11246598ee4d5a7	-
+field	c:@UA@malloc_type_descriptor_v0_t@Sa@FI@hash	-			uint32_t	-	-	-	-	e31bec54ac409752	-
+field	c:@UA@malloc_type_descriptor_v0_t@Sa@FI@summary	-			malloc_type_summary_v0_t	-	-	-	-	8b06b010808e467a	-
+field	c:@UA@malloc_type_descriptor_v0_t@FI@type_id	malloc_type_descriptor_v0_t			malloc_type_id_t	-	-	-	-	b47637d4799d16c7	-
+typedef	c:@T@malloc_type_descriptor_v0_t	-			union malloc_type_descriptor_v0_t	-	-	-	-	2747145aed6cb2b8	-
+function	c:@F@malloc_default_zone	-			malloc_zone_t * (void)	-	-	-	-	488815b2abc0135a	-
+function	c:@F@malloc_create_zone	-			malloc_zone_t * (vm_size_t, unsigned int)	vm_size_t start_size | unsigned int flags	-	-	-	d3630d40f0c0e294	-
+function	c:@F@malloc_destroy_zone	-			void (malloc_zone_t *)	malloc_zone_t * zone	-	-	-	f9d553ee1924a788	-
+function	c:@F@malloc_zone_malloc	-			void * (malloc_zone_t *, size_t)	malloc_zone_t * zone | size_t size	-	-	-	b3da7b478be6f56b	-
+function	c:@F@malloc_zone_malloc_with_options	-			void * (malloc_zone_t *, size_t, size_t, malloc_zone_malloc_options_t)	malloc_zone_t * zone | size_t align | size_t size | malloc_zone_malloc_options_t opts	-	driverkit=25.0/-/-/0,ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	136d25f2cc15a66c	-
+function	c:@F@malloc_zone_calloc	-			void * (malloc_zone_t *, size_t, size_t)	malloc_zone_t * zone | size_t num_items | size_t size	-	-	-	dd480461102da5a6	-
+function	c:@F@malloc_zone_valloc	-			void * (malloc_zone_t *, size_t)	malloc_zone_t * zone | size_t size	-	-	-	50874b6c9a368512	-
+function	c:@F@malloc_zone_free	-			void (malloc_zone_t *, void *)	malloc_zone_t * zone | void * ptr	-	-	-	e70f8cd49873e807	-
+function	c:@F@malloc_zone_realloc	-			void * (malloc_zone_t *, void *, size_t)	malloc_zone_t * zone | void * ptr | size_t size	-	-	-	0a278d91f5bc3d63	-
+function	c:@F@malloc_zone_from_ptr	-			malloc_zone_t * (const void *)	const void * ptr	-	-	-	84952ec75590fc91	-
+function	c:@F@malloc_size	-			size_t (const void *)	const void * ptr	-	-	-	d70e3a8ec997c1e5	-
+function	c:@F@malloc_good_size	-			size_t (size_t)	size_t size	-	-	-	67954a752610bd67	-
+function	c:@F@malloc_zone_memalign	-			void * (malloc_zone_t *, size_t, size_t)	malloc_zone_t * zone | size_t alignment | size_t size	-	ios=3.0/-/-/0	-	2c695b646aa55bee	-
+function	c:@F@malloc_zone_batch_malloc	-			unsigned int (malloc_zone_t *, size_t, void **, unsigned int)	malloc_zone_t * zone | size_t size | void ** results | unsigned int num_requested	-	-	-	9ddbdb9a8036e751	-
+function	c:@F@malloc_zone_batch_free	-			void (malloc_zone_t *, void **, unsigned int)	malloc_zone_t * zone | void ** to_be_freed | unsigned int num	-	-	-	4b655e2fc5a7a0fd	-
+function	c:@F@malloc_default_purgeable_zone	-			malloc_zone_t * (void)	-	-	ios=3.0/-/-/0	-	cec57d022ddfe348	-
+function	c:@F@malloc_make_purgeable	-			void (void *)	void * ptr	-	ios=3.0/-/-/0	-	c534c85c199d4fc7	-
+function	c:@F@malloc_make_nonpurgeable	-			int (void *)	void * ptr	-	ios=3.0/-/-/0	-	d900abd86ec576b7	-
+function	c:@F@malloc_zone_register	-			void (malloc_zone_t *)	malloc_zone_t * zone	-	-	-	8539d03e7b157a6f	-
+function	c:@F@malloc_zone_unregister	-			void (malloc_zone_t *)	malloc_zone_t * zone	-	-	-	145194414dc9fc88	-
+function	c:@F@malloc_set_zone_name	-			void (malloc_zone_t *, const char *)	malloc_zone_t * zone | const char * name	-	-	-	47c630e2e34ee718	-
+function	c:@F@malloc_get_zone_name	-			const char * (malloc_zone_t *)	malloc_zone_t * zone	-	-	-	8145e836e82e32e8	-
+function	c:@F@malloc_zone_pressure_relief	-			size_t (malloc_zone_t *, size_t)	malloc_zone_t * zone | size_t goal	-	ios=4.3/-/-/0	-	f081e537a5e94f90	-
+struct	c:@SA@vm_range_t	-			-	-	-	-	-	5785f391e37da9f7	-
+field	c:@SA@vm_range_t@FI@address	vm_range_t			vm_address_t	-	-	-	-	51695a7f54b7afe1	-
+field	c:@SA@vm_range_t@FI@size	vm_range_t			vm_size_t	-	-	-	-	3eaee9934d243633	-
+typedef	c:@T@vm_range_t	-			struct vm_range_t	-	-	-	-	76a90e452c0c4331	-
+struct	c:@S@malloc_statistics_t	-			-	-	-	-	-	6f3dc5b471efef12	-
+field	c:@S@malloc_statistics_t@FI@blocks_in_use	malloc_statistics_t			unsigned int	-	-	-	-	f89e486fb94a20d9	-
+field	c:@S@malloc_statistics_t@FI@size_in_use	malloc_statistics_t			size_t	-	-	-	-	619d8af399ad3f7b	-
+field	c:@S@malloc_statistics_t@FI@max_size_in_use	malloc_statistics_t			size_t	-	-	-	-	60398568ea07fe58	-
+field	c:@S@malloc_statistics_t@FI@size_allocated	malloc_statistics_t			size_t	-	-	-	-	488b6090c881ecde	-
+typedef	c:@T@malloc_statistics_t	-			struct malloc_statistics_t	-	-	-	-	9ea3477cdcd44d75	-
+typedef	c:@T@memory_reader_t	-			kern_return_t (task_t, vm_address_t, vm_size_t, void **)	-	-	-	-	22e9b2894ed44bf4	-
+typedef	c:@T@vm_range_recorder_t	-			void (task_t, void *, unsigned int, vm_range_t *, unsigned int)	-	-	-	-	98ab6043c31b3415	-
+typedef	c:@T@print_task_printer_t	-			void (const char *, ...)	-	-	-	-	bbefd0cd75a19846	-
+struct	c:@S@malloc_introspection_t	-			-	-	-	-	-	b769b7b6756b9889	-
+field	c:@S@malloc_introspection_t@FI@enumerator	malloc_introspection_t			kern_return_t (*)(task_t, void *, unsigned int, vm_address_t, memory_reader_t *, vm_range_recorder_t *)	-	-	-	-	486d3fca55b6d4b9	-
+field	c:@S@malloc_introspection_t@FI@good_size	malloc_introspection_t			size_t (*)(malloc_zone_t *, size_t)	-	-	-	-	3fb525888290baf0	-
+field	c:@S@malloc_introspection_t@FI@check	malloc_introspection_t			boolean_t (*)(malloc_zone_t *)	-	-	-	-	1b6fceb216815924	-
+field	c:@S@malloc_introspection_t@FI@print	malloc_introspection_t			void (*)(malloc_zone_t *, boolean_t)	-	-	-	-	3d3b975d8be9353e	-
+field	c:@S@malloc_introspection_t@FI@log	malloc_introspection_t			void (*)(malloc_zone_t *, void *)	-	-	-	-	ca1c4ad0ba21fa6b	-
+field	c:@S@malloc_introspection_t@FI@force_lock	malloc_introspection_t			void (*)(malloc_zone_t *)	-	-	-	-	db7e448bc3ba10ee	-
+field	c:@S@malloc_introspection_t@FI@force_unlock	malloc_introspection_t			void (*)(malloc_zone_t *)	-	-	-	-	c481539f3d43824f	-
+field	c:@S@malloc_introspection_t@FI@statistics	malloc_introspection_t			void (*)(malloc_zone_t *, malloc_statistics_t *)	-	-	-	-	6c9c092121452160	-
+field	c:@S@malloc_introspection_t@FI@zone_locked	malloc_introspection_t			boolean_t (*)(malloc_zone_t *)	-	-	-	-	a8ae5a2c37150f81	-
+field	c:@S@malloc_introspection_t@FI@enable_discharge_checking	malloc_introspection_t			boolean_t (*)(malloc_zone_t *)	-	-	-	-	2d2289d0997dea8f	-
+field	c:@S@malloc_introspection_t@FI@disable_discharge_checking	malloc_introspection_t			void (*)(malloc_zone_t *)	-	-	-	-	0ebbeb1cc5bf765d	-
+field	c:@S@malloc_introspection_t@FI@discharge	malloc_introspection_t			void (*)(malloc_zone_t *, void *)	-	-	-	-	a698b3e5710e673b	-
+field	c:@S@malloc_introspection_t@FI@enumerate_discharged_pointers	malloc_introspection_t			void (*)(malloc_zone_t *, void (^)(void *, void *))	-	-	-	-	67d1d830ff66426b	-
+field	c:@S@malloc_introspection_t@FI@reinit_lock	malloc_introspection_t			void (*)(malloc_zone_t *)	-	-	-	-	1c8865bc86318a7f	-
+field	c:@S@malloc_introspection_t@FI@print_task	malloc_introspection_t			void (*)(task_t, unsigned int, vm_address_t, memory_reader_t *, print_task_printer_t *)	-	-	-	-	b177e69b10b2079c	-
+field	c:@S@malloc_introspection_t@FI@task_statistics	malloc_introspection_t			void (*)(task_t, vm_address_t, memory_reader_t *, malloc_statistics_t *)	-	-	-	-	eea27be973657d2d	-
+field	c:@S@malloc_introspection_t@FI@zone_type	malloc_introspection_t			unsigned int	-	-	-	-	4d7a7cb5c6ab5e30	-
+typedef	c:@T@malloc_introspection_t	-			struct malloc_introspection_t	-	-	-	-	043e57c9cc35f835	-
+function	c:@F@malloc_printf	-			void (const char *, ...)	const char * format	variadic	-	-	c0e31b6ae5915eca	-
+function	c:@F@malloc_get_all_zones	-			kern_return_t (task_t, memory_reader_t, vm_address_t **, unsigned int *)	task_t task | memory_reader_t reader | vm_address_t ** addresses | unsigned int * count	-	-	-	fe87ecfa7074c7cf	-
+function	c:@F@malloc_zone_print_ptr_info	-			void (void *)	void * ptr	-	-	-	e32422be0c5de80f	-
+function	c:@F@malloc_zone_check	-			boolean_t (malloc_zone_t *)	malloc_zone_t * zone	-	-	-	cb657218b712aa1e	-
+function	c:@F@malloc_zone_print	-			void (malloc_zone_t *, boolean_t)	malloc_zone_t * zone | boolean_t verbose	-	-	-	61cea8a52f9b1255	-
+function	c:@F@malloc_zone_statistics	-			void (malloc_zone_t *, malloc_statistics_t *)	malloc_zone_t * zone | malloc_statistics_t * stats	-	-	-	7f6cea79ba9b91f8	-
+function	c:@F@malloc_zone_log	-			void (malloc_zone_t *, void *)	malloc_zone_t * zone | void * address	-	-	-	4e44bb53967e9391	-
+struct	c:@S@mstats	-			-	-	-	-	-	1300c8e8f1786a91	-
+field	c:@S@mstats@FI@bytes_total	mstats			size_t	-	-	-	-	550b3b798a67f88a	-
+field	c:@S@mstats@FI@chunks_used	mstats			size_t	-	-	-	-	3fec191617cf770b	-
+field	c:@S@mstats@FI@bytes_used	mstats			size_t	-	-	-	-	8272a2c0c98b3856	-
+field	c:@S@mstats@FI@chunks_free	mstats			size_t	-	-	-	-	34251eadf1fbabbe	-
+field	c:@S@mstats@FI@bytes_free	mstats			size_t	-	-	-	-	fa10bf5b51cc59d2	-
+function	c:@F@mstats	-			struct mstats (void)	-	-	-	-	775bd8878920afd5	-
+function	c:@F@malloc_zone_enable_discharge_checking	-			boolean_t (malloc_zone_t *)	malloc_zone_t * zone	-	ios=4.3/-/-/0	-	1bf984c545ec41aa	-
+function	c:@F@malloc_zone_disable_discharge_checking	-			void (malloc_zone_t *)	malloc_zone_t * zone	-	ios=4.3/-/-/0	-	be22054fb9cd8c15	-
+function	c:@F@malloc_zone_discharge	-			void (malloc_zone_t *, void *)	malloc_zone_t * zone | void * memory	-	ios=4.3/-/-/0	-	e218f81c06b78ca4	-
+function	c:@F@malloc_zone_enumerate_discharged_pointers	-			void (malloc_zone_t *, void (^)(void *, void *))	malloc_zone_t * zone | void (^)(void *, void *) report_discharged	-	ios=4.3/-/-/0	-	948534a363c0abe7	-
+function	c:@F@_Block_copy	-			void * (const void *)	const void * aBlock	-	-	-	b8ede1a461a7b7f7	-
+function	c:@F@_Block_release	-			void (const void *)	const void * aBlock	-	-	-	e3197e673116dbc7	-
+function	c:@F@_Block_object_assign	-			void (void *, const void *, const int)	void *  | const void *  | const int 	-	-	-	eff83479f40f8244	-
+function	c:@F@_Block_object_dispose	-			void (const void *, const int)	const void *  | const int 	-	-	-	ae522d006039e9d3	-
+var	c:@_NSConcreteGlobalBlock	-			void *[32]	-	-	-	-	96241b574e020c8d	-
+var	c:@_NSConcreteStackBlock	-			void *[32]	-	-	-	-	7b9b4d316fce12a2	-
+function	c:@F@backtrace	-			int (void **, int)	void **  | int __size	-	ios=2.0/-/-/0	-	9b01bd0859ed8e07	-
+function	c:@F@backtrace_from_fp	-			int (void *, void **, int)	void * startfp | void ** array | int size	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	d50bf917563ef759	-
+function	c:@F@backtrace_symbols	-			char ** (void *const *, int)	void *const *  | int __size	-	ios=2.0/-/-/0	-	fe507bb26e940400	-
+function	c:@F@backtrace_symbols_fd	-			void (void *const *, int, int)	void *const *  | int __size | int 	-	ios=2.0/-/-/0	-	9e011482186feab8	-
+struct	c:@S@image_offset	-			-	-	-	-	-	b5dc1107b383c421	-
+field	c:@S@image_offset@FI@uuid	image_offset			uuid_t	-	-	-	-	d3171e7681e14d58	-
+field	c:@S@image_offset@FI@offset	image_offset			uint32_t	-	-	-	-	9d7b52a20020abe9	-
+function	c:@F@backtrace_image_offsets	-			void (void *const *, struct image_offset *, int)	void *const * array | struct image_offset * image_offsets | int size	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	2761c7ba87c5fda4	-
+function	c:@F@backtrace_async	-			size_t (void **, size_t, uint32_t *)	void ** array | size_t length | uint32_t * task_id	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	74dcf7c87d2ecd7c	-
+struct	c:@S@fstab	-			-	-	-	-	-	1cef28505ced3347	-
+field	c:@S@fstab@FI@fs_spec	fstab			char *	-	-	-	-	b11d62779063db05	-
+field	c:@S@fstab@FI@fs_file	fstab			char *	-	-	-	-	2b61991feb390907	-
+field	c:@S@fstab@FI@fs_vfstype	fstab			char *	-	-	-	-	b1e823bfe648423b	-
+field	c:@S@fstab@FI@fs_mntops	fstab			char *	-	-	-	-	3affd9e313a40f4d	-
+field	c:@S@fstab@FI@fs_type	fstab			char *	-	-	-	-	4bfbfa079b3fbcdc	-
+field	c:@S@fstab@FI@fs_freq	fstab			int	-	-	-	-	04ebae1709d99b60	-
+field	c:@S@fstab@FI@fs_passno	fstab			int	-	-	-	-	daafdb53e1049c4e	-
+function	c:@F@getfsent	-			struct fstab * (void)	-	-	-	-	90823e7f64e802a6	-
+function	c:@F@getfsspec	-			struct fstab * (const char *)	const char * 	-	-	-	165f84e59b51d23b	-
+function	c:@F@getfsfile	-			struct fstab * (const char *)	const char * 	-	-	-	7adf10b827fa2163	-
+function	c:@F@setfsent	-			int (void)	-	-	-	-	5a937c266b0c8f44	-
+function	c:@F@endfsent	-			void (void)	-	-	-	-	72e03a57d78004af	-
+struct	c:@SA@nt_sid_t	-			-	-	-	-	-	854cbe38d65dc7d4	-
+field	c:@SA@nt_sid_t@FI@sid_kind	nt_sid_t			u_int8_t	-	-	-	-	3bdb351e084d8920	-
+field	c:@SA@nt_sid_t@FI@sid_authcount	nt_sid_t			u_int8_t	-	-	-	-	8a17118a9e43bc7c	-
+field	c:@SA@nt_sid_t@FI@sid_authority	nt_sid_t			u_int8_t[6]	-	-	-	-	cfbaa55c00d51edf	-
+field	c:@SA@nt_sid_t@FI@sid_authorities	nt_sid_t			u_int32_t[16]	-	-	-	-	8401f368e47e7aed	-
+typedef	c:@T@nt_sid_t	-			struct nt_sid_t	-	-	-	-	ce2bc903b46548a1	-
+function	c:@F@mbr_uid_to_uuid	-			int (uid_t, uuid_t)	uid_t uid | uuid_t uu	-	-	-	8823923042e7267b	-
+function	c:@F@mbr_gid_to_uuid	-			int (gid_t, uuid_t)	gid_t gid | uuid_t uu	-	-	-	54b736d7d8ba2566	-
+function	c:@F@mbr_sid_to_uuid	-			int (const nt_sid_t *, uuid_t)	const nt_sid_t * sid | uuid_t uu	-	-	-	17ba0ac8e1afea32	-
+function	c:@F@mbr_identifier_to_uuid	-			int (int, const void *, size_t, uuid_t)	int id_type | const void * identifier | size_t identifier_size | uuid_t uu	-	-	-	42d8118dfdff2f67	-
+function	c:@F@mbr_uuid_to_id	-			int (const uuid_t, id_t *, int *)	const uuid_t uu | id_t * uid_or_gid | int * id_type	-	-	-	89d342557bf18ea5	-
+function	c:@F@mbr_uuid_to_sid	-			int (const uuid_t, nt_sid_t *)	const uuid_t uu | nt_sid_t * sid	-	-	-	5944042fec0d0347	-
+function	c:@F@mbr_sid_to_string	-			int (const nt_sid_t *, char *)	const nt_sid_t * sid | char * string	-	-	-	ac9c379e96be373f	-
+function	c:@F@mbr_string_to_sid	-			int (const char *, nt_sid_t *)	const char * string | nt_sid_t * sid	-	-	-	863a4881382f377e	-
+function	c:@F@mbr_check_membership	-			int (const uuid_t, const uuid_t, int *)	const uuid_t user | const uuid_t group | int * ismember	-	-	-	ac50351496b128c6	-
+function	c:@F@mbr_check_service_membership	-			int (const uuid_t, const char *, int *)	const uuid_t user | const char * servicename | int * ismember	-	-	-	fd73b3eae9c0fb7a	-
+enum	c:@EA@sysdir_search_path_directory_t	-			unsigned int	-	-	-	-	a9682d77f5387aa7	-
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_APPLICATION	sysdir_search_path_directory_t			-	-	-	-	-	caf2f0d92c4ef51a	1
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DEMO_APPLICATION	sysdir_search_path_directory_t			-	-	-	-	-	08c2030ff0bbd775	2
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DEVELOPER_APPLICATION	sysdir_search_path_directory_t			-	-	-	-	-	1e514a0e5456af68	3
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_ADMIN_APPLICATION	sysdir_search_path_directory_t			-	-	-	-	-	5a1acb1943bd4dd7	4
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_LIBRARY	sysdir_search_path_directory_t			-	-	-	-	-	2297be3bf7377d47	5
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DEVELOPER	sysdir_search_path_directory_t			-	-	-	-	-	f136e2e191470b65	6
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_USER	sysdir_search_path_directory_t			-	-	-	-	-	a7d960e81c732b48	7
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DOCUMENTATION	sysdir_search_path_directory_t			-	-	-	-	-	f128ce064178ba88	8
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DOCUMENT	sysdir_search_path_directory_t			-	-	-	-	-	d5bae45cbfddb807	9
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_CORESERVICE	sysdir_search_path_directory_t			-	-	-	-	-	cdd0fa71fed59312	10
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_AUTOSAVED_INFORMATION	sysdir_search_path_directory_t			-	-	-	-	-	ad13e76e30420c5b	11
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DESKTOP	sysdir_search_path_directory_t			-	-	-	-	-	233b5994a1d8aa4b	12
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_CACHES	sysdir_search_path_directory_t			-	-	-	-	-	a2e67610fd3b34cb	13
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_APPLICATION_SUPPORT	sysdir_search_path_directory_t			-	-	-	-	-	dd304800d0ecdf1e	14
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_DOWNLOADS	sysdir_search_path_directory_t			-	-	-	-	-	2ec506bd3b0c9008	15
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_INPUT_METHODS	sysdir_search_path_directory_t			-	-	-	-	-	d2f6220ec6938c31	16
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_MOVIES	sysdir_search_path_directory_t			-	-	-	-	-	f7751c6f0b28ba09	17
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_MUSIC	sysdir_search_path_directory_t			-	-	-	-	-	be669a7c71bc73a9	18
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_PICTURES	sysdir_search_path_directory_t			-	-	-	-	-	edc6f37b7f6f66af	19
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_PRINTER_DESCRIPTION	sysdir_search_path_directory_t			-	-	-	-	-	17ad4c22a25fbd7e	20
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_SHARED_PUBLIC	sysdir_search_path_directory_t			-	-	-	-	-	eee052481551e572	21
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_PREFERENCE_PANES	sysdir_search_path_directory_t			-	-	-	-	-	c127251631e9fb4c	22
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_ALL_APPLICATIONS	sysdir_search_path_directory_t			-	-	-	-	-	83d6b2c7578248fd	100
+enumconst	c:@EA@sysdir_search_path_directory_t@SYSDIR_DIRECTORY_ALL_LIBRARIES	sysdir_search_path_directory_t			-	-	-	-	-	1ddf112b3d0ffb94	101
+typedef	c:@T@sysdir_search_path_directory_t	-			enum sysdir_search_path_directory_t	-	-	-	-	755d8918bfa0446e	-
+enum	c:@EA@sysdir_search_path_domain_mask_t	-			unsigned int	-	-	-	-	1f614e01b26d7c2c	-
+enumconst	c:@EA@sysdir_search_path_domain_mask_t@SYSDIR_DOMAIN_MASK_USER	sysdir_search_path_domain_mask_t			-	-	-	-	-	886214636278e4e3	1
+enumconst	c:@EA@sysdir_search_path_domain_mask_t@SYSDIR_DOMAIN_MASK_LOCAL	sysdir_search_path_domain_mask_t			-	-	-	-	-	abe3c02e0b9821d8	2
+enumconst	c:@EA@sysdir_search_path_domain_mask_t@SYSDIR_DOMAIN_MASK_NETWORK	sysdir_search_path_domain_mask_t			-	-	-	-	-	4aa7e21f4250b79c	4
+enumconst	c:@EA@sysdir_search_path_domain_mask_t@SYSDIR_DOMAIN_MASK_SYSTEM	sysdir_search_path_domain_mask_t			-	-	-	-	-	387ce2962b0da049	8
+enumconst	c:@EA@sysdir_search_path_domain_mask_t@SYSDIR_DOMAIN_MASK_ALL	sysdir_search_path_domain_mask_t			-	-	-	-	-	062904576db11cad	65535
+typedef	c:@T@sysdir_search_path_domain_mask_t	-			enum sysdir_search_path_domain_mask_t	-	-	-	-	66100e253857d48d	-
+typedef	c:@T@sysdir_search_path_enumeration_state	-			unsigned int	-	-	-	-	ee803d53c8ba4a5b	-
+function	c:@F@sysdir_start_search_path_enumeration	-			sysdir_search_path_enumeration_state (sysdir_search_path_directory_t, sysdir_search_path_domain_mask_t)	sysdir_search_path_directory_t dir | sysdir_search_path_domain_mask_t domainMask	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d12bc4a6f2660807	-
+function	c:@F@sysdir_get_next_search_path_enumeration	-			sysdir_search_path_enumeration_state (sysdir_search_path_enumeration_state, char *)	sysdir_search_path_enumeration_state state | char * path	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	433d918312822ffd	-
+typedef	c:@T@NXSwappedFloat	-			unsigned long	-	-	-	-	5950a6b8c38fa4e8	-
+typedef	c:@T@NXSwappedDouble	-			unsigned long long	-	-	-	-	60ecf43c5db92266	-
+function	c:@F@NXSwapShort	-			unsigned short (unsigned short)	unsigned short inv	-	*deprecated	-	5ce80ad9feec6f9c	-
+function	c:@F@NXSwapInt	-			unsigned int (unsigned int)	unsigned int inv	-	*deprecated	-	c0fc2f7df4174b60	-
+function	c:@F@NXSwapLong	-			unsigned long (unsigned long)	unsigned long inv	-	*deprecated	-	35c5decc902b630c	-
+function	c:@F@NXSwapLongLong	-			unsigned long long (unsigned long long)	unsigned long long inv	-	*deprecated	-	2f56bc5e93a0067d	-
+function	c:@F@NXConvertHostFloatToSwapped	-			NXSwappedFloat (float)	float x	-	*deprecated	-	044522542855b641	-
+function	c:@F@NXConvertSwappedFloatToHost	-			float (NXSwappedFloat)	NXSwappedFloat x	-	*deprecated	-	97065cef8b6769f7	-
+function	c:@F@NXConvertHostDoubleToSwapped	-			NXSwappedDouble (double)	double x	-	*deprecated	-	e99cd8ceee511439	-
+function	c:@F@NXConvertSwappedDoubleToHost	-			double (NXSwappedDouble)	NXSwappedDouble x	-	*deprecated	-	d35e88975b8206e6	-
+function	c:@F@NXSwapFloat	-			NXSwappedFloat (NXSwappedFloat)	NXSwappedFloat x	-	*deprecated	-	2d22a677e5ec1608	-
+function	c:@F@NXSwapDouble	-			NXSwappedDouble (NXSwappedDouble)	NXSwappedDouble x	-	*deprecated	-	1d8f96896e404d08	-
+enum	c:@E@NXByteOrder	-			unsigned int	-	-	-	-	2f5e153b8f57c45c	-
+enumconst	c:@E@NXByteOrder@NX_UnknownByteOrder	NXByteOrder			-	-	-	-	-	acdf536058dc6644	0
+enumconst	c:@E@NXByteOrder@NX_LittleEndian	NXByteOrder			-	-	-	-	-	d45e524df4ae9afe	1
+enumconst	c:@E@NXByteOrder@NX_BigEndian	NXByteOrder			-	-	-	-	-	3696a2d6899addd6	2
+function	c:@F@NXHostByteOrder	-			enum NXByteOrder (void)	-	-	-	-	407343c1f2e63910	-
+function	c:@F@NXSwapBigShortToHost	-			unsigned short (unsigned short)	unsigned short x	-	*deprecated	-	e54d281fb63f0a1d	-
+function	c:@F@NXSwapBigIntToHost	-			unsigned int (unsigned int)	unsigned int x	-	*deprecated	-	4b850cb7c3d7727c	-
+function	c:@F@NXSwapBigLongToHost	-			unsigned long (unsigned long)	unsigned long x	-	*deprecated	-	e6a39786b7d08843	-
+function	c:@F@NXSwapBigLongLongToHost	-			unsigned long long (unsigned long long)	unsigned long long x	-	*deprecated	-	d1e52f88e64b50d1	-
+function	c:@F@NXSwapBigDoubleToHost	-			double (NXSwappedDouble)	NXSwappedDouble x	-	*deprecated	-	77bfca9c8970bdff	-
+function	c:@F@NXSwapBigFloatToHost	-			float (NXSwappedFloat)	NXSwappedFloat x	-	*deprecated	-	ed191ddd3881cba3	-
+function	c:@F@NXSwapHostShortToBig	-			unsigned short (unsigned short)	unsigned short x	-	*deprecated	-	71ce95e2fafb7ece	-
+function	c:@F@NXSwapHostIntToBig	-			unsigned int (unsigned int)	unsigned int x	-	*deprecated	-	b4f0140f32c94bc3	-
+function	c:@F@NXSwapHostLongToBig	-			unsigned long (unsigned long)	unsigned long x	-	*deprecated	-	8df22e63e1a5e5b5	-
+function	c:@F@NXSwapHostLongLongToBig	-			unsigned long long (unsigned long long)	unsigned long long x	-	*deprecated	-	16ab7b713a12f703	-
+function	c:@F@NXSwapHostDoubleToBig	-			NXSwappedDouble (double)	double x	-	*deprecated	-	b25978df2a5de6a5	-
+function	c:@F@NXSwapHostFloatToBig	-			NXSwappedFloat (float)	float x	-	*deprecated	-	fc3d2dfe30abc2a2	-
+function	c:@F@NXSwapLittleShortToHost	-			unsigned short (unsigned short)	unsigned short x	-	*deprecated	-	002a7e9ff00277ac	-
+function	c:@F@NXSwapLittleIntToHost	-			unsigned int (unsigned int)	unsigned int x	-	*deprecated	-	b3d3c59b9c9155ef	-
+function	c:@F@NXSwapLittleLongToHost	-			unsigned long (unsigned long)	unsigned long x	-	*deprecated	-	b01a80b386d009b0	-
+function	c:@F@NXSwapLittleLongLongToHost	-			unsigned long long (unsigned long long)	unsigned long long x	-	*deprecated	-	8ffa2b71ab34058b	-
+function	c:@F@NXSwapLittleDoubleToHost	-			double (NXSwappedDouble)	NXSwappedDouble x	-	*deprecated	-	0d9050dffd9ff3b7	-
+function	c:@F@NXSwapLittleFloatToHost	-			float (NXSwappedFloat)	NXSwappedFloat x	-	*deprecated	-	b3594451afd930fb	-
+function	c:@F@NXSwapHostShortToLittle	-			unsigned short (unsigned short)	unsigned short x	-	*deprecated	-	c5c8004b845ea96d	-
+function	c:@F@NXSwapHostIntToLittle	-			unsigned int (unsigned int)	unsigned int x	-	*deprecated	-	39a5e2cdf83fa773	-
+function	c:@F@NXSwapHostLongToLittle	-			unsigned long (unsigned long)	unsigned long x	-	*deprecated	-	50d2413052d2ef94	-
+function	c:@F@NXSwapHostLongLongToLittle	-			unsigned long long (unsigned long long)	unsigned long long x	-	*deprecated	-	367e775625950fb2	-
+function	c:@F@NXSwapHostDoubleToLittle	-			NXSwappedDouble (double)	double x	-	*deprecated	-	4e15754b43eb573c	-
+function	c:@F@NXSwapHostFloatToLittle	-			NXSwappedFloat (float)	float x	-	*deprecated	-	1eda7e8e2db9e36e	-
+typedef	c:@T@__uint16_t	-			unsigned short	-	-	-	-	a7bc1cb528a5deea	-
+typedef	c:@T@__uint32_t	-			unsigned int	-	-	-	-	c165177149766f1f	-
+typedef	c:@T@__uint64_t	-			unsigned long long	-	-	-	-	f3f983597d64f162	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@uid_t	-			__darwin_uid_t	-	-	-	-	6084ffa514638080	-
+typedef	c:@T@__darwin_uid_t	-			__uint32_t	-	-	-	-	073c04a7a5ce4f9c	-
+typedef	c:@T@pid_t	-			__darwin_pid_t	-	-	-	-	bf2c1907ad5396d7	-
+typedef	c:@T@__darwin_pid_t	-			__int32_t	-	-	-	-	cb5c92904c281d82	-
+typedef	c:@T@__int32_t	-			int	-	-	-	-	71b73741152fe871	-
+typedef	c:@T@u_int16_t	-			unsigned short	-	-	-	-	f001648696c65924	-
+typedef	c:@T@u_int32_t	-			unsigned int	-	-	-	-	c124ba0ccea6e1e3	-
+typedef	c:@T@u_int64_t	-			unsigned long long	-	-	-	-	d21b4e932f7e4bcd	-
+typedef	c:@T@dev_t	-			__darwin_dev_t	-	-	-	-	14a84ca0e8bf867e	-
+typedef	c:@T@__darwin_dev_t	-			__int32_t	-	-	-	-	9d1541788438c8e0	-
+typedef	c:@T@time_t	-			__darwin_time_t	-	-	-	-	13e90b94f84e3aca	-
+typedef	c:@T@__darwin_time_t	-			long	-	-	-	-	cc0e13085dd2bf24	-
+typedef	c:@T@mach_port_name_t	-			natural_t	-	-	-	-	54ec52468bf91691	-
+typedef	c:@T@natural_t	-			__darwin_natural_t	-	-	-	-	0942d39489032078	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-
+typedef	c:@T@ino_t	-			__darwin_ino_t	-	-	-	-	11490b242e06956b	-
+typedef	c:@T@__darwin_ino_t	-			__darwin_ino64_t	-	-	-	-	3add59b9cde1a7cc	-
+typedef	c:@T@__darwin_ino64_t	-			__uint64_t	-	-	-	-	54ff3e6e4a843fee	-
+typedef	c:@T@nlink_t	-			__uint16_t	-	-	-	-	46fa054ec1bd9a2c	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@uintptr_t	-			unsigned long	-	-	-	-	d45bca13aaee37a2	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@boolean_t	-			int	-	-	-	-	beea3da3dd8be24e	-
+typedef	c:@T@vm_size_t	-			uintptr_t	-	-	-	-	58917db4e1bfc008	-
+typedef	c:@T@vm_address_t	-			vm_offset_t	-	-	-	-	cad3c6ebd7e3c97f	-
+typedef	c:@T@vm_offset_t	-			uintptr_t	-	-	-	-	eab5cc0fd0561c2e	-
+typedef	c:@T@kern_return_t	-			int	-	-	-	-	ed251c61fba39e79	-
+typedef	c:@T@task_t	-			mach_port_t	-	-	-	-	b2cfd43b2af5e4e4	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@uuid_t	-			__darwin_uuid_t	-	-	-	-	9f32779f176ee30f	-
+typedef	c:@T@__darwin_uuid_t	-			unsigned char[16]	-	-	-	-	8e41facc8ea29412	-
+typedef	c:@T@u_int8_t	-			unsigned char	-	-	-	-	ed6837ff6d0fcfa1	-
+typedef	c:@T@gid_t	-			__darwin_gid_t	-	-	-	-	a7ab6a243ada7837	-
+typedef	c:@T@__darwin_gid_t	-			__uint32_t	-	-	-	-	0bd5f511332b23bd	-
+typedef	c:@T@id_t	-			__darwin_id_t	-	-	-	-	67f59bf7c1919040	-
+typedef	c:@T@__darwin_id_t	-			__uint32_t	-	-	-	-	0a897dc3ea4b5d8b	-

@@ -1,0 +1,16 @@
+{
+  "framework": "AVKit",
+  "entries": [
+    {
+      "api": "AVPictureInPictureControllerContentSource",
+      "kind": "class",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the content source's player-layer half is this port's own picture-in-picture: AVPlayerLayer is exported on this release and AVPictureInPictureController.m already reparents one into its floating window, so the box holds the very layer that window uses. Its sample-buffer half is not carried, and the row of AVPictureInPictureSampleBufferPlaybackDelegate names that half",
+      "effect": "a source holds the player layer it was made with and reports it back; a source made with no layer is still a source, and the controller built from it reports no content source at all, because -isPictureInPicturePossible is computed from that layer's real readyForDisplay and player",
+      "facts": "facts/AVKit/AVPictureInPictureContentSource.md",
+      "source": "SDK 26.2 AVKit/AVPictureInPictureController.h:180-205; the armv7 cache of 6.1.3 carries AVPlayerLayer and its readyForDisplay"
+    }
+  ]
+}

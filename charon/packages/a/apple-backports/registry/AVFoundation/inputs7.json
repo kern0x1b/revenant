@@ -1,0 +1,38 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVAudioSession.availableInputs",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 lists the inputs of the route in use and not every input it could use",
+      "effect": "the inputs of the current route of iOS 6, whose list is the one the release gives for the route in use",
+      "facts": "facts/AVFoundation/AVAudioSessionInputs.md",
+      "source": "the header of iOS 16.4 for the members and the release that added them; AVAudioSession of iOS 6.0, whose current route lists the inputs in use (the iOS 6.0 emulator lists the built-in microphone for a session of the record category)"
+    },
+    {
+      "api": "AVAudioSession.preferredInput",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 cannot choose an input, so a preference is kept only for the input in use",
+      "effect": "the input set as preferred while it is still an input of the current route, and nil otherwise",
+      "facts": "facts/AVFoundation/AVAudioSessionInputs.md",
+      "source": "the header of iOS 16.4 for the members and the release that added them; AVAudioSession of iOS 6.0, whose current route lists the inputs in use (the iOS 6.0 emulator lists the built-in microphone for a session of the record category)"
+    },
+    {
+      "api": "-[AVAudioSession setPreferredInput:error:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 cannot choose an input, and the answer is refused and not made up",
+      "effect": "YES for nil, which clears the preference, and for an input of the current route, which is the input in use; NO with an error of AVAudioSessionErrorCodeResourceNotAvailable for any other input, since iOS 6 has no way to switch to it",
+      "facts": "facts/AVFoundation/AVAudioSessionInputs.md",
+      "source": "the header of iOS 16.4 for the members and the release that added them; AVAudioSession of iOS 6.0, whose current route lists the inputs in use (the iOS 6.0 emulator lists the built-in microphone for a session of the record category)"
+    }
+  ]
+}

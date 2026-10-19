@@ -1,0 +1,80 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+SCNAnimatable	8.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	addAnimation:forKey:	- (void)addAnimation:(id<SCNAnimation>  _Nonnull)animation forKey:(NSString * _Nullable)key;	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	addAnimationPlayer:forKey:	- (void)addAnimationPlayer:(SCNAnimationPlayer * _Nonnull)player forKey:(NSString * _Nullable)key API_AVAILABLE(ios(11.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	removeAllAnimations	- (void)removeAllAnimations;	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	removeAllAnimationsWithBlendOutDuration:	- (void)removeAllAnimationsWithBlendOutDuration:(CGFloat)duration API_AVAILABLE(ios(15.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	removeAnimationForKey:	- (void)removeAnimationForKey:(NSString * _Nonnull)key;	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	removeAnimationForKey:blendOutDuration:	- (void)removeAnimationForKey:(NSString * _Nonnull)key blendOutDuration:(CGFloat)duration API_AVAILABLE(ios(11.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	property	no	animationKeys	@property (atomic, readonly) NSArray<NSString *> * _Nonnull animationKeys;	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	animationPlayerForKey:	- (SCNAnimationPlayer * _Nullable)animationPlayerForKey:(NSString * _Nonnull)key API_AVAILABLE(ios(11.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	removeAnimationForKey:fadeOutDuration:	- (void)removeAnimationForKey:(NSString * _Nonnull)key fadeOutDuration:(CGFloat)duration API_AVAILABLE(ios(8.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	animationForKey:	- (CAAnimation * _Nullable)animationForKey:(NSString * _Nonnull)key API_AVAILABLE(ios(8.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	pauseAnimationForKey:	- (void)pauseAnimationForKey:(NSString * _Nonnull)key API_AVAILABLE(ios(8.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	resumeAnimationForKey:	- (void)resumeAnimationForKey:(NSString * _Nonnull)key API_AVAILABLE(ios(8.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	setSpeed:forAnimationKey:	- (void)setSpeed:(CGFloat)speed forAnimationKey:(NSString * _Nonnull)key API_AVAILABLE(ios(10.0));	yes
+SCNAnimatable	8.0	sdk16 body		NSObject	required	method	yes	isAnimationForKeyPaused:	- (BOOL)isAnimationForKeyPaused:(NSString * _Nonnull)key API_AVAILABLE(ios(8.0));	yes
+SCNAvoidOccluderConstraintDelegate	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNAvoidOccluderConstraintDelegate	11.0	sdk16 body		NSObject	optional	method	yes	avoidOccluderConstraint:shouldAvoidOccluder:forNode:	- (BOOL)avoidOccluderConstraint:(SCNAvoidOccluderConstraint * _Nonnull)constraint shouldAvoidOccluder:(SCNNode * _Nonnull)occluder forNode:(SCNNode * _Nonnull)node;	yes
+SCNAvoidOccluderConstraintDelegate	11.0	sdk16 body		NSObject	optional	method	yes	avoidOccluderConstraint:didAvoidOccluder:forNode:	- (void)avoidOccluderConstraint:(SCNAvoidOccluderConstraint * _Nonnull)constraint didAvoidOccluder:(SCNNode * _Nonnull)occluder forNode:(SCNNode * _Nonnull)node;	yes
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	required	property	no	autoSwitchToFreeCamera	@property (nonatomic, readwrite, assign, unsafe_unretained) BOOL autoSwitchToFreeCamera;	yes
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	required	property	no	allowsTranslation	@property (nonatomic, readwrite, assign, unsafe_unretained) BOOL allowsTranslation;	yes
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	required	property	no	flyModeVelocity	@property (nonatomic, readwrite, assign, unsafe_unretained) CGFloat flyModeVelocity;	yes
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	required	property	no	panSensitivity	@property (nonatomic, readwrite, assign, unsafe_unretained) CGFloat panSensitivity;	yes
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	required	property	no	truckSensitivity	@property (nonatomic, readwrite, assign, unsafe_unretained) CGFloat truckSensitivity;	yes
+SCNCameraControlConfiguration	11.0	sdk16 body		NSObject	required	property	no	rotationSensitivity	@property (nonatomic, readwrite, assign, unsafe_unretained) CGFloat rotationSensitivity;	yes
+SCNCameraControllerDelegate	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNCameraControllerDelegate	11.0	sdk16 body		NSObject	optional	method	yes	cameraInertiaWillStartForController:	- (void)cameraInertiaWillStartForController:(SCNCameraController * _Nonnull)cameraController;	yes
+SCNCameraControllerDelegate	11.0	sdk16 body		NSObject	optional	method	yes	cameraInertiaDidEndForController:	- (void)cameraInertiaDidEndForController:(SCNCameraController * _Nonnull)cameraController;	yes
+SCNSceneExportDelegate	10.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNSceneExportDelegate	10.0	sdk16 body		NSObject	optional	method	yes	writeImage:withSceneDocumentURL:originalImageURL:	- (NSURL * _Nullable)writeImage:(UIImage * _Nonnull)image withSceneDocumentURL:(NSURL * _Nonnull)documentURL originalImageURL:(NSURL * _Nullable)originalImageURL API_AVAILABLE(ios(10.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	scene	@property (nonatomic, readwrite, retain) SCNScene * _Nullable scene;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	presentScene:withTransition:incomingPointOfView:completionHandler:	- (void)presentScene:(SCNScene * _Nonnull)scene withTransition:(SKTransition * _Nonnull)transition incomingPointOfView:(SCNNode * _Nullable)pointOfView completionHandler:(void (^ _Nullable)(void))completionHandler API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	sceneTime	@property (nonatomic, readwrite, assign, unsafe_unretained) NSTimeInterval sceneTime;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	delegate	@property (nonatomic, readwrite, weak) id<SCNSceneRendererDelegate> _Nullable delegate;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	hitTest:options:	- (NSArray<SCNHitTestResult *> * _Nonnull)hitTest:(CGPoint)point options:(NSDictionary<SCNHitTestOption,id> * _Nullable)options;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	isNodeInsideFrustum:withPointOfView:	- (BOOL)isNodeInsideFrustum:(SCNNode * _Nonnull)node withPointOfView:(SCNNode * _Nonnull)pointOfView;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	nodesInsideFrustumWithPointOfView:	- (NSArray<SCNNode *> * _Nonnull)nodesInsideFrustumWithPointOfView:(SCNNode * _Nonnull)pointOfView API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	projectPoint:	- (SCNVector3)projectPoint:(SCNVector3)point;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	unprojectPoint:	- (SCNVector3)unprojectPoint:(SCNVector3)point;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	playing	@property (atomic, readwrite, assign, unsafe_unretained, getter=isPlaying) BOOL playing;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	loops	@property (nonatomic, readwrite, assign, unsafe_unretained) BOOL loops;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	pointOfView	@property (nonatomic, readwrite, retain) SCNNode * _Nullable pointOfView;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	autoenablesDefaultLighting	@property (nonatomic, readwrite, assign, unsafe_unretained) BOOL autoenablesDefaultLighting;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	jitteringEnabled	@property (nonatomic, readwrite, assign, unsafe_unretained, getter=isJitteringEnabled) BOOL jitteringEnabled;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	temporalAntialiasingEnabled	@property (nonatomic, readwrite, assign, unsafe_unretained, getter=isTemporalAntialiasingEnabled) BOOL temporalAntialiasingEnabled API_AVAILABLE(ios(13.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	prepareObject:shouldAbortBlock:	- (BOOL)prepareObject:(id  _Nonnull)object shouldAbortBlock:(BOOL (^ _Nullable)(void))block;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	method	yes	prepareObjects:withCompletionHandler:	- (void)prepareObjects:(NSArray * _Nonnull)objects withCompletionHandler:(void (^ _Nullable)(BOOL))completionHandler;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	showsStatistics	@property (nonatomic, readwrite, assign, unsafe_unretained) BOOL showsStatistics;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	debugOptions	@property (nonatomic, readwrite, assign, unsafe_unretained) SCNDebugOptions debugOptions API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	overlaySKScene	@property (nonatomic, readwrite, retain) API_AVAILABLE(macos(10.10)) SKScene *overlaySKScene;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	renderingAPI	@property (nonatomic, readonly) SCNRenderingAPI renderingAPI API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	workingColorSpace	@property (nonatomic, readonly) CGColorSpaceRef _Nonnull workingColorSpace API_AVAILABLE(ios(17.0));	no
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	context	@property (nonatomic, readonly) void * _Nullable context;	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	currentRenderCommandEncoder	@property (nonatomic, readonly) id<MTLRenderCommandEncoder> _Nullable currentRenderCommandEncoder API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	currentRenderPassDescriptor	@property (nonatomic, readonly) API_UNAVAILABLE(watchos) MTLRenderPassDescriptor *currentRenderPassDescriptor API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	device	@property (nonatomic, readonly) id<MTLDevice> _Nullable device API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	colorPixelFormat	@property (nonatomic, readonly) MTLPixelFormat colorPixelFormat API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	depthPixelFormat	@property (nonatomic, readonly) MTLPixelFormat depthPixelFormat API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	stencilPixelFormat	@property (nonatomic, readonly) MTLPixelFormat stencilPixelFormat API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	commandQueue	@property (nonatomic, readonly) id<MTLCommandQueue> _Nullable commandQueue API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	audioEngine	@property (nonatomic, readonly) AVAudioEngine * _Nonnull audioEngine API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	audioEnvironmentNode	@property (nonatomic, readonly) API_UNAVAILABLE(watchos) AVAudioEnvironmentNode *audioEnvironmentNode API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	audioListener	@property (nonatomic, readwrite, retain) SCNNode * _Nullable audioListener API_AVAILABLE(ios(9.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	currentViewport	@property (nonatomic, readonly) CGRect currentViewport API_AVAILABLE(ios(13.0));	yes
+SCNSceneRenderer	9.0	sdk16 body		NSObject	required	property	no	usesReverseZ	@property (nonatomic, readwrite, assign, unsafe_unretained) BOOL usesReverseZ API_AVAILABLE(ios(13.0));	yes
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	optional	method	yes	renderer:updateAtTime:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer updateAtTime:(NSTimeInterval)time;	yes
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	optional	method	yes	renderer:didApplyAnimationsAtTime:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didApplyAnimationsAtTime:(NSTimeInterval)time;	yes
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	optional	method	yes	renderer:didSimulatePhysicsAtTime:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didSimulatePhysicsAtTime:(NSTimeInterval)time;	yes
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	optional	method	yes	renderer:didApplyConstraintsAtTime:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didApplyConstraintsAtTime:(NSTimeInterval)time API_AVAILABLE(ios(11.0));	yes
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	optional	method	yes	renderer:willRenderScene:atTime:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer willRenderScene:(SCNScene * _Nonnull)scene atTime:(NSTimeInterval)time;	yes
+SCNSceneRendererDelegate	11.0	sdk16 body		NSObject	optional	method	yes	renderer:didRenderScene:atTime:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didRenderScene:(SCNScene * _Nonnull)scene atTime:(NSTimeInterval)time;	yes
+SCNShadable	15.0	sdk16 body		NSObject	-	-	-	-	-	-
+SCNShadable	15.0	sdk16 body		NSObject	optional	property	no	program	@property (nonatomic, readwrite, retain) API_UNAVAILABLE(watchos) SCNProgram *program;	yes
+SCNShadable	15.0	sdk16 body		NSObject	optional	method	yes	handleBindingOfSymbol:usingBlock:	- (void)handleBindingOfSymbol:(NSString * _Nonnull)symbol usingBlock:(SCNBindingBlock  _Nullable)block;	yes
+SCNShadable	15.0	sdk16 body		NSObject	optional	method	yes	handleUnbindingOfSymbol:usingBlock:	- (void)handleUnbindingOfSymbol:(NSString * _Nonnull)symbol usingBlock:(SCNBindingBlock  _Nullable)block;	yes
+SCNShadable	15.0	sdk16 body		NSObject	optional	property	no	shaderModifiers	@property (nonatomic, readwrite, copy) API_AVAILABLE(macos(10.9)) NSDictionary<SCNShaderModifierEntryPoint,NSString *> *shaderModifiers;	yes
+SCNShadable	15.0	sdk16 body		NSObject	optional	property	no	minimumLanguageVersion	@property (nonatomic, readwrite, retain) NSNumber * _Nullable minimumLanguageVersion API_AVAILABLE(ios(15.0));	yes

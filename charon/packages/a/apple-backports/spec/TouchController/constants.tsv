@@ -1,0 +1,2 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	TCGameControllerProductCategoryTouchController	-	TCGameControllerProductCategoryTouchController	26.0	NSString *const	API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(macCatalyst, visionos)	4637a34710335e62	found	Touch Controller	-	ios-26.2-cache (no host value)	-	exported	ns	-

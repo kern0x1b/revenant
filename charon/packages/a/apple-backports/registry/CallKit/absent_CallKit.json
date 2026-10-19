@@ -1,0 +1,15 @@
+{
+  "framework": "CallKit",
+  "entries": [
+    {
+      "api": "CXCallDirectoryExtensionContextDelegate",
+      "kind": "protocol",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the protocol CXCallDirectoryExtensionContextDelegate",
+      "effect": "until built: NSProtocolFromString answers nil",
+      "source": "SDK 16.4, CallKit"
+    }
+  ]
+}

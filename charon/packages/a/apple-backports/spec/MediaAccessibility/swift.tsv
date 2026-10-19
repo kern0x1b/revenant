@@ -1,0 +1,9 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+MediaAccessibility	swift-struct	c:@S@MAMusicHaptics	-	MAMusicHaptics	-	-	-	-	-	5dfd065b9432bccd
+MediaAccessibility	swift-property	s:So14MAMusicHapticsV18MediaAccessibilityE34enabledStatusDidChangeNotificationSo18NSNotificationNameavpZ	MAMusicHaptics	enabledStatusDidChangeNotification	+	Foundation.Notification.Name	-	-	-	5c7902bed17bd858
+MediaAccessibility	swift-class	c:objc(cs)MAFlashingLightsProcessor	-	MAFlashingLightsProcessor	-	-	-	ios=17.0	-	17d0213b728753eb
+MediaAccessibility	swift-struct	s:So25MAFlashingLightsProcessorC18MediaAccessibilityE6ResultV	MAFlashingLightsProcessor	Result	-	-	-	-	-	a236eea9afc4b37b
+MediaAccessibility	swift-property	s:So25MAFlashingLightsProcessorC18MediaAccessibilityE6ResultV16surfaceProcessedSbvp	MAFlashingLightsProcessor.Result	surfaceProcessed	-	Swift.Bool	-	-	-	964e5db8c1f6912b
+MediaAccessibility	swift-property	s:So25MAFlashingLightsProcessorC18MediaAccessibilityE6ResultV15mitigationLevelSfvp	MAFlashingLightsProcessor.Result	mitigationLevel	-	Swift.Float	-	-	-	06c050aeb3ed799f
+MediaAccessibility	swift-property	s:So25MAFlashingLightsProcessorC18MediaAccessibilityE6ResultV14intensityLevelSfvp	MAFlashingLightsProcessor.Result	intensityLevel	-	Swift.Float	-	-	-	b82037d23f447a8f
+MediaAccessibility	swift-method	s:So25MAFlashingLightsProcessorC18MediaAccessibilityE14processSurface_03outG09timestamp7optionsAbCE6ResultVSo12IOSurfaceRefa_AKzSdSDySo0abC9OptionKeyaypGSgtF	MAFlashingLightsProcessor	processSurface(_:outSurface:timestamp:options:)	-	MediaAccessibility.MAFlashingLightsProcessor.Result	CoreGraphics.IOSurfaceRef | CoreGraphics.IOSurfaceRef | CoreFoundation.CFAbsoluteTime | [MediaAccessibility.MAFlashingLightsProcessor.OptionKey : Any]?	-	-	c71a5ab27961d7a9

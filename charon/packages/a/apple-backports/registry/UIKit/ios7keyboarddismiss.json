@@ -1,0 +1,14 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIScrollView.keyboardDismissMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIScrollViewKeyboardDismiss.md",
+      "source": "the host's own UIKit for the default and the stored values (Mac Catalyst), and tests/backports/device/keyboarddismiss.m with real touches and the keyboard on iOS 6"
+    }
+  ]
+}

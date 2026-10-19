@@ -1,0 +1,63 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+ModelIO	swift-class	c:objc(cs)MDLMatrix4x4Array	-	MDLMatrix4x4Array	-	-	-	ios=11.0	-	ccf27ffc9a31e44f
+ModelIO	swift-property	s:So17MDLMatrix4x4ArrayC7ModelIOE08float4x4B0SaySo05simd_E0aGvp	MDLMatrix4x4Array	float4x4Array	-	[simd.float4x4]	-	-	-	671eee1f2b07537e
+ModelIO	swift-property	s:So17MDLMatrix4x4ArrayC7ModelIOE09double4x4B0SaySo05simd_E0aGvp	MDLMatrix4x4Array	double4x4Array	-	[simd.double4x4]	-	-	-	997d9b4da1f42076
+ModelIO	swift-class	c:objc(cs)MDLAnimatedValue	-	MDLAnimatedValue	-	-	-	ios=11.0	-	112e92c1753412b5
+ModelIO	swift-property	s:So16MDLAnimatedValueC7ModelIOE5timesSaySdGvp	MDLAnimatedValue	times	-	[Foundation.TimeInterval]	-	-	-	4600c86bb7b7c876
+ModelIO	swift-class	c:objc(cs)MDLAnimatedScalarArray	-	MDLAnimatedScalarArray	-	-	-	ios=11.0	-	84b528ae914fae19
+ModelIO	swift-method	s:So22MDLAnimatedScalarArrayC7ModelIOE3set05floatC06atTimeySaySfG_SdtF	MDLAnimatedScalarArray	set(floatArray:atTime:)	-	()	[Swift.Float] | Foundation.TimeInterval	-	-	7a176b781eee14c1
+ModelIO	swift-method	s:So22MDLAnimatedScalarArrayC7ModelIOE3set06doubleC06atTimeySaySdG_SdtF	MDLAnimatedScalarArray	set(doubleArray:atTime:)	-	()	[Swift.Double] | Foundation.TimeInterval	-	-	fa1fe69dde704d4c
+ModelIO	swift-method	s:So22MDLAnimatedScalarArrayC7ModelIOE05floatC06atTimeSaySfGSd_tF	MDLAnimatedScalarArray	floatArray(atTime:)	-	[Swift.Float]	Foundation.TimeInterval	-	-	084572f8991c0482
+ModelIO	swift-method	s:So22MDLAnimatedScalarArrayC7ModelIOE06doubleC06atTimeSaySdGSd_tF	MDLAnimatedScalarArray	doubleArray(atTime:)	-	[Swift.Double]	Foundation.TimeInterval	-	-	349fcdc7bfb1c972
+ModelIO	swift-method	s:So22MDLAnimatedScalarArrayC7ModelIOE5reset05floatC07atTimesySaySfG_SaySdGtF	MDLAnimatedScalarArray	reset(floatArray:atTimes:)	-	()	[Swift.Float] | [Foundation.TimeInterval]	-	-	f76ff27f8f3f2358
+ModelIO	swift-method	s:So22MDLAnimatedScalarArrayC7ModelIOE5reset06doubleC07atTimesySaySdG_AGtF	MDLAnimatedScalarArray	reset(doubleArray:atTimes:)	-	()	[Swift.Double] | [Foundation.TimeInterval]	-	-	c15ae47527da709a
+ModelIO	swift-property	s:So22MDLAnimatedScalarArrayC7ModelIOE05floatC0SaySfGvp	MDLAnimatedScalarArray	floatArray	-	[Swift.Float]	-	-	-	f68858da272ba340
+ModelIO	swift-property	s:So22MDLAnimatedScalarArrayC7ModelIOE06doubleC0SaySdGvp	MDLAnimatedScalarArray	doubleArray	-	[Swift.Double]	-	-	-	2948e358d15b4df3
+ModelIO	swift-class	c:objc(cs)MDLAnimatedVector3Array	-	MDLAnimatedVector3Array	-	-	-	ios=11.0	-	4dac5033ddbbbe98
+ModelIO	swift-method	s:So23MDLAnimatedVector3ArrayC7ModelIOE3set06float3C06atTimeySays5SIMD3VySfGG_SdtF	MDLAnimatedVector3Array	set(float3Array:atTime:)	-	()	[Swift.SIMD3<Swift.Float>] | Foundation.TimeInterval	-	-	806f53d87572d11f
+ModelIO	swift-method	s:So23MDLAnimatedVector3ArrayC7ModelIOE3set07double3C06atTimeySays5SIMD3VySdGG_SdtF	MDLAnimatedVector3Array	set(double3Array:atTime:)	-	()	[Swift.SIMD3<Swift.Double>] | Foundation.TimeInterval	-	-	f98279f4507b0822
+ModelIO	swift-method	s:So23MDLAnimatedVector3ArrayC7ModelIOE06float3C06atTimeSays5SIMD3VySfGGSd_tF	MDLAnimatedVector3Array	float3Array(atTime:)	-	[Swift.SIMD3<Swift.Float>]	Foundation.TimeInterval	-	-	e9ee9fae72a845f7
+ModelIO	swift-method	s:So23MDLAnimatedVector3ArrayC7ModelIOE07double3C06atTimeSays5SIMD3VySdGGSd_tF	MDLAnimatedVector3Array	double3Array(atTime:)	-	[Swift.SIMD3<Swift.Double>]	Foundation.TimeInterval	-	-	4ea03c1febe030f5
+ModelIO	swift-method	s:So23MDLAnimatedVector3ArrayC7ModelIOE5reset06float3C07atTimesySays5SIMD3VySfGG_SaySdGtF	MDLAnimatedVector3Array	reset(float3Array:atTimes:)	-	()	[Swift.SIMD3<Swift.Float>] | [Foundation.TimeInterval]	-	-	a7989b9545c17500
+ModelIO	swift-method	s:So23MDLAnimatedVector3ArrayC7ModelIOE5reset07double3C07atTimesySays5SIMD3VySdGG_SaySdGtF	MDLAnimatedVector3Array	reset(double3Array:atTimes:)	-	()	[Swift.SIMD3<Swift.Double>] | [Foundation.TimeInterval]	-	-	f625edff21c1c324
+ModelIO	swift-property	s:So23MDLAnimatedVector3ArrayC7ModelIOE06float3C0Says5SIMD3VySfGGvp	MDLAnimatedVector3Array	float3Array	-	[Swift.SIMD3<Swift.Float>]	-	-	-	7f646585ca68ed55
+ModelIO	swift-property	s:So23MDLAnimatedVector3ArrayC7ModelIOE07double3C0Says5SIMD3VySdGGvp	MDLAnimatedVector3Array	double3Array	-	[Swift.SIMD3<Swift.Double>]	-	-	-	6f10f7d6c830c75d
+ModelIO	swift-class	c:objc(cs)MDLAnimatedQuaternionArray	-	MDLAnimatedQuaternionArray	-	-	-	ios=11.0	-	9dd9f9df56996ed2
+ModelIO	swift-method	s:So26MDLAnimatedQuaternionArrayC7ModelIOE3set05floatbC06atTimeySaySo10simd_quatfaG_SdtF	MDLAnimatedQuaternionArray	set(floatQuaternionArray:atTime:)	-	()	[simd.simd_quatf] | Foundation.TimeInterval	-	-	d26958d542e932e8
+ModelIO	swift-method	s:So26MDLAnimatedQuaternionArrayC7ModelIOE3set06doublebC06atTimeySaySo10simd_quatdaG_SdtF	MDLAnimatedQuaternionArray	set(doubleQuaternionArray:atTime:)	-	()	[simd.simd_quatd] | Foundation.TimeInterval	-	-	baff0647ae4ca65c
+ModelIO	swift-method	s:So26MDLAnimatedQuaternionArrayC7ModelIOE05floatbC06atTimeSaySo10simd_quatfaGSd_tF	MDLAnimatedQuaternionArray	floatQuaternionArray(atTime:)	-	[simd.simd_quatf]	Foundation.TimeInterval	-	-	bc982cd83d4a8de7
+ModelIO	swift-method	s:So26MDLAnimatedQuaternionArrayC7ModelIOE06doublebC06atTimeSaySo10simd_quatdaGSd_tF	MDLAnimatedQuaternionArray	doubleQuaternionArray(atTime:)	-	[simd.simd_quatd]	Foundation.TimeInterval	-	-	5853b94412f34827
+ModelIO	swift-method	s:So26MDLAnimatedQuaternionArrayC7ModelIOE5reset05floatbC07atTimesySaySo10simd_quatfaG_SaySdGtF	MDLAnimatedQuaternionArray	reset(floatQuaternionArray:atTimes:)	-	()	[simd.simd_quatf] | [Foundation.TimeInterval]	-	-	9b44a0332ccd4e64
+ModelIO	swift-method	s:So26MDLAnimatedQuaternionArrayC7ModelIOE5reset06doublebC07atTimesySaySo10simd_quatdaG_SaySdGtF	MDLAnimatedQuaternionArray	reset(doubleQuaternionArray:atTimes:)	-	()	[simd.simd_quatd] | [Foundation.TimeInterval]	-	-	cbb9e55cd2fcb804
+ModelIO	swift-property	s:So26MDLAnimatedQuaternionArrayC7ModelIOE05floatbC0SaySo10simd_quatfaGvp	MDLAnimatedQuaternionArray	floatQuaternionArray	-	[simd.simd_quatf]	-	-	-	c1077bac41c28be3
+ModelIO	swift-property	s:So26MDLAnimatedQuaternionArrayC7ModelIOE06doublebC0SaySo10simd_quatdaGvp	MDLAnimatedQuaternionArray	doubleQuaternionArray	-	[simd.simd_quatd]	-	-	-	540d2018891d0d01
+ModelIO	swift-class	c:objc(cs)MDLAnimatedScalar	-	MDLAnimatedScalar	-	-	-	ios=11.0	-	4b1bbef3306533bb
+ModelIO	swift-method	s:So17MDLAnimatedScalarC7ModelIOE5reset10floatArray7atTimesySaySfG_SaySdGtF	MDLAnimatedScalar	reset(floatArray:atTimes:)	-	()	[Swift.Float] | [Foundation.TimeInterval]	-	-	4e535a9b3e590e32
+ModelIO	swift-method	s:So17MDLAnimatedScalarC7ModelIOE5reset11doubleArray7atTimesySaySdG_AGtF	MDLAnimatedScalar	reset(doubleArray:atTimes:)	-	()	[Swift.Double] | [Foundation.TimeInterval]	-	-	ff5db3de7b099662
+ModelIO	swift-property	s:So17MDLAnimatedScalarC7ModelIOE10floatArraySaySfGvp	MDLAnimatedScalar	floatArray	-	[Swift.Float]	-	-	-	9479c9ecdde6599e
+ModelIO	swift-property	s:So17MDLAnimatedScalarC7ModelIOE11doubleArraySaySdGvp	MDLAnimatedScalar	doubleArray	-	[Swift.Double]	-	-	-	303dba4de3143519
+ModelIO	swift-class	c:objc(cs)MDLAnimatedVector2	-	MDLAnimatedVector2	-	-	-	ios=11.0	-	bcdca0ee05e78c59
+ModelIO	swift-method	s:So18MDLAnimatedVector2C7ModelIOE5reset11float2Array7atTimesySays5SIMD2VySfGG_SaySdGtF	MDLAnimatedVector2	reset(float2Array:atTimes:)	-	()	[Swift.SIMD2<Swift.Float>] | [Foundation.TimeInterval]	-	-	a24e4212709c513f
+ModelIO	swift-method	s:So18MDLAnimatedVector2C7ModelIOE5reset12double2Array7atTimesySays5SIMD2VySdGG_SaySdGtF	MDLAnimatedVector2	reset(double2Array:atTimes:)	-	()	[Swift.SIMD2<Swift.Double>] | [Foundation.TimeInterval]	-	-	50877d239ca92de5
+ModelIO	swift-property	s:So18MDLAnimatedVector2C7ModelIOE11float2ArraySays5SIMD2VySfGGvp	MDLAnimatedVector2	float2Array	-	[Swift.SIMD2<Swift.Float>]	-	-	-	2d723dfe4a91aacb
+ModelIO	swift-property	s:So18MDLAnimatedVector2C7ModelIOE12double2ArraySays5SIMD2VySdGGvp	MDLAnimatedVector2	double2Array	-	[Swift.SIMD2<Swift.Double>]	-	-	-	eb7404ae707213e7
+ModelIO	swift-class	c:objc(cs)MDLAnimatedVector3	-	MDLAnimatedVector3	-	-	-	ios=11.0	-	83c07b3425057533
+ModelIO	swift-method	s:So18MDLAnimatedVector3C7ModelIOE5reset11float3Array7atTimesySays5SIMD3VySfGG_SaySdGtF	MDLAnimatedVector3	reset(float3Array:atTimes:)	-	()	[Swift.SIMD3<Swift.Float>] | [Foundation.TimeInterval]	-	-	cdd2182848702651
+ModelIO	swift-method	s:So18MDLAnimatedVector3C7ModelIOE5reset12double3Array7atTimesySays5SIMD3VySdGG_SaySdGtF	MDLAnimatedVector3	reset(double3Array:atTimes:)	-	()	[Swift.SIMD3<Swift.Double>] | [Foundation.TimeInterval]	-	-	a14482c2163c65a4
+ModelIO	swift-property	s:So18MDLAnimatedVector3C7ModelIOE11float3ArraySays5SIMD3VySfGGvp	MDLAnimatedVector3	float3Array	-	[Swift.SIMD3<Swift.Float>]	-	-	-	5b138f7e5a6a0760
+ModelIO	swift-property	s:So18MDLAnimatedVector3C7ModelIOE12double3ArraySays5SIMD3VySdGGvp	MDLAnimatedVector3	double3Array	-	[Swift.SIMD3<Swift.Double>]	-	-	-	2e63bada25e52585
+ModelIO	swift-class	c:objc(cs)MDLAnimatedVector4	-	MDLAnimatedVector4	-	-	-	ios=11.0	-	f3f6cc7b2ff66962
+ModelIO	swift-method	s:So18MDLAnimatedVector4C7ModelIOE5reset11float4Array7atTimesySays5SIMD4VySfGG_SaySdGtF	MDLAnimatedVector4	reset(float4Array:atTimes:)	-	()	[Swift.SIMD4<Swift.Float>] | [Foundation.TimeInterval]	-	-	b62812374ea3581a
+ModelIO	swift-method	s:So18MDLAnimatedVector4C7ModelIOE5reset12double4Array7atTimesySays5SIMD4VySdGG_SaySdGtF	MDLAnimatedVector4	reset(double4Array:atTimes:)	-	()	[Swift.SIMD4<Swift.Double>] | [Foundation.TimeInterval]	-	-	81df12e611f365de
+ModelIO	swift-property	s:So18MDLAnimatedVector4C7ModelIOE11float4ArraySays5SIMD4VySfGGvp	MDLAnimatedVector4	float4Array	-	[Swift.SIMD4<Swift.Float>]	-	-	-	1b26ef0ff478d6fe
+ModelIO	swift-property	s:So18MDLAnimatedVector4C7ModelIOE12double4ArraySays5SIMD4VySdGGvp	MDLAnimatedVector4	double4Array	-	[Swift.SIMD4<Swift.Double>]	-	-	-	55e35bb4e3a09a61
+ModelIO	swift-class	c:objc(cs)MDLAnimatedMatrix4x4	-	MDLAnimatedMatrix4x4	-	-	-	ios=11.0	-	331d1f3544beeae8
+ModelIO	swift-method	s:So20MDLAnimatedMatrix4x4C7ModelIOE5reset13float4x4Array7atTimesySaySo05simd_F0aG_SaySdGtF	MDLAnimatedMatrix4x4	reset(float4x4Array:atTimes:)	-	()	[simd.float4x4] | [Foundation.TimeInterval]	-	-	37eda631aa6f60b1
+ModelIO	swift-method	s:So20MDLAnimatedMatrix4x4C7ModelIOE5reset12double4Array7atTimesySaySo14simd_double4x4aG_SaySdGtF	MDLAnimatedMatrix4x4	reset(double4Array:atTimes:)	-	()	[simd.double4x4] | [Foundation.TimeInterval]	-	-	bf0cedca6d3f0f1d
+ModelIO	swift-property	s:So20MDLAnimatedMatrix4x4C7ModelIOE13float4x4ArraySaySo05simd_E0aGvp	MDLAnimatedMatrix4x4	float4x4Array	-	[simd.float4x4]	-	-	-	6cf9af30f7e3151a
+ModelIO	swift-property	s:So20MDLAnimatedMatrix4x4C7ModelIOE14double4x4ArraySaySo05simd_E0aGvp	MDLAnimatedMatrix4x4	double4x4Array	-	[simd.double4x4]	-	-	-	2a50055902e7d1e7
+ModelIO	swift-class	c:objc(cs)MDLAnimatedQuaternion	-	MDLAnimatedQuaternion	-	-	-	ios=12.0	-	b81dd04026b14645
+ModelIO	swift-method	s:So21MDLAnimatedQuaternionC7ModelIOE5reset05floatB5Array7atTimesySaySo10simd_quatfaG_SaySdGtF	MDLAnimatedQuaternion	reset(floatQuaternionArray:atTimes:)	-	()	[simd.simd_quatf] | [Foundation.TimeInterval]	-	-	ca95070b0f737f64
+ModelIO	swift-method	s:So21MDLAnimatedQuaternionC7ModelIOE5reset06doubleB5Array7atTimesySaySo10simd_quatdaG_SaySdGtF	MDLAnimatedQuaternion	reset(doubleQuaternionArray:atTimes:)	-	()	[simd.simd_quatd] | [Foundation.TimeInterval]	-	-	3e9153a010bd1b10
+ModelIO	swift-property	s:So21MDLAnimatedQuaternionC7ModelIOE05floatB5ArraySaySo10simd_quatfaGvp	MDLAnimatedQuaternion	floatQuaternionArray	-	[simd.simd_quatf]	-	-	-	0876ccf0ae6d65c3
+ModelIO	swift-property	s:So21MDLAnimatedQuaternionC7ModelIOE06doubleB5ArraySaySo10simd_quatdaGvp	MDLAnimatedQuaternion	doubleQuaternionArray	-	[simd.simd_quatd]	-	-	-	cb450f24d3522ff7

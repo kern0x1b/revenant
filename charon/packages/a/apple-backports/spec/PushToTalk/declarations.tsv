@@ -1,0 +1,106 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)PTParticipant	-			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e3313b0bde87e32b	-
+super	-	PTParticipant	NSObject		-	-	-	-	-	aa12fe6ec5c77d7d	-
+property	c:objc(cs)PTParticipant(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eec4b0c5d315759f	-
+property	c:objc(cs)PTParticipant(py)image	-			UIImage *	-	readonly,copy,nonatomic	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4ff7d2733ec8d567	-
+method	c:objc(cs)PTParticipant(cm)new	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3fafed6dc0bdc19e	-
+method	c:objc(cs)PTParticipant(im)init	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ed2f54c91b97929f	-
+method	c:objc(cs)PTParticipant(im)initWithName:image:	-			instancetype	NSString * name | UIImage * image	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d14b36498e88cfc0	-
+interface	c:objc(cs)PTPushResult	-			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	41ee92037153eb2b	-
+super	-	PTPushResult	NSObject		-	-	-	-	-	d922bacc779b1de5	-
+method	c:objc(cs)PTPushResult(cm)new	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	aa7dfd5e66c0304b	-
+method	c:objc(cs)PTPushResult(im)init	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7567be9f461c8353	-
+property	c:objc(cs)PTPushResult(cpy)leaveChannelPushResult	-			PTPushResult *	-	readonly,nonatomic,class	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	80cd709d3e9f310d	-
+method	c:objc(cs)PTPushResult(cm)pushResultForActiveRemoteParticipant:	-			PTPushResult *	PTParticipant * participant	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3a06f55bbc617aec	-
+interface	c:objc(cs)PTChannelDescriptor	-			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	87c4604d94eeb09e	-
+super	-	PTChannelDescriptor	NSObject		-	-	-	-	-	2495bc0500866fe9	-
+method	c:objc(cs)PTChannelDescriptor(cm)new	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f1ef3a0cbdeb2e71	-
+method	c:objc(cs)PTChannelDescriptor(im)init	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ead2bb9bb20d00e2	-
+method	c:objc(cs)PTChannelDescriptor(im)initWithName:image:	-			instancetype	NSString * name | UIImage * image	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d02d24528ed370c7	-
+property	c:objc(cs)PTChannelDescriptor(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ef137a8598a4e677	-
+property	c:objc(cs)PTChannelDescriptor(py)image	-			UIImage *	-	readonly,copy,nonatomic	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ccb3f4a84cfd6140	-
+typedef	c:@T@PTChannelJoinReason	-			enum PTChannelJoinReason	-	-	-	-	e24555db5699b6dc	-
+enum	c:@E@PTChannelJoinReason	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	93d99641b693ae12	-
+enumconst	c:@E@PTChannelJoinReason@PTChannelJoinReasonDeveloperRequest	PTChannelJoinReason			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	67b9e2a3a8b699f1	0
+enumconst	c:@E@PTChannelJoinReason@PTChannelJoinReasonChannelRestoration	PTChannelJoinReason			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	27c8abdf786e86e8	1
+typedef	c:@T@PTChannelLeaveReason	-			enum PTChannelLeaveReason	-	-	-	-	467c7affc43fe4f2	-
+enum	c:@E@PTChannelLeaveReason	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	367c7daf659bf7e9	-
+enumconst	c:@E@PTChannelLeaveReason@PTChannelLeaveReasonUnknown	PTChannelLeaveReason			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	090eed357d81ffa8	0
+enumconst	c:@E@PTChannelLeaveReason@PTChannelLeaveReasonUserRequest	PTChannelLeaveReason			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e71890991d956c0d	1
+enumconst	c:@E@PTChannelLeaveReason@PTChannelLeaveReasonDeveloperRequest	PTChannelLeaveReason			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c063f7fd67cc1ba3	2
+enumconst	c:@E@PTChannelLeaveReason@PTChannelLeaveReasonSystemPolicy	PTChannelLeaveReason			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	620695e27d5b9112	3
+typedef	c:@T@PTChannelTransmitRequestSource	-			enum PTChannelTransmitRequestSource	-	-	-	-	15224a4fe8669cb2	-
+enum	c:@E@PTChannelTransmitRequestSource	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	022e4cd56a9e8e39	-
+enumconst	c:@E@PTChannelTransmitRequestSource@PTChannelTransmitRequestSourceUnknown	PTChannelTransmitRequestSource			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bb81cf122f789bfd	0
+enumconst	c:@E@PTChannelTransmitRequestSource@PTChannelTransmitRequestSourceUserRequest	PTChannelTransmitRequestSource			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fb3b0ea77c5aa68d	1
+enumconst	c:@E@PTChannelTransmitRequestSource@PTChannelTransmitRequestSourceDeveloperRequest	PTChannelTransmitRequestSource			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ad81c39cc4a9aa61	2
+enumconst	c:@E@PTChannelTransmitRequestSource@PTChannelTransmitRequestSourceHandsfreeButton	PTChannelTransmitRequestSource			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	46a9a5178d583b91	3
+protocol	c:objc(pl)PTChannelManagerDelegate	-			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6eb0fafdd6c9dad9	-
+conforms	c:objc(pl)PTChannelManagerDelegate	PTChannelManagerDelegate	NSObject		-	-	-	-	-	e211421aed531743	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:didJoinChannelWithUUID:reason:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | PTChannelJoinReason reason	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d88f776ac9ad9f42	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:didLeaveChannelWithUUID:reason:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | PTChannelLeaveReason reason	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3965d6e7324bef7f	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:channelUUID:didBeginTransmittingFromSource:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | PTChannelTransmitRequestSource source	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2311f87a34a7142b	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:channelUUID:didEndTransmittingFromSource:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | PTChannelTransmitRequestSource source	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	881717bfa3a07ec6	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:receivedEphemeralPushToken:	-			void	PTChannelManager * channelManager | NSData * pushToken	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	761bcf5e088bbd97	-
+method	c:objc(pl)PTChannelManagerDelegate(im)incomingPushResultForChannelManager:channelUUID:pushPayload:	-			PTPushResult *	PTChannelManager * channelManager | NSUUID * channelUUID | NSDictionary<NSString *,id> * pushPayload	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eca04a4eb3e3c4f2	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:didActivateAudioSession:	-			void	PTChannelManager * channelManager | AVAudioSession * audioSession	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0834c3aacea1dba6	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:didDeactivateAudioSession:	-			void	PTChannelManager * channelManager | AVAudioSession * audioSession	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	58c070efaafbd83e	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:failedToJoinChannelWithUUID:error:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | NSError * error	optional	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3f9f7db39af5ae8b	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:failedToLeaveChannelWithUUID:error:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | NSError * error	optional	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bda5c3b5d811abbb	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:failedToBeginTransmittingInChannelWithUUID:error:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | NSError * error	optional	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b8e2d15b64bde0a4	-
+method	c:objc(pl)PTChannelManagerDelegate(im)channelManager:failedToStopTransmittingInChannelWithUUID:error:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | NSError * error	optional	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eec214cf624645bc	-
+method	c:objc(pl)PTChannelManagerDelegate(im)incomingServiceUpdatePushForChannelManager:channelUUID:pushPayload:isHighPriority:remainingHighPriorityBudget:withCompletionHandler:	-			void	PTChannelManager * channelManager | NSUUID * channelUUID | NSDictionary<NSString *,id> * pushPayload | BOOL isHighPriority | NSInteger remainingHighPriorityBudget | void (^)(void) completion	optional	ios=17.2/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d0939e6306f45ed0	-
+protocol	c:objc(pl)PTChannelRestorationDelegate	-			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e552dfa7fcea8a35	-
+conforms	c:objc(pl)PTChannelRestorationDelegate	PTChannelRestorationDelegate	NSObject		-	-	-	-	-	49a54c71bd06841a	-
+method	c:objc(pl)PTChannelRestorationDelegate(im)channelDescriptorForRestoredChannelUUID:	-			PTChannelDescriptor *	NSUUID * channelUUID	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	345847f9c8616d82	-
+typedef	c:@T@PTServiceStatus	-			enum PTServiceStatus	-	-	-	-	87610ed9e940f25f	-
+enum	c:@E@PTServiceStatus	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3140dba014a38a4e	-
+enumconst	c:@E@PTServiceStatus@PTServiceStatusReady	PTServiceStatus			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	006608c4d90dbf7d	0
+enumconst	c:@E@PTServiceStatus@PTServiceStatusConnecting	PTServiceStatus			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	aa1b1c43bec66c36	1
+enumconst	c:@E@PTServiceStatus@PTServiceStatusUnavailable	PTServiceStatus			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	809339f459c61f5a	2
+typedef	c:@T@PTTransmissionMode	-			enum PTTransmissionMode	-	-	-	-	52eca3a395837088	-
+enum	c:@E@PTTransmissionMode	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	51cfad42dc6d159a	-
+enumconst	c:@E@PTTransmissionMode@PTTransmissionModeFullDuplex	PTTransmissionMode			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2dfe32633ed1560d	0
+enumconst	c:@E@PTTransmissionMode@PTTransmissionModeHalfDuplex	PTTransmissionMode			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0ca15df57b9b110c	1
+enumconst	c:@E@PTTransmissionMode@PTTransmissionModeListenOnly	PTTransmissionMode			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	542ef6cabdb30a87	2
+interface	c:objc(cs)PTChannelManager	-			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7fc51e5d6887a93e	-
+super	-	PTChannelManager	NSObject		-	-	-	-	-	6e8a25935c78ea0b	-
+method	c:objc(cs)PTChannelManager(cm)channelManagerWithDelegate:restorationDelegate:completionHandler:	-			void	id<PTChannelManagerDelegate> delegate | id<PTChannelRestorationDelegate> restorationDelegate | void (^)(PTChannelManager * _Nullable, NSError * _Nullable) completionHandler	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6d1ab39574289b54	-
+method	c:objc(cs)PTChannelManager(cm)new	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0c4f188b70519d3c	-
+method	c:objc(cs)PTChannelManager(im)init	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	17211cf1c144484e	-
+property	c:objc(cs)PTChannelManager(py)activeChannelUUID	-			NSUUID *	-	readonly,strong,nonatomic	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8d26b4b543afd135	-
+method	c:objc(cs)PTChannelManager(im)requestJoinChannelWithUUID:descriptor:	-			void	NSUUID * channelUUID | PTChannelDescriptor * descriptor	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c595f5e5b445a273	-
+method	c:objc(cs)PTChannelManager(im)requestBeginTransmittingWithChannelUUID:	-			void	NSUUID * channelUUID	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	18a58638fb728cc6	-
+method	c:objc(cs)PTChannelManager(im)stopTransmittingWithChannelUUID:	-			void	NSUUID * channelUUID	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6e74c88811ff20f1	-
+method	c:objc(cs)PTChannelManager(im)leaveChannelWithUUID:	-			void	NSUUID * channelUUID	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	cfb9b519dbb7b09b	-
+method	c:objc(cs)PTChannelManager(im)setChannelDescriptor:forChannelUUID:completionHandler:	-			void	PTChannelDescriptor * channelDescriptor | NSUUID * channelUUID | void (^)(NSError * _Nullable) completionHandler	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e0ad1bd2db025155	-
+method	c:objc(cs)PTChannelManager(im)setActiveRemoteParticipant:forChannelUUID:completionHandler:	-			void	PTParticipant * participant | NSUUID * channelUUID | void (^)(NSError * _Nullable) completionHandler	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	15a945b66727528f	-
+method	c:objc(cs)PTChannelManager(im)setServiceStatus:forChannelUUID:completionHandler:	-			void	PTServiceStatus status | NSUUID * channelUUID | void (^)(NSError * _Nullable) completionHandler	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4aa550cfc8e8b1d8	-
+method	c:objc(cs)PTChannelManager(im)setTransmissionMode:forChannelUUID:completionHandler:	-			void	PTTransmissionMode transmissionMode | NSUUID * channelUUID | void (^)(NSError * _Nullable) completionHandler	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e7f55c4e7ac75e6e	-
+method	c:objc(cs)PTChannelManager(im)setAccessoryButtonEventsEnabled:forChannelUUID:completionHandler:	-			void	BOOL enabled | NSUUID * channelUUID | void (^)(NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	dd5760b2784d8546	-
+var	c:@PTInstantiationErrorDomain	-			const NSErrorDomain	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	51e650d71f9ad690	-
+var	c:@PTChannelErrorDomain	-			const NSErrorDomain	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e6a7bc3ece4010dd	-
+typedef	c:@T@PTInstantiationError	-			enum PTInstantiationError	-	-	-	-	6b89fe1f27c34c9d	-
+enum	c:@E@PTInstantiationError	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0a67f927be5b430e	-
+enumconst	c:@E@PTInstantiationError@PTInstantiationErrorUnknown	PTInstantiationError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	be2b5e827730ab07	0
+enumconst	c:@E@PTInstantiationError@PTInstantiationErrorInvalidPlatform	PTInstantiationError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8247bf4ec20b1d74	1
+enumconst	c:@E@PTInstantiationError@PTInstantiationErrorMissingBackgroundMode	PTInstantiationError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	af9d9a872d50d4ea	2
+enumconst	c:@E@PTInstantiationError@PTInstantiationErrorMissingPushServerEnvironment	PTInstantiationError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	56814a3a8d559bee	3
+enumconst	c:@E@PTInstantiationError@PTInstantiationErrorMissingEntitlement	PTInstantiationError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4c01bcae5acfd3dc	4
+enumconst	c:@E@PTInstantiationError@PTInstantiationErrorInstantiationAlreadyInProgress	PTInstantiationError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	893f9ec01e5cc5aa	5
+typedef	c:@T@PTChannelError	-			enum PTChannelError	-	-	-	-	86eeddea6eef8aa8	-
+enum	c:@E@PTChannelError	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	9abd8b03420fa1b4	-
+enumconst	c:@E@PTChannelError@PTChannelErrorUnknown	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ab443aa44aa0d40a	0
+enumconst	c:@E@PTChannelError@PTChannelErrorChannelNotFound	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ce99f9e06cb924b4	1
+enumconst	c:@E@PTChannelError@PTChannelErrorChannelLimitReached	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7b2402bf99fdcd75	2
+enumconst	c:@E@PTChannelError@PTChannelErrorCallActive	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	747ff3ed6b7a4f9d	3
+enumconst	c:@E@PTChannelError@PTChannelErrorTransmissionInProgress	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	57084fe7434e50a6	4
+enumconst	c:@E@PTChannelError@PTChannelErrorTransmissionNotFound	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c627becf9c62a96f	5
+enumconst	c:@E@PTChannelError@PTChannelErrorAppNotForeground	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fb7538cce4dfac4c	6
+enumconst	c:@E@PTChannelError@PTChannelErrorDeviceManagementRestriction	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c3a180b2ebbc0c7c	7
+enumconst	c:@E@PTChannelError@PTChannelErrorScreenTimeRestriction	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8509e9298ace8529	8
+enumconst	c:@E@PTChannelError@PTChannelErrorTransmissionNotAllowed	PTChannelError			-	-	-	ios=16.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	82daf5d5369e1aae	9
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-

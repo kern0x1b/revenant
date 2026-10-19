@@ -1,0 +1,25 @@
+set_project("charonphotobracketprobe")
+set_version("0.0.1")
+-- The bracketed capture probe of tests/backports/emulate/photobracket, as an application installed on the emulated 6.1.3 device
+-- (its executable runs as /Applications/charonphotobracketprobe.app/charonphotobracketprobe). The working copy under test is
+-- named by CHARPHOTOBRACKET_ROOT.
+local root = os.getenv("CHARPHOTOBRACKET_ROOT") or path.join(os.scriptdir(), "../../../../..")
+add_repositories("charon " .. root)
+add_addons("charon v0.8.17")
+set_config("apple_minimum", os.getenv("CHARPHOTOBRACKET_MINIMUM") or "6.1.3")
+add_requires("charon@apple-backports", {alias = "apple-backports", configs = {avfoundation = true}})
+includes("@addon/charon/apple-ios")
+includes("@addon/charon/emulate")
+set_defaultplat("iphoneos")
+set_defaultarchs("iphoneos|armv7")
+
+target("charonphotobracketprobe")
+    add_rules("@addon/charon/app")
+    add_files(path.join(root, "tests/backports/emulate/photobracket/app/main.m"))
+    add_mflags("-fobjc-arc")
+    add_ldflags("-fobjc-arc", {force = true})
+    add_frameworks("Foundation", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreImage", "ImageIO", "AVFoundation")
+    add_packages("apple-backports")
+    set_values("charon.libraries", "apple-backports")
+    set_values("app.plist-file", "Info.plist")
+    set_values("charon.control", "control")

@@ -1,0 +1,38 @@
+{
+  "framework": "CoreTelephony",
+  "entries": [
+    {
+      "api": "CTCellularData",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the crash-exposure verdict that reopened CoreTelephony (corpus fixed a missing umbrella header that had hidden all of CoreTelephony's demand): telegram calls this class directly, rank 222. It reports a cellular-data restriction state, not a radio technology - the 4S has a real cellular radio, so unlike serviceCurrentRadioAccessTechnology's single-radio wall, there is no hardware boundary here, only the question of how 6.1.3 expresses the restriction",
+      "effect": "backed by the release's own private C API: CTServerConnectionGetCellularDataIsDisallowed, exported by iOS 6.1.3's own CoreTelephony.framework (confirmed present via modules/apple/dyld.lua's image_symbols, not guessed) and resolved through dlopen/dlsym the way this project's other private-framework bridges already do (facts/AVFoundation/AVCaptureDeviceAuthorization.md's pattern). A connection is created once with CTServerConnectionCreate; every read is a fresh call, never cached stale",
+      "facts": "facts/CoreTelephony/CellularData.md",
+      "source": "CTServerConnectionGetCellularDataIsDisallowed/CTServerConnectionCreate, disassembled from the armv7 shared cache of iOS 6.1.3's own CoreTelephony.framework with modules/apple/dyld.lua's extract and capstone; CTError's real definition from the header of iOS 16.4. Measured on an iPhone 4S (6.1.3), facts/CoreTelephony/CellularData.md: the NULL-callback assumption was wrong and is fixed, restrictedState reads NotRestricted with no error"
+    },
+    {
+      "api": "CTCellularData.restrictedState",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus's own crash-exposure row; must not answer a plausible-sounding default when the real state cannot be read",
+      "effect": "kCTCellularDataRestricted or kCTCellularDataNotRestricted when CTServerConnectionGetCellularDataIsDisallowed answers with kCTErrorDomainNoError; kCTCellularDataRestrictedStateUnknown - never kCTCellularDataNotRestricted - when the connection, the symbol, or the call itself fails, so an application never sees a permissive answer this port could not actually measure",
+      "facts": "facts/CoreTelephony/CellularData.md",
+      "source": "see CTCellularData"
+    },
+    {
+      "api": "CTCellularData.cellularDataRestrictionDidUpdateNotifier",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a stored block that is never called is a silent non-function an application waits on forever; this port ties it to a real system signal rather than accepting it unfired",
+      "effect": "setting a notifier registers for the Darwin notification \"com.apple.coretelephony\" (the release's own single umbrella notification for CoreTelephony state changes, confirmed present in the armv7 shared cache) on the Darwin notify center; every time it fires, restrictedState is re-read and the notifier is only called when the answer actually changed from the last one, so an unrelated CoreTelephony change does not spuriously fire this notifier. The notifier is also called once immediately with the state at the time it is set, since the header documents that a first call happens then too",
+      "facts": "facts/CoreTelephony/CellularData.md",
+      "source": "see CTCellularData"
+    }
+  ]
+}

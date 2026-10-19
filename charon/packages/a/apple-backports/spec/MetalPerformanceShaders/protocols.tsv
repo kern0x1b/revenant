@@ -1,0 +1,49 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	-	-	-	-	-	-
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	numberOfFeatureChannels	- (NSUInteger)numberOfFeatureChannels;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	gamma	- (float * _Nullable)gamma;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	beta	- (float * _Nullable)beta;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	mean	- (float * _Nullable)mean;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	variance	- (float * _Nullable)variance;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	load	- (BOOL)load;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	purge	- (void)purge;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	label	- (NSString * _Nullable)label;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	updateGammaAndBetaWithCommandBuffer:batchNormalizationState:	- (MPSCNNNormalizationGammaAndBetaState * _Nullable)updateGammaAndBetaWithCommandBuffer:(id<MTLCommandBuffer>  _Nonnull)commandBuffer batchNormalizationState:(MPSCNNBatchNormalizationState * _Nonnull)batchNormalizationState;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	updateMeanAndVarianceWithCommandBuffer:batchNormalizationState:	- (MPSCNNNormalizationMeanAndVarianceState * _Nullable)updateMeanAndVarianceWithCommandBuffer:(id<MTLCommandBuffer>  _Nonnull)commandBuffer batchNormalizationState:(MPSCNNBatchNormalizationState * _Nonnull)batchNormalizationState API_AVAILABLE(ios(12.0));	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	updateGammaAndBetaWithBatchNormalizationState:	- (BOOL)updateGammaAndBetaWithBatchNormalizationState:(MPSCNNBatchNormalizationState * _Nonnull)batchNormalizationState;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	updateMeanAndVarianceWithBatchNormalizationState:	- (BOOL)updateMeanAndVarianceWithBatchNormalizationState:(MPSCNNBatchNormalizationState * _Nonnull)batchNormalizationState API_AVAILABLE(ios(12.0));	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	epsilon	- (float)epsilon;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	encodeWithCoder:	- (void)encodeWithCoder:(NSCoder * _Nonnull)aCoder;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	initWithCoder:	- (instancetype _Nullable)initWithCoder:(NSCoder * _Nonnull)aDecoder;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	property	no	supportsSecureCoding	@property (class, atomic, readonly) BOOL supportsSecureCoding;	yes
+MPSCNNBatchNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	copyWithZone:device:	- (instancetype _Nonnull)copyWithZone:(NSZone * _Nullable)zone device:(id<MTLDevice>  _Nullable)device API_AVAILABLE(ios(12.0));	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	-	-	-	-	-	-
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	required	method	yes	gamma	- (float * _Nullable)gamma;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	required	method	yes	beta	- (float * _Nullable)beta;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	required	property	no	numberOfFeatureChannels	@property (nonatomic, readonly) NSUInteger numberOfFeatureChannels;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	required	property	no	numberOfGroups	@property (nonatomic, readwrite, assign, unsafe_unretained) NSUInteger numberOfGroups;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	required	method	yes	label	- (NSString * _Nullable)label;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	method	yes	updateGammaAndBetaWithCommandBuffer:groupNormalizationStateBatch:	- (MPSCNNNormalizationGammaAndBetaState * _Nullable)updateGammaAndBetaWithCommandBuffer:(id<MTLCommandBuffer>  _Nonnull)commandBuffer groupNormalizationStateBatch:(MPSCNNGroupNormalizationGradientStateBatch * _Nonnull)groupNormalizationStateBatch;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	method	yes	updateGammaAndBetaWithGroupNormalizationStateBatch:	- (BOOL)updateGammaAndBetaWithGroupNormalizationStateBatch:(MPSCNNGroupNormalizationGradientStateBatch * _Nonnull)groupNormalizationStateBatch;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	method	yes	epsilon	- (float)epsilon;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	method	yes	encodeWithCoder:	- (void)encodeWithCoder:(NSCoder * _Nonnull)aCoder;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	method	yes	initWithCoder:	- (instancetype _Nullable)initWithCoder:(NSCoder * _Nonnull)aDecoder;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	property	no	supportsSecureCoding	@property (class, atomic, readonly) BOOL supportsSecureCoding;	yes
+MPSCNNGroupNormalizationDataSource	13.0	sdk16 body		NSObject,NSCopying	optional	method	yes	copyWithZone:device:	- (instancetype _Nonnull)copyWithZone:(NSZone * _Nullable)zone device:(id<MTLDevice>  _Nullable)device;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	-	-	-	-	-	-
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	gamma	- (float * _Nullable)gamma;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	beta	- (float * _Nullable)beta;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	property	no	numberOfFeatureChannels	@property (nonatomic, readonly) NSUInteger numberOfFeatureChannels;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	required	method	yes	label	- (NSString * _Nullable)label;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	updateGammaAndBetaWithCommandBuffer:instanceNormalizationStateBatch:	- (MPSCNNNormalizationGammaAndBetaState * _Nullable)updateGammaAndBetaWithCommandBuffer:(id<MTLCommandBuffer>  _Nonnull)commandBuffer instanceNormalizationStateBatch:(MPSCNNInstanceNormalizationGradientStateBatch * _Nonnull)instanceNormalizationStateBatch;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	updateGammaAndBetaWithInstanceNormalizationStateBatch:	- (BOOL)updateGammaAndBetaWithInstanceNormalizationStateBatch:(MPSCNNInstanceNormalizationGradientStateBatch * _Nonnull)instanceNormalizationStateBatch;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	epsilon	- (float)epsilon;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	encodeWithCoder:	- (void)encodeWithCoder:(NSCoder * _Nonnull)aCoder;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	initWithCoder:	- (instancetype _Nullable)initWithCoder:(NSCoder * _Nonnull)aDecoder;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	property	no	supportsSecureCoding	@property (class, atomic, readonly) BOOL supportsSecureCoding;	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	copyWithZone:device:	- (instancetype _Nonnull)copyWithZone:(NSZone * _Nullable)zone device:(id<MTLDevice>  _Nullable)device API_AVAILABLE(ios(12.0));	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	load	- (BOOL)load API_AVAILABLE(ios(13));	yes
+MPSCNNInstanceNormalizationDataSource	11.3	sdk16 body		NSObject,NSCopying	optional	method	yes	purge	- (void)purge API_AVAILABLE(ios(13));	yes
+MPSSVGFTextureAllocator	13.0	sdk16 body		NSObject	-	-	-	-	-	-
+MPSSVGFTextureAllocator	13.0	sdk16 body		NSObject	required	method	yes	textureWithPixelFormat:width:height:	- (id<MTLTexture> _Nullable)textureWithPixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height;	yes
+MPSSVGFTextureAllocator	13.0	sdk16 body		NSObject	required	method	yes	returnTexture:	- (void)returnTexture:(id<MTLTexture>  _Nonnull)texture;	yes

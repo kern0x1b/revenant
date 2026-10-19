@@ -1,0 +1,338 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "AVAudioFormat",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initWithStreamDescription:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initWithStreamDescription:channelLayout:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initStandardFormatWithSampleRate:channels:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initStandardFormatWithSampleRate:channelLayout:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initWithCommonFormat:sampleRate:channels:interleaved:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initWithCommonFormat:sampleRate:interleaved:channelLayout:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFormat initWithSettings:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.standard",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.commonFormat",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.channelCount",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.sampleRate",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.interleaved",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.streamDescription",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.channelLayout",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFormat.settings",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioPCMBuffer initWithPCMFormat:frameCapacity:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer.frameCapacity",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer.frameLength",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer.stride",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer.floatChannelData",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer.int16ChannelData",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioPCMBuffer.int32ChannelData",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFile",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile initForReading:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile initForReading:commonFormat:interleaved:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile initForWriting:settings:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile initForWriting:settings:commonFormat:interleaved:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile readIntoBuffer:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile readIntoBuffer:frameCount:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioFile writeFromBuffer:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFile.url",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFile.fileFormat",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFile.processingFormat",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFile.length",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioFile.framePosition",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVFAudio.md",
+      "source": "SDK 16.4, AVFAudio"
+    }
+  ]
+}

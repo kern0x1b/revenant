@@ -1,0 +1,132 @@
+{
+ "framework": "BackgroundTasks",
+ "entries": [
+  {
+   "api": "BGTaskRequest",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGAppRefreshTaskRequest",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGProcessingTaskRequest",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGTask",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGAppRefreshTask",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGProcessingTask",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGTaskScheduler",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "BGTaskSchedulerErrorDomain",
+   "kind": "constant",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework"
+  },
+  {
+   "api": "-[BGTaskScheduler registerForTaskWithIdentifier:usingQueue:launchHandler:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework",
+   "reason": "iOS 6 launches an application for no background task",
+   "effect": "the handler is kept and never called"
+  },
+  {
+   "api": "-[BGTaskScheduler submitTaskRequest:error:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework",
+   "reason": "iOS 6 has no scheduler that launches an application for a task",
+   "effect": "answers NO with BGTaskSchedulerErrorDomain code 1, or 3 when the identifier or the background mode is not permitted"
+  },
+  {
+   "api": "-[BGTaskScheduler getPendingTaskRequestsWithCompletionHandler:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework",
+   "reason": "no request is ever accepted",
+   "effect": "the handler is called with an empty array"
+  },
+  {
+   "api": "-[BGTaskScheduler cancelTaskRequestWithIdentifier:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework",
+   "reason": "no request is ever accepted, so there is nothing to cancel",
+   "effect": "does nothing"
+  },
+  {
+   "api": "-[BGTaskScheduler cancelAllTaskRequests]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/BackgroundTasks/BGTaskScheduler.md",
+   "source": "the SDK headers of BackgroundTasks; the host has no such framework",
+   "reason": "no request is ever accepted, so there is nothing to cancel",
+   "effect": "does nothing"
+  }
+ ]
+}

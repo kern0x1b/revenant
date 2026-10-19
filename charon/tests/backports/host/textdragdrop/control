@@ -1,0 +1,4 @@
+Package: textdragdrop
+Architecture: iphoneos-arm
+Depends:
+Maintainer: charon

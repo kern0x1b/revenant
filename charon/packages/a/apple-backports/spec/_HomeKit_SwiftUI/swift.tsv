@@ -1,0 +1,5 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_HomeKit_SwiftUI	swift-struct	s:16_HomeKit_SwiftUI10CameraViewV	-	CameraView	-	-	-	ios=14.0,tvos=14.0,watchos=7.0	-	36473ad6675cd9c1
+_HomeKit_SwiftUI	swift-method	s:16_HomeKit_SwiftUI10CameraViewV6sourceACSo14HMCameraSourceC_tcfc	CameraView	init(source:)	-	-	_HomeKit_SwiftUI.CameraView | HomeKit.HMCameraSource	-	-	40d249129b97f080
+_HomeKit_SwiftUI	swift-property	s:16_HomeKit_SwiftUI10CameraViewV4bodyQrvp	CameraView	body	-	some SwiftUI.View	-	-	-	136d22cba14d7574
+_HomeKit_SwiftUI	swift-typealias	s:16_HomeKit_SwiftUI10CameraViewV4Bodya	CameraView	Body	-	-	-	ios=14.0,tvos=14.0,watchos=7.0	-	4691a75348da07db

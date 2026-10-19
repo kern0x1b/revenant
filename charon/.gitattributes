@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+*.deb binary
+*.a   binary
+*.dylib binary
+
+# Keep generated/vendored bulk out of language stats and diffs
+docs/**            linguist-documentation
+*.lock             linguist-generated

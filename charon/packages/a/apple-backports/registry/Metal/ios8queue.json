@@ -1,0 +1,16 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLCommandQueue insertDebugCaptureBoundary]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the call marks a point in a GPU frame capture, and a capture runs only under a tool attached to the process, which no device has; with no capture running, Metal does nothing with the call",
+      "effect": "returns with no effect and no log; the command buffers committed after it complete as they would without it",
+      "facts": "facts/Metal/CommandBuffer.md",
+      "source": "SDK 16.4, Metal; the introduction 8.0 from the corpus surface of the 26.2 SDK; the no-capture answer measured on the host in tests/backports/device/commandbuffer-probe/host-expectations.txt"
+    }
+  ]
+}

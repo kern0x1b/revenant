@@ -1,0 +1,170 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "-[AVCaptureDeviceInput isMultichannelAudioModeSupported:]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 6.1.3 armv7 cache's AVCaptureDeviceInput answers neither this selector nor any other of the multichannel-audio API (tools/corpus/objc-inventory.lua over ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7), and the type of the argument, AVCaptureMultichannelAudioMode, is an 18.0 declaration SDK 16.4 does not make",
+      "effect": "YES for AVCaptureMultichannelAudioModeNone and NO for Stereo, first-order ambisonics and any number that is not one of the three, by the header's own reading of what the modes are (AVCaptureInput.h:357-362): None is 'no multichannel audio', which is what a single microphone records, and the other two are two and four microphones' worth of audio. The port's devices have one microphone (measured on an iPhone 4S and an iPad 2, facts/AVFoundation/AVCaptureDeviceDiscovery.md). Measured on this host, whose built-in microphone is a single one as well: 1, 0, 0 - so the port and the host agree on all three modes, and 0 for a number outside the enum",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureInput.h:353-385), transcribed into CharonAVCaptureDeviceCapabilities18.h"
+    },
+    {
+      "api": "AVCaptureDevice.autoVideoFrameRateEnabled",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDevice is a class of 6.0 and neither -autoVideoFrameRateEnabled nor -setAutoVideoFrameRateEnabled: is an instance selector of any of the caches this port's bands are measured against (tools/corpus/objc-inventory.lua); the header declares the property getter=isAutoVideoFrameRateEnabled (AVCaptureDevice.h:404), so those are the two selectors an application compiled against a newer SDK sends, and the port defines exactly them",
+      "effect": "the value the last accepted -setAutoVideoFrameRateEnabled: was given, false until then - the header's own default: 'When you change the device's active format, this property resets to its default value of false' (AVCaptureDevice.h:399). Setting it goes through the header's refusal, below, so on this release no set is accepted and the getter answers false. The host's own camera answers 0 as well (measured), and its setter refuses for the same reason this one does",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:396-404), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isAutoVideoFrameRateEnabled"
+    },
+    {
+      "api": "AVCaptureDevice.backgroundReplacementActive",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDevice is there and neither -backgroundReplacementActive nor any setter of it is a selector of the releases this port's bands are measured against; the header declares the property getter=isBackgroundReplacementActive (AVCaptureDevice.h:2531)",
+      "effect": "NO, always: 'Indicates whether Background Replacement is currently active on a particular AVCaptureDevice' (:2524), and nothing can start it - see AVCaptureDevice.backgroundReplacementEnabled, which is the setting that would have to be on. This host's own camera answers 0 here as well (measured), so the two columns agree",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2524-2531), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isBackgroundReplacementActive"
+    },
+    {
+      "api": "AVCaptureDevice.backgroundReplacementEnabled",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a CLASS property of a class of 6.0, and no release this port's bands are measured against carries the selector; the header declares it getter=isBackgroundReplacementEnabled (AVCaptureDevice.h:2521), so +isBackgroundReplacementEnabled is the selector a caller sends",
+      "effect": "NO, and the reason is that there is no choice to report: 'A class property indicating whether the user has enabled the Background Replacement feature for this application' (:2521). This release has no Background Replacement feature, no setting for it in Settings and no Control Center, so no user can have enabled it. The same shape as AVCaptureDevice.reactionEffectGesturesEnabled on a release with no Gestures setting (facts/AVFoundation/CaptureDeviceReactions.md). The host answers 0 here as well (measured: this Mac's own Control Center has Background Replacement switched off)",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2513-2521), transcribed into CharonAVCaptureDeviceCapabilities18.h, class property getter=isBackgroundReplacementEnabled"
+    },
+    {
+      "api": "AVCaptureDevice.displayVideoZoomFactorMultiplier",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDevice is there and -displayVideoZoomFactorMultiplier is a selector of no release this port's bands are measured against; the member is macOS 14's and iOS 18's (AVCaptureDevice.h:1989)",
+      "effect": "1.0. The header says what the number is for: 'In some system user interfaces ... the video zoom factor value is displayed in a way most appropriate for visual representation and might differ from the videoZoomFactor property value on the receiver by a fixed ratio' (:1987), and its own example of such an interface is the macOS Video Effects Menu. This release has no system interface that displays a video zoom factor, so there is no ratio to apply and the factor is displayed as itself. Measured on this host: 0.5, because that Mac's menu does display it, at half the capture value - so the two columns differ for a reason the header names",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1982-1989), transcribed into CharonAVCaptureDeviceCapabilities18.h"
+    },
+    {
+      "api": "AVCaptureDevice.spatialCaptureDiscomfortReasons",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDevice is there and -spatialCaptureDiscomfortReasons is a selector of no release this port's bands are measured against, and the element type, AVSpatialCaptureDiscomfortReason, is an 18.0 declaration SDK 16.4 does not make (the header declares it at AVCaptureDevice.h:2652)",
+      "effect": "an empty NSSet: 'Indicates whether or not the current environmental conditions are amenable to a spatial capture that is comfortable to view' (:2673), and this hardware cannot capture spatially at all - every format answers NO for AVCaptureDeviceFormat.spatialVideoCaptureSupported - so no scene and no set of reasons makes it amenable. The host's own camera answers an empty set here as well (measured), so the two columns agree. The two constants of this type are 18.0 rows of their own and are not carried, so nothing a caller can name is ever in the set",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2647-2677), transcribed into CharonAVCaptureDeviceCapabilities18.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.autoVideoFrameRateSupported",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is a class of 6.0 and neither -autoVideoFrameRateSupported nor a setter of it is a selector of the releases this port's bands are measured against; the header declares the property getter=isAutoVideoFrameRateSupported (AVCaptureDevice.h:3510), and this is the row -setAutoVideoFrameRateEnabled: reads to decide whether it may be set",
+      "effect": "NO: 'Indicates whether the device format supports auto video frame rate' (:3508), the feature being the device lowering its frame rate under low light - for the 30 fps formats a switch between 30 and 24 (:396-398). No format of this hardware has such a mode. Measured on the host: 0 for all seven of this Mac's formats, and its -setAutoVideoFrameRateEnabled: refuses for exactly this reason",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3503-3510), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isAutoVideoFrameRateSupported"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.backgroundReplacementSupported",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is there and -backgroundReplacementSupported is a selector of no release this port's bands are measured against; the header declares the property getter=isBackgroundReplacementSupported (AVCaptureDevice.h:3738)",
+      "effect": "NO: 'This property returns YES if the format supports Background Replacement' (:3736), and no format of an iPhone 4S or an iPad 2 does. Measured on the host: 1 for all seven formats of this Mac's camera, which has the hardware - so this row's two columns differ for the reason the header gives, and the harness's expectation says which is which",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3731-3738), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isBackgroundReplacementSupported"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.spatialVideoCaptureSupported",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is there and -spatialVideoCaptureSupported is a selector of no release this port's bands are measured against; the header declares the property getter=isSpatialVideoCaptureSupported (AVCaptureDevice.h:3555)",
+      "effect": "NO: 'Returns whether or not the format supports capturing spatial video to a file' (:3553). Capturing a spatial video means recording the two views a depth map is computed from, so it needs the two lenses of a multi-camera device; these devices have one lens per camera. Measured on the host: 0, because this Mac's camera is one lens too",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3551-3555), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isSpatialVideoCaptureSupported"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.systemRecommendedExposureBiasRange",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is there and -systemRecommendedExposureBiasRange is a selector of no release this port's bands are measured against, and the type it hands back, AVExposureBiasRange, is an 18.0 class SDK 16.4 does not declare; the header declares the property at AVCaptureDevice.h:3313",
+      "effect": "nil, the header's own answer for the case: 'When a recommendation is not available, this property returns nil' (:3309). A recommendation is the range a system's own exposure control uses, and this release has no such control - AVCaptureSystemExposureBiasSlider arrived with iOS 18 and its class is not carried by this port, so there is no system range to hand out. Measured on the host: nil, so the two columns agree",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2960-2999 for the class, :3304-3313 for the member), transcribed into CharonAVCaptureDeviceCapabilities18.h, which forward-declares AVExposureBiasRange"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.systemRecommendedVideoZoomRange",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is there and -systemRecommendedVideoZoomRange is a selector of no release this port's bands are measured against, and the type it hands back, AVZoomRange, is a 17.2 class SDK 16.4 does not declare (its own rows are a family of their own); the header declares the property at AVCaptureDevice.h:3281",
+      "effect": "nil, by the header's own sentence for the same case as the exposure-bias range above: 'When a recommendation is not available, this property returns nil' (:3277). The system range is AVCaptureSystemZoomSlider's, and that is iOS 18's. Measured on the host: nil, so the two columns agree",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3272-3281), transcribed into CharonAVCaptureDeviceCapabilities18.h, which forward-declares AVZoomRange"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.videoFrameRateRangeForBackgroundReplacement",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is there and -videoFrameRateRangeForBackgroundReplacement is a selector of no release this port's bands are measured against; the header declares the property at AVCaptureDevice.h:3748",
+      "effect": "nil, the header's own answer for a format that cannot run the feature: 'If this device format does not support Background Replacement, this property returns nil' (:3746), and AVCaptureDeviceFormat.backgroundReplacementSupported is NO for every format here. Measured on the host: a range, for all seven of its formats, because its camera supports Background Replacement - the pairing of that YES with a range is the same rule the header states",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3741-3748), transcribed into CharonAVCaptureDeviceCapabilities18.h"
+    },
+    {
+      "api": "AVCaptureDeviceInput.multichannelAudioMode",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceInput is a class of 6.0 and neither -multichannelAudioMode nor -setMultichannelAudioMode: is a selector of the releases this port's bands are measured against, and the property's type, AVCaptureMultichannelAudioMode, is an 18.0 enum SDK 16.4 does not declare (the header declares it at AVCaptureInput.h:364)",
+      "effect": "the value the caller set, AVCaptureMultichannelAudioModeNone until then: 'The default value is AVCaptureMultichannelAudioModeNone, in which case the default single channel audio recording is used' (:395), which is what one microphone records. Setting any mode this input does not support raises NSInvalidArgumentException with Apple's own reason - see the effect of the refusal in AVCaptureDeviceCapabilities18.md - and setting None is accepted, as it is on the host (measured). Measured on the host: 0",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureInput.h:388-397), transcribed into CharonAVCaptureDeviceCapabilities18.h"
+    },
+    {
+      "api": "AVCaptureDeviceInput.windNoiseRemovalEnabled",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceInput is there and neither -windNoiseRemovalEnabled nor -setWindNoiseRemovalEnabled: is a selector of the releases this port's bands are measured against; the header declares the property getter=isWindNoiseRemovalEnabled (AVCaptureInput.h:417), so those two are the selectors a caller sends",
+      "effect": "the value the caller set, NO until then, and NO is what it answers here - which is the measured answer rather than a refusal: Apple's own setter keeps what it was given on an input whose isWindNoiseRemovalSupported is 0 (measured on this host: set YES answers YES afterwards, set NO answers NO again, on both a microphone input and a camera input). Nothing on this release acts on the value: 'Wind noise removal is available when the AVCaptureDeviceInput multichannelAudioMode property is set to any value other than AVCaptureMultichannelAudioModeNone' (:415), and this input cannot be set to any other value. Measured on the host: 0",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureInput.h:410-417), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isWindNoiseRemovalEnabled"
+    },
+    {
+      "api": "AVCaptureDeviceInput.windNoiseRemovalSupported",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceInput is there and -windNoiseRemovalSupported is a selector of no release this port's bands are measured against; the header declares the property getter=isWindNoiseRemovalSupported (AVCaptureInput.h:407)",
+      "effect": "NO: 'YES if the device supports wind noise removal, NO otherwise' (:405). The port's devices have one microphone, and separating one speaker's voice from the wind around it needs the several microphones the feature runs on. Measured on the host, whose built-in microphone is a single one as well: 0, so the two columns agree",
+      "facts": "facts/AVFoundation/CaptureDeviceCapabilities18.md",
+      "source": "the header of the SDK 26.2 (AVCaptureInput.h:400-407), transcribed into CharonAVCaptureDeviceCapabilities18.h, getter=isWindNoiseRemovalSupported"
+    }
+  ]
+}

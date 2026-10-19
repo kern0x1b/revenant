@@ -1,0 +1,60 @@
+{
+ "framework": "VideoToolbox",
+ "entries": [
+  {
+   "api": "kVTVideoDecoderSpecification_PreferredDecoderGPURegistryID",
+   "kind": "constant",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 11.3, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 12.0; SDK 26.2, VideoToolbox/Headers, states 11.3"
+  },
+  {
+   "api": "kVTVideoDecoderSpecification_RequiredDecoderGPURegistryID",
+   "kind": "constant",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 11.3, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 12.0; SDK 26.2, VideoToolbox/Headers, states 11.3"
+  },
+  {
+   "api": "kVTCompressionPropertyKey_AllowOpenGOP",
+   "kind": "constant",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 12.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "SDK 26.2, VideoToolbox/Headers/VTCompressionProperties.h, the declaration's own availability"
+  },
+  {
+   "api": "kVTCompressionPropertyKey_MaximizePowerEfficiency",
+   "kind": "constant",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 12.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "SDK 26.2, VideoToolbox/Headers/VTCompressionProperties.h, the declaration's own availability"
+  },
+  {
+   "api": "kVTDecompressionPropertyKey_MaximizePowerEfficiency",
+   "kind": "constant",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 8.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 12.0; SDK 26.2, VideoToolbox/Headers, states 8.0"
+  }
+ ]
+}

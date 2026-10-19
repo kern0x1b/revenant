@@ -1,0 +1,64 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@CLLocationDegrees	-			double	-	-	-	-	cb440e63fae31da0	-
+typedef	c:@T@CLLocationAccuracy	-			double	-	-	-	-	3bc8a490e8501ff0	-
+typedef	c:@T@CLLocationSpeed	-			double	-	-	-	-	78851780c58c56ab	-
+typedef	c:@T@CLLocationSpeedAccuracy	-			double	-	-	-	-	a55e4a3fdade9d6f	-
+typedef	c:@T@CLLocationDirection	-			double	-	-	-	-	6793469c05475b02	-
+typedef	c:@T@CLLocationDirectionAccuracy	-			double	-	-	-	-	e2daefd89a07eff4	-
+struct	c:@S@CLLocationCoordinate2D	-			-	-	-	-	-	405410af0fe0044c	-
+field	c:@S@CLLocationCoordinate2D@FI@latitude	CLLocationCoordinate2D			CLLocationDegrees	-	-	-	-	65bb7089cb319214	-
+field	c:@S@CLLocationCoordinate2D@FI@longitude	CLLocationCoordinate2D			CLLocationDegrees	-	-	-	-	4c3354a16fb273d8	-
+typedef	c:@T@CLLocationCoordinate2D	-			struct CLLocationCoordinate2D	-	-	-	-	9d11eb66555ff740	-
+typedef	c:@T@CLLocationDistance	-			double	-	-	-	-	e6b55a169d2f4b70	-
+var	c:@kCLDistanceFilterNone	-			const CLLocationDistance	-	-	-	-	d6be63dc3bde7987	-
+var	c:@kCLLocationAccuracyBestForNavigation	-			const CLLocationAccuracy	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	297d3dde31426d28	-
+var	c:@kCLLocationAccuracyBest	-			const CLLocationAccuracy	-	-	-	-	577e2441ffd9328d	-
+var	c:@kCLLocationAccuracyNearestTenMeters	-			const CLLocationAccuracy	-	-	-	-	e13dd0d2a51a9c91	-
+var	c:@kCLLocationAccuracyHundredMeters	-			const CLLocationAccuracy	-	-	-	-	9ce5709b2358746b	-
+var	c:@kCLLocationAccuracyKilometer	-			const CLLocationAccuracy	-	-	-	-	edc7985858fa46a9	-
+var	c:@kCLLocationAccuracyThreeKilometers	-			const CLLocationAccuracy	-	-	-	-	0405aeb8d4b068e2	-
+var	c:@kCLLocationAccuracyReduced	-			const CLLocationAccuracy	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	cb1b19e7868350b5	-
+var	c:@CLLocationDistanceMax	-			const CLLocationDistance	-	-	ios=6.0/-/-/0,macos=10.14/-/-/0	-	b4de75333ad10ab0	-
+var	c:@CLTimeIntervalMax	-			const NSTimeInterval	-	-	ios=6.0/-/-/0,macos=10.14/-/-/0	-	313cbc451b75ff6b	-
+var	c:@kCLLocationCoordinate2DInvalid	-			const CLLocationCoordinate2D	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	d5a203ba7f374f08	-
+function	c:@F@CLLocationCoordinate2DIsValid	-			BOOL (CLLocationCoordinate2D)	CLLocationCoordinate2D coord	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	0103d16abd8319ba	-
+function	c:@F@CLLocationCoordinate2DMake	-			CLLocationCoordinate2D (CLLocationDegrees, CLLocationDegrees)	CLLocationDegrees latitude | CLLocationDegrees longitude	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	9102b020addc8e9f	-
+interface	c:objc(cs)CLFloor	-			-	-	-	ios=8.0/-/-/0,macos=10.15/-/-/0	-	0274b184b9d8b3c9	-
+super	-	CLFloor	NSObject		-	-	-	-	-	c3c4cca7e9a39c62	-
+conforms	c:objc(cs)CLFloor	CLFloor	NSCopying		-	-	-	-	-	77e983c1e8f86728	-
+conforms	c:objc(cs)CLFloor	CLFloor	NSSecureCoding		-	-	-	-	-	009efa22ea5d86ae	-
+property	c:objc(cs)CLFloor(py)level	-			NSInteger	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.15/-/-/0	-	28266b8886f94da6	-
+interface	c:objc(cs)CLLocationSourceInformation	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	db6a3f31c67d45b3	-
+super	-	CLLocationSourceInformation	NSObject		-	-	-	-	-	6ccea5b94b58af28	-
+conforms	c:objc(cs)CLLocationSourceInformation	CLLocationSourceInformation	NSCopying		-	-	-	-	-	6d926daea2247052	-
+conforms	c:objc(cs)CLLocationSourceInformation	CLLocationSourceInformation	NSSecureCoding		-	-	-	-	-	1631f3fee4f064b5	-
+method	c:objc(cs)CLLocationSourceInformation(im)initWithSoftwareSimulationState:andExternalAccessoryState:	-			instancetype	BOOL isSoftware | BOOL isAccessory	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	6beb731a65242d67	-
+property	c:objc(cs)CLLocationSourceInformation(py)isSimulatedBySoftware	-			BOOL	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	be78e958f6266b74	-
+property	c:objc(cs)CLLocationSourceInformation(py)isProducedByAccessory	-			BOOL	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	66a12605d5955253	-
+interface	c:objc(cs)CLLocation	-			-	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	deprecated: Use -distanceFromLocation: instead	ee6bdcd7695ba360	-
+super	-	CLLocation	NSObject		-	-	-	-	-	7f57898200c05489	-
+conforms	c:objc(cs)CLLocation	CLLocation	NSCopying		-	-	-	-	-	d1b74ae5062d967a	-
+conforms	c:objc(cs)CLLocation	CLLocation	NSSecureCoding		-	-	-	-	-	1ba4baab874ee6e9	-
+method	c:objc(cs)CLLocation(im)initWithLatitude:longitude:	-			instancetype	CLLocationDegrees latitude | CLLocationDegrees longitude	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	be5b4d04d7f8761a	-
+method	c:objc(cs)CLLocation(im)initWithCoordinate:altitude:horizontalAccuracy:verticalAccuracy:timestamp:	-			instancetype	CLLocationCoordinate2D coordinate | CLLocationDistance altitude | CLLocationAccuracy hAccuracy | CLLocationAccuracy vAccuracy | NSDate * timestamp	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e17ff42a7047bbd4	-
+method	c:objc(cs)CLLocation(im)initWithCoordinate:altitude:horizontalAccuracy:verticalAccuracy:course:speed:timestamp:	-			instancetype	CLLocationCoordinate2D coordinate | CLLocationDistance altitude | CLLocationAccuracy hAccuracy | CLLocationAccuracy vAccuracy | CLLocationDirection course | CLLocationSpeed speed | NSDate * timestamp	-	ios=4.2/-/-/0,macos=10.7/-/-/0	-	6efd083f36239a50	-
+method	c:objc(cs)CLLocation(im)initWithCoordinate:altitude:horizontalAccuracy:verticalAccuracy:course:courseAccuracy:speed:speedAccuracy:timestamp:	-			instancetype	CLLocationCoordinate2D coordinate | CLLocationDistance altitude | CLLocationAccuracy hAccuracy | CLLocationAccuracy vAccuracy | CLLocationDirection course | CLLocationDirectionAccuracy courseAccuracy | CLLocationSpeed speed | CLLocationSpeedAccuracy speedAccuracy | NSDate * timestamp	-	ios=13.4/-/-/0,macos=10.15.4/-/-/0,tvos=13.4/-/-/0,watchos=6.2/-/-/0	-	be6efc974eab4f02	-
+method	c:objc(cs)CLLocation(im)initWithCoordinate:altitude:horizontalAccuracy:verticalAccuracy:course:courseAccuracy:speed:speedAccuracy:timestamp:sourceInfo:	-			instancetype	CLLocationCoordinate2D coordinate | CLLocationDistance altitude | CLLocationAccuracy hAccuracy | CLLocationAccuracy vAccuracy | CLLocationDirection course | CLLocationDirectionAccuracy courseAccuracy | CLLocationSpeed speed | CLLocationSpeedAccuracy speedAccuracy | NSDate * timestamp | CLLocationSourceInformation * sourceInfo	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	978503aab107c9c6	-
+property	c:objc(cs)CLLocation(py)coordinate	-			CLLocationCoordinate2D	-	readonly,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	3c62f4202bc9fc5b	-
+property	c:objc(cs)CLLocation(py)altitude	-			CLLocationDistance	-	readonly,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	49df08b7f90a9cb6	-
+property	c:objc(cs)CLLocation(py)ellipsoidalAltitude	-			CLLocationDistance	-	readonly,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0,watchos=8/-/-/0	-	24a7367917da4f26	-
+property	c:objc(cs)CLLocation(py)horizontalAccuracy	-			CLLocationAccuracy	-	readonly,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f4b9eca5ce4416d4	-
+property	c:objc(cs)CLLocation(py)verticalAccuracy	-			CLLocationAccuracy	-	readonly,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	02545b887abdf2cd	-
+property	c:objc(cs)CLLocation(py)course	-			CLLocationDirection	-	readonly,nonatomic	ios=2.2/-/-/0,macos=10.7/-/-/0	-	aa73a2ac281fc00b	-
+property	c:objc(cs)CLLocation(py)courseAccuracy	-			CLLocationDirectionAccuracy	-	readonly,nonatomic	ios=13.4/-/-/0,macos=10.15.4/-/-/0,tvos=13.4/-/-/0,watchos=6.2/-/-/0	-	5a9aa5e5084d7118	-
+property	c:objc(cs)CLLocation(py)speed	-			CLLocationSpeed	-	readonly,nonatomic	ios=2.2/-/-/0,macos=10.7/-/-/0	-	5b6561a3c4099e4b	-
+property	c:objc(cs)CLLocation(py)speedAccuracy	-			CLLocationSpeedAccuracy	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.15/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	74eed68e4e160e43	-
+property	c:objc(cs)CLLocation(py)timestamp	-			NSDate *	-	readonly,copy,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	de468aaa009ae4d1	-
+property	c:objc(cs)CLLocation(py)floor	-			CLFloor *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.15/-/-/0	-	ffba1cc767a740af	-
+property	c:objc(cs)CLLocation(py)sourceInformation	-			CLLocationSourceInformation *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	b800eef5d8005930	-
+method	c:objc(cs)CLLocation(im)getDistanceFrom:	-			CLLocationDistance	const CLLocation * location	-	ios=2.0/3.2/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use -distanceFromLocation: instead	81e648d042adeba3	-
+method	c:objc(cs)CLLocation(im)distanceFromLocation:	-			CLLocationDistance	const CLLocation * location	-	ios=3.2/-/-/0,macos=10.6/-/-/0	-	734618c9db06c730	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-

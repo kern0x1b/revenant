@@ -1,0 +1,33 @@
+.DS_Store
+__pycache__/
+**/test_package/build*/
+**/test_package/CMakeUserPresets.json
+.xmake/
+build/
+
+# Personal / device data — never tracked. Only the example is.
+device.env*
+device.*.env
+!device.env.example
+
+# Local screenshots may show device content
+**/shots/
+*-shots/
+tests/backports/emulate/calls/xmake-addons.lock
+
+# A hand-run Swift probe writes its compiled module next to the sources it was made from; a stale
+# one there is what a later `-I` on that directory reads instead of the source. The recipes compile
+# the module from the sources, so these are never needed (AGENTS.md, Conventions: build artifacts are
+# never committed).
+*.swiftmodule
+*.swiftdoc
+*.swiftsourceinfo
+*.abi.json
+tools/.media-player-include.m
+tools/.media-player-include.m.ast
+
+# The sibling of a file the generators' atomic writer (tools/atomic.lua) was writing when its process was killed.
+*.charon-new.*
+
+# The generated layer of the apple-backports package: written by tools/gen.lua from the committed spec/ snapshot at build time.
+packages/a/apple-backports/.gen/

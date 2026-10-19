@@ -1,0 +1,38 @@
+{
+  "framework": "SceneKit",
+  "entries": [
+    {
+      "api": "SCNErrorDomain",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the error domain -[SCNScene sceneWithURL:options:error:] uses when the archive names an unknown class or its top-level object is not a SCNScene; sdk-introduced.json has no ios() version for it (header silent, same as the rest of SceneKit's original surface), so the version here is not read from that index at all -- it is measured directly against the release cache ladder, which the port's own build gate (band()'s release-export split) caught: the symbol is absent from both the 8.0 and 8.4.1 armv7 dyld_shared_cache and present in the 9.0 one",
+      "effect": "carries the literal domain string; the NSError this port raises always uses it",
+      "source": "release cache measurement: _SCNErrorDomain absent from the armv7 dyld_shared_cache of 8.0 and 8.4.1, present in the armv7 dyld_shared_cache of 9.0; found because charon's own band() split check refused to link SCNScene.o's real 8.0-era symbols (SCNScene, SCNSceneStartTimeAttributeKey and its three siblings) together with SCNErrorDomain in one object once it saw SCNErrorDomain missing from the release the band was checked against",
+      "facts": "facts/SceneKit/SceneKit.md"
+    },
+    {
+      "api": "SCNLightTypeProbe",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "sdk-introduced.json marks both SCNLightTypeIES and SCNLightTypeProbe as ios 10.0, but a precise ladder walk (every armv7/armv7s dyld_shared_cache from 6.0 to 10.3.4) found SCNLightTypeProbe already present at 9.0/9.2.1/9.3/9.3.5/9.3.6, one full band before SCNLightTypeIES actually appears at 10.0.1; a pre-check script (symbol_ladder.lua) caught this by finding the two symbols first-appear in different releases even though the port's own build gate did not flag it -- both had been declared '10.0' in the registry and rounded onto the same existing 10.0.1 band boundary, so the build passed green while the registry's claim about SCNLightTypeProbe was a full band wrong",
+      "effect": "SCNLight.type accepts this string; none of the four target assets (gift/diamond/star2/coin) use a probe light",
+      "source": "release cache measurement: _SCNLightTypeProbe present in the armv7 dyld_shared_cache of 9.0 through 9.3.6, absent before it (8.0/8.4.1 checked)",
+      "facts": "facts/SceneKit/SceneKit.md"
+    },
+    {
+      "api": "SCNSceneRendererDelegate",
+      "kind": "protocol",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "SCNView sends it; the protocol status is not pushed onto the class that sends it",
+      "effect": "renderer:updateAtTime:, didApplyAnimationsAtTime:, didSimulatePhysicsAtTime:, didApplyConstraintsAtTime:, willRenderScene:atTime: and didRenderScene:atTime: are sent in that order for every frame the view draws, on the main thread, and once at time 0 from -snapshot",
+      "source": "measured on the cache ladder with objc.inventory: the protocol is absent from the armv7 caches up to 8.4.1 and present from 9.0; the order and the snapshot's messages from macOS SceneKit's SCNView (facts)",
+      "facts": "facts/SceneKit/SCNView.md"
+    }
+  ]
+}

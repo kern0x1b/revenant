@@ -1,0 +1,81 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+ImagePlayground	swift-class	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController	-	ImagePlaygroundViewController	-	-	-	ios=18.1,macos=15.1	-	ae05240f71125a6a
+ImagePlayground	swift-property	s:15ImagePlayground0aB14ViewControllerC23allowedGenerationStylesSayAA0aB5StyleVGvp	ImagePlaygroundViewController	allowedGenerationStyles	-	[ImagePlayground.ImagePlaygroundStyle]	-	ios=18.4,macos=15.4	-	5644385be4d02dbc
+ImagePlayground	swift-property	s:15ImagePlayground0aB14ViewControllerC23selectedGenerationStyleAA0abG0Vvp	ImagePlaygroundViewController	selectedGenerationStyle	-	ImagePlayground.ImagePlaygroundStyle	-	ios=18.4,macos=15.4	-	228f0ca888ffce5a
+ImagePlayground	swift-property	s:15ImagePlayground0aB14ViewControllerC21personalizationPolicyAA0ab15PersonalizationF0Ovp	ImagePlaygroundViewController	personalizationPolicy	-	ImagePlayground.ImagePlaygroundPersonalizationPolicy	-	ios=18.4,macos=15.4	-	6f7e8f16ea3379c4
+ImagePlayground	swift-property	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(py)sourceImage	ImagePlaygroundViewController	sourceImage	-	UIKit.UIImage?	-	-	-	27b7baed41fa2e5f
+ImagePlayground	swift-property	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(py)delegate	ImagePlaygroundViewController	delegate	-	(any ImagePlayground.ImagePlaygroundViewController.Delegate)?	-	-	-	ba348021846069fa
+ImagePlayground	swift-property	s:15ImagePlayground0aB14ViewControllerC8conceptsSayAA0aB7ConceptVGvp	ImagePlaygroundViewController	concepts	-	[ImagePlayground.ImagePlaygroundConcept]	-	-	-	d0304eec2f25f339
+ImagePlayground	swift-method	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(im)init	ImagePlaygroundViewController	init()	-	-	ImagePlayground.ImagePlaygroundViewController	-	-	ada1afee7541a6a0
+ImagePlayground	swift-property	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(py)modalPresentationStyle	ImagePlaygroundViewController	modalPresentationStyle	-	UIKit.UIModalPresentationStyle	-	-	-	2951f24dc195cea5
+ImagePlayground	swift-property	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(py)preferredContentSize	ImagePlaygroundViewController	preferredContentSize	-	CoreFoundation.CGSize	-	-	-	1f71f7cf85bd8806
+ImagePlayground	swift-property	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(py)modalInPresentation	ImagePlaygroundViewController	isModalInPresentation	-	Swift.Bool	-	-	-	aa04ef5c8cfb5a76
+ImagePlayground	swift-property	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(py)supportedInterfaceOrientations	ImagePlaygroundViewController	supportedInterfaceOrientations	-	UIKit.UIInterfaceOrientationMask	-	-	-	01a47aa1b635f2c4
+ImagePlayground	swift-method	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(im)viewDidLoad	ImagePlaygroundViewController	viewDidLoad()	-	()	-	-	-	86adbbf5c3eaf896
+ImagePlayground	swift-method	c:@M@ImagePlayground@objc(cs)ImagePlaygroundViewController(im)viewDidDisappear:	ImagePlaygroundViewController	viewDidDisappear(_:)	-	()	Swift.Bool	-	-	513239452f8b7a29
+ImagePlayground	swift-property	c:@CM@ImagePlayground@objc(cs)ImagePlaygroundViewController(cpy)available	ImagePlaygroundViewController	isAvailable	+	Swift.Bool	-	-	-	cd2859df15989e29
+ImagePlayground	swift-protocol	s:15ImagePlayground0aB14ViewControllerC8DelegateP	ImagePlaygroundViewController	Delegate	-	-	-	ios=18.1,macos=15.1	-	57ab45cf39dd2e9a
+ImagePlayground	swift-method	s:15ImagePlayground0aB14ViewControllerC8DelegateP05imagebcD0_09didCreateA2AtyAC_10Foundation3URLVtF	ImagePlaygroundViewController.Delegate	imagePlaygroundViewController(_:didCreateImageAt:)	-	()	ImagePlayground.ImagePlaygroundViewController | Foundation.URL	-	-	07e91ffe2eabd147
+ImagePlayground	swift-method	s:15ImagePlayground0aB14ViewControllerC8DelegateP05imagebcD9DidCancelyyACF	ImagePlaygroundViewController.Delegate	imagePlaygroundViewControllerDidCancel(_:)	-	()	ImagePlayground.ImagePlaygroundViewController	-	-	133ed79d5258c58d
+ImagePlayground	swift-struct	s:15ImagePlayground0aB7ConceptV	-	ImagePlaygroundConcept	-	-	-	ios=18.1,macos=15.1	-	6aaffaaa2aaafe7c
+ImagePlayground	swift-method	s:15ImagePlayground0aB7ConceptV4textyACSSFZ	ImagePlaygroundConcept	text(_:)	+	ImagePlayground.ImagePlaygroundConcept	Swift.String	-	-	cef446c83190e4fc
+ImagePlayground	swift-method	s:15ImagePlayground0aB7ConceptV9extracted4from5titleACSS_SSSgtFZ	ImagePlaygroundConcept	extracted(from:title:)	+	ImagePlayground.ImagePlaygroundConcept	Swift.String | Swift.String?	-	-	74e911e15b7c0fb3
+ImagePlayground	swift-method	s:15ImagePlayground0aB7ConceptV7drawingyAC9PencilKit9PKDrawingVFZ	ImagePlaygroundConcept	drawing(_:)	+	ImagePlayground.ImagePlaygroundConcept	PencilKit.PKDrawing	-	-	6290ce1401495fa2
+ImagePlayground	swift-method	s:15ImagePlayground0aB7ConceptV5imageyACSo10CGImageRefaFZ	ImagePlaygroundConcept	image(_:)	+	ImagePlayground.ImagePlaygroundConcept	CoreGraphics.CGImage	-	-	1a879f392a0a1317
+ImagePlayground	swift-method	s:15ImagePlayground0aB7ConceptV5imageyACSg10Foundation3URLVFZ	ImagePlaygroundConcept	image(_:)	+	ImagePlayground.ImagePlaygroundConcept?	Foundation.URL	-	-	13f60a19633af2b3
+ImagePlayground	swift-struct	s:15ImagePlayground0aB5StyleV	-	ImagePlaygroundStyle	-	-	-	ios=18.4,macos=15.4	-	8bd45f8032bc62aa
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV9animationACvpZ	ImagePlaygroundStyle	animation	+	ImagePlayground.ImagePlaygroundStyle	-	-	-	896338fc0a300160
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV12illustrationACvpZ	ImagePlaygroundStyle	illustration	+	ImagePlayground.ImagePlaygroundStyle	-	-	-	078b8667cd18664a
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV6sketchACvpZ	ImagePlaygroundStyle	sketch	+	ImagePlayground.ImagePlaygroundStyle	-	-	-	99146eac7b4cd9d8
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV16externalProviderACvpZ	ImagePlaygroundStyle	externalProvider	+	ImagePlayground.ImagePlaygroundStyle	-	ios=26.0,macos=26.0	-	6c84d7c3de1a2ecb
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV3allSayACGvpZ	ImagePlaygroundStyle	all	+	[ImagePlayground.ImagePlaygroundStyle]	-	-	-	0c4b57705a57b24a
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV2idSSvp	ImagePlaygroundStyle	id	-	Swift.String	-	-	-	d9216ab93c6870df
+ImagePlayground	swift-method	s:15ImagePlayground0aB5StyleV2eeoiySbAC_ACtFZ	ImagePlaygroundStyle	==(_:_:)	+	Swift.Bool	ImagePlayground.ImagePlaygroundStyle | ImagePlayground.ImagePlaygroundStyle	-	-	2f0ebe59fc44f6c1
+ImagePlayground	swift-typealias	s:15ImagePlayground0aB5StyleV2IDa	ImagePlaygroundStyle	ID	-	-	-	ios=18.4,macos=15.4	-	6478b4a1230374ce
+ImagePlayground	swift-method	s:15ImagePlayground0aB5StyleV6encode2toys7Encoder_p_tKF	ImagePlaygroundStyle	encode(to:)	-	()	any Swift.Encoder	-	-	798c67a7ee141a82
+ImagePlayground	swift-method	s:15ImagePlayground0aB5StyleV4hash4intoys6HasherVz_tF	ImagePlaygroundStyle	hash(into:)	-	()	Swift.Hasher	-	-	2ba67576991626ad
+ImagePlayground	swift-property	s:15ImagePlayground0aB5StyleV9hashValueSivp	ImagePlaygroundStyle	hashValue	-	Swift.Int	-	-	-	eccb9462c9a76573
+ImagePlayground	swift-method	s:15ImagePlayground0aB5StyleV4fromACs7Decoder_p_tKcfc	ImagePlaygroundStyle	init(from:)	-	-	ImagePlayground.ImagePlaygroundStyle | any Swift.Decoder	-	-	7e36123ca4285b94
+ImagePlayground	swift-enum	s:15ImagePlayground0aB21PersonalizationPolicyO	-	ImagePlaygroundPersonalizationPolicy	-	-	-	ios=18.4,macos=15.4	-	0c546721702c86cd
+ImagePlayground	swift-constant	s:15ImagePlayground0aB21PersonalizationPolicyO9automaticyA2CmF	ImagePlaygroundPersonalizationPolicy	automatic	-	-	-	-	-	da47a6a24186011c
+ImagePlayground	swift-constant	s:15ImagePlayground0aB21PersonalizationPolicyO7enabledyA2CmF	ImagePlaygroundPersonalizationPolicy	enabled	-	-	-	-	-	69b4a2ef796c6091
+ImagePlayground	swift-constant	s:15ImagePlayground0aB21PersonalizationPolicyO8disabledyA2CmF	ImagePlaygroundPersonalizationPolicy	disabled	-	-	-	-	-	2a7c626d6568f502
+ImagePlayground	swift-method	s:15ImagePlayground0aB21PersonalizationPolicyO8rawValueACSgSi_tcfc	ImagePlaygroundPersonalizationPolicy	init(rawValue:)	-	-	ImagePlayground.ImagePlaygroundPersonalizationPolicy? | Swift.Int	-	-	a7e981771864e6b4
+ImagePlayground	swift-typealias	s:15ImagePlayground0aB21PersonalizationPolicyO8RawValuea	ImagePlaygroundPersonalizationPolicy	RawValue	-	-	-	ios=18.4,macos=15.4	-	82171e7886a2b653
+ImagePlayground	swift-property	s:15ImagePlayground0aB21PersonalizationPolicyO8rawValueSivp	ImagePlaygroundPersonalizationPolicy	rawValue	-	Swift.Int	-	-	-	28644f747cae3eed
+ImagePlayground	swift-class	s:15ImagePlayground0A7CreatorC	-	ImageCreator	-	-	-	ios=18.4,macos=15.4	-	f6b6079d692d2b76
+ImagePlayground	swift-struct	s:15ImagePlayground0A7CreatorC07CreatedA0V	ImageCreator	CreatedImage	-	-	-	-	-	4d0b1564e438df0c
+ImagePlayground	swift-property	s:15ImagePlayground0A7CreatorC07CreatedA0V02cgA0So10CGImageRefavp	ImageCreator.CreatedImage	cgImage	-	CoreGraphics.CGImage	-	-	-	013a5476701eb9c4
+ImagePlayground	swift-method	s:15ImagePlayground0A7CreatorCACyYaKcfc	ImageCreator	init()	-	-	ImagePlayground.ImageCreator	-	-	c9168e41f7f38c25
+ImagePlayground	swift-property	s:15ImagePlayground0A7CreatorC15availableStylesSayAA0aB5StyleVGvp	ImageCreator	availableStyles	-	[ImagePlayground.ImagePlaygroundStyle]	-	-	-	0683a12169b1b106
+ImagePlayground	swift-method	s:15ImagePlayground0A7CreatorC6images3for5style5limitQrSayAA0aB7ConceptVG_AA0aB5StyleVSitF	ImageCreator	images(for:style:limit:)	-	some _Concurrency.AsyncSequence<ImagePlayground.ImageCreator.CreatedImage, any Swift.Error>	[ImagePlayground.ImagePlaygroundConcept] | ImagePlayground.ImagePlaygroundStyle | Swift.Int	-	-	1065f727f79f47dc
+ImagePlayground	swift-enum	s:15ImagePlayground0A7CreatorC5ErrorO	ImageCreator	Error	-	-	-	-	-	f0b09029396a8357
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO12notSupportedyA2EmF	ImageCreator.Error	notSupported	-	-	-	-	-	5ace308237ac49de
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO11unavailableyA2EmF	ImageCreator.Error	unavailable	-	-	-	-	-	8d50cbe381e1949f
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO17creationCancelledyA2EmF	ImageCreator.Error	creationCancelled	-	-	-	-	-	ccbbcf5797cd4b46
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO06faceInA8TooSmallyA2EmF	ImageCreator.Error	faceInImageTooSmall	-	-	-	-	-	e89e2b3c960012c5
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO19unsupportedLanguageyA2EmF	ImageCreator.Error	unsupportedLanguage	-	-	-	-	-	9b888bd2cd6b89b1
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO016unsupportedInputA0yA2EmF	ImageCreator.Error	unsupportedInputImage	-	-	-	-	-	bd21b3df1e53803a
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO27backgroundCreationForbiddenyA2EmF	ImageCreator.Error	backgroundCreationForbidden	-	-	-	-	-	972a19a131cb6d24
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO14creationFailedyA2EmF	ImageCreator.Error	creationFailed	-	-	-	-	-	7268263e3420c9ea
+ImagePlayground	swift-constant	s:15ImagePlayground0A7CreatorC5ErrorO29conceptsRequirePersonIdentityyA2EmF	ImageCreator.Error	conceptsRequirePersonIdentity	-	-	-	ios=26.0,macos=26.0	-	fa9b4c250ec8ba72
+ImagePlayground	swift-property	s:15ImagePlayground0A7CreatorC5ErrorO8allCasesSayAEGvpZ	ImageCreator.Error	allCases	+	[ImagePlayground.ImageCreator.Error]	-	-	-	fa4740430385d011
+ImagePlayground	swift-property	s:15ImagePlayground0A7CreatorC5ErrorO11errorDomainSSvpZ	ImageCreator.Error	errorDomain	+	Swift.String	-	-	-	3cac806d402f6574
+ImagePlayground	swift-property	s:15ImagePlayground0A7CreatorC5ErrorO13errorUserInfoSDySSypGvp	ImageCreator.Error	errorUserInfo	-	[Swift.String : Any]	-	-	-	8c1b8bc7b3f559c3
+ImagePlayground	swift-method	s:15ImagePlayground0A7CreatorC5ErrorO2eeoiySbAE_AEtFZ	ImageCreator.Error	==(_:_:)	+	Swift.Bool	ImagePlayground.ImageCreator.Error | ImagePlayground.ImageCreator.Error	-	-	74eb2fcc6a3bb52d
+ImagePlayground	swift-typealias	s:15ImagePlayground0A7CreatorC5ErrorO8AllCasesa	ImageCreator.Error	AllCases	-	-	-	ios=18.4,macos=15.4	-	12fd0f663b556ded
+ImagePlayground	swift-method	s:15ImagePlayground0A7CreatorC5ErrorO4hash4intoys6HasherVz_tF	ImageCreator.Error	hash(into:)	-	()	Swift.Hasher	-	-	4e8b630f6cfae8b6
+ImagePlayground	swift-property	s:15ImagePlayground0A7CreatorC5ErrorO9hashValueSivp	ImageCreator.Error	hashValue	-	Swift.Int	-	-	-	4dcfc0802b13bc87
+ImagePlayground	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
+ImagePlayground	swift-method	s:7SwiftUI4ViewP15ImagePlaygroundE05imageE5Sheet11isPresented8concepts06sourceD012onCompletion0L12CancellationQrAA7BindingVySbG_SayAD0dE7ConceptVGAA0D0VSgy10Foundation3URLVcyycSgtF	View	imagePlaygroundSheet(isPresented:concepts:sourceImage:onCompletion:onCancellation:)	-	some SwiftUI.View	SwiftUI.Binding<Swift.Bool> | [ImagePlayground.ImagePlaygroundConcept] | SwiftUI.Image? | (Foundation.URL) -> Swift.Void | (() -> Swift.Void)?	ios=18.1,macos=15.1	-	d803b595eca28bd7
+ImagePlayground	swift-method	s:7SwiftUI4ViewP15ImagePlaygroundE05imageE5Sheet11isPresented8concepts06sourceD3URL12onCompletion0M12CancellationQrAA7BindingVySbG_SayAD0dE7ConceptVG10Foundation0L0VyAScyycSgtF	View	imagePlaygroundSheet(isPresented:concepts:sourceImageURL:onCompletion:onCancellation:)	-	some SwiftUI.View	SwiftUI.Binding<Swift.Bool> | [ImagePlayground.ImagePlaygroundConcept] | Foundation.URL | (Foundation.URL) -> Swift.Void | (() -> Swift.Void)?	ios=18.1,macos=15.1	-	81649e494545e672
+ImagePlayground	swift-method	s:7SwiftUI4ViewP15ImagePlaygroundE05imageE5Sheet11isPresented7concept06sourceD3URL12onCompletion0M12CancellationQrAA7BindingVySbG_SS10Foundation0L0VyAPcyycSgtF	View	imagePlaygroundSheet(isPresented:concept:sourceImageURL:onCompletion:onCancellation:)	-	some SwiftUI.View	SwiftUI.Binding<Swift.Bool> | Swift.String | Foundation.URL | (Foundation.URL) -> Swift.Void | (() -> Swift.Void)?	ios=18.1,macos=15.1	-	9e3ad435ca2c98ec
+ImagePlayground	swift-method	s:7SwiftUI4ViewP15ImagePlaygroundE05imageE5Sheet11isPresented7concept06sourceD012onCompletion0L12CancellationQrAA7BindingVySbG_SSAA0D0VSgy10Foundation3URLVcyycSgtF	View	imagePlaygroundSheet(isPresented:concept:sourceImage:onCompletion:onCancellation:)	-	some SwiftUI.View	SwiftUI.Binding<Swift.Bool> | Swift.String | SwiftUI.Image? | (Foundation.URL) -> Swift.Void | (() -> Swift.Void)?	ios=18.1,macos=15.1	-	c66942d5069b047d
+ImagePlayground	swift-method	s:7SwiftUI4ViewP15ImagePlaygroundE05imageE15GenerationStyle_2inQrAD0deH0V_SayAHGtF	View	imagePlaygroundGenerationStyle(_:in:)	-	some SwiftUI.View	ImagePlayground.ImagePlaygroundStyle | [ImagePlayground.ImagePlaygroundStyle]	ios=18.4,macos=15.4	-	abcd0d6948642f2f
+ImagePlayground	swift-method	s:7SwiftUI4ViewP15ImagePlaygroundE05imageE21PersonalizationPolicyyQrAD0degH0OF	View	imagePlaygroundPersonalizationPolicy(_:)	-	some SwiftUI.View	ImagePlayground.ImagePlaygroundPersonalizationPolicy	ios=18.4,macos=15.4	-	63b278840031475b
+ImagePlayground	swift-struct	s:7SwiftUI17EnvironmentValuesV	-	EnvironmentValues	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	61d076f6895cbf5f
+ImagePlayground	swift-property	s:7SwiftUI17EnvironmentValuesV15ImagePlaygroundE05imageF23AllowedGenerationStylesSayAD0eF5StyleVGvp	EnvironmentValues	imagePlaygroundAllowedGenerationStyles	-	[ImagePlayground.ImagePlaygroundStyle]	-	-	-	83fa562577381936
+ImagePlayground	swift-property	s:7SwiftUI17EnvironmentValuesV15ImagePlaygroundE05imageF23SelectedGenerationStyleAD0efJ0Vvp	EnvironmentValues	imagePlaygroundSelectedGenerationStyle	-	ImagePlayground.ImagePlaygroundStyle	-	-	-	ac7466b138dd205f
+ImagePlayground	swift-property	s:7SwiftUI17EnvironmentValuesV15ImagePlaygroundE05imageF21PersonalizationPolicyAD0efhI0Ovp	EnvironmentValues	imagePlaygroundPersonalizationPolicy	-	ImagePlayground.ImagePlaygroundPersonalizationPolicy	-	-	-	a8c19078b70a143d
+ImagePlayground	swift-property	s:7SwiftUI17EnvironmentValuesV15ImagePlaygroundE08supportseF0Sbvp	EnvironmentValues	supportsImagePlayground	-	Swift.Bool	-	ios=18.1,macos=15.1	-	85d152313696c110
+ImagePlayground	swift-method	s:15ImagePlayground0aB7ConceptV9extracted4fromACSS_tFZ	ImagePlaygroundConcept	extracted(from:)	+	ImagePlayground.ImagePlaygroundConcept	Swift.String	-	-	d848ac51d74d6b0b

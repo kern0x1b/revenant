@@ -1,0 +1,8 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_GeoToolbox_AppIntents	swift-struct	s:10GeoToolbox15PlaceDescriptorV	-	PlaceDescriptor	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	a7914219ca96c923
+_GeoToolbox_AppIntents	swift-property	s:10GeoToolbox15PlaceDescriptorV01_aB11_AppIntentsE25typeDisplayRepresentation0eF004TypehI0VvpZ	PlaceDescriptor	typeDisplayRepresentation	+	AppIntents.TypeDisplayRepresentation	-	-	-	dfc5a20eac480f73
+_GeoToolbox_AppIntents	swift-property	s:10GeoToolbox15PlaceDescriptorV01_aB11_AppIntentsE21displayRepresentation0eF007DisplayH0Vvp	PlaceDescriptor	displayRepresentation	-	AppIntents.DisplayRepresentation	-	-	-	f42b457f0d60c755
+_GeoToolbox_AppIntents	swift-property	s:10GeoToolbox15PlaceDescriptorV01_aB11_AppIntentsE28defaultResolverSpecificationQrvpZ	PlaceDescriptor	defaultResolverSpecification	+	some AppIntents.ResolverSpecification	-	-	-	2038585bbee0cce7
+_GeoToolbox_AppIntents	swift-typealias	s:10GeoToolbox15PlaceDescriptorV01_aB11_AppIntentsE13Specificationa	PlaceDescriptor	Specification	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	81256138c5a51ab9
+_GeoToolbox_AppIntents	swift-typealias	s:10GeoToolbox15PlaceDescriptorV01_aB11_AppIntentsE13UnwrappedTypea	PlaceDescriptor	UnwrappedType	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	d52d9b31888f566a
+_GeoToolbox_AppIntents	swift-typealias	s:10GeoToolbox15PlaceDescriptorV01_aB11_AppIntentsE9ValueTypea	PlaceDescriptor	ValueType	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	fe77c8d404a8303f

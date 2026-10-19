@@ -1,0 +1,3 @@
+- (void)provideCredentialWithoutUserInteractionForIdentity:(ASPasswordCredentialIdentity *)credentialIdentity
+{
+    // The header asks the extension to provide a credential for an identity WITHOUT the user's

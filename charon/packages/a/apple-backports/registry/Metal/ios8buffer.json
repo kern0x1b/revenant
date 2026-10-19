@@ -1,0 +1,16 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLBuffer newTextureWithDescriptor:offset:bytesPerRow:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "a texture over a window of a buffer's bytes needs the texture storage of the MTLTexture tranche, which comes after the buffer, and the aliasing of Metal for that texture is not measured",
+      "effect": "the selector is not there: respondsToSelector: answers NO and a call through a compile time reference crashes",
+      "facts": "facts/Metal/Buffers.md",
+      "source": "SDK 16.4, Metal; the introduction 8.0 from the corpus surface of the 26.2 SDK"
+    }
+  ]
+}

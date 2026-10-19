@@ -1,0 +1,47 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@S@opaqueMTAudioProcessingTap	-			-	-	-	-	-	98e86c95c5687cba	-
+typedef	c:@T@MTAudioProcessingTapRef	-			const struct opaqueMTAudioProcessingTap *	-	-	-	-	1378bec5e1b9d491	-
+function	c:@F@MTAudioProcessingTapGetTypeID	-			CFTypeID (void)	-	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	3ab555f26c171273	-
+typedef	c:@T@MTAudioProcessingTapCreationFlags	-			uint32_t	-	-	-	-	19c8f99d6703125b	-
+enum	c:@Ea@kMTAudioProcessingTapCreationFlag_PreEffects	-	-		MTAudioProcessingTapCreationFlags	-	-	-	-	a59c42b4380ba8ff	-
+enumconst	c:@Ea@kMTAudioProcessingTapCreationFlag_PreEffects@kMTAudioProcessingTapCreationFlag_PreEffects	-			-	-	-	-	-	87cd7f6a206e0114	1
+enumconst	c:@Ea@kMTAudioProcessingTapCreationFlag_PreEffects@kMTAudioProcessingTapCreationFlag_PostEffects	-			-	-	-	-	-	8d02f208479299cf	2
+typedef	c:@T@MTAudioProcessingTapFlags	-			uint32_t	-	-	-	-	b42976cf09bd1f44	-
+enum	c:@Ea@kMTAudioProcessingTapFlag_StartOfStream	-	-		MTAudioProcessingTapFlags	-	-	-	-	54df205368d05c04	-
+enumconst	c:@Ea@kMTAudioProcessingTapFlag_StartOfStream@kMTAudioProcessingTapFlag_StartOfStream	-			-	-	-	-	-	e04f8b49c12fa1d2	256
+enumconst	c:@Ea@kMTAudioProcessingTapFlag_StartOfStream@kMTAudioProcessingTapFlag_EndOfStream	-			-	-	-	-	-	c65ae98ffc1e82fe	512
+typedef	c:@T@MTAudioProcessingTapInitCallback	-			void (*)(MTAudioProcessingTapRef _Nonnull, void * _Nullable, void * _Nullable * _Nonnull)	-	-	-	-	4e6f7062f91930d9	-
+typedef	c:@T@MTAudioProcessingTapFinalizeCallback	-			void (*)(MTAudioProcessingTapRef _Nonnull)	-	-	-	-	25ed2bd2259bc349	-
+typedef	c:@T@MTAudioProcessingTapPrepareCallback	-			void (*)(MTAudioProcessingTapRef _Nonnull, CMItemCount, const AudioStreamBasicDescription * _Nonnull)	-	-	-	-	a654cfe3793249fd	-
+typedef	c:@T@MTAudioProcessingTapUnprepareCallback	-			void (*)(MTAudioProcessingTapRef _Nonnull)	-	-	-	-	da589819c9e1b286	-
+typedef	c:@T@MTAudioProcessingTapProcessCallback	-			void (*)(MTAudioProcessingTapRef _Nonnull, CMItemCount, MTAudioProcessingTapFlags, AudioBufferList * _Nonnull, CMItemCount * _Nonnull, MTAudioProcessingTapFlags * _Nonnull)	-	-	-	-	9c436f9ccbb5dfdb	-
+enum	c:@Ea@kMTAudioProcessingTapCallbacksVersion_0	-	-		int	-	-	-	-	6a4b361dbbc0b1d9	-
+enumconst	c:@Ea@kMTAudioProcessingTapCallbacksVersion_0@kMTAudioProcessingTapCallbacksVersion_0	-			-	-	-	-	-	1c8172d65d68c930	0
+struct	c:@SA@MTAudioProcessingTapCallbacks	-			-	-	-	-	-	0587279e91bdb94c	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@version	MTAudioProcessingTapCallbacks			int	-	-	-	-	361a16be10051f07	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@clientInfo	MTAudioProcessingTapCallbacks			void *	-	-	-	-	b7eca17920da383a	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@init	MTAudioProcessingTapCallbacks			MTAudioProcessingTapInitCallback	-	-	-	-	77538592defe4672	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@finalize	MTAudioProcessingTapCallbacks			MTAudioProcessingTapFinalizeCallback	-	-	-	-	7608bb8cf94dd127	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@prepare	MTAudioProcessingTapCallbacks			MTAudioProcessingTapPrepareCallback	-	-	-	-	9e1b97e2c0702429	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@unprepare	MTAudioProcessingTapCallbacks			MTAudioProcessingTapUnprepareCallback	-	-	-	-	b64f41617dd24e0b	-
+field	c:@SA@MTAudioProcessingTapCallbacks@FI@process	MTAudioProcessingTapCallbacks			MTAudioProcessingTapProcessCallback	-	-	-	-	e08317cb83a86e4a	-
+typedef	c:@T@MTAudioProcessingTapCallbacks	-			struct MTAudioProcessingTapCallbacks	-	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	17a6db5b1e40d067	-
+function	c:@F@MTAudioProcessingTapCreate	-			OSStatus (CFAllocatorRef, const MTAudioProcessingTapCallbacks *, MTAudioProcessingTapCreationFlags, MTAudioProcessingTapRef  _Nullable *)	CFAllocatorRef allocator | const MTAudioProcessingTapCallbacks * callbacks | MTAudioProcessingTapCreationFlags flags | MTAudioProcessingTapRef  _Nullable * tapOut	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	ac6c02ebb38c5a3e	-
+function	c:@F@MTAudioProcessingTapGetStorage	-			void * (MTAudioProcessingTapRef)	MTAudioProcessingTapRef tap	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	ffd880c44b859cd9	-
+function	c:@F@MTAudioProcessingTapGetSourceAudio	-			OSStatus (MTAudioProcessingTapRef, CMItemCount, AudioBufferList *, MTAudioProcessingTapFlags *, CMTimeRange *, CMItemCount *)	MTAudioProcessingTapRef tap | CMItemCount numberFrames | AudioBufferList * bufferListInOut | MTAudioProcessingTapFlags * flagsOut | CMTimeRange * timeRangeOut | CMItemCount * numberFramesOut	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	f92db46cd15c990f	-
+function	c:@F@MTCopyLocalizedNameForMediaType	-			CFStringRef (CMMediaType)	CMMediaType mediaType	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	d6a61e505f68dbc2	-
+function	c:@F@MTCopyLocalizedNameForMediaSubType	-			CFStringRef (CMMediaType, FourCharCode)	CMMediaType mediaType | FourCharCode mediaSubType	-	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=1.0/-/-/0	-	c2dc8b05769125b1	-
+typedef	c:@T@CFTypeID	-			unsigned long	-	-	-	-	1a1b10310e893e1f	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@CMItemCount	-			CFIndex	-	-	-	-	5376d25ce0c42dff	-
+typedef	c:@T@CFIndex	-			long	-	-	-	-	9f50caf8b7c4f278	-
+typedef	c:@T@AudioStreamBasicDescription	-			struct AudioStreamBasicDescription	-	-	-	-	830421b7fd18d7b1	-
+typedef	c:@T@AudioBufferList	-			struct AudioBufferList	-	-	-	-	07faf9bcbab5aaf3	-
+typedef	c:@T@OSStatus	-			SInt32	-	-	-	-	c9d4cae3c2778a27	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+typedef	c:@T@CFAllocatorRef	-			const struct __CFAllocator *	-	-	-	-	d153ce1dfad01936	-
+typedef	c:@T@CMTimeRange	-			struct CMTimeRange	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	86e58de4593d57eb	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@CMMediaType	-			FourCharCode	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	773a6719784f9921	-
+typedef	c:@T@FourCharCode	-			UInt32	-	-	-	-	a0f4e71a4dbfcb9b	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-

@@ -1,0 +1,369 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+enum	c:@EA@qos_class_t	-			unsigned int	-	-	-	-	f8107e65844ce494	-
+enumconst	c:@EA@qos_class_t@QOS_CLASS_USER_INTERACTIVE	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	9d06f5781c4ddeb2	33
+enumconst	c:@EA@qos_class_t@QOS_CLASS_USER_INITIATED	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	4ae9648d778837b4	25
+enumconst	c:@EA@qos_class_t@QOS_CLASS_DEFAULT	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	086f071bdc0c8403	21
+enumconst	c:@EA@qos_class_t@QOS_CLASS_UTILITY	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	5051a3de81493e2e	17
+enumconst	c:@EA@qos_class_t@QOS_CLASS_BACKGROUND	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	386f1e475b32187b	9
+enumconst	c:@EA@qos_class_t@QOS_CLASS_UNSPECIFIED	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ee2c00107f9a0d4b	0
+typedef	c:@T@qos_class_t	-			enum qos_class_t	-	-	-	-	2497899fa59592bb	-
+function	c:@F@qos_class_self	-			qos_class_t (void)	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	102afcf72e075b65	-
+function	c:@F@qos_class_main	-			qos_class_t (void)	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	180c2e784e691493	-
+function	c:@F@___mb_cur_max	-			int (void)	-	-	-	-	6d2d3d6e43308dc2	-
+struct	c:@S@_xlocale	-			-	-	-	-	-	42eddf56d2640d86	-
+typedef	c:@T@locale_t	-			struct _xlocale *	-	-	-	-	4d3b7099a57d493e	-
+function	c:@F@___mb_cur_max_l	-			int (locale_t)	locale_t 	-	-	-	8ecbed310f660553	-
+typedef	c:@T@u_char	-			unsigned char	-	-	-	-	f4c7d2bf594e9071	-
+typedef	c:@T@u_short	-			unsigned short	-	-	-	-	acca982aae85a48e	-
+typedef	c:@T@u_int	-			unsigned int	-	-	-	-	50a69dc8154190c5	-
+typedef	c:@T@u_int8_t	-			unsigned char	-	-	-	-	ed6837ff6d0fcfa1	-
+typedef	c:@T@u_int16_t	-			unsigned short	-	-	-	-	f001648696c65924	-
+typedef	c:@T@u_int32_t	-			unsigned int	-	-	-	-	c124ba0ccea6e1e3	-
+typedef	c:@T@u_int64_t	-			unsigned long long	-	-	-	-	d21b4e932f7e4bcd	-
+function	c:@F@__assert_rtn	-			void (const char *, const char *, int, const char *)	const char *  | const char *  | int  | const char * 	-	-	-	f094e7b1be414ed2	-
+function	c:@F@cacosf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	8879be45e173fdf0	-
+function	c:@F@cacos	-			_Complex double (_Complex double)	_Complex double 	-	-	-	3593fc406016b53a	-
+function	c:@F@cacosl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	05ec578eaba4ad9c	-
+function	c:@F@casinf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	a6fd472464d41ca9	-
+function	c:@F@casin	-			_Complex double (_Complex double)	_Complex double 	-	-	-	b84043cb5eb1c670	-
+function	c:@F@casinl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	5f48bedb25c5dda4	-
+function	c:@F@catanf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	76b30e3a379fa3e9	-
+function	c:@F@catan	-			_Complex double (_Complex double)	_Complex double 	-	-	-	8cce38e28dc3ee88	-
+function	c:@F@catanl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	be4434d7a4d09490	-
+function	c:@F@ccosf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	35f83f823dee0a6b	-
+function	c:@F@ccos	-			_Complex double (_Complex double)	_Complex double 	-	-	-	3f4ab0e19cdac42d	-
+function	c:@F@ccosl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	0490648e4fba9ec7	-
+function	c:@F@csinf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	c1fb89c586393bd1	-
+function	c:@F@csin	-			_Complex double (_Complex double)	_Complex double 	-	-	-	5de67cd5b245f98f	-
+function	c:@F@csinl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	a8d8e0fdcbd17874	-
+function	c:@F@ctanf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	08301226717d8267	-
+function	c:@F@ctan	-			_Complex double (_Complex double)	_Complex double 	-	-	-	54d8751a0669486e	-
+function	c:@F@ctanl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	f05fd2cf8a490da4	-
+function	c:@F@cacoshf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	d62fa95881cd8fe8	-
+function	c:@F@cacosh	-			_Complex double (_Complex double)	_Complex double 	-	-	-	bd2cf8e2508728b4	-
+function	c:@F@cacoshl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	c287e324b11bc884	-
+function	c:@F@casinhf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	69a0fba6065306f6	-
+function	c:@F@casinh	-			_Complex double (_Complex double)	_Complex double 	-	-	-	be2669667cd94f1b	-
+function	c:@F@casinhl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	5d84e8c3dea2442c	-
+function	c:@F@catanhf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	7fc2e4147e28ddf6	-
+function	c:@F@catanh	-			_Complex double (_Complex double)	_Complex double 	-	-	-	8d2d54fb9851caae	-
+function	c:@F@catanhl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	7bf94083f2936e23	-
+function	c:@F@ccoshf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	68968d4eb8c44fd4	-
+function	c:@F@ccosh	-			_Complex double (_Complex double)	_Complex double 	-	-	-	040765c628b8e3d2	-
+function	c:@F@ccoshl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	5ff460af858d58f6	-
+function	c:@F@csinhf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	d74afa461247d411	-
+function	c:@F@csinh	-			_Complex double (_Complex double)	_Complex double 	-	-	-	309c0015dde54034	-
+function	c:@F@csinhl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	242d1d378cdc7c92	-
+function	c:@F@ctanhf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	c08c62a92601ac5e	-
+function	c:@F@ctanh	-			_Complex double (_Complex double)	_Complex double 	-	-	-	5e000c372f463c91	-
+function	c:@F@ctanhl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	75a47129227ca031	-
+function	c:@F@cexpf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	0e83bc0d84d1f998	-
+function	c:@F@cexp	-			_Complex double (_Complex double)	_Complex double 	-	-	-	0609309c0d11dd88	-
+function	c:@F@cexpl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	ecff328da610a040	-
+function	c:@F@clogf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	3711130d44fb641b	-
+function	c:@F@clog	-			_Complex double (_Complex double)	_Complex double 	-	-	-	283ba6bed8324f48	-
+function	c:@F@clogl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	5b3093330a40af46	-
+function	c:@F@cabsf	-			float (_Complex float)	_Complex float 	-	-	-	7b2cdedc73d9ce6d	-
+function	c:@F@cabs	-			double (_Complex double)	_Complex double 	-	-	-	ed932c363271fd7d	-
+function	c:@F@cabsl	-			long double (_Complex long double)	_Complex long double 	-	-	-	2c924af29ccbd278	-
+function	c:@F@cpowf	-			_Complex float (_Complex float, _Complex float)	_Complex float  | _Complex float 	-	-	-	334ffaaa03213e85	-
+function	c:@F@cpow	-			_Complex double (_Complex double, _Complex double)	_Complex double  | _Complex double 	-	-	-	436576e3d34ce912	-
+function	c:@F@cpowl	-			_Complex long double (_Complex long double, _Complex long double)	_Complex long double  | _Complex long double 	-	-	-	009367393a091519	-
+function	c:@F@csqrtf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	b29726f9986fe544	-
+function	c:@F@csqrt	-			_Complex double (_Complex double)	_Complex double 	-	-	-	c064ea77656cee17	-
+function	c:@F@csqrtl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	a30d076e148bc518	-
+function	c:@F@cargf	-			float (_Complex float)	_Complex float 	-	-	-	61e53ec424e42adf	-
+function	c:@F@carg	-			double (_Complex double)	_Complex double 	-	-	-	ba7eb28f318c3376	-
+function	c:@F@cargl	-			long double (_Complex long double)	_Complex long double 	-	-	-	5dd24d4b3f5d046a	-
+function	c:@F@cimagf	-			float (_Complex float)	_Complex float 	-	-	-	3b5cd69c6840d8e7	-
+function	c:@F@cimag	-			double (_Complex double)	_Complex double 	-	-	-	44a0c5f1ea640963	-
+function	c:@F@cimagl	-			long double (_Complex long double)	_Complex long double 	-	-	-	e6990de60dd7afb1	-
+function	c:@F@conjf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	5011f243f5c13b8b	-
+function	c:@F@conj	-			_Complex double (_Complex double)	_Complex double 	-	-	-	779950acd75c6752	-
+function	c:@F@conjl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	250aadf1517099df	-
+function	c:@F@cprojf	-			_Complex float (_Complex float)	_Complex float 	-	-	-	e97e33cb9163aa2e	-
+function	c:@F@cproj	-			_Complex double (_Complex double)	_Complex double 	-	-	-	f839416a2cf75181	-
+function	c:@F@cprojl	-			_Complex long double (_Complex long double)	_Complex long double 	-	-	-	f1bcb2d737fef7d8	-
+function	c:@F@crealf	-			float (_Complex float)	_Complex float 	-	-	-	8b1f6c74a60080a6	-
+function	c:@F@creal	-			double (_Complex double)	_Complex double 	-	-	-	fc038c62b4106a44	-
+function	c:@F@creall	-			long double (_Complex long double)	_Complex long double 	-	-	-	370b11abfb622d0e	-
+typedef	c:@T@errno_t	-			int	-	-	-	-	0f1b7925690fec6f	-
+function	c:@F@__error	-			int * (void)	-	-	-	-	64f5c0746d599ab5	-
+struct	c:@SA@fenv_t	-			-	-	-	-	-	81c71b374d12ac6f	-
+field	c:@SA@fenv_t@FI@__fpsr	fenv_t			unsigned long long	-	-	-	-	ee5e0cea27da050e	-
+field	c:@SA@fenv_t@FI@__fpcr	fenv_t			unsigned long long	-	-	-	-	bbfa276c3bf996da	-
+typedef	c:@T@fenv_t	-			struct fenv_t	-	-	-	-	0c7ea93ec6a84624	-
+typedef	c:@T@fexcept_t	-			unsigned short	-	-	-	-	79dea9f7218fee2a	-
+enum	c:@Ea@__fpcr_trap_invalid	-	-		unsigned int	-	-	-	-	9389610bfc980a46	-
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_trap_invalid	-			-	-	-	-	-	58eac8d6948f8a76	256
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_trap_divbyzero	-			-	-	-	-	-	805f90519fe54aef	512
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_trap_overflow	-			-	-	-	-	-	29811a84116a64e0	1024
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_trap_underflow	-			-	-	-	-	-	243743d6753b544d	2048
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_trap_inexact	-			-	-	-	-	-	dd6c6ef7e6670aa0	4096
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_trap_denormal	-			-	-	-	-	-	35fc9d0edb22f10b	32768
+enumconst	c:@Ea@__fpcr_trap_invalid@__fpcr_flush_to_zero	-			-	-	-	-	-	077fbf1dcfa5a270	16777216
+enum	c:@Ea@__fpsr_saturation	-	-		unsigned int	-	-	-	-	1a1cb2e11ff4059a	-
+enumconst	c:@Ea@__fpsr_saturation@__fpsr_saturation	-			-	-	-	-	-	c628d5cb5ab2c399	134217728
+var	c:@_FE_DFL_ENV	-			const fenv_t	-	-	-	-	4cc710270a4215af	-
+var	c:@_FE_DFL_DISABLE_DENORMS_ENV	-			const fenv_t	-	-	-	-	65abc427852d508c	-
+function	c:@F@feclearexcept	-			int (int)	int 	-	-	-	050e7e5e67f38054	-
+function	c:@F@fegetexceptflag	-			int (fexcept_t *, int)	fexcept_t *  | int 	-	-	-	a06dff5314fb2442	-
+function	c:@F@feraiseexcept	-			int (int)	int 	-	-	-	9ef13918e50db6c4	-
+function	c:@F@fesetexceptflag	-			int (const fexcept_t *, int)	const fexcept_t *  | int 	-	-	-	db9daf956d8a5240	-
+function	c:@F@fetestexcept	-			int (int)	int 	-	-	-	eb6012fd33a2a436	-
+function	c:@F@fegetround	-			int (void)	-	-	-	-	70b0f586baf75710	-
+function	c:@F@fesetround	-			int (int)	int 	-	-	-	38d63423da7f6924	-
+function	c:@F@fegetenv	-			int (fenv_t *)	fenv_t * 	-	-	-	8f48cd4a99a3d95b	-
+function	c:@F@feholdexcept	-			int (fenv_t *)	fenv_t * 	-	-	-	bf3d6fe843011a86	-
+function	c:@F@fesetenv	-			int (const fenv_t *)	const fenv_t * 	-	-	-	aa01b0942f0bfa95	-
+function	c:@F@feupdateenv	-			int (const fenv_t *)	const fenv_t * 	-	-	-	aa8dff2a8b355b77	-
+typedef	c:@T@float_t	-			float	-	-	-	-	14b9cae89c18b2c6	-
+typedef	c:@T@double_t	-			double	-	-	-	-	4e36ef08c0d2eac9	-
+function	c:@F@__math_errhandling	-			int (void)	-	-	-	-	67e0bb9e334bfc8f	-
+function	c:@F@__fpclassifyf	-			int (float)	float 	-	-	-	368e7f35c4220338	-
+function	c:@F@__fpclassifyd	-			int (double)	double 	-	-	-	298e7ec169ba71c4	-
+function	c:@F@__fpclassifyl	-			int (long double)	long double 	-	-	-	8e964107f7fa5dfe	-
+function	c:@F@__inline_isfinitef	-			int (float)	float 	-	-	-	f1e7aa9d852d17c9	-
+function	c:@F@__inline_isfinited	-			int (double)	double 	-	-	-	744c9a2f732ed65a	-
+function	c:@F@__inline_isfinitel	-			int (long double)	long double 	-	-	-	8017ab133411895a	-
+function	c:@F@__inline_isinff	-			int (float)	float 	-	-	-	11fa3130075ee8f6	-
+function	c:@F@__inline_isinfd	-			int (double)	double 	-	-	-	16e49f306b864705	-
+function	c:@F@__inline_isinfl	-			int (long double)	long double 	-	-	-	d0ef55718a7bd0da	-
+function	c:@F@__inline_isnanf	-			int (float)	float 	-	-	-	07cb0a852676b4ed	-
+function	c:@F@__inline_isnand	-			int (double)	double 	-	-	-	3f559e5f6227e528	-
+function	c:@F@__inline_isnanl	-			int (long double)	long double 	-	-	-	68d93b6d5fb97a0f	-
+function	c:@F@__inline_isnormalf	-			int (float)	float 	-	-	-	1650fbd71990a990	-
+function	c:@F@__inline_isnormald	-			int (double)	double 	-	-	-	74bdea6bcc74d274	-
+function	c:@F@__inline_isnormall	-			int (long double)	long double 	-	-	-	aff1f0014e12d336	-
+function	c:@F@__inline_signbitf	-			int (float)	float 	-	-	-	e3dd205e07618982	-
+function	c:@F@__inline_signbitd	-			int (double)	double 	-	-	-	2923a28873a2c938	-
+function	c:@F@__inline_signbitl	-			int (long double)	long double 	-	-	-	c2759dad9d9c9af8	-
+function	c:@F@acosf	-			float (float)	float 	-	-	-	59b5210d01065535	-
+function	c:@F@acos	-			double (double)	double 	-	-	-	63ea9ba4829f7188	-
+function	c:@F@acosl	-			long double (long double)	long double 	-	-	-	854e06652b05d715	-
+function	c:@F@asinf	-			float (float)	float 	-	-	-	893a85ffcae65ef2	-
+function	c:@F@asin	-			double (double)	double 	-	-	-	d09a314431254feb	-
+function	c:@F@asinl	-			long double (long double)	long double 	-	-	-	0790b467267bb1c5	-
+function	c:@F@atanf	-			float (float)	float 	-	-	-	fc0f6d543654835e	-
+function	c:@F@atan	-			double (double)	double 	-	-	-	55934881074069a2	-
+function	c:@F@atanl	-			long double (long double)	long double 	-	-	-	d2632d23db2b3ed1	-
+function	c:@F@atan2f	-			float (float, float)	float  | float 	-	-	-	08004caf9c2435b3	-
+function	c:@F@atan2	-			double (double, double)	double  | double 	-	-	-	07ff60fe91906539	-
+function	c:@F@atan2l	-			long double (long double, long double)	long double  | long double 	-	-	-	bcc03402a3c18f85	-
+function	c:@F@cosf	-			float (float)	float 	-	-	-	d22372747f705bd1	-
+function	c:@F@cos	-			double (double)	double 	-	-	-	ed0683c28c204503	-
+function	c:@F@cosl	-			long double (long double)	long double 	-	-	-	e225a33fec2e6dae	-
+function	c:@F@sinf	-			float (float)	float 	-	-	-	82b4cf070c9b6617	-
+function	c:@F@sin	-			double (double)	double 	-	-	-	b424bdf9dc8d6f50	-
+function	c:@F@sinl	-			long double (long double)	long double 	-	-	-	7a741d8f4dde6ae0	-
+function	c:@F@tanf	-			float (float)	float 	-	-	-	4456ee0bf6dfb475	-
+function	c:@F@tan	-			double (double)	double 	-	-	-	b0e9b24934b1b948	-
+function	c:@F@tanl	-			long double (long double)	long double 	-	-	-	54e17bbe1926a7ed	-
+function	c:@F@acoshf	-			float (float)	float 	-	-	-	5a42b319807f2f9a	-
+function	c:@F@acosh	-			double (double)	double 	-	-	-	6af4d5c3512b7474	-
+function	c:@F@acoshl	-			long double (long double)	long double 	-	-	-	02ce73f6d97eaa87	-
+function	c:@F@asinhf	-			float (float)	float 	-	-	-	62a54f827ecf205b	-
+function	c:@F@asinh	-			double (double)	double 	-	-	-	92418b2971fbfcc4	-
+function	c:@F@asinhl	-			long double (long double)	long double 	-	-	-	f32535e515d4a74d	-
+function	c:@F@atanhf	-			float (float)	float 	-	-	-	d045744c67c3ee3a	-
+function	c:@F@atanh	-			double (double)	double 	-	-	-	dd15767447880726	-
+function	c:@F@atanhl	-			long double (long double)	long double 	-	-	-	b8d0c5d4f1174413	-
+function	c:@F@coshf	-			float (float)	float 	-	-	-	083c8c3c62e9e840	-
+function	c:@F@cosh	-			double (double)	double 	-	-	-	5dea9fb3a5fbc480	-
+function	c:@F@coshl	-			long double (long double)	long double 	-	-	-	83e569cce09c1d69	-
+function	c:@F@sinhf	-			float (float)	float 	-	-	-	ebade37a8d88b3c2	-
+function	c:@F@sinh	-			double (double)	double 	-	-	-	2d198068923d5ca3	-
+function	c:@F@sinhl	-			long double (long double)	long double 	-	-	-	13ce8e4c97b6c4a9	-
+function	c:@F@tanhf	-			float (float)	float 	-	-	-	dee70857a8edeab7	-
+function	c:@F@tanh	-			double (double)	double 	-	-	-	cde4b96e5f9aacfe	-
+function	c:@F@tanhl	-			long double (long double)	long double 	-	-	-	564f79c2ae33a37d	-
+function	c:@F@expf	-			float (float)	float 	-	-	-	d2b948e577b3669b	-
+function	c:@F@exp	-			double (double)	double 	-	-	-	6c1d0989d28508be	-
+function	c:@F@expl	-			long double (long double)	long double 	-	-	-	d818afd094ef68d2	-
+function	c:@F@exp2f	-			float (float)	float 	-	-	-	5aff63e7f8b9de58	-
+function	c:@F@exp2	-			double (double)	double 	-	-	-	4271155b4c8fc0a1	-
+function	c:@F@exp2l	-			long double (long double)	long double 	-	-	-	117ce00ebcff7534	-
+function	c:@F@expm1f	-			float (float)	float 	-	-	-	52c8614127b58ea6	-
+function	c:@F@expm1	-			double (double)	double 	-	-	-	0c91eb8b843210b7	-
+function	c:@F@expm1l	-			long double (long double)	long double 	-	-	-	f150d398c8d9c91d	-
+function	c:@F@logf	-			float (float)	float 	-	-	-	61c3fa2069cf8a2b	-
+function	c:@F@log	-			double (double)	double 	-	-	-	ade6a7cc2847a98e	-
+function	c:@F@logl	-			long double (long double)	long double 	-	-	-	fb7a48ff04524b59	-
+function	c:@F@log10f	-			float (float)	float 	-	-	-	7fd3424f1ddfbc50	-
+function	c:@F@log10	-			double (double)	double 	-	-	-	8adaeaadb5dee0fe	-
+function	c:@F@log10l	-			long double (long double)	long double 	-	-	-	5bc246900cf76c9f	-
+function	c:@F@log2f	-			float (float)	float 	-	-	-	4fa4388c69420aa9	-
+function	c:@F@log2	-			double (double)	double 	-	-	-	e76f934ecb50c734	-
+function	c:@F@log2l	-			long double (long double)	long double 	-	-	-	b0d0f4e5117d24b2	-
+function	c:@F@log1pf	-			float (float)	float 	-	-	-	72b0ca0589f7155c	-
+function	c:@F@log1p	-			double (double)	double 	-	-	-	d7e3d946283bfee9	-
+function	c:@F@log1pl	-			long double (long double)	long double 	-	-	-	b9ab0564a10310e3	-
+function	c:@F@logbf	-			float (float)	float 	-	-	-	be8390a5d01bf8ce	-
+function	c:@F@logb	-			double (double)	double 	-	-	-	edcf5f576e264fac	-
+function	c:@F@logbl	-			long double (long double)	long double 	-	-	-	e19d197b4b428f60	-
+function	c:@F@modff	-			float (float, float *)	float  | float * 	-	-	-	e24a752d34889c07	-
+function	c:@F@modf	-			double (double, double *)	double  | double * 	-	-	-	cfaf4b6e06075c86	-
+function	c:@F@modfl	-			long double (long double, long double *)	long double  | long double * 	-	-	-	f713dd91f149fb65	-
+function	c:@F@ldexpf	-			float (float, int)	float  | int 	-	-	-	8b8f6d9c00aed3f9	-
+function	c:@F@ldexp	-			double (double, int)	double  | int 	-	-	-	2be53b03a85f7283	-
+function	c:@F@ldexpl	-			long double (long double, int)	long double  | int 	-	-	-	e20e799dd9c9748e	-
+function	c:@F@frexpf	-			float (float, int *)	float  | int * 	-	-	-	33d3fe94fc0ff17c	-
+function	c:@F@frexp	-			double (double, int *)	double  | int * 	-	-	-	ac375914d3600470	-
+function	c:@F@frexpl	-			long double (long double, int *)	long double  | int * 	-	-	-	ec13f3d3e5fdabad	-
+function	c:@F@ilogbf	-			int (float)	float 	-	-	-	cef69f7936da2e51	-
+function	c:@F@ilogb	-			int (double)	double 	-	-	-	b6256f4423d42a03	-
+function	c:@F@ilogbl	-			int (long double)	long double 	-	-	-	c29b502b25e58426	-
+function	c:@F@scalbnf	-			float (float, int)	float  | int 	-	-	-	7ce3396ea37e1427	-
+function	c:@F@scalbn	-			double (double, int)	double  | int 	-	-	-	37dd42cfaeb3dde0	-
+function	c:@F@scalbnl	-			long double (long double, int)	long double  | int 	-	-	-	9c52e48602ec3543	-
+function	c:@F@scalblnf	-			float (float, long)	float  | long 	-	-	-	ee542fce9e71ad61	-
+function	c:@F@scalbln	-			double (double, long)	double  | long 	-	-	-	db7b1ad18aee3386	-
+function	c:@F@scalblnl	-			long double (long double, long)	long double  | long 	-	-	-	1f2bf0312ac570df	-
+function	c:@F@fabsf	-			float (float)	float 	-	-	-	cb61333e9d7e4b72	-
+function	c:@F@fabs	-			double (double)	double 	-	-	-	e26f7993c4f1bc9a	-
+function	c:@F@fabsl	-			long double (long double)	long double 	-	-	-	bf29b650dcb76a3a	-
+function	c:@F@cbrtf	-			float (float)	float 	-	-	-	8ecc93b1fb4f83c3	-
+function	c:@F@cbrt	-			double (double)	double 	-	-	-	c46d964ad8056749	-
+function	c:@F@cbrtl	-			long double (long double)	long double 	-	-	-	312e857115c42b68	-
+function	c:@F@hypotf	-			float (float, float)	float  | float 	-	-	-	f78019c13c64db68	-
+function	c:@F@hypot	-			double (double, double)	double  | double 	-	-	-	455617fef4e2a436	-
+function	c:@F@hypotl	-			long double (long double, long double)	long double  | long double 	-	-	-	2db9e84bb6fe971b	-
+function	c:@F@powf	-			float (float, float)	float  | float 	-	-	-	4c251d1b3ed1215b	-
+function	c:@F@pow	-			double (double, double)	double  | double 	-	-	-	a9c11370cf27d1b0	-
+function	c:@F@powl	-			long double (long double, long double)	long double  | long double 	-	-	-	31f8e35fb3b4df9c	-
+function	c:@F@sqrtf	-			float (float)	float 	-	-	-	9d64f058ca60de86	-
+function	c:@F@sqrt	-			double (double)	double 	-	-	-	2dc954cb243abaa3	-
+function	c:@F@sqrtl	-			long double (long double)	long double 	-	-	-	8a73d4e770f206ad	-
+function	c:@F@erff	-			float (float)	float 	-	-	-	a3490c23fdf82bb6	-
+function	c:@F@erf	-			double (double)	double 	-	-	-	5956f84aa8b0af0c	-
+function	c:@F@erfl	-			long double (long double)	long double 	-	-	-	10045136a8bb07ae	-
+function	c:@F@erfcf	-			float (float)	float 	-	-	-	2005b09a78b0c3aa	-
+function	c:@F@erfc	-			double (double)	double 	-	-	-	e59307ab3b8ffeef	-
+function	c:@F@erfcl	-			long double (long double)	long double 	-	-	-	0e891cdae75af6bc	-
+function	c:@F@lgammaf	-			float (float)	float 	-	-	-	147eb3e694e0454e	-
+function	c:@F@lgamma	-			double (double)	double 	-	-	-	1bb566d59769574a	-
+function	c:@F@lgammal	-			long double (long double)	long double 	-	-	-	375ebea35b84f21c	-
+function	c:@F@tgammaf	-			float (float)	float 	-	-	-	d3ba5fedead1f07b	-
+function	c:@F@tgamma	-			double (double)	double 	-	-	-	0d07fcd0addf5224	-
+function	c:@F@tgammal	-			long double (long double)	long double 	-	-	-	09cddc31b2a97905	-
+function	c:@F@ceilf	-			float (float)	float 	-	-	-	e2ae7b83a7be47c8	-
+function	c:@F@ceil	-			double (double)	double 	-	-	-	3cde4649e7c35cef	-
+function	c:@F@ceill	-			long double (long double)	long double 	-	-	-	147ac99c6391856a	-
+function	c:@F@floorf	-			float (float)	float 	-	-	-	c78c524a2450a683	-
+function	c:@F@floor	-			double (double)	double 	-	-	-	77e0312085a1ca41	-
+function	c:@F@floorl	-			long double (long double)	long double 	-	-	-	dfc1ce67ac738d62	-
+function	c:@F@nearbyintf	-			float (float)	float 	-	-	-	e2490627d76b079b	-
+function	c:@F@nearbyint	-			double (double)	double 	-	-	-	1d67d765b4d50b4f	-
+function	c:@F@nearbyintl	-			long double (long double)	long double 	-	-	-	d30c6c361396c182	-
+function	c:@F@rintf	-			float (float)	float 	-	-	-	c003fbb1c5365031	-
+function	c:@F@rint	-			double (double)	double 	-	-	-	acb819db4006955e	-
+function	c:@F@rintl	-			long double (long double)	long double 	-	-	-	5039c52b2ab5d72b	-
+function	c:@F@lrintf	-			long (float)	float 	-	-	-	c6ee85501e3bb57c	-
+function	c:@F@lrint	-			long (double)	double 	-	-	-	257a69a07809482c	-
+function	c:@F@lrintl	-			long (long double)	long double 	-	-	-	7cbffc7ac1b6b536	-
+function	c:@F@roundf	-			float (float)	float 	-	-	-	75adde76bb103a3e	-
+function	c:@F@round	-			double (double)	double 	-	-	-	5cd76390eaeebb42	-
+function	c:@F@roundl	-			long double (long double)	long double 	-	-	-	71e67bf5511b5306	-
+function	c:@F@lroundf	-			long (float)	float 	-	-	-	4ba900e244cf90f9	-
+function	c:@F@lround	-			long (double)	double 	-	-	-	af6bb2636da8a924	-
+function	c:@F@lroundl	-			long (long double)	long double 	-	-	-	05e0f6309baa3ee7	-
+function	c:@F@llrintf	-			long long (float)	float 	-	-	-	9c4fc51c9c38d49e	-
+function	c:@F@llrint	-			long long (double)	double 	-	-	-	4726f0357fdcce27	-
+function	c:@F@llrintl	-			long long (long double)	long double 	-	-	-	1a8969998f9824be	-
+function	c:@F@llroundf	-			long long (float)	float 	-	-	-	6a2369f366b03e93	-
+function	c:@F@llround	-			long long (double)	double 	-	-	-	1dfc43af7554b4fe	-
+function	c:@F@llroundl	-			long long (long double)	long double 	-	-	-	4d8b6d8f01f6045a	-
+function	c:@F@truncf	-			float (float)	float 	-	-	-	b4e14460df799977	-
+function	c:@F@trunc	-			double (double)	double 	-	-	-	60ae962823fc152f	-
+function	c:@F@truncl	-			long double (long double)	long double 	-	-	-	66b7b5f90508833c	-
+function	c:@F@fmodf	-			float (float, float)	float  | float 	-	-	-	f44d6fff92ee19e7	-
+function	c:@F@fmod	-			double (double, double)	double  | double 	-	-	-	daadc929b2f5a368	-
+function	c:@F@fmodl	-			long double (long double, long double)	long double  | long double 	-	-	-	cee0abbf4c6c2657	-
+function	c:@F@remainderf	-			float (float, float)	float  | float 	-	-	-	11176a440b7f27b6	-
+function	c:@F@remainder	-			double (double, double)	double  | double 	-	-	-	9b82bf9f4d00673c	-
+function	c:@F@remainderl	-			long double (long double, long double)	long double  | long double 	-	-	-	1e66a5e7a3a64fe5	-
+function	c:@F@remquof	-			float (float, float, int *)	float  | float  | int * 	-	-	-	5ba4a22940862977	-
+function	c:@F@remquo	-			double (double, double, int *)	double  | double  | int * 	-	-	-	dd19af34573639a2	-
+function	c:@F@remquol	-			long double (long double, long double, int *)	long double  | long double  | int * 	-	-	-	d6219d7a1975d8ac	-
+function	c:@F@copysignf	-			float (float, float)	float  | float 	-	-	-	4ac6f3f88873690f	-
+function	c:@F@copysign	-			double (double, double)	double  | double 	-	-	-	a5cdd230d0e30de6	-
+function	c:@F@copysignl	-			long double (long double, long double)	long double  | long double 	-	-	-	962c7d2b615879f1	-
+function	c:@F@nanf	-			float (const char *)	const char * 	-	-	-	f5e34059cc3b6f71	-
+function	c:@F@nan	-			double (const char *)	const char * 	-	-	-	9c849687de9f3ba0	-
+function	c:@F@nanl	-			long double (const char *)	const char * 	-	-	-	dfc21ffd13ddca05	-
+function	c:@F@nextafterf	-			float (float, float)	float  | float 	-	-	-	20debea62cbbc966	-
+function	c:@F@nextafter	-			double (double, double)	double  | double 	-	-	-	b9a580e68a3f6c44	-
+function	c:@F@nextafterl	-			long double (long double, long double)	long double  | long double 	-	-	-	88b0cac08220e425	-
+function	c:@F@nexttoward	-			double (double, long double)	double  | long double 	-	-	-	ae0b46b95525504a	-
+function	c:@F@nexttowardf	-			float (float, long double)	float  | long double 	-	-	-	f2e6fd307fce68e8	-
+function	c:@F@nexttowardl	-			long double (long double, long double)	long double  | long double 	-	-	-	6a92d3d597850c7c	-
+function	c:@F@fdimf	-			float (float, float)	float  | float 	-	-	-	16dd2b7d873b4da1	-
+function	c:@F@fdim	-			double (double, double)	double  | double 	-	-	-	9f763c15b46886c6	-
+function	c:@F@fdiml	-			long double (long double, long double)	long double  | long double 	-	-	-	0ac78c50b10af03e	-
+function	c:@F@fmaxf	-			float (float, float)	float  | float 	-	-	-	b2a3e0e1980db46b	-
+function	c:@F@fmax	-			double (double, double)	double  | double 	-	-	-	316550af1e0eeb07	-
+function	c:@F@fmaxl	-			long double (long double, long double)	long double  | long double 	-	-	-	ee1797ed36e394ff	-
+function	c:@F@fminf	-			float (float, float)	float  | float 	-	-	-	22a51f7deadd4f51	-
+function	c:@F@fmin	-			double (double, double)	double  | double 	-	-	-	fb98d71a4a69a3b5	-
+function	c:@F@fminl	-			long double (long double, long double)	long double  | long double 	-	-	-	1f52d89cfaddb0d5	-
+function	c:@F@fmaf	-			float (float, float, float)	float  | float  | float 	-	-	-	18545c79781ab300	-
+function	c:@F@fma	-			double (double, double, double)	double  | double  | double 	-	-	-	b67b9e95ffb3f335	-
+function	c:@F@fmal	-			long double (long double, long double, long double)	long double  | long double  | long double 	-	-	-	bcd4e8b0915a9e62	-
+function	c:@F@__exp10f	-			float (float)	float 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	25e269b18f7e6c7e	-
+function	c:@F@__exp10	-			double (double)	double 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	dad1623b9b26b93e	-
+function	c:@F@__sincosf	-			void (float, float *, float *)	float __x | float * __sinp | float * __cosp	-	-	-	d0542597cc351fc6	-
+function	c:@F@__sincos	-			void (double, double *, double *)	double __x | double * __sinp | double * __cosp	-	-	-	19a2a43cc9f12d93	-
+function	c:@F@__cospif	-			float (float)	float 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	d84814384d808384	-
+function	c:@F@__cospi	-			double (double)	double 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	927a4dd56d5415b2	-
+function	c:@F@__sinpif	-			float (float)	float 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	58d7e76e534920c8	-
+function	c:@F@__sinpi	-			double (double)	double 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	65db67ee7a9edbf6	-
+function	c:@F@__tanpif	-			float (float)	float 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	fbe128963b1f74cc	-
+function	c:@F@__tanpi	-			double (double)	double 	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	6c1580e4bb288945	-
+function	c:@F@__fabsf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	3fd73603a6cf8c80	-
+function	c:@F@__hypotf16	-			_Float16 (_Float16, _Float16)	_Float16  | _Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	9894ebfdf8cff448	-
+function	c:@F@__sqrtf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	637dce906629f088	-
+function	c:@F@__ceilf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	71de62ef49f52b5f	-
+function	c:@F@__floorf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	4da74f81122908d4	-
+function	c:@F@__rintf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	69e3d5a10195bfa4	-
+function	c:@F@__roundf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	848c43436642a37f	-
+function	c:@F@__truncf16	-			_Float16 (_Float16)	_Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	f4a3fbf236a8b89d	-
+function	c:@F@__copysignf16	-			_Float16 (_Float16, _Float16)	_Float16  | _Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	0509c3270f428ca3	-
+function	c:@F@__nextafterf16	-			_Float16 (_Float16, _Float16)	_Float16  | _Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	f7fe3bf69e1e7e46	-
+function	c:@F@__fmaxf16	-			_Float16 (_Float16, _Float16)	_Float16  | _Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	5cd5016cfce85703	-
+function	c:@F@__fminf16	-			_Float16 (_Float16, _Float16)	_Float16  | _Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	f335bb7f93355a72	-
+function	c:@F@__fmaf16	-			_Float16 (_Float16, _Float16, _Float16)	_Float16  | _Float16  | _Float16 	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	d8e4ff1f03d7ed4f	-
+function	c:@F@__sincospif	-			void (float, float *, float *)	float __x | float * __sinp | float * __cosp	-	-	-	9a85a1ac1fb17c72	-
+function	c:@F@__sincospi	-			void (double, double *, double *)	double __x | double * __sinp | double * __cosp	-	-	-	0037d0bd5a39d02a	-
+struct	c:@S@__float2	-			-	-	-	-	-	7e8a15ab0500281c	-
+field	c:@S@__float2@FI@__sinval	__float2			float	-	-	-	-	0d5efe37cae7b786	-
+field	c:@S@__float2@FI@__cosval	__float2			float	-	-	-	-	3e882104f6d85584	-
+struct	c:@S@__double2	-			-	-	-	-	-	75f7615e621bada4	-
+field	c:@S@__double2@FI@__sinval	__double2			double	-	-	-	-	063114aa38d4c4cb	-
+field	c:@S@__double2@FI@__cosval	__double2			double	-	-	-	-	dbc41bc04b296d94	-
+function	c:@F@__sincosf_stret	-			struct __float2 (float)	float 	-	-	-	dba9f5276744e5eb	-
+function	c:@F@__sincos_stret	-			struct __double2 (double)	double 	-	-	-	54e0159bd808fa86	-
+function	c:@F@__sincospif_stret	-			struct __float2 (float)	float 	-	-	-	0f889a4c62aa06e5	-
+function	c:@F@__sincospi_stret	-			struct __double2 (double)	double 	-	-	-	f1d911a8a7e86d4b	-
+function	c:@F@j0	-			double (double)	double 	-	ios=3.2/-/-/0,macos=10.0/-/-/0	-	9e52de17ae7b91dd	-
+function	c:@F@j1	-			double (double)	double 	-	ios=3.2/-/-/0,macos=10.0/-/-/0	-	04b329a906abd997	-
+function	c:@F@jn	-			double (int, double)	int  | double 	-	ios=3.2/-/-/0,macos=10.0/-/-/0	-	b59f8cbc13611e95	-
+function	c:@F@y0	-			double (double)	double 	-	ios=3.2/-/-/0,macos=10.0/-/-/0	-	97da0f4bfced6649	-
+function	c:@F@y1	-			double (double)	double 	-	ios=3.2/-/-/0,macos=10.0/-/-/0	-	c41ef94a60af630f	-
+function	c:@F@yn	-			double (int, double)	int  | double 	-	ios=3.2/-/-/0,macos=10.0/-/-/0	-	d96621579dc418da	-
+function	c:@F@scalb	-			double (double, double)	double  | double 	-	-	-	b44ebfbff583055a	-
+var	c:@signgam	-			int	-	-	-	-	f743b6eaee80b168	-
+struct	c:@S@exception	-			-	-	-	-	-	3f0e0ecd7fb9f01e	-
+field	c:@S@exception@FI@type	exception			int	-	-	-	-	9d67e1da8796129d	-
+field	c:@S@exception@FI@name	exception			char *	-	-	-	-	4b08eb378fadf0a5	-
+field	c:@S@exception@FI@arg1	exception			double	-	-	-	-	a95f6b3977a10571	-
+field	c:@S@exception@FI@arg2	exception			double	-	-	-	-	c48bdacf71d3ded1	-
+field	c:@S@exception@FI@retval	exception			double	-	-	-	-	af12848c1c8131e3	-
+typedef	c:@T@jmp_buf	-			int[48]	-	-	-	-	ebe1c8777c9d37b2	-
+typedef	c:@T@sigjmp_buf	-			int[49]	-	-	-	-	4d0c2d5368738b65	-
+function	c:@F@setjmp	-			int (int *)	jmp_buf 	-	-	-	1977482279d562e2	-
+function	c:@F@longjmp	-			void (int *, int)	jmp_buf  | int 	-	-	-	e10f8f2c2913ee82	-
+function	c:@F@_setjmp	-			int (int *)	jmp_buf 	-	-	-	aa81210aeec120e6	-
+function	c:@F@_longjmp	-			void (int *, int)	jmp_buf  | int 	-	-	-	31e81c97633ccbb6	-
+function	c:@F@sigsetjmp	-			int (int *, int)	sigjmp_buf  | int 	-	-	-	20ea4ade073f7daf	-
+function	c:@F@siglongjmp	-			void (int *, int)	sigjmp_buf  | int 	-	-	-	51fb31da5e49753e	-
+function	c:@F@longjmperror	-			void (void)	-	-	-	-	c72008122648156a	-

@@ -1,0 +1,14 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "+[UIActivity activityCategory]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIActivityCategory.md",
+      "source": "the header of SDK 9.3, which documents the override point and its default"
+    }
+  ]
+}

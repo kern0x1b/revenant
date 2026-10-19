@@ -1,0 +1,332 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@TKErrorDomain	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	c5c141373551222b	-
+typedef	c:@T@TKErrorCode	-			enum TKErrorCode	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	2c1a0cffb6844523	-
+enum	c:@E@TKErrorCode	-			NSInteger	-	-	-	-	18bd8f47135f4243	-
+enumconst	c:@E@TKErrorCode@TKErrorCodeNotImplemented	TKErrorCode			-	-	-	-	-	bc20b4f6da27a705	-1
+enumconst	c:@E@TKErrorCode@TKErrorCodeCommunicationError	TKErrorCode			-	-	-	-	-	1b1849854a1968be	-2
+enumconst	c:@E@TKErrorCode@TKErrorCodeCorruptedData	TKErrorCode			-	-	-	-	-	bb336138deb50c96	-3
+enumconst	c:@E@TKErrorCode@TKErrorCodeCanceledByUser	TKErrorCode			-	-	-	-	-	ffcf53a7330f18a9	-4
+enumconst	c:@E@TKErrorCode@TKErrorCodeAuthenticationFailed	TKErrorCode			-	-	-	-	-	4bfb4fc05c2be9ee	-5
+enumconst	c:@E@TKErrorCode@TKErrorCodeObjectNotFound	TKErrorCode			-	-	-	-	-	1b9e9827b00240d9	-6
+enumconst	c:@E@TKErrorCode@TKErrorCodeTokenNotFound	TKErrorCode			-	-	-	-	-	b18d6a0675bb4e80	-7
+enumconst	c:@E@TKErrorCode@TKErrorCodeBadParameter	TKErrorCode			-	-	-	-	-	f78a9d0759e1160e	-8
+enumconst	c:@E@TKErrorCode@TKErrorCodeAuthenticationNeeded	TKErrorCode			-	-	-	-	-	198884a30c871ad0	-9
+enumconst	c:@E@TKErrorCode@TKErrorAuthenticationFailed	TKErrorCode			-	-	-	ios=9.0/9.0/-/0,macos=10.10/10.11/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	deprecated: Use TKErrorCodeAuthenticationFailed instead	4ae54fb988948f1b	-5
+enumconst	c:@E@TKErrorCode@TKErrorObjectNotFound	TKErrorCode			-	-	-	ios=9.0/9.0/-/0,macos=10.10/10.11/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	deprecated: Use TKErrorCodeObjectNotFound instead	19c5579029c9ff85	-6
+enumconst	c:@E@TKErrorCode@TKErrorTokenNotFound	TKErrorCode			-	-	-	ios=9.0/9.0/-/0,macos=10.10/10.11/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	deprecated: Use TKErrorCodeTokenNotFound instead	afcf0d2e43ade411	-7
+typedef	c:@T@TKTLVTag	-			UInt64	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	5846fd9cef67f202	-
+interface	c:objc(cs)TKTLVRecord	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	539c6bcce73cabd4	-
+super	-	TKTLVRecord	NSObject		-	-	-	-	-	70a89e82c4575702	-
+property	c:objc(cs)TKTLVRecord(py)tag	-			TKTLVTag	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f7007ce006d12a9e	-
+property	c:objc(cs)TKTLVRecord(py)value	-			NSData *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	67383d7f0fad61a0	-
+property	c:objc(cs)TKTLVRecord(py)data	-			NSData *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	351b9e91755b1832	-
+method	c:objc(cs)TKTLVRecord(cm)recordFromData:	-			instancetype	NSData * data	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e8d3a898b90e6e37	-
+method	c:objc(cs)TKTLVRecord(cm)sequenceOfRecordsFromData:	-			NSArray<TKTLVRecord *> *	NSData * data	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4081a66991dba829	-
+method	c:objc(cs)TKTLVRecord(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	fe76fceebafefbfe	-
+interface	c:objc(cs)TKBERTLVRecord	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	deae321a6d7f191e	-
+super	-	TKBERTLVRecord	TKTLVRecord		-	-	-	-	-	e9fd94065bff8c8e	-
+method	c:objc(cs)TKBERTLVRecord(cm)dataForTag:	-			NSData *	TKTLVTag tag	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	7b5e32b9b93cfa28	-
+method	c:objc(cs)TKBERTLVRecord(im)initWithTag:value:	-			instancetype	TKTLVTag tag | NSData * value	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	df4c822ec1c37504	-
+method	c:objc(cs)TKBERTLVRecord(im)initWithTag:records:	-			instancetype	TKTLVTag tag | NSArray<TKTLVRecord *> * records	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e1747517c1e3be52	-
+interface	c:objc(cs)TKSimpleTLVRecord	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	8a59329e4e908e25	-
+super	-	TKSimpleTLVRecord	TKTLVRecord		-	-	-	-	-	58cdf1502faedcd5	-
+method	c:objc(cs)TKSimpleTLVRecord(im)initWithTag:value:	-			instancetype	UInt8 tag | NSData * value	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	fe486cd7764579a0	-
+interface	c:objc(cs)TKCompactTLVRecord	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4793697bff58cd62	-
+super	-	TKCompactTLVRecord	TKTLVRecord		-	-	-	-	-	9f9ff610531d724d	-
+method	c:objc(cs)TKCompactTLVRecord(im)initWithTag:value:	-			instancetype	UInt8 tag | NSData * value	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3a850d2f94a6f89a	-
+typedef	c:@T@TKSmartCardProtocol	-			enum TKSmartCardProtocol	-	-	-	-	00149a176434a119	-
+enum	c:@E@TKSmartCardProtocol	-			NSUInteger	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	e8c96f1ed265e299	-
+enumconst	c:@E@TKSmartCardProtocol@TKSmartCardProtocolNone	TKSmartCardProtocol			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	3126906da87cecee	0
+enumconst	c:@E@TKSmartCardProtocol@TKSmartCardProtocolT0	TKSmartCardProtocol			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	999f60106b453ee2	1
+enumconst	c:@E@TKSmartCardProtocol@TKSmartCardProtocolT1	TKSmartCardProtocol			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	af2c569cc99f7ad7	2
+enumconst	c:@E@TKSmartCardProtocol@TKSmartCardProtocolT15	TKSmartCardProtocol			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	b6f9f7d78fca7982	32768
+enumconst	c:@E@TKSmartCardProtocol@TKSmartCardProtocolAny	TKSmartCardProtocol			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	4659d5d847afbb9a	65535
+interface	c:objc(cs)TKSmartCardATRInterfaceGroup	-			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	232acb29006a5f4f	-
+super	-	TKSmartCardATRInterfaceGroup	NSObject		-	-	-	-	-	853e73d72b60fcce	-
+property	c:objc(cs)TKSmartCardATRInterfaceGroup(py)TA	-			NSNumber *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6e917b127dda64de	-
+property	c:objc(cs)TKSmartCardATRInterfaceGroup(py)TB	-			NSNumber *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	5cb8d78ca1550d32	-
+property	c:objc(cs)TKSmartCardATRInterfaceGroup(py)TC	-			NSNumber *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	48fa35c7bdda83a9	-
+property	c:objc(cs)TKSmartCardATRInterfaceGroup(py)protocol	-			NSNumber *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	171e57c7b50e49aa	-
+interface	c:objc(cs)TKSmartCardATR	-			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	a217be70aff06633	-
+super	-	TKSmartCardATR	NSObject		-	-	-	-	-	1312d8b8a79afb67	-
+method	c:objc(cs)TKSmartCardATR(im)initWithBytes:	-			instancetype	NSData * bytes	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	95651a0d1c274695	-
+method	c:objc(cs)TKSmartCardATR(im)initWithSource:	-			instancetype	int (^)(void) source	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	a4e9eaf38418772f	-
+property	c:objc(cs)TKSmartCardATR(py)bytes	-			NSData *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	e1d3c69fb1cad005	-
+property	c:objc(cs)TKSmartCardATR(py)protocols	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	cf8d10f228993c16	-
+method	c:objc(cs)TKSmartCardATR(im)interfaceGroupAtIndex:	-			TKSmartCardATRInterfaceGroup *	NSInteger index	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	32bc2cb5ef294acb	-
+method	c:objc(cs)TKSmartCardATR(im)interfaceGroupForProtocol:	-			TKSmartCardATRInterfaceGroup *	TKSmartCardProtocol protocol	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	8bc1346f44d352f8	-
+property	c:objc(cs)TKSmartCardATR(py)historicalBytes	-			NSData *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c9016e7cdc0ef1aa	-
+property	c:objc(cs)TKSmartCardATR(py)historicalRecords	-			NSArray<TKCompactTLVRecord *> *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	617ef44a7e41c419	-
+interface	c:objc(cs)TKSmartCardSlotNFCSession	-			-	-	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	572f9668518f5fd4	-
+super	-	TKSmartCardSlotNFCSession	NSObject		-	-	-	-	-	95f420b169911d23	-
+property	c:objc(cs)TKSmartCardSlotNFCSession(py)slotName	-			NSString *	-	readonly,copy,nonatomic	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	ee4696c031187e73	-
+method	c:objc(cs)TKSmartCardSlotNFCSession(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	7f20924d9d1c85cb	-
+method	c:objc(cs)TKSmartCardSlotNFCSession(im)updateWithMessage:error:	-			BOOL	NSString * message | NSError * _Nullable * error	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	7b85e528bee2d3cb	-
+method	c:objc(cs)TKSmartCardSlotNFCSession(im)endSession	-			void	-	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	1b3193854f296655	-
+interface	c:objc(cs)TKSmartCardSlotManager	-			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	abb70dfd82fcec63	-
+super	-	TKSmartCardSlotManager	NSObject		-	-	-	-	-	3c0097561f4fd938	-
+property	c:objc(cs)TKSmartCardSlotManager(cpy)defaultManager	-			TKSmartCardSlotManager *	-	readonly,class	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	9acfc76f4cc9a0cb	-
+property	c:objc(cs)TKSmartCardSlotManager(py)slotNames	-			NSArray<NSString *> *	-	readonly	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6dd072d47fe52088	-
+method	c:objc(cs)TKSmartCardSlotManager(im)getSlotWithName:reply:	-			void	NSString * name | void (^)(TKSmartCardSlot * _Nullable) reply	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	354b846b6538bf80	-
+method	c:objc(cs)TKSmartCardSlotManager(im)slotNamed:	-			TKSmartCardSlot *	NSString * name	-	ios=9.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	dba1c6dac92c60c7	-
+method	c:objc(cs)TKSmartCardSlotManager(im)createNFCSlotWithMessage:completion:	-			void	NSString * message | void (^)(TKSmartCardSlotNFCSession * _Nullable, NSError * _Nullable) completion	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f78227b25df04a02	-
+method	c:objc(cs)TKSmartCardSlotManager(im)isNFCSupported	-			BOOL	-	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	202b469a8234fffc	-
+typedef	c:@T@TKSmartCardSlotState	-			enum TKSmartCardSlotState	-	-	-	-	42f87df2d78cf370	-
+enum	c:@E@TKSmartCardSlotState	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	963b33c84b71784a	-
+enumconst	c:@E@TKSmartCardSlotState@TKSmartCardSlotStateMissing	TKSmartCardSlotState			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	09171c4d8fa2adec	0
+enumconst	c:@E@TKSmartCardSlotState@TKSmartCardSlotStateEmpty	TKSmartCardSlotState			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	8e5af8a21ae0fec3	1
+enumconst	c:@E@TKSmartCardSlotState@TKSmartCardSlotStateProbing	TKSmartCardSlotState			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	d98c9c88649bd0eb	2
+enumconst	c:@E@TKSmartCardSlotState@TKSmartCardSlotStateMuteCard	TKSmartCardSlotState			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	e3c13c03ab01d4ca	3
+enumconst	c:@E@TKSmartCardSlotState@TKSmartCardSlotStateValidCard	TKSmartCardSlotState			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c079fdd78522e640	4
+typedef	c:@T@TKSmartCardPINCharset	-			enum TKSmartCardPINCharset	-	-	-	-	c37e253d09331590	-
+enum	c:@E@TKSmartCardPINCharset	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6b45db2775db02fc	-
+enumconst	c:@E@TKSmartCardPINCharset@TKSmartCardPINCharsetNumeric	TKSmartCardPINCharset			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	ae16d5194c94e7ed	0
+enumconst	c:@E@TKSmartCardPINCharset@TKSmartCardPINCharsetAlphanumeric	TKSmartCardPINCharset			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	2cd3ac58c83a1a5b	1
+enumconst	c:@E@TKSmartCardPINCharset@TKSmartCardPINCharsetUpperAlphanumeric	TKSmartCardPINCharset			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	4365a39593e98d2d	2
+typedef	c:@T@TKSmartCardPINEncoding	-			enum TKSmartCardPINEncoding	-	-	-	-	4c298a133ea9278e	-
+enum	c:@E@TKSmartCardPINEncoding	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6c0020da000b7feb	-
+enumconst	c:@E@TKSmartCardPINEncoding@TKSmartCardPINEncodingBinary	TKSmartCardPINEncoding			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	a84b81fbc04703fd	0
+enumconst	c:@E@TKSmartCardPINEncoding@TKSmartCardPINEncodingASCII	TKSmartCardPINEncoding			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	18e98bf233fecf6d	1
+enumconst	c:@E@TKSmartCardPINEncoding@TKSmartCardPINEncodingBCD	TKSmartCardPINEncoding			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	798fc44bea9b975a	2
+typedef	c:@T@TKSmartCardPINJustification	-			enum TKSmartCardPINJustification	-	-	-	-	b271cf0b65c6c534	-
+enum	c:@E@TKSmartCardPINJustification	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	62de8201e0dc8c2a	-
+enumconst	c:@E@TKSmartCardPINJustification@TKSmartCardPINJustificationLeft	TKSmartCardPINJustification			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	afb6c1e7302682df	0
+enumconst	c:@E@TKSmartCardPINJustification@TKSmartCardPINJustificationRight	TKSmartCardPINJustification			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	8c0ced120f793427	1
+typedef	c:@T@TKSmartCardPINCompletion	-			enum TKSmartCardPINCompletion	-	-	-	-	99240cea6fbd8ce3	-
+enum	c:@E@TKSmartCardPINCompletion	-			NSUInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	2d50f6225927db0a	-
+enumconst	c:@E@TKSmartCardPINCompletion@TKSmartCardPINCompletionMaxLength	TKSmartCardPINCompletion			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	335dd2b20a5d9ac7	1
+enumconst	c:@E@TKSmartCardPINCompletion@TKSmartCardPINCompletionKey	TKSmartCardPINCompletion			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	f4c252a5cbf2c51d	2
+enumconst	c:@E@TKSmartCardPINCompletion@TKSmartCardPINCompletionTimeout	TKSmartCardPINCompletion			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	a9d93aab6746bf2e	4
+typedef	c:@T@TKSmartCardPINConfirmation	-			enum TKSmartCardPINConfirmation	-	-	-	-	0727b66339383323	-
+enum	c:@E@TKSmartCardPINConfirmation	-			NSUInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	019d95a58666f6a6	-
+enumconst	c:@E@TKSmartCardPINConfirmation@TKSmartCardPINConfirmationNone	TKSmartCardPINConfirmation			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	2bf7ef8805e50315	0
+enumconst	c:@E@TKSmartCardPINConfirmation@TKSmartCardPINConfirmationNew	TKSmartCardPINConfirmation			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	2e6349a55c0590d0	1
+enumconst	c:@E@TKSmartCardPINConfirmation@TKSmartCardPINConfirmationCurrent	TKSmartCardPINConfirmation			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	2eb468aee01ef2d1	2
+interface	c:objc(cs)TKSmartCardPINFormat	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	cdee9e71ae01bb1b	-
+super	-	TKSmartCardPINFormat	NSObject		-	-	-	-	-	cc80fa087eefd1ff	-
+property	c:objc(cs)TKSmartCardPINFormat(py)charset	-			TKSmartCardPINCharset	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	f88100e966747a03	-
+property	c:objc(cs)TKSmartCardPINFormat(py)encoding	-			TKSmartCardPINEncoding	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	e66e93f4f4dd0149	-
+property	c:objc(cs)TKSmartCardPINFormat(py)minPINLength	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	ad46d2d6446a5f78	-
+property	c:objc(cs)TKSmartCardPINFormat(py)maxPINLength	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6d3e313a6c47e234	-
+property	c:objc(cs)TKSmartCardPINFormat(py)PINBlockByteLength	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	92a9dfe3774e3b9c	-
+property	c:objc(cs)TKSmartCardPINFormat(py)PINJustification	-			TKSmartCardPINJustification	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	68d185827ced63db	-
+property	c:objc(cs)TKSmartCardPINFormat(py)PINBitOffset	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	971fecfe6569a3c7	-
+property	c:objc(cs)TKSmartCardPINFormat(py)PINLengthBitOffset	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	326e9879cbcae3a9	-
+property	c:objc(cs)TKSmartCardPINFormat(py)PINLengthBitSize	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	aaf177da35a5eeac	-
+protocol	c:objc(pl)TKSmartCardUserInteractionDelegate	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c1cb2aeaf2283273	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)characterEnteredInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	857b0bbb736b58e8	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)correctionKeyPressedInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	981b1c8a9446a7e0	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)validationKeyPressedInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c77cb1c638278a54	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)invalidCharacterEnteredInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	25004f6c04ceca3c	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)oldPINRequestedInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	ee2aaa56d508d431	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)newPINRequestedInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	0edf1cf44df12405	-
+method	c:objc(pl)TKSmartCardUserInteractionDelegate(im)newPINConfirmationRequestedInUserInteraction:	-			void	TKSmartCardUserInteraction * interaction	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	bae9b81b6231ed65	-
+interface	c:objc(cs)TKSmartCardUserInteraction	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	5af4794c9cc5d496	-
+super	-	TKSmartCardUserInteraction	NSObject		-	-	-	-	-	8f880ae9c4b85365	-
+property	c:objc(cs)TKSmartCardUserInteraction(py)delegate	-			id<TKSmartCardUserInteractionDelegate>	-	weak	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	9f05a0cd93f3d539	-
+property	c:objc(cs)TKSmartCardUserInteraction(py)initialTimeout	-			NSTimeInterval	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	8d415642ca62b13f	-
+property	c:objc(cs)TKSmartCardUserInteraction(py)interactionTimeout	-			NSTimeInterval	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c78cdf4a1a529d34	-
+method	c:objc(cs)TKSmartCardUserInteraction(im)runWithReply:	-			void	void (^)(BOOL, NSError * _Nullable) reply	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	d774e8c72cd51311	-
+method	c:objc(cs)TKSmartCardUserInteraction(im)cancel	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	408ab3b496694f5a	-
+interface	c:objc(cs)TKSmartCardUserInteractionForPINOperation	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	47fc0b2d66ce0f70	-
+super	-	TKSmartCardUserInteractionForPINOperation	TKSmartCardUserInteraction		-	-	-	-	-	c75b0da41e14099c	-
+property	c:objc(cs)TKSmartCardUserInteractionForPINOperation(py)PINCompletion	-			TKSmartCardPINCompletion	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	cd9c6a91b05dcb30	-
+property	c:objc(cs)TKSmartCardUserInteractionForPINOperation(py)PINMessageIndices	-			NSArray<NSNumber *> *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	18c7e069b17d25f8	-
+property	c:objc(cs)TKSmartCardUserInteractionForPINOperation(py)locale	-			NSLocale *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	1b3bddffacd1bd37	-
+property	c:objc(cs)TKSmartCardUserInteractionForPINOperation(py)resultSW	-			UInt16	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	598ea0764110d82a	-
+property	c:objc(cs)TKSmartCardUserInteractionForPINOperation(py)resultData	-			NSData *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c1be2edf961824e5	-
+interface	c:objc(cs)TKSmartCardUserInteractionForSecurePINVerification	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	cb1e35bddd387987	-
+super	-	TKSmartCardUserInteractionForSecurePINVerification	TKSmartCardUserInteractionForPINOperation		-	-	-	-	-	bbcf990c6d29f4aa	-
+interface	c:objc(cs)TKSmartCardUserInteractionForSecurePINChange	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	76a71e663bd65d2a	-
+super	-	TKSmartCardUserInteractionForSecurePINChange	TKSmartCardUserInteractionForPINOperation		-	-	-	-	-	b939e1ecf6b72c05	-
+property	c:objc(cs)TKSmartCardUserInteractionForSecurePINChange(py)PINConfirmation	-			TKSmartCardPINConfirmation	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	f171c6301e132e3d	-
+interface	c:objc(cs)TKSmartCardSlot	-			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	e8572f593578b93a	-
+super	-	TKSmartCardSlot	NSObject		-	-	-	-	-	1d489f1ae2d3765b	-
+property	c:objc(cs)TKSmartCardSlot(py)state	-			TKSmartCardSlotState	-	readonly	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	1fe6b73b2396cb53	-
+property	c:objc(cs)TKSmartCardSlot(py)ATR	-			TKSmartCardATR *	-	readonly	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	16b1849a28465d97	-
+property	c:objc(cs)TKSmartCardSlot(py)name	-			NSString *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	9811e17cc73701d9	-
+property	c:objc(cs)TKSmartCardSlot(py)maxInputLength	-			NSInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	bc18badf5531466e	-
+property	c:objc(cs)TKSmartCardSlot(py)maxOutputLength	-			NSInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	a580a1994fc82c61	-
+method	c:objc(cs)TKSmartCardSlot(im)makeSmartCard	-			TKSmartCard *	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	dcc795b7376bccc3	-
+interface	c:objc(cs)TKSmartCard	-			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	7654d7f7b0efd3e6	-
+super	-	TKSmartCard	NSObject		-	-	-	-	-	ff32503b527d445e	-
+property	c:objc(cs)TKSmartCard(py)slot	-			TKSmartCardSlot *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c7b8b1a67624e601	-
+property	c:objc(cs)TKSmartCard(py)valid	-			BOOL	-	readonly	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	1ddbfb1120a4d661	-
+property	c:objc(cs)TKSmartCard(py)allowedProtocols	-			TKSmartCardProtocol	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	5010d397016798b6	-
+property	c:objc(cs)TKSmartCard(py)currentProtocol	-			TKSmartCardProtocol	-	readonly	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	ff8803e56558359b	-
+property	c:objc(cs)TKSmartCard(py)sensitive	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6974efdf35396d9d	-
+property	c:objc(cs)TKSmartCard(py)context	-			id	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	bff6b69a855073e0	-
+method	c:objc(cs)TKSmartCard(im)beginSessionWithReply:	-			void	void (^)(BOOL, NSError * _Nullable) reply	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	33acc64e72a46a5b	-
+method	c:objc(cs)TKSmartCard(im)transmitRequest:reply:	-			void	NSData * request | void (^)(NSData * _Nullable, NSError * _Nullable) reply	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	4ef11570841ce914	-
+method	c:objc(cs)TKSmartCard(im)endSession	-			void	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	cb47c09a00a1998e	-
+method	c:objc(cs)TKSmartCard(im)userInteractionForSecurePINVerificationWithPINFormat:APDU:PINByteOffset:	-			TKSmartCardUserInteractionForSecurePINVerification *	TKSmartCardPINFormat * PINFormat | NSData * APDU | NSInteger PINByteOffset	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	998ca8755325e255	-
+method	c:objc(cs)TKSmartCard(im)userInteractionForSecurePINChangeWithPINFormat:APDU:currentPINByteOffset:newPINByteOffset:	-			TKSmartCardUserInteractionForSecurePINChange *	TKSmartCardPINFormat * PINFormat | NSData * APDU | NSInteger currentPINByteOffset | NSInteger newPINByteOffset	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	6d2ebe9373ab4116	-
+category	c:objc(cy)TKSmartCard@APDULevelTransmit	-			-	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	7422f792acb75589	-
+property	c:objc(cs)TKSmartCard(py)cla	APDULevelTransmit			UInt8	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	c02115db2248a3fc	-
+property	c:objc(cs)TKSmartCard(py)useExtendedLength	APDULevelTransmit			BOOL	-	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	e91cee5a8b13ed12	-
+property	c:objc(cs)TKSmartCard(py)useCommandChaining	APDULevelTransmit			BOOL	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	4bdedf6a87ca4659	-
+method	c:objc(cs)TKSmartCard(im)sendIns:p1:p2:data:le:reply:	APDULevelTransmit			void	UInt8 ins | UInt8 p1 | UInt8 p2 | NSData * requestData | NSNumber * le | void (^)(NSData * _Nullable, UInt16, NSError * _Nullable) reply	-	ios=9.0/-/-/0,macos=10.10/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	f5ee4fec8d934aa9	-
+method	c:objc(cs)TKSmartCard(im)inSessionWithError:executeBlock:	APDULevelTransmit			BOOL	NSError * _Nullable * error | BOOL (^)(NSError * _Nullable * _Nullable) block	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	ca5dffc3e6dfbb6c	-
+method	c:objc(cs)TKSmartCard(im)sendIns:p1:p2:data:le:sw:error:	APDULevelTransmit			NSData *	UInt8 ins | UInt8 p1 | UInt8 p2 | NSData * requestData | NSNumber * le | UInt16 * sw | NSError * _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0,xros=1.0/-/-/0	-	94e537cc5f9184bd	-
+typedef	c:@T@TKTokenObjectID	-			id	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	54f63071465d77a0	-
+typedef	c:@T@TKTokenInstanceID	-			NSString *	-	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	12bd3929d6ca2284	-
+typedef	c:@T@TKTokenDriverClassID	-			NSString *	-	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	d34d3deae6dbd746	-
+typedef	c:@T@TKTokenOperation	-			enum TKTokenOperation	-	-	-	-	b10a26245c09c692	-
+enum	c:@E@TKTokenOperation	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e0117c20e64acd60	-
+enumconst	c:@E@TKTokenOperation@TKTokenOperationNone	TKTokenOperation			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e5dff2747697506b	0
+enumconst	c:@E@TKTokenOperation@TKTokenOperationReadData	TKTokenOperation			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	825ef684a82dfb03	1
+enumconst	c:@E@TKTokenOperation@TKTokenOperationSignData	TKTokenOperation			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	75b12707eae5a81f	2
+enumconst	c:@E@TKTokenOperation@TKTokenOperationDecryptData	TKTokenOperation			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f7f9ecfba6006f39	3
+enumconst	c:@E@TKTokenOperation@TKTokenOperationPerformKeyExchange	TKTokenOperation			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	342b262ac22eabae	4
+typedef	c:@T@TKTokenOperationConstraint	-			id	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d022f024eee7620d	-
+interface	c:objc(cs)TKTokenKeyAlgorithm	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d172334528a50698	-
+super	-	TKTokenKeyAlgorithm	NSObject		-	-	-	-	-	340099f1f458604b	-
+method	c:objc(cs)TKTokenKeyAlgorithm(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e2f0e3cd9cc664cd	-
+method	c:objc(cs)TKTokenKeyAlgorithm(im)isAlgorithm:	-			BOOL	SecKeyAlgorithm algorithm	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	28f13841ba092552	-
+method	c:objc(cs)TKTokenKeyAlgorithm(im)supportsAlgorithm:	-			BOOL	SecKeyAlgorithm algorithm	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e5c8e05389ac2076	-
+interface	c:objc(cs)TKTokenKeyExchangeParameters	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	670f52c1ae3fe7c0	-
+super	-	TKTokenKeyExchangeParameters	NSObject		-	-	-	-	-	6cbf351692fee610	-
+property	c:objc(cs)TKTokenKeyExchangeParameters(py)requestedSize	-			NSInteger	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	13c6bf11d6c21af4	-
+property	c:objc(cs)TKTokenKeyExchangeParameters(py)sharedInfo	-			NSData *	-	readonly,copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	12d8737e374ca2f9	-
+interface	c:objc(cs)TKTokenSession	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	16a5090743277d19	-
+super	-	TKTokenSession	NSObject		-	-	-	-	-	1df5debaf75d5ef7	-
+method	c:objc(cs)TKTokenSession(im)initWithToken:	-			instancetype	TKToken * token	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	fce05ebbcf5027ca	-
+property	c:objc(cs)TKTokenSession(py)token	-			TKToken *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	35152218da738439	-
+property	c:objc(cs)TKTokenSession(py)delegate	-			id<TKTokenSessionDelegate>	-	weak	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	5d97872746ca759a	-
+method	c:objc(cs)TKTokenSession(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1cedde9a07cd7298	-
+protocol	c:objc(pl)TKTokenSessionDelegate	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	fd1a0ebc4459db9f	-
+conforms	c:objc(pl)TKTokenSessionDelegate	TKTokenSessionDelegate	NSObject		-	-	-	-	-	a18d06dfad7cae27	-
+method	c:objc(pl)TKTokenSessionDelegate(im)tokenSession:beginAuthForOperation:constraint:error:	-			TKTokenAuthOperation *	TKTokenSession * session | TKTokenOperation operation | TKTokenOperationConstraint constraint | NSError * _Nullable * error	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	41e9a90b139d68ad	-
+method	c:objc(pl)TKTokenSessionDelegate(im)tokenSession:supportsOperation:usingKey:algorithm:	-			BOOL	TKTokenSession * session | TKTokenOperation operation | TKTokenObjectID keyObjectID | TKTokenKeyAlgorithm * algorithm	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3e803e05582fe08c	-
+method	c:objc(pl)TKTokenSessionDelegate(im)tokenSession:signData:usingKey:algorithm:error:	-			NSData *	TKTokenSession * session | NSData * dataToSign | TKTokenObjectID keyObjectID | TKTokenKeyAlgorithm * algorithm | NSError * _Nullable * error	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f4d63e95d8de4c65	-
+method	c:objc(pl)TKTokenSessionDelegate(im)tokenSession:decryptData:usingKey:algorithm:error:	-			NSData *	TKTokenSession * session | NSData * ciphertext | TKTokenObjectID keyObjectID | TKTokenKeyAlgorithm * algorithm | NSError * _Nullable * error	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cc99c6a8a3434f4d	-
+method	c:objc(pl)TKTokenSessionDelegate(im)tokenSession:performKeyExchangeWithPublicKey:usingKey:algorithm:parameters:error:	-			NSData *	TKTokenSession * session | NSData * otherPartyPublicKeyData | TKTokenObjectID objectID | TKTokenKeyAlgorithm * algorithm | TKTokenKeyExchangeParameters * parameters | NSError * _Nullable * error	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	c0f9a0ee53b647b4	-
+interface	c:objc(cs)TKToken	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b44179a2362579a7	-
+super	-	TKToken	NSObject		-	-	-	-	-	e698bb3df665abb0	-
+method	c:objc(cs)TKToken(im)initWithTokenDriver:instanceID:	-			instancetype	TKTokenDriver * tokenDriver | TKTokenInstanceID instanceID	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	399035ca9377b837	-
+property	c:objc(cs)TKToken(py)tokenDriver	-			TKTokenDriver *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2368695c0f7a852e	-
+property	c:objc(cs)TKToken(py)delegate	-			id<TKTokenDelegate>	-	weak	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3d5c9c1d4bab2d76	-
+property	c:objc(cs)TKToken(py)configuration	-			TKTokenConfiguration *	-	readonly	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	57bb423dbb9579dd	-
+property	c:objc(cs)TKToken(py)keychainContents	-			TKTokenKeychainContents *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	17cb13d7622c85df	-
+method	c:objc(cs)TKToken(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1badfc6578c8ff3e	-
+protocol	c:objc(pl)TKTokenDelegate	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	0070474a6d9c4317	-
+conforms	c:objc(pl)TKTokenDelegate	TKTokenDelegate	NSObject		-	-	-	-	-	7943335fd1a5c23a	-
+method	c:objc(pl)TKTokenDelegate(im)token:createSessionWithError:	-			TKTokenSession *	TKToken * token | NSError * _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f89d14caf7c0734f	-
+method	c:objc(pl)TKTokenDelegate(im)token:terminateSession:	-			void	TKToken * token | TKTokenSession * session	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f494be22ff95cdb7	-
+interface	c:objc(cs)TKTokenDriver	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4e3c0d6f7b1ec931	-
+super	-	TKTokenDriver	NSObject		-	-	-	-	-	1d699f4c70a52570	-
+property	c:objc(cs)TKTokenDriver(py)delegate	-			id<TKTokenDriverDelegate>	-	weak	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d97daebf27714d69	-
+protocol	c:objc(pl)TKTokenDriverDelegate	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	7ea8d253cbbe6157	-
+conforms	c:objc(pl)TKTokenDriverDelegate	TKTokenDriverDelegate	NSObject		-	-	-	-	-	7ca76422bf4ba023	-
+method	c:objc(pl)TKTokenDriverDelegate(im)tokenDriver:tokenForConfiguration:error:	-			TKToken *	TKTokenDriver * driver | TKTokenConfiguration * configuration | NSError * _Nullable * error	optional	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	717ed5b18d2a78ac	-
+method	c:objc(pl)TKTokenDriverDelegate(im)tokenDriver:terminateToken:	-			void	TKTokenDriver * driver | TKToken * token	optional	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cef54b5aee35fa6b	-
+interface	c:objc(cs)TKTokenAuthOperation	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e44a0cc6eded57d4	-
+super	-	TKTokenAuthOperation	NSObject		-	-	-	-	-	f7ba25b1b4f16de1	-
+conforms	c:objc(cs)TKTokenAuthOperation	TKTokenAuthOperation	NSSecureCoding		-	-	-	-	-	755c0fd47cb3dba3	-
+method	c:objc(cs)TKTokenAuthOperation(im)finishWithError:	-			BOOL	NSError * _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ad26f803df7950ba	-
+interface	c:objc(cs)TKTokenPasswordAuthOperation	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3fddce40b8e95313	-
+super	-	TKTokenPasswordAuthOperation	TKTokenAuthOperation		-	-	-	-	-	31767a9ef4515ffd	-
+property	c:objc(cs)TKTokenPasswordAuthOperation(py)password	-			NSString *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	618624800be4a086	-
+interface	c:objc(cs)TKTokenKeychainItem	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6a98e9461a38b1aa	-
+super	-	TKTokenKeychainItem	NSObject		-	-	-	-	-	95e2b74496012939	-
+method	c:objc(cs)TKTokenKeychainItem(im)initWithObjectID:	-			instancetype	TKTokenObjectID objectID	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	95ef348b668ce914	-
+method	c:objc(cs)TKTokenKeychainItem(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	66ac753fb173b01d	-
+property	c:objc(cs)TKTokenKeychainItem(py)objectID	-			TKTokenObjectID	-	readonly,copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e1356984109db6bf	-
+property	c:objc(cs)TKTokenKeychainItem(py)label	-			NSString *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	0639dd0a60a56d5d	-
+property	c:objc(cs)TKTokenKeychainItem(py)constraints	-			NSDictionary<NSNumber *,TKTokenOperationConstraint> *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	966043235462df2e	-
+interface	c:objc(cs)TKTokenKeychainCertificate	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f8dde0507dba2315	-
+super	-	TKTokenKeychainCertificate	TKTokenKeychainItem		-	-	-	-	-	89d99916e65c6044	-
+method	c:objc(cs)TKTokenKeychainCertificate(im)initWithCertificate:objectID:	-			instancetype	SecCertificateRef certificateRef | TKTokenObjectID objectID	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6033731db36476e3	-
+method	c:objc(cs)TKTokenKeychainCertificate(im)initWithObjectID:	-			instancetype	TKTokenObjectID objectID	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	54482cbf46d9d8ac	-
+property	c:objc(cs)TKTokenKeychainCertificate(py)data	-			NSData *	-	readonly,copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	12f65d18231bea79	-
+interface	c:objc(cs)TKTokenKeychainKey	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e3edaa6a17e864e9	-
+super	-	TKTokenKeychainKey	TKTokenKeychainItem		-	-	-	-	-	ceeb167116f4050e	-
+method	c:objc(cs)TKTokenKeychainKey(im)initWithCertificate:objectID:	-			instancetype	SecCertificateRef certificateRef | TKTokenObjectID objectID	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	75aa98b6982b1484	-
+method	c:objc(cs)TKTokenKeychainKey(im)initWithObjectID:	-			instancetype	TKTokenObjectID objectID	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	9c4966d741ca1d8a	-
+property	c:objc(cs)TKTokenKeychainKey(py)keyType	-			NSString *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	45b89d42a35345df	-
+property	c:objc(cs)TKTokenKeychainKey(py)applicationTag	-			NSData *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	99068410815ca7df	-
+property	c:objc(cs)TKTokenKeychainKey(py)keySizeInBits	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	89aeb6ef18645833	-
+property	c:objc(cs)TKTokenKeychainKey(py)publicKeyData	-			NSData *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	202f48ae01b1f2e0	-
+property	c:objc(cs)TKTokenKeychainKey(py)publicKeyHash	-			NSData *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	38885af56acf86ea	-
+property	c:objc(cs)TKTokenKeychainKey(py)canDecrypt	-			BOOL	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	39a6c043616320ff	-
+property	c:objc(cs)TKTokenKeychainKey(py)canSign	-			BOOL	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3003d72a5ad35233	-
+property	c:objc(cs)TKTokenKeychainKey(py)canPerformKeyExchange	-			BOOL	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	9131fba5a5bdd02a	-
+property	c:objc(cs)TKTokenKeychainKey(py)suitableForLogin	-			BOOL	-	getter=isSuitableForLogin	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d785e2c80a3c9a57	-
+interface	c:objc(cs)TKTokenKeychainContents	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	8c00b1fb275f71ba	-
+super	-	TKTokenKeychainContents	NSObject		-	-	-	-	-	1ae4bc7b450b60e3	-
+method	c:objc(cs)TKTokenKeychainContents(im)fillWithItems:	-			void	NSArray<TKTokenKeychainItem *> * items	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	974b0957c9a197c3	-
+property	c:objc(cs)TKTokenKeychainContents(py)items	-			NSArray<TKTokenKeychainItem *> *	-	readonly,copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b670486fe9c7d0fd	-
+method	c:objc(cs)TKTokenKeychainContents(im)keyForObjectID:error:	-			TKTokenKeychainKey *	TKTokenObjectID objectID | NSError * _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f886a1cdeeda7eda	-
+method	c:objc(cs)TKTokenKeychainContents(im)certificateForObjectID:error:	-			TKTokenKeychainCertificate *	TKTokenObjectID objectID | NSError * _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1d1d91325740df4d	-
+method	c:objc(cs)TKTokenKeychainContents(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ebe1f1689eb368b4	-
+interface	c:objc(cs)TKTokenDriverConfiguration	-			-	-	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	98ce1b395e5e01fd	-
+super	-	TKTokenDriverConfiguration	NSObject		-	-	-	-	-	a735632d4787cbe9	-
+property	c:objc(cs)TKTokenDriverConfiguration(cpy)driverConfigurations	-			NSDictionary<TKTokenDriverClassID,TKTokenDriverConfiguration *> *	-	readonly,nonatomic,class	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	b55d985b07843168	-
+property	c:objc(cs)TKTokenDriverConfiguration(py)classID	-			TKTokenDriverClassID	-	readonly,nonatomic	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	1e74a76f14114163	-
+property	c:objc(cs)TKTokenDriverConfiguration(py)tokenConfigurations	-			NSDictionary<TKTokenInstanceID,TKTokenConfiguration *> *	-	readonly,copy,nonatomic	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	c5741ce6ded69678	-
+method	c:objc(cs)TKTokenDriverConfiguration(im)addTokenConfigurationForTokenInstanceID:	-			TKTokenConfiguration *	TKTokenInstanceID instanceID	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	99e73d48e44977b3	-
+method	c:objc(cs)TKTokenDriverConfiguration(im)removeTokenConfigurationForTokenInstanceID:	-			void	TKTokenInstanceID instanceID	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	220289adbe6ccf54	-
+method	c:objc(cs)TKTokenDriverConfiguration(im)init	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	fea1dbc63e5f84c2	-
+method	c:objc(cs)TKTokenDriverConfiguration(cm)new	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	4a4b1f3baf819df0	-
+interface	c:objc(cs)TKTokenConfiguration	-			-	-	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	b662ef3ad6bf3557	-
+super	-	TKTokenConfiguration	NSObject		-	-	-	-	-	44de8ad20f6561a0	-
+property	c:objc(cs)TKTokenConfiguration(py)instanceID	-			TKTokenInstanceID	-	readonly,nonatomic	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	83351c2915116318	-
+property	c:objc(cs)TKTokenConfiguration(py)configurationData	-			NSData *	-	copy,nonatomic	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	8f4643145ca243c0	-
+property	c:objc(cs)TKTokenConfiguration(py)keychainItems	-			NSArray<__kindof TKTokenKeychainItem *> *	-	copy,nonatomic	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	fee9d93d9f7633ba	-
+method	c:objc(cs)TKTokenConfiguration(im)keyForObjectID:error:	-			TKTokenKeychainKey *	TKTokenObjectID objectID | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	d430ab58d158120e	-
+method	c:objc(cs)TKTokenConfiguration(im)certificateForObjectID:error:	-			TKTokenKeychainCertificate *	TKTokenObjectID objectID | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	d42d01aa56a01a4f	-
+method	c:objc(cs)TKTokenConfiguration(im)init	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	b45aa207081e4729	-
+method	c:objc(cs)TKTokenConfiguration(cm)new	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	3e30b3915bb0b66b	-
+interface	c:objc(cs)TKTokenSmartCardPINAuthOperation	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	727ba82d5fbae1cb	-
+super	-	TKTokenSmartCardPINAuthOperation	TKTokenAuthOperation		-	-	-	-	-	0868ce6c56140ecd	-
+property	c:objc(cs)TKTokenSmartCardPINAuthOperation(py)PINFormat	-			TKSmartCardPINFormat *	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	666c46eea102e1f3	-
+property	c:objc(cs)TKTokenSmartCardPINAuthOperation(py)APDUTemplate	-			NSData *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	a3167bf5c0bd54af	-
+property	c:objc(cs)TKTokenSmartCardPINAuthOperation(py)PINByteOffset	-			NSInteger	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	54e7814a6bf8ab5e	-
+property	c:objc(cs)TKTokenSmartCardPINAuthOperation(py)smartCard	-			TKSmartCard *	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	187d856d9a5d0640	-
+property	c:objc(cs)TKTokenSmartCardPINAuthOperation(py)PIN	-			NSString *	-	copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	745384689faccf7a	-
+interface	c:objc(cs)TKSmartCardTokenSession	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	deprecated: Use getSmartCardWithError: instead	987062b0befea1a3	-
+super	-	TKSmartCardTokenSession	TKTokenSession		-	-	-	-	-	ec99a3292eaac7cd	-
+property	c:objc(cs)TKSmartCardTokenSession(py)smartCard	-			TKSmartCard *	-	readonly	ios=10.0/26.0/-/0,macos=10.12/26.0/-/0,tvos=11.0/26.0/-/0,watchos=4.0/26.0/-/0,xros=1.0/26.0/-/0	-	4b60acd1ebdf337f	-
+method	c:objc(cs)TKSmartCardTokenSession(im)getSmartCardWithError:	-			TKSmartCard *	NSError * _Nullable * error	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	2b1c324ad7f6d059	-
+interface	c:objc(cs)TKSmartCardToken	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6a595d2b43c1a402	-
+super	-	TKSmartCardToken	TKToken		-	-	-	-	-	0e3423b4f6bb2940	-
+method	c:objc(cs)TKSmartCardToken(im)initWithSmartCard:AID:instanceID:tokenDriver:	-			instancetype	TKSmartCard * smartCard | NSData * AID | NSString * instanceID | TKSmartCardTokenDriver * tokenDriver	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2501c95dc44d17c5	-
+property	c:objc(cs)TKSmartCardToken(py)AID	-			NSData *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1136d182708bf980	-
+method	c:objc(cs)TKSmartCardToken(im)initWithTokenDriver:instanceID:	-			instancetype	TKTokenDriver * tokenDriver | NSString * instanceID	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	119372005fdcc63c	-
+interface	c:objc(cs)TKSmartCardTokenDriver	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	02f8b1d57c11a992	-
+super	-	TKSmartCardTokenDriver	TKTokenDriver		-	-	-	-	-	56070ca4cb8cf834	-
+protocol	c:objc(pl)TKSmartCardTokenDriverDelegate	-			-	-	-	-	-	121661ad0b7be328	-
+conforms	c:objc(pl)TKSmartCardTokenDriverDelegate	TKSmartCardTokenDriverDelegate	TKTokenDriverDelegate		-	-	-	-	-	16590097a7e24ca8	-
+method	c:objc(pl)TKSmartCardTokenDriverDelegate(im)tokenDriver:createTokenForSmartCard:AID:error:	-			TKSmartCardToken *	TKSmartCardTokenDriver * driver | TKSmartCard * smartCard | NSData * AID | NSError * _Nullable * error	-	-	-	23f75e360ba697b9	-
+interface	c:objc(cs)TKTokenWatcherTokenInfo	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	1b8b6a2ff883928b	-
+super	-	TKTokenWatcherTokenInfo	NSObject		-	-	-	-	-	be00dad4f4aa061f	-
+property	c:objc(cs)TKTokenWatcherTokenInfo(py)tokenID	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	c5f1fd130c659255	-
+property	c:objc(cs)TKTokenWatcherTokenInfo(py)slotName	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	28a14c233d81ccd7	-
+property	c:objc(cs)TKTokenWatcherTokenInfo(py)driverName	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	de098d0c6ee58fc5	-
+method	c:objc(cs)TKTokenWatcherTokenInfo(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	94cadee0a2c79382	-
+method	c:objc(cs)TKTokenWatcherTokenInfo(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	7d8045ea97ea3766	-
+interface	c:objc(cs)TKTokenWatcher	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	deprecated: Use setInsertionHandler instead	de0b437c5931d91b	-
+super	-	TKTokenWatcher	NSObject		-	-	-	-	-	4d72fef3c4c19197	-
+property	c:objc(cs)TKTokenWatcher(py)tokenIDs	-			NSArray<NSString *> *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	31699378a6fb0627	-
+method	c:objc(cs)TKTokenWatcher(im)init	-			instancetype	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e2ad7246c0e7111f	-
+method	c:objc(cs)TKTokenWatcher(im)initWithInsertionHandler:	-			instancetype	void (^)(NSString * _Nonnull) insertionHandler	-	ios=10.0/11.0/-/0,macos=10.12/10.13/-/0	deprecated: Use setInsertionHandler instead	55bbadf5b90cbd37	-
+method	c:objc(cs)TKTokenWatcher(im)setInsertionHandler:	-			void	void (^)(NSString * _Nonnull) insertionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	47388f6554bbf025	-
+method	c:objc(cs)TKTokenWatcher(im)addRemovalHandler:forTokenID:	-			void	void (^)(NSString * _Nonnull) removalHandler | NSString * tokenID	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2dc02ef7f153668c	-
+method	c:objc(cs)TKTokenWatcher(im)tokenInfoForTokenID:	-			TKTokenWatcherTokenInfo *	NSString * tokenID	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	d95e43e1bb3dde33	-
+interface	c:objc(cs)TKSmartCardTokenRegistrationManager	-			-	-	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	6e2c51e30a472f3c	-
+super	-	TKSmartCardTokenRegistrationManager	NSObject		-	-	-	-	-	8b26c1b3846c4a06	-
+property	c:objc(cs)TKSmartCardTokenRegistrationManager(cpy)defaultManager	-			TKSmartCardTokenRegistrationManager *	-	readonly,class	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	b6b21ccd8bf94b7b	-
+property	c:objc(cs)TKSmartCardTokenRegistrationManager(py)registeredSmartCardTokens	-			NSArray<NSString *> *	-	readonly	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	5b4dada564e619ce	-
+method	c:objc(cs)TKSmartCardTokenRegistrationManager(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	5e0c5f3336485925	-
+method	c:objc(cs)TKSmartCardTokenRegistrationManager(im)registerSmartCardWithTokenID:promptMessage:error:	-			BOOL	NSString * tokenID | NSString * promptMessage | NSError * _Nullable * error	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	78ff2efbfdefa7bb	-
+method	c:objc(cs)TKSmartCardTokenRegistrationManager(im)unregisterSmartCardWithTokenID:error:	-			BOOL	NSString * tokenID | NSError * _Nullable * error	-	ios=26.0/-/-/0,maccatalyst=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	91bcaf77b9286a83	-
+typedef	c:@T@UInt64	-			unsigned long long	-	-	-	-	b41c42eb5e2605ba	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@UInt8	-			unsigned char	-	-	-	-	a9ef2eddf94d7e81	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@UInt16	-			unsigned short	-	-	-	-	89acd83db7a94864	-
+typedef	c:@T@SecKeyAlgorithm	-			CFStringRef	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b999b4356bcec665	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@SecCertificateRef	-			struct __SecCertificate *	-	-	-	-	8cee4190d5517141	-

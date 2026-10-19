@@ -1,0 +1,1009 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+enum	c:@Ea@kMIDIInvalidClient	-	-		OSStatus	-	-	-	-	5e96a06f97a67d12	-
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIInvalidClient	-			-	-	-	-	-	ff6c80e04988c626	-10830
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIInvalidPort	-			-	-	-	-	-	8f4899e5dc6dd99e	-10831
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIWrongEndpointType	-			-	-	-	-	-	133541302f351946	-10832
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDINoConnection	-			-	-	-	-	-	8f7ef7ef46baf06a	-10833
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIUnknownEndpoint	-			-	-	-	-	-	6f197c6c01975342	-10834
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIUnknownProperty	-			-	-	-	-	-	36c8e6b5a2a3f479	-10835
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIWrongPropertyType	-			-	-	-	-	-	2292bf29bdb0da4b	-10836
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDINoCurrentSetup	-			-	-	-	-	-	36a20a51acae66df	-10837
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIMessageSendErr	-			-	-	-	-	-	38f0194cf451b0bf	-10838
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIServerStartErr	-			-	-	-	-	-	78f440b6b2bb9b92	-10839
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDISetupFormatErr	-			-	-	-	-	-	47f1aa59111c9c37	-10840
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIWrongThread	-			-	-	-	-	-	ee086ea2d673c597	-10841
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIObjectNotFound	-			-	-	-	-	-	ebbb2f9e9c7fdf04	-10842
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIIDNotUnique	-			-	-	-	-	-	3e87f0839d4d1d27	-10843
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDINotPermitted	-			-	-	-	-	-	0ef9d6869c796bf0	-10844
+enumconst	c:@Ea@kMIDIInvalidClient@kMIDIUnknownError	-			-	-	-	-	-	9cd25445f96bd9b2	-10845
+typedef	c:@T@MIDIObjectRef	-			UInt32	-	-	-	-	80870b190f69680c	-
+typedef	c:@T@MIDIClientRef	-			MIDIObjectRef	-	-	-	-	d392bdaf39fb86f0	-
+typedef	c:@T@MIDIPortRef	-			MIDIObjectRef	-	-	-	-	7e02438d35eaf8d1	-
+typedef	c:@T@MIDIDeviceRef	-			MIDIObjectRef	-	-	-	-	22d08594bd889ce7	-
+typedef	c:@T@MIDIEntityRef	-			MIDIObjectRef	-	-	-	-	25baabbf796d9b1a	-
+typedef	c:@T@MIDIEndpointRef	-			MIDIObjectRef	-	-	-	-	17958cf20513daff	-
+typedef	c:@T@MIDITimeStamp	-			UInt64	-	-	-	-	03b2f7f3dd1ce776	-
+typedef	c:@T@MIDIObjectType	-			enum MIDIObjectType	-	-	-	-	6cb8eea598fbda46	-
+enum	c:@E@MIDIObjectType	-			SInt32	-	-	-	-	41f7edfa7117bd83	-
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_Other	MIDIObjectType			-	-	-	-	-	041da93a738f79d5	-1
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_Device	MIDIObjectType			-	-	-	-	-	555d67d34e0c203b	0
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_Entity	MIDIObjectType			-	-	-	-	-	7893278f2715b75f	1
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_Source	MIDIObjectType			-	-	-	-	-	8344201738134fca	2
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_Destination	MIDIObjectType			-	-	-	-	-	1254441859baafa4	3
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_ExternalDevice	MIDIObjectType			-	-	-	-	-	4cbc0fb0681dea87	16
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_ExternalEntity	MIDIObjectType			-	-	-	-	-	9c36f91de83b8da6	17
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_ExternalSource	MIDIObjectType			-	-	-	-	-	908a92f49599600c	18
+enumconst	c:@E@MIDIObjectType@kMIDIObjectType_ExternalDestination	MIDIObjectType			-	-	-	-	-	fafbd5e0161e9ed4	19
+typedef	c:@T@MIDIUniqueID	-			SInt32	-	-	-	-	666c890eee700058	-
+enum	c:@Ea@kMIDIInvalidUniqueID	-	-		MIDIUniqueID	-	-	-	-	7482ce3aaa1a6cc6	-
+enumconst	c:@Ea@kMIDIInvalidUniqueID@kMIDIInvalidUniqueID	-			-	-	-	-	-	c1ac1f4b23e0ff15	0
+typedef	c:@T@MIDIProtocolID	-			enum MIDIProtocolID	-	-	-	-	011f1e07732445e1	-
+enum	c:@E@MIDIProtocolID	-			SInt32	-	-	-	-	06a8f93c4f2512f5	-
+enumconst	c:@E@MIDIProtocolID@kMIDIProtocol_1_0	MIDIProtocolID			-	-	-	-	-	244445001912fab2	1
+enumconst	c:@E@MIDIProtocolID@kMIDIProtocol_2_0	MIDIProtocolID			-	-	-	-	-	1bde25ee41fd2aaa	2
+typedef	c:@T@MIDIEventList	-			struct MIDIEventList	-	-	-	-	32e759972310bb27	-
+typedef	c:@T@MIDIPacketList	-			struct MIDIPacketList	-	-	-	-	a9aba90553490a6a	-
+typedef	c:@T@MIDISysexSendRequest	-			struct MIDISysexSendRequest	-	-	-	-	f2f0694fabc16100	-
+typedef	c:@T@MIDISysexSendRequestUMP	-			struct MIDISysexSendRequestUMP	-	-	-	-	b6d92ef2bfecf9f0	-
+typedef	c:@T@MIDINotification	-			struct MIDINotification	-	-	-	-	f56b38672948f8f1	-
+typedef	c:@T@MIDINotifyProc	-			void (*)(const MIDINotification * _Nonnull, void * _Nullable)	-	-	-	-	ef1a64f4f8ceab35	-
+typedef	c:@T@MIDINotifyBlock	-			void ((^))(const MIDINotification *)	-	-	-	-	84ba4af45f704e8f	-
+typedef	c:@T@MIDIReceiveBlock	-			void ((^))(const MIDIEventList *, void *)	-	-	-	-	973a5253520dff4a	-
+typedef	c:@T@MIDIReadProc	-			void (*)(const MIDIPacketList * _Nonnull, void * _Nullable, void * _Nullable) __attribute__((nonblocking))	-	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9e37e4b80ae45dd0	-
+typedef	c:@T@MIDIReadBlock	-			void ((^))(const MIDIPacketList *, void *)	-	-	ios=9.0/100000/-/0,macos=10.11/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9cc50f8efd3a4001	-
+typedef	c:@T@MIDICompletionProc	-			void (*)(MIDISysexSendRequest * _Nonnull)	-	-	-	-	82d01edb41857554	-
+typedef	c:@T@MIDICompletionProcUMP	-			void (*)(MIDISysexSendRequestUMP * _Nonnull)	-	-	-	-	72c01a01f62c1a04	-
+struct	c:@S@MIDIEventPacket	-			-	-	-	-	-	358dcda0913762a2	-
+field	c:@S@MIDIEventPacket@FI@timeStamp	MIDIEventPacket			MIDITimeStamp	-	-	-	-	fbb4f99518ab0c61	-
+field	c:@S@MIDIEventPacket@FI@wordCount	MIDIEventPacket			UInt32	-	-	-	-	ccb5fcd96bbe7b4e	-
+field	c:@S@MIDIEventPacket@FI@words	MIDIEventPacket			UInt32[64]	-	-	-	-	b44493e822868db6	-
+typedef	c:@T@MIDIEventPacket	-			struct MIDIEventPacket	-	-	-	-	464e37ddcdb29d33	-
+struct	c:@S@MIDIEventList	-			-	-	-	-	-	a8840d0e053f03d4	-
+field	c:@S@MIDIEventList@FI@protocol	MIDIEventList			MIDIProtocolID	-	-	-	-	60cef90344aff0a1	-
+field	c:@S@MIDIEventList@FI@numPackets	MIDIEventList			UInt32	-	-	-	-	eaa435e9207001a8	-
+field	c:@S@MIDIEventList@FI@packet	MIDIEventList			MIDIEventPacket[1]	-	-	-	-	8deddc760bc5a62d	-
+struct	c:@S@MIDIPacket	-			-	-	-	-	-	4904e2b32b62a24d	-
+field	c:@S@MIDIPacket@FI@timeStamp	MIDIPacket			MIDITimeStamp	-	-	-	-	0698d4d847fa3e3e	-
+field	c:@S@MIDIPacket@FI@length	MIDIPacket			UInt16	-	-	-	-	e2a7d8ef1487a1fa	-
+field	c:@S@MIDIPacket@FI@data	MIDIPacket			Byte[256]	-	-	-	-	fcdd3d613849dec5	-
+typedef	c:@T@MIDIPacket	-			struct MIDIPacket	-	-	-	-	d826c0ae5a2bf866	-
+struct	c:@S@MIDIPacketList	-			-	-	-	-	-	ef5cdc61706c2224	-
+field	c:@S@MIDIPacketList@FI@numPackets	MIDIPacketList			UInt32	-	-	-	-	a5b8f696ce5f9eaa	-
+field	c:@S@MIDIPacketList@FI@packet	MIDIPacketList			MIDIPacket[1]	-	-	-	-	d0b83cbdab5036e1	-
+struct	c:@S@MIDISysexSendRequest	-			-	-	-	-	-	6559f966044fb5a1	-
+field	c:@S@MIDISysexSendRequest@FI@destination	MIDISysexSendRequest			MIDIEndpointRef	-	-	-	-	127a509839d5f1ad	-
+field	c:@S@MIDISysexSendRequest@FI@data	MIDISysexSendRequest			const Byte *	-	-	-	-	84770c7f76050fd3	-
+field	c:@S@MIDISysexSendRequest@FI@bytesToSend	MIDISysexSendRequest			UInt32	-	-	-	-	e643841688c5d2c3	-
+field	c:@S@MIDISysexSendRequest@FI@complete	MIDISysexSendRequest			Boolean	-	-	-	-	6ef5d445c99f36fd	-
+field	c:@S@MIDISysexSendRequest@FI@reserved	MIDISysexSendRequest			Byte[3]	-	-	-	-	51fafdb1d69cf053	-
+field	c:@S@MIDISysexSendRequest@FI@completionProc	MIDISysexSendRequest			MIDICompletionProc	-	-	-	-	78dc022601863078	-
+field	c:@S@MIDISysexSendRequest@FI@completionRefCon	MIDISysexSendRequest			void *	-	-	-	-	913f315281021314	-
+struct	c:@S@MIDISysexSendRequestUMP	-			-	-	-	-	-	8d3b52539f93efd7	-
+field	c:@S@MIDISysexSendRequestUMP@FI@destination	MIDISysexSendRequestUMP			MIDIEndpointRef	-	-	-	-	ed35f007cb543b33	-
+field	c:@S@MIDISysexSendRequestUMP@FI@words	MIDISysexSendRequestUMP			UInt32 *	-	-	-	-	709a0738072736a0	-
+field	c:@S@MIDISysexSendRequestUMP@FI@wordsToSend	MIDISysexSendRequestUMP			UInt32	-	-	-	-	7661de15244e44e5	-
+field	c:@S@MIDISysexSendRequestUMP@FI@complete	MIDISysexSendRequestUMP			Boolean	-	-	-	-	04634c41e69a2939	-
+field	c:@S@MIDISysexSendRequestUMP@FI@completionProc	MIDISysexSendRequestUMP			MIDICompletionProcUMP	-	-	-	-	25cdb5f887b75cf3	-
+field	c:@S@MIDISysexSendRequestUMP@FI@completionRefCon	MIDISysexSendRequestUMP			void *	-	-	-	-	30faea583f964769	-
+typedef	c:@T@MIDINotificationMessageID	-			enum MIDINotificationMessageID	-	-	-	-	493bcd9467819571	-
+enum	c:@E@MIDINotificationMessageID	-			SInt32	-	-	-	-	0a0aacbbffda7916	-
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgSetupChanged	MIDINotificationMessageID			-	-	-	-	-	ec75657320a0bc71	1
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgObjectAdded	MIDINotificationMessageID			-	-	-	-	-	784d1b298a01393b	2
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgObjectRemoved	MIDINotificationMessageID			-	-	-	-	-	dd008ddb43c10b59	3
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgPropertyChanged	MIDINotificationMessageID			-	-	-	-	-	70913962bfdb431d	4
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgThruConnectionsChanged	MIDINotificationMessageID			-	-	-	-	-	587e80d2b4dae625	5
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgSerialPortOwnerChanged	MIDINotificationMessageID			-	-	-	-	-	26e4a53d3499a5a0	6
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgIOError	MIDINotificationMessageID			-	-	-	-	-	675ac2d520e90ba4	7
+enumconst	c:@E@MIDINotificationMessageID@kMIDIMsgInternalStart	MIDINotificationMessageID			-	-	-	macos=-/-/-/1	-	95c3533429e4a0a5	4096
+struct	c:@S@MIDINotification	-			-	-	-	-	-	fa88dee2967f5441	-
+field	c:@S@MIDINotification@FI@messageID	MIDINotification			MIDINotificationMessageID	-	-	-	-	7c40d89565029dfa	-
+field	c:@S@MIDINotification@FI@messageSize	MIDINotification			UInt32	-	-	-	-	4ae0e28bd79eba37	-
+struct	c:@S@MIDIObjectAddRemoveNotification	-			-	-	-	-	-	941d94dc202eec21	-
+field	c:@S@MIDIObjectAddRemoveNotification@FI@messageID	MIDIObjectAddRemoveNotification			MIDINotificationMessageID	-	-	-	-	23d4bc4f0b258c1a	-
+field	c:@S@MIDIObjectAddRemoveNotification@FI@messageSize	MIDIObjectAddRemoveNotification			UInt32	-	-	-	-	e9ba078f5030e0d6	-
+field	c:@S@MIDIObjectAddRemoveNotification@FI@parent	MIDIObjectAddRemoveNotification			MIDIObjectRef	-	-	-	-	2624245599063fd0	-
+field	c:@S@MIDIObjectAddRemoveNotification@FI@parentType	MIDIObjectAddRemoveNotification			MIDIObjectType	-	-	-	-	520b54bcc13f9ab5	-
+field	c:@S@MIDIObjectAddRemoveNotification@FI@child	MIDIObjectAddRemoveNotification			MIDIObjectRef	-	-	-	-	a8d657091b3ffbff	-
+field	c:@S@MIDIObjectAddRemoveNotification@FI@childType	MIDIObjectAddRemoveNotification			MIDIObjectType	-	-	-	-	5f5d10fe98082a6c	-
+typedef	c:@T@MIDIObjectAddRemoveNotification	-			struct MIDIObjectAddRemoveNotification	-	-	-	-	66bbf8820b288ac2	-
+struct	c:@S@MIDIObjectPropertyChangeNotification	-			-	-	-	-	-	c9ae5c4255054c53	-
+field	c:@S@MIDIObjectPropertyChangeNotification@FI@messageID	MIDIObjectPropertyChangeNotification			MIDINotificationMessageID	-	-	-	-	0bd2dcde5e657eb8	-
+field	c:@S@MIDIObjectPropertyChangeNotification@FI@messageSize	MIDIObjectPropertyChangeNotification			UInt32	-	-	-	-	047e13e506c431de	-
+field	c:@S@MIDIObjectPropertyChangeNotification@FI@object	MIDIObjectPropertyChangeNotification			MIDIObjectRef	-	-	-	-	626f4f1433abc656	-
+field	c:@S@MIDIObjectPropertyChangeNotification@FI@objectType	MIDIObjectPropertyChangeNotification			MIDIObjectType	-	-	-	-	4c12a21d4468a52c	-
+field	c:@S@MIDIObjectPropertyChangeNotification@FI@propertyName	MIDIObjectPropertyChangeNotification			CFStringRef	-	-	-	-	8c468b575c6bbce7	-
+typedef	c:@T@MIDIObjectPropertyChangeNotification	-			struct MIDIObjectPropertyChangeNotification	-	-	-	-	f7c7208a1db5d85b	-
+struct	c:@S@MIDIIOErrorNotification	-			-	-	-	-	-	efedec3e039911d8	-
+field	c:@S@MIDIIOErrorNotification@FI@messageID	MIDIIOErrorNotification			MIDINotificationMessageID	-	-	-	-	019dd4204cf67e88	-
+field	c:@S@MIDIIOErrorNotification@FI@messageSize	MIDIIOErrorNotification			UInt32	-	-	-	-	da70ac535fbad2b8	-
+field	c:@S@MIDIIOErrorNotification@FI@driverDevice	MIDIIOErrorNotification			MIDIDeviceRef	-	-	-	-	e86e8a01191ade9b	-
+field	c:@S@MIDIIOErrorNotification@FI@errorCode	MIDIIOErrorNotification			OSStatus	-	-	-	-	d33d7cab966ada81	-
+typedef	c:@T@MIDIIOErrorNotification	-			struct MIDIIOErrorNotification	-	-	-	-	e0de8810a6b2987d	-
+var	c:@kMIDIPropertyName	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0a21ad9a8f147035	-
+var	c:@kMIDIPropertyManufacturer	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7c652689318f3f92	-
+var	c:@kMIDIPropertyModel	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7d9c2aa0f47c345b	-
+var	c:@kMIDIPropertyUniqueID	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bf13f95812b4c50a	-
+var	c:@kMIDIPropertyDeviceID	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	22cbe78b51276d1f	-
+var	c:@kMIDIPropertyReceiveChannels	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ece10978dfed1b61	-
+var	c:@kMIDIPropertyTransmitChannels	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	462bef5626dd7f23	-
+var	c:@kMIDIPropertyMaxSysExSpeed	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1dc330678f48e650	-
+var	c:@kMIDIPropertyAdvanceScheduleTimeMuSec	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	07e5cb5402394c95	-
+var	c:@kMIDIPropertyIsEmbeddedEntity	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cabd2a0d4b65bc5e	-
+var	c:@kMIDIPropertyIsBroadcast	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5ea536175f2c6f7e	-
+var	c:@kMIDIPropertySingleRealtimeEntity	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5fd1d4cc222b14b0	-
+var	c:@kMIDIPropertyConnectionUniqueID	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	953797ebe88bec41	-
+var	c:@kMIDIPropertyOffline	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	406915802d5094a8	-
+var	c:@kMIDIPropertyPrivate	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f0b1f0069de181c8	-
+var	c:@kMIDIPropertyDriverOwner	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	83a9e0c168241d34	-
+var	c:@kMIDIPropertyFactoryPatchNameFile	-			const CFStringRef	-	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/10.2/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	189c883e5dbebbd4	-
+var	c:@kMIDIPropertyUserPatchNameFile	-			const CFStringRef	-	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/10.2/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c78f8e0a9e692bd9	-
+var	c:@kMIDIPropertyNameConfiguration	-			const CFStringRef	-	-	ios=4.2/13.0/-/0,macos=10.2/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c91395927ac81364	-
+var	c:@kMIDIPropertyNameConfigurationDictionary	-			const CFStringRef	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5f6781478c2f810d	-
+var	c:@kMIDIPropertyImage	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f2424fc899c29f86	-
+var	c:@kMIDIPropertyDriverVersion	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	43973eb77af18321	-
+var	c:@kMIDIPropertySupportsGeneralMIDI	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	95e329994324123f	-
+var	c:@kMIDIPropertySupportsMMC	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	136d31cfb9cb9263	-
+var	c:@kMIDIPropertyCanRoute	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	87dfc9d5317e85f8	-
+var	c:@kMIDIPropertyReceivesClock	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1c9e0de2050a7ee8	-
+var	c:@kMIDIPropertyReceivesMTC	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bbec78855d4e6711	-
+var	c:@kMIDIPropertyReceivesNotes	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0f208c2d1ed39769	-
+var	c:@kMIDIPropertyReceivesProgramChanges	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fe07902b27dddabb	-
+var	c:@kMIDIPropertyReceivesBankSelectMSB	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	06d0f7f827d938fe	-
+var	c:@kMIDIPropertyReceivesBankSelectLSB	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	52febaadcf3128c6	-
+var	c:@kMIDIPropertyTransmitsClock	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	77223a33cc7941a5	-
+var	c:@kMIDIPropertyTransmitsMTC	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c9930d634fb61f30	-
+var	c:@kMIDIPropertyTransmitsNotes	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	aa1b6eecc89e3332	-
+var	c:@kMIDIPropertyTransmitsProgramChanges	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	be5f4101d47e06dd	-
+var	c:@kMIDIPropertyTransmitsBankSelectMSB	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	752fe4b0b953b8e6	-
+var	c:@kMIDIPropertyTransmitsBankSelectLSB	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4b684641f010dc4b	-
+var	c:@kMIDIPropertyPanDisruptsStereo	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ad7ed14552f3497d	-
+var	c:@kMIDIPropertyIsSampler	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	57fd69983b8aacd2	-
+var	c:@kMIDIPropertyIsDrumMachine	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1c220244b478d2e7	-
+var	c:@kMIDIPropertyIsMixer	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	683b7cddaa1b0b20	-
+var	c:@kMIDIPropertyIsEffectUnit	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6bcfba7020023237	-
+var	c:@kMIDIPropertyMaxReceiveChannels	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	79135c97e10dbec9	-
+var	c:@kMIDIPropertyMaxTransmitChannels	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	346c74b39ec13efa	-
+var	c:@kMIDIPropertyDriverDeviceEditorApp	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.3/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	db4801c0c8971e2a	-
+var	c:@kMIDIPropertySupportsShowControl	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e6830c425d81d9ae	-
+var	c:@kMIDIPropertyDisplayName	-			const CFStringRef	-	-	ios=4.2/-/-/0,macos=10.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b8d9f46773300191	-
+var	c:@kMIDIPropertyProtocolID	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4bd35395261ea214	-
+var	c:@kMIDIPropertyUMPActiveGroupBitmap	-			const CFStringRef	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	345308cc365c6752	-
+var	c:@kMIDIPropertyUMPCanTransmitGroupless	-			const CFStringRef	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	884ccaca16620c53	-
+var	c:@kMIDIPropertyAssociatedEndpoint	-			const CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	153bc7d171c8626e	-
+function	c:@F@MIDIClientCreate	-			OSStatus (CFStringRef, MIDINotifyProc, void *, MIDIClientRef *)	CFStringRef name | MIDINotifyProc notifyProc | void * notifyRefCon | MIDIClientRef * outClient	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bd7a877ec3628c80	-
+function	c:@F@MIDIClientCreateWithBlock	-			OSStatus (CFStringRef, MIDIClientRef *, MIDINotifyBlock)	CFStringRef name | MIDIClientRef * outClient | MIDINotifyBlock notifyBlock	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2b07fcd283071f81	-
+function	c:@F@MIDIClientDispose	-			OSStatus (MIDIClientRef)	MIDIClientRef client	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	547cdd569758f744	-
+function	c:@F@MIDIInputPortCreateWithProtocol	-			OSStatus (MIDIClientRef, CFStringRef, MIDIProtocolID, MIDIPortRef *, MIDIReceiveBlock)	MIDIClientRef client | CFStringRef portName | MIDIProtocolID protocol | MIDIPortRef * outPort | MIDIReceiveBlock receiveBlock	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3683d178bd6e6bec	-
+function	c:@F@MIDIInputPortCreate	-			OSStatus (MIDIClientRef, CFStringRef, MIDIReadProc, void *, MIDIPortRef *)	MIDIClientRef client | CFStringRef portName | MIDIReadProc readProc | void * refCon | MIDIPortRef * outPort	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIInputPortCreateWithProtocol instead	c66780c4c6e1691d	-
+function	c:@F@MIDIInputPortCreateWithBlock	-			OSStatus (MIDIClientRef, CFStringRef, MIDIPortRef *, MIDIReadBlock)	MIDIClientRef client | CFStringRef portName | MIDIPortRef * outPort | MIDIReadBlock readBlock	-	ios=9.0/100000/-/0,macos=10.11/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIInputPortCreateWithProtocol instead	c73249ee04c1e329	-
+function	c:@F@MIDIOutputPortCreate	-			OSStatus (MIDIClientRef, CFStringRef, MIDIPortRef *)	MIDIClientRef client | CFStringRef portName | MIDIPortRef * outPort	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	199c01a5cf255cf8	-
+function	c:@F@MIDIPortDispose	-			OSStatus (MIDIPortRef)	MIDIPortRef port	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5e8e8bfb0d4578d4	-
+function	c:@F@MIDIPortConnectSource	-			OSStatus (MIDIPortRef, MIDIEndpointRef, void *)	MIDIPortRef port | MIDIEndpointRef source | void * connRefCon	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e78cca8924702a36	-
+function	c:@F@MIDIPortDisconnectSource	-			OSStatus (MIDIPortRef, MIDIEndpointRef)	MIDIPortRef port | MIDIEndpointRef source	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	671ebc581ac2112f	-
+function	c:@F@MIDIGetNumberOfDevices	-			ItemCount (void)	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b820918f30097b37	-
+function	c:@F@MIDIGetDevice	-			MIDIDeviceRef (ItemCount)	ItemCount deviceIndex0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	713d62e675629f34	-
+function	c:@F@MIDIDeviceGetNumberOfEntities	-			ItemCount (MIDIDeviceRef)	MIDIDeviceRef device	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b8faaf74d428d926	-
+function	c:@F@MIDIDeviceGetEntity	-			MIDIEntityRef (MIDIDeviceRef, ItemCount)	MIDIDeviceRef device | ItemCount entityIndex0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a61b86c91e362d70	-
+function	c:@F@MIDIEntityGetNumberOfSources	-			ItemCount (MIDIEntityRef)	MIDIEntityRef entity	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b136816d82d1a205	-
+function	c:@F@MIDIEntityGetSource	-			MIDIEndpointRef (MIDIEntityRef, ItemCount)	MIDIEntityRef entity | ItemCount sourceIndex0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b7d80a850506a685	-
+function	c:@F@MIDIEntityGetNumberOfDestinations	-			ItemCount (MIDIEntityRef)	MIDIEntityRef entity	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	57c31cd1cc125af4	-
+function	c:@F@MIDIEntityGetDestination	-			MIDIEndpointRef (MIDIEntityRef, ItemCount)	MIDIEntityRef entity | ItemCount destIndex0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1af8d5184cbd9dd1	-
+function	c:@F@MIDIEntityGetDevice	-			OSStatus (MIDIEntityRef, MIDIDeviceRef *)	MIDIEntityRef inEntity | MIDIDeviceRef * outDevice	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d30746279e54ccdd	-
+function	c:@F@MIDIGetNumberOfSources	-			ItemCount (void)	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	21278e30dee8d190	-
+function	c:@F@MIDIGetSource	-			MIDIEndpointRef (ItemCount)	ItemCount sourceIndex0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	adc46427e11672a8	-
+function	c:@F@MIDIGetNumberOfDestinations	-			ItemCount (void)	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5f448ec12dd5e612	-
+function	c:@F@MIDIGetDestination	-			MIDIEndpointRef (ItemCount)	ItemCount destIndex0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	964bfece68569c18	-
+function	c:@F@MIDIEndpointGetEntity	-			OSStatus (MIDIEndpointRef, MIDIEntityRef *)	MIDIEndpointRef inEndpoint | MIDIEntityRef * outEntity	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6bf9b645a84cb51d	-
+function	c:@F@MIDIDestinationCreateWithProtocol	-			OSStatus (MIDIClientRef, CFStringRef, MIDIProtocolID, MIDIEndpointRef *, MIDIReceiveBlock)	MIDIClientRef client | CFStringRef name | MIDIProtocolID protocol | MIDIEndpointRef * outDest | MIDIReceiveBlock readBlock	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f2951ffaad79365c	-
+function	c:@F@MIDIDestinationCreate	-			OSStatus (MIDIClientRef, CFStringRef, MIDIReadProc, void *, MIDIEndpointRef *)	MIDIClientRef client | CFStringRef name | MIDIReadProc readProc | void * refCon | MIDIEndpointRef * outDest	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIDestinationCreateWithProtocol instead	96beeaf936f6a8f2	-
+function	c:@F@MIDIDestinationCreateWithBlock	-			OSStatus (MIDIClientRef, CFStringRef, MIDIEndpointRef *, MIDIReadBlock)	MIDIClientRef client | CFStringRef name | MIDIEndpointRef * outDest | MIDIReadBlock readBlock	-	ios=9.0/100000/-/0,macos=10.11/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIDestinationCreateWithProtocol instead	e2c8eb44c9fa4d45	-
+function	c:@F@MIDISourceCreateWithProtocol	-			OSStatus (MIDIClientRef, CFStringRef, MIDIProtocolID, MIDIEndpointRef *)	MIDIClientRef client | CFStringRef name | MIDIProtocolID protocol | MIDIEndpointRef * outSrc	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	69598de61e8f4206	-
+function	c:@F@MIDISourceCreate	-			OSStatus (MIDIClientRef, CFStringRef, MIDIEndpointRef *)	MIDIClientRef client | CFStringRef name | MIDIEndpointRef * outSrc	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDISourceCreateWithProtocol instead	ac8a4da5e0c9d0a1	-
+function	c:@F@MIDIEndpointDispose	-			OSStatus (MIDIEndpointRef)	MIDIEndpointRef endpt	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	10e1f52b31652b0c	-
+function	c:@F@MIDIGetNumberOfExternalDevices	-			ItemCount (void)	-	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	061d3dc916232805	-
+function	c:@F@MIDIGetExternalDevice	-			MIDIDeviceRef (ItemCount)	ItemCount deviceIndex0	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	23147cfa80cc1f2c	-
+function	c:@F@MIDIObjectGetIntegerProperty	-			OSStatus (MIDIObjectRef, CFStringRef, SInt32 *)	MIDIObjectRef obj | CFStringRef propertyID | SInt32 * outValue	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dbe72b00a868164c	-
+function	c:@F@MIDIObjectSetIntegerProperty	-			OSStatus (MIDIObjectRef, CFStringRef, SInt32)	MIDIObjectRef obj | CFStringRef propertyID | SInt32 value	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	302a47ecb83149a7	-
+function	c:@F@MIDIObjectGetStringProperty	-			OSStatus (MIDIObjectRef, CFStringRef, CFStringRef  _Nullable *)	MIDIObjectRef obj | CFStringRef propertyID | CFStringRef  _Nullable * str	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	95921bf4d8bc1539	-
+function	c:@F@MIDIObjectSetStringProperty	-			OSStatus (MIDIObjectRef, CFStringRef, CFStringRef)	MIDIObjectRef obj | CFStringRef propertyID | CFStringRef str	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6cb154b1cba3fc2d	-
+function	c:@F@MIDIObjectGetDataProperty	-			OSStatus (MIDIObjectRef, CFStringRef, CFDataRef  _Nullable *)	MIDIObjectRef obj | CFStringRef propertyID | CFDataRef  _Nullable * outData	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d1e249feb48cd6b1	-
+function	c:@F@MIDIObjectSetDataProperty	-			OSStatus (MIDIObjectRef, CFStringRef, CFDataRef)	MIDIObjectRef obj | CFStringRef propertyID | CFDataRef data	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f92f992656b1d147	-
+function	c:@F@MIDIObjectGetDictionaryProperty	-			OSStatus (MIDIObjectRef, CFStringRef, CFDictionaryRef  _Nullable *)	MIDIObjectRef obj | CFStringRef propertyID | CFDictionaryRef  _Nullable * outDict	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1a1e13d416c279c6	-
+function	c:@F@MIDIObjectSetDictionaryProperty	-			OSStatus (MIDIObjectRef, CFStringRef, CFDictionaryRef)	MIDIObjectRef obj | CFStringRef propertyID | CFDictionaryRef dict	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9d5178768e08e073	-
+function	c:@F@MIDIObjectGetProperties	-			OSStatus (MIDIObjectRef, CFPropertyListRef  _Nullable *, Boolean)	MIDIObjectRef obj | CFPropertyListRef  _Nullable * outProperties | Boolean deep	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	34a9f1b1bacc288a	-
+function	c:@F@MIDIObjectRemoveProperty	-			OSStatus (MIDIObjectRef, CFStringRef)	MIDIObjectRef obj | CFStringRef propertyID	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7705fe0dc3d7df7e	-
+function	c:@F@MIDIObjectFindByUniqueID	-			OSStatus (MIDIUniqueID, MIDIObjectRef *, MIDIObjectType *)	MIDIUniqueID inUniqueID | MIDIObjectRef * outObject | MIDIObjectType * outObjectType	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	219cf70b1ba8daf2	-
+function	c:@F@MIDISendEventList	-			OSStatus (MIDIPortRef, MIDIEndpointRef, const MIDIEventList *)	MIDIPortRef port | MIDIEndpointRef dest | const MIDIEventList * evtlist	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b26459e8ec6e9e3a	-
+function	c:@F@MIDISend	-			OSStatus (MIDIPortRef, MIDIEndpointRef, const MIDIPacketList *)	MIDIPortRef port | MIDIEndpointRef dest | const MIDIPacketList * pktlist	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDISendEventList instead	008d5d41160fa303	-
+function	c:@F@MIDISendSysex	-			OSStatus (MIDISysexSendRequest *)	MIDISysexSendRequest * request	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b1b2089cec27d4c8	-
+function	c:@F@MIDISendUMPSysex	-			OSStatus (MIDISysexSendRequestUMP *)	MIDISysexSendRequestUMP * umpRequest	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	34908bee5b48438a	-
+function	c:@F@MIDISendUMPSysex8	-			OSStatus (MIDISysexSendRequestUMP *)	MIDISysexSendRequestUMP * umpRequest	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	671ae5b3dc114881	-
+function	c:@F@MIDIEventPacketSysexBytesForGroup	-			OSStatus (const MIDIEventPacket *, UInt8, CFDataRef  _Nullable *)	const MIDIEventPacket * pkt | UInt8 groupIndex | CFDataRef  _Nullable * outData	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a6eaaf05840b66d0	-
+function	c:@F@MIDIReceivedEventList	-			OSStatus (MIDIEndpointRef, const MIDIEventList *)	MIDIEndpointRef src | const MIDIEventList * evtlist	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1dfd125983eef524	-
+function	c:@F@MIDIReceived	-			OSStatus (MIDIEndpointRef, const MIDIPacketList *)	MIDIEndpointRef src | const MIDIPacketList * pktlist	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIReceivedEventList instead	6a8877d6f2f9c8e8	-
+function	c:@F@MIDIFlushOutput	-			OSStatus (MIDIEndpointRef)	MIDIEndpointRef dest	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a76ea386eeb37cab	-
+function	c:@F@MIDIRestart	-			OSStatus (void)	-	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4b298ed2e2c7bd3e	-
+function	c:@F@MIDIEventPacketNext	-			MIDIEventPacket * (const MIDIEventPacket *)	const MIDIEventPacket * pkt	-	-	-	0590059dc63cda7e	-
+function	c:@F@MIDIEventListInit	-			MIDIEventPacket * (MIDIEventList *, MIDIProtocolID)	MIDIEventList * evtlist | MIDIProtocolID protocol	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	530ebcd22d9761ac	-
+function	c:@F@MIDIEventListAdd	-			MIDIEventPacket * (MIDIEventList *, ByteCount, MIDIEventPacket *, MIDITimeStamp, ByteCount, const UInt32 *)	MIDIEventList * evtlist | ByteCount listSize | MIDIEventPacket * curPacket | MIDITimeStamp time | ByteCount wordCount | const UInt32 * words	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	1c5f9c8808163d6b	-
+function	c:@F@MIDIPacketNext	-			MIDIPacket * (const MIDIPacket *)	const MIDIPacket * pkt	-	-	-	a639ce2430f46023	-
+function	c:@F@MIDIPacketListInit	-			MIDIPacket * (MIDIPacketList *)	MIDIPacketList * pktlist	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIEventListInit instead	518ec33cbe5c5b4b	-
+function	c:@F@MIDIPacketListAdd	-			MIDIPacket * (MIDIPacketList *, ByteCount, MIDIPacket *, MIDITimeStamp, ByteCount, const Byte *)	MIDIPacketList * pktlist | ByteCount listSize | MIDIPacket * curPacket | MIDITimeStamp time | ByteCount nData | const Byte * data	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIEventListAdd instead	34f228009bd156d6	-
+typedef	c:@T@MIDISetupRef	-			MIDIObjectRef	-	-	-	-	711c044eac6bac0a	-
+function	c:@F@MIDISetupCreate	-			OSStatus (MIDISetupRef *)	MIDISetupRef * outSetup	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.0/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	60271933ed76ccf8	-
+function	c:@F@MIDISetupDispose	-			OSStatus (MIDISetupRef)	MIDISetupRef setup	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.0/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	6ce73979b4c43a90	-
+function	c:@F@MIDISetupInstall	-			OSStatus (MIDISetupRef)	MIDISetupRef setup	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.0/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	453aeacd94cceb9c	-
+function	c:@F@MIDISetupGetCurrent	-			OSStatus (MIDISetupRef *)	MIDISetupRef * outSetup	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.0/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	f2cc64dbef11f7ad	-
+function	c:@F@MIDISetupToData	-			OSStatus (MIDISetupRef, CFDataRef  _Nullable *)	MIDISetupRef setup | CFDataRef  _Nullable * outData	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.0/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	b694df30849ede4e	-
+function	c:@F@MIDISetupFromData	-			OSStatus (CFDataRef, MIDISetupRef *)	CFDataRef data | MIDISetupRef * outSetup	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.0/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	d5686f17783e6a32	-
+function	c:@F@MIDIDeviceNewEntity	-			OSStatus (MIDIDeviceRef, CFStringRef, MIDIProtocolID, Boolean, ItemCount, ItemCount, MIDIEntityRef *)	MIDIDeviceRef device | CFStringRef name | MIDIProtocolID protocol | Boolean embedded | ItemCount numSourceEndpoints | ItemCount numDestinationEndpoints | MIDIEntityRef * newEntity	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	76e5043cfefc5a45	-
+function	c:@F@MIDIDeviceAddEntity	-			OSStatus (MIDIDeviceRef, CFStringRef, Boolean, ItemCount, ItemCount, MIDIEntityRef *)	MIDIDeviceRef device | CFStringRef name | Boolean embedded | ItemCount numSourceEndpoints | ItemCount numDestinationEndpoints | MIDIEntityRef * newEntity	-	ios=4.2/100000/-/0,macos=10.0/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use MIDIDeviceNewEntity instead	35464e1aeaf098a2	-
+function	c:@F@MIDIDeviceRemoveEntity	-			OSStatus (MIDIDeviceRef, MIDIEntityRef)	MIDIDeviceRef device | MIDIEntityRef entity	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	337b4945c88595ee	-
+function	c:@F@MIDIEntityAddOrRemoveEndpoints	-			OSStatus (MIDIEntityRef, ItemCount, ItemCount)	MIDIEntityRef entity | ItemCount numSourceEndpoints | ItemCount numDestinationEndpoints	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	832f286233f87307	-
+function	c:@F@MIDISetupAddDevice	-			OSStatus (MIDIDeviceRef)	MIDIDeviceRef device	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	41a693e028a2d556	-
+function	c:@F@MIDISetupRemoveDevice	-			OSStatus (MIDIDeviceRef)	MIDIDeviceRef device	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	01cb823fd12f69eb	-
+function	c:@F@MIDISetupAddExternalDevice	-			OSStatus (MIDIDeviceRef)	MIDIDeviceRef device	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c6c3c45531dabb99	-
+function	c:@F@MIDISetupRemoveExternalDevice	-			OSStatus (MIDIDeviceRef)	MIDIDeviceRef device	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	aa8740adf37eb126	-
+function	c:@F@MIDIGetSerialPortOwner	-			OSStatus (CFStringRef, CFStringRef  _Nullable *)	CFStringRef portName | CFStringRef  _Nullable * outDriverName	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	8ca9a467c4f5d44c	-
+function	c:@F@MIDISetSerialPortOwner	-			OSStatus (CFStringRef, CFStringRef)	CFStringRef portName | CFStringRef driverName	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	f45082b7c57749d5	-
+function	c:@F@MIDIGetSerialPortDrivers	-			OSStatus (CFArrayRef  _Nullable *)	CFArrayRef  _Nullable * outDriverNames	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/10.6/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: No longer supported	4753edcff0de5f87	-
+function	c:@F@MIDIExternalDeviceCreate	-			OSStatus (CFStringRef, CFStringRef, CFStringRef, MIDIDeviceRef *)	CFStringRef name | CFStringRef manufacturer | CFStringRef model | MIDIDeviceRef * outDevice	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b8bd180fcb6af42f	-
+typedef	c:@T@MIDIThruConnectionRef	-			MIDIObjectRef	-	-	-	-	9d48fc1f96559fd2	-
+struct	c:@S@MIDIValueMap	-			-	-	-	-	-	a44f92fe6613d693	-
+field	c:@S@MIDIValueMap@FI@value	MIDIValueMap			UInt8[128]	-	-	-	-	4b83ee5d265440e7	-
+typedef	c:@T@MIDIValueMap	-			struct MIDIValueMap	-	-	-	-	5fce4f5fcde81035	-
+typedef	c:@T@MIDITransformType	-			enum MIDITransformType	-	-	-	-	4e6a861a1ceddc0a	-
+enum	c:@E@MIDITransformType	-			UInt16	-	-	-	-	db0297c30f6b40d6	-
+enumconst	c:@E@MIDITransformType@kMIDITransform_None	MIDITransformType			-	-	-	-	-	a4cfd4926053b163	0
+enumconst	c:@E@MIDITransformType@kMIDITransform_FilterOut	MIDITransformType			-	-	-	-	-	bc8800b01688cff7	1
+enumconst	c:@E@MIDITransformType@kMIDITransform_MapControl	MIDITransformType			-	-	-	-	-	cd6a614636ea5ed7	2
+enumconst	c:@E@MIDITransformType@kMIDITransform_Add	MIDITransformType			-	-	-	-	-	a292fa00ebc2b522	8
+enumconst	c:@E@MIDITransformType@kMIDITransform_Scale	MIDITransformType			-	-	-	-	-	b2667ccdf00e9c7d	9
+enumconst	c:@E@MIDITransformType@kMIDITransform_MinValue	MIDITransformType			-	-	-	-	-	d333eaee3112177a	10
+enumconst	c:@E@MIDITransformType@kMIDITransform_MaxValue	MIDITransformType			-	-	-	-	-	c34531332ff44115	11
+enumconst	c:@E@MIDITransformType@kMIDITransform_MapValue	MIDITransformType			-	-	-	-	-	a901df78981d9132	12
+enum	c:@Ea@kMIDIThruConnection_MaxEndpoints	-	-		unsigned int	-	-	-	-	805c9d4d33fa96ac	-
+enumconst	c:@Ea@kMIDIThruConnection_MaxEndpoints@kMIDIThruConnection_MaxEndpoints	-			-	-	-	-	-	d6253bdb5e6e3ad0	8
+typedef	c:@T@MIDITransformControlType	-			enum MIDITransformControlType	-	-	-	-	655d94c69dd9a2a1	-
+enum	c:@E@MIDITransformControlType	-			UInt8	-	-	-	-	f863b302d03b5ca8	-
+enumconst	c:@E@MIDITransformControlType@kMIDIControlType_7Bit	MIDITransformControlType			-	-	-	-	-	b51c63f971d4bcd3	0
+enumconst	c:@E@MIDITransformControlType@kMIDIControlType_14Bit	MIDITransformControlType			-	-	-	-	-	eb9f9b0f505bdbc7	1
+enumconst	c:@E@MIDITransformControlType@kMIDIControlType_7BitRPN	MIDITransformControlType			-	-	-	-	-	c5b9c081dabce85e	2
+enumconst	c:@E@MIDITransformControlType@kMIDIControlType_14BitRPN	MIDITransformControlType			-	-	-	-	-	830c8e093fe717eb	3
+enumconst	c:@E@MIDITransformControlType@kMIDIControlType_7BitNRPN	MIDITransformControlType			-	-	-	-	-	f84b6f654c33bd46	4
+enumconst	c:@E@MIDITransformControlType@kMIDIControlType_14BitNRPN	MIDITransformControlType			-	-	-	-	-	52c266bbde7b93cb	5
+struct	c:@S@MIDITransform	-			-	-	-	-	-	83f84ac12618b7ee	-
+field	c:@S@MIDITransform@FI@transform	MIDITransform			MIDITransformType	-	-	-	-	6c974638b942b496	-
+field	c:@S@MIDITransform@FI@param	MIDITransform			SInt16	-	-	-	-	984fc888ad5b049a	-
+typedef	c:@T@MIDITransform	-			struct MIDITransform	-	-	-	-	174462fb321bc29e	-
+struct	c:@S@MIDIControlTransform	-			-	-	-	-	-	ff0ceae0ac5004aa	-
+field	c:@S@MIDIControlTransform@FI@controlType	MIDIControlTransform			MIDITransformControlType	-	-	-	-	64e6bec30b57d951	-
+field	c:@S@MIDIControlTransform@FI@remappedControlType	MIDIControlTransform			MIDITransformControlType	-	-	-	-	ab10f85a00649dbf	-
+field	c:@S@MIDIControlTransform@FI@controlNumber	MIDIControlTransform			UInt16	-	-	-	-	93c51d6a27aba38d	-
+field	c:@S@MIDIControlTransform@FI@transform	MIDIControlTransform			MIDITransformType	-	-	-	-	ad512009eb203f66	-
+field	c:@S@MIDIControlTransform@FI@param	MIDIControlTransform			SInt16	-	-	-	-	7de4d86a172f3639	-
+typedef	c:@T@MIDIControlTransform	-			struct MIDIControlTransform	-	-	-	-	30dc9c2b077250d8	-
+struct	c:@S@MIDIThruConnectionEndpoint	-			-	-	-	-	-	e7e3a9a9f4720e45	-
+field	c:@S@MIDIThruConnectionEndpoint@FI@endpointRef	MIDIThruConnectionEndpoint			MIDIEndpointRef	-	-	-	-	24e0b2d3587928eb	-
+field	c:@S@MIDIThruConnectionEndpoint@FI@uniqueID	MIDIThruConnectionEndpoint			MIDIUniqueID	-	-	-	-	0788d08786fbf1fe	-
+typedef	c:@T@MIDIThruConnectionEndpoint	-			struct MIDIThruConnectionEndpoint	-	-	-	-	aae9a54e0946c922	-
+struct	c:@S@MIDIThruConnectionParams	-			-	-	-	-	-	f734a8072bd63fe3	-
+field	c:@S@MIDIThruConnectionParams@FI@version	MIDIThruConnectionParams			UInt32	-	-	-	-	bc219c089d67f7d4	-
+field	c:@S@MIDIThruConnectionParams@FI@numSources	MIDIThruConnectionParams			UInt32	-	-	-	-	8fe915ff1a078c28	-
+field	c:@S@MIDIThruConnectionParams@FI@sources	MIDIThruConnectionParams			MIDIThruConnectionEndpoint[8]	-	-	-	-	75d4847eef1c4439	-
+field	c:@S@MIDIThruConnectionParams@FI@numDestinations	MIDIThruConnectionParams			UInt32	-	-	-	-	1c96294a8f8e1d34	-
+field	c:@S@MIDIThruConnectionParams@FI@destinations	MIDIThruConnectionParams			MIDIThruConnectionEndpoint[8]	-	-	-	-	ae1b7f671bee07e5	-
+field	c:@S@MIDIThruConnectionParams@FI@channelMap	MIDIThruConnectionParams			UInt8[16]	-	-	-	-	2a11cde36940c742	-
+field	c:@S@MIDIThruConnectionParams@FI@lowVelocity	MIDIThruConnectionParams			UInt8	-	-	-	-	372c52383f636f4e	-
+field	c:@S@MIDIThruConnectionParams@FI@highVelocity	MIDIThruConnectionParams			UInt8	-	-	-	-	2b6659b0b80cd114	-
+field	c:@S@MIDIThruConnectionParams@FI@lowNote	MIDIThruConnectionParams			UInt8	-	-	-	-	20976eae1f7fb961	-
+field	c:@S@MIDIThruConnectionParams@FI@highNote	MIDIThruConnectionParams			UInt8	-	-	-	-	912a9f7091b4aaae	-
+field	c:@S@MIDIThruConnectionParams@FI@noteNumber	MIDIThruConnectionParams			MIDITransform	-	-	-	-	93b501d310eaaaea	-
+field	c:@S@MIDIThruConnectionParams@FI@velocity	MIDIThruConnectionParams			MIDITransform	-	-	-	-	9f8bf48bc5e51811	-
+field	c:@S@MIDIThruConnectionParams@FI@keyPressure	MIDIThruConnectionParams			MIDITransform	-	-	-	-	6d0b603c8681fd83	-
+field	c:@S@MIDIThruConnectionParams@FI@channelPressure	MIDIThruConnectionParams			MIDITransform	-	-	-	-	e49848c677010a98	-
+field	c:@S@MIDIThruConnectionParams@FI@programChange	MIDIThruConnectionParams			MIDITransform	-	-	-	-	61ec3460464c5e7e	-
+field	c:@S@MIDIThruConnectionParams@FI@pitchBend	MIDIThruConnectionParams			MIDITransform	-	-	-	-	d4e82d1bc8d129d3	-
+field	c:@S@MIDIThruConnectionParams@FI@filterOutSysEx	MIDIThruConnectionParams			UInt8	-	-	-	-	d6226ff39dce6a9b	-
+field	c:@S@MIDIThruConnectionParams@FI@filterOutMTC	MIDIThruConnectionParams			UInt8	-	-	-	-	d7e469eb8410ab87	-
+field	c:@S@MIDIThruConnectionParams@FI@filterOutBeatClock	MIDIThruConnectionParams			UInt8	-	-	-	-	b98e87f3b80cc0fd	-
+field	c:@S@MIDIThruConnectionParams@FI@filterOutTuneRequest	MIDIThruConnectionParams			UInt8	-	-	-	-	d3c9ed0727108b00	-
+field	c:@S@MIDIThruConnectionParams@FI@reserved2	MIDIThruConnectionParams			UInt8[3]	-	-	-	-	95537873aadfad84	-
+field	c:@S@MIDIThruConnectionParams@FI@filterOutAllControls	MIDIThruConnectionParams			UInt8	-	-	-	-	504bf94e97bffa8c	-
+field	c:@S@MIDIThruConnectionParams@FI@numControlTransforms	MIDIThruConnectionParams			UInt16	-	-	-	-	eb8446cf5d4912f0	-
+field	c:@S@MIDIThruConnectionParams@FI@numMaps	MIDIThruConnectionParams			UInt16	-	-	-	-	e7b0448d5c804e91	-
+field	c:@S@MIDIThruConnectionParams@FI@reserved3	MIDIThruConnectionParams			UInt16[4]	-	-	-	-	022df75500ee5755	-
+typedef	c:@T@MIDIThruConnectionParams	-			struct MIDIThruConnectionParams	-	-	-	-	bbffcad76e59e24c	-
+function	c:@F@MIDIThruConnectionParamsSize	-			size_t (const MIDIThruConnectionParams *)	const MIDIThruConnectionParams * ptr	-	-	-	aaadca4055ed408d	-
+function	c:@F@MIDIThruConnectionParamsInitialize	-			void (MIDIThruConnectionParams *)	MIDIThruConnectionParams * inConnectionParams	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	042fad1e6ceb1555	-
+function	c:@F@MIDIThruConnectionCreate	-			OSStatus (CFStringRef, CFDataRef, MIDIThruConnectionRef *)	CFStringRef inPersistentOwnerID | CFDataRef inConnectionParams | MIDIThruConnectionRef * outConnection	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1e8f7450c4778765	-
+function	c:@F@MIDIThruConnectionDispose	-			OSStatus (MIDIThruConnectionRef)	MIDIThruConnectionRef connection	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e09433b952e9026d	-
+function	c:@F@MIDIThruConnectionGetParams	-			OSStatus (MIDIThruConnectionRef, CFDataRef  _Nonnull *)	MIDIThruConnectionRef connection | CFDataRef  _Nonnull * outConnectionParams	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	49d7dec88281bbad	-
+function	c:@F@MIDIThruConnectionSetParams	-			OSStatus (MIDIThruConnectionRef, CFDataRef)	MIDIThruConnectionRef connection | CFDataRef inConnectionParams	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	187c99c28e42e0f5	-
+function	c:@F@MIDIThruConnectionFind	-			OSStatus (CFStringRef, CFDataRef  _Nonnull *)	CFStringRef inPersistentOwnerID | CFDataRef  _Nonnull * outConnectionList	-	ios=4.2/-/-/0,macos=10.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	030c996f94599ccd	-
+typedef	c:@T@MIDIDriverInterface	-			struct MIDIDriverInterface	-	-	-	-	a4488414536bdf85	-
+typedef	c:@T@MIDIDriverRef	-			MIDIDriverInterface * _Nonnull *	-	-	-	-	c7864bb93ae996b8	-
+typedef	c:@T@MIDIDeviceListRef	-			MIDIObjectRef	-	-	-	-	825ea770ef2cf58f	-
+struct	c:@S@MIDIDriverInterface	-			-	-	-	-	-	51ea2f3f9927cbc0	-
+field	c:@S@MIDIDriverInterface@FI@_reserved	MIDIDriverInterface			void *	-	-	-	-	310446f5a83e203e	-
+field	c:@S@MIDIDriverInterface@FI@QueryInterface	MIDIDriverInterface			HRESULT (*)(void * _Nonnull, REFIID, LPVOID *)	-	-	-	-	9760271a9a37ad6e	-
+field	c:@S@MIDIDriverInterface@FI@AddRef	MIDIDriverInterface			ULONG (*)(void * _Nonnull)	-	-	-	-	32a47d4ee7334487	-
+field	c:@S@MIDIDriverInterface@FI@Release	MIDIDriverInterface			ULONG (*)(void * _Nonnull)	-	-	-	-	d6130be93dc3c9ac	-
+field	c:@S@MIDIDriverInterface@FI@FindDevices	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIDeviceListRef)	-	-	-	-	a684aef516da0a18	-
+field	c:@S@MIDIDriverInterface@FI@Start	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIDeviceListRef)	-	-	-	-	a9765bb7ec7c9c33	-
+field	c:@S@MIDIDriverInterface@FI@Stop	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull)	-	-	-	-	12f83b4697b5f1f5	-
+field	c:@S@MIDIDriverInterface@FI@Configure	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIDeviceRef)	-	-	-	-	e800be824c60ebd4	-
+field	c:@S@MIDIDriverInterface@FI@Send	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, const MIDIPacketList * _Nonnull, void * _Nonnull, void * _Nonnull) __attribute__((nonblocking))	-	-	-	-	4eb1dbda1fa31649	-
+field	c:@S@MIDIDriverInterface@FI@EnableSource	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIEndpointRef, Boolean)	-	-	-	-	ceb703fa25307fe4	-
+field	c:@S@MIDIDriverInterface@FI@Flush	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIEndpointRef, void * _Nullable, void * _Nullable)	-	-	-	-	099caf41a93aefc9	-
+field	c:@S@MIDIDriverInterface@FI@Monitor	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIEndpointRef, const MIDIPacketList * _Nonnull) __attribute__((nonblocking))	-	-	-	-	21de7f6415c500c4	-
+field	c:@S@MIDIDriverInterface@FI@SendPackets	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, const MIDIEventList * _Nonnull, void * _Nonnull, void * _Nonnull) __attribute__((nonblocking))	-	-	-	-	50a94705a229dd54	-
+field	c:@S@MIDIDriverInterface@FI@MonitorEvents	MIDIDriverInterface			OSStatus (*)(MIDIDriverRef _Nonnull, MIDIEndpointRef, const MIDIEventList * _Nonnull) __attribute__((nonblocking))	-	-	-	-	cf3bd8a1d0c2020e	-
+var	c:@kMIDIDriverPropertyUsesSerial	-			const CFStringRef	-	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4ea4604eb807d823	-
+function	c:@F@MIDIDeviceCreate	-			OSStatus (MIDIDriverRef, CFStringRef, CFStringRef, CFStringRef, MIDIDeviceRef *)	MIDIDriverRef owner | CFStringRef name | CFStringRef manufacturer | CFStringRef model | MIDIDeviceRef * outDevice	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e85de6ce59d31a0e	-
+function	c:@F@MIDIDeviceDispose	-			OSStatus (MIDIDeviceRef)	MIDIDeviceRef device	-	ios=4.2/-/-/0,macos=10.3/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bdaac03cc92981a9	-
+function	c:@F@MIDIDeviceListGetNumberOfDevices	-			ItemCount (MIDIDeviceListRef)	MIDIDeviceListRef devList	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	81691d6b9a4ee926	-
+function	c:@F@MIDIDeviceListGetDevice	-			MIDIDeviceRef (MIDIDeviceListRef, ItemCount)	MIDIDeviceListRef devList | ItemCount index0	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	eed3b8245ffd3d9e	-
+function	c:@F@MIDIDeviceListAddDevice	-			OSStatus (MIDIDeviceListRef, MIDIDeviceRef)	MIDIDeviceListRef devList | MIDIDeviceRef dev	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1fb844790821e0fa	-
+function	c:@F@MIDIDeviceListDispose	-			OSStatus (MIDIDeviceListRef)	MIDIDeviceListRef devList	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	83aa20ce4cf7119d	-
+function	c:@F@MIDIEndpointSetRefCons	-			OSStatus (MIDIEndpointRef, void *, void *)	MIDIEndpointRef endpt | void * ref1 | void * ref2	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6daa9cc937bc6c9c	-
+function	c:@F@MIDIEndpointGetRefCons	-			OSStatus (MIDIEndpointRef, void * _Nonnull *, void * _Nonnull *)	MIDIEndpointRef endpt | void * _Nonnull * ref1 | void * _Nonnull * ref2	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	02cb9757e8eb06e5	-
+function	c:@F@MIDIGetDriverIORunLoop	-			CFRunLoopRef (void)	-	-	ios=4.2/-/-/0,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	17556bda28bc0e79	-
+function	c:@F@MIDIGetDriverDeviceList	-			MIDIDeviceListRef (MIDIDriverRef)	MIDIDriverRef driver	-	ios=4.2/-/-/0,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0ffc63c53ac98378	-
+function	c:@F@MIDIDriverEnableMonitoring	-			OSStatus (MIDIDriverRef, Boolean)	MIDIDriverRef driver | Boolean enabled	-	bridgeos=-/-/-/1,ios=-/-/-/1,macos=10.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	75755c9aae893634	-
+typedef	c:@T@MIDIMessageType	-			enum MIDIMessageType	-	-	-	-	c93438fe6c9b6b01	-
+enum	c:@E@MIDIMessageType	-			unsigned int	-	-	-	-	71d6fecd7a7d5ae2	-
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeUtility	MIDIMessageType			-	-	-	-	-	70b78a564ffd83b1	0
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeSystem	MIDIMessageType			-	-	-	-	-	6a1d46f6058e7f38	1
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeChannelVoice1	MIDIMessageType			-	-	-	-	-	67fe7f57a1a8d810	2
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeSysEx	MIDIMessageType			-	-	-	-	-	720e48c07412c929	3
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeChannelVoice2	MIDIMessageType			-	-	-	-	-	1ae9165dd2ec909e	4
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeData128	MIDIMessageType			-	-	-	-	-	16f5c7f44d157a30	5
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeFlexData	MIDIMessageType			-	-	-	-	-	1f5bbb8cebf8b140	13
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeUnknownF	MIDIMessageType			-	-	-	-	-	ed427f76d39e5652	15
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeStream	MIDIMessageType			-	-	-	-	-	a36f9b8a4789c39e	15
+enumconst	c:@E@MIDIMessageType@kMIDIMessageTypeInvalid	MIDIMessageType			-	-	-	-	-	361ddb9406ead6d1	255
+typedef	c:@T@MIDICVStatus	-			enum MIDICVStatus	-	-	-	-	a5a2904b7d99a408	-
+enum	c:@E@MIDICVStatus	-			unsigned int	-	-	-	-	e1e2af009f461522	-
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusNoteOff	MIDICVStatus			-	-	-	-	-	783645ebd1bdac7d	8
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusNoteOn	MIDICVStatus			-	-	-	-	-	9db9650be30937fb	9
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusPolyPressure	MIDICVStatus			-	-	-	-	-	7bb800b7a1ff527c	10
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusControlChange	MIDICVStatus			-	-	-	-	-	f79c20741e8b770d	11
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusProgramChange	MIDICVStatus			-	-	-	-	-	f76ffef066a49b85	12
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusChannelPressure	MIDICVStatus			-	-	-	-	-	22500cfff0a20554	13
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusPitchBend	MIDICVStatus			-	-	-	-	-	c05054a9aec475c0	14
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusRegisteredPNC	MIDICVStatus			-	-	-	-	-	49cfa6d273bcec4f	0
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusAssignablePNC	MIDICVStatus			-	-	-	-	-	02cd1102f22ae472	1
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusRegisteredControl	MIDICVStatus			-	-	-	-	-	dd23db0f4cef7692	2
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusAssignableControl	MIDICVStatus			-	-	-	-	-	d7a575a5efe81815	3
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusRelRegisteredControl	MIDICVStatus			-	-	-	-	-	0e65c46136f04e7d	4
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusRelAssignableControl	MIDICVStatus			-	-	-	-	-	98466eedf37b045c	5
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusPerNotePitchBend	MIDICVStatus			-	-	-	-	-	dd727bab44653209	6
+enumconst	c:@E@MIDICVStatus@kMIDICVStatusPerNoteMgmt	MIDICVStatus			-	-	-	-	-	a8fbc50ddace8075	15
+typedef	c:@T@MIDISystemStatus	-			enum MIDISystemStatus	-	-	-	-	393631bd9cfc89f8	-
+enum	c:@E@MIDISystemStatus	-			unsigned int	-	-	-	-	679f5a53cb80f360	-
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusStartOfExclusive	MIDISystemStatus			-	-	-	-	-	1e1980fa65092d73	240
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusEndOfExclusive	MIDISystemStatus			-	-	-	-	-	0ed95241fe4853c1	247
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusMTC	MIDISystemStatus			-	-	-	-	-	3d0d98a3baee2f9d	241
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusSongPosPointer	MIDISystemStatus			-	-	-	-	-	ac799f6af49cdd84	242
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusSongSelect	MIDISystemStatus			-	-	-	-	-	0cf983240d7a3c22	243
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusTuneRequest	MIDISystemStatus			-	-	-	-	-	bca33ca96089f9a7	246
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusTimingClock	MIDISystemStatus			-	-	-	-	-	d5a7571eaae2801c	248
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusStart	MIDISystemStatus			-	-	-	-	-	6ac0cc8a2a3f1955	250
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusContinue	MIDISystemStatus			-	-	-	-	-	2f2b84763d6211ad	251
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusStop	MIDISystemStatus			-	-	-	-	-	a68b1795f80913f6	252
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusActiveSending	MIDISystemStatus			-	-	-	-	-	8c643e40bc8c074c	254
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusActiveSensing	MIDISystemStatus			-	-	-	-	-	1453e459b0f430ae	254
+enumconst	c:@E@MIDISystemStatus@kMIDIStatusSystemReset	MIDISystemStatus			-	-	-	-	-	119e75474d81d34e	255
+typedef	c:@T@MIDISysExStatus	-			enum MIDISysExStatus	-	-	-	-	66747da558f51d64	-
+enum	c:@E@MIDISysExStatus	-			unsigned int	-	-	-	-	d8356a0189d3a7ff	-
+enumconst	c:@E@MIDISysExStatus@kMIDISysExStatusComplete	MIDISysExStatus			-	-	-	-	-	15d75b224cabe7fc	0
+enumconst	c:@E@MIDISysExStatus@kMIDISysExStatusStart	MIDISysExStatus			-	-	-	-	-	d5b41124390b54cc	1
+enumconst	c:@E@MIDISysExStatus@kMIDISysExStatusContinue	MIDISysExStatus			-	-	-	-	-	3bec5c161bce9e66	2
+enumconst	c:@E@MIDISysExStatus@kMIDISysExStatusEnd	MIDISysExStatus			-	-	-	-	-	c74f0e0e29a0d623	3
+enumconst	c:@E@MIDISysExStatus@kMIDISysExStatusMixedDataSetHeader	MIDISysExStatus			-	-	-	-	-	a18ce28ae8909b61	8
+enumconst	c:@E@MIDISysExStatus@kMIDISysExStatusMixedDataSetPayload	MIDISysExStatus			-	-	-	-	-	99cfe1621279f30c	9
+typedef	c:@T@MIDIUtilityStatus	-			enum MIDIUtilityStatus	-	-	-	-	b832a38c72f4efb3	-
+enum	c:@E@MIDIUtilityStatus	-			unsigned int	-	-	-	-	4827917d244b8912	-
+enumconst	c:@E@MIDIUtilityStatus@kMIDIUtilityStatusNOOP	MIDIUtilityStatus			-	-	-	-	-	7d0b646f9335e30f	0
+enumconst	c:@E@MIDIUtilityStatus@kMIDIUtilityStatusJitterReductionClock	MIDIUtilityStatus			-	-	-	-	-	de650be88b1947de	1
+enumconst	c:@E@MIDIUtilityStatus@kMIDIUtilityStatusJitterReductionTimestamp	MIDIUtilityStatus			-	-	-	-	-	69cea8d71b0e5307	2
+enumconst	c:@E@MIDIUtilityStatus@kMIDIUtilityStatusDeltaClockstampTicksPerQuarterNote	MIDIUtilityStatus			-	-	-	-	-	c0540ee568ea3664	3
+enumconst	c:@E@MIDIUtilityStatus@kMIDIUtilityStatusTicksSinceLastEvent	MIDIUtilityStatus			-	-	-	-	-	67c711bdebf674c5	4
+typedef	c:@T@UMPStreamMessageStatus	-			enum UMPStreamMessageStatus	-	-	-	-	a6c5082fd8c09da4	-
+enum	c:@E@UMPStreamMessageStatus	-			unsigned int	-	-	-	-	9e140c3206901640	-
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusEndpointDiscovery	UMPStreamMessageStatus			-	-	-	-	-	c56ab4dccda92a05	0
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusEndpointInfoNotification	UMPStreamMessageStatus			-	-	-	-	-	15c7cab55735ca3f	1
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusDeviceIdentityNotification	UMPStreamMessageStatus			-	-	-	-	-	94713318e30a0f52	2
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusEndpointNameNotification	UMPStreamMessageStatus			-	-	-	-	-	f7ba5683b1fd7464	3
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusProductInstanceIDNotification	UMPStreamMessageStatus			-	-	-	-	-	a2884e98f4ef34ca	4
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusStreamConfigurationRequest	UMPStreamMessageStatus			-	-	-	-	-	025d055056198aa9	5
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusStreamConfigurationNotification	UMPStreamMessageStatus			-	-	-	-	-	2cafb97e3ab6aa10	6
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusFunctionBlockDiscovery	UMPStreamMessageStatus			-	-	-	-	-	3b2f8cbdb7b23c80	16
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusFunctionBlockInfoNotification	UMPStreamMessageStatus			-	-	-	-	-	5824fcb337d6693c	17
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusFunctionBlockNameNotification	UMPStreamMessageStatus			-	-	-	-	-	6a9587faea0d3fdd	18
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusStartOfClip	UMPStreamMessageStatus			-	-	-	-	-	cc3218d2101a6e0e	32
+enumconst	c:@E@UMPStreamMessageStatus@kUMPStreamMessageStatusEndOfClip	UMPStreamMessageStatus			-	-	-	-	-	98825b729b5bffc6	33
+typedef	c:@T@MIDINoteAttribute	-			enum MIDINoteAttribute	-	-	-	-	4db3296360b96b2c	-
+enum	c:@E@MIDINoteAttribute	-			UInt8	-	-	-	-	cbec301a1813d500	-
+enumconst	c:@E@MIDINoteAttribute@kMIDINoteAttributeNone	MIDINoteAttribute			-	-	-	-	-	e320eb1cfe9358e1	0
+enumconst	c:@E@MIDINoteAttribute@kMIDINoteAttributeManufacturerSpecific	MIDINoteAttribute			-	-	-	-	-	827b10c227083469	1
+enumconst	c:@E@MIDINoteAttribute@kMIDINoteAttributeProfileSpecific	MIDINoteAttribute			-	-	-	-	-	f459d0b047a6c929	2
+enumconst	c:@E@MIDINoteAttribute@kMIDINoteAttributePitch	MIDINoteAttribute			-	-	-	-	-	bf6bf162e9360d7c	3
+typedef	c:@T@MIDIProgramChangeOptions	-			enum MIDIProgramChangeOptions	-	-	-	-	97b959f6a98ec2a0	-
+enum	c:@E@MIDIProgramChangeOptions	-			UInt8	-	-	-	-	2006eab8549e4e53	-
+enumconst	c:@E@MIDIProgramChangeOptions@kMIDIProgramChangeBankValid	MIDIProgramChangeOptions			-	-	-	-	-	0d55a0c7db06659e	1
+typedef	c:@T@MIDIPerNoteManagementOptions	-			enum MIDIPerNoteManagementOptions	-	-	-	-	44ed0a8fd2f6ab7c	-
+enum	c:@E@MIDIPerNoteManagementOptions	-			UInt8	-	-	-	-	f2a54ee5d4580f93	-
+enumconst	c:@E@MIDIPerNoteManagementOptions@kMIDIPerNoteManagementReset	MIDIPerNoteManagementOptions			-	-	-	-	-	aed915529f3a12d8	1
+enumconst	c:@E@MIDIPerNoteManagementOptions@kMIDIPerNoteManagementDetach	MIDIPerNoteManagementOptions			-	-	-	-	-	4f503da15850f06f	2
+typedef	c:@T@MIDIUMPFunctionBlockMIDI1Info	-			enum MIDIUMPFunctionBlockMIDI1Info	-	-	-	-	c494b83cebcd7643	-
+enum	c:@E@MIDIUMPFunctionBlockMIDI1Info	-			SInt32	-	-	-	-	dceab48a5d921382	-
+enumconst	c:@E@MIDIUMPFunctionBlockMIDI1Info@kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1	MIDIUMPFunctionBlockMIDI1Info			-	-	-	-	-	539ef3e6ce4f75cd	0
+enumconst	c:@E@MIDIUMPFunctionBlockMIDI1Info@kMIDIUMPFunctionBlockMIDI1InfoUnrestrictedBandwidth	MIDIUMPFunctionBlockMIDI1Info			-	-	-	-	-	ed1a2c41384e9b40	1
+enumconst	c:@E@MIDIUMPFunctionBlockMIDI1Info@kMIDIUMPFunctionBlockMIDI1InfoRestrictedBandwidth	MIDIUMPFunctionBlockMIDI1Info			-	-	-	-	-	2e6ef70af6e66e5f	2
+typedef	c:@T@MIDIUMPFunctionBlockUIHint	-			enum MIDIUMPFunctionBlockUIHint	-	-	-	-	bc5f2f4f5b9b1ff7	-
+enum	c:@E@MIDIUMPFunctionBlockUIHint	-			SInt32	-	-	-	-	5ce13431adff97ed	-
+enumconst	c:@E@MIDIUMPFunctionBlockUIHint@kMIDIUMPFunctionBlockUIHintUnknown	MIDIUMPFunctionBlockUIHint			-	-	-	-	-	27c15dd1bf609063	0
+enumconst	c:@E@MIDIUMPFunctionBlockUIHint@kMIDIUMPFunctionBlockUIHintReceiver	MIDIUMPFunctionBlockUIHint			-	-	-	-	-	daadbbde7a128c10	1
+enumconst	c:@E@MIDIUMPFunctionBlockUIHint@kMIDIUMPFunctionBlockUIHintSender	MIDIUMPFunctionBlockUIHint			-	-	-	-	-	e5965d9d6d894b05	2
+enumconst	c:@E@MIDIUMPFunctionBlockUIHint@kMIDIUMPFunctionBlockUIHintSenderReceiver	MIDIUMPFunctionBlockUIHint			-	-	-	-	-	7ac63204814fa0d2	3
+typedef	c:@T@MIDIUMPFunctionBlockDirection	-			enum MIDIUMPFunctionBlockDirection	-	-	-	-	e9ccc605e3d55fe4	-
+enum	c:@E@MIDIUMPFunctionBlockDirection	-			SInt32	-	-	-	-	9fa3fc2a60944fd6	-
+enumconst	c:@E@MIDIUMPFunctionBlockDirection@kMIDIUMPFunctionBlockDirectionUnknown	MIDIUMPFunctionBlockDirection			-	-	-	-	-	0a5beb197e0c680c	0
+enumconst	c:@E@MIDIUMPFunctionBlockDirection@kMIDIUMPFunctionBlockDirectionInput	MIDIUMPFunctionBlockDirection			-	-	-	-	-	a948d15a37d75349	1
+enumconst	c:@E@MIDIUMPFunctionBlockDirection@kMIDIUMPFunctionBlockDirectionOutput	MIDIUMPFunctionBlockDirection			-	-	-	-	-	93ab4f6d00d8f76b	2
+enumconst	c:@E@MIDIUMPFunctionBlockDirection@kMIDIUMPFunctionBlockDirectionBidirectional	MIDIUMPFunctionBlockDirection			-	-	-	-	-	4f83c27122829e72	3
+typedef	c:@T@UMPStreamMessageFormat	-			enum UMPStreamMessageFormat	-	-	-	-	b880b842535b3f90	-
+enum	c:@E@UMPStreamMessageFormat	-			UInt8	-	-	-	-	dd86039e165c0429	-
+enumconst	c:@E@UMPStreamMessageFormat@kUMPStreamMessageFormatComplete	UMPStreamMessageFormat			-	-	-	-	-	bdef6b458c81438c	0
+enumconst	c:@E@UMPStreamMessageFormat@kUMPStreamMessageFormatStart	UMPStreamMessageFormat			-	-	-	-	-	58b25e1883d31ee3	1
+enumconst	c:@E@UMPStreamMessageFormat@kUMPStreamMessageFormatContinuing	UMPStreamMessageFormat			-	-	-	-	-	b7e7a991e3a035b4	2
+enumconst	c:@E@UMPStreamMessageFormat@kUMPStreamMessageFormatEnd	UMPStreamMessageFormat			-	-	-	-	-	0c853bc6deee6d3c	3
+typedef	c:@T@MIDIUInteger2	-			UInt8	-	-	-	-	df5845477bf348a0	-
+typedef	c:@T@MIDIUInteger4	-			UInt8	-	-	-	-	b2c9ce73d82005aa	-
+typedef	c:@T@MIDIUInteger7	-			UInt8	-	-	-	-	a567460ab244faf5	-
+typedef	c:@T@MIDIUInteger14	-			UInt16	-	-	-	-	0da5a027ee9245b4	-
+typedef	c:@T@MIDIUInteger28	-			UInt32	-	-	-	-	d9dc8f4785a06fda	-
+typedef	c:@T@MIDIUMPGroupNumber	-			MIDIUInteger4	-	-	-	-	994cbe8125acce88	-
+typedef	c:@T@MIDIChannelNumber	-			MIDIUInteger4	-	-	-	-	32b192d9b8776f09	-
+typedef	c:@T@MIDICIDeviceID	-			MIDIUInteger7	-	-	-	-	924e9ef53941a751	-
+typedef	c:@T@MIDICIMUID	-			MIDIUInteger28	-	-	-	-	a1df52e3bb0c3b3d	-
+typedef	c:@T@MIDIMessage_32	-			UInt32	-	-	-	-	fed4b42b9ab2f842	-
+struct	c:@S@MIDIMessage_64	-			-	-	-	-	-	a02d558fc906784c	-
+field	c:@S@MIDIMessage_64@FI@word0	MIDIMessage_64			UInt32	-	-	-	-	0e60be72b40916b8	-
+field	c:@S@MIDIMessage_64@FI@word1	MIDIMessage_64			UInt32	-	-	-	-	83d59dc403e640ee	-
+typedef	c:@T@MIDIMessage_64	-			struct MIDIMessage_64	-	-	-	-	ded9167b242613fb	-
+struct	c:@S@MIDIMessage_96	-			-	-	-	-	-	784c4fa177920f99	-
+field	c:@S@MIDIMessage_96@FI@word0	MIDIMessage_96			UInt32	-	-	-	-	67973fd31f8d0f54	-
+field	c:@S@MIDIMessage_96@FI@word1	MIDIMessage_96			UInt32	-	-	-	-	3b3456d680628634	-
+field	c:@S@MIDIMessage_96@FI@word2	MIDIMessage_96			UInt32	-	-	-	-	d79c173e89a0f9c8	-
+typedef	c:@T@MIDIMessage_96	-			struct MIDIMessage_96	-	-	-	-	0b746c7552b0ca2b	-
+struct	c:@S@MIDIMessage_128	-			-	-	-	-	-	dbfbdd5d561dfec2	-
+field	c:@S@MIDIMessage_128@FI@word0	MIDIMessage_128			UInt32	-	-	-	-	f33915cac973d821	-
+field	c:@S@MIDIMessage_128@FI@word1	MIDIMessage_128			UInt32	-	-	-	-	9c788f2489689366	-
+field	c:@S@MIDIMessage_128@FI@word2	MIDIMessage_128			UInt32	-	-	-	-	1065bdff382d8a2c	-
+field	c:@S@MIDIMessage_128@FI@word3	MIDIMessage_128			UInt32	-	-	-	-	e26cc8382e647179	-
+typedef	c:@T@MIDIMessage_128	-			struct MIDIMessage_128	-	-	-	-	8c611b7065d63f23	-
+function	c:@F@MIDIMessageTypeForUPWord	-			MIDIMessageType (const UInt32)	const UInt32 word	-	-	-	8c11369cf60de684	-
+function	c:@F@MIDI1UPChannelVoiceMessage	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 status | UInt8 channel | UInt8 data1 | UInt8 data2	-	-	-	ae44ba370adced91	-
+function	c:@F@MIDI1UPNoteOff	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 velocity	-	-	-	b2fdb478b0fb8023	-
+function	c:@F@MIDI1UPNoteOn	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 velocity	-	-	-	9beb62eab3a6ff34	-
+function	c:@F@MIDI1UPPolyPressure	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 pressure	-	-	-	9f2b0e6c6bbc3432	-
+function	c:@F@MIDI1UPControlChange	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 index | UInt8 data	-	-	-	27e3e493ada42c62	-
+function	c:@F@MIDI1UPProgramChange	-			MIDIMessage_32 (UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 program	-	-	-	bd9b5050006f6aac	-
+function	c:@F@MIDI1UPChannelPressure	-			MIDIMessage_32 (UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 value	-	-	-	a7353c2399374a59	-
+function	c:@F@MIDI1UPPitchBend	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | UInt8 lsb | UInt8 msb	-	-	-	8ad43ede78dcd7b9	-
+function	c:@F@MIDI1UPSystemCommon	-			MIDIMessage_32 (UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 status | UInt8 byte1 | UInt8 byte2	-	-	-	ba315f0a71a3a96e	-
+function	c:@F@MIDI1UPSysEx	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8)	UInt8 group | UInt8 status | UInt8 bytesUsed | UInt8 byte1 | UInt8 byte2 | UInt8 byte3 | UInt8 byte4 | UInt8 byte5 | UInt8 byte6	-	-	-	c0802d62d822114c	-
+function	c:@F@MIDI1UPSysExArray	-			MIDIMessage_64 (UInt8, UInt8, const Byte *, const Byte *)	UInt8 group | UInt8 status | const Byte * begin | const Byte * end	-	-	-	0603557d0a56e7e8	-
+function	c:@F@MIDI2ChannelVoiceMessage	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt16, UInt32)	UInt8 group | UInt8 status | UInt8 channel | UInt16 index | UInt32 value	-	-	-	2128ea8aae0d3beb	-
+function	c:@F@MIDI2NoteOn	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt16, UInt16)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 attributeType | UInt16 attributeData | UInt16 velocity	-	-	-	d491adeb7e31c35b	-
+function	c:@F@MIDI2NoteOff	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt16, UInt16)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 attributeType | UInt16 attributeData | UInt16 velocity	-	-	-	77e8c7e43334d0eb	-
+function	c:@F@MIDI2PolyPressure	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt32 value	-	-	-	367b2908d0e5f5a4	-
+function	c:@F@MIDI2RegisteredPNC	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 index | UInt32 value	-	-	-	3480b00640a758fa	-
+function	c:@F@MIDI2AssignablePNC	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt8 index | UInt32 value	-	-	-	9b8969fdf5bdaf9f	-
+function	c:@F@MIDI2PerNoteManagment	-			MIDIMessage_64 (UInt8, UInt8, UInt8, _Bool, _Bool)	UInt8 group | UInt8 channel | UInt8 noteNumber | _Bool detachPNCs | _Bool resetPNCsToDefault	-	-	-	0a3be5dbe5ef6080	-
+function	c:@F@MIDI2ControlChange	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 index | UInt32 value	-	-	-	2d129ebb3101beb4	-
+function	c:@F@MIDI2RegisteredControl	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 bank | UInt8 index | UInt32 value	-	-	-	e9feb668ca89ce32	-
+function	c:@F@MIDI2AssignableControl	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 bank | UInt8 index | UInt32 value	-	-	-	4c93fd56c3ec7f65	-
+function	c:@F@MIDI2RelRegisteredControl	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 bank | UInt8 index | UInt32 value	-	-	-	94e5fe0acb23633c	-
+function	c:@F@MIDI2RelAssignableControl	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 bank | UInt8 index | UInt32 value	-	-	-	8cb19aacac36c9fd	-
+function	c:@F@MIDI2ProgramChange	-			MIDIMessage_64 (UInt8, UInt8, _Bool, UInt8, UInt8, UInt8)	UInt8 group | UInt8 channel | _Bool bankIsValid | UInt8 program | UInt8 bank_msb | UInt8 bank_lsb	-	-	-	cb195d4728801ef8	-
+function	c:@F@MIDI2ChannelPressure	-			MIDIMessage_64 (UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt32 value	-	-	-	c755fd7cf85df646	-
+function	c:@F@MIDI2PitchBend	-			MIDIMessage_64 (UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt32 value	-	-	-	5766022bfac1c179	-
+function	c:@F@MIDI2PerNotePitchBend	-			MIDIMessage_64 (UInt8, UInt8, UInt8, UInt32)	UInt8 group | UInt8 channel | UInt8 noteNumber | UInt32 value	-	-	-	22af5805443c20e0	-
+function	c:@F@MIDI2StreamMessage	-			MIDIMessage_128 (UMPStreamMessageFormat, UMPStreamMessageStatus, UInt16, UInt32, UInt32, UInt32)	UMPStreamMessageFormat format | UMPStreamMessageStatus status | UInt16 data1 | UInt32 data2 | UInt32 data3 | UInt32 data4	-	-	-	ab0db7c5bf8ef799	-
+function	c:@F@MIDI2StreamMessageFromData	-			MIDIMessage_128 (UMPStreamMessageFormat, UMPStreamMessageStatus, const Byte *, const size_t)	UMPStreamMessageFormat format | UMPStreamMessageStatus status | const Byte * data | const size_t length	-	-	-	3ba88cb9dab52042	-
+function	c:@F@MIDI2EndpointDiscoveryMessage	-			MIDIMessage_128 (UInt8, UInt8, _Bool, _Bool, _Bool, _Bool, _Bool)	UInt8 versionMajor | UInt8 versionMinor | _Bool endpointInfoRequest | _Bool deviceIdentityRequest | _Bool endpointNameRequest | _Bool productInstanceIDRequest | _Bool streamConfigurationRequest	-	-	-	acd62a0562ea4fba	-
+function	c:@F@MIDI2EndpointInfoNotificationMessage	-			MIDIMessage_128 (UInt8, UInt8, _Bool, UInt8, _Bool, _Bool, _Bool, _Bool)	UInt8 versionMajor | UInt8 versionMinor | _Bool staticFunctionBlocks | UInt8 numberOfFunctionBlocks | _Bool m1 | _Bool m2 | _Bool receiveJRTimestamp | _Bool transmitJRTimestamp	-	-	-	7ba111237c361019	-
+function	c:@F@MIDI2EndpointDeviceIdentityNotificationMessage	-			MIDIMessage_128 (MIDIUInteger7, MIDIUInteger7, MIDIUInteger7, MIDIUInteger14, MIDIUInteger14, MIDIUInteger28)	MIDIUInteger7 deviceManufacturer1 | MIDIUInteger7 deviceManufacturer2 | MIDIUInteger7 deviceManufacturer3 | MIDIUInteger14 deviceFamily | MIDIUInteger14 deviceFamilyModel | MIDIUInteger28 revisionLevel	-	-	-	c732f0997380732b	-
+function	c:@F@MIDI2EndpointNameNotificationMessage	-			MIDIMessage_128 (UMPStreamMessageFormat, const char *, const size_t)	UMPStreamMessageFormat format | const char * data | const size_t length	-	-	-	6b9df04ab2772842	-
+function	c:@F@MIDI2EndpointProductInstanceIDNotificationMessage	-			MIDIMessage_128 (UMPStreamMessageFormat, const char *, const size_t)	UMPStreamMessageFormat format | const char * data | const size_t length	-	-	-	8ea0b81dd43a1e16	-
+function	c:@F@MIDI2StreamConfigurationRequestMessage	-			MIDIMessage_128 (UInt8, _Bool, _Bool)	UInt8 protocol | _Bool receiveJRTimestamp | _Bool transmitJRTimestamp	-	-	-	5d976780fba807a7	-
+function	c:@F@MIDI2StreamConfigurationNotificationMessage	-			MIDIMessage_128 (UInt8, _Bool, _Bool)	UInt8 protocol | _Bool receiveJRTimestamp | _Bool transmitJRTimestamp	-	-	-	52b4e36b03125c30	-
+function	c:@F@MIDI2FunctionBlockDiscoveryMessage	-			MIDIMessage_128 (UInt8, _Bool, _Bool)	UInt8 functionBlockNumber | _Bool infoRequest | _Bool nameRequest	-	-	-	61a8a692479d1d80	-
+function	c:@F@MIDI2FunctionBlockInfoNotificationMessage	-			MIDIMessage_128 (_Bool, MIDIUInteger7, MIDIUMPFunctionBlockUIHint, MIDIUMPFunctionBlockMIDI1Info, MIDIUMPFunctionBlockDirection, UInt8, UInt8, UInt8, UInt8)	_Bool active | MIDIUInteger7 blockNumber | MIDIUMPFunctionBlockUIHint UIHint | MIDIUMPFunctionBlockMIDI1Info MIDI1 | MIDIUMPFunctionBlockDirection direction | UInt8 firstGroup | UInt8 numberOfGroupsSpanned | UInt8 CIVersion | UInt8 maxSysex8Streams	-	-	-	5c1b321a9a42d863	-
+function	c:@F@MIDI2FunctionBlockNameNotificationMessage	-			MIDIMessage_128 (UMPStreamMessageFormat, UInt8, const char *, size_t)	UMPStreamMessageFormat format | UInt8 blockNumber | const char * data | size_t length	-	-	-	1b30da6752ffc999	-
+function	c:@F@MIDI2StartOfClipMessage	-			MIDIMessage_128 (void)	-	-	-	-	363520d5da48ccfc	-
+function	c:@F@MIDI2EndOfClipMessage	-			MIDIMessage_128 (void)	-	-	-	-	4821cd2217fb106f	-
+function	c:@F@MIDINoOpMessage	-			MIDIMessage_32 (void)	-	-	-	-	c456b6a00337d4bc	-
+function	c:@F@MIDIJitterReductionClockMessage	-			MIDIMessage_32 (UInt16)	UInt16 senderClockTime	-	-	-	e1b6056a0a59b6fa	-
+function	c:@F@MIDIJitterReductionTimestampMessage	-			MIDIMessage_32 (UInt16)	UInt16 senderClockTimestamp	-	-	-	87161de010023e5b	-
+function	c:@F@MIDIDeltaClockstampTicksPerQuarterNoteMessage	-			MIDIMessage_32 (UInt16)	UInt16 ticksPerQuarterNote	-	-	-	531cf87614be688b	-
+function	c:@F@MIDITicksSinceLastEventMessage	-			MIDIMessage_32 (UInt32)	UInt32 ticksSinceLastEvent	-	-	-	eb25e0af05202969	-
+function	c:@F@MIDI2FlexDataMessage	-			MIDIMessage_128 (MIDIUInteger4, MIDIUInteger2, MIDIUInteger2, MIDIUInteger4, UInt8, UInt8, UInt32, UInt32, UInt32)	MIDIUInteger4 group | MIDIUInteger2 format | MIDIUInteger2 address | MIDIUInteger4 channel | UInt8 statusBank | UInt8 status | UInt32 data1 | UInt32 data2 | UInt32 data3	-	-	-	1e502a0d229df7fd	-
+struct	c:@S@MIDIUniversalMessage	-			-	-	-	-	-	c725d3b89e8e971e	-
+field	c:@S@MIDIUniversalMessage@FI@type	MIDIUniversalMessage			MIDIMessageType	-	-	-	-	6e8dff9433d97d0c	-
+field	c:@S@MIDIUniversalMessage@FI@group	MIDIUniversalMessage			UInt8	-	-	-	-	59cdbf154ce58e1b	-
+field	c:@S@MIDIUniversalMessage@FI@reserved	MIDIUniversalMessage			UInt8[3]	-	-	-	-	8b43d54c0d2b5613	-
+union	c:@S@MIDIUniversalMessage@Ua	-	-		-	-	-	-	-	1ee3bc71a096c092	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26516	-	-		-	-	-	-	-	cf9dbf7e5b60735e	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26516@FI@status	-			MIDIUtilityStatus	-	-	-	-	50d7d7f0e142584c	-
+union	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26516@Ua	-	-		-	-	-	-	-	036771b0462ab761	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26516@Ua@FI@jitterReductionClock	-			UInt16	-	-	-	-	456e0831f7a9ebcf	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26516@Ua@FI@jitterReductionTimestamp	-			UInt16	-	-	-	-	338b7dbe0bb299fa	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@utility	-			struct (unnamed)	-	-	-	-	21bd3489b8780a46	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26891	-	-		-	-	-	-	-	32082a05dc35e982	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26891@FI@status	-			MIDISystemStatus	-	-	-	-	4e63a0e297dcea24	-
+union	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26891@Ua	-	-		-	-	-	-	-	a1ab8241ada1b94f	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26891@Ua@FI@timeCode	-			UInt8	-	-	-	-	38f2f4df50d439d6	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26891@Ua@FI@songPositionPointer	-			UInt16	-	-	-	-	243df51e9531e13f	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@26891@Ua@FI@songSelect	-			UInt8	-	-	-	-	2e301888498168f1	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@system	-			struct (unnamed)	-	-	-	-	a4792f2e33a7a0cf	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294	-	-		-	-	-	-	-	52fb3493106f8a83	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@FI@status	-			MIDICVStatus	-	-	-	-	e1aa1015e7eac0d5	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@FI@channel	-			UInt8	-	-	-	-	5c41b885e614d239	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@FI@reserved	-			UInt8[3]	-	-	-	-	403fbf1c6f1e43d7	-
+union	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua	-	-		-	-	-	-	-	b6d75567140d5aed	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27465	-	-		-	-	-	-	-	c9cb98bbdaadb16d	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27465@FI@number	-			UInt8	-	-	-	-	58c3b187ae92ceba	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27465@FI@velocity	-			UInt8	-	-	-	-	da6b00727152cd99	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@FI@note	-			struct (unnamed)	-	-	-	-	9f2582d98f73333e	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27656	-	-		-	-	-	-	-	df1ea3d8dfa036f1	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27656@FI@noteNumber	-			UInt8	-	-	-	-	2d4fde199bd1dfed	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27656@FI@pressure	-			UInt8	-	-	-	-	e9bc11a7a1a6549e	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@FI@polyPressure	-			struct (unnamed)	-	-	-	-	38d90cdd59d28536	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27850	-	-		-	-	-	-	-	a776fc1d42e7509b	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27850@FI@index	-			UInt8	-	-	-	-	69489c8c5a3e57e9	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@S@MIDIMessages.h@27850@FI@data	-			UInt8	-	-	-	-	252cb0b06d19a52b	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@FI@controlChange	-			struct (unnamed)	-	-	-	-	7be1f71c614bc124	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@FI@program	-			UInt8	-	-	-	-	695cfa584c848a03	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@FI@channelPressure	-			UInt8	-	-	-	-	29166db50ba5bde7	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@27294@Ua@FI@pitchBend	-			UInt16	-	-	-	-	6f533711769ff68d	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@channelVoice1	-			struct (unnamed)	-	-	-	-	97ba3ec74d1c3b2b	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28442	-	-		-	-	-	-	-	d03d27f3d42b4251	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28442@FI@status	-			MIDISysExStatus	-	-	-	-	a562fec1906da727	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28442@FI@channel	-			UInt8	-	-	-	-	357f42eb30103587	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28442@FI@data	-			UInt8[6]	-	-	-	-	388570822591295b	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28442@FI@reserved	-			UInt8	-	-	-	-	a2f3c11531aa0f67	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@sysEx	-			struct (unnamed)	-	-	-	-	bae505dec5bf299d	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681	-	-		-	-	-	-	-	f014b8c44a4c6d73	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@FI@status	-			MIDICVStatus	-	-	-	-	76c9173f40f3bc19	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@FI@channel	-			UInt8	-	-	-	-	5ecb44369bc33472	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@FI@reserved	-			UInt8[3]	-	-	-	-	27e18c5f1e9a4242	-
+union	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua	-	-		-	-	-	-	-	9b3b6cad364d2f34	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@28847	-	-		-	-	-	-	-	3f803e0c3c0d900d	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@28847@FI@number	-			UInt8	-	-	-	-	cb87d6cbddf0fb20	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@28847@FI@attributeType	-			MIDINoteAttribute	-	-	-	-	9ffd8481cd2030f4	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@28847@FI@velocity	-			UInt16	-	-	-	-	7107f64f5fca759a	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@28847@FI@attribute	-			UInt16	-	-	-	-	79e34b5d1cb0376e	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@note	-			struct (unnamed)	-	-	-	-	cb5c56bd38414806	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29201	-	-		-	-	-	-	-	9aee3e017ce6b753	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29201@FI@noteNumber	-			UInt8	-	-	-	-	7bda248649d5f11c	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29201@FI@reserved	-			UInt8	-	-	-	-	524211fb891eb7f5	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29201@FI@pressure	-			UInt32	-	-	-	-	e69ee9fdb2755f14	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@polyPressure	-			struct (unnamed)	-	-	-	-	c77baf51e713e589	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29415	-	-		-	-	-	-	-	51cd089a809ba653	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29415@FI@index	-			UInt8	-	-	-	-	3094c0805e23ba11	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29415@FI@reserved	-			UInt8	-	-	-	-	986b0405f81ae05a	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29415@FI@data	-			UInt32	-	-	-	-	1117b685b6b6de35	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@controlChange	-			struct (unnamed)	-	-	-	-	82ebb7ffad176675	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29628	-	-		-	-	-	-	-	900bafbba647502d	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29628@FI@options	-			MIDIProgramChangeOptions	-	-	-	-	9192242bbdc89046	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29628@FI@program	-			UInt8	-	-	-	-	ae03f084de447b70	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29628@FI@reserved	-			UInt8[2]	-	-	-	-	6e0bf9b5fb14b445	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29628@FI@bank	-			UInt16	-	-	-	-	2f52d1e0d7749ac8	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@programChange	-			struct (unnamed)	-	-	-	-	dd102149b0f9bf7c	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29885	-	-		-	-	-	-	-	a767da30d49f16d0	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29885@FI@data	-			UInt32	-	-	-	-	5a97e0348bb49304	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@29885@FI@reserved	-			UInt8[2]	-	-	-	-	830b883e8751d7e4	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@channelPressure	-			struct (unnamed)	-	-	-	-	98bd0377950c0d33	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30062	-	-		-	-	-	-	-	924260ccdefc6633	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30062@FI@data	-			UInt32	-	-	-	-	944f8d63f4436d38	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30062@FI@reserved	-			UInt8[2]	-	-	-	-	a28882e977ce16dd	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@pitchBend	-			struct (unnamed)	-	-	-	-	29dfb4d8c5ca2340	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30227	-	-		-	-	-	-	-	48194f129ed57a31	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30227@FI@noteNumber	-			UInt8	-	-	-	-	8afd501967080b26	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30227@FI@index	-			UInt8	-	-	-	-	1494b2dd2d3d960e	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30227@FI@data	-			UInt32	-	-	-	-	54b98722e59a214b	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@perNoteController	-			struct (unnamed)	-	-	-	-	43c6bb37e3771265	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30505	-	-		-	-	-	-	-	cea1c40cfb2b8e46	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30505@FI@bank	-			UInt8	-	-	-	-	7ae22188690aeb29	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30505@FI@index	-			UInt8	-	-	-	-	7b4b98c78ffc1b9e	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30505@FI@data	-			UInt32	-	-	-	-	50e226eeeef721c8	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@controller	-			struct (unnamed)	-	-	-	-	7000575ff89bcb49	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30842	-	-		-	-	-	-	-	fdbe6da19cf6ce76	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30842@FI@noteNumber	-			UInt8	-	-	-	-	6915c1d9602bc9f2	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30842@FI@reserved	-			UInt8	-	-	-	-	441e6fe12bd96732	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@30842@FI@bend	-			UInt32	-	-	-	-	3e546e8cc142c718	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@perNotePitchBend	-			struct (unnamed)	-	-	-	-	6a912185a741900d	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@31070	-	-		-	-	-	-	-	53dae07a7b113e8b	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@31070@FI@note	-			UInt8	-	-	-	-	0f4d23378c67b499	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@31070@FI@options	-			MIDIPerNoteManagementOptions	-	-	-	-	905dc2c16ab31790	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@S@MIDIMessages.h@31070@FI@reserved	-			UInt8[4]	-	-	-	-	fbf0e15cdacac11c	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@28681@Ua@FI@perNoteManagement	-			struct (unnamed)	-	-	-	-	3d8116c47c8b5d56	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@channelVoice2	-			struct (unnamed)	-	-	-	-	7b91cc0cd31f8279	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358	-	-		-	-	-	-	-	c6e5981d7f18d035	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@FI@status	-			MIDISysExStatus	-	-	-	-	36dff997565f9737	-
+union	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua	-	-		-	-	-	-	-	572785570aea3f28	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31452	-	-		-	-	-	-	-	22cc263d3b26ad4a	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31452@FI@byteCount	-			UInt8	-	-	-	-	17e43ed079ef63db	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31452@FI@streamID	-			UInt8	-	-	-	-	e4a347a84bd9a36a	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31452@FI@data	-			UInt8[13]	-	-	-	-	300de7380ae38f01	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31452@FI@reserved	-			UInt8	-	-	-	-	7a5b1be0c289f200	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@FI@sysex8	-			struct (unnamed)	-	-	-	-	0a42b32f4efe6298	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31755	-	-		-	-	-	-	-	729d0c0c30bb934b	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31755@FI@mdsID	-			UInt8	-	-	-	-	7c3303839c1b0dde	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31755@FI@data	-			UInt8[14]	-	-	-	-	bcbd92ece436238e	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@S@MIDIMessages.h@31755@FI@reserved	-			UInt8	-	-	-	-	e7774ffb335bd4ac	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@31358@Ua@FI@mixedDataSet	-			struct (unnamed)	-	-	-	-	c55a83b9828df787	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@data128	-			struct (unnamed)	-	-	-	-	91666bbac11ce787	-
+struct	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@32048	-	-		-	-	-	-	-	c3e1376747847b76	-
+field	c:@S@MIDIUniversalMessage@Ua@S@MIDIMessages.h@32048@FI@words	-			UInt32[4]	-	-	-	-	17bf6540adc1ba81	-
+field	c:@S@MIDIUniversalMessage@Ua@FI@unknown	-			struct (unnamed)	-	-	-	-	720a380c531852d0	-
+typedef	c:@T@MIDIUniversalMessage	-			struct MIDIUniversalMessage	-	-	-	-	5eb9e542bf372a2d	-
+typedef	c:@T@MIDIEventVisitor	-			void (*)(void *, MIDITimeStamp, MIDIUniversalMessage)	-	-	-	-	8e8338f4a0d61f2b	-
+function	c:@F@MIDIEventListForEachEvent	-			void (const MIDIEventList *, MIDIEventVisitor, void *)	const MIDIEventList * evtlist | MIDIEventVisitor visitor | void * visitorContext	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	0bd4a342b51ca418	-
+function	c:@F@MIDIBluetoothDriverActivateAllConnections	-			OSStatus (void)	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	b845d6190b835d77	-
+function	c:@F@MIDIBluetoothDriverDisconnect	-			OSStatus (CFStringRef)	CFStringRef uuid	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	078d49e67f1748cd	-
+struct	c:@SA@MIDI2DeviceManufacturer	-			-	-	-	-	-	53dba59d7d4f1ff0	-
+field	c:@SA@MIDI2DeviceManufacturer@FI@sysExIDByte	MIDI2DeviceManufacturer			Byte[3]	-	-	-	-	b1bce483be5f19ae	-
+typedef	c:@T@MIDI2DeviceManufacturer	-			struct MIDI2DeviceManufacturer	-	-	-	-	3eb8126ac22fd569	-
+struct	c:@SA@MIDI2DeviceRevisionLevel	-			-	-	-	-	-	ed338dad60ba47b1	-
+field	c:@SA@MIDI2DeviceRevisionLevel@FI@revisionLevel	MIDI2DeviceRevisionLevel			Byte[4]	-	-	-	-	f7aadfcfb96aed36	-
+typedef	c:@T@MIDI2DeviceRevisionLevel	-			struct MIDI2DeviceRevisionLevel	-	-	-	-	f4982ef76ceb7e13	-
+typedef	c:@T@MIDICICategoryOptions	-			enum MIDICICategoryOptions	-	-	-	-	4b3dc3f432b0d944	-
+enum	c:@E@MIDICICategoryOptions	-			MIDIUInteger7	-	-	-	-	4b7df5a5ceab080e	-
+enumconst	c:@E@MIDICICategoryOptions@kMIDICICategoryOptionsProtocolNegotiation	MIDICICategoryOptions			-	-	-	-	-	b11404d2f1e6ad9f	2
+enumconst	c:@E@MIDICICategoryOptions@kMIDICICategoryOptionsProfileConfigurationSupported	MIDICICategoryOptions			-	-	-	-	-	910e559b0cbe7d59	4
+enumconst	c:@E@MIDICICategoryOptions@kMIDICICategoryOptionsPropertyExchangeSupported	MIDICICategoryOptions			-	-	-	-	-	2d71111c17810c18	8
+enumconst	c:@E@MIDICICategoryOptions@kMIDICICategoryOptionsProcessInquirySupported	MIDICICategoryOptions			-	-	-	-	-	825346a135730f24	16
+typedef	c:@T@MIDIUMPFunctionBlockID	-			MIDIUInteger7	-	-	-	-	c55a3e4851871fb7	-
+typedef	c:@T@MIDICIDeviceType	-			enum MIDICIDeviceType	-	-	-	-	08547f1b6c5e28d0	-
+enum	c:@E@MIDICIDeviceType	-			UInt8	-	-	-	-	4c3d1abac2efb6c9	-
+enumconst	c:@E@MIDICIDeviceType@kMIDICIDeviceTypeUnknown	MIDICIDeviceType			-	-	-	-	-	f3efff03608eedfa	0
+enumconst	c:@E@MIDICIDeviceType@kMIDICIDeviceTypeLegacyMIDI1	MIDICIDeviceType			-	-	-	-	-	71acc4094e45f0e7	1
+enumconst	c:@E@MIDICIDeviceType@kMIDICIDeviceTypeVirtual	MIDICIDeviceType			-	-	-	-	-	c29be6a8ef15984c	2
+enumconst	c:@E@MIDICIDeviceType@kMIDICIDeviceTypeUSBMIDI	MIDICIDeviceType			-	-	-	-	-	79e26a21861ea259	3
+typedef	c:@T@MIDICIProfileMessageType	-			enum MIDICIProfileMessageType	-	-	-	-	43e5b30ef88f9044	-
+enum	c:@E@MIDICIProfileMessageType	-			MIDIUInteger7	-	-	-	-	1ff1e7958042bd80	-
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeProfileInquiry	MIDICIProfileMessageType			-	-	-	-	-	203e4a6ccb6ac13b	32
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeReplyToProfileInquiry	MIDICIProfileMessageType			-	-	-	-	-	f2f6a8a8b3b23b97	33
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeSetProfileOn	MIDICIProfileMessageType			-	-	-	-	-	12089a696baf049e	34
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeSetProfileOff	MIDICIProfileMessageType			-	-	-	-	-	f18318a4ce7d8680	35
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeProfileEnabledReport	MIDICIProfileMessageType			-	-	-	-	-	eb365ca6ac63373e	36
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeProfileDisabledReport	MIDICIProfileMessageType			-	-	-	-	-	0bf62da0c834cf5f	37
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeProfileAdded	MIDICIProfileMessageType			-	-	-	-	-	aaca477c70ba4ab1	38
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeProfileRemoved	MIDICIProfileMessageType			-	-	-	-	-	e7dd9ca1b6ce1c65	39
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeDetailsInquiry	MIDICIProfileMessageType			-	-	-	-	-	41aa6c71bfc5508d	40
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeReplyToDetailsInquiry	MIDICIProfileMessageType			-	-	-	-	-	b117a39a6a986b0e	41
+enumconst	c:@E@MIDICIProfileMessageType@kMIDICIProfileMessageTypeProfileSpecificData	MIDICIProfileMessageType			-	-	-	-	-	ae0775a6a7ee388a	47
+typedef	c:@T@MIDICIPropertyExchangeMessageType	-			enum MIDICIPropertyExchangeMessageType	-	-	-	-	177356dd13e287a3	-
+enum	c:@E@MIDICIPropertyExchangeMessageType	-			MIDIUInteger7	-	-	-	-	c2ee79eb46dfe127	-
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeInquiryPropertyExchangeCapabilities	MIDICIPropertyExchangeMessageType			-	-	-	-	-	6a64b152712ff8b2	48
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeReplyToPropertyExchangeCapabilities	MIDICIPropertyExchangeMessageType			-	-	-	-	-	686e3eb1a7cdf0d0	49
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeInquiryHasPropertyData_Reserved	MIDICIPropertyExchangeMessageType			-	-	-	-	-	17a52b67a81dc5f7	50
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeInquiryReplyToHasPropertyData_Reserved	MIDICIPropertyExchangeMessageType			-	-	-	-	-	8b2dbff45e353573	51
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeInquiryGetPropertyData	MIDICIPropertyExchangeMessageType			-	-	-	-	-	21614e19be6cda37	52
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeReplyToGetProperty	MIDICIPropertyExchangeMessageType			-	-	-	-	-	b446f127db823de3	53
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeInquirySetPropertyData	MIDICIPropertyExchangeMessageType			-	-	-	-	-	c2a8c8bf6a702959	54
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeReplyToSetPropertyData	MIDICIPropertyExchangeMessageType			-	-	-	-	-	f9850eca343f036f	55
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeSubscription	MIDICIPropertyExchangeMessageType			-	-	-	-	-	8fb2270aa4f1a547	56
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeReplyToSubscription	MIDICIPropertyExchangeMessageType			-	-	-	-	-	01199b13c01d3e07	57
+enumconst	c:@E@MIDICIPropertyExchangeMessageType@kMIDICIPropertyExchangeMessageTypeNotify	MIDICIPropertyExchangeMessageType			-	-	-	-	-	1a05e8918e66a5cc	63
+typedef	c:@T@MIDICIProcessInquiryMessageType	-			enum MIDICIProcessInquiryMessageType	-	-	-	-	165ce3bf649511d1	-
+enum	c:@E@MIDICIProcessInquiryMessageType	-			MIDIUInteger7	-	-	-	-	416d28ec3be21343	-
+enumconst	c:@E@MIDICIProcessInquiryMessageType@kMIDICIProcessInquiryMessageTypeInquiryProcessInquiryCapabilities	MIDICIProcessInquiryMessageType			-	-	-	-	-	4933c6a1e3fba1b8	64
+enumconst	c:@E@MIDICIProcessInquiryMessageType@kMIDICIProcessInquiryMessageTypeReplyToProcessInquiryCapabilities	MIDICIProcessInquiryMessageType			-	-	-	-	-	5a5106e7ce9e7956	65
+enumconst	c:@E@MIDICIProcessInquiryMessageType@kMIDICIProcessInquiryMessageTypeInquiryMIDIMessageReport	MIDICIProcessInquiryMessageType			-	-	-	-	-	dd171a6b3858bbf8	66
+enumconst	c:@E@MIDICIProcessInquiryMessageType@kMIDICIProcessInquiryMessageTypeReplyToMIDIMessageReport	MIDICIProcessInquiryMessageType			-	-	-	-	-	740e7972c22ad09d	67
+enumconst	c:@E@MIDICIProcessInquiryMessageType@kMIDICIProcessInquiryMessageTypeEndOfMIDIMessageReport	MIDICIProcessInquiryMessageType			-	-	-	-	-	2b25423ae6bb5956	68
+typedef	c:@T@MIDICIManagementMessageType	-			enum MIDICIManagementMessageType	-	-	-	-	1aa5483e1db05de4	-
+enum	c:@E@MIDICIManagementMessageType	-			MIDIUInteger7	-	-	-	-	7b8d2c6b880672df	-
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeDiscovery	MIDICIManagementMessageType			-	-	-	-	-	9d5028ab7a709023	112
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeReplyToDiscovery	MIDICIManagementMessageType			-	-	-	-	-	9e8a95765b4064ba	113
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeInquiryEndpointInformation	MIDICIManagementMessageType			-	-	-	-	-	9a2e732ac67af3bc	114
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeReplyToEndpointInformation	MIDICIManagementMessageType			-	-	-	-	-	e4f6949699eb8ea5	115
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeMIDICIACK	MIDICIManagementMessageType			-	-	-	-	-	464861de6f3f2694	125
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeInvalidateMUID	MIDICIManagementMessageType			-	-	-	-	-	917d6605c4504d89	126
+enumconst	c:@E@MIDICIManagementMessageType@kMIDICIManagementMessageTypeMIDICINAK	MIDICIManagementMessageType			-	-	-	-	-	adb63934df21cd7c	127
+typedef	c:@T@MIDICIProfileType	-			enum MIDICIProfileType	-	-	-	-	65260936debf430a	-
+enum	c:@E@MIDICIProfileType	-			UInt8	-	-	-	-	8e41761d7f1e1ef8	-
+enumconst	c:@E@MIDICIProfileType@kMIDICIProfileTypeSingleChannel	MIDICIProfileType			-	-	-	-	-	eddeec7f658063d4	1
+enumconst	c:@E@MIDICIProfileType@kMIDICIProfileTypeGroup	MIDICIProfileType			-	-	-	-	-	3370fdabd648b032	2
+enumconst	c:@E@MIDICIProfileType@kMIDICIProfileTypeFunctionBlock	MIDICIProfileType			-	-	-	-	-	58f17352ce42018b	3
+enumconst	c:@E@MIDICIProfileType@kMIDICIProfileTypeMultichannel	MIDICIProfileType			-	-	-	-	-	8fce3f9b33d7e91c	4
+typedef	c:@T@MIDIUMPCIObjectBackingType	-			enum MIDIUMPCIObjectBackingType	-	-	-	-	636a43c864694d05	-
+enum	c:@E@MIDIUMPCIObjectBackingType	-			UInt8	-	-	-	-	7f51bf9ad49af85d	-
+enumconst	c:@E@MIDIUMPCIObjectBackingType@kMIDIUMPCIObjectBackingTypeUnknown	MIDIUMPCIObjectBackingType			-	-	-	-	-	1274c0ed8c00f77a	0
+enumconst	c:@E@MIDIUMPCIObjectBackingType@kMIDIUMPCIObjectBackingTypeVirtual	MIDIUMPCIObjectBackingType			-	-	-	-	-	20a6a4809bbb548f	1
+enumconst	c:@E@MIDIUMPCIObjectBackingType@kMIDIUMPCIObjectBackingTypeDriverDevice	MIDIUMPCIObjectBackingType			-	-	-	-	-	9ef35e2250ad88ec	2
+enumconst	c:@E@MIDIUMPCIObjectBackingType@kMIDIUMPCIObjectBackingTypeUSBMIDI	MIDIUMPCIObjectBackingType			-	-	-	-	-	634ce22660349339	3
+struct	c:@SA@MIDICIProfileIDStandard	-			-	-	-	-	-	6fba6ae383fb9170	-
+field	c:@SA@MIDICIProfileIDStandard@FI@profileIDByte1	MIDICIProfileIDStandard			MIDIUInteger7	-	-	-	-	04aad6857a4975db	-
+field	c:@SA@MIDICIProfileIDStandard@FI@profileBank	MIDICIProfileIDStandard			MIDIUInteger7	-	-	-	-	936a0c1fbc34432a	-
+field	c:@SA@MIDICIProfileIDStandard@FI@profileNumber	MIDICIProfileIDStandard			MIDIUInteger7	-	-	-	-	5e12ad52d29240cb	-
+field	c:@SA@MIDICIProfileIDStandard@FI@profileVersion	MIDICIProfileIDStandard			MIDIUInteger7	-	-	-	-	6c720fcd3b5ad45d	-
+field	c:@SA@MIDICIProfileIDStandard@FI@profileLevel	MIDICIProfileIDStandard			MIDIUInteger7	-	-	-	-	beda757947437244	-
+typedef	c:@T@MIDICIProfileIDStandard	-			struct MIDICIProfileIDStandard	-	-	-	-	de29e2e2c75c961a	-
+struct	c:@SA@MIDICIProfileIDManufacturerSpecific	-			-	-	-	-	-	430a885c139f98a0	-
+field	c:@SA@MIDICIProfileIDManufacturerSpecific@FI@sysExID1	MIDICIProfileIDManufacturerSpecific			MIDIUInteger7	-	-	-	-	fdf619f180a347bb	-
+field	c:@SA@MIDICIProfileIDManufacturerSpecific@FI@sysExID2	MIDICIProfileIDManufacturerSpecific			MIDIUInteger7	-	-	-	-	bf10091e288ec576	-
+field	c:@SA@MIDICIProfileIDManufacturerSpecific@FI@sysExID3	MIDICIProfileIDManufacturerSpecific			MIDIUInteger7	-	-	-	-	eff39d8d9e16f61e	-
+field	c:@SA@MIDICIProfileIDManufacturerSpecific@FI@info1	MIDICIProfileIDManufacturerSpecific			MIDIUInteger7	-	-	-	-	83de46d14ad77a43	-
+field	c:@SA@MIDICIProfileIDManufacturerSpecific@FI@info2	MIDICIProfileIDManufacturerSpecific			MIDIUInteger7	-	-	-	-	78f6e0d77d0a694f	-
+typedef	c:@T@MIDICIProfileIDManufacturerSpecific	-			struct MIDICIProfileIDManufacturerSpecific	-	-	-	-	de3adfd24979f364	-
+union	c:@UA@MIDICIProfileID	-			-	-	-	-	-	6502b8bd253ccf1b	-
+field	c:@UA@MIDICIProfileID@FI@standard	MIDICIProfileID			MIDICIProfileIDStandard	-	-	-	-	9e9c51688341f966	-
+field	c:@UA@MIDICIProfileID@FI@manufacturerSpecific	MIDICIProfileID			MIDICIProfileIDManufacturerSpecific	-	-	-	-	84d8f938c4c71fe5	-
+typedef	c:@T@MIDICIProfileID	-			union MIDICIProfileID	-	-	-	-	304f84e1b91bc035	-
+typedef	c:@T@MIDICIPropertyExchangeRequestID	-			UInt8	-	-	-	-	ef6c97439bccbf4e	-
+var	c:@MIDINetworkBonjourServiceType	-			NSString *const	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3edf5444fc882bc4	-
+var	c:@MIDINetworkNotificationContactsDidChange	-			NSString *const	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e777ec483a2e5817	-
+var	c:@MIDINetworkNotificationSessionDidChange	-			NSString *const	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f41a562c8b75f46a	-
+typedef	c:@T@MIDINetworkConnectionPolicy	-			enum MIDINetworkConnectionPolicy	-	-	-	-	a8a51efb240048f0	-
+enum	c:@E@MIDINetworkConnectionPolicy	-			NSUInteger	-	-	-	-	f21261d9cacf4d4b	-
+enumconst	c:@E@MIDINetworkConnectionPolicy@MIDINetworkConnectionPolicy_NoOne	MIDINetworkConnectionPolicy			-	-	-	-	-	a73e1331c05833b5	0
+enumconst	c:@E@MIDINetworkConnectionPolicy@MIDINetworkConnectionPolicy_HostsInContactList	MIDINetworkConnectionPolicy			-	-	-	-	-	525dab490168675d	1
+enumconst	c:@E@MIDINetworkConnectionPolicy@MIDINetworkConnectionPolicy_Anyone	MIDINetworkConnectionPolicy			-	-	-	-	-	c03fec53cad1cc1a	2
+interface	c:objc(cs)MIDINetworkHost	-			-	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c44bffe79085ff33	-
+super	-	MIDINetworkHost	NSObject		-	-	-	-	-	b4c91cfbd601a86c	-
+method	c:objc(cs)MIDINetworkHost(cm)hostWithName:address:port:	-			instancetype	NSString * name | NSString * address | NSUInteger port	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	038bd010652b822f	-
+method	c:objc(cs)MIDINetworkHost(cm)hostWithName:netService:	-			instancetype	NSString * name | NSNetService * netService	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	acb16dcf994b1959	-
+method	c:objc(cs)MIDINetworkHost(cm)hostWithName:netServiceName:netServiceDomain:	-			instancetype	NSString * name | NSString * netServiceName | NSString * netServiceDomain	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c0af1059668d4eab	-
+method	c:objc(cs)MIDINetworkHost(im)hasSameAddressAs:	-			BOOL	MIDINetworkHost * other	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3facdaa3a870d089	-
+property	c:objc(cs)MIDINetworkHost(py)name	-			NSString *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	04bcdcac37c0cef8	-
+property	c:objc(cs)MIDINetworkHost(py)address	-			NSString *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6cb3f279634317b5	-
+property	c:objc(cs)MIDINetworkHost(py)port	-			NSUInteger	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	380ae7ad9d33ed65	-
+property	c:objc(cs)MIDINetworkHost(py)netServiceName	-			NSString *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d04811a6030b0fd0	-
+property	c:objc(cs)MIDINetworkHost(py)netServiceDomain	-			NSString *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d9fa3a15fc95ad44	-
+interface	c:objc(cs)MIDINetworkConnection	-			-	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	85c0698f57173c37	-
+super	-	MIDINetworkConnection	NSObject		-	-	-	-	-	34233f7a0d45269f	-
+method	c:objc(cs)MIDINetworkConnection(cm)connectionWithHost:	-			instancetype	MIDINetworkHost * host	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4294823a1ff1e78f	-
+property	c:objc(cs)MIDINetworkConnection(py)host	-			MIDINetworkHost *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	563b16b4bdd3408e	-
+interface	c:objc(cs)MIDINetworkSession	-			-	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	82a767d6984f6a95	-
+super	-	MIDINetworkSession	NSObject		-	-	-	-	-	6731f3226c20f22e	-
+method	c:objc(cs)MIDINetworkSession(cm)defaultSession	-			MIDINetworkSession *	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b58a011bb70a541b	-
+property	c:objc(cs)MIDINetworkSession(py)enabled	-			BOOL	-	nonatomic,getter=isEnabled	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2fa493302d2b5ec6	-
+property	c:objc(cs)MIDINetworkSession(py)networkPort	-			NSUInteger	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c289d7367ebf3ada	-
+property	c:objc(cs)MIDINetworkSession(py)networkName	-			NSString *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3b607f585db22253	-
+property	c:objc(cs)MIDINetworkSession(py)localName	-			NSString *	-	readonly,nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2843a8fa87f51818	-
+property	c:objc(cs)MIDINetworkSession(py)connectionPolicy	-			MIDINetworkConnectionPolicy	-	nonatomic	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cb0066ac12d5c55a	-
+method	c:objc(cs)MIDINetworkSession(im)contacts	-			NSSet<MIDINetworkHost *> *	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dab61f8dc0eb2683	-
+method	c:objc(cs)MIDINetworkSession(im)addContact:	-			BOOL	MIDINetworkHost * contact	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a5a59c1b6711a8fd	-
+method	c:objc(cs)MIDINetworkSession(im)removeContact:	-			BOOL	MIDINetworkHost * contact	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d077d55f124f4436	-
+method	c:objc(cs)MIDINetworkSession(im)connections	-			NSSet<MIDINetworkConnection *> *	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	041c6a3772887108	-
+method	c:objc(cs)MIDINetworkSession(im)addConnection:	-			BOOL	MIDINetworkConnection * connection	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9c8ae4512649dd23	-
+method	c:objc(cs)MIDINetworkSession(im)removeConnection:	-			BOOL	MIDINetworkConnection * connection	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	87b906f0b184ee78	-
+method	c:objc(cs)MIDINetworkSession(im)sourceEndpoint	-			MIDIEndpointRef	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c48508292e635b78	-
+method	c:objc(cs)MIDINetworkSession(im)destinationEndpoint	-			MIDIEndpointRef	-	-	ios=4.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0a25b4ae18e5309b	-
+interface	c:objc(cs)MIDI2DeviceInfo	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	dc6649dc0fdc045d	-
+super	-	MIDI2DeviceInfo	NSObject		-	-	-	-	-	e12b9f77763915cb	-
+property	c:objc(cs)MIDI2DeviceInfo(py)manufacturerID	-			MIDI2DeviceManufacturer	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	198e8f2a193292f3	-
+property	c:objc(cs)MIDI2DeviceInfo(py)family	-			MIDIUInteger14	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	32c620fe6116e509	-
+property	c:objc(cs)MIDI2DeviceInfo(py)modelNumber	-			MIDIUInteger14	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	9ba085a094db804d	-
+property	c:objc(cs)MIDI2DeviceInfo(py)revisionLevel	-			MIDI2DeviceRevisionLevel	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	29a4162eda3ff634	-
+method	c:objc(cs)MIDI2DeviceInfo(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	1cda57a67be79dae	-
+method	c:objc(cs)MIDI2DeviceInfo(im)initWithManufacturerID:family:modelNumber:revisionLevel:	-			instancetype	MIDI2DeviceManufacturer manufacturerID | MIDIUInteger14 family | MIDIUInteger14 modelNumber | MIDI2DeviceRevisionLevel revisionLevel	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	8a24176c83e1a2e0	-
+typedef	c:@T@MIDIUMPProtocolOptions	-			enum MIDIUMPProtocolOptions	-	-	-	-	1da7b76196a6ea30	-
+enum	c:@E@MIDIUMPProtocolOptions	-			MIDIUInteger4	-	-	-	-	58d4ddd51161b622	-
+enumconst	c:@E@MIDIUMPProtocolOptions@kMIDIUMPProtocolOptionsMIDI1	MIDIUMPProtocolOptions			-	-	-	-	-	957e3525ff5e9873	1
+enumconst	c:@E@MIDIUMPProtocolOptions@kMIDIUMPProtocolOptionsMIDI2	MIDIUMPProtocolOptions			-	-	-	-	-	91dd3a24d146c55d	2
+interface	c:objc(cs)MIDIUMPEndpoint	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	eded93d8c6d4fc96	-
+super	-	MIDIUMPEndpoint	NSObject		-	-	-	-	-	432a50b4651c7237	-
+property	c:objc(cs)MIDIUMPEndpoint(py)name	-			NSString *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	e674f8d33a9a8f3d	-
+property	c:objc(cs)MIDIUMPEndpoint(py)MIDIProtocol	-			MIDIProtocolID	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	abe9130d22cd8884	-
+property	c:objc(cs)MIDIUMPEndpoint(py)supportedMIDIProtocols	-			MIDIUMPProtocolOptions	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	8592f75b120a2613	-
+property	c:objc(cs)MIDIUMPEndpoint(py)MIDIDestination	-			MIDIEndpointRef	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	d466f294bb74925a	-
+property	c:objc(cs)MIDIUMPEndpoint(py)MIDISource	-			MIDIEndpointRef	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	3e97bc2f88480d13	-
+property	c:objc(cs)MIDIUMPEndpoint(py)deviceInfo	-			MIDI2DeviceInfo *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	4b8aeb17fe57d16d	-
+property	c:objc(cs)MIDIUMPEndpoint(py)productInstanceID	-			NSString *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	5a4968204f0d3da2	-
+property	c:objc(cs)MIDIUMPEndpoint(py)hasStaticFunctionBlocks	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	0f314b6dd8b3f740	-
+property	c:objc(cs)MIDIUMPEndpoint(py)hasJRTSReceiveCapability	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	5457467d6a4b047a	-
+property	c:objc(cs)MIDIUMPEndpoint(py)hasJRTSTransmitCapability	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	9227e0ba9e77f616	-
+property	c:objc(cs)MIDIUMPEndpoint(py)endpointType	-			MIDIUMPCIObjectBackingType	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	c4148267da3c5299	-
+property	c:objc(cs)MIDIUMPEndpoint(py)functionBlocks	-			NSArray<MIDIUMPFunctionBlock *> *	-	copy,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	9b2359e5a816fd9d	-
+method	c:objc(cs)MIDIUMPEndpoint(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	c65e350d4a63006e	-
+var	c:@MIDIUMPEndpointWasAddedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	a61c6ac7381f207f	-
+var	c:@MIDIUMPEndpointWasRemovedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	7f848ebf0b881af2	-
+var	c:@MIDIUMPEndpointWasUpdatedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	6a29666625cc8fb2	-
+var	c:@MIDIUMPFunctionBlockWasUpdatedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	eff5abde4d850131	-
+typedef	c:@T@MIDIUMPEndpointManagerDictionaryKey	-			NSString *const	-	-	-	-	9fb793ac69219ae7	-
+var	c:@MIDIUMPEndpointObjectKey	-			const MIDIUMPEndpointManagerDictionaryKey	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	f2852aad8c3ce6ae	-
+var	c:@MIDIUMPFunctionBlockObjectKey	-			const MIDIUMPEndpointManagerDictionaryKey	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	78a088b7e61c7744	-
+interface	c:objc(cs)MIDIUMPEndpointManager	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	afc3e7e37cb46b32	-
+super	-	MIDIUMPEndpointManager	NSObject		-	-	-	-	-	67d52bad56cb77ad	-
+property	c:objc(cs)MIDIUMPEndpointManager(cpy)sharedInstance	-			MIDIUMPEndpointManager *	-	readonly,nonatomic,class	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	572dbc04a37d7cd0	-
+property	c:objc(cs)MIDIUMPEndpointManager(py)UMPEndpoints	-			NSArray<MIDIUMPEndpoint *> *	-	readonly,copy,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	0af3c5a04f047e6a	-
+interface	c:objc(cs)MIDIUMPFunctionBlock	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	85d97ca5ff4dee96	-
+super	-	MIDIUMPFunctionBlock	NSObject		-	-	-	-	-	8b4d8235959cbd1a	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)name	-			NSString *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	47b17efb949047cb	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)functionBlockID	-			MIDIUMPFunctionBlockID	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	8daa254692945de1	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)direction	-			MIDIUMPFunctionBlockDirection	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	5888572a08db0cdb	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)firstGroup	-			MIDIUMPGroupNumber	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	f879a851c9d2c999	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)totalGroupsSpanned	-			MIDIUInteger7	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	d83d5b1e41e707c1	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)maxSysEx8Streams	-			UInt8	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	a993e962c28fc411	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)MIDI1Info	-			MIDIUMPFunctionBlockMIDI1Info	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	a2875a1766c0c3d3	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)UIHint	-			MIDIUMPFunctionBlockUIHint	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	99a89e0d26ee5df2	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)UMPEndpoint	-			MIDIUMPEndpoint *	-	readonly,weak,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	d4e992a60d8396d6	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)midiCIDevice	-			MIDICIDevice *	-	readonly,weak,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	259663791adffd97	-
+property	c:objc(cs)MIDIUMPFunctionBlock(py)isEnabled	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	e29e3bce6a5d2d24	-
+method	c:objc(cs)MIDIUMPFunctionBlock(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	307a528b44b38ba7	-
+interface	c:objc(cs)MIDIUMPMutableEndpoint	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	5971b0210dc6fd5b	-
+super	-	MIDIUMPMutableEndpoint	MIDIUMPEndpoint		-	-	-	-	-	5073c196dd799c73	-
+property	c:objc(cs)MIDIUMPMutableEndpoint(py)mutableFunctionBlocks	-			NSArray<MIDIUMPMutableFunctionBlock *> *	-	copy,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	f821bc363e393150	-
+property	c:objc(cs)MIDIUMPMutableEndpoint(py)isEnabled	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	c84634e1dc8ee62b	-
+method	c:objc(cs)MIDIUMPMutableEndpoint(im)initWithName:deviceInfo:productInstanceID:MIDIProtocol:destinationCallback:	-			instancetype	NSString * name | MIDI2DeviceInfo * deviceInfo | NSString * productInstanceID | MIDIProtocolID MIDIProtocol | MIDIReceiveBlock destinationCallback	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	d9166226ceae1ea5	-
+method	c:objc(cs)MIDIUMPMutableEndpoint(im)setName:error:	-			BOOL	NSString * name | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	1d75afca79e7ec2f	-
+method	c:objc(cs)MIDIUMPMutableEndpoint(im)registerFunctionBlocks:markAsStatic:error:	-			BOOL	NSArray<MIDIUMPMutableFunctionBlock *> * functionBlocks | BOOL markAsStatic | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	d6f3f3eb7b7e6353	-
+method	c:objc(cs)MIDIUMPMutableEndpoint(im)setEnabled:error:	-			BOOL	BOOL isEnabled | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	b43a9033395c4161	-
+interface	c:objc(cs)MIDIUMPMutableFunctionBlock	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	148f6ef738c1087b	-
+super	-	MIDIUMPMutableFunctionBlock	MIDIUMPFunctionBlock		-	-	-	-	-	ca8e196fb5645000	-
+property	c:objc(cs)MIDIUMPMutableFunctionBlock(py)UMPEndpoint	-			MIDIUMPMutableEndpoint *	-	readonly,weak,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	2bccb3de87eb5c9c	-
+method	c:objc(cs)MIDIUMPMutableFunctionBlock(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	ecf48e1310b306f7	-
+method	c:objc(cs)MIDIUMPMutableFunctionBlock(im)initWithName:direction:firstGroup:totalGroupsSpanned:maxSysEx8Streams:MIDI1Info:UIHint:isEnabled:	-			instancetype	NSString * name | MIDIUMPFunctionBlockDirection direction | MIDIUMPGroupNumber firstGroup | MIDIUInteger7 totalGroupsSpanned | MIDIUInteger7 maxSysEx8Streams | MIDIUMPFunctionBlockMIDI1Info MIDI1Info | MIDIUMPFunctionBlockUIHint UIHint | BOOL isEnabled	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	2ac61dfd95875d63	-
+method	c:objc(cs)MIDIUMPMutableFunctionBlock(im)setEnabled:error:	-			BOOL	BOOL isEnabled | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	ef4a48f454dccbb9	-
+method	c:objc(cs)MIDIUMPMutableFunctionBlock(im)setName:error:	-			BOOL	NSString * name | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	123fa59895d9bd5b	-
+method	c:objc(cs)MIDIUMPMutableFunctionBlock(im)reconfigureWithFirstGroup:direction:MIDI1Info:UIHint:error:	-			BOOL	MIDIUMPGroupNumber firstGroup | MIDIUMPFunctionBlockDirection direction | MIDIUMPFunctionBlockMIDI1Info MIDI1Info | MIDIUMPFunctionBlockUIHint UIHint | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	9bd7801f8064e25f	-
+interface	c:objc(cs)MIDICIDevice	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	58b11435b8ef6b9f	-
+super	-	MIDICIDevice	NSObject		-	-	-	-	-	594a2b0c58900531	-
+property	c:objc(cs)MIDICIDevice(py)deviceInfo	-			MIDI2DeviceInfo *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	cd0e735579be7b24	-
+property	c:objc(cs)MIDICIDevice(py)MUID	-			MIDICIMUID	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	21902d44702fe182	-
+property	c:objc(cs)MIDICIDevice(py)supportsProtocolNegotiation	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	fca3968edb8bfc68	-
+property	c:objc(cs)MIDICIDevice(py)supportsProfileConfiguration	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	cbe0339c3dfab520	-
+property	c:objc(cs)MIDICIDevice(py)supportsPropertyExchange	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	07e99e4153a2013b	-
+property	c:objc(cs)MIDICIDevice(py)supportsProcessInquiry	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	203d1dece900d970	-
+property	c:objc(cs)MIDICIDevice(py)maxSysExSize	-			NSUInteger	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	50e40e5c022a2331	-
+property	c:objc(cs)MIDICIDevice(py)maxPropertyExchangeRequests	-			NSUInteger	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	f99f0897fe4211da	-
+property	c:objc(cs)MIDICIDevice(py)deviceType	-			MIDICIDeviceType	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	682d1385a1b6a4ef	-
+property	c:objc(cs)MIDICIDevice(py)profiles	-			NSArray<MIDIUMPCIProfile *> *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	e4f34140411a32ef	-
+method	c:objc(cs)MIDICIDevice(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	37182cbf59970afe	-
+interface	c:objc(cs)MIDIUMPCIProfile	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4291d7d4bd593b6e	-
+super	-	MIDIUMPCIProfile	NSObject		-	-	-	-	-	841dd1b836615ed3	-
+property	c:objc(cs)MIDIUMPCIProfile(py)name	-			NSString *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	016765cee216c25c	-
+property	c:objc(cs)MIDIUMPCIProfile(py)profileID	-			MIDICIProfileID	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4992c685d5463330	-
+property	c:objc(cs)MIDIUMPCIProfile(py)profileType	-			MIDICIProfileType	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	baa7af9e7c4c5acf	-
+property	c:objc(cs)MIDIUMPCIProfile(py)groupOffset	-			MIDIUMPGroupNumber	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4231952e5ce97551	-
+property	c:objc(cs)MIDIUMPCIProfile(py)firstChannel	-			MIDIChannelNumber	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1b14f96d85b0ff2c	-
+property	c:objc(cs)MIDIUMPCIProfile(py)enabledChannelCount	-			MIDIUInteger14	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cfb94b445f42fe22	-
+property	c:objc(cs)MIDIUMPCIProfile(py)totalChannelCount	-			MIDIUInteger14	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6fe0817cff12d3cd	-
+property	c:objc(cs)MIDIUMPCIProfile(py)isEnabled	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6a0d17b9821f8f98	-
+method	c:objc(cs)MIDIUMPCIProfile(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	db70b4f6ed3ee310	-
+method	c:objc(cs)MIDIUMPCIProfile(im)setProfileState:enabledChannelCount:error:	-			BOOL	BOOL isEnabled | MIDIUInteger14 enabledChannelCount | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7ac336fb21553600	-
+var	c:@MIDICIDeviceWasAddedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	22ccd60b5a0c2a32	-
+var	c:@MIDICIDeviceWasRemovedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	0f3a2df5344fa6f0	-
+var	c:@MIDICIProfileWasUpdatedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	a5403db50aeb4587	-
+var	c:@MIDICIProfileWasRemovedNotification	-			const NSNotificationName	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	2266b1cc3df3d55e	-
+typedef	c:@T@MIDICIDeviceManagerDictionaryKey	-			NSString *const	-	-	-	-	d617bf6aaae14f62	-
+var	c:@MIDICIDeviceObjectKey	-			const MIDICIDeviceManagerDictionaryKey	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	2948d1bffb4f117d	-
+var	c:@MIDICIProfileObjectKey	-			const MIDICIDeviceManagerDictionaryKey	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	25aa0cc960f244f6	-
+interface	c:objc(cs)MIDICIDeviceManager	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	4a1967553ea0301e	-
+super	-	MIDICIDeviceManager	NSObject		-	-	-	-	-	544bc13b5cf06647	-
+property	c:objc(cs)MIDICIDeviceManager(cpy)sharedInstance	-			MIDICIDeviceManager *	-	readonly,nonatomic,class	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	183161d0dbe52d7b	-
+property	c:objc(cs)MIDICIDeviceManager(py)discoveredCIDevices	-			NSArray<MIDICIDevice *> *	-	readonly,copy,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	32611eaf57f795ec	-
+struct	c:@S@MIDICIDeviceIdentification	-			-	-	-	-	-	d777fd243240698c	-
+field	c:@S@MIDICIDeviceIdentification@FI@manufacturer	MIDICIDeviceIdentification			uint8_t[3]	-	-	-	-	749df3ff161874cd	-
+field	c:@S@MIDICIDeviceIdentification@FI@family	MIDICIDeviceIdentification			uint8_t[2]	-	-	-	-	f2fe55586628a103	-
+field	c:@S@MIDICIDeviceIdentification@FI@modelNumber	MIDICIDeviceIdentification			uint8_t[2]	-	-	-	-	110dfb93dde427b3	-
+field	c:@S@MIDICIDeviceIdentification@FI@revisionLevel	MIDICIDeviceIdentification			uint8_t[4]	-	-	-	-	051d75e49b612e9e	-
+field	c:@S@MIDICIDeviceIdentification@FI@reserved	MIDICIDeviceIdentification			uint8_t[5]	-	-	-	-	7ef1ff6593a64d7e	-
+typedef	c:@T@MIDICIDeviceIdentification	-			struct MIDICIDeviceIdentification	-	-	-	-	2586e35f01a4210d	-
+typedef	c:@T@MIDICIInitiatiorMUID	-			NSNumber *	-	-	-	-	790ad7dc0cdb6b4b	-
+typedef	c:@T@MIDICIProfileStateList	-			NSArray<MIDICIProfileState *>	-	-	-	-	3ba144873a282407	-
+interface	c:objc(cs)MIDICIDeviceInfo	-			-	-	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8d28dee13d1dd093	-
+super	-	MIDICIDeviceInfo	NSObject		-	-	-	-	-	6deffd947a776a76	-
+conforms	c:objc(cs)MIDICIDeviceInfo	MIDICIDeviceInfo	NSSecureCoding		-	-	-	-	-	e8c824eefc4d7634	-
+property	c:objc(cs)MIDICIDeviceInfo(py)manufacturerID	-			NSData *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	107260f79f23fb90	-
+property	c:objc(cs)MIDICIDeviceInfo(py)family	-			NSData *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fa3b5b69827f8c6e	-
+property	c:objc(cs)MIDICIDeviceInfo(py)modelNumber	-			NSData *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3cf1d5026fbecb07	-
+property	c:objc(cs)MIDICIDeviceInfo(py)revisionLevel	-			NSData *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6277640736db1ddc	-
+property	c:objc(cs)MIDICIDeviceInfo(py)midiDestination	-			MIDIEndpointRef	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5cf63e82e4fe4d2a	-
+method	c:objc(cs)MIDICIDeviceInfo(im)init	-			instancetype	-	-	*unavailable ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	26bf5ac24c794b41	-
+method	c:objc(cs)MIDICIDeviceInfo(im)initWithDestination:manufacturer:family:model:revision:	-			instancetype	MIDIEntityRef midiDestination | NSData * manufacturer | NSData * family | NSData * modelNumber | NSData * revisionLevel	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c3e15cc96f6251ee	-
+interface	c:objc(cs)MIDICIDiscoveredNode	-			-	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2fcd60c36212c18b	-
+super	-	MIDICIDiscoveredNode	NSObject		-	-	-	-	-	76315a6cf2805867	-
+conforms	c:objc(cs)MIDICIDiscoveredNode	MIDICIDiscoveredNode	NSSecureCoding		-	-	-	-	-	1aa13f3e32de0f34	-
+property	c:objc(cs)MIDICIDiscoveredNode(py)destination	-			MIDIEntityRef	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3b6a6be2a2e6ccee	-
+property	c:objc(cs)MIDICIDiscoveredNode(py)deviceInfo	-			MIDICIDeviceInfo *	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6a776e2285fb773c	-
+property	c:objc(cs)MIDICIDiscoveredNode(py)supportsProfiles	-			BOOL	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e8a63c081d9d8944	-
+property	c:objc(cs)MIDICIDiscoveredNode(py)supportsProperties	-			BOOL	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6162f2330a506508	-
+property	c:objc(cs)MIDICIDiscoveredNode(py)maximumSysExSize	-			NSNumber *	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c9ff76a9edc93229	-
+method	c:objc(cs)MIDICIDiscoveredNode(im)init	-			instancetype	-	-	*unavailable ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0410e2b16d875ea6	-
+interface	c:objc(cs)MIDICIProfile	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	559c9d91a9119163	-
+super	-	MIDICIProfile	NSObject		-	-	-	-	-	eb4b3332f48a3693	-
+conforms	c:objc(cs)MIDICIProfile	MIDICIProfile	NSSecureCoding		-	-	-	-	-	71d275f7df0d3a82	-
+property	c:objc(cs)MIDICIProfile(py)name	-			NSString *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bf360f07c8a9a96f	-
+property	c:objc(cs)MIDICIProfile(py)profileID	-			NSData *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	77e324566ae00100	-
+method	c:objc(cs)MIDICIProfile(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	416f9f7b971c1b83	-
+method	c:objc(cs)MIDICIProfile(im)initWithData:	-			instancetype	NSData * data	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	38734a3a64b17123	-
+method	c:objc(cs)MIDICIProfile(im)initWithData:name:	-			instancetype	NSData * data | NSString * inName	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	61aa8331c80cc799	-
+interface	c:objc(cs)MIDICIProfileState	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use initWithEnabledProfiles: instead	acce54c1a412dbd7	-
+super	-	MIDICIProfileState	NSObject		-	-	-	-	-	af78679d802113b5	-
+conforms	c:objc(cs)MIDICIProfileState	MIDICIProfileState	NSSecureCoding		-	-	-	-	-	b8fe36ffe85d1597	-
+property	c:objc(cs)MIDICIProfileState(py)midiChannel	-			MIDIChannelNumber	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fdf46ec0fa73fa19	-
+property	c:objc(cs)MIDICIProfileState(py)enabledProfiles	-			NSArray<MIDICIProfile *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5ece71050a9d78a4	-
+property	c:objc(cs)MIDICIProfileState(py)disabledProfiles	-			NSArray<MIDICIProfile *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2c3d4f055fc29bc2	-
+method	c:objc(cs)MIDICIProfileState(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b869d5afc8cfd294	-
+method	c:objc(cs)MIDICIProfileState(im)initWithChannel:enabledProfiles:disabledProfiles:	-			instancetype	MIDIChannelNumber midiChannelNum | NSArray<MIDICIProfile *> * enabled | NSArray<MIDICIProfile *> * disabled	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0	deprecated: Use initWithEnabledProfiles: instead	b1f6dd787c829a8b	-
+method	c:objc(cs)MIDICIProfileState(im)initWithEnabledProfiles:disabledProfiles:	-			instancetype	NSArray<MIDICIProfile *> * enabled | NSArray<MIDICIProfile *> * disabled	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	39e246dd1a7f9967	-
+typedef	c:@T@MIDICIProfileChangedBlock	-			void ((^))(MIDICISession *, MIDIChannelNumber, MIDICIProfile *, BOOL)	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	07095fee60a7805a	-
+typedef	c:@T@MIDICISessionDisconnectBlock	-			void ((^))(MIDICISession *, NSError *)	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b8d41fdc2c16f09f	-
+typedef	c:@T@MIDICIProfileSpecificDataBlock	-			void ((^))(MIDICISession *, MIDIChannelNumber, MIDICIProfile *, NSData *)	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c817cc4438bdb251	-
+typedef	c:@T@MIDICIDiscoveryResponseBlock	-			void ((^))(NSArray<MIDICIDiscoveredNode *> *)	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	edea8e95180c766b	-
+interface	c:objc(cs)MIDICISession	-			-	-	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d9aa575c30951588	-
+super	-	MIDICISession	NSObject		-	-	-	-	-	6ad2b301a0d3fb63	-
+method	c:objc(cs)MIDICISession(im)init	-			instancetype	-	-	*unavailable ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	97eccd53581b405a	-
+method	c:objc(cs)MIDICISession(im)initWithDiscoveredNode:dataReadyHandler:disconnectHandler:	-			instancetype	MIDICIDiscoveredNode * discoveredNode | void (^)(void) handler | MIDICISessionDisconnectBlock disconnectHandler	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9fdf8e0e5b88d196	-
+property	c:objc(cs)MIDICISession(py)midiDestination	-			MIDIEntityRef	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e09abd7bb659f811	-
+property	c:objc(cs)MIDICISession(py)supportsProfileCapability	-			BOOL	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	246b8fdaecc3f6b1	-
+property	c:objc(cs)MIDICISession(py)supportsPropertyCapability	-			BOOL	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3b5f84a702174a69	-
+property	c:objc(cs)MIDICISession(py)deviceInfo	-			MIDICIDeviceInfo *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	88566f9fcd2f0f25	-
+property	c:objc(cs)MIDICISession(py)maxSysExSize	-			NSNumber *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2aa205742ccf7b5e	-
+property	c:objc(cs)MIDICISession(py)maxPropertyRequests	-			NSNumber *	-	readonly,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e467c93721a2d01d	-
+method	c:objc(cs)MIDICISession(im)profileStateForChannel:	-			MIDICIProfileState *	MIDIChannelNumber channel	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e85938570c78ef8d	-
+method	c:objc(cs)MIDICISession(im)enableProfile:onChannel:error:	-			BOOL	MIDICIProfile * profile | MIDIChannelNumber channel | NSError * _Nullable * outError	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	670b51e5ccd74ff5	-
+method	c:objc(cs)MIDICISession(im)disableProfile:onChannel:error:	-			BOOL	MIDICIProfile * profile | MIDIChannelNumber channel | NSError * _Nullable * outError	-	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ad2cc86a06aa9f80	-
+method	c:objc(cs)MIDICISession(im)sendProfile:onChannel:profileData:	-			BOOL	MIDICIProfile * profile | MIDIChannelNumber channel | NSData * profileSpecificData	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4cd6565ef9066f4c	-
+property	c:objc(cs)MIDICISession(py)profileChangedCallback	-			MIDICIProfileChangedBlock	-	copy,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	39e300e466f8a650	-
+property	c:objc(cs)MIDICISession(py)profileSpecificDataHandler	-			MIDICIProfileSpecificDataBlock	-	copy,nonatomic	ios=12.0/18.0/-/0,macos=10.14/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2015b5a453570f3d	-
+interface	c:objc(cs)MIDICIDiscoveryManager	-			-	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2b264bd928cb9b0e	-
+super	-	MIDICIDiscoveryManager	NSObject		-	-	-	-	-	d8297ac4c15b783d	-
+method	c:objc(cs)MIDICIDiscoveryManager(cm)sharedInstance	-			MIDICIDiscoveryManager *	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b1fb20b49c388c35	-
+method	c:objc(cs)MIDICIDiscoveryManager(im)discoverWithHandler:	-			void	MIDICIDiscoveryResponseBlock completedHandler	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4b9daf29492a9bee	-
+protocol	c:objc(pl)MIDICIProfileResponderDelegate	-			-	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	20abdd926763c74e	-
+conforms	c:objc(pl)MIDICIProfileResponderDelegate	MIDICIProfileResponderDelegate	NSObject		-	-	-	-	-	fa06650f36c12d8b	-
+method	c:objc(pl)MIDICIProfileResponderDelegate(im)connectInitiator:withDeviceInfo:	-			BOOL	MIDICIInitiatiorMUID initiatorMUID | MIDICIDeviceInfo * deviceInfo	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7690b943405965da	-
+method	c:objc(pl)MIDICIProfileResponderDelegate(im)initiatorDisconnected:	-			void	MIDICIInitiatiorMUID initiatorMUID	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ff34ff96edb74c92	-
+method	c:objc(pl)MIDICIProfileResponderDelegate(im)willSetProfile:onChannel:enabled:	-			BOOL	MIDICIProfile * aProfile | MIDIChannelNumber channel | BOOL shouldEnable	optional	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d268a97a027bc407	-
+method	c:objc(pl)MIDICIProfileResponderDelegate(im)handleDataForProfile:onChannel:data:	-			void	MIDICIProfile * aProfile | MIDIChannelNumber channel | NSData * inData	optional	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e58b4113c1437293	-
+interface	c:objc(cs)MIDICIResponder	-			-	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b870b1ce0ad67942	-
+super	-	MIDICIResponder	NSObject		-	-	-	-	-	83d82acc3cbcc76e	-
+property	c:objc(cs)MIDICIResponder(py)initiators	-			NSArray<MIDICIInitiatiorMUID> *	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3b8f85226f641a44	-
+property	c:objc(cs)MIDICIResponder(py)profileDelegate	-			id<MIDICIProfileResponderDelegate>	-	readonly,retain,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8b9fc70a5b382963	-
+property	c:objc(cs)MIDICIResponder(py)deviceInfo	-			MIDICIDeviceInfo *	-	readonly,nonatomic	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	24f2964ef47f267f	-
+method	c:objc(cs)MIDICIResponder(im)init	-			instancetype	-	-	*unavailable ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	45b2bef9719b1269	-
+method	c:objc(cs)MIDICIResponder(im)initWithDeviceInfo:profileDelegate:profileStates:supportProperties:	-			instancetype	MIDICIDeviceInfo * deviceInfo | id<MIDICIProfileResponderDelegate> delegate | MIDICIProfileStateList * profileList | BOOL propertiesSupported	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6d00d22d71a82af7	-
+method	c:objc(cs)MIDICIResponder(im)notifyProfile:onChannel:isEnabled:	-			BOOL	MIDICIProfile * aProfile | MIDIChannelNumber channel | BOOL enabledState	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e50de81f68836ac7	-
+method	c:objc(cs)MIDICIResponder(im)sendProfile:onChannel:profileData:	-			BOOL	MIDICIProfile * aProfile | MIDIChannelNumber channel | NSData * profileSpecificData	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c68c727ea275584f	-
+method	c:objc(cs)MIDICIResponder(im)start	-			BOOL	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	139c197dccf2a77c	-
+method	c:objc(cs)MIDICIResponder(im)stop	-			void	-	-	ios=14.0/18.0/-/0,macos=11.0/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	220bb6281a2add51	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@UInt64	-			unsigned long long	-	-	-	-	b41c42eb5e2605ba	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+typedef	c:@T@UInt16	-			unsigned short	-	-	-	-	89acd83db7a94864	-
+typedef	c:@T@Byte	-			UInt8	-	-	-	-	44100adc069c5789	-
+typedef	c:@T@UInt8	-			unsigned char	-	-	-	-	a9ef2eddf94d7e81	-
+typedef	c:@T@Boolean	-			unsigned char	-	-	-	-	693cf733304c39d9	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@OSStatus	-			SInt32	-	-	-	-	c9d4cae3c2778a27	-
+typedef	c:@T@ItemCount	-			unsigned long	-	-	-	-	13c8ece98084342d	-
+typedef	c:@T@CFDataRef	-			const struct __CFData *	-	-	-	-	d9fe21afe938f144	-
+typedef	c:@T@CFDictionaryRef	-			const struct __CFDictionary *	-	-	-	-	95ab67be7d9fad28	-
+typedef	c:@T@CFPropertyListRef	-			CFTypeRef	-	-	-	-	7031d97fa222dccd	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@ByteCount	-			unsigned long	-	-	-	-	92f839e17ecc01e5	-
+typedef	c:@T@CFArrayRef	-			const struct __CFArray *	-	-	-	-	d3655b482ae0664e	-
+typedef	c:@T@SInt16	-			short	-	-	-	-	3eec647098d9543c	-
+typedef	c:@T@size_t	-			__darwin_size_t	-	-	-	-	8ce79a13e58a1844	-
+typedef	c:@T@__darwin_size_t	-			unsigned long	-	-	-	-	0cd38a3df2217524	-
+typedef	c:@T@HRESULT	-			SInt32	-	-	-	-	76e62a357413c999	-
+typedef	c:@T@REFIID	-			CFUUIDBytes	-	-	-	-	4e6d68f67f60bf62	-
+typedef	c:@T@CFUUIDBytes	-			struct CFUUIDBytes	-	-	-	-	191c987cbeb2b6d6	-
+typedef	c:@T@LPVOID	-			void *	-	-	-	-	0c7ed4b1a4a01875	-
+typedef	c:@T@ULONG	-			UInt32	-	-	-	-	42b7c756f9cbd672	-
+typedef	c:@T@CFRunLoopRef	-			struct __CFRunLoop *	-	-	-	-	2c9d9bba83d0f9bf	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-

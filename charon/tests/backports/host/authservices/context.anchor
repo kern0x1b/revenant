@@ -1,0 +1,1 @@
+    _lastExchange = [ASPortCredentialExchange cancelledExchangeWithError:error];

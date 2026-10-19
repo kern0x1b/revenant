@@ -1,0 +1,328 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIPress",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class UIPress",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/presses; the header of SDK 16.4"
+    },
+    {
+      "api": "UIPressesEvent",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class UIPressesEvent",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/presses; the header of SDK 16.4"
+    },
+    {
+      "api": "-[UIResponder pressesBegan:withEvent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no remote or hardware button events, so nothing ever makes a press or sends one",
+      "effect": "hands a non-empty set of presses on to the next responder, as UIKit's does, and does nothing for an empty one; the release never sends the message, so an override is called only by an application that calls it, and super may be called from one",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/presses; the header of SDK 16.4"
+    },
+    {
+      "api": "-[UIResponder pressesChanged:withEvent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no remote or hardware button events, so nothing ever makes a press or sends one",
+      "effect": "hands a non-empty set of presses on to the next responder, as UIKit's does, and does nothing for an empty one; the release never sends the message, so an override is called only by an application that calls it, and super may be called from one",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/presses; the header of SDK 16.4"
+    },
+    {
+      "api": "-[UIResponder pressesEnded:withEvent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no remote or hardware button events, so nothing ever makes a press or sends one",
+      "effect": "hands a non-empty set of presses on to the next responder, as UIKit's does, and does nothing for an empty one; the release never sends the message, so an override is called only by an application that calls it, and super may be called from one",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/presses; the header of SDK 16.4"
+    },
+    {
+      "api": "-[UIResponder pressesCancelled:withEvent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no remote or hardware button events, so nothing ever makes a press or sends one",
+      "effect": "hands a non-empty set of presses on to the next responder, as UIKit's does, and does nothing for an empty one; the release never sends the message, so an override is called only by an application that calls it, and super may be called from one",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/presses; the header of SDK 16.4"
+    },
+    {
+      "api": "UICollectionViewTransitionLayout",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the layout a collection view holds while it moves between two layouts: every element it draws is the element of the layout it comes from and the element of the layout it goes to, placed and sized and faded at the progress between them; the progress is the caller's own number and is held as given, and the animated keys read and move that same progress",
+      "facts": "facts/UIKit/CollectionViewTransition.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/collectiontransition (the transition.progress cases); the driven transition is checked by tests/backports/device/collectiontransition on hardware"
+    },
+    {
+      "api": "UIPress.key",
+      "kind": "property",
+      "introduced": "13.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "device-unverified: the port has not run on a device; a press has no keyboard key in the release",
+      "effect": "nil for every press; the release never sends a press from a hardware keyboard",
+      "facts": "facts/UIKit/UIPress.md",
+      "source": "the host's own UIKit under Mac Catalyst, measured by tests/backports/host/press-key (3 checks; a fresh press answers nil on both sides, and the planted press fails); declarations from SDK 16.4"
+    },
+    {
+      "api": "UIDynamicAnimator",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "effect": "iOS 7.0's animator over unmodified Box2D 2.2.1: bodies, joints, masks, boundaries, exceptions, callback order and the write-back of center and transform follow 7.0; the trajectory is 7.0's integrator (fixed 0.004 s sub-steps, a box 1 pt inside the item with a 0.001 m skin), predicted from the 7.0 listing, while the host's integrator, which the test compares with, sub-steps at 1/120 s; removeAllBehaviors dissociates a child once where 7.0 does it twice; an empty boundary path raises where 7.0's Box2D asserts; a resting animator wakes when its reference view's bounds size changes through setFrame: or setBounds:, seen by KVO of frame and bounds (facts M3: the same paths on emulated 4.3, 5.1.1, 6.0 and 6.1.3, Auto Layout from 6.0, and the shipped watch on those four, its wake checks on 5.1.1 to 6.1.3 only, a bare 4.3 process having no display link; not on a device)",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UIDynamicBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UIDynamicItemBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UIGravityBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UICollisionBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UIAttachmentBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UIPushBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UISnapBehavior",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+    },
+    {
+      "api": "UIDynamicItemBehavior.charge",
+      "kind": "property",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "UIDynamicItemBehavior.anchored",
+      "kind": "property",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "UISnapBehavior.snapPoint",
+      "kind": "property",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "UIAttachmentBehavior.frictionTorque",
+      "kind": "property",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "UIAttachmentBehavior.attachmentRange",
+      "kind": "property",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "+[UIAttachmentBehavior fixedAttachmentWithItem:attachedToItem:attachmentAnchor:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "+[UIAttachmentBehavior pinAttachmentWithItem:attachedToItem:attachmentAnchor:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "+[UIAttachmentBehavior slidingAttachmentWithItem:attachedToItem:attachmentAnchor:axisOfTranslation:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "+[UIAttachmentBehavior slidingAttachmentWithItem:attachmentAnchor:axisOfTranslation:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "+[UIAttachmentBehavior limitAttachmentWithItem:offsetFromCenter:attachedToItem:offsetFromCenter:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "objc inventory of the armv7 caches: on the 9.0 rung, not on 8.4.1; from 7.0 the release's own class is used, which lays the class out itself and has no such member before 9.0; the behaviour is the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "UIFieldBehavior",
+      "kind": "class",
+      "introduced": "9.0",
+      "status": "implemented",
+      "effect": "the 11 field kinds, their properties, region, items and the 32-field limit as 9.0's, built over the public 7.0 UIDynamicBehavior, UIPushBehavior and UIDynamicItemBehavior; the force of every kind is 9.0's, but it is applied once per animator step after the world step, a one-step lag where 9.0 applies it per Box2D sub-step: 0.09 to 2.1 pt from 9.0's own field over 60 frames (electric and magnetic act on a charge, which the release below 7.0 lacks); collisionBoundsType Ellipse and Path are not carried below 7.0 (deferred: the port's own animator can build a circle and a fan of convex pieces) and are not expressible on 7.0-8.x, over Apple's collision behavior; the item keeps its rectangle",
+      "facts": "facts/UIKit/UIFieldBehavior.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; the port's emulation against the host's field, frame by frame, in the fields group"
+    },
+    {
+      "api": "UIRegion",
+      "kind": "class",
+      "introduced": "9.0",
+      "status": "implemented",
+      "effect": "the region algebra of 9.0: radius and size regions, inverse, union, intersection, difference, containment on the edge, archiving and copying",
+      "facts": "facts/UIKit/UIFieldBehavior.md",
+      "source": "the host's UIKitCore through Mac Catalyst, held against the port by tests/backports/host/dynamics: 1200 containment and structure checks against the host's own region"
+    },
+    {
+      "api": "UIDynamicItemGroup",
+      "kind": "class",
+      "introduced": "9.0",
+      "status": "implemented",
+      "effect": "the group object as 9.0's: items, bounds, center and transform derived from the members; in an animator the group is one rectangle of its bounds, where 9.0 builds a compound body of the members' shapes (not carried below 7.0, deferred: the port's own animator can build it; not expressible on 7.0-8.x): 0.21 pt from 9.0's own group in free fall, 31 pt after the first contact",
+      "facts": "facts/UIKit/UIFieldBehavior.md",
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics"
+    },
+    {
+      "api": "UIFloatRangeZero",
+      "kind": "constant",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "SDK 16.4, UIKit/UIGeometry.h; the host's own value"
+    },
+    {
+      "api": "UIFloatRangeInfinite",
+      "kind": "constant",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "SDK 16.4, UIKit/UIGeometry.h; the host's own value"
+    },
+    {
+      "api": "UIFloatRangeIsInfinite()",
+      "kind": "function",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDynamicAnimator.md",
+      "source": "the host's own function, read as a listing"
+    },
+    {
+      "api": "UILexicon",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class UILexicon",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, UIKit; the release's UIKit does not export it"
+    },
+    {
+      "api": "UILexiconEntry",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class UILexiconEntry",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, UIKit; the release's UIKit does not export it"
+    },
+    {
+      "api": "NSFileProviderExtension",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class NSFileProviderExtension",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, UIKit; the release's UIKit does not export it"
+    }
+  ]
+}

@@ -1,0 +1,440 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+   "api": "NSTextListMarkerBox",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{box}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerCheck",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{check}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerCircle",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{circle}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerDecimal",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{decimal}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerDiamond",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{diamond}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerDisc",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{disc}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerHyphen",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{hyphen}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerLowercaseAlpha",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{lower-alpha}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerLowercaseHexadecimal",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{lower-hexadecimal}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerLowercaseLatin",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{lower-latin}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerLowercaseRoman",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{lower-roman}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerOctal",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{octal}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerSquare",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{square}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerUppercaseAlpha",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{upper-alpha}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerUppercaseHexadecimal",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{upper-hexadecimal}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerUppercaseLatin",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{upper-latin}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextListMarkerUppercaseRoman",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string '{upper-roman}', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextStorageDidProcessEditingNotification",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'NSTextStorageDidProcessEditingNotification', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSTextStorageWillProcessEditingNotification",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'NSTextStorageWillProcessEditingNotification', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "NSUserActivityDocumentURLKey",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'NSUserActivityDocumentURL', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIAccessibilityAssistiveTouchStatusDidChangeNotification",
+   "kind": "constant",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIAccessibilityAssistiveTouchStatusDidChangeNotification', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIAccessibilityHearingDevicePairedEarDidChangeNotification",
+   "kind": "constant",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIAccessibilityHearingDevicePairedEarDidChangeNotification', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIActivityTypeAirDrop",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'com.apple.UIKit.activity.AirDrop', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationKeyboardExtensionPointIdentifier",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'com.apple.keyboard-service', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationLaunchOptionsBluetoothCentralsKey",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationLaunchOptionsBluetoothCentralsKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationLaunchOptionsBluetoothPeripheralsKey",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationLaunchOptionsBluetoothPeripheralsKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationLaunchOptionsCloudKitShareMetadataKey",
+   "kind": "constant",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationLaunchOptionsCloudKitShareMetadataKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationLaunchOptionsUserActivityDictionaryKey",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationLaunchOptionsUserActivityDictionaryKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationLaunchOptionsUserActivityTypeKey",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationLaunchOptionsUserActivityTypeKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationStateRestorationSystemVersionKey",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationStateRestorationSystemVersion', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIApplicationStateRestorationTimestampKey",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIApplicationStateRestorationTimestamp', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIContentSizeCategoryDidChangeNotification",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIContentSizeCategoryDidChangeNotification', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIContentSizeCategoryNewValueKey",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIContentSizeCategoryNewValueKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 7.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIImagePickerControllerLivePhoto",
+   "kind": "constant",
+   "introduced": "9.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIImagePickerControllerLivePhoto', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UITextFieldDidEndEditingReasonKey",
+   "kind": "constant",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UITextFieldEndEditingReasonKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIUserNotificationActionResponseTypedTextKey",
+   "kind": "constant",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIUserNotificationActionResponseTypedTextKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIUserNotificationTextInputActionButtonTitleKey",
+   "kind": "constant",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIUserNotificationTextInputActionButtonTitleKey', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UIViewControllerShowDetailTargetDidChangeNotification",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string 'UIViewControllerShowDetailTargetDidChangeNotification', as the release's own constant holds it",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (iOS 11.0 dyld shared cache), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+   "api": "UISplitViewControllerAutomaticDimension",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the dimension a split view controller asks for when it does not want a fixed one, which is the most negative CGFloat a -3.40282e+38 can hold, as the host's constant is",
+   "facts": "facts/UIKit/ExportedConstants.md",
+   "source": "read out of a real dyld shared cache with tools/corpus/cache-value.lua (the host's own UIKit (the cache that holds the release's value could not be read for this one)), and read again out of the host's own UIKit under Mac Catalyst (macOS 27.0); the two agree on every one both could give, held by tests/backports/host/uikitconst"
+  },
+  {
+    "api": "UIFocusDidUpdateNotification",
+    "kind": "constant",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "facts": "facts/UIKit/UIKitConstants110.md",
+    "source": "the value read out of the UIKit cache of iOS 11.0, the oldest held release that exports the symbol (/System/Library/Frameworks/UIKit.framework/UIKit)"
+  },
+  {
+    "api": "UIFocusMovementDidFailNotification",
+    "kind": "constant",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "facts": "facts/UIKit/UIKitConstants110.md",
+    "source": "the value read out of the UIKit cache of iOS 11.0, the oldest held release that exports the symbol (/System/Library/Frameworks/UIKit.framework/UIKit)"
+  },
+  {
+    "api": "UIFocusUpdateContextKey",
+    "kind": "constant",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "facts": "facts/UIKit/UIKitConstants110.md",
+    "source": "the value read out of the UIKit cache of iOS 11.0, the oldest held release that exports the symbol (/System/Library/Frameworks/UIKit.framework/UIKit)"
+  },
+  {
+    "api": "UIFocusUpdateAnimationCoordinatorKey",
+    "kind": "constant",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "facts": "facts/UIKit/UIKitConstants110.md",
+    "source": "the value read out of the UIKit cache of iOS 11.0, the oldest held release that exports the symbol (/System/Library/Frameworks/UIKit.framework/UIKit)"
+  },
+  {
+    "api": "UIDocumentBrowserErrorDomain",
+    "kind": "constant",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "facts": "facts/UIKit/UIKitConstants110.md",
+    "source": "the value read out of the DocumentManager cache of iOS 11.0, the oldest held release that exports the symbol (/System/Library/Frameworks/UIKit.framework/Frameworks/DocumentManager.framework/DocumentManager)"
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+# The classes of registry/Intents/ios16.json whose own SDK header marks -init NS_UNAVAILABLE and whose
+# -[X init] row is part of the release-13 slice of that file.  One name per line, in the registry's
+# own order, and init-rows.m reads this file rather than carrying the list, so a row that is added
+# or moved is measured by the next run and not by an edit to a program.
+INAddMediaIntentResponse
+INAirline
+INAirport
+INAirportGate
+INDeleteTasksIntentResponse
+INFlight
+INGetReservationDetailsIntentResponse
+INMediaDestination
+INMediaSearch
+INMediaUserContext
+INRentalCar
+INReservation
+INReservationAction
+INSearchForMediaIntentResponse
+INSeat
+INSnoozeTasksIntentResponse
+INStartCallIntentResponse
+INTicketedEvent
+INTrainTrip
+INUpdateMediaAffinityIntentResponse
+INUserContext

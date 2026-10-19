@@ -1,0 +1,519 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+System	protocol	MachPortRight	17.4				own
+System	constant	kr					none
+System	constant	expected					none
+System	enum	Mach	17.4				own
+System	struct	Mach.Port	17.4				own
+System	method	Mach.Port.init(name:)	17.4				container
+System	method	Mach.Port.withBorrowedName(body:)	17.4				container
+System	enum	Mach.PortRightError	17.4				container
+System	constant	Mach.PortRightError.deadName	17.4				container
+System	method	Mach.PortRightError.==(a:b:)	17.4				container
+System	method	Mach.PortRightError.hash(into:)	17.4				container
+System	property	Mach.PortRightError.hashValue	17.4				container
+System	struct	Mach.ReceiveRight	17.4				container
+System	struct	Mach.SendRight	17.4				container
+System	struct	Mach.SendOnceRight	17.4				container
+System	method	Mach.Port.init(name:context:)	17.4				container
+System	method	Mach.Port.init()	17.4				own
+System	property	Mach.Port.storage	17.4				container
+System	property	Mach.Port.destructured	17.4				container
+System	method	Mach.Port.withBorrowedName(body:)	17.4				own
+System	method	Mach.Port.makeSendOnceRight()	17.4				own
+System	property	Mach.Port.newRight	17.4				container
+System	property	Mach.Port.newRightType	17.4				container
+System	method	Mach.Port.makeSendRight()	17.4				own
+System	property	Mach.Port.how	17.4				container
+System	property	Mach.Port.makeSendCount	17.4				own
+System	property	Mach.Port.status	17.4				container
+System	property	Mach.Port.size	17.4				container
+System	property	Mach.Port.status	17.4				container
+System	property	Mach.Port.info	17.4				container
+System	property	Mach.Port.name	17.4				container
+System	method	Mach.Port.copySendRight()	17.4				own
+System	property	Mach.Port.how	17.4				container
+System	property	Mach.Port.kr	17.4				container
+System	property	Mach.Port.name	17.4				container
+System	struct	FileDescriptor	14.0				own
+System	property	FileDescriptor.rawValue	14.0				container
+System	method	FileDescriptor.init(rawValue:)	14.0				container
+System	typealias	FileDescriptor.RawValue	14.0				own
+System	property	FileDescriptor.standardInput	14.0				container
+System	property	FileDescriptor.standardOutput	14.0				container
+System	property	FileDescriptor.standardError	14.0				container
+System	struct	FileDescriptor.AccessMode	14.0				own
+System	property	FileDescriptor.AccessMode.rawValue	14.0				container
+System	method	FileDescriptor.AccessMode.init(rawValue:)	14.0				container
+System	property	FileDescriptor.AccessMode.readOnly	14.0				container
+System	property	FileDescriptor.AccessMode.O_RDONLY	14.0			yes	container
+System	property	FileDescriptor.AccessMode.writeOnly	14.0				container
+System	property	FileDescriptor.AccessMode.O_WRONLY	14.0			yes	container
+System	property	FileDescriptor.AccessMode.readWrite	14.0				container
+System	property	FileDescriptor.AccessMode.O_RDWR	14.0			yes	container
+System	typealias	FileDescriptor.AccessMode.RawValue	14.0				own
+System	struct	FileDescriptor.OpenOptions	14.0				own
+System	property	FileDescriptor.OpenOptions.rawValue	14.0				container
+System	method	FileDescriptor.OpenOptions.init(rawValue:)	14.0				container
+System	property	FileDescriptor.OpenOptions.nonBlocking	14.0				container
+System	property	FileDescriptor.OpenOptions.O_NONBLOCK	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.append	14.0				container
+System	property	FileDescriptor.OpenOptions.O_APPEND	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.create	14.0				container
+System	property	FileDescriptor.OpenOptions.O_CREAT	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.truncate	14.0				container
+System	property	FileDescriptor.OpenOptions.O_TRUNC	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.exclusiveCreate	14.0				container
+System	property	FileDescriptor.OpenOptions.O_EXCL	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.sharedLock	14.0				container
+System	property	FileDescriptor.OpenOptions.O_SHLOCK	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.exclusiveLock	14.0				container
+System	property	FileDescriptor.OpenOptions.O_EXLOCK	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.noFollow	14.0				container
+System	property	FileDescriptor.OpenOptions.O_NOFOLLOW	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.directory	14.0				container
+System	property	FileDescriptor.OpenOptions.O_DIRECTORY	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.symlink	14.0				container
+System	property	FileDescriptor.OpenOptions.O_SYMLINK	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.eventOnly	14.0				container
+System	property	FileDescriptor.OpenOptions.O_EVTONLY	14.0			yes	container
+System	property	FileDescriptor.OpenOptions.closeOnExec	14.0				container
+System	property	FileDescriptor.OpenOptions.O_CLOEXEC	14.0			yes	container
+System	typealias	FileDescriptor.OpenOptions.ArrayLiteralElement	14.0				own
+System	typealias	FileDescriptor.OpenOptions.Element	14.0				own
+System	typealias	FileDescriptor.OpenOptions.RawValue	14.0				own
+System	struct	FileDescriptor.SeekOrigin	14.0				own
+System	property	FileDescriptor.SeekOrigin.rawValue	14.0				container
+System	method	FileDescriptor.SeekOrigin.init(rawValue:)	14.0				container
+System	property	FileDescriptor.SeekOrigin.start	14.0				container
+System	property	FileDescriptor.SeekOrigin.SEEK_SET	14.0			yes	container
+System	property	FileDescriptor.SeekOrigin.current	14.0				container
+System	property	FileDescriptor.SeekOrigin.SEEK_CUR	14.0			yes	container
+System	property	FileDescriptor.SeekOrigin.end	14.0				container
+System	property	FileDescriptor.SeekOrigin.SEEK_END	14.0			yes	container
+System	property	FileDescriptor.SeekOrigin.nextHole	14.0				container
+System	property	FileDescriptor.SeekOrigin.SEEK_HOLE	14.0			yes	container
+System	property	FileDescriptor.SeekOrigin.nextData	14.0				container
+System	property	FileDescriptor.SeekOrigin.SEEK_DATA	14.0			yes	container
+System	typealias	FileDescriptor.SeekOrigin.RawValue	14.0				own
+System	property	FileDescriptor.AccessMode.description	14.0				container
+System	property	FileDescriptor.AccessMode.debugDescription	14.0				container
+System	property	FileDescriptor.SeekOrigin.description	14.0				container
+System	property	FileDescriptor.SeekOrigin.debugDescription	14.0				container
+System	property	FileDescriptor.OpenOptions.description	14.0				container
+System	property	FileDescriptor.OpenOptions.debugDescription	14.0				container
+System	property	FilePath.isAbsolute	15.0				container
+System	property	FilePath.isRelative	15.0				container
+System	method	FilePath.starts(with:)	15.0				container
+System	method	FilePath.ends(with:)	15.0				container
+System	property	FilePath.isEmpty	15.0				container
+System	property	FilePath.root	15.0				container
+System	property	FilePath.lastComponent	15.0				container
+System	method	FilePath.removeLastComponent()	15.0				container
+System	property	FilePath.Component.stem	15.0				container
+System	property	FilePath.stem	15.0				container
+System	property	FilePath.isLexicallyNormal	15.0				container
+System	method	FilePath.lexicallyNormalize()	15.0				container
+System	method	FilePath.removePrefix(_:)	15.0				container
+System	method	FilePath.append(_:)	15.0				container
+System	method	FilePath.append(_:)	15.0				container
+System	method	FilePath.append(_:)	15.0				container
+System	method	FilePath.push(_:)	15.0				container
+System	method	FilePath.removeAll(keepingCapacity:)	15.0				container
+System	method	FilePath.reserveCapacity(_:)	15.0				container
+System	property	FilePath.dirname	15.0			yes	container
+System	property	FilePath.basename	15.0			yes	container
+System	method	String.init(platformString:)	15.0				container
+System	method	String.init(platformString:)	15.0				container
+System	method	String.init(platformString:)	15.0	yes			container
+System	method	String.init(platformString:)	15.0	yes			container
+System	method	String.init?(validatingPlatformString:)	15.0				container
+System	method	String.init?(validatingPlatformString:)	15.0				container
+System	method	String.init?(validatingPlatformString:)	15.0	yes			container
+System	method	String.init?(validatingPlatformString:)	15.0	yes			container
+System	method	String.withPlatformString(_:)	15.0				container
+System	struct	FilePath.Root	15.0				own
+System	struct	FilePath.Component	15.0				own
+System	enum	FilePath.Component.Kind	15.0				own
+System	constant	FilePath.Component.Kind.currentDirectory	15.0				container
+System	constant	FilePath.Component.Kind.parentDirectory	15.0				container
+System	constant	FilePath.Component.Kind.regular	15.0				container
+System	method	FilePath.Component.Kind.==(a:b:)	15.0				container
+System	method	FilePath.Component.Kind.hash(into:)	15.0				container
+System	property	FilePath.Component.Kind.hashValue	15.0				container
+System	property	FilePath.Component.kind	15.0				container
+System	method	FilePath.Component.encode(to:)	15.0				container
+System	property	FilePath.Component.hashValue	15.0				container
+System	method	FilePath.Component.init(from:)	15.0				container
+System	method	FilePath.Root.encode(to:)	15.0				container
+System	property	FilePath.Root.hashValue	15.0				container
+System	method	FilePath.Root.init(from:)	15.0				container
+System	struct	FilePath.ComponentView	15.0				own
+System	property	FilePath.components	15.0				container
+System	typealias	FilePath.ComponentView.Element	15.0				container
+System	struct	FilePath.ComponentView.Index	15.0				own
+System	method	FilePath.ComponentView.Index.<(lhs:rhs:)	15.0				container
+System	method	FilePath.ComponentView.Index.==(a:b:)	15.0				container
+System	method	FilePath.ComponentView.Index.hash(into:)	15.0				container
+System	property	FilePath.ComponentView.Index.hashValue	15.0				container
+System	property	FilePath.ComponentView.startIndex	15.0				container
+System	property	FilePath.ComponentView.endIndex	15.0				container
+System	method	FilePath.ComponentView.index(after:)	15.0				container
+System	method	FilePath.ComponentView.index(before:)	15.0				container
+System	method	FilePath.ComponentView.subscript(position:)	15.0				container
+System	typealias	FilePath.ComponentView.Indices	15.0				own
+System	typealias	FilePath.ComponentView.Iterator	15.0				own
+System	typealias	FilePath.ComponentView.SubSequence	15.0				own
+System	method	FilePath.ComponentView.init()	15.0				container
+System	method	FilePath.ComponentView.replaceSubrange(_:with:)	15.0				container
+System	method	FilePath.init(root:_:)	15.0				container
+System	method	FilePath.init(root:components:)	15.0				container
+System	method	FilePath.init(root:_:)	15.0				container
+System	method	FilePath.ComponentView.encode(to:)	15.0				container
+System	property	FilePath.ComponentView.hashValue	15.0				container
+System	method	FilePath.ComponentView.init(from:)	15.0				container
+System	struct	FilePermissions	14.0				own
+System	property	FilePermissions.rawValue	14.0				container
+System	method	FilePermissions.init(rawValue:)	14.0				container
+System	property	FilePermissions.otherRead	14.0				container
+System	property	FilePermissions.otherWrite	14.0				container
+System	property	FilePermissions.otherExecute	14.0				container
+System	property	FilePermissions.otherReadWrite	14.0				container
+System	property	FilePermissions.otherReadExecute	14.0				container
+System	property	FilePermissions.otherWriteExecute	14.0				container
+System	property	FilePermissions.otherReadWriteExecute	14.0				container
+System	property	FilePermissions.groupRead	14.0				container
+System	property	FilePermissions.groupWrite	14.0				container
+System	property	FilePermissions.groupExecute	14.0				container
+System	property	FilePermissions.groupReadWrite	14.0				container
+System	property	FilePermissions.groupReadExecute	14.0				container
+System	property	FilePermissions.groupWriteExecute	14.0				container
+System	property	FilePermissions.groupReadWriteExecute	14.0				container
+System	property	FilePermissions.ownerRead	14.0				container
+System	property	FilePermissions.ownerWrite	14.0				container
+System	property	FilePermissions.ownerExecute	14.0				container
+System	property	FilePermissions.ownerReadWrite	14.0				container
+System	property	FilePermissions.ownerReadExecute	14.0				container
+System	property	FilePermissions.ownerWriteExecute	14.0				container
+System	property	FilePermissions.ownerReadWriteExecute	14.0				container
+System	property	FilePermissions.setUserID	14.0				container
+System	property	FilePermissions.setGroupID	14.0				container
+System	property	FilePermissions.saveText	14.0				container
+System	typealias	FilePermissions.ArrayLiteralElement	14.0				own
+System	typealias	FilePermissions.Element	14.0				own
+System	typealias	FilePermissions.RawValue	14.0				own
+System	property	FilePermissions.description	14.0				container
+System	property	FilePermissions.debugDescription	14.0				container
+System	typealias	CModeT	14.0				own
+System	enum	CInterop	15.0				own
+System	typealias	CInterop.Mode	15.0				container
+System	typealias	CInterop.Char	15.0				container
+System	typealias	CInterop.PlatformChar	15.0				container
+System	typealias	CInterop.PlatformUnicodeEncoding	15.0				container
+System	method	FileDescriptor.closeAfter(_:)	14.0				container
+System	method	FileDescriptor.writeAll(_:)	14.0				container
+System	method	FileDescriptor.writeAll(toAbsoluteOffset:_:)	14.0				container
+System	method	FilePath.init(platformString:)	15.0				container
+System	method	FilePath.init(platformString:)	15.0				container
+System	method	FilePath.init(platformString:)	15.0	yes			container
+System	method	FilePath.init(platformString:)	15.0	yes			container
+System	method	FilePath.withPlatformString(_:)	15.0				container
+System	method	FilePath.Component.init?(platformString:)	15.0				container
+System	method	FilePath.Component.init?(platformString:)	15.0				container
+System	method	FilePath.Component.init?(platformString:)	15.0	yes			container
+System	method	FilePath.Component.init?(platformString:)	15.0	yes			container
+System	property	FilePath.Component.string	15.0				container
+System	method	FilePath.Component.withPlatformString(_:)	15.0				container
+System	method	FilePath.Root.init?(platformString:)	15.0				container
+System	method	FilePath.Root.init?(platformString:)	15.0				container
+System	method	FilePath.Root.init?(platformString:)	15.0	yes			container
+System	method	FilePath.Root.init?(platformString:)	15.0	yes			container
+System	property	FilePath.Root.string	15.0				container
+System	method	FilePath.Root.withPlatformString(_:)	15.0				container
+System	method	FilePath.init(stringLiteral:)	14.0				container
+System	method	FilePath.init(_:)	14.0				container
+System	typealias	FilePath.ExtendedGraphemeClusterLiteralType	14.0				own
+System	typealias	FilePath.StringLiteralType	14.0				own
+System	typealias	FilePath.UnicodeScalarLiteralType	14.0				own
+System	method	FilePath.Component.init(stringLiteral:)	15.0				container
+System	method	FilePath.Component.init?(_:)	15.0				container
+System	typealias	FilePath.Component.ExtendedGraphemeClusterLiteralType	15.0				own
+System	typealias	FilePath.Component.StringLiteralType	15.0				own
+System	typealias	FilePath.Component.UnicodeScalarLiteralType	15.0				own
+System	method	FilePath.Root.init(stringLiteral:)	15.0				container
+System	method	FilePath.Root.init?(_:)	15.0				container
+System	typealias	FilePath.Root.ExtendedGraphemeClusterLiteralType	15.0				own
+System	typealias	FilePath.Root.StringLiteralType	15.0				own
+System	typealias	FilePath.Root.UnicodeScalarLiteralType	15.0				own
+System	property	FilePath.description	14.0				container
+System	property	FilePath.debugDescription	14.0				container
+System	property	FilePath.Component.description	15.0				container
+System	property	FilePath.Component.debugDescription	15.0				container
+System	property	FilePath.Root.description	15.0				container
+System	property	FilePath.Root.debugDescription	15.0				container
+System	property	FilePath.string	15.0				container
+System	property	FilePath.Component.string	15.0				container
+System	property	FilePath.Root.string	15.0				container
+System	method	String.init(decoding:)	14.0				container
+System	method	String.init?(validating:)	15.0				own
+System	method	String.init(decoding:)	15.0				container
+System	method	String.init?(validating:)	15.0				container
+System	method	String.init(decoding:)	15.0				container
+System	method	String.init?(validating:)	15.0				container
+System	method	String.init(_:)	14.0	yes			own
+System	method	String.init?(validatingUTF8:)	14.0	yes			own
+System	method	FilePath.init(cString:)	14.0	yes			own
+System	method	FilePath.init(cString:)	14.0	yes			container
+System	method	FilePath.init(cString:)	14.0	yes			container
+System	method	FilePath.init(cString:)	14.0	yes			container
+System	method	FilePath.withCString(_:)	14.0				container
+System	struct	FilePath	14.0				own
+System	method	FilePath.init()	14.0				container
+System	property	FilePath.length	14.0				container
+System	method	FilePath.==(a:b:)	14.0				container
+System	method	FilePath.hash(into:)	14.0				container
+System	property	FilePath.hashValue	14.0				container
+System	method	FilePath.init(from:)	14.0				container
+System	method	FilePath.encode(to:)	14.0				container
+System	method	FileDescriptor.open(_:_:options:permissions:retryOnInterrupt:)	14.0				container
+System	method	FileDescriptor.open(_:_:options:permissions:retryOnInterrupt:)	14.0				container
+System	method	FileDescriptor.close()	14.0				container
+System	method	FileDescriptor.seek(offset:from:)	14.0				container
+System	method	FileDescriptor.lseek(offset:from:)	14.0			yes	container
+System	method	FileDescriptor.read(into:retryOnInterrupt:)	14.0				container
+System	method	FileDescriptor.read(fromAbsoluteOffset:into:retryOnInterrupt:)	14.0				container
+System	method	FileDescriptor.pread(fromAbsoluteOffset:into:retryOnInterrupt:)	14.0			yes	container
+System	method	FileDescriptor.write(_:retryOnInterrupt:)	14.0				container
+System	method	FileDescriptor.write(toAbsoluteOffset:_:retryOnInterrupt:)	14.0				container
+System	method	FileDescriptor.pwrite(toAbsoluteOffset:into:retryOnInterrupt:)	14.0			yes	container
+System	method	FileDescriptor.duplicate(as:retryOnInterrupt:)	15.0				own
+System	method	FileDescriptor.dup()	15.0			yes	container
+System	method	FileDescriptor.dup2()	15.0			yes	container
+System	method	FileDescriptor.pipe()	15.4				own
+System	method	FileDescriptor.resize(to:retryOnInterrupt:)	17.4				own
+System	struct	Errno	14.0				own
+System	property	Errno.rawValue	14.0				container
+System	method	Errno.init(rawValue:)	14.0				container
+System	property	Errno.notUsed	14.0				container
+System	property	Errno.ERRNO_NOT_USED	14.0			yes	container
+System	property	Errno.notPermitted	14.0				container
+System	property	Errno.EPERM	14.0			yes	container
+System	property	Errno.noSuchFileOrDirectory	14.0				container
+System	property	Errno.ENOENT	14.0			yes	container
+System	property	Errno.noSuchProcess	14.0				container
+System	property	Errno.ESRCH	14.0			yes	container
+System	property	Errno.interrupted	14.0				container
+System	property	Errno.EINTR	14.0			yes	container
+System	property	Errno.ioError	14.0				container
+System	property	Errno.EIO	14.0			yes	container
+System	property	Errno.noSuchAddressOrDevice	14.0				container
+System	property	Errno.ENXIO	14.0			yes	container
+System	property	Errno.argListTooLong	14.0				container
+System	property	Errno.E2BIG	14.0			yes	container
+System	property	Errno.execFormatError	14.0				container
+System	property	Errno.ENOEXEC	14.0			yes	container
+System	property	Errno.badFileDescriptor	14.0				container
+System	property	Errno.EBADF	14.0			yes	container
+System	property	Errno.noChildProcess	14.0				container
+System	property	Errno.ECHILD	14.0			yes	container
+System	property	Errno.deadlock	14.0				container
+System	property	Errno.EDEADLK	14.0			yes	container
+System	property	Errno.noMemory	14.0				container
+System	property	Errno.ENOMEM	14.0			yes	container
+System	property	Errno.permissionDenied	14.0				container
+System	property	Errno.EACCES	14.0			yes	container
+System	property	Errno.badAddress	14.0				container
+System	property	Errno.EFAULT	14.0			yes	container
+System	property	Errno.notBlockDevice	14.0				container
+System	property	Errno.ENOTBLK	14.0			yes	container
+System	property	Errno.resourceBusy	14.0				container
+System	property	Errno.EBUSY	14.0			yes	container
+System	property	Errno.fileExists	14.0				container
+System	property	Errno.EEXIST	14.0			yes	container
+System	property	Errno.improperLink	14.0				container
+System	property	Errno.EXDEV	14.0			yes	container
+System	property	Errno.operationNotSupportedByDevice	14.0				container
+System	property	Errno.ENODEV	14.0			yes	container
+System	property	Errno.notDirectory	14.0				container
+System	property	Errno.ENOTDIR	14.0			yes	container
+System	property	Errno.isDirectory	14.0				container
+System	property	Errno.EISDIR	14.0			yes	container
+System	property	Errno.invalidArgument	14.0				container
+System	property	Errno.EINVAL	14.0			yes	container
+System	property	Errno.tooManyOpenFilesInSystem	14.0				container
+System	property	Errno.ENFILE	14.0			yes	container
+System	property	Errno.tooManyOpenFiles	14.0				container
+System	property	Errno.EMFILE	14.0			yes	container
+System	property	Errno.inappropriateIOCTLForDevice	14.0				container
+System	property	Errno.ENOTTY	14.0			yes	container
+System	property	Errno.textFileBusy	14.0				container
+System	property	Errno.ETXTBSY	14.0			yes	container
+System	property	Errno.fileTooLarge	14.0				container
+System	property	Errno.EFBIG	14.0			yes	container
+System	property	Errno.noSpace	14.0				container
+System	property	Errno.ENOSPC	14.0			yes	container
+System	property	Errno.illegalSeek	14.0				container
+System	property	Errno.ESPIPE	14.0			yes	container
+System	property	Errno.readOnlyFileSystem	14.0				container
+System	property	Errno.EROFS	14.0			yes	container
+System	property	Errno.tooManyLinks	14.0				container
+System	property	Errno.EMLINK	14.0			yes	container
+System	property	Errno.brokenPipe	14.0				container
+System	property	Errno.EPIPE	14.0			yes	container
+System	property	Errno.outOfDomain	14.0				container
+System	property	Errno.EDOM	14.0			yes	container
+System	property	Errno.outOfRange	14.0				container
+System	property	Errno.ERANGE	14.0			yes	container
+System	property	Errno.resourceTemporarilyUnavailable	14.0				container
+System	property	Errno.EAGAIN	14.0			yes	container
+System	property	Errno.nowInProgress	14.0				container
+System	property	Errno.EINPROGRESS	14.0			yes	container
+System	property	Errno.alreadyInProcess	14.0				container
+System	property	Errno.EALREADY	14.0			yes	container
+System	property	Errno.notSocket	14.0				container
+System	property	Errno.ENOTSOCK	14.0			yes	container
+System	property	Errno.addressRequired	14.0				container
+System	property	Errno.EDESTADDRREQ	14.0			yes	container
+System	property	Errno.messageTooLong	14.0				container
+System	property	Errno.EMSGSIZE	14.0			yes	container
+System	property	Errno.protocolWrongTypeForSocket	14.0				container
+System	property	Errno.EPROTOTYPE	14.0			yes	container
+System	property	Errno.protocolNotAvailable	14.0				container
+System	property	Errno.ENOPROTOOPT	14.0			yes	container
+System	property	Errno.protocolNotSupported	14.0				container
+System	property	Errno.EPROTONOSUPPORT	14.0			yes	container
+System	property	Errno.socketTypeNotSupported	14.0				container
+System	property	Errno.ESOCKTNOSUPPORT	14.0			yes	container
+System	property	Errno.notSupported	14.0				container
+System	property	Errno.ENOTSUP	14.0			yes	container
+System	property	Errno.protocolFamilyNotSupported	14.0				container
+System	property	Errno.EPFNOSUPPORT	14.0			yes	container
+System	property	Errno.addressFamilyNotSupported	14.0				container
+System	property	Errno.EAFNOSUPPORT	14.0			yes	container
+System	property	Errno.addressInUse	14.0				container
+System	property	Errno.EADDRINUSE	14.0			yes	container
+System	property	Errno.addressNotAvailable	14.0				container
+System	property	Errno.EADDRNOTAVAIL	14.0			yes	container
+System	property	Errno.networkDown	14.0				container
+System	property	Errno.ENETDOWN	14.0			yes	container
+System	property	Errno.networkUnreachable	14.0				container
+System	property	Errno.ENETUNREACH	14.0			yes	container
+System	property	Errno.networkReset	14.0				container
+System	property	Errno.ENETRESET	14.0			yes	container
+System	property	Errno.connectionAbort	14.0				container
+System	property	Errno.ECONNABORTED	14.0			yes	container
+System	property	Errno.connectionReset	14.0				container
+System	property	Errno.ECONNRESET	14.0			yes	container
+System	property	Errno.noBufferSpace	14.0				container
+System	property	Errno.ENOBUFS	14.0			yes	container
+System	property	Errno.socketIsConnected	14.0				container
+System	property	Errno.EISCONN	14.0			yes	container
+System	property	Errno.socketNotConnected	14.0				container
+System	property	Errno.ENOTCONN	14.0			yes	container
+System	property	Errno.socketShutdown	14.0				container
+System	property	Errno.ESHUTDOWN	14.0			yes	container
+System	property	Errno.timedOut	14.0				container
+System	property	Errno.ETIMEDOUT	14.0			yes	container
+System	property	Errno.connectionRefused	14.0				container
+System	property	Errno.ECONNREFUSED	14.0			yes	container
+System	property	Errno.tooManySymbolicLinkLevels	14.0				container
+System	property	Errno.ELOOP	14.0			yes	container
+System	property	Errno.fileNameTooLong	14.0				container
+System	property	Errno.ENAMETOOLONG	14.0			yes	container
+System	property	Errno.hostIsDown	14.0				container
+System	property	Errno.EHOSTDOWN	14.0			yes	container
+System	property	Errno.noRouteToHost	14.0				container
+System	property	Errno.EHOSTUNREACH	14.0			yes	container
+System	property	Errno.directoryNotEmpty	14.0				container
+System	property	Errno.ENOTEMPTY	14.0			yes	container
+System	property	Errno.tooManyProcesses	14.0				container
+System	property	Errno.EPROCLIM	14.0			yes	container
+System	property	Errno.tooManyUsers	14.0				container
+System	property	Errno.EUSERS	14.0			yes	container
+System	property	Errno.diskQuotaExceeded	14.0				container
+System	property	Errno.EDQUOT	14.0			yes	container
+System	property	Errno.staleNFSFileHandle	14.0				container
+System	property	Errno.ESTALE	14.0			yes	container
+System	property	Errno.rpcUnsuccessful	14.0				container
+System	property	Errno.EBADRPC	14.0			yes	container
+System	property	Errno.rpcVersionMismatch	14.0				container
+System	property	Errno.ERPCMISMATCH	14.0			yes	container
+System	property	Errno.rpcProgramUnavailable	14.0				container
+System	property	Errno.EPROGUNAVAIL	14.0			yes	container
+System	property	Errno.rpcProgramVersionMismatch	14.0				container
+System	property	Errno.EPROGMISMATCH	14.0			yes	container
+System	property	Errno.rpcProcedureUnavailable	14.0				container
+System	property	Errno.EPROCUNAVAIL	14.0			yes	container
+System	property	Errno.noLocks	14.0				container
+System	property	Errno.ENOLCK	14.0			yes	container
+System	property	Errno.noFunction	14.0				container
+System	property	Errno.ENOSYS	14.0			yes	container
+System	property	Errno.badFileTypeOrFormat	14.0				container
+System	property	Errno.EFTYPE	14.0			yes	container
+System	property	Errno.authenticationError	14.0				container
+System	property	Errno.EAUTH	14.0			yes	container
+System	property	Errno.needAuthenticator	14.0				container
+System	property	Errno.ENEEDAUTH	14.0			yes	container
+System	property	Errno.devicePowerIsOff	14.0				container
+System	property	Errno.EPWROFF	14.0			yes	container
+System	property	Errno.deviceError	14.0				container
+System	property	Errno.EDEVERR	14.0			yes	container
+System	property	Errno.overflow	14.0				container
+System	property	Errno.EOVERFLOW	14.0			yes	container
+System	property	Errno.badExecutable	14.0				container
+System	property	Errno.EBADEXEC	14.0			yes	container
+System	property	Errno.badCPUType	14.0				container
+System	property	Errno.EBADARCH	14.0			yes	container
+System	property	Errno.sharedLibraryVersionMismatch	14.0				container
+System	property	Errno.ESHLIBVERS	14.0			yes	container
+System	property	Errno.malformedMachO	14.0				container
+System	property	Errno.EBADMACHO	14.0			yes	container
+System	property	Errno.canceled	14.0				container
+System	property	Errno.ECANCELED	14.0			yes	container
+System	property	Errno.identifierRemoved	14.0				container
+System	property	Errno.EIDRM	14.0			yes	container
+System	property	Errno.noMessage	14.0				container
+System	property	Errno.ENOMSG	14.0			yes	container
+System	property	Errno.illegalByteSequence	14.0				container
+System	property	Errno.EILSEQ	14.0			yes	container
+System	property	Errno.attributeNotFound	14.0				container
+System	property	Errno.ENOATTR	14.0			yes	container
+System	property	Errno.badMessage	14.0				container
+System	property	Errno.EBADMSG	14.0			yes	container
+System	property	Errno.multiHop	14.0				container
+System	property	Errno.EMULTIHOP	14.0			yes	container
+System	property	Errno.noData	14.0				container
+System	property	Errno.ENODATA	14.0			yes	container
+System	property	Errno.noLink	14.0				container
+System	property	Errno.ENOLINK	14.0			yes	container
+System	property	Errno.noStreamResources	14.0				container
+System	property	Errno.ENOSR	14.0			yes	container
+System	property	Errno.notStream	14.0				container
+System	property	Errno.ENOSTR	14.0			yes	container
+System	property	Errno.protocolError	14.0				container
+System	property	Errno.EPROTO	14.0			yes	container
+System	property	Errno.timeout	14.0				container
+System	property	Errno.ETIME	14.0			yes	container
+System	property	Errno.notSupportedOnSocket	14.0				container
+System	property	Errno.EOPNOTSUPP	14.0			yes	container
+System	typealias	Errno.RawValue	14.0				own
+System	property	Errno.wouldBlock	14.0				container
+System	property	Errno.EWOULDBLOCK	14.0			yes	container
+System	property	Errno.tooManyReferences	14.0				container
+System	property	Errno.ETOOMANYREFS	14.0			yes	container
+System	property	Errno.tooManyRemoteLevels	14.0				container
+System	property	Errno.EREMOTE	14.0			yes	container
+System	property	Errno.noSuchPolicy	14.0				container
+System	property	Errno.ENOPOLICY	14.0			yes	container
+System	property	Errno.notRecoverable	14.0				container
+System	property	Errno.ENOTRECOVERABLE	14.0			yes	container
+System	property	Errno.previousOwnerDied	14.0				container
+System	property	Errno.EOWNERDEAD	14.0			yes	container
+System	property	Errno.outputQueueFull	14.0				container
+System	property	Errno.EQFULL	14.0			yes	container
+System	property	Errno.lastErrnoValue	14.0				container
+System	property	Errno.ELAST	14.0			yes	container
+System	property	Errno._code	14.0				container
+System	property	Errno._domain	14.0				container
+System	property	Errno.description	14.0				container
+System	property	Errno.debugDescription	14.0				container
+System	method	Errno.~=(lhs:rhs:)	14.0				container

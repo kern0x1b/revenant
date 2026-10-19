@@ -1,0 +1,87 @@
+ostype 'vide'                            1835297121/5 valid 1 hash 930911443662
+sint 7                                   1953653099/2 valid 1 hash 175247351123
+flags 3                                  1885960294/7 valid 1 hash 175254677123
+float 1.5                                1953653099/3 valid 1 hash 175196716565
+kCMTagInvalid                            0/0 valid 0 hash 242338807774
+empty                                    0/0 valid 0 hash 242338807774
+-- make
+MakeWithOSTypeValue                      1835297121/5 valid 1 hash 930911443662
+MakeWithSInt64Value                      1953653099/2 valid 1 hash 175247351123
+MakeWithFlagsValue                       1885960294/7 valid 1 hash 175254677123
+MakeWithFloat64Value                     1953653099/3 valid 1 hash 175196716565
+MakeWithFloat64Value 0                   1953653099/3 valid 1 hash 175246492482
+-- equality and order
+equal ostype ostype 1, equal ostype sint 0
+compare ostype/sint -1 ostype/flags -1 sint/ostype 1
+compare invalid/empty 0 empty/invalid 0
+category equal 1 0  value equal 1 0
+-- has and get
+has category 1 0, has ostype 1, has sint 1, has flags 1, has float 1
+get category 1835297121 get value 1986618469 get dataType 5
+get ostype 1986618469 get sint 7 get flags 3 get float 1.5
+get ostype of a sint tag 7, get sint of an ostype tag 1986618469
+get value of invalid 0 get category of invalid 0
+-- description
+  {category:'mdia' value:'vide' <OSType>}
+  {category:'trak' value:7 <int64>}
+  {category:'pixf' value:0x3 <flags>}
+  {category:'trak' value:1.50 <Flt64>}
+  {category:''{INVALID}
+-- dictionary
+  {
+    category = 1835297121;
+    flags = 5;
+    value = 1986618469;
+}
+    back 1835297121/5/1986618469 valid 1
+  {
+    category = 1953653099;
+    flags = 2;
+    value = 7;
+}
+    back 1953653099/2/7 valid 1
+  {
+    category = 1885960294;
+    flags = 7;
+    value = 3;
+}
+    back 1885960294/7/3 valid 1
+  {
+    category = 1953653099;
+    flags = 3;
+    value = 4609434218613702656;
+}
+    back 1953653099/3/4609434218613702656 valid 1
+  {
+    category = 0;
+    flags = 0;
+    value = 0;
+}
+    back 0/0/0 valid 0
+  make from nothing 0
+invalid description length 21:
+  7b
+  63
+  61
+  74
+  65
+  67
+  6f
+  72
+  79
+  3a
+  27
+  27
+  7b
+  49
+  4e
+  56
+  41
+  4c
+  49
+  44
+  7d
+getOSTypeValue of a sint tag 7, getSInt64Value of an ostype tag 1986618469
+getValue of each, raw: sint 7 ostype 1986618469
+make from a dictionary missing keys: 0
+compare a tag with itself 0

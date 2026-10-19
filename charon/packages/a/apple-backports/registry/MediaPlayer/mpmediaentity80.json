@@ -1,0 +1,16 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "-[MPMediaEntity objectForKeyedSubscript:]",
+   "kind": "method",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPMediaEntity.h, - (nullable id)objectForKeyedSubscript:(id)key MP_API(ios(8.0)), whose own comment says the key IS an MPMediaEntityProperty* constant",
+   "reason": "the release carries the accessor this is a convenience over and not the convenience: read with tools/mach32_methods.py from the armv7 cache of 6.1.3 (MediaPlayer image at 0x31fe3000), MPMediaEntity has 18 own instance methods and 1 own class method and -valueForProperty: is among its own list; all 41 of the image's categories were read WITH THE CLASS EACH ONE EXTENDS, resolved through the category's own class pointer, and none extends MPMediaEntity, so nothing here can clobber the release's accessor and nothing in the release clobbers this one. -aSelectorNoFrameworkHas is absent as the control. The per-cache selector list does not decide a member - objectForKeyedSubscript: is on one line of it because a collection class declares it - which is the trap facts/MediaPlayer/MPMediaItem.md:105 records for albumTrackNumber",
+   "effect": "the release's own -valueForProperty: on the key as given, so a key the release has no value for answers nil - which is what the release answers and what the header's nullable says. Nothing is invented and nothing is defaulted",
+   "facts": "facts/MediaPlayer/MediaEntityAndPlaylist.md"
+  }
+ ]
+}

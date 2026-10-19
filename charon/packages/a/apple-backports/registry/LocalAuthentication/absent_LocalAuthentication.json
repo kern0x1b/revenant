@@ -1,0 +1,85 @@
+{
+  "framework": "LocalAuthentication",
+  "entries": [
+    {
+      "api": "LAAuthenticationRequirement",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LAAuthenticationRequirement; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LABiometryFallbackRequirement",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LABiometryFallbackRequirement; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LAPersistedRight",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LAPersistedRight; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LAPrivateKey",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LAPrivateKey; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LAPublicKey",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LAPublicKey; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LARight",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LARight; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LARightStore",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LARightStore; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    },
+    {
+      "api": "LASecret",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class LASecret; where the device lacks the part, answer as the system's availability query does",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, LocalAuthentication"
+    }
+  ]
+}

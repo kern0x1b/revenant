@@ -1,0 +1,126 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+Intents	method	INMediaSearch.init(mediaType:sortOrder:mediaName:artistName:albumName:genreNames:moodNames:releaseDate:reference:mediaIdentifier:)	13.0				container
+Intents	method	INParameter.init?(keyPath:)	11.0				container
+Intents	method	INSetCarLockStatusIntent.init(locked:carName:)	10.3				container
+Intents	property	INSetCarLockStatusIntent.locked	10.3				container
+Intents	method	INRequestRideIntent.init(pickupLocation:dropOffLocation:rideOptionName:partySize:paymentMethod:scheduledPickupTime:)	10.0				container
+Intents	property	INRequestRideIntent.partySize	10.0				container
+Intents	method	INNotebookItemTypeResolutionResult.disambiguation(with:)	11.0				container
+Intents	property	INRideOption.usesMeteredFare	10.0				own
+Intents	property	INRideOption.usesMeteredFare	10.0				own
+Intents	method	INIntegerResolutionResult.confirmationRequired(with:)	10.0				container
+Intents	method	INPlayMediaIntent.init(mediaItems:mediaContainer:playShuffled:playbackRepeatMode:resumePlayback:)	12.0		13.0		own
+Intents	method	INPlayMediaIntent.init(mediaItems:mediaContainer:playShuffled:playbackRepeatMode:resumePlayback:playbackQueueLocation:playbackSpeed:mediaSearch:)	13.0				own
+Intents	property	INPlayMediaIntent.playShuffled	12.0				container
+Intents	property	INPlayMediaIntent.resumePlayback	12.0				container
+Intents	property	INPlayMediaIntent.playbackSpeed	13.0				own
+Intents	method	INSearchCallHistoryIntent.init(dateCreated:recipient:callCapabilities:callTypes:unseen:)	11.0	15.0			own
+Intents	property	INSearchCallHistoryIntent.unseen	11.0	15.0			own
+Intents	method	INSetDefrosterSettingsInCarIntent.init(enable:defroster:carName:)	12.0	15.0			own
+Intents	method	INSetDefrosterSettingsInCarIntent.init(enable:defroster:)	10.0		12.0		container
+Intents	property	INSetDefrosterSettingsInCarIntent.enable	10.0	15.0			container
+Intents	method	INSetClimateSettingsInCarIntent.init(enableFan:enableAirConditioner:enableClimateControl:enableAutoMode:airCirculationMode:fanSpeedIndex:fanSpeedPercentage:relativeFanSpeedSetting:temperature:relativeTemperatureSetting:climateZone:carName:)	12.0	15.0			own
+Intents	method	INSetClimateSettingsInCarIntent.init(enableFan:enableAirConditioner:enableClimateControl:enableAutoMode:airCirculationMode:fanSpeedIndex:fanSpeedPercentage:relativeFanSpeedSetting:temperature:relativeTemperatureSetting:climateZone:)	10.0		12.0		container
+Intents	property	INSetClimateSettingsInCarIntent.enableFan	10.0	15.0			container
+Intents	property	INSetClimateSettingsInCarIntent.enableAirConditioner	10.0	15.0			container
+Intents	property	INSetClimateSettingsInCarIntent.enableClimateControl	10.0	15.0			container
+Intents	property	INSetClimateSettingsInCarIntent.enableAutoMode	10.0	15.0			container
+Intents	property	INSetClimateSettingsInCarIntent.fanSpeedIndex	10.0	15.0			container
+Intents	property	INSetClimateSettingsInCarIntent.fanSpeedPercentage	10.0	15.0			container
+Intents	method	INSetProfileInCarIntent.init(profileNumber:profileName:isDefaultProfile:carName:)	12.0	15.0			own
+Intents	method	INSetProfileInCarIntent.init(profileNumber:profileName:isDefaultProfile:)	11.0		12.0		own
+Intents	method	INSetProfileInCarIntent.init(defaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileLabel:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileLabel:defaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileLabel:isDefaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileName:defaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileNumber:defaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileNumber:profileLabel:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileNumber:profileLabel:defaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileNumber:profileLabel:isDefaultProfile:)	10.0	11.0			container
+Intents	method	INSetProfileInCarIntent.init(profileNumber:profileName:defaultProfile:)	10.0	11.0			container
+Intents	property	INSetProfileInCarIntent.isDefaultProfile	10.0	15.0			container
+Intents	property	INSetProfileInCarIntent.defaultProfile	10.0				container
+Intents	property	INSetProfileInCarIntent.profileNumber	10.0	15.0			container
+Intents	method	INSetSeatSettingsInCarIntent.init(enableHeating:enableCooling:enableMassage:seat:level:relativeLevel:carName:)	12.0	15.0			own
+Intents	method	INSetSeatSettingsInCarIntent.init(enableHeating:enableCooling:enableMassage:seat:level:relativeLevel:)	10.0		12.0		container
+Intents	property	INSetSeatSettingsInCarIntent.enableHeating	10.0	15.0			container
+Intents	property	INSetSeatSettingsInCarIntent.enableCooling	10.0	15.0			container
+Intents	property	INSetSeatSettingsInCarIntent.enableMassage	10.0	15.0			container
+Intents	property	INSetSeatSettingsInCarIntent.level	10.0	15.0			container
+Intents	method	NSString.deferredLocalizedIntentsString(with:_:)	12.0				own
+Intents	method	NSString.deferredLocalizedIntentsString(with:table:_:)	12.0				own
+Intents	method	NSString.deferredLocalizedIntentsString(with:table:arguments:)	12.0				own
+Intents	method	INCallRecord.init(identifier:dateCreated:caller:callRecordType:callCapability:callDuration:unseen:numberOfCalls:)	13.0				own
+Intents	method	INCallRecord.init(identifier:dateCreated:caller:callRecordType:callCapability:callDuration:unseen:)	11.0		13.0		container
+Intents	property	INCallRecord.callDuration	11.0				container
+Intents	property	INCallRecord.unseen	11.0				container
+Intents	property	INCallRecord.numberOfCalls	13.0				own
+Intents	method	INDoubleResolutionResult.confirmationRequired(with:)	10.0				container
+Intents	property	INMediaUserContext.numberOfLibraryItems	13.0				own
+Intents	protocol	_INIntentSetImageKeyPath	10.0				own
+Intents	method	_INIntentSetImageKeyPath.setImage(_:forParameterNamed:)	12.0				own
+Intents	method	_INIntentSetImageKeyPath.image(forParameterNamed:)	12.0				own
+Intents	protocol	INIntentSetImageKeyPath	10.0				own
+Intents	method	INDeleteTasksIntent.init(taskList:tasks:all:)	13.0	15.0			own
+Intents	property	INDeleteTasksIntent.all	13.0	15.0			own
+Intents	property	INGetCarPowerLevelStatusIntentResponse.fuelPercentRemaining	10.3				container
+Intents	property	INGetCarPowerLevelStatusIntentResponse.chargePercentRemaining	10.3				container
+Intents	property	INGetCarPowerLevelStatusIntentResponse.charging	12.0				own
+Intents	property	INGetCarPowerLevelStatusIntentResponse.minutesToFull	12.0				own
+Intents	property	INSearchForPhotosIntentResponse.searchResultsCount	10.0	15.0			own
+Intents	method	INSnoozeTasksIntent.init(tasks:nextTriggerTime:all:)	13.0				container
+Intents	property	INSnoozeTasksIntent.all	13.0				container
+Intents	method	INSaveProfileInCarIntent.init(profileNumber:profileLabel:)	10.0	15.0			container
+Intents	property	INSaveProfileInCarIntent.profileNumber	10.0	15.0			container
+Intents	enum	INMediaDestination	13.0				own
+Intents	typealias	INMediaDestination.ReferenceType	13.0				container
+Intents	constant	INMediaDestination.library	13.0				container
+Intents	constant	INMediaDestination.playlist	13.0				container
+Intents	property	INMediaDestination.playlistName	13.0				container
+Intents	property	INMediaDestination.description	13.0				container
+Intents	property	INMediaDestination.debugDescription	13.0				container
+Intents	method	INMediaDestination.hash(into:)	13.0				container
+Intents	property	INMediaDestination.hashValue	13.0				container
+Intents	method	INMediaDestination.==(a:b:)	13.0				container
+Intents	method	INMediaDestination._bridgeToObjectiveC()	13.0				container
+Intents	method	INMediaDestination._forceBridgeFromObjectiveC(_:result:)	13.0				container
+Intents	method	INMediaDestination._conditionallyBridgeFromObjectiveC(_:result:)	13.0				container
+Intents	method	INMediaDestination._unconditionallyBridgeFromObjectiveC(_:)	13.0				container
+Intents	typealias	INMediaDestination._ObjectiveCType	13.0				own
+Intents	method	INStartWorkoutIntent.init(workoutName:goalValue:workoutGoalUnitType:workoutLocationType:isOpenEnded:)	10.0				container
+Intents	property	INStartWorkoutIntent.goalValue	10.0				container
+Intents	property	INStartWorkoutIntent.isOpenEnded	10.0				container
+Intents	method	INRestaurantReservation.init(itemReference:reservationNumber:bookingTime:reservationStatus:reservationHolderName:actions:reservationDuration:partySize:restaurantLocation:)	13.0				container
+Intents	method	INRestaurantReservation.init(itemReference:reservationNumber:bookingTime:reservationStatus:reservationHolderName:actions:url:reservationDuration:partySize:restaurantLocation:)	14.0				own
+Intents	property	INRestaurantReservation.partySize	13.0				container
+Intents	method	INBooleanResolutionResult.confirmationRequired(with:)	10.0				container
+Intents	enum	INShortcut	12.0				own
+Intents	typealias	INShortcut.ReferenceType	12.0				container
+Intents	constant	INShortcut.intent	12.0				container
+Intents	constant	INShortcut.userActivity	12.0				container
+Intents	method	INShortcut.init?(intent:)	12.0				container
+Intents	method	INShortcut.init(userActivity:)	12.0				container
+Intents	property	INShortcut.intent	12.0				container
+Intents	property	INShortcut.userActivity	12.0				container
+Intents	property	INShortcut.description	12.0				container
+Intents	property	INShortcut.debugDescription	12.0				container
+Intents	method	INShortcut.hash(into:)	12.0				container
+Intents	property	INShortcut.hashValue	12.0				container
+Intents	method	INShortcut.==(a:b:)	12.0				container
+Intents	method	INShortcut._bridgeToObjectiveC()	12.0				container
+Intents	method	INShortcut._forceBridgeFromObjectiveC(_:result:)	12.0				container
+Intents	method	INShortcut._conditionallyBridgeFromObjectiveC(_:result:)	12.0				container
+Intents	method	INShortcut._unconditionallyBridgeFromObjectiveC(_:)	12.0				container
+Intents	typealias	INShortcut._ObjectiveCType	12.0				own
+Intents	method	INLodgingReservation.init(itemReference:reservationNumber:bookingTime:reservationStatus:reservationHolderName:actions:lodgingBusinessLocation:reservationDuration:numberOfAdults:numberOfChildren:)	13.0				container
+Intents	method	INLodgingReservation.init(itemReference:reservationNumber:bookingTime:reservationStatus:reservationHolderName:actions:url:lodgingBusinessLocation:reservationDuration:numberOfAdults:numberOfChildren:)	14.0				own
+Intents	property	INLodgingReservation.numberOfAdults	13.0				container
+Intents	property	INLodgingReservation.numberOfChildren	13.0				container
+Intents	property	INGetCarLockStatusIntentResponse.locked	10.3				container
+Intents	method	INFocusStatus.init(isFocused:)	15.0				container
+Intents	property	INFocusStatus.isFocused	15.0				container
+Intents	method	INSetRadioStationIntent.init(radioType:frequency:stationName:channel:presetNumber:)	10.0	15.0			container
+Intents	property	INSetRadioStationIntent.frequency	10.0	15.0			container
+Intents	property	INSetRadioStationIntent.presetNumber	10.0	15.0			container
+Intents	property	INStartPhotoPlaybackIntentResponse.searchResultsCount	10.0	15.0			own

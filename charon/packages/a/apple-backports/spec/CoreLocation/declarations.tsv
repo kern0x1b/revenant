@@ -1,0 +1,423 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@kCLErrorDomain	-			NSString *const	-	-	-	-	6d601569a5e1488c	-
+typedef	c:@T@CLError	-			enum CLError	-	-	-	-	9fded1d62b607a6f	-
+enum	c:@E@CLError	-			NSInteger	-	-	-	-	f31170111a07d00b	-
+enumconst	c:@E@CLError@kCLErrorLocationUnknown	CLError			-	-	-	-	-	94e1414704d1f851	0
+enumconst	c:@E@CLError@kCLErrorDenied	CLError			-	-	-	-	-	b4591b4acf60cc38	1
+enumconst	c:@E@CLError@kCLErrorNetwork	CLError			-	-	-	-	-	48ddd2ddabd1426a	2
+enumconst	c:@E@CLError@kCLErrorHeadingFailure	CLError			-	-	-	-	-	bf351fd406bf96d8	3
+enumconst	c:@E@CLError@kCLErrorRegionMonitoringDenied	CLError			-	-	-	-	-	35bbcc7009d9b2f7	4
+enumconst	c:@E@CLError@kCLErrorRegionMonitoringFailure	CLError			-	-	-	-	-	ad75054112973af2	5
+enumconst	c:@E@CLError@kCLErrorRegionMonitoringSetupDelayed	CLError			-	-	-	-	-	ddce7b2e481437f5	6
+enumconst	c:@E@CLError@kCLErrorRegionMonitoringResponseDelayed	CLError			-	-	-	-	-	2989fbec8a9d2ae7	7
+enumconst	c:@E@CLError@kCLErrorGeocodeFoundNoResult	CLError			-	-	-	-	-	dec004c1d87a8ac3	8
+enumconst	c:@E@CLError@kCLErrorGeocodeFoundPartialResult	CLError			-	-	-	-	-	d064ee89b6e833a2	9
+enumconst	c:@E@CLError@kCLErrorGeocodeCanceled	CLError			-	-	-	-	-	6a998db606b697ee	10
+enumconst	c:@E@CLError@kCLErrorDeferredFailed	CLError			-	-	-	-	-	10d3b26ce3867280	11
+enumconst	c:@E@CLError@kCLErrorDeferredNotUpdatingLocation	CLError			-	-	-	-	-	0f65317353287039	12
+enumconst	c:@E@CLError@kCLErrorDeferredAccuracyTooLow	CLError			-	-	-	-	-	96f0250cf2fd048c	13
+enumconst	c:@E@CLError@kCLErrorDeferredDistanceFiltered	CLError			-	-	-	-	-	8f5288ba88e0927d	14
+enumconst	c:@E@CLError@kCLErrorDeferredCanceled	CLError			-	-	-	-	-	c5ede8994ae31cc0	15
+enumconst	c:@E@CLError@kCLErrorRangingUnavailable	CLError			-	-	-	-	-	0012f6e4a97a09a4	16
+enumconst	c:@E@CLError@kCLErrorRangingFailure	CLError			-	-	-	-	-	4adca969d4654a01	17
+enumconst	c:@E@CLError@kCLErrorPromptDeclined	CLError			-	-	-	-	-	e53ed8df5cbdf180	18
+enumconst	c:@E@CLError@kCLErrorHistoricalLocationError	CLError			-	-	-	-	-	1e493288258206da	19
+var	c:@kCLErrorUserInfoAlternateRegionKey	-			NSString *const	-	-	ios=5.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a705d99c1083d0e4	-
+typedef	c:@T@CLRegionState	-			enum CLRegionState	-	-	-	-	748686eb4f86e98f	-
+enum	c:@E@CLRegionState	-			NSInteger	-	-	ios=7.0/-/-/0,macos=10.10/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8203187b6ad67cac	-
+enumconst	c:@E@CLRegionState@CLRegionStateUnknown	CLRegionState			-	-	-	ios=7.0/-/-/0,macos=10.10/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	de4d976f18f1ad6c	0
+enumconst	c:@E@CLRegionState@CLRegionStateInside	CLRegionState			-	-	-	ios=7.0/-/-/0,macos=10.10/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	53d8e4be11c2f9bf	1
+enumconst	c:@E@CLRegionState@CLRegionStateOutside	CLRegionState			-	-	-	ios=7.0/-/-/0,macos=10.10/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	bff2197307d52962	2
+typedef	c:@T@CLProximity	-			enum CLProximity	-	-	-	-	fc20177438130857	-
+enum	c:@E@CLProximity	-			NSInteger	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	da9572159da575df	-
+enumconst	c:@E@CLProximity@CLProximityUnknown	CLProximity			-	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	757a33617b8dfb7a	0
+enumconst	c:@E@CLProximity@CLProximityImmediate	CLProximity			-	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fe99fcba88266faa	1
+enumconst	c:@E@CLProximity@CLProximityNear	CLProximity			-	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c0f74dec7a5bce2e	2
+enumconst	c:@E@CLProximity@CLProximityFar	CLProximity			-	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e2da349a93ae7d4d	3
+interface	c:objc(cs)CLRegion	-			-	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,xros=-/-/-/1	deprecated: Please see CLCircularRegion	d1d588f87ea6f68a	-
+super	-	CLRegion	NSObject		-	-	-	-	-	b5fdd29970cb6124	-
+conforms	c:objc(cs)CLRegion	CLRegion	NSCopying		-	-	-	-	-	21d13d918e61cc06	-
+conforms	c:objc(cs)CLRegion	CLRegion	NSSecureCoding		-	-	-	-	-	c7b8478d1c56f848	-
+method	c:objc(cs)CLRegion(im)initCircularRegionWithCenter:radius:identifier:	-			instancetype	CLLocationCoordinate2D center | CLLocationDistance radius | NSString * identifier	-	ios=4.0/7.0/-/0,macos=10.7/10.10/-/0,tvos=-/-/-/1,xros=-/-/-/1	deprecated: Please see CLCircularRegion	d80258eb7dc97a5e	-
+property	c:objc(cs)CLRegion(py)center	-			CLLocationCoordinate2D	-	readonly,atomic	ios=4.0/7.0/-/0,macos=10.7/10.10/-/0,tvos=-/-/-/1,xros=-/-/-/1	-	0864f9e6076ac8ae	-
+property	c:objc(cs)CLRegion(py)radius	-			CLLocationDistance	-	readonly,atomic	ios=4.0/7.0/-/0,macos=10.7/10.10/-/0,tvos=-/-/-/1,xros=-/-/-/1	-	9640e5996d2db4e3	-
+property	c:objc(cs)CLRegion(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=4.0/-/-/0,macos=10.7/-/-/0	-	96b5815037834d36	-
+property	c:objc(cs)CLRegion(py)notifyOnEntry	-			BOOL	-	assign,atomic	ios=7.0/-/-/0,macos=10.10/-/-/0	-	a0261a05dea26401	-
+property	c:objc(cs)CLRegion(py)notifyOnExit	-			BOOL	-	assign,atomic	ios=7.0/-/-/0,macos=10.10/-/-/0	-	28a847053a071d3c	-
+method	c:objc(cs)CLRegion(im)containsCoordinate:	-			BOOL	CLLocationCoordinate2D coordinate	-	ios=4.0/7.0/-/0,macos=10.7/10.10/-/0,tvos=-/-/-/1,xros=-/-/-/1	deprecated: Please see CLCircularRegion	0eaf211ce0662c47	-
+interface	c:objc(cs)CLCondition	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	82ca1c756a97fa71	-
+super	-	CLCondition	NSObject		-	-	-	-	-	dad5310eb431769c	-
+conforms	c:objc(cs)CLCondition	CLCondition	NSSecureCoding		-	-	-	-	-	47f1b8faa7fc0e0b	-
+conforms	c:objc(cs)CLCondition	CLCondition	NSCopying		-	-	-	-	-	b0ecb5ccece61663	-
+method	c:objc(cs)CLCondition(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	75d360b4f498650f	-
+method	c:objc(cs)CLCondition(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a561ac9f49f5210a	-
+interface	c:objc(cs)CLCircularRegion	-			-	-	-	ios=7.0/100000/-/0,macos=10.10/100000/-/0,tvos=9.0/100000/-/0,watchos=2.0/100000/-/0,xros=-/-/-/1	-	5394ee0bd2159c31	-
+super	-	CLCircularRegion	CLRegion		-	-	-	-	-	88503e3bdef43f2e	-
+method	c:objc(cs)CLCircularRegion(im)initWithCenter:radius:identifier:	-			instancetype	CLLocationCoordinate2D center | CLLocationDistance radius | NSString * identifier	-	ios=7.0/100000/-/0,macos=10.10/100000/-/0,tvos=9.0/100000/-/0,watchos=2.0/100000/-/0,xros=-/-/-/1	-	4ee131f53c1a9468	-
+property	c:objc(cs)CLCircularRegion(py)center	-			CLLocationCoordinate2D	-	readonly,atomic	ios=7.0/100000/-/0,macos=10.10/100000/-/0,tvos=9.0/100000/-/0,watchos=2.0/100000/-/0,xros=-/-/-/1	-	e14073c0910dcd5e	-
+property	c:objc(cs)CLCircularRegion(py)radius	-			CLLocationDistance	-	readonly,atomic	ios=7.0/100000/-/0,macos=10.10/100000/-/0,tvos=9.0/100000/-/0,watchos=2.0/100000/-/0,xros=-/-/-/1	-	00647cc6b48b4cc5	-
+method	c:objc(cs)CLCircularRegion(im)containsCoordinate:	-			BOOL	CLLocationCoordinate2D coordinate	-	ios=7.0/100000/-/0,macos=10.10/100000/-/0,tvos=9.0/100000/-/0,watchos=2.0/100000/-/0,xros=-/-/-/1	-	ac8b392d3c480634	-
+interface	c:objc(cs)CLCircularGeographicCondition	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e4fb216e4b0439c5	-
+super	-	CLCircularGeographicCondition	CLCondition		-	-	-	-	-	f2d85855691b8d46	-
+conforms	c:objc(cs)CLCircularGeographicCondition	CLCircularGeographicCondition	NSSecureCoding		-	-	-	-	-	bd9d59666ed65959	-
+property	c:objc(cs)CLCircularGeographicCondition(py)center	-			CLLocationCoordinate2D	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	825e9183c7e36814	-
+property	c:objc(cs)CLCircularGeographicCondition(py)radius	-			CLLocationDistance	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	db0521dc764035fe	-
+method	c:objc(cs)CLCircularGeographicCondition(im)initWithCenter:radius:	-			instancetype	CLLocationCoordinate2D center | CLLocationDistance radius	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c0bbec8c73103159	-
+typedef	c:@T@CLBeaconMajorValue	-			uint16_t	-	-	-	-	7fadf4a30d75be44	-
+typedef	c:@T@CLBeaconMinorValue	-			uint16_t	-	-	-	-	c0f3b0a714ca8f1a	-
+interface	c:objc(cs)CLBeaconIdentityCondition	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	aaa8ab840298181b	-
+super	-	CLBeaconIdentityCondition	CLCondition		-	-	-	-	-	387a9cd8088fa918	-
+conforms	c:objc(cs)CLBeaconIdentityCondition	CLBeaconIdentityCondition	NSCopying		-	-	-	-	-	c6edef8c8fcd4804	-
+conforms	c:objc(cs)CLBeaconIdentityCondition	CLBeaconIdentityCondition	NSSecureCoding		-	-	-	-	-	03e1999e60b1a6c4	-
+property	c:objc(cs)CLBeaconIdentityCondition(py)UUID	-			NSUUID *	-	readonly,copy,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1a4fce2266599741	-
+property	c:objc(cs)CLBeaconIdentityCondition(py)major	-			NSNumber *	-	readonly,copy,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4cc6c80a4f20fc4b	-
+property	c:objc(cs)CLBeaconIdentityCondition(py)minor	-			NSNumber *	-	readonly,copy,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1f03a263b04929e1	-
+method	c:objc(cs)CLBeaconIdentityCondition(im)initWithUUID:	-			instancetype	NSUUID * uuid	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e4edda9b1d5aa257	-
+method	c:objc(cs)CLBeaconIdentityCondition(im)initWithUUID:major:	-			instancetype	NSUUID * uuid | CLBeaconMajorValue major	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4bf7cad4a77b8fd5	-
+method	c:objc(cs)CLBeaconIdentityCondition(im)initWithUUID:major:minor:	-			instancetype	NSUUID * uuid | CLBeaconMajorValue major | CLBeaconMinorValue minor	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9c68d73ddb721eb3	-
+interface	c:objc(cs)CLBeaconIdentityConstraint	-			-	-	-	ios=13.0/100000/-/0,macos=10.15/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fe863f9c76d17663	-
+super	-	CLBeaconIdentityConstraint	CLBeaconIdentityCondition		-	-	-	-	-	861cebc6bebdca91	-
+conforms	c:objc(cs)CLBeaconIdentityConstraint	CLBeaconIdentityConstraint	NSCopying		-	-	-	-	-	8824e7a2fe320c52	-
+conforms	c:objc(cs)CLBeaconIdentityConstraint	CLBeaconIdentityConstraint	NSSecureCoding		-	-	-	-	-	381cf886c47dd128	-
+interface	c:objc(cs)CLBeaconRegion	-			-	-	-	ios=7.0/100000/-/0,macos=10.15/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use -initWithUUID:identifier: instead	71a63e9788a9e017	-
+super	-	CLBeaconRegion	CLRegion		-	-	-	-	-	2b499ed4572c9cbe	-
+method	c:objc(cs)CLBeaconRegion(im)initWithUUID:identifier:	-			instancetype	NSUUID * uuid | NSString * identifier	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4979d20155a7f9b2	-
+method	c:objc(cs)CLBeaconRegion(im)initWithProximityUUID:identifier:	-			instancetype	NSUUID * proximityUUID | NSString * identifier	-	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,xros=-/-/-/1	deprecated: Use -initWithUUID:identifier: instead	252f35a80c266505	-
+method	c:objc(cs)CLBeaconRegion(im)initWithUUID:major:identifier:	-			instancetype	NSUUID * uuid | CLBeaconMajorValue major | NSString * identifier	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e03c1bf190a51575	-
+method	c:objc(cs)CLBeaconRegion(im)initWithProximityUUID:major:identifier:	-			instancetype	NSUUID * proximityUUID | CLBeaconMajorValue major | NSString * identifier	-	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,xros=-/-/-/1	deprecated: Use -initWithUUID:major:identifier: instead	2f9e48dfa198d7b2	-
+method	c:objc(cs)CLBeaconRegion(im)initWithUUID:major:minor:identifier:	-			instancetype	NSUUID * uuid | CLBeaconMajorValue major | CLBeaconMinorValue minor | NSString * identifier	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d1a76dc3dfdee143	-
+method	c:objc(cs)CLBeaconRegion(im)initWithProximityUUID:major:minor:identifier:	-			instancetype	NSUUID * proximityUUID | CLBeaconMajorValue major | CLBeaconMinorValue minor | NSString * identifier	-	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,xros=-/-/-/1	deprecated: Use -initWithUUID:major:identifier: instead	e25490ab648ef7d0	-
+method	c:objc(cs)CLBeaconRegion(im)initWithBeaconIdentityConstraint:identifier:	-			instancetype	CLBeaconIdentityConstraint * beaconIdentityConstraint | NSString * identifier	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	814c734252f98cfe	-
+method	c:objc(cs)CLBeaconRegion(im)peripheralDataWithMeasuredPower:	-			NSMutableDictionary<NSString *,id> *	NSNumber * measuredPower	-	ios=7.0/100000/-/0,macos=10.15/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a28335e5b541c49d	-
+property	c:objc(cs)CLBeaconRegion(py)beaconIdentityConstraint	-			CLBeaconIdentityConstraint *	-	readonly,copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a5f7ed97a8debb1b	-
+property	c:objc(cs)CLBeaconRegion(py)UUID	-			NSUUID *	-	readonly,copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	44da2f9b2b9435d5	-
+property	c:objc(cs)CLBeaconRegion(py)proximityUUID	-			NSUUID *	-	readonly,copy,nonatomic	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,xros=-/-/-/1	-	d170a0a92585501d	-
+property	c:objc(cs)CLBeaconRegion(py)major	-			NSNumber *	-	readonly,copy,nonatomic	ios=7.0/100000/-/0,macos=10.15/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	52e24f1b17f8423e	-
+property	c:objc(cs)CLBeaconRegion(py)minor	-			NSNumber *	-	readonly,copy,nonatomic	ios=7.0/100000/-/0,macos=10.15/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	abac49102fb66de9	-
+property	c:objc(cs)CLBeaconRegion(py)notifyEntryStateOnDisplay	-			BOOL	-	assign,atomic	ios=7.0/100000/-/0,macos=10.15/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c40ccd609b682fd0	-
+interface	c:objc(cs)CLBeacon	-			-	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use -UUID instead	f9c8a131f61fb5a2	-
+super	-	CLBeacon	NSObject		-	-	-	-	-	54de76a3ef0d2367	-
+conforms	c:objc(cs)CLBeacon	CLBeacon	NSCopying		-	-	-	-	-	206c874d08a85cac	-
+conforms	c:objc(cs)CLBeacon	CLBeacon	NSSecureCoding		-	-	-	-	-	4d34aec521d682fd	-
+property	c:objc(cs)CLBeacon(py)timestamp	-			NSDate *	-	readonly,copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7ec3af6829da3643	-
+property	c:objc(cs)CLBeacon(py)UUID	-			NSUUID *	-	readonly,copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2c4de2bcfcc7796c	-
+property	c:objc(cs)CLBeacon(py)proximityUUID	-			NSUUID *	-	readonly,copy,nonatomic	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,xros=-/-/-/1	-	14f4e9228f3dd053	-
+property	c:objc(cs)CLBeacon(py)major	-			NSNumber *	-	readonly,copy,nonatomic	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2c3f115e65a489e6	-
+property	c:objc(cs)CLBeacon(py)minor	-			NSNumber *	-	readonly,copy,nonatomic	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9e01bb59fea910f2	-
+property	c:objc(cs)CLBeacon(py)proximity	-			CLProximity	-	readonly,nonatomic	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	416bb6b114521d50	-
+property	c:objc(cs)CLBeacon(py)accuracy	-			CLLocationAccuracy	-	readonly,nonatomic	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8f8a1b7c57876e3f	-
+property	c:objc(cs)CLBeacon(py)rssi	-			NSInteger	-	readonly,nonatomic	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	811e8a88f5c971d0	-
+typedef	c:@T@CLHeadingComponentValue	-			double	-	-	-	-	603b2bcaa1437d98	-
+var	c:@kCLHeadingFilterNone	-			const CLLocationDegrees	-	-	-	-	4e28d54a5b5065be	-
+interface	c:objc(cs)CLHeading	-			-	-	-	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	f7da7ceb476028cf	-
+super	-	CLHeading	NSObject		-	-	-	-	-	4370bae0b3e99f03	-
+conforms	c:objc(cs)CLHeading	CLHeading	NSCopying		-	-	-	-	-	3eedf83620a06aa5	-
+conforms	c:objc(cs)CLHeading	CLHeading	NSSecureCoding		-	-	-	-	-	da5b6470e0cc13b0	-
+property	c:objc(cs)CLHeading(py)magneticHeading	-			CLLocationDirection	-	readonly,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	b1262836a14aa72f	-
+property	c:objc(cs)CLHeading(py)trueHeading	-			CLLocationDirection	-	readonly,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	41c15501dd2faa97	-
+property	c:objc(cs)CLHeading(py)headingAccuracy	-			CLLocationDirection	-	readonly,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	ae28e7c9441a14c3	-
+property	c:objc(cs)CLHeading(py)x	-			CLHeadingComponentValue	-	readonly,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	c7d32bb8ff6682db	-
+property	c:objc(cs)CLHeading(py)y	-			CLHeadingComponentValue	-	readonly,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	f7a86eb3bf2c6c7a	-
+property	c:objc(cs)CLHeading(py)z	-			CLHeadingComponentValue	-	readonly,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	ca4d80ef06ab79e2	-
+property	c:objc(cs)CLHeading(py)timestamp	-			NSDate *	-	readonly,copy,nonatomic	ios=3.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	74ae9ddd7963d5ce	-
+struct	c:@S@CLLocationCoordinate2D	-			-	-	-	-	-	405410af0fe0044c	-
+typedef	c:@T@CLLiveUpdateConfiguration	-			enum CLLiveUpdateConfiguration	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	21476ce610af00bf	-
+enum	c:@E@CLLiveUpdateConfiguration	-			NSInteger	-	-	-	-	29b2be862b7df4ef	-
+enumconst	c:@E@CLLiveUpdateConfiguration@CLLiveUpdateConfigurationDefault	CLLiveUpdateConfiguration			-	-	-	-	-	a734898e9c108cee	0
+enumconst	c:@E@CLLiveUpdateConfiguration@CLLiveUpdateConfigurationAutomotiveNavigation	CLLiveUpdateConfiguration			-	-	-	-	-	cd967a128707036c	1
+enumconst	c:@E@CLLiveUpdateConfiguration@CLLiveUpdateConfigurationOtherNavigation	CLLiveUpdateConfiguration			-	-	-	-	-	1da577c888ab79e8	2
+enumconst	c:@E@CLLiveUpdateConfiguration@CLLiveUpdateConfigurationFitness	CLLiveUpdateConfiguration			-	-	-	-	-	8030064e334e55a3	3
+enumconst	c:@E@CLLiveUpdateConfiguration@CLLiveUpdateConfigurationAirborne	CLLiveUpdateConfiguration			-	-	-	-	-	d564d1654af177c3	4
+interface	c:objc(cs)CLUpdate	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	deprecated: Use -stationary instead	61109933bbc07f37	-
+super	-	CLUpdate	NSObject		-	-	-	-	-	3cb68caaa840fe98	-
+property	c:objc(cs)CLUpdate(py)authorizationDenied	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	298990c370e0bdfd	-
+property	c:objc(cs)CLUpdate(py)authorizationDeniedGlobally	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	b23b576e4c03c232	-
+property	c:objc(cs)CLUpdate(py)authorizationRestricted	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	7bcc05ff17aff03e	-
+property	c:objc(cs)CLUpdate(py)isStationary	-			BOOL	-	readonly	ios=17.0/17.0/-/0,macos=14.0/14.0/-/0,tvos=17.0/17.0/-/0	-	af9fada0283aeccb	-
+property	c:objc(cs)CLUpdate(py)stationary	-			BOOL	-	readonly	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	0889eb2ba322ce70	-
+property	c:objc(cs)CLUpdate(py)insufficientlyInUse	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	7234f999438a1639	-
+property	c:objc(cs)CLUpdate(py)locationUnavailable	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	df98561a63a4bae5	-
+property	c:objc(cs)CLUpdate(py)accuracyLimited	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	54bcca1d8384d7f9	-
+property	c:objc(cs)CLUpdate(py)serviceSessionRequired	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c67fdabf27676c70	-
+property	c:objc(cs)CLUpdate(py)authorizationRequestInProgress	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1f7ab9a6acf26e4c	-
+property	c:objc(cs)CLUpdate(py)location	-			CLLocation *	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	c8ea2ca183652db3	-
+interface	c:objc(cs)CLLocationUpdater	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	42ee21137fd9fff7	-
+super	-	CLLocationUpdater	NSObject		-	-	-	-	-	48647426890bed25	-
+method	c:objc(cs)CLLocationUpdater(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	499299d0e8db5618	-
+method	c:objc(cs)CLLocationUpdater(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	965029dc1b5ddba1	-
+method	c:objc(cs)CLLocationUpdater(cm)liveUpdaterWithQueue:handler:	-			instancetype	dispatch_queue_t queue | void (^)(CLUpdate * _Nullable) handler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	d34a17e52cab7d88	-
+method	c:objc(cs)CLLocationUpdater(cm)liveUpdaterWithConfiguration:queue:handler:	-			instancetype	CLLiveUpdateConfiguration configuration | dispatch_queue_t queue | void (^)(CLUpdate * _Nullable) handler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	e847293e3b8ec7dc	-
+method	c:objc(cs)CLLocationUpdater(im)resume	-			void	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	eb40d9425ce696b3	-
+method	c:objc(cs)CLLocationUpdater(im)pause	-			void	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	de896aea0a53be07	-
+method	c:objc(cs)CLLocationUpdater(im)invalidate	-			void	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	cceb3efb43dabfc1	-
+typedef	c:@T@CLMonitoringState	-			enum CLMonitoringState	-	-	-	-	f4b150a6fa0736d2	-
+enum	c:@E@CLMonitoringState	-			NSUInteger	-	-	-	-	f15599bd5ef6afba	-
+enumconst	c:@E@CLMonitoringState@CLMonitoringStateUnknown	CLMonitoringState			-	-	-	-	-	f92adce9ca5b55ac	0
+enumconst	c:@E@CLMonitoringState@CLMonitoringStateSatisfied	CLMonitoringState			-	-	-	-	-	ca060b286ceead1b	1
+enumconst	c:@E@CLMonitoringState@CLMonitoringStateUnsatisfied	CLMonitoringState			-	-	-	-	-	09573ab1cfd3115c	2
+enumconst	c:@E@CLMonitoringState@CLMonitoringStateUnmonitored	CLMonitoringState			-	-	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	5be67398ed59052b	3
+interface	c:objc(cs)CLMonitoringEvent	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	63544683a3304a1c	-
+super	-	CLMonitoringEvent	NSObject		-	-	-	-	-	47af28f6332ce379	-
+conforms	c:objc(cs)CLMonitoringEvent	CLMonitoringEvent	NSSecureCoding		-	-	-	-	-	d1880ac6dea49e24	-
+property	c:objc(cs)CLMonitoringEvent(py)identifier	-			NSString *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8135ea6d1dd9fdad	-
+property	c:objc(cs)CLMonitoringEvent(py)refinement	-			__kindof CLCondition *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	adfec190327a44e7	-
+property	c:objc(cs)CLMonitoringEvent(py)state	-			CLMonitoringState	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4852921f622250f9	-
+property	c:objc(cs)CLMonitoringEvent(py)date	-			NSDate *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ca2ec91037336e85	-
+property	c:objc(cs)CLMonitoringEvent(py)authorizationDenied	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	314a3ee82e73bb00	-
+property	c:objc(cs)CLMonitoringEvent(py)authorizationDeniedGlobally	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	de7f31a41f4d32de	-
+property	c:objc(cs)CLMonitoringEvent(py)authorizationRestricted	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fd41549c4e44a696	-
+property	c:objc(cs)CLMonitoringEvent(py)insufficientlyInUse	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	92e6fbfdaecad982	-
+property	c:objc(cs)CLMonitoringEvent(py)accuracyLimited	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	92198e789854f064	-
+property	c:objc(cs)CLMonitoringEvent(py)conditionUnsupported	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b1cbaeb444fb6bbb	-
+property	c:objc(cs)CLMonitoringEvent(py)conditionLimitExceeded	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fcb349b7341045c2	-
+property	c:objc(cs)CLMonitoringEvent(py)persistenceUnavailable	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d3060c45660008d5	-
+property	c:objc(cs)CLMonitoringEvent(py)serviceSessionRequired	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0362a2c205426608	-
+property	c:objc(cs)CLMonitoringEvent(py)authorizationRequestInProgress	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f42a3f13adfe9377	-
+method	c:objc(cs)CLMonitoringEvent(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fef94a80268d19c7	-
+method	c:objc(cs)CLMonitoringEvent(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9a4f48c888be01fc	-
+interface	c:objc(cs)CLMonitoringRecord	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	bf9d5408b239dc95	-
+super	-	CLMonitoringRecord	NSObject		-	-	-	-	-	dddb95331cb2ddcd	-
+conforms	c:objc(cs)CLMonitoringRecord	CLMonitoringRecord	NSSecureCoding		-	-	-	-	-	730ae0d7f2bad91f	-
+property	c:objc(cs)CLMonitoringRecord(py)condition	-			__kindof CLCondition *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	193dca5685f007ad	-
+property	c:objc(cs)CLMonitoringRecord(py)lastEvent	-			CLMonitoringEvent *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2c020bee8173d3e5	-
+method	c:objc(cs)CLMonitoringRecord(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	0b6fab4e92f85546	-
+method	c:objc(cs)CLMonitoringRecord(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4f528a1769572e9d	-
+interface	c:objc(cs)CLMonitorConfiguration	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	08666ad11d8688ed	-
+super	-	CLMonitorConfiguration	NSObject		-	-	-	-	-	b20aef624fb9d3cf	-
+property	c:objc(cs)CLMonitorConfiguration(py)name	-			NSString *	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4d61aafd6be1da16	-
+property	c:objc(cs)CLMonitorConfiguration(py)queue	-			dispatch_queue_t	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	eddc8126a08a873e	-
+property	c:objc(cs)CLMonitorConfiguration(py)eventHandler	-			void (^)(CLMonitor * _Nonnull, CLMonitoringEvent * _Nonnull)	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	26902add66300cf7	-
+method	c:objc(cs)CLMonitorConfiguration(cm)configWithMonitorName:queue:eventHandler:	-			CLMonitorConfiguration *	NSString * name | dispatch_queue_t queue | void (^)(CLMonitor * _Nonnull, CLMonitoringEvent * _Nonnull) eventHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	075e05eac2106b19	-
+interface	c:objc(cs)CLMonitor	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	0bacb97850c4cf6c	-
+super	-	CLMonitor	NSObject		-	-	-	-	-	a7648e5f409e4a8f	-
+method	c:objc(cs)CLMonitor(cm)requestMonitorWithConfiguration:completion:	-			void	CLMonitorConfiguration * config | void (^)(CLMonitor * _Nonnull) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fc5c9652826c1e44	-
+property	c:objc(cs)CLMonitor(py)name	-			NSString *	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	5cd3cfb2a5b45a21	-
+property	c:objc(cs)CLMonitor(py)monitoredIdentifiers	-			NSArray<NSString *> *	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9a59eaf391932c59	-
+method	c:objc(cs)CLMonitor(im)addConditionForMonitoring:identifier:	-			void	CLCondition * condition | NSString * identifier	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	dd42a59b9180fd41	-
+method	c:objc(cs)CLMonitor(im)addConditionForMonitoring:identifier:assumedState:	-			void	CLCondition * condition | NSString * identifier | CLMonitoringState state	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	183e445d95c3e495	-
+method	c:objc(cs)CLMonitor(im)removeConditionFromMonitoringWithIdentifier:	-			void	NSString * identifier	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	416ac4cb1c2fea67	-
+method	c:objc(cs)CLMonitor(im)monitoringRecordForIdentifier:	-			CLMonitoringRecord *	NSString * identifier	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	32153e91737fcc2a	-
+method	c:objc(cs)CLMonitor(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2fb222eadba9e820	-
+method	c:objc(cs)CLMonitor(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	5a3f5ffa8df8bc5e	-
+typedef	c:@T@CLDeviceOrientation	-			enum CLDeviceOrientation	-	-	-	-	ef0d26ebe18e0805	-
+enum	c:@E@CLDeviceOrientation	-			int	-	-	-	-	e0a769646ed3660b	-
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationUnknown	CLDeviceOrientation			-	-	-	-	-	a6bb3207ccde4034	0
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationPortrait	CLDeviceOrientation			-	-	-	-	-	511013dc0eced0e6	1
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationPortraitUpsideDown	CLDeviceOrientation			-	-	-	-	-	132a9baf11e9f4f3	2
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationLandscapeLeft	CLDeviceOrientation			-	-	-	-	-	cdcca6992afa6282	3
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationLandscapeRight	CLDeviceOrientation			-	-	-	-	-	c3cc1f8705afb221	4
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationFaceUp	CLDeviceOrientation			-	-	-	-	-	e38c630d97b7ec09	5
+enumconst	c:@E@CLDeviceOrientation@CLDeviceOrientationFaceDown	CLDeviceOrientation			-	-	-	-	-	5e7dd688840fa8c8	6
+typedef	c:@T@CLAuthorizationStatus	-			enum CLAuthorizationStatus	-	-	-	-	752e6604c9ca99b4	-
+enum	c:@E@CLAuthorizationStatus	-			int	-	-	-	-	bdd6d7d643fa69f6	-
+enumconst	c:@E@CLAuthorizationStatus@kCLAuthorizationStatusNotDetermined	CLAuthorizationStatus			-	-	-	-	-	8c745226e3dc8e00	0
+enumconst	c:@E@CLAuthorizationStatus@kCLAuthorizationStatusRestricted	CLAuthorizationStatus			-	-	-	-	-	3459ba4be5fc81c9	1
+enumconst	c:@E@CLAuthorizationStatus@kCLAuthorizationStatusDenied	CLAuthorizationStatus			-	-	-	-	-	b316afc363e52cbd	2
+enumconst	c:@E@CLAuthorizationStatus@kCLAuthorizationStatusAuthorizedAlways	CLAuthorizationStatus			-	-	-	ios=8.0/-/-/0,macos=10.12/-/-/0,xros=-/-/-/1	-	17c247d2ce058be0	3
+enumconst	c:@E@CLAuthorizationStatus@kCLAuthorizationStatusAuthorizedWhenInUse	CLAuthorizationStatus			-	-	-	ios=8.0/-/-/0,macos=-/-/-/1	-	d7b6d9569768ca74	4
+enumconst	c:@E@CLAuthorizationStatus@kCLAuthorizationStatusAuthorized	CLAuthorizationStatus			-	-	-	ios=2.0/8.0/-/0,macos=10.6/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use kCLAuthorizationStatusAuthorizedAlways	635514638cc3661b	3
+typedef	c:@T@CLAccuracyAuthorization	-			enum CLAccuracyAuthorization	-	-	-	-	38224e44f162d305	-
+enum	c:@E@CLAccuracyAuthorization	-			NSInteger	-	-	-	-	0bd6efbb22871be3	-
+enumconst	c:@E@CLAccuracyAuthorization@CLAccuracyAuthorizationFullAccuracy	CLAccuracyAuthorization			-	-	-	-	-	7b91d358eb95c8ad	0
+enumconst	c:@E@CLAccuracyAuthorization@CLAccuracyAuthorizationReducedAccuracy	CLAccuracyAuthorization			-	-	-	-	-	d2aedb339bfe9634	1
+typedef	c:@T@CLActivityType	-			enum CLActivityType	-	-	-	-	e2d42148bcec8151	-
+enum	c:@E@CLActivityType	-			NSInteger	-	-	-	-	0881c715109005bb	-
+enumconst	c:@E@CLActivityType@CLActivityTypeOther	CLActivityType			-	-	-	-	-	053a4549b232282f	1
+enumconst	c:@E@CLActivityType@CLActivityTypeAutomotiveNavigation	CLActivityType			-	-	-	-	-	564dfc1acc9fde90	2
+enumconst	c:@E@CLActivityType@CLActivityTypeFitness	CLActivityType			-	-	-	-	-	1cf7211c4e5b33de	3
+enumconst	c:@E@CLActivityType@CLActivityTypeOtherNavigation	CLActivityType			-	-	-	-	-	1e78faaa6b064f2c	4
+enumconst	c:@E@CLActivityType@CLActivityTypeAirborne	CLActivityType			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	25fe56b3fcc5f926	5
+interface	c:objc(cs)CLLocationManager	-			-	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	deprecated: Use +isMonitoringAvailableForClass: instead	91f4601702913963	-
+super	-	CLLocationManager	NSObject		-	-	-	-	-	a95e8d78e0a6d788	-
+method	c:objc(cs)CLLocationManager(cm)locationServicesEnabled	-			BOOL	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	878fd338fbf399dc	-
+method	c:objc(cs)CLLocationManager(cm)headingAvailable	-			BOOL	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0	-	9fbc7d66c9daa67f	-
+method	c:objc(cs)CLLocationManager(cm)significantLocationChangeMonitoringAvailable	-			BOOL	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	174f84b178cafca0	-
+method	c:objc(cs)CLLocationManager(cm)isMonitoringAvailableForClass:	-			BOOL	Class regionClass	-	ios=7.0/-/-/0,macos=10.10/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c72215b5ecb5185f	-
+method	c:objc(cs)CLLocationManager(cm)regionMonitoringAvailable	-			BOOL	-	-	ios=4.0/7.0/-/0,macos=10.8/10.10/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use +isMonitoringAvailableForClass: instead	78bd6e676bff66b0	-
+method	c:objc(cs)CLLocationManager(cm)regionMonitoringEnabled	-			BOOL	-	-	ios=4.0/6.0/-/0,macos=10.8/10.10/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use +isMonitoringAvailableForClass: and -authorizationStatus instead	5d312e2a1a6e3463	-
+method	c:objc(cs)CLLocationManager(cm)isRangingAvailable	-			BOOL	-	-	ios=7.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	006b982f0d7984ee	-
+property	c:objc(cs)CLLocationManager(py)authorizationStatus	-			CLAuthorizationStatus	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	2546b9cb19630142	-
+method	c:objc(cs)CLLocationManager(cm)authorizationStatus	-			CLAuthorizationStatus	-	-	ios=4.2/14.0/-/0,macos=10.7/11.0/-/0,tvos=9.0/14.0/-/0,watchos=1.0/7.0/-/0	deprecated: Use -authorizationStatus instead	e6ef4b7548550b8f	-
+property	c:objc(cs)CLLocationManager(py)accuracyAuthorization	-			CLAccuracyAuthorization	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	0aaadd1dbe3cc865	-
+property	c:objc(cs)CLLocationManager(py)authorizedForWidgetUpdates	-			BOOL	-	readonly,nonatomic,getter=isAuthorizedForWidgetUpdates	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3185951bb4e87b81	-
+property	c:objc(cs)CLLocationManager(py)delegate	-			id<CLLocationManagerDelegate>	-	weak,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e49f93cfb1539831	-
+property	c:objc(cs)CLLocationManager(py)locationServicesEnabled	-			BOOL	-	readonly,nonatomic	ios=2.0/4.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d60136e2bb628825	-
+property	c:objc(cs)CLLocationManager(py)purpose	-			NSString *	-	copy,nonatomic	ios=3.2/6.0/-/0,macos=10.7/11.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a5a8a0e11d4c3dcc	-
+property	c:objc(cs)CLLocationManager(py)activityType	-			CLActivityType	-	assign,nonatomic	ios=6.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=4.0/-/-/0	-	a1bce6d0c67856c5	-
+property	c:objc(cs)CLLocationManager(py)distanceFilter	-			CLLocationDistance	-	assign,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	913dec69bc568d96	-
+property	c:objc(cs)CLLocationManager(py)desiredAccuracy	-			CLLocationAccuracy	-	assign,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5ef9428c051db183	-
+property	c:objc(cs)CLLocationManager(py)pausesLocationUpdatesAutomatically	-			BOOL	-	assign,nonatomic	ios=6.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	89db28c187021e48	-
+property	c:objc(cs)CLLocationManager(py)allowsBackgroundLocationUpdates	-			BOOL	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=4.0/-/-/0,xros=-/-/-/1	-	ceb287b332af47a2	-
+property	c:objc(cs)CLLocationManager(py)showsBackgroundLocationIndicator	-			BOOL	-	assign,nonatomic	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	73bffe65cb7c1422	-
+property	c:objc(cs)CLLocationManager(py)location	-			CLLocation *	-	readonly,copy,nonatomic	ios=2.0/-/-/0,macos=10.6/-/-/0	-	296fcfa18516ea90	-
+property	c:objc(cs)CLLocationManager(py)headingAvailable	-			BOOL	-	readonly,nonatomic	ios=3.0/4.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/-/0	-	6d2aa9a6c7687dc9	-
+property	c:objc(cs)CLLocationManager(py)headingFilter	-			CLLocationDegrees	-	assign,nonatomic	ios=3.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	a153c3ffc081d0d1	-
+property	c:objc(cs)CLLocationManager(py)headingOrientation	-			CLDeviceOrientation	-	assign,nonatomic	ios=4.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	4ba064466cbb850c	-
+property	c:objc(cs)CLLocationManager(py)heading	-			CLHeading *	-	readonly,copy,nonatomic	ios=4.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	b630fe8a7c8bee4e	-
+property	c:objc(cs)CLLocationManager(py)maximumRegionMonitoringDistance	-			CLLocationDistance	-	readonly,nonatomic	ios=4.0/-/-/0,macos=10.8/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	b62518e50608fdbb	-
+property	c:objc(cs)CLLocationManager(py)monitoredRegions	-			NSSet<__kindof CLRegion *> *	-	readonly,copy,nonatomic	ios=4.0/-/-/0,macos=10.8/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	772c05aefc2fef53	-
+property	c:objc(cs)CLLocationManager(py)rangedRegions	-			NSSet<__kindof CLRegion *> *	-	readonly,copy,nonatomic	ios=7.0/13.0/-/0,maccatalyst=14.0/14.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9ceb8b519b14524e	-
+property	c:objc(cs)CLLocationManager(py)rangedBeaconConstraints	-			NSSet<CLBeaconIdentityConstraint *> *	-	readonly,copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	3a74bf1a5700c5c3	-
+method	c:objc(cs)CLLocationManager(im)requestWhenInUseAuthorization	-			void	-	-	ios=8.0/-/-/0,macos=10.15/-/-/0	-	94cba008302ef175	-
+method	c:objc(cs)CLLocationManager(im)requestAlwaysAuthorization	-			void	-	-	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,xros=-/-/-/1	-	e37e2eef51aa9eb2	-
+method	c:objc(cs)CLLocationManager(im)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:completion:	-			void	NSString * purposeKey | void (^)(NSError * _Nullable) completion	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	84daa68db05fd2d5	-
+method	c:objc(cs)CLLocationManager(im)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:	-			void	NSString * purposeKey	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	44a4065953720c1c	-
+method	c:objc(cs)CLLocationManager(im)startUpdatingLocation	-			void	-	-	tvos=-/-/-/1,watchos=3.0/-/-/0	-	8400df3a1aae5189	-
+method	c:objc(cs)CLLocationManager(im)stopUpdatingLocation	-			void	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f130a0ac9f37280f	-
+method	c:objc(cs)CLLocationManager(im)requestLocation	-			void	-	-	ios=9.0/-/-/0,macos=10.14/-/-/0	-	58cc70526bd3fda9	-
+method	c:objc(cs)CLLocationManager(im)startUpdatingHeading	-			void	-	-	ios=3.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	6aea54d3469764b1	-
+method	c:objc(cs)CLLocationManager(im)stopUpdatingHeading	-			void	-	-	ios=3.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	67780495ffef37e0	-
+method	c:objc(cs)CLLocationManager(im)dismissHeadingCalibrationDisplay	-			void	-	-	ios=3.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	8d380f307bcb98ae	-
+method	c:objc(cs)CLLocationManager(im)startMonitoringSignificantLocationChanges	-			void	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9bdc8054e07cf9bb	-
+method	c:objc(cs)CLLocationManager(im)stopMonitoringSignificantLocationChanges	-			void	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	adf883f33536a2b6	-
+method	c:objc(cs)CLLocationManager(im)startMonitoringLocationPushesWithCompletion:	-			void	void (^)(NSData * _Nullable, NSError * _Nullable) completion	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	b37f98daa513c3ba	-
+method	c:objc(cs)CLLocationManager(im)stopMonitoringLocationPushes	-			void	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f93ddbab2a4a9e45	-
+method	c:objc(cs)CLLocationManager(im)startMonitoringForRegion:desiredAccuracy:	-			void	CLRegion * region | CLLocationAccuracy accuracy	-	ios=4.0/6.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use -startMonitoringForRegion: instead	aa4870f6964c571b	-
+method	c:objc(cs)CLLocationManager(im)stopMonitoringForRegion:	-			void	CLRegion * region	-	ios=5.0/100000/-/0,macos=10.8/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use Use CLMonitor to start or stop monitoring constraint instead	04d3f64a2c4d70ef	-
+method	c:objc(cs)CLLocationManager(im)startMonitoringForRegion:	-			void	CLRegion * region	-	ios=5.0/100000/-/0,macos=10.8/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use Use CLMonitor to start or stop monitoring constraint instead	1723c04d36041ccf	-
+method	c:objc(cs)CLLocationManager(im)requestStateForRegion:	-			void	CLRegion * region	-	ios=5.0/100000/-/0,macos=10.8/100000/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use Use CLMonitor to track and query the state for monitored constraints instead	64ffaaa0d85893af	-
+method	c:objc(cs)CLLocationManager(im)startRangingBeaconsInRegion:	-			void	CLBeaconRegion * region	-	ios=7.0/13.0/-/0,maccatalyst=14.0/14.0/-/0,macos=11.0/11.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use -startRangingBeaconsSatisfyingConstraint:	4179e274c9b422d8	-
+method	c:objc(cs)CLLocationManager(im)stopRangingBeaconsInRegion:	-			void	CLBeaconRegion * region	-	ios=7.0/13.0/-/0,maccatalyst=14.0/14.0/-/0,macos=11.0/11.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use -stopRangingBeaconsSatisfyingConstraint:	ad4eccb96218e577	-
+method	c:objc(cs)CLLocationManager(im)startRangingBeaconsSatisfyingConstraint:	-			void	CLBeaconIdentityConstraint * constraint	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	66bdff7847bd97fd	-
+method	c:objc(cs)CLLocationManager(im)stopRangingBeaconsSatisfyingConstraint:	-			void	CLBeaconIdentityConstraint * constraint	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	729fe7aeb744b1cc	-
+method	c:objc(cs)CLLocationManager(im)allowDeferredLocationUpdatesUntilTraveled:timeout:	-			void	CLLocationDistance distance | NSTimeInterval timeout	-	ios=6.0/13.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: You can remove calls to this method	e9e52e5039442a36	-
+method	c:objc(cs)CLLocationManager(im)disallowDeferredLocationUpdates	-			void	-	-	ios=6.0/13.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: You can remove calls to this method	54b7f9c9fe294685	-
+method	c:objc(cs)CLLocationManager(cm)deferredLocationUpdatesAvailable	-			BOOL	-	-	ios=6.0/13.0/-/0,macos=10.9/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: You can remove calls to this method	20a7c3fa14b02b67	-
+method	c:objc(cs)CLLocationManager(im)requestHistoricalLocationsWithPurposeKey:sampleCount:completionHandler:	-			void	NSString * purposeKey | NSInteger sampleCount | void (^)(NSArray<CLLocation *> * _Nonnull, NSError * _Nullable) handler	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=9.0/-/-/0	-	4fd6076963b3f7e8	-
+interface	c:objc(cs)CLVisit	-			-	-	-	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1e4fdece215196cd	-
+super	-	CLVisit	NSObject		-	-	-	-	-	87ccdfebb99b855f	-
+conforms	c:objc(cs)CLVisit	CLVisit	NSSecureCoding		-	-	-	-	-	06c2f27d266f5c88	-
+conforms	c:objc(cs)CLVisit	CLVisit	NSCopying		-	-	-	-	-	3a2c2854ed9ad1d0	-
+property	c:objc(cs)CLVisit(py)arrivalDate	-			NSDate *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d2afd1dd3ba10311	-
+property	c:objc(cs)CLVisit(py)departureDate	-			NSDate *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	db1a2fe9200478fa	-
+property	c:objc(cs)CLVisit(py)coordinate	-			CLLocationCoordinate2D	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4f89592f5a3fbb11	-
+property	c:objc(cs)CLVisit(py)horizontalAccuracy	-			CLLocationAccuracy	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1c748d50cfa14973	-
+protocol	c:objc(pl)CLLocationManagerDelegate	-			-	-	-	-	deprecated: Implement -locationManager:didUpdateLocations: instead	49a35d5d0c9d72ff	-
+conforms	c:objc(pl)CLLocationManagerDelegate	CLLocationManagerDelegate	NSObject		-	-	-	-	-	a6c7719b4e9ba94c	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didUpdateToLocation:fromLocation:	-			void	CLLocationManager * manager | CLLocation * newLocation | CLLocation * oldLocation	optional	ios=2.0/6.0/-/0,macos=10.6/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Implement -locationManager:didUpdateLocations: instead	11628d20feebee3d	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didUpdateLocations:	-			void	CLLocationManager * manager | NSArray<CLLocation *> * locations	optional	ios=6.0/-/-/0,macos=10.9/-/-/0	-	c395d1574f612d7c	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didUpdateHeading:	-			void	CLLocationManager * manager | CLHeading * newHeading	optional	ios=3.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	65cf5e9c65dc3504	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManagerShouldDisplayHeadingCalibration:	-			BOOL	CLLocationManager * manager	optional	ios=3.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=2.0/-/-/0,xros=-/-/-/1	-	bea24cd02643d03c	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didDetermineState:forRegion:	-			void	CLLocationManager * manager | CLRegionState state | CLRegion * region	optional	ios=7.0/-/-/0,macos=10.10/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1e96239b0eb3b8a1	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didRangeBeacons:inRegion:	-			void	CLLocationManager * manager | NSArray<CLBeacon *> * beacons | CLBeaconRegion * region	optional	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use Use locationManager:didRangeBeacons:satisfyingConstraint: instead	3b77b34cd2226ef9	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:rangingBeaconsDidFailForRegion:withError:	-			void	CLLocationManager * manager | CLBeaconRegion * region | NSError * error	optional	ios=7.0/13.0/-/0,macos=10.15/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	deprecated: Use Use locationManager:didFailRangingBeaconsForConstraint:error: instead	628d1621d2eb1ac5	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didRangeBeacons:satisfyingConstraint:	-			void	CLLocationManager * manager | NSArray<CLBeacon *> * beacons | CLBeaconIdentityConstraint * beaconConstraint	optional	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a5b22bbf7af7c6e0	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didFailRangingBeaconsForConstraint:error:	-			void	CLLocationManager * manager | CLBeaconIdentityConstraint * beaconConstraint | NSError * error	optional	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	57f686aca03d7426	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didEnterRegion:	-			void	CLLocationManager * manager | CLRegion * region	optional	ios=4.0/-/-/0,macos=10.8/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8c6e0cdece3eb328	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didExitRegion:	-			void	CLLocationManager * manager | CLRegion * region	optional	ios=4.0/-/-/0,macos=10.8/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e6f0b3a10f83bea4	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didFailWithError:	-			void	CLLocationManager * manager | NSError * error	optional	-	-	12bdc035aa6c5ba1	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:monitoringDidFailForRegion:withError:	-			void	CLLocationManager * manager | CLRegion * region | NSError * error	optional	ios=4.0/-/-/0,macos=10.8/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	766bf353cb193bd1	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didChangeAuthorizationStatus:	-			void	CLLocationManager * manager | CLAuthorizationStatus status	optional	ios=4.2/14.0/-/0,macos=10.7/11.0/-/0,tvos=9.0/14.0/-/0,watchos=1.0/7.0/-/0,xros=-/-/-/1	deprecated: Use -locationManagerDidChangeAuthorization: instead	2b1531ac9a59f7a6	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManagerDidChangeAuthorization:	-			void	CLLocationManager * manager	optional	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	43c2983b2df3cb98	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didStartMonitoringForRegion:	-			void	CLLocationManager * manager | CLRegion * region	optional	ios=5.0/-/-/0,macos=10.8/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	743497a3c351e208	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManagerDidPauseLocationUpdates:	-			void	CLLocationManager * manager	optional	ios=6.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fdd5dd8c95acefed	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManagerDidResumeLocationUpdates:	-			void	CLLocationManager * manager	optional	ios=6.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fd512ce9f3521c76	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didFinishDeferredUpdatesWithError:	-			void	CLLocationManager * manager | NSError * error	optional	ios=6.0/-/-/0,macos=10.9/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	49767f27f6010664	-
+method	c:objc(pl)CLLocationManagerDelegate(im)locationManager:didVisit:	-			void	CLLocationManager * manager | CLVisit * visit	optional	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8a6ed3fb25696e27	-
+category	c:objc(cy)CLLocationManager@CLVisitExtensions	-			-	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	adae9e93db6a0920	-
+method	c:objc(cs)CLLocationManager(im)startMonitoringVisits	CLVisitExtensions			void	-	-	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e328b3861daf448d	-
+method	c:objc(cs)CLLocationManager(im)stopMonitoringVisits	CLVisitExtensions			void	-	-	ios=8.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	38afde4c813d9eae	-
+interface	c:objc(cs)CLPlacemark	-			-	-	-	ios=5.0/100000/-/0,macos=10.8/100000/-/0	deprecated: Use @properties	0859ad341adafa5c	-
+super	-	CLPlacemark	NSObject		-	-	-	-	-	82631c71470aa153	-
+conforms	c:objc(cs)CLPlacemark	CLPlacemark	NSCopying		-	-	-	-	-	b5bfb9fafd334a6c	-
+conforms	c:objc(cs)CLPlacemark	CLPlacemark	NSSecureCoding		-	-	-	-	-	54f00048d7dc650c	-
+method	c:objc(cs)CLPlacemark(im)init	-			instancetype	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bd20a55431595746	-
+method	c:objc(cs)CLPlacemark(cm)new	-			instancetype	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	dab1d148681cd4cb	-
+method	c:objc(cs)CLPlacemark(im)initWithPlacemark:	-			instancetype	CLPlacemark * placemark	-	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	b890105d861903c3	-
+property	c:objc(cs)CLPlacemark(py)location	-			CLLocation *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	13686c28f21a8b62	-
+property	c:objc(cs)CLPlacemark(py)region	-			CLRegion *	-	readonly,copy,nonatomic	xros=-/-/-/1	-	eb6ea2afc0354eb4	-
+property	c:objc(cs)CLPlacemark(py)timeZone	-			NSTimeZone *	-	readonly,copy,nonatomic	ios=9.0/-/-/0	-	86f94d5081aeec86	-
+property	c:objc(cs)CLPlacemark(py)addressDictionary	-			NSDictionary *	-	readonly,copy,nonatomic	ios=5.0/11.0/-/0,macos=10.8/10.13/-/0,watchos=1.0/4.0/-/0,xros=-/-/-/1	-	ec1a4e45846cf336	-
+property	c:objc(cs)CLPlacemark(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	625630556dec381e	-
+property	c:objc(cs)CLPlacemark(py)thoroughfare	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	cd01233a59dba379	-
+property	c:objc(cs)CLPlacemark(py)subThoroughfare	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	378fa77ef12252ac	-
+property	c:objc(cs)CLPlacemark(py)locality	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	cb185ffa58564dfe	-
+property	c:objc(cs)CLPlacemark(py)subLocality	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	c308c96b8182defc	-
+property	c:objc(cs)CLPlacemark(py)administrativeArea	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	a59538c0dbef72d5	-
+property	c:objc(cs)CLPlacemark(py)subAdministrativeArea	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	156479237b9e7252	-
+property	c:objc(cs)CLPlacemark(py)postalCode	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	85cfc911f539b20b	-
+property	c:objc(cs)CLPlacemark(py)ISOcountryCode	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	156d3ca7a6d23f01	-
+property	c:objc(cs)CLPlacemark(py)country	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	f51a8bd91883c069	-
+property	c:objc(cs)CLPlacemark(py)inlandWater	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	b817786c3e712c26	-
+property	c:objc(cs)CLPlacemark(py)ocean	-			NSString *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	124e19a362654bde	-
+property	c:objc(cs)CLPlacemark(py)areasOfInterest	-			NSArray<NSString *> *	-	readonly,copy,nonatomic	ios=5.0/100000/-/0,macos=10.8/100000/-/0	-	22e69e6ba97cb586	-
+category	c:objc(cy)CLPlacemark@ContactsAdditions	-			-	-	-	ios=5.0/100000/-/0,macos=10.8/100000/-/0	deprecated: Use either GeoToolbox.PlaceDescriptor or MapKit	4b9a0d68e2f1bc80	-
+property	c:objc(cs)CLPlacemark(py)postalAddress	ContactsAdditions			CNPostalAddress *	-	readonly,nonatomic	ios=11.0/100000/-/0,macos=10.13/100000/-/0,tvos=-/-/-/1,watchos=4.0/100000/-/0	-	c898f1f838a87d7c	-
+typedef	c:@T@CLGeocodeCompletionHandler	-			void ((^))(NSArray<CLPlacemark *> *, NSError *)	-	-	-	-	a5f827f37fd35f55	-
+interface	c:objc(cs)CLGeocoder	-			-	-	-	ios=5.0/26.0/-/0,macos=10.8/26.0/-/0	deprecated: Use MKReverseGeocodingRequest	06d0e6ea4d513dd6	-
+super	-	CLGeocoder	NSObject		-	-	-	-	-	e321b65eaeb43cbb	-
+property	c:objc(cs)CLGeocoder(py)geocoding	-			BOOL	-	readonly,nonatomic,getter=isGeocoding	ios=5.0/26.0/-/0,macos=10.8/26.0/-/0	-	30ef5f02680e7e2a	-
+method	c:objc(cs)CLGeocoder(im)reverseGeocodeLocation:completionHandler:	-			void	CLLocation * location | CLGeocodeCompletionHandler completionHandler	-	ios=5.0/26.0/-/0,macos=10.8/26.0/-/0	deprecated: Use MKReverseGeocodingRequest	5b719ce8ab2f44e1	-
+method	c:objc(cs)CLGeocoder(im)reverseGeocodeLocation:preferredLocale:completionHandler:	-			void	CLLocation * location | NSLocale * locale | CLGeocodeCompletionHandler completionHandler	-	ios=11.0/26.0/-/0,macos=10.13/26.0/-/0,tvos=11.0/26.0/-/0,watchos=4.0/26.0/-/0	deprecated: Use MKReverseGeocodingRequest	fff531618847f765	-
+method	c:objc(cs)CLGeocoder(im)geocodeAddressDictionary:completionHandler:	-			void	NSDictionary * addressDictionary | CLGeocodeCompletionHandler completionHandler	-	ios=5.0/11.0/-/0,macos=10.8/10.13/-/0,watchos=1.0/4.0/-/0,xros=-/-/-/1	deprecated: Use MKReverseGeocodingRequest	3fe5e696fe99aae7	-
+method	c:objc(cs)CLGeocoder(im)geocodeAddressString:inRegion:completionHandler:	-			void	NSString * addressString | CLRegion * region | CLGeocodeCompletionHandler completionHandler	-	xros=-/-/-/1	-	58c0d247b72a46fd	-
+method	c:objc(cs)CLGeocoder(im)geocodeAddressString:inRegion:preferredLocale:completionHandler:	-			void	NSString * addressString | CLRegion * region | NSLocale * locale | CLGeocodeCompletionHandler completionHandler	-	ios=11.0/26.0/-/0,macos=10.13/26.0/-/0,tvos=11.0/26.0/-/0,watchos=4.0/26.0/-/0,xros=-/-/-/1	deprecated: Use MKGeocodingRequest	214d252f54964086	-
+method	c:objc(cs)CLGeocoder(im)geocodeAddressString:inRegionCenteredAt:inRegionRadius:preferredLocale:completionHandler:	-			void	NSString * addressString | CLLocationCoordinate2D centroid | CLLocationDistance radius | NSLocale * locale | CLGeocodeCompletionHandler completionHandler	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/26.0/-/0	deprecated: Use MKGeocodingRequest	2423b05f6c357023	-
+method	c:objc(cs)CLGeocoder(im)geocodeAddressString:completionHandler:	-			void	NSString * addressString | CLGeocodeCompletionHandler completionHandler	-	ios=5.0/26.0/-/0,macos=10.8/26.0/-/0	deprecated: Use MKGeocodingRequest	ffd9bcb7149df528	-
+method	c:objc(cs)CLGeocoder(im)cancelGeocode	-			void	-	-	ios=5.0/26.0/-/0,macos=10.8/26.0/-/0	deprecated: Use MKGeocodingRequest	d56d12cc9021a6e4	-
+category	c:objc(cy)CLGeocoder@ContactsAdditions	-			-	-	-	ios=5.0/26.0/-/0,macos=10.8/26.0/-/0	deprecated: Use MKReverseGeocodingRequest	719ba87a54600279	-
+method	c:objc(cs)CLGeocoder(im)geocodePostalAddress:completionHandler:	ContactsAdditions			void	CNPostalAddress * postalAddress | CLGeocodeCompletionHandler completionHandler	-	ios=11.0/26.0/-/0,macos=10.13/26.0/-/0,tvos=-/-/-/1,watchos=4.0/26.0/-/0	deprecated: Use MKReverseGeocodingRequest	1fb75ac466b7c29d	-
+method	c:objc(cs)CLGeocoder(im)geocodePostalAddress:preferredLocale:completionHandler:	ContactsAdditions			void	CNPostalAddress * postalAddress | NSLocale * locale | CLGeocodeCompletionHandler completionHandler	-	ios=11.0/26.0/-/0,macos=10.13/26.0/-/0,tvos=-/-/-/1,watchos=4.0/26.0/-/0	deprecated: Use MKReverseGeocodingRequest	f55cfa4a0f0ea73d	-
+protocol	c:objc(pl)CLLocationPushServiceExtension	-			-	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	875852d57c7e921b	-
+conforms	c:objc(pl)CLLocationPushServiceExtension	CLLocationPushServiceExtension	NSObject		-	-	-	-	-	601739f55987758b	-
+method	c:objc(pl)CLLocationPushServiceExtension(im)didReceiveLocationPushPayload:completion:	-			void	NSDictionary<NSString *,id> * payload | void (^)(void) completion	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	3e46c232896f6a7c	-
+method	c:objc(pl)CLLocationPushServiceExtension(im)serviceExtensionWillTerminate	-			void	-	optional	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ef91415e2fd382eb	-
+var	c:@CLLocationPushServiceErrorDomain	-			const NSErrorDomain	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d3c6f8cd26e09ffb	-
+typedef	c:@T@CLLocationPushServiceError	-			enum CLLocationPushServiceError	-	-	-	-	c0a1867f5f793cad	-
+enum	c:@E@CLLocationPushServiceError	-			NSInteger	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7ad4605cb877dbf0	-
+enumconst	c:@E@CLLocationPushServiceError@CLLocationPushServiceErrorUnknown	CLLocationPushServiceError			-	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	08ccd5734b2ba1cb	0
+enumconst	c:@E@CLLocationPushServiceError@CLLocationPushServiceErrorMissingPushExtension	CLLocationPushServiceError			-	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	88cde20531643e34	1
+enumconst	c:@E@CLLocationPushServiceError@CLLocationPushServiceErrorMissingPushServerEnvironment	CLLocationPushServiceError			-	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	61c3934e1a2c5b3c	2
+enumconst	c:@E@CLLocationPushServiceError@CLLocationPushServiceErrorMissingEntitlement	CLLocationPushServiceError			-	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d295f5593d949b47	3
+enumconst	c:@E@CLLocationPushServiceError@CLLocationPushServiceErrorUnsupportedPlatform	CLLocationPushServiceError			-	-	-	ios=15.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	cef84dfe2cc82810	4
+interface	c:objc(cs)CLBackgroundActivitySessionDiagnostic	-			-	-	-	ios=18.0/-/-/0,macos=-/-/-/1,watchos=11.0/-/-/0	-	f6b5f67ea0531ebd	-
+super	-	CLBackgroundActivitySessionDiagnostic	NSObject		-	-	-	-	-	ed4c8cc8559a480e	-
+property	c:objc(cs)CLBackgroundActivitySessionDiagnostic(py)authorizationDenied	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,watchos=11.0/-/-/0	-	94f9a65e8b8acc84	-
+property	c:objc(cs)CLBackgroundActivitySessionDiagnostic(py)authorizationDeniedGlobally	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,watchos=11.0/-/-/0	-	ecf4901b92acce98	-
+property	c:objc(cs)CLBackgroundActivitySessionDiagnostic(py)authorizationRestricted	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,watchos=11.0/-/-/0	-	207ce1f40ab09b7e	-
+property	c:objc(cs)CLBackgroundActivitySessionDiagnostic(py)insufficientlyInUse	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,watchos=11.0/-/-/0	-	a83a15bdfb5b161b	-
+property	c:objc(cs)CLBackgroundActivitySessionDiagnostic(py)serviceSessionRequired	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	de5987d8c013de65	-
+property	c:objc(cs)CLBackgroundActivitySessionDiagnostic(py)authorizationRequestInProgress	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a3583bb43fd18c75	-
+interface	c:objc(cs)CLBackgroundActivitySession	-			-	-	-	ios=17.0/-/-/0,macos=-/-/-/1,watchos=10.0/-/-/0	-	9badf53798cc111c	-
+super	-	CLBackgroundActivitySession	NSObject		-	-	-	-	-	f7a0500a4eb36416	-
+method	c:objc(cs)CLBackgroundActivitySession(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=-/-/-/1,watchos=10.0/-/-/0	-	7ca9cb722a51bf95	-
+method	c:objc(cs)CLBackgroundActivitySession(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=-/-/-/1,watchos=10.0/-/-/0	-	0b07960427415b46	-
+method	c:objc(cs)CLBackgroundActivitySession(im)invalidate	-			void	-	-	ios=17.0/-/-/0,macos=-/-/-/1,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	5bca02d3b51eb47e	-
+method	c:objc(cs)CLBackgroundActivitySession(cm)backgroundActivitySession	-			instancetype	-	-	ios=17.0/-/-/0,macos=-/-/-/1,watchos=10.0/-/-/0	-	7697217559fac665	-
+method	c:objc(cs)CLBackgroundActivitySession(cm)backgroundActivitySessionWithQueue:handler:	-			instancetype	dispatch_queue_t queue | void (^)(CLBackgroundActivitySessionDiagnostic * _Nonnull) handler	-	ios=18.0/-/-/0,macos=-/-/-/1,watchos=11.0/-/-/0	-	d7745cac1c5448d1	-
+typedef	c:@T@CLServiceSessionAuthorizationRequirement	-			enum CLServiceSessionAuthorizationRequirement	-	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	dcd372acf9ec02dd	-
+enum	c:@E@CLServiceSessionAuthorizationRequirement	-			NSInteger	-	-	-	-	13f48196db3e705a	-
+enumconst	c:@E@CLServiceSessionAuthorizationRequirement@CLServiceSessionAuthorizationRequirementNone	CLServiceSessionAuthorizationRequirement			-	-	-	-	-	8832b79a4a49b7d5	0
+enumconst	c:@E@CLServiceSessionAuthorizationRequirement@CLServiceSessionAuthorizationRequirementWhenInUse	CLServiceSessionAuthorizationRequirement			-	-	-	-	-	b413273c5f352dc0	1
+enumconst	c:@E@CLServiceSessionAuthorizationRequirement@CLServiceSessionAuthorizationRequirementAlways	CLServiceSessionAuthorizationRequirement			-	-	-	tvos=-/-/-/1	-	b0c35e36e58c6ffa	2
+interface	c:objc(cs)CLServiceSessionDiagnostic	-			-	-	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	2f5f11b57fea731f	-
+super	-	CLServiceSessionDiagnostic	NSObject		-	-	-	-	-	a18844f67a350662	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)authorizationDenied	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	06cab7ce613474e4	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)authorizationDeniedGlobally	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	04a2ccf54d73456c	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)authorizationRestricted	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	8803b69c45bf6c10	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)insufficientlyInUse	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	d2399e484ba2b817	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)serviceSessionRequired	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	b08a5b2067c4c1bd	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)fullAccuracyDenied	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	61875f0b742b7645	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)alwaysAuthorizationDenied	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	c27da2622022b360	-
+property	c:objc(cs)CLServiceSessionDiagnostic(py)authorizationRequestInProgress	-			BOOL	-	readonly,nonatomic	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	2142fdc76275accf	-
+interface	c:objc(cs)CLServiceSession	-			-	-	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	0121a5d216fad55a	-
+super	-	CLServiceSession	NSObject		-	-	-	-	-	509a45b7ec4fb4ef	-
+method	c:objc(cs)CLServiceSession(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	a543124117277cce	-
+method	c:objc(cs)CLServiceSession(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	4b4caaed1de8e4ba	-
+method	c:objc(cs)CLServiceSession(cm)sessionRequiringAuthorization:	-			CLServiceSession *	CLServiceSessionAuthorizationRequirement authorizationRequirement	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	aa1e918bba3fce8c	-
+method	c:objc(cs)CLServiceSession(cm)sessionRequiringAuthorization:queue:handler:	-			CLServiceSession *	CLServiceSessionAuthorizationRequirement authorizationRequirement | dispatch_queue_t queue | void (^)(CLServiceSessionDiagnostic * _Nonnull) handler	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	28ee65efa9e49830	-
+method	c:objc(cs)CLServiceSession(cm)sessionRequiringAuthorization:fullAccuracyPurposeKey:	-			CLServiceSession *	CLServiceSessionAuthorizationRequirement authorizationRequirement | NSString * purposeKey	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	6e9b0bf900f95b1f	-
+method	c:objc(cs)CLServiceSession(cm)sessionRequiringAuthorization:fullAccuracyPurposeKey:queue:handler:	-			CLServiceSession *	CLServiceSessionAuthorizationRequirement authorizationRequirement | NSString * purposeKey | dispatch_queue_t queue | void (^)(CLServiceSessionDiagnostic * _Nonnull) handler	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	23b2aefb83bfca27	-
+method	c:objc(cs)CLServiceSession(im)invalidate	-			void	-	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	f80189a7dc600df8	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@CLLocationCoordinate2D	-			struct CLLocationCoordinate2D	-	-	-	-	9d11eb66555ff740	-
+typedef	c:@T@CLLocationDistance	-			double	-	-	-	-	e6b55a169d2f4b70	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@CLLocationAccuracy	-			double	-	-	-	-	3bc8a490e8501ff0	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@CLLocationDegrees	-			double	-	-	-	-	cb440e63fae31da0	-
+typedef	c:@T@CLLocationDirection	-			double	-	-	-	-	6793469c05475b02	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-

@@ -1,0 +1,10 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+QuartzCore	swift-struct	c:@S@CAFrameRateRange	-	CAFrameRateRange	-	-	-	ios=15.0	-	6d95c85a92daabf6
+QuartzCore	swift-method	s:So16CAFrameRateRangeV10QuartzCoreE7minimum7maximum9preferredABSf_S2fSgtcfc	CAFrameRateRange	init(minimum:maximum:preferred:)	-	-	QuartzCore.CAFrameRateRange | Swift.Float | Swift.Float | Swift.Float?	-	-	e3570ab2cacb9c78
+QuartzCore	swift-property	s:So16CAFrameRateRangeV10QuartzCoreE9preferredSfSgvp	CAFrameRateRange	preferred	-	Swift.Float?	-	-	-	70bdd0f2e19c667e
+QuartzCore	swift-method	s:So16CAFrameRateRangeV10QuartzCoreE2eeoiySbAB_ABtFZ	CAFrameRateRange	==(_:_:)	+	Swift.Bool	QuartzCore.CAFrameRateRange | QuartzCore.CAFrameRateRange	-	-	fdf6e7f211a1fc77
+QuartzCore	swift-struct	c:@S@CATransform3D	-	CATransform3D	-	-	-	ios=2.0	-	a98e59332b1414fa
+QuartzCore	swift-method	s:So13CATransform3DV10QuartzCoreE19_bridgeToObjectiveCSo7NSValueCyF	CATransform3D	_bridgeToObjectiveC()	-	Foundation.NSValue	-	-	-	569001e69947758c
+QuartzCore	swift-method	s:So13CATransform3DV10QuartzCoreE26_forceBridgeFromObjectiveC_6resultySo7NSValueC_ABSgztFZ	CATransform3D	_forceBridgeFromObjectiveC(_:result:)	+	()	Foundation.NSValue | QuartzCore.CATransform3D?	-	-	f3293f03e97a1cc3
+QuartzCore	swift-method	s:So13CATransform3DV10QuartzCoreE34_conditionallyBridgeFromObjectiveC_6resultSbSo7NSValueC_ABSgztFZ	CATransform3D	_conditionallyBridgeFromObjectiveC(_:result:)	+	Swift.Bool	Foundation.NSValue | QuartzCore.CATransform3D?	-	-	bbf25d9f41758955
+QuartzCore	swift-method	s:So13CATransform3DV10QuartzCoreE36_unconditionallyBridgeFromObjectiveCyABSo7NSValueCSgFZ	CATransform3D	_unconditionallyBridgeFromObjectiveC(_:)	+	QuartzCore.CATransform3D	Foundation.NSValue?	-	-	a5a4cb47d3907da6

@@ -1,0 +1,14 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+PHContentEditingController	8	sdk16 body		NSObject	-	-	-	-	-	-
+PHContentEditingController	8	sdk16 body		NSObject	required	method	yes	canHandleAdjustmentData:	- (BOOL)canHandleAdjustmentData:(PHAdjustmentData * _Nonnull)adjustmentData API_AVAILABLE(ios(8));	yes
+PHContentEditingController	8	sdk16 body		NSObject	required	method	yes	startContentEditingWithInput:placeholderImage:	- (void)startContentEditingWithInput:(PHContentEditingInput * _Nonnull)contentEditingInput placeholderImage:(UIImage * _Nonnull)placeholderImage API_AVAILABLE(ios(8));	yes
+PHContentEditingController	8	sdk16 body		NSObject	required	method	yes	finishContentEditingWithCompletionHandler:	- (void)finishContentEditingWithCompletionHandler:(void (^ _Nonnull)(PHContentEditingOutput * _Nullable))completionHandler API_AVAILABLE(ios(8));	yes
+PHContentEditingController	8	sdk16 body		NSObject	required	method	yes	cancelContentEditing	- (void)cancelContentEditing API_AVAILABLE(ios(8));	yes
+PHContentEditingController	8	sdk16 body		NSObject	required	property	no	shouldShowCancelConfirmation	@property (nonatomic, readonly) BOOL shouldShowCancelConfirmation API_AVAILABLE(ios(8));	yes
+PHLivePhotoViewDelegate	9.1	sdk16 body		NSObject	-	-	-	-	-	-
+PHLivePhotoViewDelegate	9.1	sdk16 body		NSObject	optional	method	yes	livePhotoView:canBeginPlaybackWithStyle:	- (BOOL)livePhotoView:(PHLivePhotoView * _Nonnull)livePhotoView canBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle API_AVAILABLE(ios(9.1));	yes
+PHLivePhotoViewDelegate	9.1	sdk16 body		NSObject	optional	method	yes	livePhotoView:willBeginPlaybackWithStyle:	- (void)livePhotoView:(PHLivePhotoView * _Nonnull)livePhotoView willBeginPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle API_AVAILABLE(ios(9.1));	yes
+PHLivePhotoViewDelegate	9.1	sdk16 body		NSObject	optional	method	yes	livePhotoView:didEndPlaybackWithStyle:	- (void)livePhotoView:(PHLivePhotoView * _Nonnull)livePhotoView didEndPlaybackWithStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle API_AVAILABLE(ios(9.1));	yes
+PHLivePhotoViewDelegate	9.1	sdk16 body		NSObject	optional	method	yes	livePhotoView:extraMinimumTouchDurationForTouch:withStyle:	- (NSTimeInterval)livePhotoView:(PHLivePhotoView * _Nonnull)livePhotoView extraMinimumTouchDurationForTouch:(UITouch * _Nonnull)touch withStyle:(PHLivePhotoViewPlaybackStyle)playbackStyle API_AVAILABLE(ios(9.1));	yes
+PHPickerViewControllerDelegate	14	sdk16 body		NSObject	-	-	-	-	-	-
+PHPickerViewControllerDelegate	14	sdk16 body		NSObject	required	method	yes	picker:didFinishPicking:	- (void)picker:(PHPickerViewController * _Nonnull)picker didFinishPicking:(NSArray<PHPickerResult *> * _Nonnull)results API_AVAILABLE(ios(14));	yes

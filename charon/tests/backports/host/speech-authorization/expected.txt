@@ -1,0 +1,7 @@
+authorizationStatus: 0
+en-US recognizer: non-nil
+available: 1
+supportsOnDeviceRecognition: 1
+locale: en-US
+delegate: nil
+queue: set

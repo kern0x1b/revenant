@@ -1,0 +1,195 @@
+{
+ "framework": "PDFKit",
+ "entries": [
+  {
+   "api": "PDFDestination",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a destination: which page, which point on it and which zoom.  -initWithPage:atPoint: is the header's own designated initializer (PDFDestination.h:22) and is implemented because a class a program cannot construct answers a crash where the host answers an object - measured, and the measurement is in the harness's own init.* keys.  -init is implemented even though PDFDestination.h declares none, because the iOS 16.0 arm64e cache gives this class an own -init (own -init: 1) read with the tree's own census over that cache.  -initWithPage:atPoint: answers NO OBJECT for a nil page - measured, and found by the harness rather than asked for - so plain -init, which the host answers with an object, sets the members itself.  The NSCopying conformance is implemented: the copy is a new object whose PAGE IS THE SAME one, measured - a destination names a page and does not own it - with a zoom that is its own, and a destination with no page copies to an object too, which is why -copyWithZone: is not built through -initWithPage:atPoint:.  A destination read out of a document comes from the /D array of PDF 1.7 Table 8.42, [pageRef /XYZ left top zoom], and the page is resolved by IDENTITY of the page dictionary: this SDK has no object-number accessor, so CGPDFArrayGetDictionary follows the reference and the result is matched against CGPDFPageGetDictionary over the document's pages.  That was measured to hold before it was relied on",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFDestination.page",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the page the /D's first element names, weak as PDFDestination.h:19 declares, and nil in two measured cases: a NAMED destination - the format's other spelling, over both of the /Dests spellings - and a reference to an object that is not a page (act-goto-bad-page, act-goto-badpage-xyz, whose /XYZ numbers are still answered).  It is a page and not an index: a /D naming object 4 of a two-page document answers page index 1",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFDestination.point",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /XYZ left and top, read by position and each independently: /XYZ 5 6 answers (5, 6), /XYZ 7 answers (7, unspecified) and /XYZ with no numbers answers unspecified for both.  Every OTHER fit name answers an UNSPECIFIED point - /Fit, /FitB, /FitH, /FitBH and /FitBV, one fixture each, and the last three carry numbers of their own which are the box to fit rather than a position.  The unspecified answer is kPDFDestinationUnspecifiedValue, the port's own exported FLT_MAX and not CGFLOAT_MAX",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFDestination.zoom",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /XYZ zoom, and a ZERO is not a value: /XYZ 0 0 0 answers an unspecified zoom while its point answers 0,0, and /XYZ -1 -2 -3 answers zoom -3.  So the point reads a zero and the zoom does not, and that is measured both ways rather than assumed.  -setZoom: works and is compared (init.destination.made.zoomAfterSet)",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFAction",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the base of the action family, and what an /S the format does not name: measured, /S /Bogus answers a PDFAction whose -type is \"Bogus\" (act-unknown-s).  A freshly allocated one answers a NIL -type, so -type is the /S NAME and not a string fixed by the class.  All the subclasses' designated initializers are implemented for the same reason PDFDestination's is, and NONE of the four subclasses defines one, so [[X alloc] init] reaches PDFAction's: the iOS 16.0 arm64e cache gives PDFAction, PDFActionResetForm, PDFDestination and PDFBorder an own -init and PDFActionGoTo, PDFActionNamed, PDFActionURL and PDFActionRemoteGoTo none, read with the tree's own census in modules/apple/objc.lua over that cache.  A fresh action's nil -type is that inheritance: [[PDFActionGoTo alloc] init] answers a nil destination, [[PDFActionNamed alloc] init] name kPDFActionNamedNone, [[PDFActionURL alloc] init] a nil URL, and [[PDFActionRemoteGoTo alloc] init] index 0, an unspecified point and a nil URL, the last of which comes from the class's own storage rather than from an initializer.  The NSCopying conformance the header declares is implemented too: the copy is a new object of the same class carrying every member, measured, and each class copies its own",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFAction.type",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the action dictionary's /S name, without its leading slash: \"GoTo\", \"Named\", \"URI\", \"GoToR\", \"ResetForm\" and \"Bogus\" are all measured, and nil for a freshly allocated action and for an annotation whose /A has no /S at all",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionGoTo",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /GoTo action, the format's \"go to a destination in this document\".  Its /D is read as whatever object it is - an ARRAY is the destination itself and a NAME is the format's other spelling - and a /GoTo with NO /D is still an object with a nil destination, measured on act-goto-no-d.  Its copy is a new PDFActionGoTo whose DESTINATION IS A NEW OBJECT - measured - so the destination itself is copied rather than pointed at",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionGoTo.destination",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /D read through PDFDestination's own reader, and nil where the host answers no destination at all: a /D with no second element ([3 0 R]), a /D whose second element is a name the format does not list (/Zoom, /Bogus), a /D whose FIRST element is a name ([/XYZ 1 2 3], which the host refuses with a perfectly good /XYZ behind it), a /D that is not an array (/D 3) and a /D that is a dictionary.  A NAME second answers a destination with nothing in it, which is what the host answers for it",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionNamed",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /Named action.  THE HOST BUILDS ONE FOR EIGHT OF THE TWELVE NAMES THE ENUM DECLARES and for no other: act-named-all.pdf carries all twelve plus one the format does not list, one annotation each, and the host answers an object for exactly NextPage, FirstPage, LastPage, GoBack, GoForward, GoToPage, Find and Print.  None, PreviousPage, ZoomIn, ZoomOut and an unknown name answer NO ACTION AT ALL.  So the reader is an eight-entry table and not the enum, and reading the name as its enum value would answer objects for four the host never builds.  -initWithName: keeps whatever it is given - the host keeps 0 and 99 too, measured",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionNamed.name",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the enum value each of those eight names answers - /NextPage 1, /FirstPage 3, /LastPage 4, /GoBack 5, /GoForward 6, /GoToPage 7, /Find 8, /Print 9 - from the table and not from the name's position in it",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionURL",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /URI action, and a /URI action with no /URI is still an object with a nil URL - measured on act-uri's second annotation",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionURL.URL",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /URI string read out of the dictionary and handed to NSURL.  The host answers \"https://example.com/a b\" as \"https://example.com/a%20b\" and a RELATIVE /URI as itself, and keeps a fragment (act-uri, act-uri-shapes); that percent-encoding is NSURL's own, which both sides share, so what the comparison establishes is that the port read the right string",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionRemoteGoTo",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /GoToR action, and one with no /F is still an object - measured on act-gotor's second annotation",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionRemoteGoTo.pageIndex",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "0 on every /GoToR fixture measured, and NOT because it is a constant: the host's own -initWithPageIndex:atPoint:fileURL: keeps the index it is given and answers 2 for 2.  The 0s are a reading result - act-goto-page2's /D names object 4, which IS the second page of that document, and the host still answers 0, because a remote action's page belongs to the OTHER file.  A /D that is a page index rather than a reference also answers 0",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionRemoteGoTo.point",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "UNSPECIFIED on every /GoToR fixture, including the two whose /D is an /XYZ with numbers - so a remote action's position is not read out of its /D, and -initWithPageIndex:atPoint:fileURL: is what puts a point on one",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionRemoteGoTo.URL",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /F resolved AGAINST THE DOCUMENT'S OWN DIRECTORY, as a RELATIVE name whatever it looks like: act-gotor's (other.pdf) answers file:///.../fixtures/other.pdf beside a document in that directory, and act-gotor-http's https://example.com/other.pdf answers file:///.../fixtures/https://example.com/other.pdf.  nil for an action with no /F, and for a document opened with no URL",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionResetForm",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /ResetForm action.  -init is the header's own designated initializer (PDFActionResetForm.h:22) and a fresh one answers NO fields and -fieldsIncludedAreCleared YES - the header's default, and NOT what a dictionary carrying neither /Fields nor /Flags reads as, which is NO (act-reset's second annotation)",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionResetForm.fields",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /Fields array, its names or strings as strings, in the array's own order - measured f1,f2 on act-reset - and nil when the dictionary names no /Fields.  A COPY of a reset form SHARES this array rather than copying it, measured, and it is the one shallow member in the family",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  },
+  {
+   "api": "PDFActionResetForm.fieldsIncludedAreCleared",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "YES exactly when /FIELDS is present AND the /Flags bit of value 1 is CLEAR.  act-reset-flags.pdf carries seven combinations of PDF 1.7 Table 8.44's two keys and the host answers: no /Flags YES, /Flags 0 YES, /Flags 1 NO, /Flags 2 YES, /Flags 3 NO, /Flags 1 with no /Fields NO, /Flags 2 with no /Fields NO.  The last two are what make it a rule about BOTH keys - /Flags 2 alone would answer YES if only the bit mattered",
+   "facts": "facts/PDFKit/Action11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh: COMPARED 6403 MISMATCHES 0 over 105 fixtures, of which 88 are this series', and 68 red controls - one automatic and 67 naming a border, appearance, identity, action, initializer or copy key"
+  }
+ ]
+}

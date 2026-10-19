@@ -1,0 +1,17 @@
+{
+  "framework": "Fixture",
+  "package": "Fixture",
+  "prefix": "Fixture",
+  "pieces": [
+    {
+      "band": "9.0",
+      "body": "@implementation FixtureThing\n@end",
+      "carries": [],
+      "header": "<Fixture/Fixture.h>",
+      "kind": "class",
+      "name": "FixtureThing",
+      "never_call": [],
+      "tag": "9"
+    }
+  ]
+}

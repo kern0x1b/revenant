@@ -1,0 +1,12 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+VisualIntelligence	property	SemanticContentDescriptor.persistentIdentifier	26.0				container
+VisualIntelligence	property	SemanticContentDescriptor.defaultResolverSpecification	26.0				container
+VisualIntelligence	property	SemanticContentDescriptor.typeDisplayRepresentation	26.0				container
+VisualIntelligence	property	SemanticContentDescriptor.displayRepresentation	26.0				container
+VisualIntelligence	typealias	SemanticContentDescriptor.Specification	26.0				own
+VisualIntelligence	typealias	SemanticContentDescriptor.UnwrappedType	26.0				own
+VisualIntelligence	typealias	SemanticContentDescriptor.ValueType	26.0				own
+VisualIntelligence	struct	SemanticContentDescriptor	26.0				own
+VisualIntelligence	property	SemanticContentDescriptor.labels	26.0				container
+VisualIntelligence	property	SemanticContentDescriptor.pixelBuffer	26.0				container
+VisualIntelligence	property	SemanticContentDescriptor.description	26.0				container

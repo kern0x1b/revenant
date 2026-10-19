@@ -1,0 +1,10 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_DarwinFoundation2	constant	stdin	7.0				own
+_DarwinFoundation2	constant	stdout	7.0				own
+_DarwinFoundation2	constant	stderr	7.0				own
+_DarwinFoundation2	function	dprintf(_:_:_:)	7.0				own
+_DarwinFoundation2	function	snprintf(ptr:_:_:_:)	7.0				own
+_DarwinFoundation2	method	timeval.init(_:)	16.0				own
+_DarwinFoundation2	method	Duration.init(_:)	16.0				own
+_DarwinFoundation2	method	timespec.init(_:)	16.0				own
+_DarwinFoundation2	method	Duration.init(_:)	16.0				own

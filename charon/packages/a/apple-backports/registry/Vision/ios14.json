@@ -1,0 +1,15 @@
+{
+ "framework": "Vision",
+ "entries": [
+  {
+   "api": "VNObservation.timeRange",
+   "kind": "property",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the interval of a video an observation was made from: the observation holds the range it was given, and a zero range is how it says it has none",
+   "facts": "facts/Vision/Vision.md",
+   "source": "the Core ML model specification Apple ships in coremltools (BSD-3-Clause) and the runtime of coremltools 9.0 on this host, read by the CoreML backport this band carries"
+  }
+ ]
+}

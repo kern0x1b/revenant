@@ -1,0 +1,137 @@
+{
+  "framework": "HealthKit",
+  "entries": [
+    {
+      "api": "HKMetadataKeyActivityType",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKActivityType, which is NOT the constant's own name - a value written from the name would be wrong for this one",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKMetadataKeyAppleFitnessPlusSession",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKMetadataKeyAppleFitnessPlusSession, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKMetadataKeyCyclingFunctionalThresholdPowerTestType",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKCyclingCyclingFunctionalThresholdPowerTestType, which is NOT the constant's own name - a value written from the name would be wrong for this one",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKMetadataKeyMaximumLightIntensity",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKMetadataKeyMaximumLightIntensity, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKMetadataKeyPhysicalEffortEstimationType",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKPhysicalEffortEstimationType, which is NOT the constant's own name - a value written from the name would be wrong for this one",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKMetadataKeyWaterSalinity",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKMetadataKeyWaterSalinity, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierCyclingCadence",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierCyclingCadence, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierCyclingFunctionalThresholdPower",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierCyclingFunctionalThresholdPower, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierCyclingPower",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierCyclingPower, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierCyclingSpeed",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierCyclingSpeed, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierPhysicalEffort",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierPhysicalEffort, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKQuantityTypeIdentifierTimeInDaylight",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 17.0 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(17.0)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder's rung after 12.0 is 16.0 and its last is 18.0, and the 16.0 image predates this constant, so dyld.first_releases() answers 18.0 and the object that defines it is HKConstants180.m: the release check measures the release rather than reading it off a header",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKQuantityTypeIdentifierTimeInDaylight, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    }
+  ]
+}

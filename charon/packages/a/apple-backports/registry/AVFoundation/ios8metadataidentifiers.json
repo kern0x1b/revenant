@@ -1,0 +1,104 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVMetadataItem.dataType",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVMetadataItem is a real, present class on iOS 6 (4.0); the property describes the value's own type, which is derivable from the value's Objective-C class",
+      "effect": "an NSString value answers com.apple.metadata.datatype.UTF-8; NSData answers JPEG/PNG/GIF/BMP by sniffing the first bytes, else raw-data; NSNumber answers the signed/unsigned integer or float width its objCType names, all the release's own CMMetadataBaseDataType string values; nil for any other value",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract; the literal string values read out of CoreMedia extracted from the armv7 shared cache of iOS 8.0 with modules/apple/dyld.lua's extract"
+    },
+    {
+      "api": "AVMetadataItem.extendedLanguageTag",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the item's own locale (a real, already-present property since 4.0) already carries this information in POSIX form",
+      "effect": "the item's locale identifier with underscores turned to hyphens, an approximate but functional BCP 47 rendering (en_US becomes en-US); nil when there is no locale",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVMetadataItem.identifier",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "documented as keySpace and key joined; both are real, already-present properties since 4.0",
+      "effect": "\"<keySpace>/<key>\", the key turned into a string as-is if it already is one, as a decimal number if it is an NSNumber, or as lowercase hex if it is NSData; nil when key or keySpace is missing",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVMutableMetadataItem.dataType",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the mutable subclass makes the property readwrite",
+      "effect": "an explicitly set value is kept and read back as set; unset, it falls back to the same value-derived default AVMetadataItem computes",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVMutableMetadataItem.extendedLanguageTag",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the mutable subclass makes the property readwrite",
+      "effect": "setting it converts the BCP 47 tag back to POSIX form and assigns it to the item's own (real, already-present) locale property; reading follows the same conversion as AVMetadataItem",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVMutableMetadataItem.identifier",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the mutable subclass makes the property readwrite",
+      "effect": "setting it parses \"<keySpace>/<key>\" and assigns the item's own (real, already-present) key and keySpace properties; reading follows the same derivation as AVMetadataItem",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "+[AVMetadataItem identifierForKey:keySpace:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class-side counterpart of the identifier property's own derivation",
+      "effect": "\"<keySpace>/<key>\", the same string form the identifier property builds; nil when either input is missing or the key's class cannot be turned into a string",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "+[AVMetadataItem keyForIdentifier:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the inverse of identifierForKey:keySpace:",
+      "effect": "the substring after the first \"/\", always as an NSString - the original key's NSNumber or NSData form, if it was ever one of those, is not recovered, a real and stated gap",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "+[AVMetadataItem keySpaceForIdentifier:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the inverse of identifierForKey:keySpace:",
+      "effect": "the substring before the first \"/\"; nil when there is no \"/\"",
+      "facts": "facts/AVFoundation/AVMetadataItemIdentifiers.md",
+      "source": "the header of iOS 16.4 for the contract"
+    }
+  ]
+}

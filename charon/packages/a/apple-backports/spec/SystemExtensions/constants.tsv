@@ -1,0 +1,4 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	NSSystemExtensionUsageDescriptionKey	-	NSSystemExtensionUsageDescriptionKey	18.4	NSString* const	API_AVAILABLE(macos(10.15), ios(18.4)) API_UNAVAILABLE(watchos, tvos)	564b1f1b0fba5807	found	NSSystemExtensionUsageDescription	NSSystemExtensionUsageDescription	ios-26.2-cache	-	exported	ns	-
+constant	OSBundleUsageDescriptionKey	-	OSBundleUsageDescriptionKey	18.4	NSString* const	API_AVAILABLE(macos(10.15), ios(18.4)) API_UNAVAILABLE(watchos, tvos)	09ae3a1a03fb1a0e	found	OSBundleUsageDescription	OSBundleUsageDescription	ios-26.2-cache	-	exported	ns	-
+constant	OSSystemExtensionErrorDomain	-	OSSystemExtensionErrorDomain	18.4	NSErrorDomain const	API_AVAILABLE(macos(10.15), ios(18.4)) API_UNAVAILABLE(watchos, tvos)	afa4a733e7c12b88	found	OSSystemExtensionErrorDomain	OSSystemExtensionErrorDomain	ios-26.2-cache	-	exported	ns	-

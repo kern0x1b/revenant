@@ -1,0 +1,7 @@
+Package: $identifier
+Name: $Name
+Architecture: iphoneos-arm
+Description: $Name, an application
+Maintainer: $maintainer
+Author: $maintainer
+Section: Utilities

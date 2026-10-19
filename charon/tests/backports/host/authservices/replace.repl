@@ -1,0 +1,2 @@
+    NSMutableArray *records = [self charon_records];
+    for (ASPasswordCredentialIdentity *identity in newCredentialIdentities) {

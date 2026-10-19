@@ -1,0 +1,126 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVMetricMediaRendition",
+      "kind": "class",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricMediaRendition at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
+      "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "+[AVMetricMediaRendition new]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
+      "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "-[AVMetricMediaRendition init]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
+      "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricMediaRendition.URL",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricMediaRendition.stableID",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricPlayerItemVariantSwitchEvent.audioRendition",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricPlayerItemVariantSwitchEvent.subtitleRendition",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricPlayerItemVariantSwitchEvent.videoRendition",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricPlayerItemVariantSwitchStartEvent.audioRendition",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricPlayerItemVariantSwitchStartEvent.subtitleRendition",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    },
+    {
+      "api": "AVMetricPlayerItemVariantSwitchStartEvent.videoRendition",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
+      "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
+      "facts": "facts/AVFoundation/Metrics.md",
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h; no held cache places any of it - tools/symbol-first-release.lua answers `none` for `_OBJC_CLASS_$_AVMetricMediaRendition` and for every one of these selectors, because the ladder ends at 18.0 - so the band is this row's own introduced version"
+    }
+  ]
+}

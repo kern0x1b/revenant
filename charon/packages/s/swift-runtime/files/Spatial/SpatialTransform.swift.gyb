@@ -1,0 +1,1176 @@
+//===--- SpatialTransform.swift.gyb ------------------*- swift -*-===//
+//
+// The rotations, the two transformations and the two poses of Spatial, once for each of the
+// framework's two scalars.
+//
+// `SPRotation3D` is a union of a `simd_double4` and a `simd_quatd` and so the two spellings are
+// the same sixteen bytes; `SPAffineTransform3D` holds a `simd_double4x3` and
+// `SPProjectiveTransform3D` a `simd_double4x4`; `SPPose3D` and `SPScaledPose3D` are a point, a
+// rotation and (for the scaled one) a single factor. The algorithms are the SDK's C headers'
+// (usr/include/Spatial), named at each one.
+//
+//===----------------------------------------------------------------------===//
+
+import Foundation
+import simd
+
+
+//
+// The C library's name of a math function is the scalar's own: `acos` for Double and `acosf` for
+// Float, which is what `usr/include/Spatial` calls. The spelling `Foundation.acos` reaches this
+// runtime's Foundation, which is swift-corelibs-foundation and declares no math at all, so it
+// arrives at the C library's `double acos(double)` and a Float argument does not convert: 29 call
+// sites, measured with swiftc -typecheck -target armv7-apple-ios6.1.3 (the commit message has the
+// output). It does convert on the host, because Apple's Foundation re-exports the shims that
+// declare the Float half as `Float(acosf(CFloat(x)))` - macOS SDK,
+// _DarwinFoundation1.swiftinterface:237 - which is the call this makes.
+//
+
+% for scalar, vector, matrix, matrix3, matrix4, quat, suffix in [("Double", "simd_double3", "simd_double4x3", "simd_double3x3", "simd_double4x4", "simd_quatd", ""), ("Float", "simd_float3", "simd_float4x3", "simd_float3x3", "simd_float4x4", "simd_quatf", "Float")]:
+% cmath = lambda f: "Darwin." + f + ("f" if scalar == "Float" else "")
+
+// MARK: - Rotation3D${suffix}
+
+/// A rotation, held as the quaternion the SDK's union stores.
+@frozen
+public struct Rotation3D${suffix}: ${"Rotatable3D, Rotatable3DProtocol, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Rotatable3DProtocolFloat, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias AffineTransform = AffineTransform3D${suffix}
+    public typealias ProjectiveTransform = ProjectiveTransform3D${suffix}
+    public typealias Pose = Pose3D${suffix}
+    public typealias Rect = Rect3D${suffix}
+    public typealias Vector = Vector3D${suffix}
+    public typealias Point = Point3D${suffix}
+    public typealias Size = Size3D${suffix}
+    public typealias Rotation = Rotation3D${suffix}
+    public typealias Quaternion = ${quat}
+    public typealias AxisEnumeration = AxisWithFactors${suffix}
+
+    /// The quaternion, and the four numbers it is made of: the real part first, then the axis.
+    public var quaternion: ${quat}
+
+    public var vector: SIMD4<${scalar}> {
+        get { quaternion.vector }
+        set { quaternion = ${quat}(vector: newValue) }
+    }
+
+    public init() { self.init(${quat}(vector: SIMD4<${scalar}>(0, 0, 0, 1))) }
+
+    public init(_ quaternion: ${quat}) { self.quaternion = quaternion }
+
+    public init(_ source: SIMD4<${scalar}>) { self.quaternion = ${quat}(vector: source) }
+
+    public init(angle: Angle2D${suffix}, axis: RotationAxis3D${suffix}) {
+        let half = angle.radians / 2
+        let unit = Vector3D${suffix}(axis.vector).normalized
+        let s = ${cmath("sin")}(half)
+        self.quaternion = ${quat}(vector: SIMD4<${scalar}>(unit.x * s, unit.y * s, unit.z * s, ${cmath("cos")}(half)))
+    }
+
+    @available(*, deprecated, renamed: "init(angle:axis:)")
+    public init(axis: RotationAxis3D${suffix}, angle: Angle2D${suffix}) { self.init(angle: angle, axis: axis) }
+
+    public init(forward: Vector3D${suffix}, up: Vector3D${suffix} = Vector3D${suffix}(x: 0, y: 1, z: 0)) {
+        // `SPRotation3DMakeLookAt`: the frame that looks along `forward` with `up` above it.
+        let z = -forward.vector
+        let x = simd_cross(up.vector, z)
+        let y = simd_cross(z, x)
+        self.init(simd_quaternion(${matrix3}(columns: (x, y, z))))
+    }
+
+    public init(forward: Vector3D${suffix}) { self.init(forward: forward, up: Vector3D${suffix}(x: 0, y: 1, z: 0)) }
+
+    @available(*, deprecated, renamed: "init(position:target:up:)")
+    public init(eye: Point3D${suffix}, target: Point3D${suffix}, up: Vector3D${suffix} = Vector3D${suffix}(x: 0, y: 1, z: 0)) {
+        self.init(forward: target - eye, up: up)
+    }
+
+    /// The rotation that takes `from` onto `to`, about the axis they share.
+    public init(from: Vector3D${suffix}, to: Vector3D${suffix}) {
+        self.init(quaternionBetween(from.vector, to.vector))
+    }
+
+    /// `SPRotation3DGetAngle`
+    public var angle: Angle2D${suffix} {
+        get { Angle2D${suffix}(radians: simd_angle(quaternion)) }
+        set { self = Rotation3D${suffix}(angle: newValue, axis: axis) }
+    }
+
+    /// `SPRotation3DGetAxis`, which answers a zero axis when the quaternion carries no direction.
+    public var axis: RotationAxis3D${suffix} {
+        get {
+            let found = simd_axis(quaternion)
+            let whole = found.x.isFinite && found.y.isFinite && found.z.isFinite
+            return RotationAxis3D${suffix}(whole ? found : ${vector}(repeating: 0))
+        }
+        set { self = Rotation3D${suffix}(angle: angle, axis: newValue) }
+    }
+
+    public static let identity = Rotation3D${suffix}()
+
+    public var isIdentity: Bool {
+        vector == SIMD4<${scalar}>(0, 0, 0, 1)
+    }
+
+    /// The rotation that undoes this one.
+    public var inverse: Rotation3D${suffix} {
+        Rotation3D${suffix}(inverseQuaternion(vector))
+    }
+
+    /// Whether this is the rotation that does nothing, which the real part alone says.
+    public var isUnit: Bool { abs(simd_length_squared(vector) - 1) < 1e-12 }
+
+    /// A rotation turned by another is the other one, and a rotation turned by a quaternion is
+    /// itself: there is nothing of it to move.
+    /// The composition with the argument on the left: `a.rotated(by: b)` is `b * a`, which is not
+    /// `a * b` unless the two commute (the host's own answer for a.rotated(by: b) is (b * a)'s
+    /// quaternion, not (a * b)'s).
+    public func rotated(by rotation: Rotation3D${suffix}) -> Rotation3D${suffix} { rotation * self }
+
+    public func rotated(by quaternion: ${quat}) -> Rotation3D${suffix} { Rotation3D${suffix}(quaternion) * self }
+
+    /// The rotation between two rotations is the one that takes the first onto the second.
+    public func rotation(to other: Rotation3D${suffix}) -> Rotation3D${suffix} {
+        other * inverse
+    }
+
+    public static func == (lhs: Rotation3D${suffix}, rhs: Rotation3D${suffix}) -> Bool {
+        lhs.vector == rhs.vector
+    }
+
+    public static func * (lhs: Rotation3D${suffix}, rhs: Rotation3D${suffix}) -> Rotation3D${suffix} {
+        Rotation3D${suffix}(quaternionProduct(lhs.vector, rhs.vector))
+    }
+
+    public static func *= (lhs: inout Rotation3D${suffix}, rhs: Rotation3D${suffix}) { lhs = lhs * rhs }
+
+    /// The three angles about the world axes, in the order asked for.
+    public func eulerAngles(order: SPEulerAngleOrder) -> EulerAngles${suffix} {
+        EulerAngles${suffix}(quaternion: vector, order: order)
+    }
+
+    public init(eulerAngles: EulerAngles${suffix}) { self.init(eulerAngles.quaternion) }
+
+    /// The transformation this rotation is on its own.
+    public var affineTransform: AffineTransform3D${suffix} { AffineTransform3D${suffix}(rotation: self) }
+
+    public func applying(_ transform: AffineTransform3D${suffix}) -> Rotation3D${suffix} {
+        guard let turned = transform.rotation else { return self }
+        return turned * self
+    }
+
+    public func applying(_ transform: ProjectiveTransform3D${suffix}) -> Rotation3D${suffix} {
+        guard let turned = transform.rotation else { return .identity }
+        return turned * self
+    }
+
+    public func applying(_ pose: Pose3D${suffix}) -> Rotation3D${suffix} { applying(pose.affineTransform) }
+    public func applying(_ scaledPose: ScaledPose3D${suffix}) -> Rotation3D${suffix} { self }
+
+    public func unapplying(_ transform: AffineTransform3D${suffix}) -> Rotation3D${suffix} {
+        applying(transform.inverted() ?? .identity)
+    }
+
+    public func unapplying(_ transform: ProjectiveTransform3D${suffix}) -> Rotation3D${suffix} {
+        applying(transform.inverted() ?? .identity)
+    }
+
+    public func hash(into hasher: inout Hasher) { hasher.combine(vector) }
+
+    private enum VectorKeys: String, CodingKey { case vector }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: VectorKeys.self)
+        try container.encode(vector, forKey: .vector)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: VectorKeys.self)
+        self.init(try container.decode(SIMD4<${scalar}>.self, forKey: .vector))
+    }
+
+    public var description: String { "(quaternion: \(quaternion))" }
+    public var customMirror: Mirror { Mirror(self, children: ["quaternion": quaternion]) }
+}
+
+// MARK: - EulerAngles${suffix}
+
+/// Three angles and the order they are applied in.
+@frozen
+public struct EulerAngles${suffix}: ${"Hashable, Codable, Sendable" if suffix == "" else "Hashable, Codable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias Order = SPEulerAngleOrder
+
+    /// The three angles in radians, in the order `order` names.
+    public var angles: ${vector}
+
+    public var order: SPEulerAngleOrder
+
+    public init() { self.init(angles: ${vector}(repeating: 0), order: .xyz) }
+
+    public init(angles: ${vector}, order: SPEulerAngleOrder) {
+        self.angles = angles
+        self.order = order
+    }
+
+    /// The three angles of a rotation, read back out of its three-by-three. The two orders are the
+    /// two ways the framework composes them extrinsically about the world axes, so each is read off
+    /// in the order it was written in: `SPEulerXYZ` is `z` after `y` after `x`, and `SPEulerZXY` is
+    /// `y` after `x` after `z`.
+    /// The three angles of the order asked for, read off the rotation's own matrix: each order
+    /// composes its three angles in its own way, so the angles of one order are not the angles of
+    /// another and there is one extraction per order. The archived version had one extraction for
+    /// both and composed whatever it read in the order given, which answers a rotation's xyz
+    /// angles for its zxy and the host's zxy for the same rotation is
+    /// (0.071453285547587675, 0.40688398480415344, 0.58419079300079413) where that answers
+    /// (0.28960472972306656, 0.2983650431430887, 0.61327139037901746).
+    ///
+    /// `zxy` composes `Ry(y) * Rx(x) * Rz(z)` - see `vector` below - and its extraction reads
+    /// `x` from the second column's z, `y` from the top right corner against the bottom right one,
+    /// and `z` from the same pair `xyz` reads it from.
+    public init(quaternion: SIMD4<${scalar}>, order: SPEulerAngleOrder) {
+        let m = simd_matrix3x3(${quat}(vector: quaternion))
+        if case .zxy = order {
+            let cosine = (m.columns.0.y * m.columns.0.y + m.columns.1.y * m.columns.1.y).squareRoot()
+            if cosine > 1e-6 {
+                let x = ${cmath("atan2")}(-m.columns.2.y, cosine)
+                let y = ${cmath("atan2")}(m.columns.2.x, m.columns.2.z)
+                let z = ${cmath("atan2")}(m.columns.0.y, m.columns.1.y)
+                self.init(angles: ${vector}(x + 0, y + 0, z + 0), order: order)
+                return
+            }
+        }
+        let sy = (m.columns.0.x * m.columns.0.x + m.columns.0.y * m.columns.0.y).squareRoot()
+        if sy > 1e-6 {
+            let x = ${cmath("atan2")}(m.columns.1.z, m.columns.2.z)
+            let y = ${cmath("atan2")}(-m.columns.0.z, sy)
+            let z = ${cmath("atan2")}(m.columns.0.y, m.columns.0.x)
+            self.init(angles: ${vector}(x + 0, y + 0, z + 0), order: order)
+        } else {
+            // looking straight up the `y` axis, where `x` and `z` are one rotation between them
+            let x = ${cmath("atan2")}(-m.columns.2.y, m.columns.1.y)
+            self.init(angles: ${vector}(x + 0, ${cmath("atan2")}(-m.columns.0.z, sy) + 0, 0), order: order)
+        }
+    }
+
+    public init(x: Angle2D${suffix}, y: Angle2D${suffix}, z: Angle2D${suffix}, order: SPEulerAngleOrder) {
+        self.init(angles: ${vector}(x.radians, y.radians, z.radians), order: order)
+    }
+
+    public init(_ x: Angle2D${suffix}, _ y: Angle2D${suffix}, _ z: Angle2D${suffix}, order: SPEulerAngleOrder) {
+        self.init(x: x, y: y, z: z, order: order)
+    }
+
+    /// The four numbers of the rotation the three angles stand for: applied extrinsically about the
+    /// world axes, in the order they are written down.
+    public var quaternion: ${quat} {
+        ${quat}(vector: self.vector)
+    }
+
+    /// `SPEulerXYZ` applies the world `x`, then `y`, then `z`; `SPEulerZXY` the world `z`, then `x`,
+    /// then `y`. Each angle is about its own axis, so the products are Hamilton's on the numbers.
+    public var vector: SIMD4<${scalar}> {
+        let x = SIMD4<${scalar}>(${cmath("sin")}(angles.x / 2), 0, 0, ${cmath("cos")}(angles.x / 2))
+        let y = SIMD4<${scalar}>(0, ${cmath("sin")}(angles.y / 2), 0, ${cmath("cos")}(angles.y / 2))
+        let z = SIMD4<${scalar}>(0, 0, ${cmath("sin")}(angles.z / 2), ${cmath("cos")}(angles.z / 2))
+        switch order {
+        case .zxy: return quaternionProduct(y, quaternionProduct(x, z))
+        default: return quaternionProduct(z, quaternionProduct(y, x))
+        }
+    }
+
+    public static func == (lhs: EulerAngles${suffix}, rhs: EulerAngles${suffix}) -> Bool {
+        lhs.angles == rhs.angles && lhs.order == rhs.order
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(angles)
+        hasher.combine(order)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(angles, forKey: .angles)
+        try container.encode(order.rawValue, forKey: .order)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(angles: try container.decode(${vector}.self, forKey: .angles),
+                  order: SPEulerAngleOrder(try container.decode(UInt32.self, forKey: .order)))
+    }
+
+    private enum CodingKeys: String, CodingKey { case angles, order }
+}
+
+// MARK: - AffineTransform3D${suffix}
+
+/// A transformation that does not divide by a depth: a four-by-three matrix, with the translation
+/// in the fourth column.
+@frozen
+public struct AffineTransform3D${suffix}: ${"Transform3DProtocol, Shearable3D, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Transform3DProtocolFloat, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias AffineTransform = AffineTransform3D${suffix}
+    public typealias ProjectiveTransform = ProjectiveTransform3D${suffix}
+    public typealias Pose = Pose3D${suffix}
+    public typealias Rect = Rect3D${suffix}
+    public typealias Vector = Vector3D${suffix}
+    public typealias Point = Point3D${suffix}
+    public typealias Size = Size3D${suffix}
+    public typealias Rotation = Rotation3D${suffix}
+    public typealias Quaternion = ${quat}
+    public typealias AxisEnumeration = AxisWithFactors${suffix}
+
+    /// The matrix, as four columns of four numbers; the fourth row of an affine one is `0 0 0 1`
+    /// and is left out of the stored form.
+    public var matrix: ${matrix}
+
+    public init() { self.matrix = AffineTransform3D${suffix}.identityMatrix }
+
+    public init(_ matrix: ${matrix}) { self.matrix = matrix }
+
+    public init(matrix: ${matrix}) { self.matrix = matrix }
+
+    /// `SPAffineTransform3DMakeWith4x4Matrix`: the fourth row has to be `0 0 0 1`, or the matrix
+    /// does not describe an affine transform at all.
+    public init?(_ matrix: ${matrix4}) { self.init(truncating: matrix) }
+
+    public init?(matrix: ${matrix4}) { self.init(truncating: matrix) }
+
+    /// `SPAffineTransform3DMakeWithProjective`, which answers `nil` for a projective one.
+    public init?(projectiveTransform transform: ProjectiveTransform3D${suffix}) {
+        self.init(truncating: transform.matrix)
+    }
+
+    public init(truncating matrix: ${matrix4}) {
+        self.matrix = simd_matrix(first3(matrix.columns.0), first3(matrix.columns.1),
+                                    first3(matrix.columns.2), first3(matrix.columns.3))
+    }
+
+    public init(truncating transform: ProjectiveTransform3D${suffix}) { self.init(truncating: transform.matrix) }
+
+    public init(scale: Size3D${suffix}) { self.matrix = AffineTransform3D${suffix}.identityMatrix.scalingBy(x: scale.width, y: scale.height, z: scale.depth) }
+    public init(rotation: Rotation3D${suffix}) { self.matrix = AffineTransform3D${suffix}.identityMatrix.rotatingBy(rotation) }
+    public init(translation offset: Vector3D${suffix}) { self.matrix = AffineTransform3D${suffix}.identityMatrix.translatingBy(offset) }
+    public init(shear: AxisWithFactors${suffix}) { self.matrix = AffineTransform3D${suffix}.identityMatrix.shearing(shear) }
+
+    public init(scale: Size3D${suffix} = Size3D${suffix}(width: 1, height: 1, depth: 1), rotation: Rotation3D${suffix}, translation: Vector3D${suffix}) {
+        self.matrix = AffineTransform3D${suffix}.identityMatrix.scalingBy(x: scale.width, y: scale.height, z: scale.depth).rotatingBy(rotation).translatingBy(translation)
+    }
+
+    public init(pose: Pose3D${suffix}) { self.matrix = pose.matrix4x3 }
+    public init(scaledPose: ScaledPose3D${suffix}) { self.matrix = scaledPose.matrix4x3 }
+
+    @available(*, deprecated, renamed: "init(offset:)", message: "Use `Vector3D` variant.")
+    public init(translation: Size3D${suffix}) { self.init(translation: Vector3D${suffix}(translation)) }
+
+    public static let identity = AffineTransform3D${suffix}()
+
+    static var identityMatrix: ${matrix} {
+        simd_matrix(${vector}(1, 0, 0), ${vector}(0, 1, 0), ${vector}(0, 0, 1), ${vector}(0, 0, 0))
+    }
+
+    /// The four columns, as vectors.
+    public var columns: (Vector3D${suffix}, Vector3D${suffix}, Vector3D${suffix}, Vector3D${suffix}) {
+        get { (Vector3D${suffix}(matrix.columns.0), Vector3D${suffix}(matrix.columns.1),
+                Vector3D${suffix}(matrix.columns.2), Vector3D${suffix}(matrix.columns.3)) }
+        set { matrix = simd_matrix(newValue.0.vector, newValue.1.vector, newValue.2.vector, newValue.3.vector) }
+    }
+
+    /// The three-by-three part, which is where the scale and the rotation live.
+    public var matrix3x3: ${matrix3} {
+        ${matrix3}(columns: (matrix.columns.0, matrix.columns.1, matrix.columns.2))
+    }
+
+    /// The whole thing as a four-by-four, for the arithmetic the rest of the framework shares.
+    public var matrix4x4: ${matrix4} {
+        var full = ${matrix4}()
+        full.columns.0 = SIMD4<${scalar}>(matrix.columns.0, 0)
+        full.columns.1 = SIMD4<${scalar}>(matrix.columns.1, 0)
+        full.columns.2 = SIMD4<${scalar}>(matrix.columns.2, 0)
+        full.columns.3 = SIMD4<${scalar}>(matrix.columns.3, 1)
+        return full
+    }
+
+    public var translation: Vector3D${suffix} {
+        get { Vector3D${suffix}(matrix.columns.3) }
+        set { matrix.columns.3 = ${vector}(newValue.vector) }
+    }
+
+    /// The SDK's two spellings of the translation: `offset` is the older one.
+    public var offset: Vector3D${suffix} {
+        get { translation }
+        set { translation = newValue }
+    }
+
+    public var isIdentity: Bool {
+        matrix.columns.0 == Self.identityMatrix.columns.0 && matrix.columns.1 == Self.identityMatrix.columns.1 &&
+            matrix.columns.2 == Self.identityMatrix.columns.2 && matrix.columns.3 == Self.identityMatrix.columns.3
+    }
+
+
+
+    public var isTranslation: Bool { matrix3x3.isIdentity }
+
+    public var isInvertible: Bool { simd_determinant(matrix3x3) != 0 }
+
+    /// `SPAffineTransform3DIsRectilinear`: the three-by-three part turns only by whole quarter turns.
+    public var isRectilinear: Bool {
+        // `SPAffineTransform3DIsRectilinear`: the three-by-three part turns only by whole quarter
+        // turns, which is what the angle of its quaternion says, taken to the nearest quarter.
+        // The two calls are one statement apart rather than nested: `simd_angle` and
+        // `simd_quaternion` are each declared twice by the C headers, once per scalar, and
+        // Every scalar here is named rather than inferred, because the C library's `simd_angle`,
+        // `remainder` and `remainderf` are one name each and this release's headers bring the
+        // `simd_quatd`/`double` one first: `simd_angle(rotation)` with `rotation` a `simd_quatf`
+        // asks for a `simd_quatd` and unqualified `remainder` takes two Doubles. Both are the
+        // measured refusals of swiftc -typecheck at armv7, one per site.
+        let rotation = simd_quaternion(matrix3x3)
+        let turn: ${scalar} = simd_angle(rotation)
+        let angle = abs(${cmath("remainder")}(turn, ${scalar}.pi / 2))
+        return angle < spatialDefaultTolerance()
+    }
+
+    public var isUniform: Bool {
+        let size = scale
+        return isRectilinear && size.width == size.height && size.height == size.depth
+    }
+
+    public func isUniform(overDimensions: Dimension3DSet) -> Bool {
+        let size = scale
+        var uniform = isRectilinear
+        if overDimensions.contains(.x) { uniform = uniform && size.width == 1 }
+        if overDimensions.contains(.y) { uniform = uniform && size.height == 1 }
+        if overDimensions.contains(.z) { uniform = uniform && size.depth == 1 }
+        return uniform
+    }
+
+    /// `SPAffineTransform3DGetScale`: the length of each column, signed by the determinant, so a
+    /// transform that turns an axis over reports a negative edge.
+    public var scale: Size3D${suffix} {
+        let m = matrix3x3
+        let sign: ${scalar} = simd_determinant(m) >= 0 ? 1 : -1
+        return Size3D${suffix}(width: simd_length(m.columns.0) * sign,
+                              height: simd_length(m.columns.1) * sign,
+                              depth: simd_length(m.columns.2) * sign)
+    }
+
+    /// `SPAffineTransform3DGetRotation`: the three-by-three part with the scale divided out, and
+    /// with the shear taken away column by column.
+    public var rotation: Rotation3D${suffix}? {
+        var m = matrix3x3
+        let s = scale.vector
+        guard s.x != 0, s.y != 0, s.z != 0 else { return nil }
+        m.columns.0 = m.columns.0 / s.x
+        m.columns.1 = m.columns.1 / s.y
+        m.columns.2 = m.columns.2 / s.z
+        m.columns.1 = m.columns.1 - simd_project(m.columns.1, m.columns.0)
+        m.columns.2 = m.columns.2 - simd_project(m.columns.2, m.columns.0) - simd_project(m.columns.2, m.columns.1)
+        m.columns.0 = simd_normalize(m.columns.0)
+        m.columns.1 = simd_normalize(m.columns.1)
+        m.columns.2 = simd_normalize(m.columns.2)
+        let q = simd_quaternion(m)
+        let v = q.vector
+        guard v.x.isFinite && v.y.isFinite && v.z.isFinite && v.w.isFinite else { return nil }
+        return Rotation3D${suffix}(simd_normalize(q))
+    }
+
+    public var inverse: AffineTransform3D${suffix}? { inverted() }
+
+    /// The inverse, or `nil` when the three-by-three part has no inverse.
+    ///
+    /// Through the four-by-four's own elimination and not through `invertedMatrix3x3`, so that one
+    /// routine inverts a matrix in the whole module: the adjugate over the determinant was right for
+    /// a diagonal and wrong for a general three-by-three - the host's inverse of a scale of
+    /// (2, 3, 4) turned by 0.7 rad about (1, 2, 3) has the first column
+    /// (0.39081958695351254, -0.24146464210710616, 0.19736990...) where the adjugate's was
+    /// (0.3908195869535126, 0.18337241023478618, ...) - and the translation it wants is
+    /// -(5, 6, 7), which is what the elimination gives because the offset was composed through
+    /// the linear part.
+    public func inverted() -> AffineTransform3D${suffix}? {
+        guard let full = invertedMatrix(matrix4x4) else { return nil }
+        return AffineTransform3D${suffix}(simd_matrix(first3(full.columns.0), first3(full.columns.1),
+                                                      first3(full.columns.2), first3(full.columns.3)))
+    }
+
+    /// `SPAffineTransform3DConcatenation`: `self` then the other one, which is what the ordinary
+    /// matrix product of two column-vector transforms does.
+    public func concatenating(_ other: AffineTransform3D${suffix}) -> AffineTransform3D${suffix} {
+        let product = simd_mul(matrix4x4, other.matrix4x4)
+        return AffineTransform3D${suffix}(simd_matrix(first3(product.columns.0), first3(product.columns.1),
+                                                       first3(product.columns.2), first3(product.columns.3)))
+    }
+
+    public static func * (lhs: AffineTransform3D${suffix}, rhs: AffineTransform3D${suffix}) -> AffineTransform3D${suffix} {
+        lhs.concatenating(rhs)
+    }
+
+    public static func *= (lhs: inout AffineTransform3D${suffix}, rhs: AffineTransform3D${suffix}) { lhs = lhs * rhs }
+
+    public static func == (lhs: AffineTransform3D${suffix}, rhs: AffineTransform3D${suffix}) -> Bool {
+        lhs.matrix.isApproximatelyEqual(to: rhs.matrix, tolerance: 0)
+    }
+
+    public func isApproximatelyEqual(to other: AffineTransform3D${suffix}, tolerance: ${scalar}) -> Bool {
+        matrix4x4.isApproximatelyEqual(to: other.matrix4x4, tolerance: tolerance)
+    }
+
+    /// `SPAffineTransform3DChangeBasis`: `self` read in the frame `from` instead of the world, and
+    /// the answer is `nil` when either frame cannot be inverted.
+    public func changeBasis(from: AffineTransform3D${suffix} = .identity, to: AffineTransform3D${suffix} = .identity) -> AffineTransform3D${suffix}? {
+        guard let fromInverse = from.inverted() else { return nil }
+        return to.concatenating(self).concatenating(fromInverse)
+    }
+
+    public func scaledBy(x: ${scalar} = 1, y: ${scalar} = 1, z: ${scalar} = 1) -> AffineTransform3D${suffix} {
+        AffineTransform3D${suffix}(matrix: matrix.scalingBy(x: x, y: y, z: z))
+    }
+
+    public mutating func scaleBy(x: ${scalar} = 1, y: ${scalar} = 1, z: ${scalar} = 1) { self = scaledBy(x: x, y: y, z: z) }
+    public func scaled(by scale: Size3D${suffix}) -> AffineTransform3D${suffix} { scaledBy(x: scale.width, y: scale.height, z: scale.depth) }
+    public mutating func scale(by scale: Size3D${suffix}) { self = scaled(by: scale) }
+    public func uniformlyScaled(by scale: ${scalar}) -> AffineTransform3D${suffix} { scaledBy(x: scale, y: scale, z: scale) }
+    public mutating func uniformlyScale(by scale: ${scalar}) { self = uniformlyScaled(by: scale) }
+
+    public func sheared(_ shear: AxisWithFactors${suffix}) -> AffineTransform3D${suffix} {
+        AffineTransform3D${suffix}(matrix: matrix.shearing(shear))
+    }
+
+    public mutating func shear(_ shear: AxisWithFactors${suffix}) { self = sheared(shear) }
+
+    public func translated(by offset: Vector3D${suffix}) -> AffineTransform3D${suffix} {
+        AffineTransform3D${suffix}(matrix: matrix.translatingBy(offset))
+    }
+
+    @available(*, deprecated, renamed: "translated(by:)", message: "Use `Vector3D` variant.")
+    public func translated(by size: Size3D${suffix}) -> AffineTransform3D${suffix} { self + Vector3D${suffix}(size) }
+
+    public mutating func translate(by vector: Vector3D${suffix}) { self = translated(by: vector) }
+    public mutating func translate(by size: Size3D${suffix}) { self = translated(by: Vector3D${suffix}(size)) }
+
+    public static func + (lhs: AffineTransform3D${suffix}, rhs: Vector3D${suffix}) -> AffineTransform3D${suffix} { lhs.translated(by: rhs) }
+
+    public func rotated(by rotation: Rotation3D${suffix}) -> AffineTransform3D${suffix} {
+        AffineTransform3D${suffix}(matrix: matrix.rotatingBy(rotation))
+    }
+
+    public func rotated(by quaternion: ${quat}) -> AffineTransform3D${suffix} {
+        rotated(by: Rotation3D${suffix}(quaternion))
+    }
+
+    /// A transformation turned by a rotation is that one composed on the right, and the rotation
+    /// between two of them is the one that takes the first's own onto the second's.
+    public func rotation(to other: AffineTransform3D${suffix}) -> Rotation3D${suffix} {
+        guard let mine = rotation, let theirs = other.rotation else { return .identity }
+        return theirs * mine.inverse
+    }
+
+    public mutating func rotate(by rotation: Rotation3D${suffix}) { self = rotated(by: rotation) }
+    public mutating func rotate(by quaternion: ${quat}) { self = rotated(by: quaternion) }
+
+    /// `SPAffineTransform3DFlip`: turn one axis over, leaving the rest.
+    public func flipped(along axis: Axis3D) -> AffineTransform3D${suffix} {
+        guard let index = indexOfFlip(axis) else { return self }
+        return AffineTransform3D${suffix}(matrix: matrix.flippingColumn(index))
+    }
+
+    public mutating func flip(along axis: Axis3D) { self = flipped(along: axis) }
+
+    private static func index(of axis: Axis3D) -> Int? { indexOfFlip(axis) }
+
+    public func hash(into hasher: inout Hasher) { hasher.combine(matrix.columns.0)
+        hasher.combine(matrix.columns.1)
+        hasher.combine(matrix.columns.2)
+        hasher.combine(matrix.columns.3) }
+
+    private enum ColumnKeys: String, CodingKey { case column0, column1, column2, column3 }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: ColumnKeys.self)
+        try container.encode(matrix.columns.0, forKey: .column0)
+        try container.encode(matrix.columns.1, forKey: .column1)
+        try container.encode(matrix.columns.2, forKey: .column2)
+        try container.encode(matrix.columns.3, forKey: .column3)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: ColumnKeys.self)
+        self.matrix = simd_matrix(try container.decode(${vector}.self, forKey: .column0),
+                                  try container.decode(${vector}.self, forKey: .column1),
+                                  try container.decode(${vector}.self, forKey: .column2),
+                                  try container.decode(${vector}.self, forKey: .column3))
+    }
+
+    public var description: String { "(matrix: \(matrix))" }
+    public var customMirror: Mirror { Mirror(self, children: ["matrix": matrix]) }
+}
+
+// MARK: - The matrix arithmetic the two transformations share.
+
+// MARK: - ProjectiveTransform3D${suffix}
+
+/// A transformation of the whole projective space, held as a four-by-four matrix.
+@frozen
+public struct ProjectiveTransform3D${suffix}: ${"Transform3DProtocol, Shearable3D, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Transform3DProtocolFloat, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias AffineTransform = AffineTransform3D${suffix}
+    public typealias ProjectiveTransform = ProjectiveTransform3D${suffix}
+    public typealias Pose = Pose3D${suffix}
+    public typealias Rect = Rect3D${suffix}
+    public typealias Vector = Vector3D${suffix}
+    public typealias Point = Point3D${suffix}
+    public typealias Size = Size3D${suffix}
+    public typealias Rotation = Rotation3D${suffix}
+    public typealias Quaternion = ${quat}
+    public typealias AxisEnumeration = AxisWithFactors${suffix}
+
+    public var matrix: ${matrix4}
+
+    public init() { self.matrix = ProjectiveTransform3D${suffix}.identityMatrix }
+
+    public init(_ matrix: ${matrix4}) { self.matrix = matrix }
+    public init(matrix: ${matrix4}) { self.matrix = matrix }
+
+    public init(scale: Size3D${suffix}) { self.matrix = ProjectiveTransform3D${suffix}.identityMatrix.scalingBy(x: scale.width, y: scale.height, z: scale.depth) }
+    public init(rotation: Rotation3D${suffix}) { self.matrix = ProjectiveTransform3D${suffix}.identityMatrix.rotatingBy(rotation) }
+    public init(translation offset: Vector3D${suffix}) { self.matrix = ProjectiveTransform3D${suffix}.identityMatrix.translatingBy(offset) }
+    public init(shear: AxisWithFactors${suffix}) { self.matrix = ProjectiveTransform3D${suffix}.identityMatrix.shearing(shear) }
+
+    public init(scale: Size3D${suffix} = Size3D${suffix}(width: 1, height: 1, depth: 1), rotation: Rotation3D${suffix}, translation: Vector3D${suffix}) {
+        self.matrix = ProjectiveTransform3D${suffix}.identityMatrix.scalingBy(x: scale.width, y: scale.height, z: scale.depth).rotatingBy(rotation).translatingBy(translation)
+    }
+
+    public init(pose: Pose3D${suffix}) { self.matrix = pose.matrix }
+    public init(scaledPose: ScaledPose3D${suffix}) { self.matrix = scaledPose.matrix }
+
+    @available(*, deprecated, renamed: "init(offset:)", message: "Use `Vector3D` variant.")
+    public init(translation: Size3D${suffix}) { self.init(translation: Vector3D${suffix}(translation)) }
+
+    public static let identity = ProjectiveTransform3D${suffix}()
+
+    static var identityMatrix: ${matrix4} {
+        var m = ${matrix4}()
+        m.columns.0 = SIMD4<${scalar}>(1, 0, 0, 0)
+        m.columns.1 = SIMD4<${scalar}>(0, 1, 0, 0)
+        m.columns.2 = SIMD4<${scalar}>(0, 0, 1, 0)
+        m.columns.3 = SIMD4<${scalar}>(0, 0, 0, 1)
+        return m
+    }
+
+    public var matrix3x3: ${matrix3} {
+        ${matrix3}(columns: (first3(matrix.columns.0), first3(matrix.columns.1), first3(matrix.columns.2)))
+    }
+
+    public var matrix4x4: ${matrix4} { matrix }
+
+    public var translation: Vector3D${suffix} {
+        get { Vector3D${suffix}(matrix.columns.3) }
+        set { matrix.columns.3 = SIMD4<${scalar}>(newValue.vector, matrix.columns.3.w) }
+    }
+
+    public var offset: Vector3D${suffix} {
+        get { translation }
+        set { translation = newValue }
+    }
+
+    /// The projective row: what a point's depth is divided by.
+    /// The length of each column of the three-by-three part, which is what the host answers: a
+    /// shear of (0.5, 0.25) about z reads (1, 1, 1.14564392373896) - the third column is
+    /// (0.5, 0.25, 1) - and a rotation reads (0.9999999999999999, 1, 0.9999999999999999). The
+    /// archived version handed back the fourth column, which is the translation.
+    public var scaleComponent: Size3D${suffix} {
+        Size3D${suffix}(width: Vector3D${suffix}(matrix3x3.columns.0).length,
+                        height: Vector3D${suffix}(matrix3x3.columns.1).length,
+                        depth: Vector3D${suffix}(matrix3x3.columns.2).length)
+    }
+
+    public var isIdentity: Bool {
+        matrix.isApproximatelyEqual(to: ProjectiveTransform3D${suffix}.identityMatrix, tolerance: 0) &&
+            matrix.columns.3.w == 1
+    }
+    public var isTranslation: Bool { matrix3x3.isIdentity && matrix.columns.3.w == 1 }
+    public var isInvertible: Bool { invertedMatrix(matrix) != nil }
+
+    public var isRectilinear: Bool {
+        // `SPAffineTransform3DIsRectilinear`: the three-by-three part turns only by whole quarter
+        // turns, which is what the angle of its quaternion says, taken to the nearest quarter.
+        // The two calls are one statement apart rather than nested: `simd_angle` and
+        // `simd_quaternion` are each declared twice by the C headers, once per scalar, and
+        // Every scalar here is named rather than inferred, because the C library's `simd_angle`,
+        // `remainder` and `remainderf` are one name each and this release's headers bring the
+        // `simd_quatd`/`double` one first: `simd_angle(rotation)` with `rotation` a `simd_quatf`
+        // asks for a `simd_quatd` and unqualified `remainder` takes two Doubles. Both are the
+        // measured refusals of swiftc -typecheck at armv7, one per site.
+        let rotation = simd_quaternion(matrix3x3)
+        let turn: ${scalar} = simd_angle(rotation)
+        let angle = abs(${cmath("remainder")}(turn, ${scalar}.pi / 2))
+        return angle < spatialDefaultTolerance()
+    }
+
+    public var isUniform: Bool {
+        let size = scale
+        return isRectilinear && size.width == size.height && size.height == size.depth
+    }
+
+    public func isUniform(overDimensions: Dimension3DSet) -> Bool {
+        let size = scale
+        var uniform = isRectilinear
+        if overDimensions.contains(.x) { uniform = uniform && size.width == 1 }
+        if overDimensions.contains(.y) { uniform = uniform && size.height == 1 }
+        if overDimensions.contains(.z) { uniform = uniform && size.depth == 1 }
+        return uniform
+    }
+
+    public var scale: Size3D${suffix} {
+        let m = matrix3x3
+        let sign: ${scalar} = simd_determinant(m) >= 0 ? 1 : -1
+        return Size3D${suffix}(width: simd_length(m.columns.0) * sign,
+                              height: simd_length(m.columns.1) * sign,
+                              depth: simd_length(m.columns.2) * sign)
+    }
+
+    public var rotation: Rotation3D${suffix}? {
+        AffineTransform3D${suffix}(truncating: matrix).rotation
+    }
+
+    public var inverse: ProjectiveTransform3D${suffix}? { inverted() }
+
+    public func inverted() -> ProjectiveTransform3D${suffix}? {
+        invertedMatrix(matrix).map { ProjectiveTransform3D${suffix}($0) }
+    }
+
+    public func concatenating(_ other: ProjectiveTransform3D${suffix}) -> ProjectiveTransform3D${suffix} {
+        ProjectiveTransform3D${suffix}(simd_mul(matrix, other.matrix))
+    }
+
+    public static func * (lhs: ProjectiveTransform3D${suffix}, rhs: ProjectiveTransform3D${suffix}) -> ProjectiveTransform3D${suffix} {
+        lhs.concatenating(rhs)
+    }
+
+    public static func *= (lhs: inout ProjectiveTransform3D${suffix}, rhs: ProjectiveTransform3D${suffix}) { lhs = lhs * rhs }
+
+    public static func == (lhs: ProjectiveTransform3D${suffix}, rhs: ProjectiveTransform3D${suffix}) -> Bool {
+        lhs.matrix.isApproximatelyEqual(to: rhs.matrix, tolerance: 0)
+    }
+
+    public func isApproximatelyEqual(to other: ProjectiveTransform3D${suffix}, tolerance: ${scalar}) -> Bool {
+        simd_almost_equal_elements(matrix, other.matrix, tolerance)
+    }
+
+    public func scaledBy(x: ${scalar} = 1, y: ${scalar} = 1, z: ${scalar} = 1) -> ProjectiveTransform3D${suffix} {
+        ProjectiveTransform3D${suffix}(matrix: matrix.scalingBy(x: x, y: y, z: z))
+    }
+
+    public mutating func scaleBy(x: ${scalar} = 1, y: ${scalar} = 1, z: ${scalar} = 1) { self = scaledBy(x: x, y: y, z: z) }
+    public func scaled(by scale: Size3D${suffix}) -> ProjectiveTransform3D${suffix} { scaledBy(x: scale.width, y: scale.height, z: scale.depth) }
+    public mutating func scale(by scale: Size3D${suffix}) { self = scaled(by: scale) }
+    public func uniformlyScaled(by scale: ${scalar}) -> ProjectiveTransform3D${suffix} { scaledBy(x: scale, y: scale, z: scale) }
+    public mutating func uniformlyScale(by scale: ${scalar}) { self = uniformlyScaled(by: scale) }
+
+    public func sheared(_ shear: AxisWithFactors${suffix}) -> ProjectiveTransform3D${suffix} {
+        ProjectiveTransform3D${suffix}(matrix: matrix.shearing(shear))
+    }
+
+    public mutating func shear(_ shear: AxisWithFactors${suffix}) { self = sheared(shear) }
+
+    public func translated(by offset: Vector3D${suffix}) -> ProjectiveTransform3D${suffix} {
+        ProjectiveTransform3D${suffix}(matrix: matrix.translatingBy(offset))
+    }
+
+    @available(*, deprecated, renamed: "translated(by:)", message: "Use `Vector3D` variant.")
+    public func translated(by size: Size3D${suffix}) -> ProjectiveTransform3D${suffix} { self + Vector3D${suffix}(size) }
+
+    public mutating func translate(by vector: Vector3D${suffix}) { self = translated(by: vector) }
+    public mutating func translate(by size: Size3D${suffix}) { self = translated(by: Vector3D${suffix}(size)) }
+
+    public static func + (lhs: ProjectiveTransform3D${suffix}, rhs: Vector3D${suffix}) -> ProjectiveTransform3D${suffix} { lhs.translated(by: rhs) }
+
+    public func rotated(by rotation: Rotation3D${suffix}) -> ProjectiveTransform3D${suffix} {
+        ProjectiveTransform3D${suffix}(matrix: matrix.rotatingBy(rotation))
+    }
+
+    public func rotated(by quaternion: ${quat}) -> ProjectiveTransform3D${suffix} {
+        rotated(by: Rotation3D${suffix}(quaternion))
+    }
+
+
+    public mutating func rotate(by rotation: Rotation3D${suffix}) { self = rotated(by: rotation) }
+    public mutating func rotate(by quaternion: ${quat}) { self = rotated(by: quaternion) }
+
+    public func flipped(along axis: Axis3D) -> ProjectiveTransform3D${suffix} {
+        guard let index = indexOfFlip(axis) else { return self }
+        return ProjectiveTransform3D${suffix}(matrix: matrix.flippingColumn(index))
+    }
+
+    public mutating func flip(along axis: Axis3D) { self = flipped(along: axis) }
+
+    public func hash(into hasher: inout Hasher) { hasher.combine(matrix.columns.0)
+        hasher.combine(matrix.columns.1)
+        hasher.combine(matrix.columns.2)
+        hasher.combine(matrix.columns.3) }
+
+    private enum ColumnKeys: String, CodingKey { case column0, column1, column2, column3 }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: ColumnKeys.self)
+        try container.encode(matrix.columns.0, forKey: .column0)
+        try container.encode(matrix.columns.1, forKey: .column1)
+        try container.encode(matrix.columns.2, forKey: .column2)
+        try container.encode(matrix.columns.3, forKey: .column3)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: ColumnKeys.self)
+        self.matrix = simd_matrix(try container.decode(SIMD4<${scalar}>.self, forKey: .column0),
+                                  try container.decode(SIMD4<${scalar}>.self, forKey: .column1),
+                                  try container.decode(SIMD4<${scalar}>.self, forKey: .column2),
+                                  try container.decode(SIMD4<${scalar}>.self, forKey: .column3))
+    }
+
+    public var description: String { "(matrix: \(matrix))" }
+    public var customMirror: Mirror { Mirror(self, children: ["matrix": matrix]) }
+}
+
+// MARK: - Pose3D${suffix}
+
+/// Where something is and which way it faces.
+@frozen
+public struct Pose3D${suffix}: ${"Rotatable3D, Translatable3D, Rotatable3DProtocol, Translatable3DProtocol, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Rotatable3DProtocolFloat, Translatable3DProtocolFloat, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias AffineTransform = AffineTransform3D${suffix}
+    public typealias ProjectiveTransform = ProjectiveTransform3D${suffix}
+    public typealias Pose = Pose3D${suffix}
+    public typealias Rect = Rect3D${suffix}
+    public typealias Vector = Vector3D${suffix}
+    public typealias Point = Point3D${suffix}
+    public typealias Size = Size3D${suffix}
+    public typealias Rotation = Rotation3D${suffix}
+    public typealias Quaternion = ${quat}
+    public typealias AxisEnumeration = AxisWithFactors${suffix}
+
+    public var position: Point3D${suffix}
+    public var rotation: Rotation3D${suffix}
+
+    public init() { self.init(position: .zero, rotation: .identity) }
+
+    public init(position: Point3D${suffix} = .zero, rotation: Rotation3D${suffix}) {
+        self.position = position
+        self.rotation = rotation
+    }
+
+    public init(position: ${vector} = .zero, rotation: ${quat}) {
+        self.init(position: Point3D${suffix}(position), rotation: Rotation3D${suffix}(rotation))
+    }
+
+    public init(position: Point3D${suffix}, target: Point3D${suffix},
+                up: Vector3D${suffix} = Vector3D${suffix}(x: 0, y: 1, z: 0)) {
+        self.init(position: position, rotation: Rotation3D${suffix}(forward: target - position, up: up))
+    }
+
+    public init(forward: Vector3D${suffix}, up: Vector3D${suffix}) {
+        self.init(position: .zero, rotation: Rotation3D${suffix}(forward: forward, up: up))
+    }
+
+    public init?(transform: AffineTransform3D${suffix}) {
+        guard let rotation = transform.rotation else { return nil }
+        self.init(position: Point3D${suffix}(transform.translation), rotation: rotation)
+    }
+
+    public init?(transform: ProjectiveTransform3D${suffix}) {
+        guard let rotation = transform.rotation else { return nil }
+        self.init(position: Point3D${suffix}(transform.translation), rotation: rotation)
+    }
+
+    public init?(_ matrix: ${matrix4}) {
+        guard let pose = Pose3D${suffix}(transform: AffineTransform3D${suffix}(truncating: matrix)) else { return nil }
+        self = pose
+    }
+
+    public init?(matrix: ${matrix4}) { self.init(matrix) }
+
+    public static let identity = Pose3D${suffix}()
+
+    public var isIdentity: Bool { position.isZero && rotation == .identity }
+
+    public var matrix: ${matrix4} { affineTransform.matrix4x4 }
+
+    var matrix4x3: ${matrix} { affineTransform.matrix }
+
+    /// The transformation a pose stands for, which is its rotation composed with
+    /// its position; the SDK declares this for a `Rotation3D` and for a `ScaledPose3D`'s
+    /// own matrix, and not for a pose.
+    var affineTransform: AffineTransform3D${suffix} {
+        // The position goes into the fourth column as it stands and is not turned by the rotation:
+        // the host's Pose3D(position: (3, -4, 12), rotation: r).matrix has the column (3, -4, 12, 1),
+        // where `translated(by:)` on the same rotation would answer r * (3, -4, 12) - the method
+        // composes an offset through the linear part, which is what it is for, and an initialiser
+        // that means "this linear part, this column" is not the same question.
+        var transform = AffineTransform3D${suffix}(rotation: rotation)
+        transform.translation = Vector3D${suffix}(position)
+        return transform
+    }
+
+    /// `SPPose3DGetInverse`: the position is negated and then turned by the rotation undone,
+    /// which is `q^-1 * (-p)` in the header's own words.
+    public var inverse: Pose3D${suffix} {
+        let negated = Point3D${suffix}(x: -position.x, y: -position.y, z: -position.z)
+        return Pose3D${suffix}(position: negated.rotated(by: rotation.inverse), rotation: rotation.inverse)
+    }
+
+    public func concatenated(with other: Pose3D${suffix}) -> Pose3D${suffix} {
+        Pose3D${suffix}(position: position + Vector3D${suffix}(other.position.rotated(by: rotation)),
+                     rotation: rotation * other.rotation)
+    }
+
+    public func concatenated(with other: ScaledPose3D${suffix}) -> ScaledPose3D${suffix} {
+        ScaledPose3D${suffix}(pose: self).concatenated(with: other)
+    }
+
+    public func concatenating(_ transform: Pose3D${suffix}) -> Pose3D${suffix} { concatenated(with: transform) }
+    public func concatenating(_ transform: ScaledPose3D${suffix}) -> ScaledPose3D${suffix} { concatenated(with: transform) }
+
+    public static func * (lhs: Pose3D${suffix}, rhs: Pose3D${suffix}) -> Pose3D${suffix} { lhs.concatenated(with: rhs) }
+    public static func *= (lhs: inout Pose3D${suffix}, rhs: Pose3D${suffix}) { lhs = lhs * rhs }
+
+    public func applying(_ transform: ProjectiveTransform3D${suffix}) -> Pose3D${suffix} {
+        Pose3D${suffix}(position: position.applying(transform), rotation: rotation.applying(transform))
+    }
+
+    public func applying(_ transform: AffineTransform3D${suffix}) -> Pose3D${suffix} {
+        Pose3D${suffix}(position: position.applying(transform), rotation: rotation.applying(transform))
+    }
+
+    public func unapplying(_ transform: AffineTransform3D${suffix}) -> Pose3D${suffix} {
+        Pose3D${suffix}(position: position.unapplying(transform), rotation: rotation.unapplying(transform))
+    }
+
+    public func isApproximatelyEqual(to other: Pose3D${suffix}, tolerance: ${scalar}) -> Bool {
+        position.isApproximatelyEqual(to: other.position, tolerance: tolerance) &&
+            rotation.isApproximatelyEqual(to: other.rotation, tolerance: tolerance)
+    }
+
+    public func translated(by offset: Vector3D${suffix}) -> Pose3D${suffix} {
+        Pose3D${suffix}(position: position + offset, rotation: rotation)
+    }
+
+    @available(*, deprecated, message: "Use the `Vector3D` variant.")
+    public func translated(by size: Size3D${suffix}) -> Pose3D${suffix} { self + Vector3D${suffix}(size) }
+
+    public mutating func translate(by vector: Vector3D${suffix}) { self = translated(by: vector) }
+    public mutating func translate(by size: Size3D${suffix}) { self = translated(by: Vector3D${suffix}(size)) }
+
+    public static func + (lhs: Pose3D${suffix}, rhs: Vector3D${suffix}) -> Pose3D${suffix} { lhs.translated(by: rhs) }
+
+    public func rotated(by rotation: Rotation3D${suffix}) -> Pose3D${suffix} {
+        Pose3D${suffix}(position: position, rotation: self.rotation * rotation)
+    }
+
+    public func rotated(by quaternion: ${quat}) -> Pose3D${suffix} { rotated(by: Rotation3D${suffix}(quaternion)) }
+
+    /// Two poses differ by the rotation that takes one's where onto the other's.
+    public func rotation(to other: Pose3D${suffix}) -> Rotation3D${suffix} {
+        position.rotation(to: other.position)
+    }
+
+    public mutating func rotate(by rotation: Rotation3D${suffix}) { self = rotated(by: rotation) }
+    public mutating func rotate(by quaternion: ${quat}) { self = rotated(by: quaternion) }
+
+    public static func == (lhs: Pose3D${suffix}, rhs: Pose3D${suffix}) -> Bool {
+        lhs.position == rhs.position && lhs.rotation == rhs.rotation
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(position)
+        hasher.combine(rotation)
+    }
+
+    private enum CodingKeys: String, CodingKey { case position, rotation }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(position, forKey: .position)
+        try container.encode(rotation, forKey: .rotation)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(position: try container.decode(Point3D${suffix}.self, forKey: .position),
+                  rotation: try container.decode(Rotation3D${suffix}.self, forKey: .rotation))
+    }
+
+    public var description: String { "(position: \(position), rotation: \(rotation))" }
+    public var customMirror: Mirror { Mirror(self, children: ["position": position, "rotation": rotation]) }
+}
+
+// MARK: - ScaledPose3D${suffix}
+
+/// Where something is, which way it faces, and how big it is.
+@frozen
+public struct ScaledPose3D${suffix}: ${"Rotatable3D, Translatable3D, Rotatable3DProtocol, Translatable3DProtocol, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Rotatable3DProtocolFloat, Translatable3DProtocolFloat, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias AffineTransform = AffineTransform3D${suffix}
+    public typealias ProjectiveTransform = ProjectiveTransform3D${suffix}
+    public typealias Pose = Pose3D${suffix}
+    public typealias Rect = Rect3D${suffix}
+    public typealias Vector = Vector3D${suffix}
+    public typealias Point = Point3D${suffix}
+    public typealias Size = Size3D${suffix}
+    public typealias Rotation = Rotation3D${suffix}
+    public typealias Quaternion = ${quat}
+    public typealias AxisEnumeration = AxisWithFactors${suffix}
+
+    public var position: Point3D${suffix}
+    public var rotation: Rotation3D${suffix}
+    public var scale: ${scalar}
+
+    public init() { self.init(position: .zero, rotation: .identity, scale: 1) }
+
+    public init(position: Point3D${suffix}, rotation: Rotation3D${suffix}, scale: ${scalar} = 1) {
+        self.position = position
+        self.rotation = rotation
+        self.scale = scale
+    }
+
+    public init(position: ${vector} = .zero, rotation: ${quat}, scale: ${scalar} = 1) {
+        self.init(position: Point3D${suffix}(position), rotation: Rotation3D${suffix}(rotation), scale: scale)
+    }
+
+    public init(pose: Pose3D${suffix}) {
+        self.init(position: pose.position, rotation: pose.rotation, scale: 1)
+    }
+
+    public init(_ pose: Pose3D${suffix}) { self.init(pose: pose) }
+
+    /// `SPScaledPose3DMakeWithProjectiveTransform`, which reads the translation, the rotation of
+    /// the three-by-three and the scale from the first column's length.
+    public init?(transform: ProjectiveTransform3D${suffix}) {
+        guard let rotation = transform.rotation else { return nil }
+        self.init(position: Point3D${suffix}(transform.translation), rotation: rotation,
+                  scale: transform.scale.width)
+    }
+
+    /// The same, from a four-by-four, which is what the transformation is stored as.
+    public init?(transform: ${matrix4}) {
+        self.init(transform: ProjectiveTransform3D${suffix}(transform))
+    }
+
+    public static let identity = ScaledPose3D${suffix}()
+
+    public var isIdentity: Bool { position.isZero && rotation == .identity && scale == 1 }
+
+    public var pose: Pose3D${suffix} { Pose3D${suffix}(position: position, rotation: rotation) }
+
+    public var matrix: ${matrix4} { affineTransform.matrix4x4 }
+
+    var matrix4x3: ${matrix} { affineTransform.matrix }
+
+    /// The transformation a scaled pose stands for, which is its scale, its rotation and
+    /// its position. The SDK declares this for a `Rotation3D` and not by name here, so it
+    /// stays inside the module.
+    var affineTransform: AffineTransform3D${suffix} {
+        // As the pose's own: the position is the fourth column and the scale is on the left of the
+        // rotation, so `scalingBy` then `rotatingBy` then the column - never `translated(by:)`, which
+        // composes the offset through the linear part instead of placing it.
+        var transform = AffineTransform3D${suffix}(scale: Size3D${suffix}(width: scale, height: scale, depth: scale),
+                                                  rotation: rotation, translation: .zero)
+        transform.translation = Vector3D${suffix}(position)
+        return transform
+    }
+
+    public var inverse: ScaledPose3D${suffix} {
+        ScaledPose3D${suffix}(position: position.rotated(by: rotation.inverse).uniformlyScaled(by: -1 / scale),
+                              rotation: rotation.inverse,
+                              scale: 1 / scale)
+    }
+
+    public func concatenated(with other: ScaledPose3D${suffix}) -> ScaledPose3D${suffix} {
+        ScaledPose3D${suffix}(position: position + Vector3D${suffix}(other.position.rotated(by: rotation).uniformlyScaled(by: scale)),
+                              rotation: rotation * other.rotation,
+                              scale: scale * other.scale)
+    }
+
+    public func concatenating(_ transform: ScaledPose3D${suffix}) -> ScaledPose3D${suffix} { concatenated(with: transform) }
+
+    public static func * (lhs: ScaledPose3D${suffix}, rhs: ScaledPose3D${suffix}) -> ScaledPose3D${suffix} {
+        lhs.concatenated(with: rhs)
+    }
+
+    public static func *= (lhs: inout ScaledPose3D${suffix}, rhs: ScaledPose3D${suffix}) { lhs = lhs * rhs }
+
+    public func applying(_ transform: ProjectiveTransform3D${suffix}) -> ScaledPose3D${suffix} {
+        let matrix = simd_mul(matrix, transform.matrix)
+        guard let pose = ScaledPose3D${suffix}(transform: ProjectiveTransform3D${suffix}(matrix)) else { return self }
+        return pose
+    }
+
+    public func applying(_ transform: AffineTransform3D${suffix}) -> ScaledPose3D${suffix} {
+        applying(ProjectiveTransform3D${suffix}(transform.matrix4x4))
+    }
+
+    public func unapplying(_ transform: AffineTransform3D${suffix}) -> ScaledPose3D${suffix} {
+        applying(transform.inverted() ?? .identity)
+    }
+
+    public func isApproximatelyEqual(to other: ScaledPose3D${suffix}, tolerance: ${scalar}) -> Bool {
+        pose.isApproximatelyEqual(to: other.pose, tolerance: tolerance) &&
+            (scale - other.scale) * (scale - other.scale) < tolerance * tolerance
+    }
+
+    public func translated(by offset: Vector3D${suffix}) -> ScaledPose3D${suffix} {
+        ScaledPose3D${suffix}(position: position + offset, rotation: rotation, scale: scale)
+    }
+
+    @available(*, deprecated, message: "Use the `Vector3D` variant.")
+    public func translated(by size: Size3D${suffix}) -> ScaledPose3D${suffix} { self + Vector3D${suffix}(size) }
+
+    public mutating func translate(by vector: Vector3D${suffix}) { self = translated(by: vector) }
+    public mutating func translate(by size: Size3D${suffix}) { self = translated(by: Vector3D${suffix}(size)) }
+
+    public static func + (lhs: ScaledPose3D${suffix}, rhs: Vector3D${suffix}) -> ScaledPose3D${suffix} { lhs.translated(by: rhs) }
+
+    public func rotated(by rotation: Rotation3D${suffix}) -> ScaledPose3D${suffix} {
+        ScaledPose3D${suffix}(position: position.rotated(by: rotation), rotation: self.rotation * rotation, scale: scale)
+    }
+
+    public func rotated(by quaternion: ${quat}) -> ScaledPose3D${suffix} { rotated(by: Rotation3D${suffix}(quaternion)) }
+
+    /// Two poses differ by the rotation that takes one's where onto the other's; the scale is not
+    /// part of it, and a negative scale is a turn of its own that this does not read back out.
+    public func rotation(to other: ScaledPose3D${suffix}) -> Rotation3D${suffix} {
+        position.rotation(to: other.position)
+    }
+
+    public mutating func rotate(by rotation: Rotation3D${suffix}) { self = rotated(by: rotation) }
+    public mutating func rotate(by quaternion: ${quat}) { self = rotated(by: quaternion) }
+
+    public static func == (lhs: ScaledPose3D${suffix}, rhs: ScaledPose3D${suffix}) -> Bool {
+        lhs.position == rhs.position && lhs.rotation == rhs.rotation && lhs.scale == rhs.scale
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(position)
+        hasher.combine(rotation)
+        hasher.combine(scale)
+    }
+
+    private enum CodingKeys: String, CodingKey { case position, rotation, scale }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(position, forKey: .position)
+        try container.encode(rotation, forKey: .rotation)
+        try container.encode(scale, forKey: .scale)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(position: try container.decode(Point3D${suffix}.self, forKey: .position),
+                  rotation: try container.decode(Rotation3D${suffix}.self, forKey: .rotation),
+                  scale: try container.decode(${scalar}.self, forKey: .scale))
+    }
+
+    public var description: String { "(position: \(position), rotation: \(rotation), scale: \(scale))" }
+    public var customMirror: Mirror { Mirror(self, children: ["position": position, "rotation": rotation, "scale": scale]) }
+}
+
+% end

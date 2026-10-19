@@ -1,0 +1,20 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+MLBatchProvider	12.0	sdk16 body			-	-	-	-	-	-
+MLBatchProvider	12.0	sdk16 body			required	property	no	count	@property (nonatomic, readonly) NSInteger count;	yes
+MLBatchProvider	12.0	sdk16 body			required	method	yes	featuresAtIndex:	- (id<MLFeatureProvider> _Nonnull)featuresAtIndex:(NSInteger)index;	yes
+MLComputeDeviceProtocol	17.0	hand header		NSObject	-	-	-	-	-	-
+MLCustomLayer	11.2	sdk16 body			-	-	-	-	-	-
+MLCustomLayer	11.2	sdk16 body			required	method	yes	initWithParameterDictionary:error:	- (instancetype _Nullable)initWithParameterDictionary:(NSDictionary<NSString *,id> * _Nonnull)parameters error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomLayer	11.2	sdk16 body			required	method	yes	setWeightData:error:	- (BOOL)setWeightData:(NSArray<NSData *> * _Nonnull)weights error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomLayer	11.2	sdk16 body			required	method	yes	outputShapesForInputShapes:error:	- (NSArray<NSArray<NSNumber *> *> * _Nullable)outputShapesForInputShapes:(NSArray<NSArray<NSNumber *> *> * _Nonnull)inputShapes error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomLayer	11.2	sdk16 body			required	method	yes	evaluateOnCPUWithInputs:outputs:error:	- (BOOL)evaluateOnCPUWithInputs:(NSArray<MLMultiArray *> * _Nonnull)inputs outputs:(NSArray<MLMultiArray *> * _Nonnull)outputs error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomLayer	11.2	sdk16 body			optional	method	yes	encodeToCommandBuffer:inputs:outputs:error:	- (BOOL)encodeToCommandBuffer:(id<MTLCommandBuffer>  _Nonnull)commandBuffer inputs:(NSArray<id<MTLTexture>> * _Nonnull)inputs outputs:(NSArray<id<MTLTexture>> * _Nonnull)outputs error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomModel	12.0	sdk16 body			-	-	-	-	-	-
+MLCustomModel	12.0	sdk16 body			required	method	yes	initWithModelDescription:parameterDictionary:error:	- (instancetype _Nullable)initWithModelDescription:(MLModelDescription * _Nonnull)modelDescription parameterDictionary:(NSDictionary<NSString *,id> * _Nonnull)parameters error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomModel	12.0	sdk16 body			required	method	yes	predictionFromFeatures:options:error:	- (id<MLFeatureProvider> _Nullable)predictionFromFeatures:(id<MLFeatureProvider>  _Nonnull)input options:(MLPredictionOptions * _Nonnull)options error:(NSError *  _Nullable * _Nullable)error;	yes
+MLCustomModel	12.0	sdk16 body			optional	method	yes	predictionsFromBatch:options:error:	- (id<MLBatchProvider> _Nullable)predictionsFromBatch:(id<MLBatchProvider>  _Nonnull)inputBatch options:(MLPredictionOptions * _Nonnull)options error:(NSError *  _Nullable * _Nullable)error;	yes
+MLFeatureProvider	11.0	sdk16 body			-	-	-	-	-	-
+MLFeatureProvider	11.0	sdk16 body			required	property	no	featureNames	@property (nonatomic, readonly) NSSet<NSString *> * _Nonnull featureNames;	yes
+MLFeatureProvider	11.0	sdk16 body			required	method	yes	featureValueForName:	- (MLFeatureValue * _Nullable)featureValueForName:(NSString * _Nonnull)featureName;	yes
+MLWritable	13.0	sdk16 body		NSObject	-	-	-	-	-	-
+MLWritable	13.0	sdk16 body		NSObject	required	method	yes	writeToURL:error:	- (BOOL)writeToURL:(NSURL * _Nonnull)url error:(NSError * _Nullable * _Nullable)error;	yes

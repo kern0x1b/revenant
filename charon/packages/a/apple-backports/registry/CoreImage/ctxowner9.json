@@ -1,0 +1,38 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "+[CIContext contextWithCGContext:options:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no +contextWithCGContext: in either spelling - the 6.1.3 selector table has contextWithOptions:, contextWithEAGLContext: and contextWithEAGLContext:options: and nothing to extend - so the context here is one of the release's own, made by the release's own method, with the drawing surface beside it",
+      "effect": "a context of the release's own, made with the release's own +contextWithOptions:, that draws into the CGContext named; a category cannot add storage to a class the framework has, so the surface is an associated object on the context",
+      "facts": "facts/CoreImage/ContextOwner.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which draws into a CGContext on both sides and prints the bytes that context ended up holding; the 6.1.3 armv7 selector table for what the release has"
+    },
+    {
+      "api": "-[CIImage imageBySettingProperties:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[CIImage imageBySettingProperties:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/CoreImage/ContextOwner.md",
+      "source": "the header of the iOS 16.4 SDK, where -imageBySettingProperties: is declared at CIImage.h:386; the host's own CoreImage over the same call, by tests/backports/host/ciimage/pixel, which prints the identity, the class and the extent of what came back"
+    },
+    {
+      "api": "-[CIImage imageByUnpremultiplyingAlpha]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[CIImage imageByUnpremultiplyingAlpha]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/CoreImage/ContextOwner.md",
+      "source": "the header of the iOS 16.4 SDK, where -imageByUnpremultiplyingAlpha is declared at CIImage.h:377; the host's own CoreImage over the same call, by tests/backports/host/ciimage/pixel, which prints the rendered bytes and four pixels of them"
+    }
+  ]
+}

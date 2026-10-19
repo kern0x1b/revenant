@@ -1,0 +1,60 @@
+{
+  "framework": "PhotosUI",
+  "entries": [
+    {
+      "api": "PHPickerFilter.depthEffectPhotosFilter",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a depth effect photo is an image with a depth map beside it, and this release's library has no property that says an image has one",
+      "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
+      "facts": "facts/PhotosUI/Filters.md",
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+    },
+    {
+      "api": "PHPickerFilter.burstsFilter",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a burst is several exposures the library would have to group, and this release's library keeps no record of a group: ALAsset names a date and a duration and nothing that says which shots belong together",
+      "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
+      "facts": "facts/PhotosUI/Filters.md",
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+    },
+    {
+      "api": "PHPickerFilter.cinematicVideosFilter",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a cinematic video is a video shot in a particular way, and this release's library has no property that says which way",
+      "effect": "the filter that names no media type, which is +livePhotosFilter, and a picker configured with it presents nothing and calls its delegate with no results once it has appeared",
+      "facts": "facts/PhotosUI/Filters.md",
+      "source": "PHPicker.h of the iOS 16.4 SDK, the SDK this package compiles against, for the declaration and its availability; ALAsset.h and ALAssetsFilter.h of the same SDK for everything the release's library can say about an asset (type, location, duration, orientation, date, representations, URLs, and the three type constants; the filters allPhotos, allVideos and allAssets); and tools/cache-index/first-rung.lua over the 50 held rungs, which answers NONE for _ALAssetTypePanorama and _ALAssetTypePhotoStream"
+    },
+    {
+      "api": "-[PHPickerViewController deselectAssetsWithIdentifiers:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[PHPickerViewController deselectAssetsWithIdentifiers:]",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/PhotosUI/PickerState.md",
+      "source": "the differential of tests/backports/host/photosui, which asks the host's own PhotosUI and this port the same 38 questions and compares the answers line for line (34 the same, 4 outside what the host answers at all, each stated with its reason); the header of PhotosUI of the iOS 16.4 SDK for the contract and its wording"
+    },
+    {
+      "api": "-[PHPickerViewController moveAssetWithIdentifier:afterAssetWithIdentifier:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[PHPickerViewController moveAssetWithIdentifier:afterAssetWithIdentifier:]",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/PhotosUI/PickerState.md",
+      "source": "the differential of tests/backports/host/photosui, which asks the host's own PhotosUI and this port the same 38 questions and compares the answers line for line (34 the same, 4 outside what the host answers at all, each stated with its reason); the header of PhotosUI of the iOS 16.4 SDK for the contract and its wording"
+    }
+  ]
+}

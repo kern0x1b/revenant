@@ -1,0 +1,14 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+MessageUI	swift-struct	c:@E@MFMailComposeErrorCode	-	MFMailComposeError	-	-	-	ios=3.0	-	ca8d2fefba58e6b2
+MessageUI	swift-property	s:SC22MFMailComposeErrorCodeLeV03_nsC0So7NSErrorCvp	MFMailComposeError	_nsError	-	Foundation.NSError	-	-	-	c35161a7c3468c07
+MessageUI	swift-method	s:SC22MFMailComposeErrorCodeLeV03_nsC0ABSo7NSErrorC_tcfc	MFMailComposeError	init(_nsError:)	-	-	MessageUI.MFMailComposeError | Foundation.NSError	-	-	5eafe3d750f1b3c3
+MessageUI	swift-property	s:SC22MFMailComposeErrorCodeLeV11errorDomainSSvpZ	MFMailComposeError	errorDomain	+	Swift.String	-	-	-	462c1352e5c055ce
+MessageUI	swift-enum	c:@E@MFMailComposeErrorCode	MFMailComposeError	Code	-	-	-	ios=3.0	-	a21c26369a5af01e
+MessageUI	swift-method	s:So22MFMailComposeErrorCodeV8rawValueABSgSi_tcfc	MFMailComposeError.Code	init(rawValue:)	-	-	MessageUI.MFMailComposeError.Code? | Swift.Int	-	-	6362f96a2381772c
+MessageUI	swift-property	s:So22MFMailComposeErrorCodeV8rawValueSivp	MFMailComposeError.Code	rawValue	-	Swift.Int	-	-	-	2745c35ff26d5ede
+MessageUI	swift-typealias	s:So22MFMailComposeErrorCodeV8RawValuea	MFMailComposeError.Code	RawValue	-	-	-	-	-	b57a0cd9f4022c7d
+MessageUI	swift-typealias	c:@E@MFMailComposeErrorCode	MFMailComposeError.Code	_ErrorType	-	-	-	-	-	26ef29c5eb10caee
+MessageUI	swift-constant	c:@E@MFMailComposeErrorCode@MFMailComposeErrorCodeSaveFailed	MFMailComposeError.Code	saveFailed	-	-	-	-	-	fc2c7cffa2f64ec2
+MessageUI	swift-constant	c:@E@MFMailComposeErrorCode@MFMailComposeErrorCodeSendFailed	MFMailComposeError.Code	sendFailed	-	-	-	-	-	5fd7e805c5d81f21
+MessageUI	swift-property	c:@E@MFMailComposeErrorCode@MFMailComposeErrorCodeSaveFailed	MFMailComposeError	saveFailed	+	MessageUI.MFMailComposeError.Code	-	-	-	83736c028a5dde45
+MessageUI	swift-property	c:@E@MFMailComposeErrorCode@MFMailComposeErrorCodeSendFailed	MFMailComposeError	sendFailed	+	MessageUI.MFMailComposeError.Code	-	-	-	c557dd72dbc7e92b

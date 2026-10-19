@@ -1,0 +1,15 @@
+diff --git a/Sources/SwiftDriver/Toolchains/DarwinToolchain.swift b/Sources/SwiftDriver/Toolchains/DarwinToolchain.swift
+index 0d75805..af9c147 100644
+--- a/Sources/SwiftDriver/Toolchains/DarwinToolchain.swift
++++ b/Sources/SwiftDriver/Toolchains/DarwinToolchain.swift
+@@ -267,7 +267,9 @@ public final class DarwinToolchain: Toolchain {
+     // Check minimum supported OS versions. Note that Mac Catalyst falls into the iOS device case. The driver automatically uplevels the deployment target to iOS >= 13.1.
+     let minVersions: [Triple.OS: (DarwinPlatform, Triple.Version)] = [
+       .macosx: (.macOS, Triple.Version(10, 9, 0)),
+-      .ios: (.iOS(targetTriple._isSimulatorEnvironment ? .simulator : .device), Triple.Version(7, 0, 0)),
++      // iOS is left out: a program that carries its own Swift runtime, which -bundled-swift-runtime says it does, decides
++      // for itself how old a release it runs on, and the frontend compiles for those releases. The runtime Charon builds is
++      // for iOS 6.0.
+       .tvos: (.tvOS(targetTriple._isSimulatorEnvironment ? .simulator : .device), Triple.Version(9, 0, 0)),
+       .watchos: (.watchOS(targetTriple._isSimulatorEnvironment ? .simulator : .device), Triple.Version(2, 0, 0)),
+       .visionos: (.visionOS(targetTriple._isSimulatorEnvironment ? .simulator : .device), Triple.Version(1, 0, 0))

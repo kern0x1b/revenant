@@ -1,0 +1,1 @@
+            double y = CharonMPSApplyNeuron(neuron.type, sum, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));

@@ -1,0 +1,65 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_RGB16UtoARGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the three channels of an interleaved 16-bit RGB row with an alpha in front; the alpha is the caller's plane if there is one and the caller's value if there is not, and premultiply scales the three colours by it as value * alpha / 65535",
+      "effect": "A R G B in memory order, measured; a NULL alpha buffer is not a refusal but the fill becomes the alpha",
+      "facts": "facts/Accelerate/vImageAlpha16.md",
+      "source": "the header of iOS 16.4, which declares all five at 7.0 with the argument order the tables follow",
+      "order": "0, 1, 2, alpha"
+    },
+    {
+      "api": "vImageConvert_RGB16UtoRGBA16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same three channels with the alpha last, the same alpha plane or fill and the same premultiply",
+      "effect": "R G B A in memory order, measured; the only difference from ARGB16U is which slot the alpha lands in",
+      "facts": "facts/Accelerate/vImageAlpha16.md",
+      "source": "the header of iOS 16.4, which declares all five at 7.0 with the argument order the tables follow",
+      "order": "0, 1, 2, alpha"
+    },
+    {
+      "api": "vImageConvert_RGB16UtoBGRA16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same three channels with blue first and the alpha last",
+      "effect": "B G R A in memory order, measured over one plane and three fills",
+      "facts": "facts/Accelerate/vImageAlpha16.md",
+      "source": "the header of iOS 16.4, which declares all five at 7.0 with the argument order the tables follow",
+      "order": "2, 1, 0, alpha"
+    },
+    {
+      "api": "vImageConvert_RGBA16UtoRGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "three sixteen-bit rows out of an interleaved RGBA row, the alpha dropped and the colours unmoved",
+      "effect": "R G B, taken from source channels 0, 1 and 2; 0x2111, 0x3222 and 0x4333 come out as 8465, 12834 and 17203",
+      "facts": "facts/Accelerate/vImageAlpha16.md",
+      "source": "the header of iOS 16.4, which declares all five at 7.0 with the argument order the tables follow",
+      "order": "0, 1, 2"
+    },
+    {
+      "api": "vImageConvert_BGRA16UtoRGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same drop out of an interleaved BGRA row, where the colours are not in destination order",
+      "effect": "R G B, taken from source channels 2, 1 and 0, so the row is a reorder and not a drop",
+      "facts": "facts/Accelerate/vImageAlpha16.md",
+      "source": "the header of iOS 16.4, which declares all five at 7.0 with the argument order the tables follow",
+      "order": "2, 1, 0"
+    }
+  ]
+}

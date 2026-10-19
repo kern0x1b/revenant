@@ -1,0 +1,21 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+ServicesAccountLinking	swift-struct	c:@E@SALRegistrationError	-	RegistrationError	-	-	-	-	-	98c257ffa8011dd1
+ServicesAccountLinking	swift-property	s:SC20SALRegistrationErrorLeV03_nsB0So7NSErrorCvp	RegistrationError	_nsError	-	Foundation.NSError	-	-	-	8665ba8284b3770e
+ServicesAccountLinking	swift-method	s:SC20SALRegistrationErrorLeV03_nsB0ABSo7NSErrorC_tcfc	RegistrationError	init(_nsError:)	-	-	ServicesAccountLinking.RegistrationError | Foundation.NSError	-	-	2f77639a47d5ae0b
+ServicesAccountLinking	swift-property	s:SC20SALRegistrationErrorLeV11errorDomainSSvpZ	RegistrationError	errorDomain	+	Swift.String	-	-	-	66ae8783eb1594a7
+ServicesAccountLinking	swift-enum	c:@E@SALRegistrationError	RegistrationError	Code	-	-	-	-	-	b949cd7e15883965
+ServicesAccountLinking	swift-method	s:So20SALRegistrationErrorV8rawValueABSgSi_tcfc	RegistrationError.Code	init(rawValue:)	-	-	ServicesAccountLinking.RegistrationError.Code? | Swift.Int	-	-	44bb8b9ffa438c49
+ServicesAccountLinking	swift-property	s:So20SALRegistrationErrorV8rawValueSivp	RegistrationError.Code	rawValue	-	Swift.Int	-	-	-	f0866151f4e9dcbf
+ServicesAccountLinking	swift-typealias	s:So20SALRegistrationErrorV8RawValuea	RegistrationError.Code	RawValue	-	-	-	-	-	f75fdd3b40ec510c
+ServicesAccountLinking	swift-typealias	c:@E@SALRegistrationError	RegistrationError.Code	_ErrorType	-	-	-	-	-	2e8d4b52980e1038
+ServicesAccountLinking	swift-constant	c:@E@SALRegistrationError@SALRegistrationErrorNotEligible	RegistrationError.Code	notEligible	-	-	-	-	-	d98057f324d337a5
+ServicesAccountLinking	swift-constant	c:@E@SALRegistrationError@SALRegistrationErrorFailed	RegistrationError.Code	failed	-	-	-	-	-	6edab5c8733e0a08
+ServicesAccountLinking	swift-property	c:@E@SALRegistrationError@SALRegistrationErrorNotEligible	RegistrationError	notEligible	+	ServicesAccountLinking.RegistrationError.Code	-	-	-	fd3ededb6275f78d
+ServicesAccountLinking	swift-property	c:@E@SALRegistrationError@SALRegistrationErrorFailed	RegistrationError	failed	+	ServicesAccountLinking.RegistrationError.Code	-	-	-	65ae197adf854bf9
+ServicesAccountLinking	swift-constant	c:@ServicesAccountLinkingVersionNumber	-	ServicesAccountLinkingVersionNumber	-	Swift.Double	-	-	-	5a53f0f924137459
+ServicesAccountLinking	swift-constant	c:@ServicesAccountLinkingVersionString	-	ServicesAccountLinkingVersionString	-	_	-	-	-	2ab4ee960cf5fb9b
+ServicesAccountLinking	swift-struct	c:@SA@SALResellerAccount	-	ResellerAccount	-	-	-	-	-	45597fa22a0fec2f
+ServicesAccountLinking	swift-method	s:So18SALResellerAccounta08ServicesB7LinkingE13registerTokenyySSYaKFZ	ResellerAccount	registerToken(_:)	+	()	Swift.String	ios=16.4	-	bfb12411b890a57f
+ServicesAccountLinking	swift-method	s:So18SALResellerAccounta08ServicesB7LinkingE18registerIdentifieryySSYaKFZ	ResellerAccount	registerIdentifier(_:)	+	()	Swift.String	ios=16.4	-	afb44a1103b22ca2
+ServicesAccountLinking	swift-method	s:So18SALResellerAccounta08ServicesB7LinkingE17realRegisterTokenyySSYaKFZ	ResellerAccount	realRegisterToken(_:)	+	()	Swift.String	ios=26.2	-	b05ea8703bc5b39a
+ServicesAccountLinking	swift-method	s:So18SALResellerAccounta08ServicesB7LinkingE22realRegisterIdentifieryySSYaKFZ	ResellerAccount	realRegisterIdentifier(_:)	+	()	Swift.String	ios=26.2	-	bc02bf4a4e554c54

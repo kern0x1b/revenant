@@ -1,0 +1,28 @@
+== program change with bank valid, 2.0 -> 1.0 destination
+pc bank-valid msb=0x0A lsb=0x03 prog=5: [20B0000A 20B02003 20C00500]  (1 packets)
+== RPN 0,0 value 0x00400000 (word0 0x40200000), 2.0 -> 1.0
+rpn 0,0: [20B06500 20B06400 20B00600 20B02610]  (1 packets)
+nrpn 1,35: [20B06301 20B06223 20B00600 20B02610]  (1 packets)
+rpn 0,0 value 0: [20B06500 20B06400 20B00600]  (1 packets)
+rpn 0,0 value FFFFFFFF: [20B0067F 20B0267F]  (1 packets)
+== per-note pitch bend, per-note management, assignable controllers, 2.0 -> 1.0
+per-note pitch bend:  (0 packets)
+per-note management detach:  (0 packets)
+relative RPN?(0x4010):  (0 packets)
+assignable-nrpn 0x4010 idx 0x01:  (0 packets)
+== MIDI 1.0 CC sequences into a 2.0 destination (RPN 0,0 bytes)
+cc101/100/6 bytes into 2.0 dest: [40200000 18000000]  (1 packets)
+== MIDIEventListAdd: same timestamp, overflow, 64-word limit
+same ts twice: packets=1 ptr=ok
+64-byte buffer: packets=3, then ptr non-null
+65 words: accepted, numPackets=1
+64 words: accepted
+protocol field after init 2.0: 2
+first packet timestamp=0 wordCount=1
+== MIDIEventListInit on a list of 0 bytes
+init result offset=8 numPackets=0
+== sizes: MIDIEventList=276 MIDIEventPacket=268 MIDIUniversalMessage=28
+== constants
+kMIDIProtocol_1_0=1 kMIDIProtocol_2_0=2
+kMIDIPropertyProtocolID=protocol
+kMIDIPropertyNameConfigurationDictionary=nameConfigurationDictionary

@@ -1,0 +1,85 @@
+{
+  "framework": "SafariServices",
+  "entries": [
+    {
+      "api": "SSReadingList",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class SSReadingList",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SSReadingListErrorDomain",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the constant SSReadingListErrorDomain",
+      "effect": "until built: the symbol is not exported",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SFContentBlockerErrorDomain",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the constant SFContentBlockerErrorDomain",
+      "effect": "until built: the symbol is not exported",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SFContentBlockerManager",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class SFContentBlockerManager",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SFContentBlockerState",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class SFContentBlockerState",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SFErrorDomain",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the constant SFErrorDomain",
+      "effect": "until built: the symbol is not exported",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SFExtensionMessageKey",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the constant SFExtensionMessageKey",
+      "effect": "until built: the symbol is not exported",
+      "source": "SDK 16.4, SafariServices"
+    },
+    {
+      "api": "SFSafariViewControllerDataStore",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class SFSafariViewControllerDataStore",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, SafariServices"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+PhotosUI	swift-struct	s:8PhotosUI12PHPickerModeV	-	PHPickerMode	-	-	-	ios=17.0,macos=14.0	-	e03405d67375a90c
+PhotosUI	swift-property	s:8PhotosUI12PHPickerModeV7defaultACvpZ	PHPickerMode	default	+	PhotosUI.PHPickerMode	-	-	-	8606d087c237feef
+PhotosUI	swift-property	s:8PhotosUI12PHPickerModeV7compactACvpZ	PHPickerMode	compact	+	PhotosUI.PHPickerMode	-	-	-	4a74979d488ccc6e
+PhotosUI	swift-method	s:8PhotosUI12PHPickerModeV2eeoiySbAC_ACtFZ	PHPickerMode	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerMode | PhotosUI.PHPickerMode	-	-	433bbadb5803aef6
+PhotosUI	swift-method	s:8PhotosUI12PHPickerModeV4hash4intoys6HasherVz_tF	PHPickerMode	hash(into:)	-	()	Swift.Hasher	-	-	507f425cc246e1cc
+PhotosUI	swift-property	s:8PhotosUI12PHPickerModeV9hashValueSivp	PHPickerMode	hashValue	-	Swift.Int	-	-	-	4221eaf97398290a
+PhotosUI	swift-struct	s:8PhotosUI14PHPickerFilterV	-	PHPickerFilter	-	-	-	ios=14.0,macos=13.0,watchos=9.0	-	6c66255c3c3472aa
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV6imagesACvpZ	PHPickerFilter	images	+	PhotosUI.PHPickerFilter	-	-	-	4b4ba58bfa88d32c
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV6videosACvpZ	PHPickerFilter	videos	+	PhotosUI.PHPickerFilter	-	-	-	01f85e1843e4ae48
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV04liveA0ACvpZ	PHPickerFilter	livePhotos	+	PhotosUI.PHPickerFilter	-	-	-	7129cb78c0d49c6d
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV011depthEffectA0ACvpZ	PHPickerFilter	depthEffectPhotos	+	PhotosUI.PHPickerFilter	-	ios=16.0	-	973dfd816dec0ab8
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV6burstsACvpZ	PHPickerFilter	bursts	+	PhotosUI.PHPickerFilter	-	ios=16.0	-	b5ede995277f3df0
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV9panoramasACvpZ	PHPickerFilter	panoramas	+	PhotosUI.PHPickerFilter	-	ios=15.0	-	776b7df83a3a6a19
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV11screenshotsACvpZ	PHPickerFilter	screenshots	+	PhotosUI.PHPickerFilter	-	ios=15.0	-	bdfd22a8b54f0cac
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV16screenRecordingsACvpZ	PHPickerFilter	screenRecordings	+	PhotosUI.PHPickerFilter	-	ios=15.0	-	81fe9646cf3e54b1
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV11slomoVideosACvpZ	PHPickerFilter	slomoVideos	+	PhotosUI.PHPickerFilter	-	ios=15.0	-	18a639a803098af1
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV15timelapseVideosACvpZ	PHPickerFilter	timelapseVideos	+	PhotosUI.PHPickerFilter	-	ios=15.0	-	3180741a70e3482b
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV15cinematicVideosACvpZ	PHPickerFilter	cinematicVideos	+	PhotosUI.PHPickerFilter	-	ios=16.0	-	85c8208508094da5
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV12spatialMediaACvpZ	PHPickerFilter	spatialMedia	+	PhotosUI.PHPickerFilter	-	ios=18.0,macos=15.0	-	46a28a1fe84094b4
+PhotosUI	swift-method	s:8PhotosUI14PHPickerFilterV13playbackStyleyACSo015PHAssetPlaybackF0VFZ	PHPickerFilter	playbackStyle(_:)	+	PhotosUI.PHPickerFilter	Photos.PHAsset.PlaybackStyle	ios=15.0	-	d7ea5bbfafb52096
+PhotosUI	swift-method	s:8PhotosUI14PHPickerFilterV3any2ofACSayACG_tFZ	PHPickerFilter	any(of:)	+	PhotosUI.PHPickerFilter	[PhotosUI.PHPickerFilter]	-	-	a3bcc03b00892bfe
+PhotosUI	swift-method	s:8PhotosUI14PHPickerFilterV3all2ofACSayACG_tFZ	PHPickerFilter	all(of:)	+	PhotosUI.PHPickerFilter	[PhotosUI.PHPickerFilter]	ios=15.0	-	675e19bdcbac2399
+PhotosUI	swift-method	s:8PhotosUI14PHPickerFilterV3notyA2CFZ	PHPickerFilter	not(_:)	+	PhotosUI.PHPickerFilter	PhotosUI.PHPickerFilter	ios=15.0	-	8d63fb908d234922
+PhotosUI	swift-method	s:8PhotosUI14PHPickerFilterV2eeoiySbAC_ACtFZ	PHPickerFilter	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerFilter | PhotosUI.PHPickerFilter	-	-	29728503dad434c6
+PhotosUI	swift-method	s:8PhotosUI14PHPickerFilterV4hash4intoys6HasherVz_tF	PHPickerFilter	hash(into:)	-	()	Swift.Hasher	-	-	bfd69b48ced84802
+PhotosUI	swift-property	s:8PhotosUI14PHPickerFilterV9hashValueSivp	PHPickerFilter	hashValue	-	Swift.Int	-	-	-	9b0217485b7c28b7
+PhotosUI	swift-struct	s:8PhotosUI21PHPickerConfigurationV	-	PHPickerConfiguration	-	-	-	ios=14.0,macos=13.0	-	ca1a13975bcd19f7
+PhotosUI	swift-enum	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO	PHPickerConfiguration	AssetRepresentationMode	-	-	-	-	-	100512c8a0cef833
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO9automaticyA2EmF	PHPickerConfiguration.AssetRepresentationMode	automatic	-	-	-	-	-	01ad784642e5b0ad
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO7currentyA2EmF	PHPickerConfiguration.AssetRepresentationMode	current	-	-	-	-	-	915a5a07cda0d01c
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO10compatibleyA2EmF	PHPickerConfiguration.AssetRepresentationMode	compatible	-	-	-	-	-	33c4ea5f4bc3c146
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO2eeoiySbAE_AEtFZ	PHPickerConfiguration.AssetRepresentationMode	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerConfiguration.AssetRepresentationMode | PhotosUI.PHPickerConfiguration.AssetRepresentationMode	-	-	5bcac2c74cd67c7e
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO4hash4intoys6HasherVz_tF	PHPickerConfiguration.AssetRepresentationMode	hash(into:)	-	()	Swift.Hasher	-	-	074455f86f04b76b
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV23AssetRepresentationModeO9hashValueSivp	PHPickerConfiguration.AssetRepresentationMode	hashValue	-	Swift.Int	-	-	-	907aba1c62d97944
+PhotosUI	swift-enum	s:8PhotosUI21PHPickerConfigurationV9SelectionO	PHPickerConfiguration	Selection	-	-	-	ios=15.0	-	e11e15712c05edca
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV9SelectionO7defaultyA2EmF	PHPickerConfiguration.Selection	default	-	-	-	-	-	923a118883d71d8e
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV9SelectionO7orderedyA2EmF	PHPickerConfiguration.Selection	ordered	-	-	-	-	-	45164b2d33a2d0cb
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV9SelectionO10continuousyA2EmF	PHPickerConfiguration.Selection	continuous	-	-	-	ios=17.0,macos=14.0	-	eaebb0528e39f28c
+PhotosUI	swift-constant	s:8PhotosUI21PHPickerConfigurationV9SelectionO20continuousAndOrderedyA2EmF	PHPickerConfiguration.Selection	continuousAndOrdered	-	-	-	ios=17.0,macos=14.0	-	889129443712c744
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV9SelectionO2eeoiySbAE_AEtFZ	PHPickerConfiguration.Selection	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerConfiguration.Selection | PhotosUI.PHPickerConfiguration.Selection	-	-	976d55af6d940f47
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV9SelectionO4hash4intoys6HasherVz_tF	PHPickerConfiguration.Selection	hash(into:)	-	()	Swift.Hasher	-	-	5b393222272c02fb
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV9SelectionO9hashValueSivp	PHPickerConfiguration.Selection	hashValue	-	Swift.Int	-	-	-	d3ca6b2385f48fdf
+PhotosUI	swift-struct	s:8PhotosUI21PHPickerConfigurationV6UpdateV	PHPickerConfiguration	Update	-	-	-	ios=17.0,macos=14.0	-	3c591d8b0a99f93a
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV6UpdateV14selectionLimitSiSgvp	PHPickerConfiguration.Update	selectionLimit	-	Swift.Int?	-	-	-	f524b68d07c020ec
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV6UpdateV26edgesWithoutContentMarginsSo21NSDirectionalRectEdgeVSgvp	PHPickerConfiguration.Update	edgesWithoutContentMargins	-	UIKit.NSDirectionalRectEdge?	-	-	-	a3ef6813d793691a
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV6UpdateVAEycfc	PHPickerConfiguration.Update	init()	-	-	PhotosUI.PHPickerConfiguration.Update	-	-	a75a1706428b02e7
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV6UpdateV2eeoiySbAE_AEtFZ	PHPickerConfiguration.Update	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerConfiguration.Update | PhotosUI.PHPickerConfiguration.Update	-	-	b55e9ad937736c8c
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV6UpdateV4hash4intoys6HasherVz_tF	PHPickerConfiguration.Update	hash(into:)	-	()	Swift.Hasher	-	-	87491d90bae1b7a0
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV6UpdateV9hashValueSivp	PHPickerConfiguration.Update	hashValue	-	Swift.Int	-	-	-	5f32680606a5fad0
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV32preferredAssetRepresentationModeAC0fgH0Ovp	PHPickerConfiguration	preferredAssetRepresentationMode	-	PhotosUI.PHPickerConfiguration.AssetRepresentationMode	-	-	-	267eb211e2b442b4
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV9selectionAC9SelectionOvp	PHPickerConfiguration	selection	-	PhotosUI.PHPickerConfiguration.Selection	-	ios=15.0	-	5183d4a45ecab431
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV14selectionLimitSivp	PHPickerConfiguration	selectionLimit	-	Swift.Int	-	-	-	2e1589f484846893
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV6filterAA0C6FilterVSgvp	PHPickerConfiguration	filter	-	PhotosUI.PHPickerFilter?	-	-	-	276ad35b2eb91c9d
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV27preselectedAssetIdentifiersSaySSGvp	PHPickerConfiguration	preselectedAssetIdentifiers	-	[Swift.String]	-	ios=15.0	-	29dd7354dd84a29e
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV4modeAA0C4ModeVvp	PHPickerConfiguration	mode	-	PhotosUI.PHPickerMode	-	ios=17.0,macos=14.0	-	af69fb7289f47ffd
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV26edgesWithoutContentMarginsSo21NSDirectionalRectEdgeVvp	PHPickerConfiguration	edgesWithoutContentMargins	-	UIKit.NSDirectionalRectEdge	-	ios=17.0,macos=14.0	-	4e634bfe54e9b669
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV20disabledCapabilitiesSo0cF0Vvp	PHPickerConfiguration	disabledCapabilities	-	PhotosUI.PHPickerCapabilities	-	ios=17.0,macos=14.0	-	b5a27456356ea49a
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationVACycfc	PHPickerConfiguration	init()	-	-	PhotosUI.PHPickerConfiguration	-	-	a88b534b325c634b
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV12photoLibraryACSo07PHPhotoF0C_tcfc	PHPickerConfiguration	init(photoLibrary:)	-	-	PhotosUI.PHPickerConfiguration | Photos.PHPhotoLibrary	-	-	200ece119d6bfb66
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV2eeoiySbAC_ACtFZ	PHPickerConfiguration	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerConfiguration | PhotosUI.PHPickerConfiguration	-	-	af08a2527f3e4abd
+PhotosUI	swift-method	s:8PhotosUI21PHPickerConfigurationV4hash4intoys6HasherVz_tF	PHPickerConfiguration	hash(into:)	-	()	Swift.Hasher	-	-	b59ffda532a5555c
+PhotosUI	swift-property	s:8PhotosUI21PHPickerConfigurationV9hashValueSivp	PHPickerConfiguration	hashValue	-	Swift.Int	-	-	-	ecfb3a18987833e2
+PhotosUI	swift-struct	s:8PhotosUI14PHPickerResultV	-	PHPickerResult	-	-	-	ios=14.0,macos=13.0	-	5aa48531b6431213
+PhotosUI	swift-property	s:8PhotosUI14PHPickerResultV12itemProviderSo06NSItemF0Cvp	PHPickerResult	itemProvider	-	Foundation.NSItemProvider	-	-	-	fe651e7554bb680a
+PhotosUI	swift-property	s:8PhotosUI14PHPickerResultV15assetIdentifierSSSgvp	PHPickerResult	assetIdentifier	-	Swift.String?	-	-	-	794d3b6ded86331d
+PhotosUI	swift-method	s:8PhotosUI14PHPickerResultV2eeoiySbAC_ACtFZ	PHPickerResult	==(_:_:)	+	Swift.Bool	PhotosUI.PHPickerResult | PhotosUI.PHPickerResult	-	-	c3c39abac798edf4
+PhotosUI	swift-method	s:8PhotosUI14PHPickerResultV4hash4intoys6HasherVz_tF	PHPickerResult	hash(into:)	-	()	Swift.Hasher	-	-	c537311ccf565fe6
+PhotosUI	swift-property	s:8PhotosUI14PHPickerResultV9hashValueSivp	PHPickerResult	hashValue	-	Swift.Int	-	-	-	d8e241ea9737708f
+PhotosUI	swift-protocol	s:8PhotosUI30PHPickerViewControllerDelegateP	-	PHPickerViewControllerDelegate	-	-	-	ios=14.0,macos=13.0	-	728dfa00bf8fd669
+PhotosUI	swift-method	s:8PhotosUI30PHPickerViewControllerDelegateP6picker_16didFinishPickingySo0cdE0C_SayAA0C6ResultVGtF	PHPickerViewControllerDelegate	picker(_:didFinishPicking:)	-	()	PhotosUI.PHPickerViewController | [PhotosUI.PHPickerResult]	-	-	5e0b12b935db1012
+PhotosUI	swift-class	c:objc(cs)PHPickerViewController	-	PHPickerViewController	-	-	-	ios=14	-	ea7ee642c2ebea51
+PhotosUI	swift-property	s:So22PHPickerViewControllerC8PhotosUIE13configurationAC0A13ConfigurationVvp	PHPickerViewController	configuration	-	PhotosUI.PHPickerConfiguration	-	-	-	9d914bdf2b3f32f8
+PhotosUI	swift-property	s:So22PHPickerViewControllerC8PhotosUIE8delegateAC0abC8Delegate_pSgvp	PHPickerViewController	delegate	-	(any PhotosUI.PHPickerViewControllerDelegate)?	-	-	-	5118f6cadaf2e3c7
+PhotosUI	swift-method	s:So22PHPickerViewControllerC8PhotosUIE13configurationAbC0A13ConfigurationV_tcfc	PHPickerViewController	init(configuration:)	-	-	PhotosUI.PHPickerViewController | PhotosUI.PHPickerConfiguration	-	-	f9cc8fcc2d78f69c
+PhotosUI	swift-method	s:So22PHPickerViewControllerC8PhotosUIE12updatePicker5usingyAC0A13ConfigurationV6UpdateV_tF	PHPickerViewController	updatePicker(using:)	-	()	PhotosUI.PHPickerConfiguration.Update	ios=17.0,macos=14.0	-	2e3ff2a594c982a0

@@ -1,0 +1,137 @@
+{
+  "framework": "ImageIO",
+  "entries": [
+    {
+      "api": "kCGComputeHDRStats",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGComputeHDRStats, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeAlternateColorSpace",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeAlternateColorSpace, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeBaseColorSpace",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeBaseColorSpace, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeBasePixelFormatRequest",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeBasePixelFormatRequest, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeGainMapPixelFormatRequest",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeGainMapPixelFormatRequest, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeGainMapSubsampleFactor",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeGainMapSubsampleFactor, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeGenerateGainMapWithBaseImage",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeGenerateGainMapWithBaseImage, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageDestinationEncodeIsBaseImage",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageDestinationEncodeIsBaseImage, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImagePropertyASTCBlockSize4x4",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImagePropertyASTCBlockSize4x4, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImagePropertyASTCBlockSize8x8",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImagePropertyASTCBlockSize8x8, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageProviderPreferredTileHeight",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageProviderPreferredTileHeight, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImageProviderPreferredTileWidth",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the twelve are in no held rung and are annotated iOS 26.0; ImageIONames260.m already holds the one 26.0 name the port had, and a second object of the same band is what the split by symbol asks for, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImageProviderPreferredTileWidth, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    }
+  ]
+}

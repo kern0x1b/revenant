@@ -1,0 +1,186 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_DarwinFoundation1	swift-constant	s:6Darwin5errnos5Int32Vvp	-	errno	-	Swift.Int32	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	27dba20f18689db1
+_DarwinFoundation1	swift-enum	c:@M@_DarwinFoundation1@E@POSIXErrorCode	-	POSIXErrorCode	-	-	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	6c619a51478d057b
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPERM	POSIXErrorCode	EPERM	-	-	-	-	-	b18cac6703ac8bef
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOENT	POSIXErrorCode	ENOENT	-	-	-	-	-	fb1572ac1d03680a
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeESRCH	POSIXErrorCode	ESRCH	-	-	-	-	-	126c7876ade14e28
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEINTR	POSIXErrorCode	EINTR	-	-	-	-	-	262ef379e52ac167
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEIO	POSIXErrorCode	EIO	-	-	-	-	-	e337aa16b69e3ac4
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENXIO	POSIXErrorCode	ENXIO	-	-	-	-	-	b624704ec364dd81
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeE2BIG	POSIXErrorCode	E2BIG	-	-	-	-	-	6bd28c62162546ac
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOEXEC	POSIXErrorCode	ENOEXEC	-	-	-	-	-	7f84d46c1a2cbcb3
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBADF	POSIXErrorCode	EBADF	-	-	-	-	-	b96221ed211d587c
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeECHILD	POSIXErrorCode	ECHILD	-	-	-	-	-	de0f535cd376a57c
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEDEADLK	POSIXErrorCode	EDEADLK	-	-	-	-	-	df38d98c739abeb7
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOMEM	POSIXErrorCode	ENOMEM	-	-	-	-	-	e5919bdf089ca262
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEACCES	POSIXErrorCode	EACCES	-	-	-	-	-	7819c39ee570ad41
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEFAULT	POSIXErrorCode	EFAULT	-	-	-	-	-	41c27476fa69c6c0
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTBLK	POSIXErrorCode	ENOTBLK	-	-	-	-	-	05f760aeecb9af36
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBUSY	POSIXErrorCode	EBUSY	-	-	-	-	-	9de6c10e82c8b9b2
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEEXIST	POSIXErrorCode	EEXIST	-	-	-	-	-	d58cdd3823d47ba6
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEXDEV	POSIXErrorCode	EXDEV	-	-	-	-	-	f0c9217724a6896b
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENODEV	POSIXErrorCode	ENODEV	-	-	-	-	-	a01a9aef633a0b7f
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTDIR	POSIXErrorCode	ENOTDIR	-	-	-	-	-	7671fe1c76f0ab5d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEISDIR	POSIXErrorCode	EISDIR	-	-	-	-	-	66c6bf783814e5e4
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEINVAL	POSIXErrorCode	EINVAL	-	-	-	-	-	ea41d826cef816c2
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENFILE	POSIXErrorCode	ENFILE	-	-	-	-	-	7058bb1bce5c2cf1
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEMFILE	POSIXErrorCode	EMFILE	-	-	-	-	-	b86bcf9888105778
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTTY	POSIXErrorCode	ENOTTY	-	-	-	-	-	eb19a0f0b0f31c10
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeETXTBSY	POSIXErrorCode	ETXTBSY	-	-	-	-	-	d4c9b77fbfd2f521
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEFBIG	POSIXErrorCode	EFBIG	-	-	-	-	-	9c2394e4673fc5c8
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOSPC	POSIXErrorCode	ENOSPC	-	-	-	-	-	517177b0ce64ac4e
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeESPIPE	POSIXErrorCode	ESPIPE	-	-	-	-	-	d9f78df5ec4e7e0e
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEROFS	POSIXErrorCode	EROFS	-	-	-	-	-	5af48aa0320a97bc
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEMLINK	POSIXErrorCode	EMLINK	-	-	-	-	-	356b32a2ec6771d6
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPIPE	POSIXErrorCode	EPIPE	-	-	-	-	-	5f8b2c0e9b4c7cf6
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEDOM	POSIXErrorCode	EDOM	-	-	-	-	-	c0573561084a68f8
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeERANGE	POSIXErrorCode	ERANGE	-	-	-	-	-	60d6763b005e101f
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEAGAIN	POSIXErrorCode	EAGAIN	-	-	-	-	-	4689dc8bfa6bf0af
+_DarwinFoundation1	swift-property	s:6Darwin14POSIXErrorCodeO11EWOULDBLOCKACvpZ	POSIXErrorCode	EWOULDBLOCK	+	_DarwinFoundation1.POSIXErrorCode	-	-	-	5622c42f2e9b9a0e
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEINPROGRESS	POSIXErrorCode	EINPROGRESS	-	-	-	-	-	b5d6360f28b1090d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEALREADY	POSIXErrorCode	EALREADY	-	-	-	-	-	8cc447281082d055
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTSOCK	POSIXErrorCode	ENOTSOCK	-	-	-	-	-	96576a2c0b2b2908
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEDESTADDRREQ	POSIXErrorCode	EDESTADDRREQ	-	-	-	-	-	eb50807902eca253
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEMSGSIZE	POSIXErrorCode	EMSGSIZE	-	-	-	-	-	4de38a41f215d5f4
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROTOTYPE	POSIXErrorCode	EPROTOTYPE	-	-	-	-	-	2a95eeb507bf348e
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOPROTOOPT	POSIXErrorCode	ENOPROTOOPT	-	-	-	-	-	8de918d3b5de9711
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROTONOSUPPORT	POSIXErrorCode	EPROTONOSUPPORT	-	-	-	-	-	aed0ccdb7e063e7f
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeESOCKTNOSUPPORT	POSIXErrorCode	ESOCKTNOSUPPORT	-	-	-	-	-	eeb601619c4b2cc7
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTSUP	POSIXErrorCode	ENOTSUP	-	-	-	-	-	173f467e24ba5fd7
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPFNOSUPPORT	POSIXErrorCode	EPFNOSUPPORT	-	-	-	-	-	a800fcc758e70314
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEAFNOSUPPORT	POSIXErrorCode	EAFNOSUPPORT	-	-	-	-	-	a30915d41c7cea47
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEADDRINUSE	POSIXErrorCode	EADDRINUSE	-	-	-	-	-	15edc7f8942330f2
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEADDRNOTAVAIL	POSIXErrorCode	EADDRNOTAVAIL	-	-	-	-	-	5c220b1fd94f08c3
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENETDOWN	POSIXErrorCode	ENETDOWN	-	-	-	-	-	1a2cf7f0a771d35d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENETUNREACH	POSIXErrorCode	ENETUNREACH	-	-	-	-	-	a46f3f674d371d29
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENETRESET	POSIXErrorCode	ENETRESET	-	-	-	-	-	cef1ba1a32affa71
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeECONNABORTED	POSIXErrorCode	ECONNABORTED	-	-	-	-	-	04ba3c6e2af2a49f
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeECONNRESET	POSIXErrorCode	ECONNRESET	-	-	-	-	-	d249404119f51835
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOBUFS	POSIXErrorCode	ENOBUFS	-	-	-	-	-	aa15e12772f72bca
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEISCONN	POSIXErrorCode	EISCONN	-	-	-	-	-	04c60023484f46c8
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTCONN	POSIXErrorCode	ENOTCONN	-	-	-	-	-	82754ca112565a9f
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeESHUTDOWN	POSIXErrorCode	ESHUTDOWN	-	-	-	-	-	aa7c30c4603cbda1
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeETOOMANYREFS	POSIXErrorCode	ETOOMANYREFS	-	-	-	-	-	8e04baf7c0514651
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeETIMEDOUT	POSIXErrorCode	ETIMEDOUT	-	-	-	-	-	904aebe62be96aaa
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeECONNREFUSED	POSIXErrorCode	ECONNREFUSED	-	-	-	-	-	77006d220ef64c82
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeELOOP	POSIXErrorCode	ELOOP	-	-	-	-	-	92ebf0dea164ba3d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENAMETOOLONG	POSIXErrorCode	ENAMETOOLONG	-	-	-	-	-	25b16f895aff515a
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEHOSTDOWN	POSIXErrorCode	EHOSTDOWN	-	-	-	-	-	9808b5264953d345
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEHOSTUNREACH	POSIXErrorCode	EHOSTUNREACH	-	-	-	-	-	9ca5dae05454f09d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTEMPTY	POSIXErrorCode	ENOTEMPTY	-	-	-	-	-	8ca5c4881cce0e06
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROCLIM	POSIXErrorCode	EPROCLIM	-	-	-	-	-	70994ddf4b58ae02
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEUSERS	POSIXErrorCode	EUSERS	-	-	-	-	-	df68554f4b18d2d6
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEDQUOT	POSIXErrorCode	EDQUOT	-	-	-	-	-	c9faa1267a7f3af3
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeESTALE	POSIXErrorCode	ESTALE	-	-	-	-	-	f01e2c6f975250aa
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEREMOTE	POSIXErrorCode	EREMOTE	-	-	-	-	-	27a99538a80e85fc
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBADRPC	POSIXErrorCode	EBADRPC	-	-	-	-	-	14a7ec96b68ce843
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeERPCMISMATCH	POSIXErrorCode	ERPCMISMATCH	-	-	-	-	-	cb28c0e885e48f67
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROGUNAVAIL	POSIXErrorCode	EPROGUNAVAIL	-	-	-	-	-	157b1629d5b1ddfb
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROGMISMATCH	POSIXErrorCode	EPROGMISMATCH	-	-	-	-	-	a3927fcad66b9480
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROCUNAVAIL	POSIXErrorCode	EPROCUNAVAIL	-	-	-	-	-	1aa5255a8e3646ee
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOLCK	POSIXErrorCode	ENOLCK	-	-	-	-	-	7e0056b45c0a8774
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOSYS	POSIXErrorCode	ENOSYS	-	-	-	-	-	fa7eb682c032de3d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEFTYPE	POSIXErrorCode	EFTYPE	-	-	-	-	-	926d85385242ec80
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEAUTH	POSIXErrorCode	EAUTH	-	-	-	-	-	16e13c939f951d73
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENEEDAUTH	POSIXErrorCode	ENEEDAUTH	-	-	-	-	-	d238ee58ee945946
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPWROFF	POSIXErrorCode	EPWROFF	-	-	-	-	-	2b61770a4ffd3f41
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEDEVERR	POSIXErrorCode	EDEVERR	-	-	-	-	-	3073f6eada21da19
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEOVERFLOW	POSIXErrorCode	EOVERFLOW	-	-	-	-	-	fb0c284ebdba9f27
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBADEXEC	POSIXErrorCode	EBADEXEC	-	-	-	-	-	21cc336bee1c8c38
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBADARCH	POSIXErrorCode	EBADARCH	-	-	-	-	-	ccff3eee467907da
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeESHLIBVERS	POSIXErrorCode	ESHLIBVERS	-	-	-	-	-	aab7c7db02dcc938
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBADMACHO	POSIXErrorCode	EBADMACHO	-	-	-	-	-	34b2a42dba72d4fb
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeECANCELED	POSIXErrorCode	ECANCELED	-	-	-	-	-	dad83f341fc9bc0a
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEIDRM	POSIXErrorCode	EIDRM	-	-	-	-	-	08dcafb0035a09a5
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOMSG	POSIXErrorCode	ENOMSG	-	-	-	-	-	366c50cdb2ec8fe9
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEILSEQ	POSIXErrorCode	EILSEQ	-	-	-	-	-	939ad3d7e0f13ef7
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOATTR	POSIXErrorCode	ENOATTR	-	-	-	-	-	23d99700ff47309d
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEBADMSG	POSIXErrorCode	EBADMSG	-	-	-	-	-	de9049f7dd0fe569
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEMULTIHOP	POSIXErrorCode	EMULTIHOP	-	-	-	-	-	3aea5e671d14e7b3
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENODATA	POSIXErrorCode	ENODATA	-	-	-	-	-	b6e305bf171674db
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOLINK	POSIXErrorCode	ENOLINK	-	-	-	-	-	d860afdd5684a3d3
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOSR	POSIXErrorCode	ENOSR	-	-	-	-	-	ee826c903f8f77e2
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOSTR	POSIXErrorCode	ENOSTR	-	-	-	-	-	e003e8bde2e7d956
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEPROTO	POSIXErrorCode	EPROTO	-	-	-	-	-	65a4f0239e784c38
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeETIME	POSIXErrorCode	ETIME	-	-	-	-	-	08058e4b59a350e1
+_DarwinFoundation1	swift-property	s:6Darwin14POSIXErrorCodeO10EOPNOTSUPPACvpZ	POSIXErrorCode	EOPNOTSUPP	+	_DarwinFoundation1.POSIXErrorCode	-	-	-	f66b02feca8f3cd2
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOPOLICY	POSIXErrorCode	ENOPOLICY	-	-	-	-	-	8992c4ecb91ee4be
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTRECOVERABLE	POSIXErrorCode	ENOTRECOVERABLE	-	-	-	-	-	a0e3c3ddc0da45b1
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEOWNERDEAD	POSIXErrorCode	EOWNERDEAD	-	-	-	-	-	83d129d913a4c0aa
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeEQFULL	POSIXErrorCode	EQFULL	-	-	-	-	-	d8dd982539a59641
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCodeENOTCAPABLE	POSIXErrorCode	ENOTCAPABLE	-	-	-	-	-	8a48dc4ea484dff8
+_DarwinFoundation1	swift-property	s:6Darwin14POSIXErrorCodeO5ELASTACvpZ	POSIXErrorCode	ELAST	+	_DarwinFoundation1.POSIXErrorCode	-	-	-	7787316845d7abea
+_DarwinFoundation1	swift-method	s:6Darwin14POSIXErrorCodeO8rawValueACSgs5Int32V_tcfc	POSIXErrorCode	init(rawValue:)	-	-	_DarwinFoundation1.POSIXErrorCode? | Swift.Int32	-	-	5b64c5cd36125b22
+_DarwinFoundation1	swift-typealias	s:6Darwin14POSIXErrorCodeO8RawValuea	POSIXErrorCode	RawValue	-	-	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	8346332aec339ce6
+_DarwinFoundation1	swift-property	s:6Darwin14POSIXErrorCodeO8rawValues5Int32Vvp	POSIXErrorCode	rawValue	-	Swift.Int32	-	-	-	809b6a48ee590aa9
+_DarwinFoundation1	swift-constant	s:6Darwin4M_PISdvp	-	M_PI	-	Swift.Double	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	8a490305b29aad9b
+_DarwinFoundation1	swift-constant	s:6Darwin6M_PI_2Sdvp	-	M_PI_2	-	Swift.Double	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	e7958f0726be4e76
+_DarwinFoundation1	swift-constant	s:6Darwin6M_PI_4Sdvp	-	M_PI_4	-	Swift.Double	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	5ae75340f639a071
+_DarwinFoundation1	swift-constant	s:6Darwin7M_SQRT2Sdvp	-	M_SQRT2	-	Swift.Double	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	8c9e289db7be7206
+_DarwinFoundation1	swift-constant	s:6Darwin9M_SQRT1_2Sdvp	-	M_SQRT1_2	-	Swift.Double	-	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	f1a723a20ad8a9c7
+_DarwinFoundation1	swift-function	s:6Darwin4fabsyxxSFRzlF	-	fabs(_:)	-	T	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	f7523df6c5a596db
+_DarwinFoundation1	swift-function	s:6Darwin4sqrtyxxSFRzlF	-	sqrt(_:)	-	T	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	32da65c5f08d4a72
+_DarwinFoundation1	swift-function	s:6Darwin3fmayxx_xxtSFRzlF	-	fma(_:_:_:)	-	T	T | T | T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	25c83b37a76323be
+_DarwinFoundation1	swift-function	s:6Darwin9remainderyxx_xtSFRzlF	-	remainder(_:_:)	-	T	T | T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	5ce0503929cd0bf7
+_DarwinFoundation1	swift-function	s:6Darwin4fmodyxx_xtSFRzlF	-	fmod(_:_:)	-	T	T | T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	a407a7f65a549dc7
+_DarwinFoundation1	swift-function	s:6Darwin4ceilyxxSFRzlF	-	ceil(_:)	-	T	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	8191ec090f8312cf
+_DarwinFoundation1	swift-function	s:6Darwin5flooryxxSFRzlF	-	floor(_:)	-	T	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	8a9e392204e0dd49
+_DarwinFoundation1	swift-function	s:6Darwin5roundyxxSFRzlF	-	round(_:)	-	T	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	b35287fe944975bc
+_DarwinFoundation1	swift-function	s:6Darwin5truncyxxSFRzlF	-	trunc(_:)	-	T	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	10cc9281911f4b60
+_DarwinFoundation1	swift-function	s:6Darwin6scalbnyxx_SitSFRzlF	-	scalbn(_:_:)	-	T	T | Swift.Int	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	51446aa0ff055724
+_DarwinFoundation1	swift-function	s:6Darwin4modfyx_xtxSFRzlF	-	modf(_:)	-	(T, T)	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	c6c3ddb3663fff8e
+_DarwinFoundation1	swift-function	s:6Darwin5frexpyx_SitxSBRzlF	-	frexp(_:)	-	(T, Swift.Int)	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	aa1a3ce131bab379
+_DarwinFoundation1	swift-function	s:6Darwin5ldexpyS2f_SitF	-	ldexp(_:_:)	-	Swift.Float	Swift.Float | Swift.Int	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	7a1b32a61e5cfcf2
+_DarwinFoundation1	swift-function	s:6Darwin5ldexpyS2d_SitF	-	ldexp(_:_:)	-	Swift.Double	Swift.Double | Swift.Int	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	de7d4f86f1a87dd7
+_DarwinFoundation1	swift-function	s:6Darwin5ilogbySixSBRzlF	-	ilogb(_:)	-	Swift.Int	T	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	fd9e33bcc03a5daa
+_DarwinFoundation1	swift-function	s:6Darwin4acosyS2fF	-	acos(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	9efe38c6d58bda0d
+_DarwinFoundation1	swift-function	s:6Darwin4asinyS2fF	-	asin(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	0e04abfa06c9f329
+_DarwinFoundation1	swift-function	s:6Darwin4atanyS2fF	-	atan(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	6e92e80663032b7a
+_DarwinFoundation1	swift-function	s:6Darwin3tanyS2fF	-	tan(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	6d1d14d9762d4887
+_DarwinFoundation1	swift-function	s:6Darwin5acoshyS2fF	-	acosh(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	f34ee506a4dc406c
+_DarwinFoundation1	swift-function	s:6Darwin5asinhyS2fF	-	asinh(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	65a54143b9648d01
+_DarwinFoundation1	swift-function	s:6Darwin5atanhyS2fF	-	atanh(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	f4802b6586a4d760
+_DarwinFoundation1	swift-function	s:6Darwin4coshyS2fF	-	cosh(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	4abe5352b7e5324b
+_DarwinFoundation1	swift-function	s:6Darwin4sinhyS2fF	-	sinh(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	1679af92ba4e6df5
+_DarwinFoundation1	swift-function	s:6Darwin4tanhyS2fF	-	tanh(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	fa3b72348a593be7
+_DarwinFoundation1	swift-function	s:6Darwin5expm1yS2fF	-	expm1(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	a3bc128b72207224
+_DarwinFoundation1	swift-function	s:6Darwin5log1pyS2fF	-	log1p(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	2794d00e8ac94864
+_DarwinFoundation1	swift-function	s:6Darwin4logbyS2fF	-	logb(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	b6683b60b9edce6d
+_DarwinFoundation1	swift-function	s:6Darwin4cbrtyS2fF	-	cbrt(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	caff7558d9121c46
+_DarwinFoundation1	swift-function	s:6Darwin3erfyS2fF	-	erf(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	c151642e6f9781bd
+_DarwinFoundation1	swift-function	s:6Darwin4erfcyS2fF	-	erfc(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	88d463835695ad72
+_DarwinFoundation1	swift-function	s:6Darwin6tgammayS2fF	-	tgamma(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	ca5fed9206eed0c1
+_DarwinFoundation1	swift-function	s:6Darwin3cosyS2fF	-	cos(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	0e07e31b70a7cacd
+_DarwinFoundation1	swift-function	s:6Darwin3cosyS2dF	-	cos(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	ed7377f54a79c793
+_DarwinFoundation1	swift-function	s:6Darwin3sinyS2fF	-	sin(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	1eec7b85629a6057
+_DarwinFoundation1	swift-function	s:6Darwin3sinyS2dF	-	sin(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	a4c098436d5c73a9
+_DarwinFoundation1	swift-function	s:6Darwin3expyS2fF	-	exp(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	1fbc3fed8d7fd679
+_DarwinFoundation1	swift-function	s:6Darwin3expyS2dF	-	exp(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	c6fc5199ca392032
+_DarwinFoundation1	swift-function	s:6Darwin4exp2yS2fF	-	exp2(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	c8b05cc06c9b2111
+_DarwinFoundation1	swift-function	s:6Darwin4exp2yS2dF	-	exp2(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	06a90c4e6369990e
+_DarwinFoundation1	swift-function	s:6Darwin3logyS2fF	-	log(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	2970fbcc1a0cc651
+_DarwinFoundation1	swift-function	s:6Darwin3logyS2dF	-	log(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	d05b05f5ed49cee8
+_DarwinFoundation1	swift-function	s:6Darwin5log10yS2fF	-	log10(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	9809bdfe8e49cec8
+_DarwinFoundation1	swift-function	s:6Darwin5log10yS2dF	-	log10(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	3951d7ab660ae60a
+_DarwinFoundation1	swift-function	s:6Darwin4log2yS2fF	-	log2(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	6e849b5f931bbafa
+_DarwinFoundation1	swift-function	s:6Darwin4log2yS2dF	-	log2(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	98e90d0440b1639a
+_DarwinFoundation1	swift-function	s:6Darwin9nearbyintyS2fF	-	nearbyint(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	946d141f1a2383b1
+_DarwinFoundation1	swift-function	s:6Darwin9nearbyintyS2dF	-	nearbyint(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	3db7398854058ee6
+_DarwinFoundation1	swift-function	s:6Darwin4rintyS2fF	-	rint(_:)	-	Swift.Float	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	a6ecdeae70faba77
+_DarwinFoundation1	swift-function	s:6Darwin4rintyS2dF	-	rint(_:)	-	Swift.Double	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	4af6bd5d6aa7ec8e
+_DarwinFoundation1	swift-function	s:6Darwin5atan2yS2f_SftF	-	atan2(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	f12c31ab64fcf985
+_DarwinFoundation1	swift-function	s:6Darwin5hypotyS2f_SftF	-	hypot(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	b2efc3a998a8633f
+_DarwinFoundation1	swift-function	s:6Darwin3powyS2f_SftF	-	pow(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	ffc1bf1eacf721ec
+_DarwinFoundation1	swift-function	s:6Darwin8copysignyS2f_SftF	-	copysign(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	b5bc5109f2521b20
+_DarwinFoundation1	swift-function	s:6Darwin9nextafteryS2f_SftF	-	nextafter(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	28e4ad134c31f057
+_DarwinFoundation1	swift-function	s:6Darwin4fdimyS2f_SftF	-	fdim(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	cf80b5a6f6a96115
+_DarwinFoundation1	swift-function	s:6Darwin4fmaxyS2f_SftF	-	fmax(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	257b4a54620eec33
+_DarwinFoundation1	swift-function	s:6Darwin4fminyS2f_SftF	-	fmin(_:_:)	-	Swift.Float	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	18de1faf474dea52
+_DarwinFoundation1	swift-function	s:6Darwin6lgammaySf_SitSfF	-	lgamma(_:)	-	(Swift.Float, Swift.Int)	Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	09a6f59e03775eaa
+_DarwinFoundation1	swift-function	s:6Darwin6lgammaySd_SitSdF	-	lgamma(_:)	-	(Swift.Double, Swift.Int)	Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	0f55e1874bc33be3
+_DarwinFoundation1	swift-function	s:6Darwin6remquoySf_SitSf_SftF	-	remquo(_:_:)	-	(Swift.Float, Swift.Int)	Swift.Float | Swift.Float	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	747622c34bf125a5
+_DarwinFoundation1	swift-function	s:6Darwin6remquoySd_SitSd_SdtF	-	remquo(_:_:)	-	(Swift.Double, Swift.Int)	Swift.Double | Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	dfa387823fcfa406
+_DarwinFoundation1	swift-function	s:6Darwin3nanySfSSF	-	nan(_:)	-	Swift.Float	Swift.String	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	fc5b57d94d2a2c05
+_DarwinFoundation1	swift-function	s:6Darwin2jnySdSi_SdtF	-	jn(_:_:)	-	Swift.Double	Swift.Int | Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	974dcf2af657e773
+_DarwinFoundation1	swift-function	s:6Darwin2ynySdSi_SdtF	-	yn(_:_:)	-	Swift.Double	Swift.Int | Swift.Double	ios=7.0,macos=10.9,tvos=9.0,watchos=2.0	-	42c00f963ff04d76
+_DarwinFoundation1	swift-constant	c:@M@_DarwinFoundation1@E@POSIXErrorCode@POSIXErrorCode_EOPNOTSUPP_UNIX2003	POSIXErrorCode	_EOPNOTSUPP_UNIX2003	-	-	-	-	-	c43241d9d3b86bf8

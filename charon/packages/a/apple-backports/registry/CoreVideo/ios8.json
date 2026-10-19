@@ -1,0 +1,93 @@
+{
+  "framework": "CoreVideo",
+  "entries": [
+    {
+      "api": "CVMetalTextureCacheCreate()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function answers honestly that it cannot make a cache, as a device without Metal does",
+      "effect": "answers kCVReturnInvalidArgument and writes NULL to the cache out, because the Metal device the caller gave is nil on a device with no Metal",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureCacheCreateTextureFromImage()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function answers honestly that it cannot make a texture, as a device without Metal does",
+      "effect": "answers kCVReturnInvalidArgument and writes NULL to the texture out, because no cache was made and no Metal device is there",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureCacheFlush()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function does nothing, because there is no cache to flush",
+      "effect": "does nothing",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureCacheGetTypeID()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function answers that the type does not exist, as no cache was ever made",
+      "effect": "answers 0",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureGetCleanTexCoords()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function writes zeros, because there is no texture to read coordinates from",
+      "effect": "writes 0.0 to each of the four coordinate pairs",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureGetTexture()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function answers nil, because there is no Metal texture to give",
+      "effect": "answers nil",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureGetTypeID()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function answers that the type does not exist, as no texture was ever made",
+      "effect": "answers 0",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    },
+    {
+      "api": "CVMetalTextureIsFlipped()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived with Metal in iOS 8, and the device has no Metal hardware; the import resolves so the application launches, and the function answers false, because there is no texture to be flipped",
+      "effect": "answers false",
+      "facts": "facts/CoreVideo/CVMetalTexture.md",
+      "source": "the header of iOS 16.4 for the contract; CoreVideo of the armv7 shared cache of iOS 6.1.3, which exports none of the CVMetalTexture names; Metal is not in the device"
+    }
+  ]
+}

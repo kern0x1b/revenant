@@ -1,0 +1,8 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)DDDevicePickerViewController	-			-	-	-	ios=26.0/-/-/0,macos=-/-/-/1,tvos=16.0/-/-/0,watchos=-/-/-/1	-	ed2f576dc302b12f	-
+super	-	DDDevicePickerViewController	UIViewController		-	-	-	-	-	c04eca3f997d6980	-
+method	c:objc(cs)DDDevicePickerViewController(cm)new	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,macos=-/-/-/1,tvos=16.0/-/-/0,watchos=-/-/-/1	-	24e3587be969096a	-
+method	c:objc(cs)DDDevicePickerViewController(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,macos=-/-/-/1,tvos=16.0/-/-/0,watchos=-/-/-/1	-	56c3c64ab225f4cd	-
+method	c:objc(cs)DDDevicePickerViewController(im)initWithNibName:bundle:	-			instancetype	NSString * nibNameOrNil | NSBundle * nibBundleOrNil	-	*unavailable ios=26.0/-/-/0,macos=-/-/-/1,tvos=16.0/-/-/0,watchos=-/-/-/1	-	2c629e1aca66d906	-
+method	c:objc(cs)DDDevicePickerViewController(im)initWithCoder:	-			instancetype	NSCoder * coder	-	*unavailable ios=26.0/-/-/0,macos=-/-/-/1,tvos=16.0/-/-/0,watchos=-/-/-/1	-	f12da654f02a3568	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-

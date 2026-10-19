@@ -1,0 +1,3 @@
+#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@fallback_umbrella	-			int (void)	-	-	-	-	4db35d50f69c72c9	-
+function	c:@F@extra_value	-			int (void)	-	-	-	-	8c14ffa0d890b1e4	-

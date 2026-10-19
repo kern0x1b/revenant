@@ -1,0 +1,60 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_biquadm_CreateSetupD()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "M sections over N channels with their five coefficients each, the layout the header's own pseudocode uses: the block for section s and channel c begins at (s * N + c) * 5, measured; the delay of every section and channel is zero, which is what the header says a new setup's delay values are",
+      "effect": "a setup of M * N sections, or NULL for no coefficients at all - which the host cannot be asked about, since it reads through the array and stops the process - and for a count that would overflow. No sections and no channels are not refusals: the host answers a setup for both, and a call over M = 0 passes the input through unchanged (measured, 1, 2, 3, 4) while a call over N = 0 writes nothing at all (measured, the output left as it was)",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_DestroySetupD()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "frees what CreateSetupD made",
+      "effect": "frees the setup; NULL does nothing",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadmD()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the 7.0 filter in double",
+      "effect": "the same cascade and the same answers as vDSP_biquadm, in double, with the targets of a SetTargetsD call in place before the first sample rather than approached",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_ResetStateD()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as the single-precision one, for the double setup",
+      "effect": "every delay to zero",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_CopyStateD()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as the single-precision one, for the double setup",
+      "effect": "the destination's delays become the source's",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    }
+  ]
+}

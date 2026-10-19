@@ -1,0 +1,4 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+MTKViewDelegate	9.0	sdk16 body		NSObject	-	-	-	-	-	-
+MTKViewDelegate	9.0	sdk16 body		NSObject	required	method	yes	mtkView:drawableSizeWillChange:	- (void)mtkView:(MTKView * _Nonnull)view drawableSizeWillChange:(CGSize)size;	yes
+MTKViewDelegate	9.0	sdk16 body		NSObject	required	method	yes	drawInMTKView:	- (void)drawInMTKView:(MTKView * _Nonnull)view;	yes

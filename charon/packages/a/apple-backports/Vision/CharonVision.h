@@ -1,0 +1,37 @@
+#import <Vision/Vision.h>
+#import <objc/runtime.h>
+
+static inline id charon_vision_clone(id object, NSZone *zone)
+{
+    id copy = [[object class] allocWithZone:zone];
+    for (Class cls = [object class]; cls && cls != [NSObject class]; cls = class_getSuperclass(cls)) {
+        unsigned count = 0;
+        Ivar *ivars = class_copyIvarList(cls, &count);
+        for (unsigned index = 0; index < count; index++) {
+            const char *type = ivar_getTypeEncoding(ivars[index]);
+            if (type[0] == '@') {
+                object_setIvar(copy, ivars[index], object_getIvar(object, ivars[index]));
+            } else {
+                NSUInteger size;
+                NSGetSizeAndAlignment(type, &size, NULL);
+                ptrdiff_t offset = ivar_getOffset(ivars[index]);
+                memcpy((char *)(__bridge void *)copy + offset, (const char *)(__bridge void *)object + offset, size);
+            }
+        }
+        free(ivars);
+    }
+    return copy;
+}
+
+static inline NSError *charon_vision_error(NSInteger code, NSString *message)
+{
+    return [NSError errorWithDomain:VNErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
+}
+
+/* The contour request's answer for a picture, which the handler asks for: the request is a 14.0 class whose work is in
+ * Vision14_0.m, and the handler is in VNHandlers.m. */
+@interface VNDetectContoursRequest (CharonPerform)
+- (NSArray<VNContoursObservation *> *)charon_observationsOnImage:(id)image error:(NSError **)error;
+- (nullable NSNumber *)charon_contrastPivotValue;
+- (void)charon_setContrastPivotValue:(NSNumber *)value;
+@end

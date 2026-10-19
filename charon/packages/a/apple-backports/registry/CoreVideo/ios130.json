@@ -1,0 +1,49 @@
+{
+  "framework": "CoreVideo",
+  "entries": [
+    {
+      "api": "kCVImageBufferAlphaChannelModeKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string AlphaChannelMode, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVImageBufferAlphaChannelMode_PremultipliedAlpha",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string PremultipliedAlpha, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVImageBufferAlphaChannelMode_StraightAlpha",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string StraightAlpha, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVMetalTextureStorageMode",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string MetalTextureStorageMode, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    }
+  ]
+}

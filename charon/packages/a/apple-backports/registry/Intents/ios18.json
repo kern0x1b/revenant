@@ -1,0 +1,201 @@
+{
+  "framework": "Intents",
+  "entries": [
+    {
+      "api": "INEditMessageIntent",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
+      "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
+      "effect": "every member the header declares has a body that stores or returns the class's own state; the object file is generated from the SDK's own declarations by tools/intents/gen-intents.py and this entry is written from what that generator emitted, read back out of the emitted text"
+    },
+    {
+      "api": "INEditMessageIntentResponse",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
+      "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
+      "effect": "every member the header declares has a body that stores or returns the class's own state; the object file is generated from the SDK's own declarations by tools/intents/gen-intents.py and this entry is written from what that generator emitted, read back out of the emitted text"
+    },
+    {
+      "api": "INMessageReaction",
+      "kind": "class",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
+      "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
+      "effect": "every member the header declares has a body that stores or returns the class's own state; the object file is generated from the SDK's own declarations by tools/intents/gen-intents.py and this entry is written from what that generator emitted, read back out of the emitted text"
+    },
+    {
+      "api": "INSticker",
+      "kind": "class",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
+      "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
+      "effect": "every member the header declares has a body that stores or returns the class's own state; the object file is generated from the SDK's own declarations by tools/intents/gen-intents.py and this entry is written from what that generator emitted, read back out of the emitted text"
+    },
+    {
+      "api": "-[INEditMessageIntent initWithMessageIdentifier:editedContent:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INEditMessageIntent, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "-[INEditMessageIntentResponse initWithCode:userActivity:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INEditMessageIntentResponse, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "-[INEditMessageIntentResponse init]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INEditMessageIntentResponse, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua); and for the -init, which the header marks unavailable on some of these classes and declares on others, the host's own answer, measured for every class this framework carries a -init row for by tests/backports/host/intents-init/run.sh: it reads class_getInstanceMethod(Cls, @selector(init)) and calls [[Cls alloc] init] through that IMP, because a compile-time call to the selector is unavailable and could not be the measurement; it looks up NSObject, NSString, INCar and INListCarsIntent first and fails if any is missing, and prints the forwarding trampoline beside three real IMPs, so a zero it reports is the host's answer and not the reader's; it compares every line against expected.txt and then re-runs itself with PLANT=one-wrong, which must FAIL. The IMP is how the answer was read, and is how the emitted body reaches the superclass, because the marker is what forbids naming the selector at compile time. Its golden line for this class is INEditMessageIntentResponse\\townobject\\t1\\t0\\t, which says the class DECLARES -init and [[INEditMessageIntentResponse alloc] init] through that IMP answered an object, so respondsToSelector:init is 1 by the same lookup, and the 1 properties the port synthesizes for this class were read off that fresh object: none of them read non-nil. The harness's own counts for the whole population, and the argument behind every figure here, are in facts/Intents/Intents.md"
+    },
+    {
+      "api": "-[INMessageReaction initWithReactionType:reactionDescription:emoji:]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INMessageReaction, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "-[INSticker initWithType:emoji:]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INSticker, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INEditMessageIntent.editedContent",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INEditMessageIntent, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INEditMessageIntent.messageIdentifier",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INEditMessageIntent, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INEditMessageIntentResponse.code",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INEditMessageIntentResponse, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INMessageReaction.emoji",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INMessageReaction, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INMessageReaction.reactionDescription",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INMessageReaction, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INMessageReaction.reactionType",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INMessageReaction, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INSticker.emoji",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INSticker, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INSticker.type",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Intents.md",
+      "reason": "a member of INSticker, which the class's own generated implementation answers",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
+    },
+    {
+      "api": "INCarChargingConnectorTypeNACSAC",
+      "kind": "constant",
+      "introduced": "17.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Constants.md",
+      "source": "the value read out of the host's own Intents at runtime by dlsym, and the object's own rung: 17.4, which is the release it first appears in",
+      "reason": "the header declares it an extern NSString *const and the release has no such symbol in the built libraries or the 6.1.3 cache, so the port has to export it; the SDK's own availability for it is 17.4",
+      "effect": "the symbol is there and its value is the system's own: a program that reads it gets the same string the host holds, and the object's release rung is 17.4, so a band gate sees the definition only in the bands that export it"
+    },
+    {
+      "api": "INCarChargingConnectorTypeNACSDC",
+      "kind": "constant",
+      "introduced": "17.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Intents/Constants.md",
+      "source": "the value read out of the host's own Intents at runtime by dlsym, and the object's own rung: 17.4, which is the release it first appears in",
+      "reason": "the header declares it an extern NSString *const and the release has no such symbol in the built libraries or the 6.1.3 cache, so the port has to export it; the SDK's own availability for it is 17.4",
+      "effect": "the symbol is there and its value is the system's own: a program that reads it gets the same string the host holds, and the object's release rung is 17.4, so a band gate sees the definition only in the bands that export it"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "+[MPMediaLibrary authorizationStatus]",
+   "kind": "method",
+   "introduced": "9.3",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPMediaLibrary.h, + (MPMediaLibraryAuthorizationStatus)authorizationStatus MP_API(ios(9.3))",
+   "reason": "read with tools/mach32_methods.py from the armv7 cache of 6.1.3 (MediaPlayer image at 0x31fe3000), MPMediaLibrary has 110 own instance methods and 23 own class methods and not one of the 110 instance or 23 class methods authorizes anything: there is no -authorizationStatus, no -requestAuthorization:, no prompt and no restriction object; all 41 of the image's categories were read WITH THE CLASS EACH ONE EXTENDS, resolved through each category's own class pointer, and none extends MPMediaLibrary, so nothing here can clobber a release accessor and nothing in the release clobbers this one; -aSelectorNoFrameworkHas is absent as the control. The release's whole-cache selector list (selectors_armv7.txt, 113981 DISTINCT names, a list of names and not per-class counts) reads 1 for this selector, which says only that other frameworks have a class with that name; the per-class read above decides THE ANSWER IS A CONSTANT AND SAYS SO: MPMediaLibraryAuthorizationStatusAuthorized. iOS 6.1.3 has no library authorization - 'Media & Apple Music Restrictions' is a 7.0 Settings pane and the release has no such object, selector or notification among its 236 classes - and the release hands out +defaultMediaLibrary unconditionally, its own 23 class methods including nothing that refuses. Of the four cases NotDetermined claims a prompt exists (and it is the enum's zero, which is why answering it would be the easy wrong answer), Denied and Restricted claim a refusal there was none of, and Authorized is the device's measured state",
+   "effect": "MPMediaLibraryAuthorizationStatusAuthorized, which is the state of a device with no restriction pane. The limit is in the row's reason: on a release that DOES gate the library the release's own +authorizationStatus is the answer, not this one",
+   "facts": "facts/MediaPlayer/ReleaseOwnedMembers.md"
+  },
+  {
+   "api": "+[MPMediaLibrary requestAuthorization:]",
+   "kind": "method",
+   "introduced": "9.3",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPMediaLibrary.h, + (void)requestAuthorization:(void (^)(MPMediaLibraryAuthorizationStatus status))completionHandler MP_API(ios(9.3))",
+   "reason": "read with tools/mach32_methods.py from the armv7 cache of 6.1.3 (MediaPlayer image at 0x31fe3000), MPMediaLibrary has 110 own instance methods and 23 own class methods and nothing in them authorizes anything; all 41 of the image's categories were read WITH THE CLASS EACH ONE EXTENDS, resolved through each category's own class pointer, and none extends MPMediaLibrary, so nothing here can clobber a release accessor and nothing in the release clobbers this one; -aSelectorNoFrameworkHas is absent as the control. The release's whole-cache selector list (selectors_armv7.txt, 113981 DISTINCT names, a list of names and not per-class counts) reads 0 for this selector, which is absence from the WHOLE release - no class anywhere in 6.1.3 declares this selector It hands its completion handler the same MPMediaLibraryAuthorizationStatusAuthorized, for the reason the authorizationStatus row gives, and only when the caller supplied one - Apple's block is nonnull in the signature while the header's sibling methods accept a nullable completion handler, so a caller that passed nil must not be crashed by the one that does not",
+   "effect": "the completion handler, when there is one, is called once with MPMediaLibraryAuthorizationStatusAuthorized - the device's measured state, and Apple's enum has no 'not applicable' case that would say it better",
+   "facts": "facts/MediaPlayer/ReleaseOwnedMembers.md"
+  }
+ ]
+}

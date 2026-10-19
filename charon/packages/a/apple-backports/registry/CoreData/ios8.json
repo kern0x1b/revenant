@@ -1,0 +1,57 @@
+{
+  "framework": "CoreData",
+  "entries": [
+    {
+      "api": "NSBatchUpdateRequest",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the values are set on the objects the predicate finds, in a private context, so the model's validation and rules apply to them and a value that does not fit its attribute fails the save, where iOS 12 writes it into the store as it is; the calling context's objects are already up to date afterwards where iOS 12 leaves them as they were",
+      "effect": "a request names an entity, a predicate, the properties to update with a constant or an expression each, and whether the entity's subentities are included; executing it changes the store and answers a batch update result",
+      "facts": "facts/CoreData/BatchUpdate.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0, read case by case with the strings of its messages; the host's Core Data, run beside the port on a twin store (tests/backports/host/batchupdate); an iPad 2 running 6.1.3 (tests/backports/device/coredata8.m)"
+    },
+    {
+      "api": "NSBatchUpdateResult",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "holds the result and the result type of a batch update: the status YES, the array of the updated object IDs, or their number",
+      "facts": "facts/CoreData/BatchUpdate.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0, read case by case with the strings of its messages; the host's Core Data, run beside the port on a twin store (tests/backports/host/batchupdate); an iPad 2 running 6.1.3 (tests/backports/device/coredata8.m)"
+    },
+    {
+      "api": "NSAsynchronousFetchRequest",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the fetch runs in a context of its own on a background queue and the objects are made in the calling context when it is delivered, unless the context holds changes its fetch must see, in which case it runs on the context's queue",
+      "effect": "a request holds a fetch request, the block that receives the result, and the number of results it is expected to have; executing it answers a result at once and calls the block on the context's queue with the final result",
+      "facts": "facts/CoreData/AsynchronousFetch.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0, read case by case with the strings of its messages; the host's Core Data, run beside the port on a twin store (tests/backports/host/asyncfetch); an iPad 2 running 6.1.3 (tests/backports/device/coredata8.m)"
+    },
+    {
+      "api": "NSAsynchronousFetchResult",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the result an executed asynchronous fetch answers, and the block receives: the request, the final result (an array of faults, object IDs or dictionaries, empty when it was cancelled) once delivered",
+      "facts": "facts/CoreData/AsynchronousFetch.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0, read case by case with the strings of its messages; the host's Core Data, run beside the port on a twin store (tests/backports/host/asyncfetch); an iPad 2 running 6.1.3 (tests/backports/device/coredata8.m)"
+    },
+    {
+      "api": "NSPersistentStoreAsynchronousResult",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the part of an asynchronous result that is not its fetch: the context it runs in, the error, the progress when there was a current progress to be a child of, and cancel",
+      "facts": "facts/CoreData/AsynchronousFetch.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0, read case by case with the strings of its messages; the host's Core Data, run beside the port on a twin store (tests/backports/host/asyncfetch); an iPad 2 running 6.1.3 (tests/backports/device/coredata8.m)"
+    }
+  ]
+}

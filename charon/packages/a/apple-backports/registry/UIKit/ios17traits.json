@@ -1,0 +1,675 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UITraitUserInterfaceIdiom",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitUserInterfaceStyle",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitLayoutDirection",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitDisplayScale",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitHorizontalSizeClass",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitVerticalSizeClass",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitForceTouchCapability",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitPreferredContentSizeCategory",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitDisplayGamut",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitAccessibilityContrast",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitUserInterfaceLevel",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitLegibilityWeight",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitActiveAppearance",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitToolbarItemPresentationSize",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitImageDynamicRange",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitTypesettingLanguage",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitSceneCaptureState",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitHDRHeadroomUsageLimit",
+      "kind": "class",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitResolvesNaturalAlignmentWithBaseWritingDirection",
+      "kind": "class",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitListEnvironment",
+      "kind": "class",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitTabAccessoryEnvironment",
+      "kind": "class",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitSplitViewControllerLayoutEnvironment",
+      "kind": "class",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the class is there and NSClassFromString answers it, so an application that names one links and a test that asks for one has it",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitDefinition",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UICGFloatTraitDefinition",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UINSIntegerTraitDefinition",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UIObjectTraitDefinition",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UIMutableTraits",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitOverrides",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitChangeRegistration",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "UIKitCore 26.2 arm64e under Mac Catalyst, the host's own UIKit, measured by .agent-work/runs/traits17/probe.m and held by tests/backports/host/uikit2/traits17_test.m"
+    },
+    {
+      "api": "UITraitChangeObservable",
+      "kind": "protocol",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
+      "source": "the conformance is the port's own: UITraitOverrides17.m declares NSObject (CharonTraitChange) <UITraitChangeObservable>, so the protocol is in NSObject's own class list, which check_registration in tests/backports/host/uikit2/traits17_test.m holds; the host's own UITrait.h declares the protocol's members"
+    },
+    {
+      "api": "+[UITraitCollection traitCollectionWithCGFloatValue:forTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a collection holding that trait, refused with the host's words if the trait class is not a CGFloat one",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "+[UITraitCollection traitCollectionWithNSIntegerValue:forTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a collection holding that trait, refused with the host's words if the trait class is not an NSInteger one",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "+[UITraitCollection traitCollectionWithObject:forTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a collection holding that trait, refused with the host's words if the trait class is not an object one",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "-[UITraitCollection traitCollectionByReplacingCGFloatValue:forTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a copy of the collection with that trait replaced, the collection it was made from unchanged",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "-[UITraitCollection traitCollectionByReplacingNSIntegerValue:forTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a copy of the collection with that trait replaced, the collection it was made from unchanged",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "-[UITraitCollection traitCollectionByReplacingObject:forTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a copy of the collection with that trait replaced, the collection it was made from unchanged",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "-[UITraitCollection changedTraitsFromTraitCollection:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the traits whose value differs from the other collection's, an empty set for a collection against itself",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "+[UITraitCollection traitCollectionWithTraits:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a collection holding the traits the block sets, every other trait at its default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "-[UITraitCollection traitCollectionByModifyingTraits:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a copy of the collection with the traits the block sets over the ones it had",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "-[UITraitChangeObservable registerForTraitChanges:withHandler:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a registration to take back with unregisterForTraitChanges:, which is the same object on both sides of a call and beside the system's",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M6)"
+    },
+    {
+      "api": "-[NSObject registerForTraitChanges:withHandler:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a registration on the object itself, which is where the port's CharonTraitChange category puts it",
+      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+    },
+    {
+      "api": "-[UITraitChangeObservable registerForTraitChanges:withTarget:action:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a registration that calls the method with the environment, and with the collection it had before when the method takes two arguments",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M6)"
+    },
+    {
+      "api": "-[NSObject registerForTraitChanges:withTarget:action:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a registration that calls the method with the environment and the collection",
+      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+    },
+    {
+      "api": "-[UITraitChangeObservable registerForTraitChanges:withAction:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a registration for the method on the observable itself",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M6)"
+    },
+    {
+      "api": "-[NSObject registerForTraitChanges:withAction:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "a registration that calls the selector the port's category adds, with no environment",
+      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+    },
+    {
+      "api": "-[UITraitChangeObservable unregisterForTraitChanges:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "nothing, and nothing the second time, and nothing for a registration of another observable",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M6)"
+    },
+    {
+      "api": "-[NSObject unregisterForTraitChanges:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the way to take a registration back, on the object the port's category adds it to",
+      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+    },
+    {
+      "api": "-[UIView updateTraitsIfNeeded]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the environment is the screen's traits and nothing here has moved them, so the call answers by doing the whole of what there is to do",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M5)"
+    },
+    {
+      "api": "-[UIViewController updateTraitsIfNeeded]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the environment is the screen's traits and nothing here has moved them, so the call answers by doing the whole of what there is to do",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M5)"
+    },
+    {
+      "api": "UITraitCollection.systemTraitsAffectingColorAppearance",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the six trait classes that decide how a dynamic colour resolves, in the system's order; the system's own list also holds four private classes no SDK header declares, which the port does not carry",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.systemTraitsAffectingImageLookup",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the ten trait classes that decide how a dynamic image resolves, in the system's order; the system's own list also holds one private class no SDK header declares, which the port does not carry",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.imageDynamicRange",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.typesettingLanguage",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the language set for that trait, or nil",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.sceneCaptureState",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.hdrHeadroomUsageLimit",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.listEnvironment",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.tabAccessoryEnvironment",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.splitViewControllerLayoutEnvironment",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.resolvesNaturalAlignmentWithBaseWritingDirection",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "whether natural alignment resolves from the base writing direction, true for a collection that sets nothing, which is what this release's own text alignment resolves from",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UITraitCollection.toolbarItemPresentationSize",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value set for that trait, or the trait class's default; the accessor was declared and not implemented before, so calling it raised",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M2 to M4, M7)"
+    },
+    {
+      "api": "UIView.traitOverrides",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "an overrides object of the port's own class, one per owner, which holds what it is told and answers what it is not told about with the host's refusal",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M5)"
+    },
+    {
+      "api": "UIViewController.traitOverrides",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "an overrides object of the port's own class, one per owner, which holds what it is told and answers what it is not told about with the host's refusal",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M5)"
+    },
+    {
+      "api": "UIPresentationController.traitOverrides",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "an overrides object of the port's own class, one per owner, which holds what it is told and answers what it is not told about with the host's refusal",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M5)"
+    },
+    {
+      "api": "UIWindowScene.traitOverrides",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "an overrides object of the port's own class, one per owner, which holds what it is told and answers what it is not told about with the host's refusal",
+      "source": "the host's own UIKit under Mac Catalyst, measured by the same probe (facts/UIKit/UITrait17.md, M5)"
+    },
+    {
+      "api": "-[UITraitCollection objectForTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the object the collection holds for a trait, which the port's own mapping answers",
+      "source": "the port reads the trait through the collection; with no row of its own this name resolved to the UITraitCollection class row, whose minimum is 5.0, and the object then held two minimums"
+    },
+    {
+      "api": "-[UITraitCollection valueForCGFloatTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value of a CGFloat trait, read through the collection the port's mapping holds",
+      "source": "the port reads the trait through the collection; with no row of its own this name resolved to the UITraitCollection class row, whose minimum is 5.0, and the object then held two minimums"
+    },
+    {
+      "api": "-[UITraitCollection valueForNSIntegerTrait:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITrait17.md",
+      "effect": "the value of an NSInteger trait, read through the collection the port's mapping holds",
+      "source": "the port reads the trait through the collection; with no row of its own this name resolved to the UITraitCollection class row, whose minimum is 5.0, and the object then held two minimums"
+    }
+  ]
+}

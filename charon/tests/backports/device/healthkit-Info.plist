@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>HealthKit</string>
+	<key>CFBundleExecutable</key>
+	<string>healthkit</string>
+	<key>CFBundleIdentifier</key>
+	<string>local.charon.backports.healthkit</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>healthkit</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>iPhoneOS</string>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>DTPlatformName</key>
+	<string>iphoneos</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>The test reads nothing it did not ask for.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>The test writes nothing.</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>healthkit</string>
+	</array>
+</dict>
+</plist>

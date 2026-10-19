@@ -1,0 +1,1047 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+protocol	c:objc(pl)MDLAssetResolver	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2a7deea9c976f1c3	-
+conforms	c:objc(pl)MDLAssetResolver	MDLAssetResolver	NSObject		-	-	-	-	-	be938387f8855d6b	-
+method	c:objc(pl)MDLAssetResolver(im)canResolveAssetNamed:	-			BOOL	NSString * name	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d30e85cef0ebb6ba	-
+method	c:objc(pl)MDLAssetResolver(im)resolveAssetNamed:	-			NSURL *	NSString * name	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	765df307af35a5b4	-
+interface	c:objc(cs)MDLRelativeAssetResolver	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	342dbdb3d02aed7b	-
+super	-	MDLRelativeAssetResolver	NSObject		-	-	-	-	-	f5e3ccee6cb6d8c2	-
+conforms	c:objc(cs)MDLRelativeAssetResolver	MDLRelativeAssetResolver	MDLAssetResolver		-	-	-	-	-	018abad75ace0051	-
+method	c:objc(cs)MDLRelativeAssetResolver(im)initWithAsset:	-			instancetype	MDLAsset * asset	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	564321f1121d9251	-
+property	c:objc(cs)MDLRelativeAssetResolver(py)asset	-			MDLAsset *	-	weak,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	592e1c4f594f0a92	-
+interface	c:objc(cs)MDLPathAssetResolver	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fbf7f21b6e091419	-
+super	-	MDLPathAssetResolver	NSObject		-	-	-	-	-	48fa09c0a789302e	-
+conforms	c:objc(cs)MDLPathAssetResolver	MDLPathAssetResolver	MDLAssetResolver		-	-	-	-	-	a1119a463856719b	-
+method	c:objc(cs)MDLPathAssetResolver(im)initWithPath:	-			instancetype	NSString * path	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9d0d87016a37f931	-
+property	c:objc(cs)MDLPathAssetResolver(py)path	-			NSString *	-	copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b4af7d281829a84b	-
+interface	c:objc(cs)MDLBundleAssetResolver	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9062fd2c07a54f5f	-
+super	-	MDLBundleAssetResolver	NSObject		-	-	-	-	-	646e3ba4148871d9	-
+conforms	c:objc(cs)MDLBundleAssetResolver	MDLBundleAssetResolver	MDLAssetResolver		-	-	-	-	-	5457b5cb4048c26c	-
+method	c:objc(cs)MDLBundleAssetResolver(im)initWithBundle:	-			instancetype	NSString * path	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c0ce20deaefc77c7	-
+property	c:objc(cs)MDLBundleAssetResolver(py)path	-			NSString *	-	copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	395a6a42a3cde208	-
+var	c:@kUTTypeAlembic	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	100bc259bc32e3be	-
+var	c:@kUTType3dObject	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6df629f53a46b043	-
+var	c:@kUTTypePolygon	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e4ff2dacc9277416	-
+var	c:@kUTTypeStereolithography	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a148a3a0de4a9b04	-
+var	c:@kUTTypeUniversalSceneDescription	-			NSString *const	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=9.0/-/-/0	-	434074aee2200cbe	-
+var	c:@kUTTypeUniversalSceneDescriptionMobile	-			NSString *const	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0	-	7a24eead325cc30d	-
+typedef	c:@T@MDLIndexBitDepth	-			enum MDLIndexBitDepth	-	-	-	-	5373d34bd83ac74c	-
+enum	c:@E@MDLIndexBitDepth	-			NSUInteger	-	-	-	-	12604e9945a67c2e	-
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthInvalid	MDLIndexBitDepth			-	-	-	-	-	19d0f768ddbb8f13	0
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthUInt8	MDLIndexBitDepth			-	-	-	-	-	d187fda23ea474bb	8
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthUint8	MDLIndexBitDepth			-	-	-	-	-	ff4d0163e15258eb	8
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthUInt16	MDLIndexBitDepth			-	-	-	-	-	6a8316f8b055a726	16
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthUint16	MDLIndexBitDepth			-	-	-	-	-	41d38164727ad571	16
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthUInt32	MDLIndexBitDepth			-	-	-	-	-	82ea1ca8f8c6fe26	32
+enumconst	c:@E@MDLIndexBitDepth@MDLIndexBitDepthUint32	MDLIndexBitDepth			-	-	-	-	-	887cdfec97b1ed5b	32
+typedef	c:@T@MDLGeometryType	-			enum MDLGeometryType	-	-	-	-	481d851b823abe29	-
+enum	c:@E@MDLGeometryType	-			NSInteger	-	-	-	-	cf8473b95b35d1e4	-
+enumconst	c:@E@MDLGeometryType@MDLGeometryTypePoints	MDLGeometryType			-	-	-	-	-	3a9531dcbd86852b	0
+enumconst	c:@E@MDLGeometryType@MDLGeometryTypeLines	MDLGeometryType			-	-	-	-	-	4cb320ef49af1b9a	1
+enumconst	c:@E@MDLGeometryType@MDLGeometryTypeTriangles	MDLGeometryType			-	-	-	-	-	ad76a0a775f44bcc	2
+enumconst	c:@E@MDLGeometryType@MDLGeometryTypeTriangleStrips	MDLGeometryType			-	-	-	-	-	e92239f50b400e97	3
+enumconst	c:@E@MDLGeometryType@MDLGeometryTypeQuads	MDLGeometryType			-	-	-	-	-	f188a8740ab6f6c9	4
+enumconst	c:@E@MDLGeometryType@MDLGeometryTypeVariableTopology	MDLGeometryType			-	-	-	-	-	93095a75efbe3b5e	5
+typedef	c:@T@MDLProbePlacement	-			enum MDLProbePlacement	-	-	-	-	cb3d1e1ec07710a4	-
+enum	c:@E@MDLProbePlacement	-			NSInteger	-	-	-	-	d42ca74f87db900f	-
+enumconst	c:@E@MDLProbePlacement@MDLProbePlacementUniformGrid	MDLProbePlacement			-	-	-	-	-	a318f40c2895d689	0
+enumconst	c:@E@MDLProbePlacement@MDLProbePlacementIrradianceDistribution	MDLProbePlacement			-	-	-	-	-	e28f2a61582a9347	1
+typedef	c:@T@MDLDataPrecision	-			enum MDLDataPrecision	-	-	-	-	8d3be06d4024b8c5	-
+enum	c:@E@MDLDataPrecision	-			NSUInteger	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	84e4111e3211157c	-
+enumconst	c:@E@MDLDataPrecision@MDLDataPrecisionUndefined	MDLDataPrecision			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5a4ac4c758311543	0
+enumconst	c:@E@MDLDataPrecision@MDLDataPrecisionFloat	MDLDataPrecision			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3b8f07a373c1c0ec	1
+enumconst	c:@E@MDLDataPrecision@MDLDataPrecisionDouble	MDLDataPrecision			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f674a74ce5f637d9	2
+protocol	c:objc(pl)MDLNamed	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f3ce047498ed89f7	-
+property	c:objc(pl)MDLNamed(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	465289ad1a0301f8	-
+protocol	c:objc(pl)MDLComponent	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6f14298248e43d1d	-
+conforms	c:objc(pl)MDLComponent	MDLComponent	NSObject		-	-	-	-	-	f554fb3c88323ca9	-
+protocol	c:objc(pl)MDLObjectContainerComponent	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	72d0de22517246e1	-
+conforms	c:objc(pl)MDLObjectContainerComponent	MDLObjectContainerComponent	MDLComponent		-	-	-	-	-	32deacb125f5ab30	-
+conforms	c:objc(pl)MDLObjectContainerComponent	MDLObjectContainerComponent	NSFastEnumeration		-	-	-	-	-	22193df491d89093	-
+method	c:objc(pl)MDLObjectContainerComponent(im)addObject:	-			void	MDLObject * object	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	70f064c4ffd8043d	-
+method	c:objc(pl)MDLObjectContainerComponent(im)removeObject:	-			void	MDLObject * object	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	59eb67db7995582c	-
+method	c:objc(pl)MDLObjectContainerComponent(im)objectAtIndexedSubscript:	-			MDLObject *	NSUInteger index	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c01e1cc8d002dabb	-
+property	c:objc(pl)MDLObjectContainerComponent(py)count	-			NSUInteger	-	readonly	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	10ece528c69a1556	-
+property	c:objc(pl)MDLObjectContainerComponent(py)objects	-			NSArray<MDLObject *> *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8e5d3a2ebdd0d34c	-
+struct	c:@SA@MDLAxisAlignedBoundingBox	-			-	-	-	-	-	4dd8abc0d08de589	-
+field	c:@SA@MDLAxisAlignedBoundingBox@FI@maxBounds	MDLAxisAlignedBoundingBox			vector_float3	-	-	-	-	f45d015f6edde64e	-
+field	c:@SA@MDLAxisAlignedBoundingBox@FI@minBounds	MDLAxisAlignedBoundingBox			vector_float3	-	-	-	-	45abd8d9ea3516d4	-
+typedef	c:@T@MDLAxisAlignedBoundingBox	-			struct MDLAxisAlignedBoundingBox	-	-	-	-	3276179809a993ea	-
+protocol	c:objc(pl)MDLTransformComponent	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0b507276fcaa298d	-
+conforms	c:objc(pl)MDLTransformComponent	MDLTransformComponent	MDLComponent		-	-	-	-	-	6fac39cd2968ff89	-
+property	c:objc(pl)MDLTransformComponent(py)matrix	-			matrix_float4x4	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	eb4e8f6772ed4fd1	-
+property	c:objc(pl)MDLTransformComponent(py)resetsTransform	-			BOOL	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8419df351750b68c	-
+property	c:objc(pl)MDLTransformComponent(py)minimumTime	-			NSTimeInterval	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fece93fc2d9f7445	-
+property	c:objc(pl)MDLTransformComponent(py)maximumTime	-			NSTimeInterval	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5b16af8ffc3954b9	-
+property	c:objc(pl)MDLTransformComponent(py)keyTimes	-			NSArray<NSNumber *> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2f378ec275b00d5b	-
+method	c:objc(pl)MDLTransformComponent(im)setLocalTransform:forTime:	-			void	matrix_float4x4 transform | NSTimeInterval time	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4d5a6269bd415c97	-
+method	c:objc(pl)MDLTransformComponent(im)setLocalTransform:	-			void	matrix_float4x4 transform	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	69e4cec85339ae8d	-
+method	c:objc(pl)MDLTransformComponent(im)localTransformAtTime:	-			matrix_float4x4	NSTimeInterval time	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2cefb722455d6904	-
+method	c:objc(pl)MDLTransformComponent(cm)globalTransformWithObject:atTime:	-			matrix_float4x4	MDLObject * object | NSTimeInterval time	optional	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6862c8d2b65eeba5	-
+interface	c:objc(cs)MDLTransform	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	deprecated: Use init instead	450eab566721de91	-
+super	-	MDLTransform	NSObject		-	-	-	-	-	6d904bec7fa72e8e	-
+conforms	c:objc(cs)MDLTransform	MDLTransform	NSCopying		-	-	-	-	-	3bbba716719633d1	-
+conforms	c:objc(cs)MDLTransform	MDLTransform	MDLTransformComponent		-	-	-	-	-	fec3957025669043	-
+method	c:objc(cs)MDLTransform(im)init	-			instancetype	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	3dc1db6a4f1c8c29	-
+method	c:objc(cs)MDLTransform(im)initWithIdentity	-			instancetype	-	-	ios=9.0/11.0/-/0,macos=10.11/10.13/-/0,tvos=9.0/11.0/-/0	deprecated: Use init instead	a009065a2d3395ac	-
+method	c:objc(cs)MDLTransform(im)initWithTransformComponent:	-			instancetype	id<MDLTransformComponent> component	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d30a007d7c90f258	-
+method	c:objc(cs)MDLTransform(im)initWithTransformComponent:resetsTransform:	-			instancetype	id<MDLTransformComponent> component | BOOL resetsTransform	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	88a0ad5dd76f2782	-
+method	c:objc(cs)MDLTransform(im)initWithMatrix:	-			instancetype	matrix_float4x4 matrix	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	689bed786e21d277	-
+method	c:objc(cs)MDLTransform(im)initWithMatrix:resetsTransform:	-			instancetype	matrix_float4x4 matrix | BOOL resetsTransform	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b15f65ebd28755be	-
+method	c:objc(cs)MDLTransform(im)setIdentity	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	48ed6a1165f07d5c	-
+method	c:objc(cs)MDLTransform(im)translationAtTime:	-			vector_float3	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8df5b9331a03e910	-
+method	c:objc(cs)MDLTransform(im)rotationAtTime:	-			vector_float3	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	642b792d32d52723	-
+method	c:objc(cs)MDLTransform(im)shearAtTime:	-			vector_float3	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	88e90d73e0605d24	-
+method	c:objc(cs)MDLTransform(im)scaleAtTime:	-			vector_float3	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	13bc393fcccf1c5f	-
+method	c:objc(cs)MDLTransform(im)setMatrix:forTime:	-			void	matrix_float4x4 matrix | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	93c9757a729dada3	-
+method	c:objc(cs)MDLTransform(im)setTranslation:forTime:	-			void	vector_float3 translation | NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4529433e98b370d8	-
+method	c:objc(cs)MDLTransform(im)setRotation:forTime:	-			void	vector_float3 rotation | NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	960c62b8eb4dac41	-
+method	c:objc(cs)MDLTransform(im)setShear:forTime:	-			void	vector_float3 shear | NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	168e5e6e68220d40	-
+method	c:objc(cs)MDLTransform(im)setScale:forTime:	-			void	vector_float3 scale | NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	80425d6868beadc4	-
+method	c:objc(cs)MDLTransform(im)rotationMatrixAtTime:	-			matrix_float4x4	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fc8c1d6522ac62ae	-
+property	c:objc(cs)MDLTransform(py)translation	-			vector_float3	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b9e2f377f6216509	-
+property	c:objc(cs)MDLTransform(py)rotation	-			vector_float3	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ac2994264b5dfb11	-
+property	c:objc(cs)MDLTransform(py)shear	-			vector_float3	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f59bb3e8ed9969d7	-
+property	c:objc(cs)MDLTransform(py)scale	-			vector_float3	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e87a3e013f041eb1	-
+interface	c:objc(cs)MDLObject	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	23f5ff5a83b98f8e	-
+super	-	MDLObject	NSObject		-	-	-	-	-	4f10483301d610a3	-
+conforms	c:objc(cs)MDLObject	MDLObject	MDLNamed		-	-	-	-	-	b8ccd370d46bef2e	-
+property	c:objc(cs)MDLObject(py)components	-			NSArray<id<MDLComponent>> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8a5261a1c46e8a6c	-
+method	c:objc(cs)MDLObject(im)setComponent:forProtocol:	-			void	id<MDLComponent> component | Protocol * protocol	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6e0a19a227037d3e	-
+method	c:objc(cs)MDLObject(im)componentConformingToProtocol:	-			id<MDLComponent>	Protocol * protocol	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	bd0fd3c0da19e7be	-
+method	c:objc(cs)MDLObject(im)objectForKeyedSubscript:	-			id<MDLComponent>	Protocol * key	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ef83023b362076ac	-
+method	c:objc(cs)MDLObject(im)setObject:forKeyedSubscript:	-			void	id<MDLComponent> obj | Protocol * key	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9a5998d72419ee9b	-
+property	c:objc(cs)MDLObject(py)parent	-			MDLObject *	-	weak,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	30895986c0e070ea	-
+property	c:objc(cs)MDLObject(py)instance	-			MDLObject *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e1dfeb0dbd809738	-
+property	c:objc(cs)MDLObject(py)path	-			NSString *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4b83cfa6549ac3b3	-
+method	c:objc(cs)MDLObject(im)objectAtPath:	-			MDLObject *	NSString * path	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cea129d4bc3f266e	-
+method	c:objc(cs)MDLObject(im)enumerateChildObjectsOfClass:root:usingBlock:stopPointer:	-			void	Class objectClass | MDLObject * root | void (^)(MDLObject * _Nonnull, BOOL * _Nonnull) block | BOOL * stopPointer	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c66a964407ce8065	-
+property	c:objc(cs)MDLObject(py)transform	-			id<MDLTransformComponent>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ec725b8b48a99afa	-
+property	c:objc(cs)MDLObject(py)children	-			id<MDLObjectContainerComponent>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	eaa03c73ffd2d199	-
+property	c:objc(cs)MDLObject(py)hidden	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a8bec96b9b3e7578	-
+method	c:objc(cs)MDLObject(im)addChild:	-			void	MDLObject * child	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	dacb9b5285fda233	-
+method	c:objc(cs)MDLObject(im)boundingBoxAtTime:	-			MDLAxisAlignedBoundingBox	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c4d3b29ef747d4ff	-
+interface	c:objc(cs)MDLObjectContainer	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fc2f94195fa0ccfd	-
+super	-	MDLObjectContainer	NSObject		-	-	-	-	-	61257949fcff052f	-
+conforms	c:objc(cs)MDLObjectContainer	MDLObjectContainer	MDLObjectContainerComponent		-	-	-	-	-	1099475779aebcd3	-
+typedef	c:@T@MDLMeshBufferType	-			enum MDLMeshBufferType	-	-	-	-	c0f20e0c2d1e798f	-
+enum	c:@E@MDLMeshBufferType	-			NSUInteger	-	-	-	-	de2f9cadaa7e467e	-
+enumconst	c:@E@MDLMeshBufferType@MDLMeshBufferTypeVertex	MDLMeshBufferType			-	-	-	-	-	e622026aba121f94	1
+enumconst	c:@E@MDLMeshBufferType@MDLMeshBufferTypeIndex	MDLMeshBufferType			-	-	-	-	-	f72abffd1162ccd7	2
+enumconst	c:@E@MDLMeshBufferType@MDLMeshBufferTypeCustom	MDLMeshBufferType			-	-	-	-	-	0782d6aea4dd44ff	3
+interface	c:objc(cs)MDLMeshBufferMap	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	89dc17b1f1aa72c3	-
+super	-	MDLMeshBufferMap	NSObject		-	-	-	-	-	df8c5f59413e0aaa	-
+method	c:objc(cs)MDLMeshBufferMap(im)initWithBytes:deallocator:	-			instancetype	void * bytes | void (^)(void) deallocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	60eceb25dd9a14c9	-
+property	c:objc(cs)MDLMeshBufferMap(py)bytes	-			void *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6c7f3bcffc9b1120	-
+protocol	c:objc(pl)MDLMeshBuffer	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	23db7915bd76313f	-
+conforms	c:objc(pl)MDLMeshBuffer	MDLMeshBuffer	NSObject		-	-	-	-	-	dc66570172e2c2b8	-
+conforms	c:objc(pl)MDLMeshBuffer	MDLMeshBuffer	NSCopying		-	-	-	-	-	b0a4cbde8a901091	-
+method	c:objc(pl)MDLMeshBuffer(im)fillData:offset:	-			void	NSData * data | NSUInteger offset	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1bf433030ceffdc6	-
+method	c:objc(pl)MDLMeshBuffer(im)map	-			MDLMeshBufferMap *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2ece6dfcbbf3b747	-
+property	c:objc(pl)MDLMeshBuffer(py)length	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	14832e903d7dc81b	-
+property	c:objc(pl)MDLMeshBuffer(py)allocator	-			id<MDLMeshBufferAllocator>	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4fbede29733f169c	-
+property	c:objc(pl)MDLMeshBuffer(py)zone	-			id<MDLMeshBufferZone>	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4d21de4a4e1cb402	-
+property	c:objc(pl)MDLMeshBuffer(py)type	-			MDLMeshBufferType	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ae1757978110e32a	-
+interface	c:objc(cs)MDLMeshBufferData	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	170876f2a5aa0847	-
+super	-	MDLMeshBufferData	NSObject		-	-	-	-	-	3a61bf93017fea42	-
+conforms	c:objc(cs)MDLMeshBufferData	MDLMeshBufferData	MDLMeshBuffer		-	-	-	-	-	68c77d9e5e18816e	-
+method	c:objc(cs)MDLMeshBufferData(im)initWithType:length:	-			instancetype	MDLMeshBufferType type | NSUInteger length	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	46d9e4b33c85e222	-
+method	c:objc(cs)MDLMeshBufferData(im)initWithType:data:	-			instancetype	MDLMeshBufferType type | NSData * data	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	afbbe10ea11acdb4	-
+property	c:objc(cs)MDLMeshBufferData(py)data	-			NSData *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5a72bea4345d86d9	-
+protocol	c:objc(pl)MDLMeshBufferZone	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ad6b1b300fdfc101	-
+conforms	c:objc(pl)MDLMeshBufferZone	MDLMeshBufferZone	NSObject		-	-	-	-	-	079c1645da5ddd61	-
+property	c:objc(pl)MDLMeshBufferZone(py)capacity	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e376dcfc425099a4	-
+property	c:objc(pl)MDLMeshBufferZone(py)allocator	-			id<MDLMeshBufferAllocator>	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	caea0087ac5bdd47	-
+protocol	c:objc(pl)MDLMeshBufferAllocator	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	88b58323f0470a66	-
+conforms	c:objc(pl)MDLMeshBufferAllocator	MDLMeshBufferAllocator	NSObject		-	-	-	-	-	0374d0e41ed6cf5d	-
+method	c:objc(pl)MDLMeshBufferAllocator(im)newZone:	-			id<MDLMeshBufferZone>	NSUInteger capacity	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e73906be57a0a236	-
+method	c:objc(pl)MDLMeshBufferAllocator(im)newZoneForBuffersWithSize:andType:	-			id<MDLMeshBufferZone>	NSArray<NSNumber *> * sizes | NSArray<NSNumber *> * types	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0a38a63182ef6d2c	-
+method	c:objc(pl)MDLMeshBufferAllocator(im)newBuffer:type:	-			id<MDLMeshBuffer>	NSUInteger length | MDLMeshBufferType type	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a60a5f40461c64f7	-
+method	c:objc(pl)MDLMeshBufferAllocator(im)newBufferWithData:type:	-			id<MDLMeshBuffer>	NSData * data | MDLMeshBufferType type	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b18bc36408e42df1	-
+method	c:objc(pl)MDLMeshBufferAllocator(im)newBufferFromZone:length:type:	-			id<MDLMeshBuffer>	id<MDLMeshBufferZone> zone | NSUInteger length | MDLMeshBufferType type	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	35d2a89fa6dde784	-
+method	c:objc(pl)MDLMeshBufferAllocator(im)newBufferFromZone:data:type:	-			id<MDLMeshBuffer>	id<MDLMeshBufferZone> zone | NSData * data | MDLMeshBufferType type	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	786c8ff6d0bd2585	-
+interface	c:objc(cs)MDLMeshBufferDataAllocator	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e3ca18994f599666	-
+super	-	MDLMeshBufferDataAllocator	NSObject		-	-	-	-	-	bc5b3742224b93ab	-
+conforms	c:objc(cs)MDLMeshBufferDataAllocator	MDLMeshBufferDataAllocator	MDLMeshBufferAllocator		-	-	-	-	-	064483a718177fe1	-
+interface	c:objc(cs)MDLMeshBufferZoneDefault	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6aca4d05891eafd6	-
+super	-	MDLMeshBufferZoneDefault	NSObject		-	-	-	-	-	371c382efde94e68	-
+conforms	c:objc(cs)MDLMeshBufferZoneDefault	MDLMeshBufferZoneDefault	MDLMeshBufferZone		-	-	-	-	-	ba5020427f5c6b4f	-
+property	c:objc(cs)MDLMeshBufferZoneDefault(py)capacity	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e68f62deeb629d4d	-
+property	c:objc(cs)MDLMeshBufferZoneDefault(py)allocator	-			id<MDLMeshBufferAllocator>	-	readonly,retain,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	66edb0c3fea5a8bc	-
+var	c:@MDLVertexAttributeAnisotropy	-			NSString *const	-	-	-	-	abc18568fb31641c	-
+var	c:@MDLVertexAttributeBinormal	-			NSString *const	-	-	-	-	75ccbf1af7af1df5	-
+var	c:@MDLVertexAttributeBitangent	-			NSString *const	-	-	-	-	8ed0aa44799e8442	-
+var	c:@MDLVertexAttributeColor	-			NSString *const	-	-	-	-	dca1e5cf35c99867	-
+var	c:@MDLVertexAttributeEdgeCrease	-			NSString *const	-	-	-	-	9f0f2c64137f4a7d	-
+var	c:@MDLVertexAttributeJointIndices	-			NSString *const	-	-	-	-	52fdab4ab40ad0fd	-
+var	c:@MDLVertexAttributeJointWeights	-			NSString *const	-	-	-	-	0c8b53f9072db617	-
+var	c:@MDLVertexAttributeNormal	-			NSString *const	-	-	-	-	e9e17d5370a1f327	-
+var	c:@MDLVertexAttributeOcclusionValue	-			NSString *const	-	-	-	-	30d6cfd2ccfd511c	-
+var	c:@MDLVertexAttributePosition	-			NSString *const	-	-	-	-	b579d318a21fc62c	-
+var	c:@MDLVertexAttributeShadingBasisU	-			NSString *const	-	-	-	-	3be7fe33381f5f5c	-
+var	c:@MDLVertexAttributeShadingBasisV	-			NSString *const	-	-	-	-	2b43a37ba8eb1934	-
+var	c:@MDLVertexAttributeSubdivisionStencil	-			NSString *const	-	-	-	-	6652c32bbe25e07a	-
+var	c:@MDLVertexAttributeTangent	-			NSString *const	-	-	-	-	1643d85454b26c0c	-
+var	c:@MDLVertexAttributeTextureCoordinate	-			NSString *const	-	-	-	-	34a8f742c7c0250d	-
+typedef	c:@T@MDLVertexFormat	-			enum MDLVertexFormat	-	-	-	-	5ea8b3c177d1e86c	-
+enum	c:@E@MDLVertexFormat	-			NSUInteger	-	-	-	-	e0438428c496caca	-
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatInvalid	MDLVertexFormat			-	-	-	-	-	db5d8304065dc89c	0
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatPackedBit	MDLVertexFormat			-	-	-	-	-	8a715c2339bd7df7	4096
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUCharBits	MDLVertexFormat			-	-	-	-	-	507575068f76632a	65536
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatCharBits	MDLVertexFormat			-	-	-	-	-	fa73c889cfa741f0	131072
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUCharNormalizedBits	MDLVertexFormat			-	-	-	-	-	09c40d2b5d72f4fb	196608
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatCharNormalizedBits	MDLVertexFormat			-	-	-	-	-	611ca56957861b52	262144
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShortBits	MDLVertexFormat			-	-	-	-	-	ff36d0902a4537e7	327680
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShortBits	MDLVertexFormat			-	-	-	-	-	79110d30a7f5d76d	393216
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShortNormalizedBits	MDLVertexFormat			-	-	-	-	-	824fc16ae00b6a13	458752
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShortNormalizedBits	MDLVertexFormat			-	-	-	-	-	7ed8e6af1bcabe3d	524288
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUIntBits	MDLVertexFormat			-	-	-	-	-	3b20530ba80b3838	589824
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatIntBits	MDLVertexFormat			-	-	-	-	-	e10a19cc0dbd4a6a	655360
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatHalfBits	MDLVertexFormat			-	-	-	-	-	d45268fb8ca10e39	720896
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatFloatBits	MDLVertexFormat			-	-	-	-	-	05b0a1e7cef36fbf	786432
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar	MDLVertexFormat			-	-	-	-	-	447bd2b1f1e64a13	65537
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar2	MDLVertexFormat			-	-	-	-	-	7333118137f45bc6	65538
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar3	MDLVertexFormat			-	-	-	-	-	e17b957031ac4ae4	65539
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar4	MDLVertexFormat			-	-	-	-	-	56bed40f9281becc	65540
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar	MDLVertexFormat			-	-	-	-	-	4dafd6048a086aee	131073
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar2	MDLVertexFormat			-	-	-	-	-	8bc16e026d25a48b	131074
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar3	MDLVertexFormat			-	-	-	-	-	00775188c46428a3	131075
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar4	MDLVertexFormat			-	-	-	-	-	46f8c030b9a19e0e	131076
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUCharNormalized	MDLVertexFormat			-	-	-	-	-	7df6d62494245b59	196609
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar2Normalized	MDLVertexFormat			-	-	-	-	-	d3c624361f766547	196610
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar3Normalized	MDLVertexFormat			-	-	-	-	-	adb43ac9cd2cf81b	196611
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUChar4Normalized	MDLVertexFormat			-	-	-	-	-	b1b6c430c7918973	196612
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatCharNormalized	MDLVertexFormat			-	-	-	-	-	53651a2d7083cf89	262145
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar2Normalized	MDLVertexFormat			-	-	-	-	-	2971d54b4664bbd9	262146
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar3Normalized	MDLVertexFormat			-	-	-	-	-	3f66e6b034a8e724	262147
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatChar4Normalized	MDLVertexFormat			-	-	-	-	-	4c2eb3480d6e53b4	262148
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort	MDLVertexFormat			-	-	-	-	-	002bc95f08e105c8	327681
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort2	MDLVertexFormat			-	-	-	-	-	fd8f1974a77c0e1e	327682
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort3	MDLVertexFormat			-	-	-	-	-	23f2e58642e922f7	327683
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort4	MDLVertexFormat			-	-	-	-	-	83419d7109a64b86	327684
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort	MDLVertexFormat			-	-	-	-	-	00b4f861bc06df0e	393217
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort2	MDLVertexFormat			-	-	-	-	-	341917d7633ab6d7	393218
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort3	MDLVertexFormat			-	-	-	-	-	b253db23456a960f	393219
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort4	MDLVertexFormat			-	-	-	-	-	a78b68405f1281ae	393220
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShortNormalized	MDLVertexFormat			-	-	-	-	-	8e5a75944d35f9de	458753
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort2Normalized	MDLVertexFormat			-	-	-	-	-	784b5d4235f9aff2	458754
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort3Normalized	MDLVertexFormat			-	-	-	-	-	277df8968edac52a	458755
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUShort4Normalized	MDLVertexFormat			-	-	-	-	-	e753816f52ebd2e7	458756
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShortNormalized	MDLVertexFormat			-	-	-	-	-	470ef30d9140cbe2	524289
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort2Normalized	MDLVertexFormat			-	-	-	-	-	b9c4ac89e586e580	524290
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort3Normalized	MDLVertexFormat			-	-	-	-	-	e7aff25881807a53	524291
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatShort4Normalized	MDLVertexFormat			-	-	-	-	-	3b0080f2cbd838e8	524292
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUInt	MDLVertexFormat			-	-	-	-	-	97d73b159cc4e3ef	589825
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUInt2	MDLVertexFormat			-	-	-	-	-	ecdab3ce7431db42	589826
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUInt3	MDLVertexFormat			-	-	-	-	-	40002e32041db27a	589827
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUInt4	MDLVertexFormat			-	-	-	-	-	2f160baf8ab556a8	589828
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatInt	MDLVertexFormat			-	-	-	-	-	be32d204116eede1	655361
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatInt2	MDLVertexFormat			-	-	-	-	-	e3d7e22316215ad6	655362
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatInt3	MDLVertexFormat			-	-	-	-	-	9d523cadd774f544	655363
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatInt4	MDLVertexFormat			-	-	-	-	-	e22f614a8db030a1	655364
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatHalf	MDLVertexFormat			-	-	-	-	-	bb3b08fdbc53c52e	720897
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatHalf2	MDLVertexFormat			-	-	-	-	-	212f0b53b8c1ec24	720898
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatHalf3	MDLVertexFormat			-	-	-	-	-	4ce26004e7059d27	720899
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatHalf4	MDLVertexFormat			-	-	-	-	-	ff63f319f539e9df	720900
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatFloat	MDLVertexFormat			-	-	-	-	-	421cfb7c7fc420b8	786433
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatFloat2	MDLVertexFormat			-	-	-	-	-	2f8f28167f6bbb0d	786434
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatFloat3	MDLVertexFormat			-	-	-	-	-	25dea49ad6d0a115	786435
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatFloat4	MDLVertexFormat			-	-	-	-	-	37cfdfc04fe8d44f	786436
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatInt1010102Normalized	MDLVertexFormat			-	-	-	-	-	223e4cffcc2c7900	659460
+enumconst	c:@E@MDLVertexFormat@MDLVertexFormatUInt1010102Normalized	MDLVertexFormat			-	-	-	-	-	03243b39921ace83	593924
+interface	c:objc(cs)MDLVertexBufferLayout	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9f283dcbc430ccfa	-
+super	-	MDLVertexBufferLayout	NSObject		-	-	-	-	-	eb91238833d75cb6	-
+conforms	c:objc(cs)MDLVertexBufferLayout	MDLVertexBufferLayout	NSCopying		-	-	-	-	-	1e84cc8b6794225f	-
+method	c:objc(cs)MDLVertexBufferLayout(im)initWithStride:	-			instancetype	NSUInteger stride	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	78d4d58954b2a72d	-
+property	c:objc(cs)MDLVertexBufferLayout(py)stride	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	083e6c2832e0f54a	-
+interface	c:objc(cs)MDLVertexAttribute	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	06b77f8e2e291eb7	-
+super	-	MDLVertexAttribute	NSObject		-	-	-	-	-	5e3e087f91db8121	-
+conforms	c:objc(cs)MDLVertexAttribute	MDLVertexAttribute	NSCopying		-	-	-	-	-	f15c93664980bc50	-
+method	c:objc(cs)MDLVertexAttribute(im)initWithName:format:offset:bufferIndex:	-			instancetype	NSString * name | MDLVertexFormat format | NSUInteger offset | NSUInteger bufferIndex	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	01e6c097d1b796dd	-
+property	c:objc(cs)MDLVertexAttribute(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0b847f424bc755af	-
+property	c:objc(cs)MDLVertexAttribute(py)format	-			MDLVertexFormat	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7f77fc4ccbc946cc	-
+property	c:objc(cs)MDLVertexAttribute(py)offset	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f162a6e1a03544fb	-
+property	c:objc(cs)MDLVertexAttribute(py)bufferIndex	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	951eed3531a38af3	-
+property	c:objc(cs)MDLVertexAttribute(py)time	-			NSTimeInterval	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	069394e5cb0521c3	-
+property	c:objc(cs)MDLVertexAttribute(py)initializationValue	-			vector_float4	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b754b51baa082845	-
+interface	c:objc(cs)MDLVertexDescriptor	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	01430db9157d8ee7	-
+super	-	MDLVertexDescriptor	NSObject		-	-	-	-	-	cd2b09b0cd970be6	-
+conforms	c:objc(cs)MDLVertexDescriptor	MDLVertexDescriptor	NSCopying		-	-	-	-	-	a9f60252b28d5624	-
+method	c:objc(cs)MDLVertexDescriptor(im)initWithVertexDescriptor:	-			instancetype	MDLVertexDescriptor * vertexDescriptor	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	365c6497c27390ac	-
+method	c:objc(cs)MDLVertexDescriptor(im)attributeNamed:	-			MDLVertexAttribute *	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	61a95d0fbe180ed3	-
+method	c:objc(cs)MDLVertexDescriptor(im)addOrReplaceAttribute:	-			void	MDLVertexAttribute * attribute	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6ee3241c96582280	-
+method	c:objc(cs)MDLVertexDescriptor(im)removeAttributeNamed:	-			void	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d773a8c02400758a	-
+property	c:objc(cs)MDLVertexDescriptor(py)attributes	-			NSMutableArray<MDLVertexAttribute *> *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e23c68dfa1e5d81f	-
+property	c:objc(cs)MDLVertexDescriptor(py)layouts	-			NSMutableArray<MDLVertexBufferLayout *> *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ceb29d5952af344a	-
+method	c:objc(cs)MDLVertexDescriptor(im)reset	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	df055ac16dac412f	-
+method	c:objc(cs)MDLVertexDescriptor(im)setPackedStrides	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f9f91bae3150b159	-
+method	c:objc(cs)MDLVertexDescriptor(im)setPackedOffsets	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1a2389552fdd565f	-
+interface	c:objc(cs)MDLMatrix4x4Array	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	95606b1af8970592	-
+super	-	MDLMatrix4x4Array	NSObject		-	-	-	-	-	4a870f9ac2153502	-
+conforms	c:objc(cs)MDLMatrix4x4Array	MDLMatrix4x4Array	NSCopying		-	-	-	-	-	42da98dd47c6e475	-
+property	c:objc(cs)MDLMatrix4x4Array(py)elementCount	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a7855f527a784465	-
+property	c:objc(cs)MDLMatrix4x4Array(py)precision	-			MDLDataPrecision	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	309d8613ae649b66	-
+method	c:objc(cs)MDLMatrix4x4Array(im)clear	-			void	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	af6b90cdd4104d8a	-
+method	c:objc(cs)MDLMatrix4x4Array(im)initWithElementCount:	-			instancetype	NSUInteger arrayElementCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5d7041964d50ca41	-
+method	c:objc(cs)MDLMatrix4x4Array(im)setFloat4x4Array:count:	-			void	const matrix_float4x4 * valuesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7157968bc725d2ff	-
+method	c:objc(cs)MDLMatrix4x4Array(im)setDouble4x4Array:count:	-			void	const matrix_double4x4 * valuesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5c1c42196f770358	-
+method	c:objc(cs)MDLMatrix4x4Array(im)getFloat4x4Array:maxCount:	-			NSUInteger	matrix_float4x4 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	56f5200dcac820eb	-
+method	c:objc(cs)MDLMatrix4x4Array(im)getDouble4x4Array:maxCount:	-			NSUInteger	matrix_double4x4 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7b257ea48182585b	-
+typedef	c:@T@MDLAnimatedValueInterpolation	-			enum MDLAnimatedValueInterpolation	-	-	-	-	9c5f928b76f6290f	-
+enum	c:@E@MDLAnimatedValueInterpolation	-			NSUInteger	-	-	-	-	20c00a11f3f35276	-
+enumconst	c:@E@MDLAnimatedValueInterpolation@MDLAnimatedValueInterpolationConstant	MDLAnimatedValueInterpolation			-	-	-	-	-	53f6a2d845330876	0
+enumconst	c:@E@MDLAnimatedValueInterpolation@MDLAnimatedValueInterpolationLinear	MDLAnimatedValueInterpolation			-	-	-	-	-	e021a7ec69d92b55	1
+interface	c:objc(cs)MDLAnimatedValue	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f9f69ac8e92adfc0	-
+super	-	MDLAnimatedValue	NSObject		-	-	-	-	-	db08c766b99be424	-
+conforms	c:objc(cs)MDLAnimatedValue	MDLAnimatedValue	NSCopying		-	-	-	-	-	dfe58659f0574470	-
+method	c:objc(cs)MDLAnimatedValue(im)isAnimated	-			BOOL	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8c4117d1c70906e5	-
+property	c:objc(cs)MDLAnimatedValue(py)precision	-			MDLDataPrecision	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2d62a31c7ff6136b	-
+property	c:objc(cs)MDLAnimatedValue(py)timeSampleCount	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1593570115b20203	-
+property	c:objc(cs)MDLAnimatedValue(py)minimumTime	-			NSTimeInterval	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	418dfb25b2c36dfc	-
+property	c:objc(cs)MDLAnimatedValue(py)maximumTime	-			NSTimeInterval	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	65134b39b8f0aa21	-
+property	c:objc(cs)MDLAnimatedValue(py)interpolation	-			MDLAnimatedValueInterpolation	-	nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0e4a9952bd9914a8	-
+property	c:objc(cs)MDLAnimatedValue(py)keyTimes	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c5aa35a64b8b5a9e	-
+method	c:objc(cs)MDLAnimatedValue(im)clear	-			void	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e4fab5c08cbde2f3	-
+method	c:objc(cs)MDLAnimatedValue(im)getTimes:maxCount:	-			NSUInteger	NSTimeInterval * timesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	49c3bf2cb50c9d8e	-
+interface	c:objc(cs)MDLAnimatedScalarArray	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1d964dc114176e91	-
+super	-	MDLAnimatedScalarArray	MDLAnimatedValue		-	-	-	-	-	7a753fbad4440266	-
+property	c:objc(cs)MDLAnimatedScalarArray(py)elementCount	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fdd83066406702a7	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)initWithElementCount:	-			id	NSUInteger arrayElementCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	db5d881c56a1ca9b	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)setFloatArray:count:atTime:	-			void	const float * array | NSUInteger count | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7e8a2c1572f80297	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)setDoubleArray:count:atTime:	-			void	const double * array | NSUInteger count | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1885a0a770293f50	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)getFloatArray:maxCount:atTime:	-			NSUInteger	float * array | NSUInteger maxCount | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b05ac2bd1924f5ef	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)getDoubleArray:maxCount:atTime:	-			NSUInteger	double * array | NSUInteger maxCount | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2859ac43696f7301	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)resetWithFloatArray:count:atTimes:count:	-			void	const float * valuesArray | NSUInteger valuesCount | const NSTimeInterval * timesArray | NSUInteger timesCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e9b7060148433e97	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)resetWithDoubleArray:count:atTimes:count:	-			void	const double * valuesArray | NSUInteger valuesCount | const NSTimeInterval * timesArray | NSUInteger timesCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	4b53a780325dac56	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)getFloatArray:maxCount:	-			NSUInteger	float * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5d2e433e1d5162d3	-
+method	c:objc(cs)MDLAnimatedScalarArray(im)getDoubleArray:maxCount:	-			NSUInteger	double * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	896fc2c5f186812d	-
+interface	c:objc(cs)MDLAnimatedVector3Array	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	65c2e48da27285aa	-
+super	-	MDLAnimatedVector3Array	MDLAnimatedValue		-	-	-	-	-	01c2427f5266f2d4	-
+property	c:objc(cs)MDLAnimatedVector3Array(py)elementCount	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1e41514a385f595c	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)initWithElementCount:	-			id	NSUInteger arrayElementCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b1999e2477033409	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)setFloat3Array:count:atTime:	-			void	const vector_float3 * array | NSUInteger count | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2e2418103cf293b0	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)setDouble3Array:count:atTime:	-			void	const vector_double3 * array | NSUInteger count | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3894e3682a7c8956	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)getFloat3Array:maxCount:atTime:	-			NSUInteger	vector_float3 * array | NSUInteger maxCount | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	adcc1d100f5b8cd6	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)getDouble3Array:maxCount:atTime:	-			NSUInteger	vector_double3 * array | NSUInteger maxCount | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f4c4266ecd786445	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)resetWithFloat3Array:count:atTimes:count:	-			void	const vector_float3 * valuesArray | NSUInteger valuesCount | const NSTimeInterval * timesArray | NSUInteger timesCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	22a6c057de28c901	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)resetWithDouble3Array:count:atTimes:count:	-			void	const vector_double3 * valuesArray | NSUInteger valuesCount | const NSTimeInterval * timesArray | NSUInteger timesCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9cbf982a6df7f4f6	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)getFloat3Array:maxCount:	-			NSUInteger	vector_float3 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	64398457fbadbdf4	-
+method	c:objc(cs)MDLAnimatedVector3Array(im)getDouble3Array:maxCount:	-			NSUInteger	vector_double3 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	713823934d05bff4	-
+interface	c:objc(cs)MDLAnimatedQuaternionArray	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7b6f704363790a60	-
+super	-	MDLAnimatedQuaternionArray	MDLAnimatedValue		-	-	-	-	-	b1bcdfb68f68ac34	-
+property	c:objc(cs)MDLAnimatedQuaternionArray(py)elementCount	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1b3c484e38996cb8	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)initWithElementCount:	-			id	NSUInteger arrayElementCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1d9aeb9fcb3a0eb2	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)setFloatQuaternionArray:count:atTime:	-			void	const simd_quatf * array | NSUInteger count | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fc3799c35600e182	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)setDoubleQuaternionArray:count:atTime:	-			void	const simd_quatd * array | NSUInteger count | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7ef2be2509b5572d	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)getFloatQuaternionArray:maxCount:atTime:	-			NSUInteger	simd_quatf * array | NSUInteger maxCount | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5be2269914a8fb93	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)getDoubleQuaternionArray:maxCount:atTime:	-			NSUInteger	simd_quatd * array | NSUInteger maxCount | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0f9fb345fd4f410f	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)resetWithFloatQuaternionArray:count:atTimes:count:	-			void	const simd_quatf * valuesArray | NSUInteger valuesCount | const NSTimeInterval * timesArray | NSUInteger timesCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	088fcd8f75a0bf14	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)resetWithDoubleQuaternionArray:count:atTimes:count:	-			void	const simd_quatd * valuesArray | NSUInteger valuesCount | const NSTimeInterval * timesArray | NSUInteger timesCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	980fc983d80fa881	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)getFloatQuaternionArray:maxCount:	-			NSUInteger	simd_quatf * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a75ac267eb9f21b5	-
+method	c:objc(cs)MDLAnimatedQuaternionArray(im)getDoubleQuaternionArray:maxCount:	-			NSUInteger	simd_quatd * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b13e184bddfd60d6	-
+interface	c:objc(cs)MDLAnimatedScalar	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	64281bcb8045f7b8	-
+super	-	MDLAnimatedScalar	MDLAnimatedValue		-	-	-	-	-	44713c35435cc061	-
+method	c:objc(cs)MDLAnimatedScalar(im)setFloat:atTime:	-			void	float value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	882d421b8cd1556a	-
+method	c:objc(cs)MDLAnimatedScalar(im)setDouble:atTime:	-			void	double value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e8b660be3c4bf211	-
+method	c:objc(cs)MDLAnimatedScalar(im)floatAtTime:	-			float	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9206eccb38701a0d	-
+method	c:objc(cs)MDLAnimatedScalar(im)doubleAtTime:	-			double	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5dc2299a45e0416e	-
+method	c:objc(cs)MDLAnimatedScalar(im)resetWithFloatArray:atTimes:count:	-			void	const float * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	4ca9b62401240071	-
+method	c:objc(cs)MDLAnimatedScalar(im)resetWithDoubleArray:atTimes:count:	-			void	const double * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6cae74460621eaa3	-
+method	c:objc(cs)MDLAnimatedScalar(im)getFloatArray:maxCount:	-			NSUInteger	float * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6b9ac9f542b92520	-
+method	c:objc(cs)MDLAnimatedScalar(im)getDoubleArray:maxCount:	-			NSUInteger	double * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	aa4a87f3f4584ed0	-
+interface	c:objc(cs)MDLAnimatedVector2	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6f6f1a67cf387ca2	-
+super	-	MDLAnimatedVector2	MDLAnimatedValue		-	-	-	-	-	85906a5fc8e38a0a	-
+method	c:objc(cs)MDLAnimatedVector2(im)setFloat2:atTime:	-			void	vector_float2 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e334a9b1c6ea62a1	-
+method	c:objc(cs)MDLAnimatedVector2(im)setDouble2:atTime:	-			void	vector_double2 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fd42c659ca5b6744	-
+method	c:objc(cs)MDLAnimatedVector2(im)float2AtTime:	-			vector_float2	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9567d217916ba66d	-
+method	c:objc(cs)MDLAnimatedVector2(im)double2AtTime:	-			vector_double2	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c7e52021d27cb35b	-
+method	c:objc(cs)MDLAnimatedVector2(im)resetWithFloat2Array:atTimes:count:	-			void	const vector_float2 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3c5a319ec7d6d2ef	-
+method	c:objc(cs)MDLAnimatedVector2(im)resetWithDouble2Array:atTimes:count:	-			void	const vector_double2 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	083f7b81e3a485b0	-
+method	c:objc(cs)MDLAnimatedVector2(im)getFloat2Array:maxCount:	-			NSUInteger	vector_float2 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	00fca5c8512c8618	-
+method	c:objc(cs)MDLAnimatedVector2(im)getDouble2Array:maxCount:	-			NSUInteger	vector_double2 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8e14ded935a49b0c	-
+interface	c:objc(cs)MDLAnimatedVector3	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	40c1398718422e14	-
+super	-	MDLAnimatedVector3	MDLAnimatedValue		-	-	-	-	-	15bcd6e34dc0aa74	-
+method	c:objc(cs)MDLAnimatedVector3(im)setFloat3:atTime:	-			void	vector_float3 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ff545cfb48034c4b	-
+method	c:objc(cs)MDLAnimatedVector3(im)setDouble3:atTime:	-			void	vector_double3 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f7fe11bf2407eefe	-
+method	c:objc(cs)MDLAnimatedVector3(im)float3AtTime:	-			vector_float3	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	66f991e478d8f95a	-
+method	c:objc(cs)MDLAnimatedVector3(im)double3AtTime:	-			vector_double3	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d1ada08b1c6f17d9	-
+method	c:objc(cs)MDLAnimatedVector3(im)resetWithFloat3Array:atTimes:count:	-			void	const vector_float3 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3cf54f0bd3d72104	-
+method	c:objc(cs)MDLAnimatedVector3(im)resetWithDouble3Array:atTimes:count:	-			void	const vector_double3 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	668e71f466ab3369	-
+method	c:objc(cs)MDLAnimatedVector3(im)getFloat3Array:maxCount:	-			NSUInteger	vector_float3 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e76e1822c8ba4d16	-
+method	c:objc(cs)MDLAnimatedVector3(im)getDouble3Array:maxCount:	-			NSUInteger	vector_double3 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	617f75e6942488b1	-
+interface	c:objc(cs)MDLAnimatedVector4	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a48436832be3bbc9	-
+super	-	MDLAnimatedVector4	MDLAnimatedValue		-	-	-	-	-	b21da204b4f2e6e4	-
+method	c:objc(cs)MDLAnimatedVector4(im)setFloat4:atTime:	-			void	vector_float4 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	42c753195224f058	-
+method	c:objc(cs)MDLAnimatedVector4(im)setDouble4:atTime:	-			void	vector_double4 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6eafbea07d08d0b2	-
+method	c:objc(cs)MDLAnimatedVector4(im)float4AtTime:	-			vector_float4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	523689fdb09db025	-
+method	c:objc(cs)MDLAnimatedVector4(im)double4AtTime:	-			vector_double4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	dc65274b05206ab7	-
+method	c:objc(cs)MDLAnimatedVector4(im)resetWithFloat4Array:atTimes:count:	-			void	const vector_float4 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0812998aaf6de57e	-
+method	c:objc(cs)MDLAnimatedVector4(im)resetWithDouble4Array:atTimes:count:	-			void	const vector_double4 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7131d9b70ba23ca6	-
+method	c:objc(cs)MDLAnimatedVector4(im)getFloat4Array:maxCount:	-			NSUInteger	vector_float4 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	55257cbcd1a57646	-
+method	c:objc(cs)MDLAnimatedVector4(im)getDouble4Array:maxCount:	-			NSUInteger	vector_double4 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	768bc500266a1f6e	-
+interface	c:objc(cs)MDLAnimatedQuaternion	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	bf3c955ed9f41b17	-
+super	-	MDLAnimatedQuaternion	MDLAnimatedValue		-	-	-	-	-	9752c2850d5e2efd	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)setFloatQuaternion:atTime:	-			void	simd_quatf value | NSTimeInterval time	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	e8bace98c78c639e	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)setDoubleQuaternion:atTime:	-			void	simd_quatd value | NSTimeInterval time	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	27eaaf9a8e177a07	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)floatQuaternionAtTime:	-			simd_quatf	NSTimeInterval time	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	809c708187b19642	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)doubleQuaternionAtTime:	-			simd_quatd	NSTimeInterval time	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	25af5d18cc576acc	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)resetWithFloatQuaternionArray:atTimes:count:	-			void	const simd_quatf * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	4985fb12638ecaf6	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)resetWithDoubleQuaternionArray:atTimes:count:	-			void	const simd_quatd * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	c5401f4924cf144a	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)getFloatQuaternionArray:maxCount:	-			NSUInteger	simd_quatf * valuesArray | NSUInteger maxCount	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	44cfbff7227b941f	-
+method	c:objc(cs)MDLAnimatedQuaternion(im)getDoubleQuaternionArray:maxCount:	-			NSUInteger	simd_quatd * valuesArray | NSUInteger maxCount	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	692f2a32df74511b	-
+interface	c:objc(cs)MDLAnimatedMatrix4x4	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d2efd75b12ebc32e	-
+super	-	MDLAnimatedMatrix4x4	MDLAnimatedValue		-	-	-	-	-	d1c31e744f7a5625	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)setFloat4x4:atTime:	-			void	matrix_float4x4 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	933465345ffc0511	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)setDouble4x4:atTime:	-			void	matrix_double4x4 value | NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e0d3d0e72387da1d	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)float4x4AtTime:	-			matrix_float4x4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ebd2693c18df74f0	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)double4x4AtTime:	-			matrix_double4x4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	33d8d15d3024d654	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)resetWithFloat4x4Array:atTimes:count:	-			void	const matrix_float4x4 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2b72d9885eda99fd	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)resetWithDouble4x4Array:atTimes:count:	-			void	const matrix_double4x4 * valuesArray | const NSTimeInterval * timesArray | NSUInteger count	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0cbed4be24ad98f5	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)getFloat4x4Array:maxCount:	-			NSUInteger	matrix_float4x4 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	faeb3b3320f72736	-
+method	c:objc(cs)MDLAnimatedMatrix4x4(im)getDouble4x4Array:maxCount:	-			NSUInteger	matrix_double4x4 * valuesArray | NSUInteger maxCount	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	004b83cc4eedc9f4	-
+interface	c:objc(cs)MDLSkeleton	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	144b3733119011be	-
+super	-	MDLSkeleton	MDLObject		-	-	-	-	-	343e8d5f3ffb865f	-
+conforms	c:objc(cs)MDLSkeleton	MDLSkeleton	NSCopying		-	-	-	-	-	4671a8ccf704667d	-
+property	c:objc(cs)MDLSkeleton(py)jointPaths	-			NSArray<NSString *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	69390b347b58386f	-
+property	c:objc(cs)MDLSkeleton(py)jointBindTransforms	-			MDLMatrix4x4Array *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ab8103d550a5cc73	-
+property	c:objc(cs)MDLSkeleton(py)jointRestTransforms	-			MDLMatrix4x4Array *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cc42295b8786c1b6	-
+method	c:objc(cs)MDLSkeleton(im)initWithName:jointPaths:	-			instancetype	NSString * name | NSArray<NSString *> * jointPaths	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	58a04da2b8a4fbf0	-
+protocol	c:objc(pl)MDLJointAnimation	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9395f81c04442809	-
+interface	c:objc(cs)MDLPackedJointAnimation	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7a09231a531b59d4	-
+super	-	MDLPackedJointAnimation	MDLObject		-	-	-	-	-	3ed5ec0a7e45e42d	-
+conforms	c:objc(cs)MDLPackedJointAnimation	MDLPackedJointAnimation	NSCopying		-	-	-	-	-	b876adb98b095a2d	-
+conforms	c:objc(cs)MDLPackedJointAnimation	MDLPackedJointAnimation	MDLJointAnimation		-	-	-	-	-	ee67029c16737d91	-
+property	c:objc(cs)MDLPackedJointAnimation(py)jointPaths	-			NSArray<NSString *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	caf205ccf66d4ee4	-
+property	c:objc(cs)MDLPackedJointAnimation(py)translations	-			MDLAnimatedVector3Array *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b1c602e94d785bc7	-
+property	c:objc(cs)MDLPackedJointAnimation(py)rotations	-			MDLAnimatedQuaternionArray *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3954f8fa4c5f855e	-
+property	c:objc(cs)MDLPackedJointAnimation(py)scales	-			MDLAnimatedVector3Array *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a8cc30a8c140ff2c	-
+method	c:objc(cs)MDLPackedJointAnimation(im)initWithName:jointPaths:	-			instancetype	NSString * name | NSArray<NSString *> * jointPaths	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	59e90afde569a549	-
+interface	c:objc(cs)MDLAnimationBindComponent	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0c63a59e1131b68c	-
+super	-	MDLAnimationBindComponent	NSObject		-	-	-	-	-	a68c68adbd4923a5	-
+conforms	c:objc(cs)MDLAnimationBindComponent	MDLAnimationBindComponent	NSCopying		-	-	-	-	-	9e2b9a277544ebb2	-
+conforms	c:objc(cs)MDLAnimationBindComponent	MDLAnimationBindComponent	MDLComponent		-	-	-	-	-	c0549b40693dbbd4	-
+property	c:objc(cs)MDLAnimationBindComponent(py)skeleton	-			MDLSkeleton *	-	retain,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	be3f6af963a2f6eb	-
+property	c:objc(cs)MDLAnimationBindComponent(py)jointAnimation	-			id<MDLJointAnimation>	-	retain,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	dff5b7bd4455f414	-
+property	c:objc(cs)MDLAnimationBindComponent(py)jointPaths	-			NSArray<NSString *> *	-	retain,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7c736091c6d721d3	-
+property	c:objc(cs)MDLAnimationBindComponent(py)geometryBindTransform	-			matrix_double4x4	-	nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1ab335a2a2299f10	-
+interface	c:objc(cs)MDLAsset	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	deprecated: Use originals instead	d271271c594c7cc0	-
+super	-	MDLAsset	NSObject		-	-	-	-	-	1fa720058d686cdc	-
+conforms	c:objc(cs)MDLAsset	MDLAsset	NSCopying		-	-	-	-	-	20ec49b705edebe6	-
+conforms	c:objc(cs)MDLAsset	MDLAsset	NSFastEnumeration		-	-	-	-	-	50b5685d126106c9	-
+method	c:objc(cs)MDLAsset(im)initWithURL:	-			instancetype	NSURL * URL	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fb6dd366e450952c	-
+method	c:objc(cs)MDLAsset(im)initWithURL:vertexDescriptor:bufferAllocator:	-			instancetype	NSURL * URL | MDLVertexDescriptor * vertexDescriptor | id<MDLMeshBufferAllocator> bufferAllocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ac5c0fc03b3b1702	-
+method	c:objc(cs)MDLAsset(im)initWithBufferAllocator:	-			instancetype	id<MDLMeshBufferAllocator> bufferAllocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5bb5e9d898401343	-
+method	c:objc(cs)MDLAsset(im)initWithURL:vertexDescriptor:bufferAllocator:preserveTopology:error:	-			instancetype	NSURL * URL | MDLVertexDescriptor * vertexDescriptor | id<MDLMeshBufferAllocator> bufferAllocator | BOOL preserveTopology | NSError * _Nullable * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b0d033e8e115e04e	-
+method	c:objc(cs)MDLAsset(im)exportAssetToURL:	-			BOOL	NSURL * URL	-	swift=-/-/-/1	-	c5102fa89e43e1bf	-
+method	c:objc(cs)MDLAsset(im)exportAssetToURL:error:	-			BOOL	NSURL * URL | NSError * _Nullable * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7400df1609f0e1e4	-
+method	c:objc(cs)MDLAsset(im)objectAtPath:	-			MDLObject *	NSString * path	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2376e90b09adbdd4	-
+method	c:objc(cs)MDLAsset(cm)canImportFileExtension:	-			BOOL	NSString * extension	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9922c5262c65bc38	-
+method	c:objc(cs)MDLAsset(cm)canExportFileExtension:	-			BOOL	NSString * extension	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	eeb76574624f326c	-
+method	c:objc(cs)MDLAsset(im)childObjectsOfClass:	-			NSArray<MDLObject *> *	Class objectClass	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	92364c0426de36f8	-
+method	c:objc(cs)MDLAsset(im)loadTextures	-			void	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	95e65f6587fb8aef	-
+method	c:objc(cs)MDLAsset(im)boundingBoxAtTime:	-			MDLAxisAlignedBoundingBox	NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	bc5c2d9e5fc03989	-
+property	c:objc(cs)MDLAsset(py)boundingBox	-			MDLAxisAlignedBoundingBox	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d2bd436b55f1ab61	-
+property	c:objc(cs)MDLAsset(py)frameInterval	-			NSTimeInterval	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b78e4ad229c09372	-
+property	c:objc(cs)MDLAsset(py)startTime	-			NSTimeInterval	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	de381894a6fded94	-
+property	c:objc(cs)MDLAsset(py)endTime	-			NSTimeInterval	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	845de144e0d008d5	-
+property	c:objc(cs)MDLAsset(py)upAxis	-			vector_float3	-	nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5d4d1a0d8d312e9b	-
+property	c:objc(cs)MDLAsset(py)URL	-			NSURL *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	bbabb2f8fccd650d	-
+property	c:objc(cs)MDLAsset(py)resolver	-			id<MDLAssetResolver>	-	retain,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	273da3bee867a922	-
+property	c:objc(cs)MDLAsset(py)bufferAllocator	-			id<MDLMeshBufferAllocator>	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a1ea97b9d8115530	-
+property	c:objc(cs)MDLAsset(py)vertexDescriptor	-			MDLVertexDescriptor *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	af165f5cf8261696	-
+method	c:objc(cs)MDLAsset(im)addObject:	-			void	MDLObject * object	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b541e66b63f1afe6	-
+method	c:objc(cs)MDLAsset(im)removeObject:	-			void	MDLObject * object	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c26a88dab59339ae	-
+property	c:objc(cs)MDLAsset(py)count	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6fdfec79f20fe075	-
+method	c:objc(cs)MDLAsset(im)objectAtIndexedSubscript:	-			MDLObject *	NSUInteger index	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	29dddefd34222df3	-
+method	c:objc(cs)MDLAsset(im)objectAtIndex:	-			MDLObject *	NSUInteger index	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b4c9ff500e6660f4	-
+property	c:objc(cs)MDLAsset(py)masters	-			id<MDLObjectContainerComponent>	-	retain,nonatomic	ios=10.0/15.0/-/0,macos=10.12/12.0/-/0,tvos=10.0/15.0/-/0	-	cd873ca5f9cd6620	-
+property	c:objc(cs)MDLAsset(py)originals	-			id<MDLObjectContainerComponent>	-	retain,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0	-	626f478f68f5c97a	-
+property	c:objc(cs)MDLAsset(py)animations	-			id<MDLObjectContainerComponent>	-	retain,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	23494877d3e57466	-
+protocol	c:objc(pl)MDLLightProbeIrradianceDataSource	-			-	-	-	-	-	8a7bd334c65d8b53	-
+conforms	c:objc(pl)MDLLightProbeIrradianceDataSource	MDLLightProbeIrradianceDataSource	NSObject		-	-	-	-	-	e3a543babfb27f12	-
+property	c:objc(pl)MDLLightProbeIrradianceDataSource(py)boundingBox	-			MDLAxisAlignedBoundingBox	-	-	-	-	6c2a18e1812d3feb	-
+property	c:objc(pl)MDLLightProbeIrradianceDataSource(py)sphericalHarmonicsLevel	-			NSUInteger	-	-	-	-	f43efd9872a9d245	-
+method	c:objc(pl)MDLLightProbeIrradianceDataSource(im)sphericalHarmonicsCoefficientsAtPosition:	-			NSData *	vector_float3 position	optional	-	-	07aa6fe9307db7f9	-
+category	c:objc(cy)MDLAsset@MDLLightBaking	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d617e5d92a2f0aa0	-
+method	c:objc(cs)MDLAsset(cm)placeLightProbesWithDensity:heuristic:usingIrradianceDataSource:	MDLLightBaking			NSArray<MDLLightProbe *> *	float value | MDLProbePlacement type | id<MDLLightProbeIrradianceDataSource> dataSource	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e1fe8d59ef0d3de4	-
+typedef	c:@T@MDLCameraProjection	-			enum MDLCameraProjection	-	-	-	-	5885befff93dc1d9	-
+enum	c:@E@MDLCameraProjection	-			NSUInteger	-	-	-	-	66f63a9b004e7133	-
+enumconst	c:@E@MDLCameraProjection@MDLCameraProjectionPerspective	MDLCameraProjection			-	-	-	-	-	f1fa884b5dcfb971	0
+enumconst	c:@E@MDLCameraProjection@MDLCameraProjectionOrthographic	MDLCameraProjection			-	-	-	-	-	c4c2fcc0c475a222	1
+interface	c:objc(cs)MDLCamera	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	726f1e4c317ebc73	-
+super	-	MDLCamera	MDLObject		-	-	-	-	-	64d73a934245f310	-
+property	c:objc(cs)MDLCamera(py)projectionMatrix	-			matrix_float4x4	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a9f893892c0fb1ca	-
+property	c:objc(cs)MDLCamera(py)projection	-			MDLCameraProjection	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cfbed9fbb38f29d1	-
+method	c:objc(cs)MDLCamera(im)frameBoundingBox:setNearAndFar:	-			void	MDLAxisAlignedBoundingBox boundingBox | BOOL setNearAndFar	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fc164ca9a91b3e6d	-
+method	c:objc(cs)MDLCamera(im)lookAt:	-			void	vector_float3 focusPosition	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fe6e4b13edd4d0c0	-
+method	c:objc(cs)MDLCamera(im)lookAt:from:	-			void	vector_float3 focusPosition | vector_float3 cameraPosition	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6805f89e46e94311	-
+method	c:objc(cs)MDLCamera(im)rayTo:forViewPort:	-			vector_float3	vector_int2 pixel | vector_int2 size	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9203d5e47d4ff839	-
+property	c:objc(cs)MDLCamera(py)nearVisibilityDistance	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	53a85579a9eefa2f	-
+property	c:objc(cs)MDLCamera(py)farVisibilityDistance	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	71dc88d0a2953155	-
+property	c:objc(cs)MDLCamera(py)worldToMetersConversionScale	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f0d2fc97ad6fc4cd	-
+property	c:objc(cs)MDLCamera(py)barrelDistortion	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9be2e8563fd2e4fc	-
+property	c:objc(cs)MDLCamera(py)fisheyeDistortion	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d5ec0a29b38ebf68	-
+property	c:objc(cs)MDLCamera(py)opticalVignetting	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b975d568bb66d22f	-
+property	c:objc(cs)MDLCamera(py)chromaticAberration	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	37a9ba078b82d739	-
+property	c:objc(cs)MDLCamera(py)focalLength	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0299c7473cee240b	-
+property	c:objc(cs)MDLCamera(py)focusDistance	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	28e9b0352b115417	-
+property	c:objc(cs)MDLCamera(py)fieldOfView	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	14b4d824e6005fef	-
+property	c:objc(cs)MDLCamera(py)fStop	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a6aeac04f3de4de9	-
+property	c:objc(cs)MDLCamera(py)apertureBladeCount	-			NSUInteger	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8861081dbe8d035b	-
+property	c:objc(cs)MDLCamera(py)maximumCircleOfConfusion	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	71045c52d90dab6e	-
+method	c:objc(cs)MDLCamera(im)bokehKernelWithSize:	-			MDLTexture *	vector_int2 size	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ad595e641ee211ec	-
+property	c:objc(cs)MDLCamera(py)shutterOpenInterval	-			NSTimeInterval	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	77f80528107b9cfc	-
+property	c:objc(cs)MDLCamera(py)sensorVerticalAperture	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	33248cc49cde4a35	-
+property	c:objc(cs)MDLCamera(py)sensorAspect	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8895c22d442cc37c	-
+property	c:objc(cs)MDLCamera(py)sensorEnlargement	-			vector_float2	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1aaf90c303184ea2	-
+property	c:objc(cs)MDLCamera(py)sensorShift	-			vector_float2	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	aa57363044f6e3c2	-
+property	c:objc(cs)MDLCamera(py)flash	-			vector_float3	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	799ec38aa7eb353f	-
+property	c:objc(cs)MDLCamera(py)exposureCompression	-			vector_float2	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	40a5ffe79b42fa9d	-
+property	c:objc(cs)MDLCamera(py)exposure	-			vector_float3	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1fe1be875a307194	-
+interface	c:objc(cs)MDLStereoscopicCamera	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	55c583aae00bc669	-
+super	-	MDLStereoscopicCamera	MDLCamera		-	-	-	-	-	7cd533311872c25a	-
+property	c:objc(cs)MDLStereoscopicCamera(py)interPupillaryDistance	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b70d40c828c5cec2	-
+property	c:objc(cs)MDLStereoscopicCamera(py)leftVergence	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4bd9b06f595a04dc	-
+property	c:objc(cs)MDLStereoscopicCamera(py)rightVergence	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	37079bdd3844d371	-
+property	c:objc(cs)MDLStereoscopicCamera(py)overlap	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1b6a35823ef4042a	-
+property	c:objc(cs)MDLStereoscopicCamera(py)leftViewMatrix	-			matrix_float4x4	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b00748484a2f01aa	-
+property	c:objc(cs)MDLStereoscopicCamera(py)rightViewMatrix	-			matrix_float4x4	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6efbedacd6ad18d3	-
+property	c:objc(cs)MDLStereoscopicCamera(py)leftProjectionMatrix	-			matrix_float4x4	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1f4f8c600cc8c141	-
+property	c:objc(cs)MDLStereoscopicCamera(py)rightProjectionMatrix	-			matrix_float4x4	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	253ef4a6909ac0dc	-
+typedef	c:@T@MDLLightType	-			enum MDLLightType	-	-	-	-	5b15d0dea42b2b62	-
+enum	c:@E@MDLLightType	-			NSUInteger	-	-	-	-	9571994d3380b187	-
+enumconst	c:@E@MDLLightType@MDLLightTypeUnknown	MDLLightType			-	-	-	-	-	99cbac3531309beb	0
+enumconst	c:@E@MDLLightType@MDLLightTypeAmbient	MDLLightType			-	-	-	-	-	7f69d930b2f308d4	1
+enumconst	c:@E@MDLLightType@MDLLightTypeDirectional	MDLLightType			-	-	-	-	-	b125430c73a0c987	2
+enumconst	c:@E@MDLLightType@MDLLightTypeSpot	MDLLightType			-	-	-	-	-	c667ae87a9dafe2f	3
+enumconst	c:@E@MDLLightType@MDLLightTypePoint	MDLLightType			-	-	-	-	-	92732d4f9d4b9fbc	4
+enumconst	c:@E@MDLLightType@MDLLightTypeLinear	MDLLightType			-	-	-	-	-	dd66f4637103b638	5
+enumconst	c:@E@MDLLightType@MDLLightTypeDiscArea	MDLLightType			-	-	-	-	-	5f90ff497668e8c7	6
+enumconst	c:@E@MDLLightType@MDLLightTypeRectangularArea	MDLLightType			-	-	-	-	-	8206503d218f9180	7
+enumconst	c:@E@MDLLightType@MDLLightTypeSuperElliptical	MDLLightType			-	-	-	-	-	ff414c378f4015ba	8
+enumconst	c:@E@MDLLightType@MDLLightTypePhotometric	MDLLightType			-	-	-	-	-	8059dab203dd7e77	9
+enumconst	c:@E@MDLLightType@MDLLightTypeProbe	MDLLightType			-	-	-	-	-	a839bcc5d6fd0bcc	10
+enumconst	c:@E@MDLLightType@MDLLightTypeEnvironment	MDLLightType			-	-	-	-	-	361d967291a2d9c0	11
+interface	c:objc(cs)MDLLight	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ea7755fc8f56ae1e	-
+super	-	MDLLight	MDLObject		-	-	-	-	-	8deb790fa1767e3c	-
+method	c:objc(cs)MDLLight(im)irradianceAtPoint:	-			CGColorRef	vector_float3 point	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cc57ab0fbdf6ee28	-
+method	c:objc(cs)MDLLight(im)irradianceAtPoint:colorSpace:	-			CGColorRef	vector_float3 point | CGColorSpaceRef colorSpace	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fcde7709fa8a1f36	-
+property	c:objc(cs)MDLLight(py)lightType	-			MDLLightType	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	80bc5671b5df67da	-
+property	c:objc(cs)MDLLight(py)colorSpace	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	03cae05a94c00095	-
+interface	c:objc(cs)MDLPhysicallyPlausibleLight	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	990f903d8a90c46e	-
+super	-	MDLPhysicallyPlausibleLight	MDLLight		-	-	-	-	-	ab99595e71ec44ba	-
+method	c:objc(cs)MDLPhysicallyPlausibleLight(im)setColorByTemperature:	-			void	float temperature	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	3bf5ff341f569fe5	-
+property	c:objc(cs)MDLPhysicallyPlausibleLight(py)color	-			CGColorRef	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	94802cec17967492	-
+property	c:objc(cs)MDLPhysicallyPlausibleLight(py)lumens	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7a4a0374b73c7436	-
+property	c:objc(cs)MDLPhysicallyPlausibleLight(py)innerConeAngle	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	92b321559f6588e1	-
+property	c:objc(cs)MDLPhysicallyPlausibleLight(py)outerConeAngle	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	12f73460b5ede32d	-
+property	c:objc(cs)MDLPhysicallyPlausibleLight(py)attenuationStartDistance	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	3802f72476c5e97c	-
+property	c:objc(cs)MDLPhysicallyPlausibleLight(py)attenuationEndDistance	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	612a42a997bf2eec	-
+interface	c:objc(cs)MDLAreaLight	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	29af30a7120f7435	-
+super	-	MDLAreaLight	MDLPhysicallyPlausibleLight		-	-	-	-	-	f84ca272f3433210	-
+property	c:objc(cs)MDLAreaLight(py)areaRadius	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d254b431e9fa974b	-
+property	c:objc(cs)MDLAreaLight(py)superEllipticPower	-			vector_float2	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6952b2ce0aa2a0a3	-
+property	c:objc(cs)MDLAreaLight(py)aspect	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5dec6259ad7f212d	-
+interface	c:objc(cs)MDLPhotometricLight	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	10f436beed811297	-
+super	-	MDLPhotometricLight	MDLPhysicallyPlausibleLight		-	-	-	-	-	7e77ab100c792096	-
+method	c:objc(cs)MDLPhotometricLight(im)initWithIESProfile:	-			instancetype	NSURL * URL	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ba99ddcb49440285	-
+method	c:objc(cs)MDLPhotometricLight(im)generateSphericalHarmonicsFromLight:	-			void	NSUInteger sphericalHarmonicsLevel	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f0b6dcddb04274f4	-
+method	c:objc(cs)MDLPhotometricLight(im)generateCubemapFromLight:	-			void	NSUInteger textureSize	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	28628115dd7e5c65	-
+method	c:objc(cs)MDLPhotometricLight(im)generateTexture:	-			MDLTexture *	NSUInteger textureSize	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	71e996ae53e457f0	-
+property	c:objc(cs)MDLPhotometricLight(py)lightCubeMap	-			MDLTexture *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d1659bfb25719498	-
+property	c:objc(cs)MDLPhotometricLight(py)sphericalHarmonicsLevel	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e2ca38d3a75c3146	-
+property	c:objc(cs)MDLPhotometricLight(py)sphericalHarmonicsCoefficients	-			NSData *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	774d6cebc455623e	-
+interface	c:objc(cs)MDLLightProbe	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0069d31b593635e5	-
+super	-	MDLLightProbe	MDLLight		-	-	-	-	-	590e7e5a8dda78d3	-
+method	c:objc(cs)MDLLightProbe(im)initWithReflectiveTexture:irradianceTexture:	-			instancetype	MDLTexture * reflectiveTexture | MDLTexture * irradianceTexture	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8b9f7122b6a53dbe	-
+method	c:objc(cs)MDLLightProbe(im)generateSphericalHarmonicsFromIrradiance:	-			void	NSUInteger sphericalHarmonicsLevel	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	73bbf07ce6b7cac1	-
+property	c:objc(cs)MDLLightProbe(py)reflectiveTexture	-			MDLTexture *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ec5b21bd1e19106b	-
+property	c:objc(cs)MDLLightProbe(py)irradianceTexture	-			MDLTexture *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	66319b461fa2766b	-
+property	c:objc(cs)MDLLightProbe(py)sphericalHarmonicsLevel	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8a8a95438454b9e0	-
+property	c:objc(cs)MDLLightProbe(py)sphericalHarmonicsCoefficients	-			NSData *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c25510acc91a1ff7	-
+category	c:objc(cy)MDLLightProbe@MDLLightBaking	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	deaf1fcaae44937f	-
+method	c:objc(cs)MDLLightProbe(cm)lightProbeWithTextureSize:forLocation:lightsToConsider:objectsToConsider:reflectiveCubemap:irradianceCubemap:	MDLLightBaking			MDLLightProbe *	NSInteger textureSize | MDLTransform * transform | NSArray<MDLLight *> * lightsToConsider | NSArray<MDLObject *> * objectsToConsider | MDLTexture * reflectiveCubemap | MDLTexture * irradianceCubemap	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	596691a611e61c17	-
+typedef	c:@T@MDLMaterialSemantic	-			enum MDLMaterialSemantic	-	-	-	-	58c235d1dbd2d8a4	-
+enum	c:@E@MDLMaterialSemantic	-			NSUInteger	-	-	-	-	a4a90172a7a1f5dc	-
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticBaseColor	MDLMaterialSemantic			-	-	-	-	-	e9bcf6ea0e12b39b	0
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticSubsurface	MDLMaterialSemantic			-	-	-	-	-	3edf7374dfd2b581	1
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticMetallic	MDLMaterialSemantic			-	-	-	-	-	af4723a74b403a2c	2
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticSpecular	MDLMaterialSemantic			-	-	-	-	-	9f9069631fa61e1a	3
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticSpecularExponent	MDLMaterialSemantic			-	-	-	-	-	a46c16b7845c790d	4
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticSpecularTint	MDLMaterialSemantic			-	-	-	-	-	de18d3726564422a	5
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticRoughness	MDLMaterialSemantic			-	-	-	-	-	a664fc030095de01	6
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticAnisotropic	MDLMaterialSemantic			-	-	-	-	-	5c1877fa0a38f923	7
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticAnisotropicRotation	MDLMaterialSemantic			-	-	-	-	-	fa551ada7e9b94b2	8
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticSheen	MDLMaterialSemantic			-	-	-	-	-	00261b2feb999530	9
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticSheenTint	MDLMaterialSemantic			-	-	-	-	-	f1bc38b3e9352b04	10
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticClearcoat	MDLMaterialSemantic			-	-	-	-	-	853f96f17d69e1f6	11
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticClearcoatGloss	MDLMaterialSemantic			-	-	-	-	-	f31a015e9fcc8a6d	12
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticEmission	MDLMaterialSemantic			-	-	-	-	-	802f52411bfac312	13
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticBump	MDLMaterialSemantic			-	-	-	-	-	438b168de4ae338b	14
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticOpacity	MDLMaterialSemantic			-	-	-	-	-	cc2a4c9142ca324e	15
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticInterfaceIndexOfRefraction	MDLMaterialSemantic			-	-	-	-	-	d728e990995c8a01	16
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticMaterialIndexOfRefraction	MDLMaterialSemantic			-	-	-	-	-	a0a7511d0c90d670	17
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticObjectSpaceNormal	MDLMaterialSemantic			-	-	-	-	-	6f033fa0c671b341	18
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticTangentSpaceNormal	MDLMaterialSemantic			-	-	-	-	-	03b83624737be6cd	19
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticDisplacement	MDLMaterialSemantic			-	-	-	-	-	f81fab2404d34ae9	20
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticDisplacementScale	MDLMaterialSemantic			-	-	-	-	-	25b4097bbfb4af1c	21
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticAmbientOcclusion	MDLMaterialSemantic			-	-	-	-	-	56f46d3903020fc9	22
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticAmbientOcclusionScale	MDLMaterialSemantic			-	-	-	-	-	84e2ffc49af5b055	23
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticNone	MDLMaterialSemantic			-	-	-	-	-	03108fea30c79d2f	32768
+enumconst	c:@E@MDLMaterialSemantic@MDLMaterialSemanticUserDefined	MDLMaterialSemantic			-	-	-	-	-	58500dafa45e74b7	32769
+typedef	c:@T@MDLMaterialPropertyType	-			enum MDLMaterialPropertyType	-	-	-	-	b356de3cc44e0c66	-
+enum	c:@E@MDLMaterialPropertyType	-			NSUInteger	-	-	-	-	6a4661b5fa8e19f6	-
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeNone	MDLMaterialPropertyType			-	-	-	-	-	847f1d435060c0be	0
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeString	MDLMaterialPropertyType			-	-	-	-	-	a3e0862a72615bfa	1
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeURL	MDLMaterialPropertyType			-	-	-	-	-	1682437e21e61bbd	2
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeTexture	MDLMaterialPropertyType			-	-	-	-	-	4205b893c8d5f235	3
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeColor	MDLMaterialPropertyType			-	-	-	-	-	ce36d4d563ad312a	4
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeFloat	MDLMaterialPropertyType			-	-	-	-	-	8801c4aca1c528b2	5
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeFloat2	MDLMaterialPropertyType			-	-	-	-	-	fc8b87e42c556fff	6
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeFloat3	MDLMaterialPropertyType			-	-	-	-	-	8802571da7e7eb87	7
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeFloat4	MDLMaterialPropertyType			-	-	-	-	-	32eea8b62602edd4	8
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeMatrix44	MDLMaterialPropertyType			-	-	-	-	-	d07c1652a738b137	9
+enumconst	c:@E@MDLMaterialPropertyType@MDLMaterialPropertyTypeBuffer	MDLMaterialPropertyType			-	-	-	-	-	e4bd10bf5ca83f62	10
+typedef	c:@T@MDLMaterialTextureWrapMode	-			enum MDLMaterialTextureWrapMode	-	-	-	-	eb821381d4342014	-
+enum	c:@E@MDLMaterialTextureWrapMode	-			NSUInteger	-	-	-	-	b7858d020860b2ee	-
+enumconst	c:@E@MDLMaterialTextureWrapMode@MDLMaterialTextureWrapModeClamp	MDLMaterialTextureWrapMode			-	-	-	-	-	b32323739c31d99e	0
+enumconst	c:@E@MDLMaterialTextureWrapMode@MDLMaterialTextureWrapModeRepeat	MDLMaterialTextureWrapMode			-	-	-	-	-	01793c982fc7c74e	1
+enumconst	c:@E@MDLMaterialTextureWrapMode@MDLMaterialTextureWrapModeMirror	MDLMaterialTextureWrapMode			-	-	-	-	-	6d4f7073d756a7bc	2
+typedef	c:@T@MDLMaterialTextureFilterMode	-			enum MDLMaterialTextureFilterMode	-	-	-	-	ca7835a30eb243ee	-
+enum	c:@E@MDLMaterialTextureFilterMode	-			NSUInteger	-	-	-	-	a66f65b890a2f096	-
+enumconst	c:@E@MDLMaterialTextureFilterMode@MDLMaterialTextureFilterModeNearest	MDLMaterialTextureFilterMode			-	-	-	-	-	a1ee02fbabe835b2	0
+enumconst	c:@E@MDLMaterialTextureFilterMode@MDLMaterialTextureFilterModeLinear	MDLMaterialTextureFilterMode			-	-	-	-	-	8dd26e2a8ad23806	1
+typedef	c:@T@MDLMaterialMipMapFilterMode	-			enum MDLMaterialMipMapFilterMode	-	-	-	-	c362367b6ba62796	-
+enum	c:@E@MDLMaterialMipMapFilterMode	-			NSUInteger	-	-	-	-	63a5f75c53615dec	-
+enumconst	c:@E@MDLMaterialMipMapFilterMode@MDLMaterialMipMapFilterModeNearest	MDLMaterialMipMapFilterMode			-	-	-	-	-	b73cb6b3016255cf	0
+enumconst	c:@E@MDLMaterialMipMapFilterMode@MDLMaterialMipMapFilterModeLinear	MDLMaterialMipMapFilterMode			-	-	-	-	-	29fb20d91077f62d	1
+interface	c:objc(cs)MDLTextureFilter	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	06b6a2b78eecf177	-
+super	-	MDLTextureFilter	NSObject		-	-	-	-	-	40a7b2bf0891b428	-
+property	c:objc(cs)MDLTextureFilter(py)sWrapMode	-			MDLMaterialTextureWrapMode	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	91ce608bcf43039c	-
+property	c:objc(cs)MDLTextureFilter(py)tWrapMode	-			MDLMaterialTextureWrapMode	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a017f96c00086934	-
+property	c:objc(cs)MDLTextureFilter(py)rWrapMode	-			MDLMaterialTextureWrapMode	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f5576cd2d9185909	-
+property	c:objc(cs)MDLTextureFilter(py)minFilter	-			MDLMaterialTextureFilterMode	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a7eb5db58a8b7fbe	-
+property	c:objc(cs)MDLTextureFilter(py)magFilter	-			MDLMaterialTextureFilterMode	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	dc1f5ee359c81993	-
+property	c:objc(cs)MDLTextureFilter(py)mipFilter	-			MDLMaterialMipMapFilterMode	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	509d0dd5ad8c1603	-
+interface	c:objc(cs)MDLTextureSampler	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e3d26fa86929195b	-
+super	-	MDLTextureSampler	NSObject		-	-	-	-	-	5516867647b006e6	-
+property	c:objc(cs)MDLTextureSampler(py)texture	-			MDLTexture *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0a2165fdd3f921b7	-
+property	c:objc(cs)MDLTextureSampler(py)hardwareFilter	-			MDLTextureFilter *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1bb4c924d077f0ad	-
+property	c:objc(cs)MDLTextureSampler(py)transform	-			MDLTransform *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f35ede27cf9342b3	-
+interface	c:objc(cs)MDLMaterialProperty	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7b3e026f3b8b66a7	-
+super	-	MDLMaterialProperty	NSObject		-	-	-	-	-	e9cd8f4f328182fa	-
+conforms	c:objc(cs)MDLMaterialProperty	MDLMaterialProperty	MDLNamed		-	-	-	-	-	a1cfd7e4d84e2e39	-
+conforms	c:objc(cs)MDLMaterialProperty	MDLMaterialProperty	NSCopying		-	-	-	-	-	df98f4884730e031	-
+method	c:objc(cs)MDLMaterialProperty(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	64c314efcc76225f	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:	-			instancetype	NSString * name | MDLMaterialSemantic semantic	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9fad50ae12953d19	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:float:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | float value	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c173fc8b753cf3a1	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:float2:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | vector_float2 value	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8ac4cf9e60d8d8f8	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:float3:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | vector_float3 value	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	93c7cd5c395ac894	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:float4:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | vector_float4 value	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4e04454dc01b8812	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:matrix4x4:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | matrix_float4x4 value	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b5480a8ba387721a	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:URL:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | NSURL * URL	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c1c6420186818b46	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:string:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | NSString * string	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a5a8d3e90b85bf02	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:textureSampler:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | MDLTextureSampler * textureSampler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	805bb1c09d471ad5	-
+method	c:objc(cs)MDLMaterialProperty(im)initWithName:semantic:color:	-			instancetype	NSString * name | MDLMaterialSemantic semantic | CGColorRef color	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0721766adfc906e1	-
+method	c:objc(cs)MDLMaterialProperty(im)setProperties:	-			void	MDLMaterialProperty * property	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	759d225da08c4903	-
+property	c:objc(cs)MDLMaterialProperty(py)semantic	-			MDLMaterialSemantic	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ca08e4f432c7cf59	-
+property	c:objc(cs)MDLMaterialProperty(py)type	-			MDLMaterialPropertyType	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a6d2d59d51e57a46	-
+property	c:objc(cs)MDLMaterialProperty(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d8c4c7b9004c04d0	-
+property	c:objc(cs)MDLMaterialProperty(py)stringValue	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d1d1617c5ff8b4c5	-
+property	c:objc(cs)MDLMaterialProperty(py)URLValue	-			NSURL *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	480314adb8506f23	-
+property	c:objc(cs)MDLMaterialProperty(py)textureSamplerValue	-			MDLTextureSampler *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9990c63873b53452	-
+property	c:objc(cs)MDLMaterialProperty(py)color	-			CGColorRef	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e8ae4047e54f9d86	-
+property	c:objc(cs)MDLMaterialProperty(py)floatValue	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	aebb4c922aac5d3f	-
+property	c:objc(cs)MDLMaterialProperty(py)float2Value	-			vector_float2	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	185ef9dfd01e13fe	-
+property	c:objc(cs)MDLMaterialProperty(py)float3Value	-			vector_float3	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fdfac036177dc8f4	-
+property	c:objc(cs)MDLMaterialProperty(py)float4Value	-			vector_float4	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f4d8e4f0f2dbdf7a	-
+property	c:objc(cs)MDLMaterialProperty(py)matrix4x4	-			matrix_float4x4	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	068932d5f248ddd4	-
+property	c:objc(cs)MDLMaterialProperty(py)luminance	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f2eb3dde5b7c57e4	-
+interface	c:objc(cs)MDLMaterialPropertyConnection	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	d6bf3c3da0f9cc00	-
+super	-	MDLMaterialPropertyConnection	NSObject		-	-	-	-	-	93ea9eb1c6726220	-
+conforms	c:objc(cs)MDLMaterialPropertyConnection	MDLMaterialPropertyConnection	MDLNamed		-	-	-	-	-	4567feef5cc42465	-
+method	c:objc(cs)MDLMaterialPropertyConnection(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	89bfc2801ed21862	-
+method	c:objc(cs)MDLMaterialPropertyConnection(im)initWithOutput:input:	-			instancetype	MDLMaterialProperty * output | MDLMaterialProperty * input	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	1a078eccce7541a5	-
+property	c:objc(cs)MDLMaterialPropertyConnection(py)output	-			MDLMaterialProperty *	-	readonly,weak,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	1c3bbaa5bf46c0cd	-
+property	c:objc(cs)MDLMaterialPropertyConnection(py)input	-			MDLMaterialProperty *	-	readonly,weak,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	014b6bf2bc6ca8b4	-
+interface	c:objc(cs)MDLMaterialPropertyNode	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	46d7f0a11ca8abee	-
+super	-	MDLMaterialPropertyNode	NSObject		-	-	-	-	-	71bdaefb43713cd2	-
+conforms	c:objc(cs)MDLMaterialPropertyNode	MDLMaterialPropertyNode	MDLNamed		-	-	-	-	-	5522cd4342214aad	-
+method	c:objc(cs)MDLMaterialPropertyNode(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	e0f78757de1a700b	-
+method	c:objc(cs)MDLMaterialPropertyNode(im)initWithInputs:outputs:evaluationFunction:	-			instancetype	NSArray<MDLMaterialProperty *> * inputs | NSArray<MDLMaterialProperty *> * outputs | void (^)(MDLMaterialPropertyNode * _Nonnull) function	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	f3e37c67e2562892	-
+property	c:objc(cs)MDLMaterialPropertyNode(py)evaluationFunction	-			void (^)(MDLMaterialPropertyNode * _Nonnull)	-	copy,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	51474e1e1226e636	-
+property	c:objc(cs)MDLMaterialPropertyNode(py)inputs	-			NSArray<MDLMaterialProperty *> *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	8ab410ea49715854	-
+property	c:objc(cs)MDLMaterialPropertyNode(py)outputs	-			NSArray<MDLMaterialProperty *> *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	52716cae54d25a78	-
+interface	c:objc(cs)MDLMaterialPropertyGraph	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	db9e15bb04cc7ac8	-
+super	-	MDLMaterialPropertyGraph	MDLMaterialPropertyNode		-	-	-	-	-	9282c533de4d5af7	-
+method	c:objc(cs)MDLMaterialPropertyGraph(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	9750efe9cbc961a1	-
+method	c:objc(cs)MDLMaterialPropertyGraph(im)initWithNodes:connections:	-			instancetype	NSArray<MDLMaterialPropertyNode *> * nodes | NSArray<MDLMaterialPropertyConnection *> * connections	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	7b2531ed9ca3b207	-
+method	c:objc(cs)MDLMaterialPropertyGraph(im)evaluate	-			void	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	0af2952716db35b4	-
+property	c:objc(cs)MDLMaterialPropertyGraph(py)nodes	-			NSArray<MDLMaterialPropertyNode *> *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	018383dc118957be	-
+property	c:objc(cs)MDLMaterialPropertyGraph(py)connections	-			NSArray<MDLMaterialPropertyConnection *> *	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0	-	ffcf82bb7db23691	-
+interface	c:objc(cs)MDLScatteringFunction	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	03c833237e5d5b4e	-
+super	-	MDLScatteringFunction	NSObject		-	-	-	-	-	64969a0470d45d0f	-
+conforms	c:objc(cs)MDLScatteringFunction	MDLScatteringFunction	MDLNamed		-	-	-	-	-	269d2ce02974f223	-
+property	c:objc(cs)MDLScatteringFunction(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	3d1ddb0bd312e990	-
+property	c:objc(cs)MDLScatteringFunction(py)baseColor	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	396773fdf390f6aa	-
+property	c:objc(cs)MDLScatteringFunction(py)emission	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b21907ad18520127	-
+property	c:objc(cs)MDLScatteringFunction(py)specular	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f1e87d5f43605b28	-
+property	c:objc(cs)MDLScatteringFunction(py)materialIndexOfRefraction	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d25b50951beb5881	-
+property	c:objc(cs)MDLScatteringFunction(py)interfaceIndexOfRefraction	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4893877783804f54	-
+property	c:objc(cs)MDLScatteringFunction(py)normal	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	201ffd2f5ad562b7	-
+property	c:objc(cs)MDLScatteringFunction(py)ambientOcclusion	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	544aa2e17b789ddb	-
+property	c:objc(cs)MDLScatteringFunction(py)ambientOcclusionScale	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c0cb7031f435abbe	-
+interface	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4cf6db5f6ebeb4d2	-
+super	-	MDLPhysicallyPlausibleScatteringFunction	MDLScatteringFunction		-	-	-	-	-	4353e714f28df454	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)version	-			NSInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8f18e229d219b0b5	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)subsurface	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	40f5d27fab78b513	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)metallic	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4063855dd1b64894	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)specularAmount	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	49ddbd3426d90394	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)specularTint	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	bd1a6ab7dbd2fafb	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)roughness	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	476b548cbb5e3f24	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)anisotropic	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	44e54122149ef48a	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)anisotropicRotation	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	526d0824c1ca5ec6	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)sheen	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b6bdfc193a7f4dc5	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)sheenTint	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	61fd39c2f3f8c159	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)clearcoat	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	aba734644b9b2abf	-
+property	c:objc(cs)MDLPhysicallyPlausibleScatteringFunction(py)clearcoatGloss	-			MDLMaterialProperty *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e48104c42db70b60	-
+typedef	c:@T@MDLMaterialFace	-			enum MDLMaterialFace	-	-	-	-	4277a7a4bcbf9eb9	-
+enum	c:@E@MDLMaterialFace	-			NSUInteger	-	-	-	-	070f870581c7b6fa	-
+enumconst	c:@E@MDLMaterialFace@MDLMaterialFaceFront	MDLMaterialFace			-	-	-	-	-	ac178e5907b97470	0
+enumconst	c:@E@MDLMaterialFace@MDLMaterialFaceBack	MDLMaterialFace			-	-	-	-	-	f55299578a5448c3	1
+enumconst	c:@E@MDLMaterialFace@MDLMaterialFaceDoubleSided	MDLMaterialFace			-	-	-	-	-	292c0ca7f10ddef0	2
+interface	c:objc(cs)MDLMaterial	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	51f3222f7d6c8ba6	-
+super	-	MDLMaterial	NSObject		-	-	-	-	-	24bc791d257c89d8	-
+conforms	c:objc(cs)MDLMaterial	MDLMaterial	MDLNamed		-	-	-	-	-	0f348347a188766c	-
+conforms	c:objc(cs)MDLMaterial	MDLMaterial	NSFastEnumeration		-	-	-	-	-	c172d904d7cf070f	-
+method	c:objc(cs)MDLMaterial(im)initWithName:scatteringFunction:	-			instancetype	NSString * name | MDLScatteringFunction * scatteringFunction	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b096fb74fb2fa862	-
+method	c:objc(cs)MDLMaterial(im)setProperty:	-			void	MDLMaterialProperty * property	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8f8ec469ff0191f3	-
+method	c:objc(cs)MDLMaterial(im)removeProperty:	-			void	MDLMaterialProperty * property	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f95317d65b556ad7	-
+method	c:objc(cs)MDLMaterial(im)propertyNamed:	-			MDLMaterialProperty *	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	62aa69c475500eeb	-
+method	c:objc(cs)MDLMaterial(im)propertyWithSemantic:	-			MDLMaterialProperty *	MDLMaterialSemantic semantic	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	353abc318b3c0a1c	-
+method	c:objc(cs)MDLMaterial(im)propertiesWithSemantic:	-			NSArray<MDLMaterialProperty *> *	MDLMaterialSemantic semantic	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cf540c85a5c339dd	-
+method	c:objc(cs)MDLMaterial(im)removeAllProperties	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5a301a90f42812a4	-
+method	c:objc(cs)MDLMaterial(im)resolveTexturesWithResolver:	-			void	id<MDLAssetResolver> resolver	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	306082a02d3d5ea7	-
+method	c:objc(cs)MDLMaterial(im)loadTexturesUsingResolver:	-			void	id<MDLAssetResolver> resolver	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b801e5f68cc28b08	-
+property	c:objc(cs)MDLMaterial(py)scatteringFunction	-			MDLScatteringFunction *	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fcef0b3fd8d11611	-
+property	c:objc(cs)MDLMaterial(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e9b39b5175162b78	-
+property	c:objc(cs)MDLMaterial(py)baseMaterial	-			MDLMaterial *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7db9117979dcdf9f	-
+method	c:objc(cs)MDLMaterial(im)objectAtIndexedSubscript:	-			MDLMaterialProperty *	NSUInteger idx	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	aca98dda1715b7e7	-
+method	c:objc(cs)MDLMaterial(im)objectForKeyedSubscript:	-			MDLMaterialProperty *	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	63f28825c7d48e76	-
+property	c:objc(cs)MDLMaterial(py)count	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2e4512595e2c116a	-
+property	c:objc(cs)MDLMaterial(py)materialFace	-			MDLMaterialFace	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b29b909cee9c2e98	-
+interface	c:objc(cs)MDLSubmeshTopology	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	173e3983d5a6e2b6	-
+super	-	MDLSubmeshTopology	NSObject		-	-	-	-	-	17832a6d8fb85c31	-
+method	c:objc(cs)MDLSubmeshTopology(im)initWithSubmesh:	-			instancetype	MDLSubmesh * submesh	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0b1d4078265e8e70	-
+property	c:objc(cs)MDLSubmeshTopology(py)faceTopology	-			id<MDLMeshBuffer>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	94b2bddba8d591fc	-
+property	c:objc(cs)MDLSubmeshTopology(py)faceCount	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	16cf44eddcc23c79	-
+property	c:objc(cs)MDLSubmeshTopology(py)vertexCreaseIndices	-			id<MDLMeshBuffer>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d39fd3da462e39eb	-
+property	c:objc(cs)MDLSubmeshTopology(py)vertexCreases	-			id<MDLMeshBuffer>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1882819d0d35f25d	-
+property	c:objc(cs)MDLSubmeshTopology(py)vertexCreaseCount	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b512795a3e29b25d	-
+property	c:objc(cs)MDLSubmeshTopology(py)edgeCreaseIndices	-			id<MDLMeshBuffer>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e05b8d3f0ac548ec	-
+property	c:objc(cs)MDLSubmeshTopology(py)edgeCreases	-			id<MDLMeshBuffer>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	eaeb8fdd9fdc7f68	-
+property	c:objc(cs)MDLSubmeshTopology(py)edgeCreaseCount	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a62aed7848720e6c	-
+property	c:objc(cs)MDLSubmeshTopology(py)holes	-			id<MDLMeshBuffer>	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	43ce827f41f06b54	-
+property	c:objc(cs)MDLSubmeshTopology(py)holeCount	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c08e99abb3b74d00	-
+interface	c:objc(cs)MDLSubmesh	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	72f94b18aa1f0346	-
+super	-	MDLSubmesh	NSObject		-	-	-	-	-	5fec7425dfb127f6	-
+conforms	c:objc(cs)MDLSubmesh	MDLSubmesh	MDLNamed		-	-	-	-	-	f1b50546dfc7bfde	-
+method	c:objc(cs)MDLSubmesh(im)initWithName:indexBuffer:indexCount:indexType:geometryType:material:	-			instancetype	NSString * name | id<MDLMeshBuffer> indexBuffer | NSUInteger indexCount | MDLIndexBitDepth indexType | MDLGeometryType geometryType | MDLMaterial * material	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fb596f4eea0f26ee	-
+method	c:objc(cs)MDLSubmesh(im)initWithIndexBuffer:indexCount:indexType:geometryType:material:	-			instancetype	id<MDLMeshBuffer> indexBuffer | NSUInteger indexCount | MDLIndexBitDepth indexType | MDLGeometryType geometryType | MDLMaterial * material	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	851e971084ad331d	-
+method	c:objc(cs)MDLSubmesh(im)initWithName:indexBuffer:indexCount:indexType:geometryType:material:topology:	-			instancetype	NSString * name | id<MDLMeshBuffer> indexBuffer | NSUInteger indexCount | MDLIndexBitDepth indexType | MDLGeometryType geometryType | MDLMaterial * material | MDLSubmeshTopology * topology	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7d0aafe4f4dbc1c6	-
+method	c:objc(cs)MDLSubmesh(im)initWithMDLSubmesh:indexType:geometryType:	-			instancetype	MDLSubmesh * submesh | MDLIndexBitDepth indexType | MDLGeometryType geometryType	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ba75c62e1b075b4c	-
+property	c:objc(cs)MDLSubmesh(py)indexBuffer	-			id<MDLMeshBuffer>	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ac5203e784eec179	-
+method	c:objc(cs)MDLSubmesh(im)indexBufferAsIndexType:	-			id<MDLMeshBuffer>	MDLIndexBitDepth indexType	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f719836476bf6ddd	-
+property	c:objc(cs)MDLSubmesh(py)indexCount	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d83f3cc66da24a34	-
+property	c:objc(cs)MDLSubmesh(py)indexType	-			MDLIndexBitDepth	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	45166d1d3b27a4f9	-
+property	c:objc(cs)MDLSubmesh(py)geometryType	-			MDLGeometryType	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b5604dee85e05452	-
+property	c:objc(cs)MDLSubmesh(py)material	-			MDLMaterial *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a3d2b1b08538c3af	-
+property	c:objc(cs)MDLSubmesh(py)topology	-			MDLSubmeshTopology *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f7fb4dc34a4c3d34	-
+property	c:objc(cs)MDLSubmesh(py)name	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0f28c29d94093922	-
+interface	c:objc(cs)MDLVertexAttributeData	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2b564fa57e0f4514	-
+super	-	MDLVertexAttributeData	NSObject		-	-	-	-	-	bc27d37694301192	-
+property	c:objc(cs)MDLVertexAttributeData(py)map	-			MDLMeshBufferMap *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9e3cf1a29bdcf90f	-
+property	c:objc(cs)MDLVertexAttributeData(py)dataStart	-			void *	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	aaf6e9b2e3f938e0	-
+property	c:objc(cs)MDLVertexAttributeData(py)stride	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9005373681f3573a	-
+property	c:objc(cs)MDLVertexAttributeData(py)format	-			MDLVertexFormat	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8c6bfe1d38946e6f	-
+property	c:objc(cs)MDLVertexAttributeData(py)bufferSize	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	877ea78d899ca442	-
+interface	c:objc(cs)MDLMesh	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a5ae51a4e569c6fd	-
+super	-	MDLMesh	MDLObject		-	-	-	-	-	f2ffd1cc8e3147ea	-
+method	c:objc(cs)MDLMesh(im)initWithBufferAllocator:	-			instancetype	id<MDLMeshBufferAllocator> bufferAllocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	37ab58ffd5f68d95	-
+method	c:objc(cs)MDLMesh(im)initWithVertexBuffer:vertexCount:descriptor:submeshes:	-			instancetype	id<MDLMeshBuffer> vertexBuffer | NSUInteger vertexCount | MDLVertexDescriptor * descriptor | NSArray<MDLSubmesh *> * submeshes	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	37635f958df4358e	-
+method	c:objc(cs)MDLMesh(im)initWithVertexBuffers:vertexCount:descriptor:submeshes:	-			instancetype	NSArray<id<MDLMeshBuffer>> * vertexBuffers | NSUInteger vertexCount | MDLVertexDescriptor * descriptor | NSArray<MDLSubmesh *> * submeshes	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b68e7688ab9deeb8	-
+method	c:objc(cs)MDLMesh(im)vertexAttributeDataForAttributeNamed:	-			MDLVertexAttributeData *	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cbab1292403e6980	-
+method	c:objc(cs)MDLMesh(im)vertexAttributeDataForAttributeNamed:asFormat:	-			MDLVertexAttributeData *	NSString * name | MDLVertexFormat format	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f1cb04e865d9fc19	-
+property	c:objc(cs)MDLMesh(py)boundingBox	-			MDLAxisAlignedBoundingBox	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4db737b66cac6ca5	-
+property	c:objc(cs)MDLMesh(py)vertexDescriptor	-			MDLVertexDescriptor *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ecc8b9868bf4abd4	-
+property	c:objc(cs)MDLMesh(py)vertexCount	-			NSUInteger	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	537187de13189e60	-
+property	c:objc(cs)MDLMesh(py)vertexBuffers	-			NSArray<id<MDLMeshBuffer>> *	-	retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f9c20eaa3c91d134	-
+property	c:objc(cs)MDLMesh(py)submeshes	-			NSMutableArray<MDLSubmesh *> *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b27ff19c455c05b2	-
+property	c:objc(cs)MDLMesh(py)allocator	-			id<MDLMeshBufferAllocator>	-	readonly,retain,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	fbeaeafabfb0cd17	-
+category	c:objc(cy)MDLMesh@Modifiers	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	851892dc2207e615	-
+method	c:objc(cs)MDLMesh(im)addAttributeWithName:format:	Modifiers			void	NSString * name | MDLVertexFormat format	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4e9925ddac61ad55	-
+method	c:objc(cs)MDLMesh(im)addAttributeWithName:format:type:data:stride:	Modifiers			void	NSString * name | MDLVertexFormat format | NSString * type | NSData * data | NSInteger stride	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5bec712b2abcf45f	-
+method	c:objc(cs)MDLMesh(im)addAttributeWithName:format:type:data:stride:time:	Modifiers			void	NSString * name | MDLVertexFormat format | NSString * type | NSData * data | NSInteger stride | NSTimeInterval time	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	753e63c1f9c642dd	-
+method	c:objc(cs)MDLMesh(im)addNormalsWithAttributeNamed:creaseThreshold:	Modifiers			void	NSString * attributeName | float creaseThreshold	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cb6dec427025c291	-
+method	c:objc(cs)MDLMesh(im)addTangentBasisForTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:	Modifiers			void	NSString * textureCoordinateAttributeName | NSString * tangentAttributeName | NSString * bitangentAttributeName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f071fc0030562658	-
+method	c:objc(cs)MDLMesh(im)addTangentBasisForTextureCoordinateAttributeNamed:normalAttributeNamed:tangentAttributeNamed:	Modifiers			void	NSString * textureCoordinateAttributeName | NSString * normalAttributeName | NSString * tangentAttributeName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0f0cdd4b576d873b	-
+method	c:objc(cs)MDLMesh(im)addOrthTanBasisForTextureCoordinateAttributeNamed:normalAttributeNamed:tangentAttributeNamed:	Modifiers			void	NSString * textureCoordinateAttributeName | NSString * normalAttributeName | NSString * tangentAttributeName	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	20553c12b9101d36	-
+method	c:objc(cs)MDLMesh(im)addUnwrappedTextureCoordinatesForAttributeNamed:	Modifiers			void	NSString * textureCoordinateAttributeName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2a4074d82e4e5657	-
+method	c:objc(cs)MDLMesh(im)flipTextureCoordinatesInAttributeNamed:	Modifiers			void	NSString * textureCoordinateAttributeName	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	908df81b5505020a	-
+method	c:objc(cs)MDLMesh(im)makeVerticesUnique	Modifiers			void	-	-	ios=9.0/11.0/-/0	-	bbd26d1dcc62f27d	-
+method	c:objc(cs)MDLMesh(im)makeVerticesUniqueAndReturnError:	Modifiers			BOOL	NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8cb846bae7964a07	-
+method	c:objc(cs)MDLMesh(im)replaceAttributeNamed:withData:	Modifiers			void	NSString * name | MDLVertexAttributeData * newData	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	381fc7f5a6815ddd	-
+method	c:objc(cs)MDLMesh(im)updateAttributeNamed:withData:	Modifiers			void	NSString * name | MDLVertexAttributeData * newData	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	36f825fa9d84d800	-
+method	c:objc(cs)MDLMesh(im)removeAttributeNamed:	Modifiers			void	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9eab4169ac73bf63	-
+category	c:objc(cy)MDLMesh@Generators	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4cca3a568097bd11	-
+method	c:objc(cs)MDLMesh(im)initBoxWithExtent:segments:inwardNormals:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint3 segments | BOOL inwardNormals | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f80b4f65ba0fb2d3	-
+method	c:objc(cs)MDLMesh(im)initSphereWithExtent:segments:inwardNormals:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint2 segments | BOOL inwardNormals | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e44bfc9bad463992	-
+method	c:objc(cs)MDLMesh(im)initHemisphereWithExtent:segments:inwardNormals:cap:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint2 segments | BOOL inwardNormals | BOOL cap | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e405c4fc61189f64	-
+method	c:objc(cs)MDLMesh(im)initCylinderWithExtent:segments:inwardNormals:topCap:bottomCap:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint2 segments | BOOL inwardNormals | BOOL topCap | BOOL bottomCap | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7442f4a4860db032	-
+method	c:objc(cs)MDLMesh(im)initCapsuleWithExtent:cylinderSegments:hemisphereSegments:inwardNormals:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint2 segments | int hemisphereSegments | BOOL inwardNormals | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ecbf23079b36af48	-
+method	c:objc(cs)MDLMesh(im)initConeWithExtent:segments:inwardNormals:cap:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint2 segments | BOOL inwardNormals | BOOL cap | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b3d181bf280ce2e5	-
+method	c:objc(cs)MDLMesh(im)initPlaneWithExtent:segments:geometryType:allocator:	Generators			instancetype	vector_float3 extent | vector_uint2 segments | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	008c170f3fc1c1df	-
+method	c:objc(cs)MDLMesh(im)initIcosahedronWithExtent:inwardNormals:geometryType:allocator:	Generators			instancetype	vector_float3 extent | BOOL inwardNormals | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	66d457571ba0069d	-
+method	c:objc(cs)MDLMesh(im)initMeshBySubdividingMesh:submeshIndex:subdivisionLevels:allocator:	Generators			instancetype	MDLMesh * mesh | int submeshIndex | unsigned int subdivisionLevels | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f38425ca5d9645e9	-
+method	c:objc(cs)MDLMesh(cm)newBoxWithDimensions:segments:geometryType:inwardNormals:allocator:	Generators			instancetype	vector_float3 dimensions | vector_uint3 segments | MDLGeometryType geometryType | BOOL inwardNormals | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	80baa74b03843af7	-
+method	c:objc(cs)MDLMesh(cm)newEllipsoidWithRadii:radialSegments:verticalSegments:geometryType:inwardNormals:hemisphere:allocator:	Generators			instancetype	vector_float3 radii | NSUInteger radialSegments | NSUInteger verticalSegments | MDLGeometryType geometryType | BOOL inwardNormals | BOOL hemisphere | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	3ed480ee0a1e709f	-
+method	c:objc(cs)MDLMesh(cm)newCylinderWithHeight:radii:radialSegments:verticalSegments:geometryType:inwardNormals:allocator:	Generators			instancetype	float height | vector_float2 radii | NSUInteger radialSegments | NSUInteger verticalSegments | MDLGeometryType geometryType | BOOL inwardNormals | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	662ce1feab1366b1	-
+method	c:objc(cs)MDLMesh(cm)newCapsuleWithHeight:radii:radialSegments:verticalSegments:hemisphereSegments:geometryType:inwardNormals:allocator:	Generators			instancetype	float height | vector_float2 radii | NSUInteger radialSegments | NSUInteger verticalSegments | NSUInteger hemisphereSegments | MDLGeometryType geometryType | BOOL inwardNormals | id<MDLMeshBufferAllocator> allocator	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3b3b6d4b27365b50	-
+method	c:objc(cs)MDLMesh(cm)newEllipticalConeWithHeight:radii:radialSegments:verticalSegments:geometryType:inwardNormals:allocator:	Generators			instancetype	float height | vector_float2 radii | NSUInteger radialSegments | NSUInteger verticalSegments | MDLGeometryType geometryType | BOOL inwardNormals | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	bf6148b6225a90ad	-
+method	c:objc(cs)MDLMesh(cm)newPlaneWithDimensions:segments:geometryType:allocator:	Generators			instancetype	vector_float2 dimensions | vector_uint2 segments | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	121cd46d6a12acdc	-
+method	c:objc(cs)MDLMesh(cm)newIcosahedronWithRadius:inwardNormals:geometryType:allocator:	Generators			instancetype	float radius | BOOL inwardNormals | MDLGeometryType geometryType | id<MDLMeshBufferAllocator> allocator	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0de666f4fa83a377	-
+method	c:objc(cs)MDLMesh(cm)newIcosahedronWithRadius:inwardNormals:allocator:	Generators			instancetype	float radius | BOOL inwardNormals | id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	d71d5b8d63566ec9	-
+method	c:objc(cs)MDLMesh(cm)newSubdividedMesh:submeshIndex:subdivisionLevels:	Generators			instancetype	MDLMesh * mesh | NSUInteger submeshIndex | NSUInteger subdivisionLevels	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	89880650e6500b6a	-
+category	c:objc(cy)MDLMesh@MDLLightBaking	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f5c1de7d76aa3f33	-
+method	c:objc(cs)MDLMesh(im)generateAmbientOcclusionTextureWithSize:raysPerSample:attenuationFactor:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:	MDLLightBaking			BOOL	vector_int2 textureSize | NSInteger raysPerSample | float attenuationFactor | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName | NSString * materialPropertyName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	545b88fceea0d756	-
+method	c:objc(cs)MDLMesh(im)generateAmbientOcclusionTextureWithQuality:attenuationFactor:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:	MDLLightBaking			BOOL	float bakeQuality | float attenuationFactor | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName | NSString * materialPropertyName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5d780cd8bd31ef8a	-
+method	c:objc(cs)MDLMesh(im)generateAmbientOcclusionVertexColorsWithRaysPerSample:attenuationFactor:objectsToConsider:vertexAttributeNamed:	MDLLightBaking			BOOL	NSInteger raysPerSample | float attenuationFactor | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8b7b6fc3f89e821d	-
+method	c:objc(cs)MDLMesh(im)generateAmbientOcclusionVertexColorsWithQuality:attenuationFactor:objectsToConsider:vertexAttributeNamed:	MDLLightBaking			BOOL	float bakeQuality | float attenuationFactor | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6f25b71eff184020	-
+method	c:objc(cs)MDLMesh(im)generateLightMapTextureWithTextureSize:lightsToConsider:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:	MDLLightBaking			BOOL	vector_int2 textureSize | NSArray<MDLLight *> * lightsToConsider | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName | NSString * materialPropertyName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	928daab5e450c4f3	-
+method	c:objc(cs)MDLMesh(im)generateLightMapTextureWithQuality:lightsToConsider:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:	MDLLightBaking			BOOL	float bakeQuality | NSArray<MDLLight *> * lightsToConsider | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName | NSString * materialPropertyName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5cf1537c8d877bea	-
+method	c:objc(cs)MDLMesh(im)generateLightMapVertexColorsWithLightsToConsider:objectsToConsider:vertexAttributeNamed:	MDLLightBaking			BOOL	NSArray<MDLLight *> * lightsToConsider | NSArray<MDLObject *> * objectsToConsider | NSString * vertexAttributeName	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6323fd1c840b8038	-
+typedef	c:@T@MDLTextureChannelEncoding	-			enum MDLTextureChannelEncoding	-	-	-	-	ad5909af03e9318b	-
+enum	c:@E@MDLTextureChannelEncoding	-			NSInteger	-	-	-	-	7ebb8eecf4703bea	-
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUInt8	MDLTextureChannelEncoding			-	-	-	-	-	32baa24018cf2fd7	1
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUint8	MDLTextureChannelEncoding			-	-	-	-	-	6d8c3ae9507fe889	1
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUInt16	MDLTextureChannelEncoding			-	-	-	-	-	89021725c9b1fc3d	2
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUint16	MDLTextureChannelEncoding			-	-	-	-	-	f444dda70358903a	2
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUInt24	MDLTextureChannelEncoding			-	-	-	-	-	7ee21dfb5bfecd82	3
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUint24	MDLTextureChannelEncoding			-	-	-	-	-	194af56517833588	3
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUInt32	MDLTextureChannelEncoding			-	-	-	-	-	14aad9424b34a011	4
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingUint32	MDLTextureChannelEncoding			-	-	-	-	-	8917528b74362cf2	4
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingFloat16	MDLTextureChannelEncoding			-	-	-	-	-	00ce8df7e7e410e8	258
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingFloat16SR	MDLTextureChannelEncoding			-	-	-	-	-	ce82e8ce683b6497	770
+enumconst	c:@E@MDLTextureChannelEncoding@MDLTextureChannelEncodingFloat32	MDLTextureChannelEncoding			-	-	-	-	-	86c4265fb4413cbf	260
+interface	c:objc(cs)MDLTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cd763917f29dc6ba	-
+super	-	MDLTexture	NSObject		-	-	-	-	-	42e8e13c7dbafc46	-
+conforms	c:objc(cs)MDLTexture	MDLTexture	MDLNamed		-	-	-	-	-	9479f88742f9a75c	-
+method	c:objc(cs)MDLTexture(im)init	-			instancetype	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9ba3affe92317ee0	-
+method	c:objc(cs)MDLTexture(cm)textureNamed:	-			instancetype	NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	43b9efb4e4fbdb88	-
+method	c:objc(cs)MDLTexture(cm)textureNamed:bundle:	-			instancetype	NSString * name | NSBundle * bundleOrNil	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0c8cf8d336b01616	-
+method	c:objc(cs)MDLTexture(cm)textureNamed:assetResolver:	-			instancetype	NSString * name | id<MDLAssetResolver> resolver	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	400ea8f852e8f4f9	-
+method	c:objc(cs)MDLTexture(cm)textureCubeWithImagesNamed:	-			instancetype	NSArray<NSString *> * names	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5228a5dcd7adbe1f	-
+method	c:objc(cs)MDLTexture(cm)textureCubeWithImagesNamed:bundle:	-			instancetype	NSArray<NSString *> * names | NSBundle * bundleOrNil	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2eca8fafdea5525a	-
+method	c:objc(cs)MDLTexture(cm)irradianceTextureCubeWithTexture:name:dimensions:	-			instancetype	MDLTexture * texture | NSString * name | vector_int2 dimensions	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	bf70b1c49b6df494	-
+method	c:objc(cs)MDLTexture(cm)irradianceTextureCubeWithTexture:name:dimensions:roughness:	-			instancetype	MDLTexture * texture | NSString * name | vector_int2 dimensions | float roughness	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	781127b5273ab0ec	-
+method	c:objc(cs)MDLTexture(im)initWithData:topLeftOrigin:name:dimensions:rowStride:channelCount:channelEncoding:isCube:	-			instancetype	NSData * pixelData | BOOL topLeftOrigin | NSString * name | vector_int2 dimensions | NSInteger rowStride | NSUInteger channelCount | MDLTextureChannelEncoding channelEncoding | BOOL isCube	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	397db2285f27ee6b	-
+method	c:objc(cs)MDLTexture(im)writeToURL:	-			BOOL	NSURL * URL	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0271f5016667f813	-
+method	c:objc(cs)MDLTexture(im)writeToURL:level:	-			BOOL	NSURL * URL | NSUInteger level	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5c7c8f8af587ac3a	-
+method	c:objc(cs)MDLTexture(im)writeToURL:type:	-			BOOL	NSURL * nsurl | CFStringRef type	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	569186af0d26bae1	-
+method	c:objc(cs)MDLTexture(im)writeToURL:type:level:	-			BOOL	NSURL * nsurl | CFStringRef type | NSUInteger level	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	dd06bbb76994eddc	-
+method	c:objc(cs)MDLTexture(im)imageFromTexture	-			CGImageRef	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a2c8020e7cfe287c	-
+method	c:objc(cs)MDLTexture(im)imageFromTextureAtLevel:	-			CGImageRef	NSUInteger level	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2d9c6d32f1908e19	-
+method	c:objc(cs)MDLTexture(im)texelDataWithTopLeftOrigin	-			NSData *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	441dcc181c1febc4	-
+method	c:objc(cs)MDLTexture(im)texelDataWithBottomLeftOrigin	-			NSData *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	1a28e47679c14907	-
+method	c:objc(cs)MDLTexture(im)texelDataWithTopLeftOriginAtMipLevel:create:	-			NSData *	NSInteger level | BOOL create	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6e2acfb45ceeb031	-
+method	c:objc(cs)MDLTexture(im)texelDataWithBottomLeftOriginAtMipLevel:create:	-			NSData *	NSInteger level | BOOL create	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6a771fa2e1dca681	-
+property	c:objc(cs)MDLTexture(py)dimensions	-			vector_int2	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a763897aa661a1a5	-
+property	c:objc(cs)MDLTexture(py)rowStride	-			NSInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	3eab8b695058aad9	-
+property	c:objc(cs)MDLTexture(py)channelCount	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	392d865c59deebb4	-
+property	c:objc(cs)MDLTexture(py)mipLevelCount	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	876ac4f6540108d0	-
+property	c:objc(cs)MDLTexture(py)channelEncoding	-			MDLTextureChannelEncoding	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f7f2a1e87fa4ec52	-
+property	c:objc(cs)MDLTexture(py)isCube	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	47d648c7b4e21fc5	-
+property	c:objc(cs)MDLTexture(py)hasAlphaValues	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c617be89f70f5f43	-
+interface	c:objc(cs)MDLURLTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6ce897fb9ca9dd29	-
+super	-	MDLURLTexture	MDLTexture		-	-	-	-	-	48406e0e758d2bc5	-
+method	c:objc(cs)MDLURLTexture(im)initWithURL:name:	-			instancetype	NSURL * URL | NSString * name	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9c503c24ca5054a9	-
+property	c:objc(cs)MDLURLTexture(py)URL	-			NSURL *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	936d5b8ecbfe63a7	-
+interface	c:objc(cs)MDLCheckerboardTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	127420f3193bee27	-
+super	-	MDLCheckerboardTexture	MDLTexture		-	-	-	-	-	28345844f2a56d59	-
+method	c:objc(cs)MDLCheckerboardTexture(im)initWithDivisions:name:dimensions:channelCount:channelEncoding:color1:color2:	-			instancetype	float divisions | NSString * name | vector_int2 dimensions | int channelCount | MDLTextureChannelEncoding channelEncoding | CGColorRef color1 | CGColorRef color2	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	c5238cf24bddcbcf	-
+property	c:objc(cs)MDLCheckerboardTexture(py)divisions	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	19eb68a49bc5fafd	-
+property	c:objc(cs)MDLCheckerboardTexture(py)color1	-			CGColorRef	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	86be042b4cad2067	-
+property	c:objc(cs)MDLCheckerboardTexture(py)color2	-			CGColorRef	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	00b8f25b8d60fb49	-
+interface	c:objc(cs)MDLSkyCubeTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e8adf7517b0a8238	-
+super	-	MDLSkyCubeTexture	MDLTexture		-	-	-	-	-	3b8ecec535c96192	-
+method	c:objc(cs)MDLSkyCubeTexture(im)initWithName:channelEncoding:textureDimensions:turbidity:sunElevation:upperAtmosphereScattering:groundAlbedo:	-			instancetype	NSString * name | MDLTextureChannelEncoding channelEncoding | vector_int2 textureDimensions | float turbidity | float sunElevation | float upperAtmosphereScattering | float groundAlbedo	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4553fc0d8e945f78	-
+method	c:objc(cs)MDLSkyCubeTexture(im)initWithName:channelEncoding:textureDimensions:turbidity:sunElevation:sunAzimuth:upperAtmosphereScattering:groundAlbedo:	-			instancetype	NSString * name | MDLTextureChannelEncoding channelEncoding | vector_int2 textureDimensions | float turbidity | float sunElevation | float sunAzimuth | float upperAtmosphereScattering | float groundAlbedo	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	55806b6949048295	-
+method	c:objc(cs)MDLSkyCubeTexture(im)updateTexture	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9dabb29e7500929b	-
+property	c:objc(cs)MDLSkyCubeTexture(py)turbidity	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	11740c604eeaa6f4	-
+property	c:objc(cs)MDLSkyCubeTexture(py)sunElevation	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cacef7ad6494133e	-
+property	c:objc(cs)MDLSkyCubeTexture(py)sunAzimuth	-			float	-	assign,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8d5edddd9993fa4a	-
+property	c:objc(cs)MDLSkyCubeTexture(py)upperAtmosphereScattering	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	95a9ad7f3404565e	-
+property	c:objc(cs)MDLSkyCubeTexture(py)groundAlbedo	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	275773d3bbbe9716	-
+property	c:objc(cs)MDLSkyCubeTexture(py)horizonElevation	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4ed5817f6f7c35a8	-
+property	c:objc(cs)MDLSkyCubeTexture(py)groundColor	-			CGColorRef	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	2effc002d18838f9	-
+property	c:objc(cs)MDLSkyCubeTexture(py)gamma	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	5a3e6350235037b2	-
+property	c:objc(cs)MDLSkyCubeTexture(py)exposure	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	20b854d28c987150	-
+property	c:objc(cs)MDLSkyCubeTexture(py)brightness	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4547b6e4bae3cc9d	-
+property	c:objc(cs)MDLSkyCubeTexture(py)contrast	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	26c725c5e60450a1	-
+property	c:objc(cs)MDLSkyCubeTexture(py)saturation	-			float	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f34167f8c8f73974	-
+property	c:objc(cs)MDLSkyCubeTexture(py)highDynamicRangeCompression	-			vector_float2	-	assign,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	aff71003647a8730	-
+interface	c:objc(cs)MDLColorSwatchTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	967798305cd9fc0c	-
+super	-	MDLColorSwatchTexture	MDLTexture		-	-	-	-	-	b1cf06f5e61152a8	-
+method	c:objc(cs)MDLColorSwatchTexture(im)initWithColorTemperatureGradientFrom:toColorTemperature:name:textureDimensions:	-			instancetype	float colorTemperature1 | float colorTemperature2 | NSString * name | vector_int2 textureDimensions	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4495f892d0774135	-
+method	c:objc(cs)MDLColorSwatchTexture(im)initWithColorGradientFrom:toColor:name:textureDimensions:	-			instancetype	CGColorRef color1 | CGColorRef color2 | NSString * name | vector_int2 textureDimensions	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	44e33840bce01336	-
+interface	c:objc(cs)MDLNoiseTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	dea6befb0b4d27fb	-
+super	-	MDLNoiseTexture	MDLTexture		-	-	-	-	-	ee8a113d8b37a51b	-
+method	c:objc(cs)MDLNoiseTexture(im)initVectorNoiseWithSmoothness:name:textureDimensions:channelEncoding:	-			instancetype	float smoothness | NSString * name | vector_int2 textureDimensions | MDLTextureChannelEncoding channelEncoding	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	748f164bc893424f	-
+method	c:objc(cs)MDLNoiseTexture(im)initScalarNoiseWithSmoothness:name:textureDimensions:channelCount:channelEncoding:grayscale:	-			instancetype	float smoothness | NSString * name | vector_int2 textureDimensions | int channelCount | MDLTextureChannelEncoding channelEncoding | BOOL grayscale	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	44c41ab4199f8629	-
+method	c:objc(cs)MDLNoiseTexture(im)initCellularNoiseWithFrequency:name:textureDimensions:channelEncoding:	-			instancetype	float frequency | NSString * name | vector_int2 textureDimensions | MDLTextureChannelEncoding channelEncoding	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0046c86a0e93c324	-
+interface	c:objc(cs)MDLNormalMapTexture	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	6559be66b8542b4c	-
+super	-	MDLNormalMapTexture	MDLTexture		-	-	-	-	-	77c342a27d0db868	-
+method	c:objc(cs)MDLNormalMapTexture(im)initByGeneratingNormalMapWithTexture:name:smoothness:contrast:	-			instancetype	MDLTexture * sourceTexture | NSString * name | float smoothness | float contrast	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	31e370a0631b0426	-
+typedef	c:@T@MDLTransformOpRotationOrder	-			enum MDLTransformOpRotationOrder	-	-	-	-	bcf9f8e8f63bb98b	-
+enum	c:@E@MDLTransformOpRotationOrder	-			NSUInteger	-	-	-	-	607b2fcf2ed97667	-
+enumconst	c:@E@MDLTransformOpRotationOrder@MDLTransformOpRotationOrderXYZ	MDLTransformOpRotationOrder			-	-	-	-	-	4de7b6e7d5cb1aa2	1
+enumconst	c:@E@MDLTransformOpRotationOrder@MDLTransformOpRotationOrderXZY	MDLTransformOpRotationOrder			-	-	-	-	-	de9ff91097e3c73a	2
+enumconst	c:@E@MDLTransformOpRotationOrder@MDLTransformOpRotationOrderYXZ	MDLTransformOpRotationOrder			-	-	-	-	-	fe5bfae5d3c0082c	3
+enumconst	c:@E@MDLTransformOpRotationOrder@MDLTransformOpRotationOrderYZX	MDLTransformOpRotationOrder			-	-	-	-	-	ee0c50c985bae63e	4
+enumconst	c:@E@MDLTransformOpRotationOrder@MDLTransformOpRotationOrderZXY	MDLTransformOpRotationOrder			-	-	-	-	-	608cf36c17fa35c7	5
+enumconst	c:@E@MDLTransformOpRotationOrder@MDLTransformOpRotationOrderZYX	MDLTransformOpRotationOrder			-	-	-	-	-	5fdb2270e39f30c0	6
+protocol	c:objc(pl)MDLTransformOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9eaad54a57f579ec	-
+property	c:objc(pl)MDLTransformOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9912e22f00bed28a	-
+method	c:objc(pl)MDLTransformOp(im)float4x4AtTime:	-			matrix_float4x4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	23e135c04866fcc4	-
+method	c:objc(pl)MDLTransformOp(im)double4x4AtTime:	-			matrix_double4x4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	4aa61bd2dd36924c	-
+method	c:objc(pl)MDLTransformOp(im)IsInverseOp	-			_Bool	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	bf21a78745d5ca69	-
+interface	c:objc(cs)MDLTransformRotateXOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d802efca9a01ff82	-
+super	-	MDLTransformRotateXOp	NSObject		-	-	-	-	-	2de62cdefc108ba3	-
+conforms	c:objc(cs)MDLTransformRotateXOp	MDLTransformRotateXOp	MDLTransformOp		-	-	-	-	-	2a9566ba16a6c418	-
+property	c:objc(cs)MDLTransformRotateXOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	047af43a5e9f0a90	-
+property	c:objc(cs)MDLTransformRotateXOp(py)animatedValue	-			MDLAnimatedScalar *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	79eb8739a6c9379a	-
+interface	c:objc(cs)MDLTransformRotateYOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c38882367f3dbcce	-
+super	-	MDLTransformRotateYOp	NSObject		-	-	-	-	-	d70b4a5a2ccdda9a	-
+conforms	c:objc(cs)MDLTransformRotateYOp	MDLTransformRotateYOp	MDLTransformOp		-	-	-	-	-	7de230f36c870f95	-
+property	c:objc(cs)MDLTransformRotateYOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d69b851c6b7de57d	-
+property	c:objc(cs)MDLTransformRotateYOp(py)animatedValue	-			MDLAnimatedScalar *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0ecdce6ca009da07	-
+interface	c:objc(cs)MDLTransformRotateZOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c2fb431b6af2a931	-
+super	-	MDLTransformRotateZOp	NSObject		-	-	-	-	-	fb08585727cd541a	-
+conforms	c:objc(cs)MDLTransformRotateZOp	MDLTransformRotateZOp	MDLTransformOp		-	-	-	-	-	d03c09463367b9c2	-
+property	c:objc(cs)MDLTransformRotateZOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8cb9b6e7a63e8477	-
+property	c:objc(cs)MDLTransformRotateZOp(py)animatedValue	-			MDLAnimatedScalar *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2ef1d261ec349b8c	-
+interface	c:objc(cs)MDLTransformRotateOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d03a9ca63bfbc9f0	-
+super	-	MDLTransformRotateOp	NSObject		-	-	-	-	-	2e2e01df854fbbee	-
+conforms	c:objc(cs)MDLTransformRotateOp	MDLTransformRotateOp	MDLTransformOp		-	-	-	-	-	a244d7c9cc53b4d8	-
+property	c:objc(cs)MDLTransformRotateOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7c499e1aaa3d9f43	-
+property	c:objc(cs)MDLTransformRotateOp(py)animatedValue	-			MDLAnimatedVector3 *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1f342732cdba36f9	-
+interface	c:objc(cs)MDLTransformTranslateOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	50d7f434bdf42f87	-
+super	-	MDLTransformTranslateOp	NSObject		-	-	-	-	-	ea1d318947554def	-
+conforms	c:objc(cs)MDLTransformTranslateOp	MDLTransformTranslateOp	MDLTransformOp		-	-	-	-	-	dea78ccc503b21ea	-
+property	c:objc(cs)MDLTransformTranslateOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	da484b201c137662	-
+property	c:objc(cs)MDLTransformTranslateOp(py)animatedValue	-			MDLAnimatedVector3 *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1860caa64f42dada	-
+interface	c:objc(cs)MDLTransformScaleOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c14bcfa6251addb9	-
+super	-	MDLTransformScaleOp	NSObject		-	-	-	-	-	0f73bd40053c2511	-
+conforms	c:objc(cs)MDLTransformScaleOp	MDLTransformScaleOp	MDLTransformOp		-	-	-	-	-	ed9701d73e0b8e26	-
+property	c:objc(cs)MDLTransformScaleOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0b60157e3bd1d939	-
+property	c:objc(cs)MDLTransformScaleOp(py)animatedValue	-			MDLAnimatedVector3 *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	030f2b266a7b4bfd	-
+interface	c:objc(cs)MDLTransformMatrixOp	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f5a880c80ce5273e	-
+super	-	MDLTransformMatrixOp	NSObject		-	-	-	-	-	48a223ce5772fccc	-
+conforms	c:objc(cs)MDLTransformMatrixOp	MDLTransformMatrixOp	MDLTransformOp		-	-	-	-	-	8f489118dd827f87	-
+property	c:objc(cs)MDLTransformMatrixOp(py)name	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1b16dfdb5f0aee65	-
+property	c:objc(cs)MDLTransformMatrixOp(py)animatedValue	-			MDLAnimatedMatrix4x4 *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	96ce72f6ee82dd3d	-
+interface	c:objc(cs)MDLTransformOrientOp	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	4be31f010acd7742	-
+super	-	MDLTransformOrientOp	NSObject		-	-	-	-	-	1034627c90e14503	-
+conforms	c:objc(cs)MDLTransformOrientOp	MDLTransformOrientOp	MDLTransformOp		-	-	-	-	-	91c6a2575ceb9763	-
+property	c:objc(cs)MDLTransformOrientOp(py)name	-			NSString *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	71473044fd5283a9	-
+property	c:objc(cs)MDLTransformOrientOp(py)animatedValue	-			MDLAnimatedQuaternion *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	c763213719051ebe	-
+interface	c:objc(cs)MDLTransformStack	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	673b18c70abc2e0e	-
+super	-	MDLTransformStack	NSObject		-	-	-	-	-	7fdf9ad5355cf2f5	-
+conforms	c:objc(cs)MDLTransformStack	MDLTransformStack	NSCopying		-	-	-	-	-	50337bd6cea237d7	-
+conforms	c:objc(cs)MDLTransformStack	MDLTransformStack	MDLTransformComponent		-	-	-	-	-	dd44c5737a761aac	-
+method	c:objc(cs)MDLTransformStack(im)init	-			id	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7e3527004342aef3	-
+method	c:objc(cs)MDLTransformStack(im)addTranslateOp:inverse:	-			MDLTransformTranslateOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5924894024aafe8a	-
+method	c:objc(cs)MDLTransformStack(im)addRotateXOp:inverse:	-			MDLTransformRotateXOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e696fd45c870f0ad	-
+method	c:objc(cs)MDLTransformStack(im)addRotateYOp:inverse:	-			MDLTransformRotateYOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3314f1791787abf4	-
+method	c:objc(cs)MDLTransformStack(im)addRotateZOp:inverse:	-			MDLTransformRotateZOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6392d9745261a7c0	-
+method	c:objc(cs)MDLTransformStack(im)addRotateOp:order:inverse:	-			MDLTransformRotateOp *	NSString * animatedValueName | MDLTransformOpRotationOrder order | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d10e2f84c30edf43	-
+method	c:objc(cs)MDLTransformStack(im)addScaleOp:inverse:	-			MDLTransformScaleOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	52f47c5c320fc984	-
+method	c:objc(cs)MDLTransformStack(im)addMatrixOp:inverse:	-			MDLTransformMatrixOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	deeb5facb8f0bfc1	-
+method	c:objc(cs)MDLTransformStack(im)addOrientOp:inverse:	-			MDLTransformOrientOp *	NSString * animatedValueName | _Bool inverse	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f710e49ab0d65c59	-
+method	c:objc(cs)MDLTransformStack(im)animatedValueWithName:	-			MDLAnimatedValue *	NSString * name	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	760dcecb7074040b	-
+method	c:objc(cs)MDLTransformStack(im)float4x4AtTime:	-			matrix_float4x4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	42edf5791dbddd5c	-
+method	c:objc(cs)MDLTransformStack(im)double4x4AtTime:	-			matrix_double4x4	NSTimeInterval time	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7d4f537c957c3caa	-
+method	c:objc(cs)MDLTransformStack(im)count	-			NSUInteger	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6866b1b25de5322e	-
+property	c:objc(cs)MDLTransformStack(py)keyTimes	-			NSArray<NSNumber *> *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	15053e40519d3fde	-
+property	c:objc(cs)MDLTransformStack(py)transformOps	-			NSArray<id<MDLTransformOp>> *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ba517c14ad9795c3	-
+typedef	c:@T@MDLVoxelIndex	-			vector_int4	-	-	-	-	59e21ff7f93a6f13	-
+struct	c:@SA@MDLVoxelIndexExtent	-			-	-	-	-	-	a946ce20a4a2155f	-
+field	c:@SA@MDLVoxelIndexExtent@FI@minimumExtent	MDLVoxelIndexExtent			MDLVoxelIndex	-	-	-	-	b238f63ac2deb797	-
+field	c:@SA@MDLVoxelIndexExtent@FI@maximumExtent	MDLVoxelIndexExtent			MDLVoxelIndex	-	-	-	-	415dc66ab746dc2e	-
+typedef	c:@T@MDLVoxelIndexExtent	-			struct MDLVoxelIndexExtent	-	-	-	-	10a94c9e7ebfc63a	-
+interface	c:objc(cs)MDLVoxelArray	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	7c4af268b568bd16	-
+super	-	MDLVoxelArray	MDLObject		-	-	-	-	-	7151c8af6bbb6e1a	-
+method	c:objc(cs)MDLVoxelArray(im)initWithAsset:divisions:patchRadius:	-			instancetype	MDLAsset * asset | int divisions | float patchRadius	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9434e2effabf635f	-
+method	c:objc(cs)MDLVoxelArray(im)initWithData:boundingBox:voxelExtent:	-			instancetype	NSData * voxelData | MDLAxisAlignedBoundingBox boundingBox | float voxelExtent	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f7b7806f93bd6579	-
+method	c:objc(cs)MDLVoxelArray(im)initWithAsset:divisions:interiorShells:exteriorShells:patchRadius:	-			instancetype	MDLAsset * asset | int divisions | int interiorShells | int exteriorShells | float patchRadius	-	ios=-/-/-/1	-	6225239f1a7d4b50	-
+method	c:objc(cs)MDLVoxelArray(im)initWithAsset:divisions:interiorNBWidth:exteriorNBWidth:patchRadius:	-			instancetype	MDLAsset * asset | int divisions | float interiorNBWidth | float exteriorNBWidth | float patchRadius	-	ios=-/-/-/1	-	180a94712fc0b1b0	-
+property	c:objc(cs)MDLVoxelArray(py)count	-			NSUInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a852ef18700d963e	-
+property	c:objc(cs)MDLVoxelArray(py)voxelIndexExtent	-			MDLVoxelIndexExtent	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8b468ee991d0a5b0	-
+method	c:objc(cs)MDLVoxelArray(im)voxelExistsAtIndex:allowAnyX:allowAnyY:allowAnyZ:allowAnyShell:	-			BOOL	MDLVoxelIndex index | BOOL allowAnyX | BOOL allowAnyY | BOOL allowAnyZ | BOOL allowAnyShell	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9f38307b092b8b69	-
+method	c:objc(cs)MDLVoxelArray(im)voxelsWithinExtent:	-			NSData *	MDLVoxelIndexExtent extent	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	9e6b98fc436a7911	-
+method	c:objc(cs)MDLVoxelArray(im)voxelIndices	-			NSData *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	ced0e0dbcc7c11de	-
+method	c:objc(cs)MDLVoxelArray(im)setVoxelAtIndex:	-			void	MDLVoxelIndex index	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	354d9ea8a2c92a58	-
+method	c:objc(cs)MDLVoxelArray(im)setVoxelsForMesh:divisions:patchRadius:	-			void	MDLMesh * mesh | int divisions | float patchRadius	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	0fbd40286f7fc787	-
+method	c:objc(cs)MDLVoxelArray(im)setVoxelsForMesh:divisions:interiorShells:exteriorShells:patchRadius:	-			void	MDLMesh * mesh | int divisions | int interiorShells | int exteriorShells | float patchRadius	-	ios=-/-/-/1	-	cebe3899e054be38	-
+method	c:objc(cs)MDLVoxelArray(im)setVoxelsForMesh:divisions:interiorNBWidth:exteriorNBWidth:patchRadius:	-			void	MDLMesh * mesh | int divisions | float interiorNBWidth | float exteriorNBWidth | float patchRadius	-	ios=-/-/-/1	-	d636e332c5d634ee	-
+method	c:objc(cs)MDLVoxelArray(im)unionWithVoxels:	-			void	MDLVoxelArray * voxels	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	cc650a9163255c07	-
+method	c:objc(cs)MDLVoxelArray(im)intersectWithVoxels:	-			void	MDLVoxelArray * voxels	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	53ef2d77db0ddb79	-
+method	c:objc(cs)MDLVoxelArray(im)differenceWithVoxels:	-			void	MDLVoxelArray * voxels	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	47278f837aa5c25c	-
+property	c:objc(cs)MDLVoxelArray(py)boundingBox	-			MDLAxisAlignedBoundingBox	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	a0db8dd503245495	-
+method	c:objc(cs)MDLVoxelArray(im)indexOfSpatialLocation:	-			MDLVoxelIndex	vector_float3 location	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	e9512735a171bf23	-
+method	c:objc(cs)MDLVoxelArray(im)spatialLocationOfIndex:	-			vector_float3	MDLVoxelIndex index	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	8ad78cd5a8c6fb4c	-
+method	c:objc(cs)MDLVoxelArray(im)voxelBoundingBoxAtIndex:	-			MDLAxisAlignedBoundingBox	MDLVoxelIndex index	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	f9977e3f300070b7	-
+method	c:objc(cs)MDLVoxelArray(im)convertToSignedShellField	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	74aa8b54b199d6cc	-
+property	c:objc(cs)MDLVoxelArray(py)isValidSignedShellField	-			BOOL	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	b0d78c1c1021d5ec	-
+property	c:objc(cs)MDLVoxelArray(py)shellFieldInteriorThickness	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	900473d1defcdeff	-
+property	c:objc(cs)MDLVoxelArray(py)shellFieldExteriorThickness	-			float	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	4c80cb0ed5c71831	-
+method	c:objc(cs)MDLVoxelArray(im)coarseMesh	-			MDLMesh *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	847c4733cc7dde0b	-
+method	c:objc(cs)MDLVoxelArray(im)coarseMeshUsingAllocator:	-			MDLMesh *	id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	50aede4e59f62685	-
+method	c:objc(cs)MDLVoxelArray(im)meshUsingAllocator:	-			MDLMesh *	id<MDLMeshBufferAllocator> allocator	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0	-	56e6a513bbd812d9	-
+interface	c:objc(cs)MDLUtility	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0	-	771b9048efe0cb80	-
+super	-	MDLUtility	NSObject		-	-	-	-	-	14b0e5f56b4abcf8	-
+method	c:objc(cs)MDLUtility(cm)convertToUSDZ:writeToURL:	-			void	NSURL * inputURL | NSURL * outputURL	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0	-	1aed3558d677321e	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@vector_float3	-			simd_float3	-	-	-	-	7bbe17e377973398	-
+typedef	c:@T@simd_float3	-			float __attribute__((ext_vector_type(3)))	-	-	-	-	0fce24b6ffb4ccd2	-
+typedef	c:@T@matrix_float4x4	-			simd_float4x4	-	-	-	-	6fb55312c43daa5f	-
+typedef	c:@T@simd_float4x4	-			struct simd_float4x4	-	-	-	-	23bb586ffbc899fb	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@vector_float4	-			simd_float4	-	-	-	-	cf7d3a842c448cc6	-
+typedef	c:@T@simd_float4	-			float __attribute__((ext_vector_type(4)))	-	-	-	-	0025db7fec7cd0cf	-
+typedef	c:@T@matrix_double4x4	-			simd_double4x4	-	-	-	-	5960fdee1a33b383	-
+typedef	c:@T@simd_double4x4	-			struct simd_double4x4	-	-	-	-	bb2dbe3a51d88540	-
+typedef	c:@T@vector_double3	-			simd_double3	-	-	-	-	a28bebbc1b6a0e21	-
+typedef	c:@T@simd_double3	-			double __attribute__((ext_vector_type(3)))	-	-	-	-	14a9cfb3c3d4cb6b	-
+typedef	c:@T@simd_quatf	-			struct simd_quatf	-	-	-	-	6f7e5a385ce21003	-
+typedef	c:@T@simd_quatd	-			struct simd_quatd	-	-	-	-	e49e6bafef700b78	-
+typedef	c:@T@vector_float2	-			simd_float2	-	-	-	-	912882ff81a65378	-
+typedef	c:@T@simd_float2	-			float __attribute__((ext_vector_type(2)))	-	-	-	-	4a78b2800bdae091	-
+typedef	c:@T@vector_double2	-			simd_double2	-	-	-	-	105aa1e45a522dc2	-
+typedef	c:@T@simd_double2	-			double __attribute__((ext_vector_type(2)))	-	-	-	-	99822a9fba6409c0	-
+typedef	c:@T@vector_double4	-			simd_double4	-	-	-	-	963142d1dba5592b	-
+typedef	c:@T@simd_double4	-			double __attribute__((ext_vector_type(4)))	-	-	-	-	e301d328aec8a7b8	-
+typedef	c:@T@vector_int2	-			simd_int2	-	-	-	-	c969531d72d9d185	-
+typedef	c:@T@simd_int2	-			int __attribute__((ext_vector_type(2)))	-	-	-	-	6ff9e5d3795ec09b	-
+typedef	c:@T@CGColorRef	-			struct CGColor *	-	-	-	-	6d1707fde3455599	-
+typedef	c:@T@CGColorSpaceRef	-			struct CGColorSpace *	-	-	-	-	046fe86c4865065b	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@vector_uint3	-			simd_uint3	-	-	-	-	0a833da8a9361354	-
+typedef	c:@T@simd_uint3	-			unsigned int __attribute__((ext_vector_type(3)))	-	-	-	-	48488fd5ae9a2950	-
+typedef	c:@T@vector_uint2	-			simd_uint2	-	-	-	-	b5bea0bbddcf36d2	-
+typedef	c:@T@simd_uint2	-			unsigned int __attribute__((ext_vector_type(2)))	-	-	-	-	eda525197cd5c123	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@CGImageRef	-			struct CGImage *	-	-	-	-	61e7c30be1f5f379	-
+typedef	c:@T@vector_int4	-			simd_int4	-	-	-	-	a57a7b6955354f99	-
+typedef	c:@T@simd_int4	-			int __attribute__((ext_vector_type(4)))	-	-	-	-	5f286e1a9b9a8eb2	-

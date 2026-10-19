@@ -1,0 +1,34 @@
+{
+ "framework": "QuartzCore",
+ "entries": [
+  {
+   "api": "kCACornerCurveCircular",
+   "kind": "constant",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/QuartzCore/CALayerCornerCurve.md",
+   "source": "the host's own QuartzCore"
+  },
+  {
+   "api": "kCACornerCurveContinuous",
+   "kind": "constant",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/QuartzCore/CALayerCornerCurve.md",
+   "source": "the host's own QuartzCore"
+  },
+  {
+   "api": "CALayer.cornerCurve",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "iOS 6 rounds a corner with a circular arc only, so the continuous curve is a mask of the layer laid over its circular clip",
+   "effect": "a layer that clips to its bounds with a corner radius and is set to continuous gets a mask of the continuous corner shape, within 1.5% of the area the system covers, kept in step with its bounds and radius; a layer that does not clip, or has a mask of its own, keeps its circular corners",
+   "facts": "facts/QuartzCore/CALayerCornerCurve.md",
+   "source": "the host's own QuartzCore"
+  }
+ ]
+}

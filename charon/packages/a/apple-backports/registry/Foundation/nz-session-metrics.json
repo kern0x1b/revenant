@@ -1,0 +1,506 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "-[NSURLSessionConfiguration TLSMaximumSupportedProtocolVersion]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "7.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration TLSMinimumSupportedProtocolVersion]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "7.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration allowsUltraConstrainedNetworkAccess]",
+      "kind": "method",
+      "introduced": "26.1",
+      "minimum": "7.0",
+      "maximum": "26.1",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration enablesEarlyData]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "7.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration multipathServiceType]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "7.0",
+      "maximum": "11.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration requiresDNSSECValidation]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "7.0",
+      "maximum": "16.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setAllowsUltraConstrainedNetworkAccess:]",
+      "kind": "method",
+      "introduced": "26.1",
+      "minimum": "7.0",
+      "maximum": "26.1",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setEnablesEarlyData:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "7.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setMultipathServiceType:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "7.0",
+      "maximum": "11.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setRequiresDNSSECValidation:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "7.0",
+      "maximum": "16.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setShouldUseExtendedBackgroundIdleMode:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "7.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setTLSMaximumSupportedProtocolVersion:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "7.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setTLSMinimumSupportedProtocolVersion:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "7.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration setUsesClassicLoadingMode:]",
+      "kind": "method",
+      "introduced": "18.4",
+      "minimum": "7.0",
+      "maximum": "18.4",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration shouldUseExtendedBackgroundIdleMode]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "7.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionConfiguration usesClassicLoadingMode]",
+      "kind": "method",
+      "introduced": "18.4",
+      "minimum": "7.0",
+      "maximum": "18.4",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLSessionTaskTransactionMetrics countOfRequestBodyBytesBeforeEncoding]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values"
+    },
+    {
+      "api": "-[NSURLSessionTaskTransactionMetrics countOfRequestBodyBytesSent]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values"
+    },
+    {
+      "api": "-[NSURLSessionTaskTransactionMetrics countOfResponseBodyBytesAfterDecoding]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values"
+    },
+    {
+      "api": "-[NSURLSessionTaskTransactionMetrics countOfResponseBodyBytesReceived]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values"
+    },
+    {
+      "api": "-[NSURLSessionTaskTransactionMetrics domainResolutionProtocol]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values"
+    },
+    {
+      "api": "NSURLSessionConfiguration.TLSMaximumSupportedProtocolVersion",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "7.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.TLSMinimumSupportedProtocolVersion",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "7.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.allowsUltraConstrainedNetworkAccess",
+      "kind": "property",
+      "introduced": "26.1",
+      "minimum": "7.0",
+      "maximum": "26.1",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.enablesEarlyData",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "7.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.multipathServiceType",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "7.0",
+      "maximum": "11.0",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.requiresDNSSECValidation",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "7.0",
+      "maximum": "16.0",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.shouldUseExtendedBackgroundIdleMode",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "7.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionConfiguration.usesClassicLoadingMode",
+      "kind": "property",
+      "introduced": "18.4",
+      "minimum": "7.0",
+      "maximum": "18.4",
+      "status": "implemented",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device",
+      "facts": "facts/Foundation/NSURLSessionConfigurationFlags.md"
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.cellular",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values. The getter is the one the SDK's own header names: NSURLSession.h:1415 declares the property `cellular` with `getter=isCellular`, so the selector is -isCellular and not -cellular, and that is what Foundation/NSURLSessionTaskTransactionMetrics+Counts13.m:106 implements, reading the flag -charon_noteInterfaceFlags:expensive:constrained:proxy: stored. Measured in the 6.1.3 build: the class's own method list carries -isCellular and no -cellular.",
+      "measured": "read through the port's own note call -charon_noteInterfaceFlags:expensive:constrained:proxy:, which charon_metrics_response makes at NSURLSession.m:676 out of SystemConfiguration, the same question the session already asks before it enqueues. It is the port's own reading of the interface, not a value the release reports about a connection. Not watched on a release either: the only level that could is the 6.1.3 emulator, whose [super resume] is the release's own class, and that probe does not exist."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.constrained",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values. The getter is the one the SDK's own header names: NSURLSession.h:1425 declares the property `constrained` with `getter=isConstrained`, so the selector is -isConstrained and not -constrained, and that is what Foundation/NSURLSessionTaskTransactionMetrics+Counts13.m:108 implements, reading the flag -charon_noteInterfaceFlags:expensive:constrained:proxy: stored. Measured in the 6.1.3 build: the class's own method list carries -isConstrained and no -constrained.",
+      "reason": "a literal, by design: the release gives nothing to observe it from. 6.1.3 has no API that reports whether a link is expensive or constrained -- those two arrived with iOS 13 and are the *session configuration's* to say, not the connection's to report -- and whether a connection went through a proxy is the release's own NSURLConnection, which does not say. So the port answers NO, which is the value a release without the signal has, and says so here rather than leaving a reader to believe a measurement was taken"
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.countOfRequestBodyBytesBeforeEncoding",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values",
+      "measured": "the body the caller handed over, read through the port's own note call -charon_noteBytesSent:beforeEncoding:received:, which charon_task_sent makes at NSURLSession.m:1048 with the loader's own totals; the number is the port's and not a release's. It is the task's own body, which is why a file body answers its size and a stream with no Content-Length answers NSURLSessionTransferSizeUnknown. Not watched on a release either: the only level that could is the 6.1.3 emulator, whose [super resume] is the release's own class, and that probe does not exist."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.countOfRequestBodyBytesSent",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values",
+      "measured": "what went on the wire, read through the port's own note call -charon_noteBytesSent:beforeEncoding:received:, which charon_task_sent makes at NSURLSession.m:1048 with the loader's own totals; the number is the port's and not a release's. It is the connection's own total, which is a different number from the one before encoding and is kept apart from it for that reason. Not watched on a release either: the only level that could is the 6.1.3 emulator, whose [super resume] is the release's own class, and that probe does not exist."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.countOfRequestHeaderBytesSent",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "10.0",
+      "status": "absent",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "SDK 16.4 Foundation/NSURLSession.h:1327 and :1343 for the property and its ios(13.0) availability; the port's own search of its tree for an accessor - Foundation/NSURLSessionTaskMetrics.m:21 lists both properties @dynamic and NSURLSessionTaskTransactionMetrics+Counts13.m defines no accessor for either, so each name occurs in that one line and in this row and nowhere else in the package; and the release's own CFNetwork across the ladder, read from the cache index tools/cache-index/build.lua writes: NSURLSessionTaskTransactionMetrics is present from 10.0.1 on, and neither countOfRequestHeaderBytesSent nor countOfResponseHeaderBytesReceived is in any held rung from 10.0.1 to 12.0 - none of the nine armv7s rungs 10.0.1, 10.1.1, 10.2, 10.2.1, 10.3, 10.3.1, 10.3.2, 10.3.3, 10.3.4, nor the arm64 rungs 11.0 and 12.0 - while both first appear at 16.0 (arm64e) and are still there at 18.0 (arm64e)",
+      "reason": "the data task's transaction is the release's own connection, and its request and response header bytes reach the release's parser and stop there. A stream task cannot stand in for it: it is a raw TCP connection that sends no request and receives no response, so the socket path that closes the other six has no header to count either (facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md, section 4, measures both halves). What the port would have to count to answer it is the header block it composed itself, and CFNetwork's own additions to that block - Host, Connection, User-Agent - are not observable from the port, so the number would differ from the release's rather than match it",
+      "effect": "below 10.0 - the bands where the port's own NSURLSessionTaskTransactionMetrics is the class in charge - the port's class lists the property @dynamic and defines no accessor for it, so respondsToSelector: answers NO for the getter and an unchecked read raises unrecognized selector. From 10.0 the release's own class is in charge and this row leaves the bands there, because that is where the class stops being the port's. What the release's own class does with the getter is now measured rather than assumed, and the measurement settles it without reading one class's method list: a method in a cache must have its selector name in that cache, in __TEXT,__objc_methname or in a __cstring literal, and neither name is anywhere in the held rungs 10.0.1 through 12.0, so the release cannot answer it there - while both are present at 16.0 and 18.0. So the gap the port leaves is 10.0 to 15.x, and the 13.0 to 15.x part of it is not measurable on this machine: the held ladder has no rung between 12.0 and 16.0"
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.countOfResponseBodyBytesAfterDecoding",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values",
+      "measured": "the received count again: read through the port's own note call -charon_noteBytesSent:beforeEncoding:received:, which charon_task_sent makes at NSURLSession.m:1048 with the loader's own totals; the number is the port's and not a release's. The port records the same number for both on purpose - the release's own connection decodes the body and hands a port nothing it decoded - so this row says that instead of claiming a decoding step that was not measured. Not watched on a release either: the only level that could is the 6.1.3 emulator, whose [super resume] is the release's own class, and that probe does not exist."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.countOfResponseBodyBytesReceived",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values",
+      "measured": "what came back, read through the port's own note call -charon_noteBytesSent:beforeEncoding:received:, which charon_task_sent makes at NSURLSession.m:1048 with the loader's own totals; the number is the port's and not a release's. Not watched on a release either: the only level that could is the 6.1.3 emulator, whose [super resume] is the release's own class, and that probe does not exist."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.countOfResponseHeaderBytesReceived",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "10.0",
+      "status": "absent",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "SDK 16.4 Foundation/NSURLSession.h:1327 and :1343 for the property and its ios(13.0) availability; the port's own search of its tree for an accessor - Foundation/NSURLSessionTaskMetrics.m:21 lists both properties @dynamic and NSURLSessionTaskTransactionMetrics+Counts13.m defines no accessor for either, so each name occurs in that one line and in this row and nowhere else in the package; and the release's own CFNetwork across the ladder, read from the cache index tools/cache-index/build.lua writes: NSURLSessionTaskTransactionMetrics is present from 10.0.1 on, and neither countOfRequestHeaderBytesSent nor countOfResponseHeaderBytesReceived is in any held rung from 10.0.1 to 12.0 - none of the nine armv7s rungs 10.0.1, 10.1.1, 10.2, 10.2.1, 10.3, 10.3.1, 10.3.2, 10.3.3, 10.3.4, nor the arm64 rungs 11.0 and 12.0 - while both first appear at 16.0 (arm64e) and are still there at 18.0 (arm64e)",
+      "reason": "the data task's transaction is the release's own connection, and its request and response header bytes reach the release's parser and stop there. A stream task cannot stand in for it: it is a raw TCP connection that sends no request and receives no response, so the socket path that closes the other six has no header to count either (facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md, section 4, measures both halves). What the port would have to count to answer it is the header block it composed itself, and CFNetwork's own additions to that block - Host, Connection, User-Agent - are not observable from the port, so the number would differ from the release's rather than match it",
+      "effect": "below 10.0 - the bands where the port's own NSURLSessionTaskTransactionMetrics is the class in charge - the port's class lists the property @dynamic and defines no accessor for it, so respondsToSelector: answers NO for the getter and an unchecked read raises unrecognized selector. From 10.0 the release's own class is in charge and this row leaves the bands there, because that is where the class stops being the port's. What the release's own class does with the getter is now measured rather than assumed, and the measurement settles it without reading one class's method list: a method in a cache must have its selector name in that cache, in __TEXT,__objc_methname or in a __cstring literal, and neither name is anywhere in the held rungs 10.0.1 through 12.0, so the release cannot answer it there - while both are present at 16.0 and 18.0. So the gap the port leaves is 10.0 to 15.x, and the 13.0 to 15.x part of it is not measurable on this machine: the held ladder has no rung between 12.0 and 16.0"
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.domainResolutionProtocol",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "5.0",
+      "maximum": "14.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values",
+      "measured": "a literal, by design, and not read through a note call: the release's own connection resolves and connects with whatever it uses and hands a port nothing that says which, so the answer is the enumeration's own unknown rather than a guess."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.expensive",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values. The getter is the one the SDK's own header names: NSURLSession.h:1420 declares the property `expensive` with `getter=isExpensive`, so the selector is -isExpensive and not -expensive, and that is what Foundation/NSURLSessionTaskTransactionMetrics+Counts13.m:107 implements, reading the flag -charon_noteInterfaceFlags:expensive:constrained:proxy: stored. Measured in the 6.1.3 build: the class's own method list carries -isExpensive and no -expensive.",
+      "reason": "a literal, by design: the release gives nothing to observe it from. 6.1.3 has no API that reports whether a link is expensive or constrained -- those two arrived with iOS 13 and are the *session configuration's* to say, not the connection's to report -- and whether a connection went through a proxy is the release's own NSURLConnection, which does not say. So the port answers NO, which is the value a release without the signal has, and says so here rather than leaving a reader to believe a measurement was taken"
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.localAddress",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "the port's own stream task over the release's CFStream pair: kCFStreamPropertySocketNativeHandle and getsockname/getpeername for the four names, and kCFStreamPropertySSLContext with SSLGetNegotiatedProtocolVersion and SSLGetNegotiatedCipher for the two values -- all measured in the 6.1.3 armv7 cache with tools/corpus/cache-value.lua, and all reached by name where this library links no CFNetwork and no Security",
+      "measured": "handed to the transaction by the stream task that owns the socket - NSURLSessionStreamTask9.m:271 calls -charon_noteSocketLocalAddress:port:remoteAddress:remotePort:tlsProtocolVersion:cipherSuite:, and a stream task runs no loader, so the loader is not what makes this one. NOT YET OBSERVED. The only level that could observe these is the 6.1.3 emulator, where [super resume] is the release's own class, and that probe does not exist in this series; the host cannot hold it, because the host's NSURLSessionTask carries -resume mangled to -_onqueue_resume and a stream task cannot be run beside the system's in one process at all (tests/backports/host/streammetrics/ says so in its own header and exits 134 by design). The code is in the library and the 6.1.3 link is green; the measurement is not taken, and this line says so where a porter will read it."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.localPort",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "the port's own stream task over the release's CFStream pair: kCFStreamPropertySocketNativeHandle and getsockname/getpeername for the four names, and kCFStreamPropertySSLContext with SSLGetNegotiatedProtocolVersion and SSLGetNegotiatedCipher for the two values -- all measured in the 6.1.3 armv7 cache with tools/corpus/cache-value.lua, and all reached by name where this library links no CFNetwork and no Security",
+      "measured": "handed to the transaction by the stream task that owns the socket - NSURLSessionStreamTask9.m:271 calls -charon_noteSocketLocalAddress:port:remoteAddress:remotePort:tlsProtocolVersion:cipherSuite:, and a stream task runs no loader, so the loader is not what makes this one. NOT YET OBSERVED. The only level that could observe these is the 6.1.3 emulator, where [super resume] is the release's own class, and that probe does not exist in this series; the host cannot hold it, because the host's NSURLSessionTask carries -resume mangled to -_onqueue_resume and a stream task cannot be run beside the system's in one process at all (tests/backports/host/streammetrics/ says so in its own header and exits 134 by design). The code is in the library and the 6.1.3 link is green; the measurement is not taken, and this line says so where a porter will read it."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.multipath",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values. The getter is the one the SDK's own header names: NSURLSession.h:1430 declares the property `multipath` with `getter=isMultipath`, so the selector is -isMultipath and not -multipath, and that is what Foundation/NSURLSessionTaskTransactionMetrics+Counts13.m:114 implements. Measured in the 6.1.3 build: the class's own method list carries -isMultipath and no -multipath.",
+      "measured": "a literal, by design, and not read through a note call: 6.1.3 has no multipath, so nothing here is one and a system without the feature answers the default, false."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.negotiatedTLSCipherSuite",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "the port's own stream task over the release's CFStream pair: kCFStreamPropertySocketNativeHandle and getsockname/getpeername for the four names, and kCFStreamPropertySSLContext with SSLGetNegotiatedProtocolVersion and SSLGetNegotiatedCipher for the two values -- all measured in the 6.1.3 armv7 cache with tools/corpus/cache-value.lua, and all reached by name where this library links no CFNetwork and no Security",
+      "measured": "handed to the transaction by the stream task that owns the socket - NSURLSessionStreamTask9.m:271 calls -charon_noteSocketLocalAddress:port:remoteAddress:remotePort:tlsProtocolVersion:cipherSuite:, and a stream task runs no loader, so the loader is not what makes this one. NOT YET OBSERVED. The only level that could observe these is the 6.1.3 emulator, where [super resume] is the release's own class, and that probe does not exist in this series; the host cannot hold it, because the host's NSURLSessionTask carries -resume mangled to -_onqueue_resume and a stream task cannot be run beside the system's in one process at all (tests/backports/host/streammetrics/ says so in its own header and exits 134 by design). The code is in the library and the 6.1.3 link is green; the measurement is not taken, and this line says so where a porter will read it."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.negotiatedTLSProtocolVersion",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "the port's own stream task over the release's CFStream pair: kCFStreamPropertySocketNativeHandle and getsockname/getpeername for the four names, and kCFStreamPropertySSLContext with SSLGetNegotiatedProtocolVersion and SSLGetNegotiatedCipher for the two values -- all measured in the 6.1.3 armv7 cache with tools/corpus/cache-value.lua, and all reached by name where this library links no CFNetwork and no Security",
+      "measured": "handed to the transaction by the stream task that owns the socket - NSURLSessionStreamTask9.m:271 calls -charon_noteSocketLocalAddress:port:remoteAddress:remotePort:tlsProtocolVersion:cipherSuite:, and a stream task runs no loader, so the loader is not what makes this one. NOT YET OBSERVED. The only level that could observe these is the 6.1.3 emulator, where [super resume] is the release's own class, and that probe does not exist in this series; the host cannot hold it, because the host's NSURLSessionTask carries -resume mangled to -_onqueue_resume and a stream task cannot be run beside the system's in one process at all (tests/backports/host/streammetrics/ says so in its own header and exits 134 by design). The code is in the library and the 6.1.3 link is green; the measurement is not taken, and this line says so where a porter will read it."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.proxyConnection",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "5.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values. The getter is the one the SDK's own header names: NSURLSession.h:1312 declares the property `proxyConnection` with `getter=isProxyConnection`, so the selector is -isProxyConnection and not -proxyConnection, and that is what Foundation/NSURLSessionTaskMetrics.m:77 implements, answering NO as this row's own reason says. Measured in the 6.1.3 build: the class's own method list carries -isProxyConnection and no -proxyConnection.",
+      "reason": "a literal, by design: the release gives nothing to observe it from. 6.1.3 has no API that reports whether a link is expensive or constrained -- those two arrived with iOS 13 and are the *session configuration's* to say, not the connection's to report -- and whether a connection went through a proxy is the release's own NSURLConnection, which does not say. So the port answers NO, which is the value a release without the signal has, and says so here rather than leaving a reader to believe a measurement was taken"
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.remoteAddress",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "the port's own stream task over the release's CFStream pair: kCFStreamPropertySocketNativeHandle and getsockname/getpeername for the four names, and kCFStreamPropertySSLContext with SSLGetNegotiatedProtocolVersion and SSLGetNegotiatedCipher for the two values -- all measured in the 6.1.3 armv7 cache with tools/corpus/cache-value.lua, and all reached by name where this library links no CFNetwork and no Security",
+      "measured": "handed to the transaction by the stream task that owns the socket - NSURLSessionStreamTask9.m:271 calls -charon_noteSocketLocalAddress:port:remoteAddress:remotePort:tlsProtocolVersion:cipherSuite:, and a stream task runs no loader, so the loader is not what makes this one. NOT YET OBSERVED. The only level that could observe these is the 6.1.3 emulator, where [super resume] is the release's own class, and that probe does not exist in this series; the host cannot hold it, because the host's NSURLSessionTask carries -resume mangled to -_onqueue_resume and a stream task cannot be run beside the system's in one process at all (tests/backports/host/streammetrics/ says so in its own header and exits 134 by design). The code is in the library and the 6.1.3 link is green; the measurement is not taken, and this line says so where a porter will read it."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.remotePort",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "5.0",
+      "maximum": "13.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionStreamTaskSocketMetrics.md",
+      "source": "the port's own stream task over the release's CFStream pair: kCFStreamPropertySocketNativeHandle and getsockname/getpeername for the four names, and kCFStreamPropertySSLContext with SSLGetNegotiatedProtocolVersion and SSLGetNegotiatedCipher for the two values -- all measured in the 6.1.3 armv7 cache with tools/corpus/cache-value.lua, and all reached by name where this library links no CFNetwork and no Security",
+      "measured": "handed to the transaction by the stream task that owns the socket - NSURLSessionStreamTask9.m:271 calls -charon_noteSocketLocalAddress:port:remoteAddress:remotePort:tlsProtocolVersion:cipherSuite:, and a stream task runs no loader, so the loader is not what makes this one. NOT YET OBSERVED. The only level that could observe these is the 6.1.3 emulator, where [super resume] is the release's own class, and that probe does not exist in this series; the host cannot hold it, because the host's NSURLSessionTask carries -resume mangled to -_onqueue_resume and a stream task cannot be run beside the system's in one process at all (tests/backports/host/streammetrics/ says so in its own header and exits 134 by design). The code is in the library and the 6.1.3 link is green; the measurement is not taken, and this line says so where a porter will read it."
+    },
+    {
+      "api": "NSURLSessionTaskTransactionMetrics.reusedConnection",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "5.0",
+      "maximum": "10.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLSessionTaskMetricsCounts.md",
+      "source": "swift-corelibs-foundation's URLSessionTaskMetrics.swift (Apache-2.0) for the shape, and the port's own loader for the values. The getter is the one the SDK's own header names: NSURLSession.h:1317 declares the property `reusedConnection` with `getter=isReusedConnection`, so the selector is -isReusedConnection and not -reusedConnection, and that is what Foundation/NSURLSessionTaskMetrics.m:78 implements, answering NO as this row's own reason says. Measured in the 6.1.3 build: the class's own method list carries -isReusedConnection and no -reusedConnection.",
+      "measured": "read through the port's own note call -charon_noteConnectionReused:, which charon_task_release_slot makes at NSURLSession.m:652 out of the session's own per-host table: whether a connection to that host was already open when this task needed one. Not watched on a release either: the only level that could is the 6.1.3 emulator, whose [super resume] is the release's own class, and that probe does not exist."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "framework": "ImageIO",
+  "entries": [
+    {
+      "api": "kCGImageSourceShouldCacheImmediately",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the constant kCGImageSourceShouldCacheImmediately",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "source": "the host's own ImageIO, held against the port by tests/backports/host/imageio and the same test on a device running 6.1.3"
+    }
+  ]
+}

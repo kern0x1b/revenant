@@ -1,0 +1,86 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+PassKit	struct	JPKIPassContents	18.0				own
+PassKit	property	JPKIPassContents.userIdentity	18.0				container
+PassKit	property	JPKIPassContents.signingIdentity	18.0				container
+PassKit	method	JPKIPassContents.init(_:)	18.0				container
+PassKit	protocol	JPKIPassContents.Identity	18.0				container
+PassKit	property	JPKIPassContents.Identity.authenticationTriesRemaining	18.0				container
+PassKit	method	JPKIPassContents.Identity.certificate(using:)	18.0				container
+PassKit	method	JPKIPassContents.Identity.signature(for:using:)	18.0				container
+PassKit	method	JPKIPassContents.Identity.signature(for:using:)	18.0				container
+PassKit	struct	JPKIPassContents.UserIdentity	18.0				container
+PassKit	property	JPKIPassContents.UserIdentity.authenticationTriesRemaining	18.0				container
+PassKit	enum	JPKIPassContents.UserIdentity.AuthenticationType	18.0				container
+PassKit	constant	JPKIPassContents.UserIdentity.AuthenticationType.pin	18.0				container
+PassKit	constant	JPKIPassContents.UserIdentity.AuthenticationType.systemBiometric	18.0				container
+PassKit	method	JPKIPassContents.UserIdentity.certificate(using:)	18.0				container
+PassKit	method	JPKIPassContents.UserIdentity.signature(for:using:)	18.0				container
+PassKit	method	JPKIPassContents.UserIdentity.signature(for:using:)	18.0				container
+PassKit	method	JPKIPassContents.UserIdentity.changePIN(from:to:)	18.0				container
+PassKit	typealias	JPKIPassContents.UserIdentity.IdentityType	18.0				own
+PassKit	struct	JPKIPassContents.SigningIdentity	18.0				container
+PassKit	property	JPKIPassContents.SigningIdentity.authenticationTriesRemaining	18.0				container
+PassKit	enum	JPKIPassContents.SigningIdentity.AuthenticationType	18.0				container
+PassKit	constant	JPKIPassContents.SigningIdentity.AuthenticationType.password	18.0				container
+PassKit	method	JPKIPassContents.SigningIdentity.certificate(using:)	18.0				container
+PassKit	method	JPKIPassContents.SigningIdentity.signature(for:using:)	18.0				container
+PassKit	method	JPKIPassContents.SigningIdentity.signature(for:using:)	18.0				container
+PassKit	method	JPKIPassContents.SigningIdentity.changePassword(from:to:)	18.0				container
+PassKit	typealias	JPKIPassContents.SigningIdentity.IdentityType	18.0				own
+PassKit	struct	JPKIPassContents.Certificate	18.0				container
+PassKit	property	JPKIPassContents.Certificate.data	18.0				container
+PassKit	struct	JPKIPassContents.Signature	18.0				container
+PassKit	property	JPKIPassContents.Signature.signatureData	18.0				container
+PassKit	property	JPKIPassContents.Signature.certificate	18.0				container
+PassKit	struct	JPKIPassContents.AuthenticationRequest	18.0				container
+PassKit	enum	JPKIPassContents.Error	18.0				container
+PassKit	constant	JPKIPassContents.Error.appNotForeground	18.0				container
+PassKit	constant	JPKIPassContents.Error.invalidInput	18.0				container
+PassKit	constant	JPKIPassContents.Error.biometricUnavailable	18.0	18.4			own
+PassKit	constant	JPKIPassContents.Error.biometricAuthenticationFailed	18.4				own
+PassKit	constant	JPKIPassContents.Error.incorrectUserAuthentication	18.0	18.4			own
+PassKit	constant	JPKIPassContents.Error.userAuthenticationFailed	18.4				own
+PassKit	constant	JPKIPassContents.Error.resourceNotAvailable	18.0				container
+PassKit	constant	JPKIPassContents.Error.unknownError	18.4				own
+PassKit	method	JPKIPassContents.AuthenticationRequest.init(type:)	18.0				container
+PassKit	method	JPKIPassContents.AuthenticationRequest.init(type:)	18.0				container
+PassKit	property	PKStoredValuePassProperties.isBlocked	15.0				container
+PassKit	property	PKTransitPassProperties.isBlocked	14.5				own
+PassKit	property	PKSuicaPassProperties.isBlocked	10.1				container
+PassKit	method	PKStoredValuePassBalance.==(lhs:rhs:)	15.0				container
+PassKit	property	PKStoredValuePassBalance.amount	15.0				container
+PassKit	method	PKPaymentRequest.paymentCouponCodeInvalidError(localizedDescription:)	15.0				own
+PassKit	method	PKPaymentRequest.paymentCouponCodeExpiredError(localizedDescription:)	15.0				own
+PassKit	property	PKPaymentRequest.applePayLaterAvailability	17.0				own
+PassKit	enum	PKPaymentRequest.ApplePayLaterAvailability	17.0				own
+PassKit	constant	PKPaymentRequest.ApplePayLaterAvailability.available	17.0				container
+PassKit	constant	PKPaymentRequest.ApplePayLaterAvailability.unavailable	17.0				container
+PassKit	enum	PKPaymentRequest.ApplePayLaterAvailability.Reason	17.0				own
+PassKit	constant	PKPaymentRequest.ApplePayLaterAvailability.Reason.itemIneligible	17.0				container
+PassKit	constant	PKPaymentRequest.ApplePayLaterAvailability.Reason.recurringTransaction	17.0				container
+PassKit	method	PKPaymentRequest.ApplePayLaterAvailability.Reason.==(a:b:)	17.0				container
+PassKit	method	PKPaymentRequest.ApplePayLaterAvailability.Reason.hash(into:)	17.0				container
+PassKit	property	PKPaymentRequest.ApplePayLaterAvailability.Reason.hashValue	17.0				container
+PassKit	property	PKPaymentRequest.merchantCategoryCode	18.0				own
+PassKit	struct	PKPaymentRequest.MerchantCategoryCode	18.0				own
+PassKit	method	PKPaymentRequest.MerchantCategoryCode.init(rawValue:)	18.0				container
+PassKit	property	PKPaymentRequest.MerchantCategoryCode.rawValue	18.0				container
+PassKit	method	PKPaymentRequest.MerchantCategoryCode.init?(_:)	18.0				container
+PassKit	property	PKPaymentRequest.MerchantCategoryCode.description	18.0				container
+PassKit	method	PKPaymentRequest.MerchantCategoryCode.init(from:)	18.0				container
+PassKit	method	PKPaymentRequest.MerchantCategoryCode.encode(to:)	18.0				container
+PassKit	typealias	PKPaymentRequest.MerchantCategoryCode.RawValue	18.0				own
+PassKit	property	PKMerchantCapability.capability3DS	8	17			own
+PassKit	property	PKMerchantCapability.capabilityEMV	8	17			own
+PassKit	property	PKMerchantCapability.capabilityCredit	9	17			own
+PassKit	property	PKMerchantCapability.capabilityDebit	9	17			own
+PassKit	property	PKDisbursementRequest.region	17.0				container
+PassKit	property	PKDisbursementRequest.currency	17.0				container
+PassKit	property	PKDisbursementRequest.supportedRegions	17.0				container
+PassKit	method	PKDisbursementRequest.init(merchantIdentifier:currency:region:supportedNetworks:merchantCapabilities:summaryItems:)	17.0				container
+PassKit	method	PKPayLaterView.init(amount:currency:)	17.0				container
+PassKit	property	PKPayLaterView.amount	17.0				container
+PassKit	property	PKPayLaterView.currency	17.0				container
+PassKit	enum	PKPayLater	17.0				own
+PassKit	method	PKPayLater.validate(amount:currency:)	17.0				container
+PassKit	property	PKIdentityNationalIDCardDescriptor.region	18.0				container

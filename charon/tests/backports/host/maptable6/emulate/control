@@ -1,0 +1,7 @@
+Package: org.charon.maptable6
+Name: maptable6
+Architecture: iphoneos-arm
+Description: The NSMapTable factories of iOS 6.0 against the release
+Maintainer: charon
+Author: charon
+Section: Development

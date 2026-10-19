@@ -1,0 +1,2 @@
+            // MUTATION: zeros written, not untouched
+            if (resultGradientForGammaVector) { { CharonMPSVectorView v = CharonMPSVectorViewOf(resultGradientForGammaVector); for (NSUInteger i = 0; i < v.length; i++) CharonMPSStore(CharonMPSVectorElement(&v, 0, i), v.dataType, 0, 0.0); } }

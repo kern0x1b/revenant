@@ -1,0 +1,2 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+OS_os_activity	10.0	refused	OS_os_activity: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-

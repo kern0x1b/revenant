@@ -1,0 +1,5 @@
+$ xcrun swiftc -O -o preprocessing-updatable-estimator-host preprocessing-updatable-estimator-host.swift
+$ ./preprocessing-updatable-estimator-host
+after preprocessed(from:): the values are [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+   1, 2, 3 ... would mean the identity preprocessor was used; anything else means it was fitted.
+   The port fits here (Preprocessing.swift:137), so this decides whether the port is right.

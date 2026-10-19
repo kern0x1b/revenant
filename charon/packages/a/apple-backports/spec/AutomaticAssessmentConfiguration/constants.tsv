@@ -1,0 +1,3 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	AEAssessmentErrorDomain	-	AEAssessmentErrorDomain	13.4	NSErrorDomain const	API_AVAILABLE(ios(13.4), macos(10.15.4), macCatalyst(14.0)) API_UNAVAILABLE(visionos)	f965f2634d8a63b2	found	AEAssessmentErrorDomain	AEAssessmentErrorDomain	ios-26.2-cache	-	exported	ns	-
+constant	AENotInstalledParticipantsKey	-	AENotInstalledParticipantsKey	26.0	NSString *	API_AVAILABLE(ios(26.0), macCatalyst(26.0), macos(26.0)) API_UNAVAILABLE(visionos)	122bb500ae1163d3	found	AENotInstalledParticipants	AENotInstalledParticipants	host-macos	-	exported	ns	-

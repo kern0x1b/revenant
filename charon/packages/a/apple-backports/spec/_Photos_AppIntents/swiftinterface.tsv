@@ -1,0 +1,8 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_Photos_AppIntents	property	PHAsset.typeDisplayRepresentation	26.4				container
+_Photos_AppIntents	property	PHAsset.displayRepresentation	26.4				container
+_Photos_AppIntents	property	PHAsset.defaultResolverSpecification	26.4				container
+_Photos_AppIntents	property	PHAsset.persistentIdentifier	26.4				container
+_Photos_AppIntents	typealias	PHAsset.Specification	26.4				own
+_Photos_AppIntents	typealias	PHAsset.UnwrappedType	26.4				own
+_Photos_AppIntents	typealias	PHAsset.ValueType	26.4				own

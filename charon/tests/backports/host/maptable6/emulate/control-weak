@@ -1,0 +1,7 @@
+Package: org.charon.weakprobe
+Name: weakprobe
+Architecture: iphoneos-arm
+Description: __weak probe
+Maintainer: charon
+Author: charon
+Section: Development

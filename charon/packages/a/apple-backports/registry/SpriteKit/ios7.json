@@ -1,0 +1,1870 @@
+{
+  "framework": "SpriteKit",
+  "note": "SKNode of iOS 7 (and SKEffectNode, SKScene and SKView of iOS 7, in facts/SpriteKit/SKScene.md; SKTexture and SKSpriteNode of iOS 7, in facts/SpriteKit/SKTexture.md and SKSpriteNode.md): the class and the surface the port carries, the node tree, the frame, the hit tests and the conversions. The SDK's member rows carry no availability of their own (the class's 7.0 applies), except where a row says otherwise. Members owed to later objects are rows too, so an application that sends one gets the runtime's unrecognised-selector error and not a silent nil.",
+  "entries": [
+    {
+      "api": "SKNode",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKNode, NSObject with NSCopying and NSSecureCoding on iOS); SpriteKit/CharonSpriteKit.h",
+      "effect": "the base of every node: the tree, the transform and the hit tests; a plain SKNode draws nothing"
+    },
+    {
+      "api": "+[SKNode node]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)node, instancetype",
+      "effect": "a new node with no name, no parent and the default transform"
+    },
+    {
+      "api": "-[SKNode init]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)init, instancetype",
+      "effect": "the same node as +node"
+    },
+    {
+      "api": "SKNode.name",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)name, NSString *",
+      "effect": "the name a path matches; copied on set"
+    },
+    {
+      "api": "SKNode.position",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)position, CGPoint",
+      "effect": "the node's point in its parent, the origin of the local transform"
+    },
+    {
+      "api": "SKNode.zPosition",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)zPosition, CGFloat",
+      "effect": "stored; the port's draw order is owed to the renderer"
+    },
+    {
+      "api": "SKNode.zRotation",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)zRotation, CGFloat",
+      "effect": "the rotation in radians of the local transform, applied after the scale"
+    },
+    {
+      "api": "SKNode.xScale",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)xScale, CGFloat",
+      "effect": "the horizontal scale of the local transform"
+    },
+    {
+      "api": "SKNode.yScale",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)yScale, CGFloat",
+      "effect": "the vertical scale of the local transform"
+    },
+    {
+      "api": "-[SKNode setScale:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)setScale:, void",
+      "effect": "sets xScale and yScale to the one value"
+    },
+    {
+      "api": "SKNode.alpha",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)alpha, CGFloat",
+      "effect": "stored; the blend is the renderer's and is owed to it"
+    },
+    {
+      "api": "SKNode.speed",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)speed, CGFloat",
+      "effect": "stored; the action clock that reads it is owed with the actions"
+    },
+    {
+      "api": "SKNode.paused",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)paused, BOOL",
+      "effect": "stored; read by the action clock once the actions are owed to it"
+    },
+    {
+      "api": "SKNode.hidden",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)hidden, BOOL",
+      "effect": "stored; the renderer skips a hidden node once the renderer is built"
+    },
+    {
+      "api": "SKNode.userInteractionEnabled",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)userInteractionEnabled, BOOL",
+      "effect": "stored; the touch routing that reads it is owed to the view"
+    },
+    {
+      "api": "SKNode.userData",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)userData, NSMutableDictionary *",
+      "effect": "nil until set (measured); what the host does with the dictionary on set is unmeasured, and the port keeps the reference"
+    },
+    {
+      "api": "SKNode.parent",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)parent, SKNode *",
+      "effect": "the node that holds this one, nil at the root of a tree"
+    },
+    {
+      "api": "SKNode.children",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)children, NSArray<SKNode *> *",
+      "effect": "the children in order, as the path and enumeration rows list them"
+    },
+    {
+      "api": "SKNode.frame",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)frame, CGRect",
+      "effect": "zero-size at the origin for a node with no content; a node with content supplies its own"
+    },
+    {
+      "api": "-[SKNode calculateAccumulatedFrame]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)calculateAccumulatedFrame, CGRect",
+      "effect": "the union of the frames of the node and its descendants, in the node's own coordinates; empty frames contribute nothing"
+    },
+    {
+      "api": "-[SKNode addChild:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)addChild:, void",
+      "effect": "appends the node; a node that already has a parent raises NSInvalidArgumentException (measured), so a move is removeFromParent then addChild:"
+    },
+    {
+      "api": "-[SKNode insertChild:atIndex:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)insertChild:atIndex:, void",
+      "effect": "inserts the node at the index; a nil node raises with the host's name and a reason that describes this node; an index past the end raises NSRangeException (the host raises the same for indices of 2^31 and up, and is killed for the smaller ones, where the port raises rather than crash) - measured in facts/SpriteKit/SKNode.md"
+    },
+    {
+      "api": "-[SKNode removeChildrenInArray:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)removeChildrenInArray:, void",
+      "effect": "removes each node that is a child of this one; a node that is not a child is skipped"
+    },
+    {
+      "api": "-[SKNode removeAllChildren]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)removeAllChildren, void",
+      "effect": "every child loses its parent; the children array is empty"
+    },
+    {
+      "api": "-[SKNode removeFromParent]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)removeFromParent, void",
+      "effect": "leaves the parent; a node with no parent is left alone"
+    },
+    {
+      "api": "-[SKNode childNodeWithName:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)childNodeWithName:, SKNode *",
+      "effect": "the first node the path picks out, in the order the host lists them (facts/SpriteKit/SKNode.md)"
+    },
+    {
+      "api": "-[SKNode enumerateChildNodesWithName:usingBlock:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)enumerateChildNodesWithName:usingBlock:, void",
+      "effect": "calls the block for each node the path picks out, until the block sets stop"
+    },
+    {
+      "api": "-[SKNode inParentHierarchy:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)inParentHierarchy:, BOOL",
+      "effect": "YES when the argument is this node or one of its ancestors"
+    },
+    {
+      "api": "-[SKNode containsPoint:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)containsPoint:, BOOL",
+      "effect": "NO for a node with no content (the host's measured answer); a node with content answers from its frame"
+    },
+    {
+      "api": "-[SKNode nodeAtPoint:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)nodeAtPoint:, SKNode *",
+      "effect": "the node itself for a plain tree (measured); the topmost hit when descendants have non-zero frames is unmeasured"
+    },
+    {
+      "api": "-[SKNode nodesAtPoint:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)nodesAtPoint:, NSArray<SKNode *> *",
+      "effect": "every descendant whose containsPoint: answers YES; the array is empty for a plain tree"
+    },
+    {
+      "api": "-[SKNode convertPoint:fromNode:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)convertPoint:fromNode:, CGPoint",
+      "effect": "maps a point from the other node's coordinates into this node's, through the scene root both share"
+    },
+    {
+      "api": "-[SKNode convertPoint:toNode:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)convertPoint:toNode:, CGPoint",
+      "effect": "maps a point from this node's coordinates into the other node's"
+    },
+    {
+      "api": "-[SKNode intersectsNode:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)intersectsNode:, BOOL",
+      "effect": "NO for two zero-size nodes (measured); with non-zero frames the port intersects them in the scene root's coordinates, which is unmeasured"
+    },
+    {
+      "api": "-[SKNode isEqualToNode:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)isEqualToNode:, BOOL",
+      "effect": "YES only for the same object: the host answers by identity and the port does the same"
+    },
+        {
+      "api": "SKNode.physicsBody",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "physics is step 4 (Box2D with contacts and joints matched to the host); SKPhysicsBody does not exist in the port yet",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "SKNode.constraints",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "SKConstraint is not carried; the 26.2 header puts no availability on the member, so 7.0 here is the class's and the release it arrived in is unverified (no SDK on disk annotates it)",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "SKNode.reachConstraints",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "SKReachConstraints is not carried; the same unverified availability as constraints",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "SKNode.focusBehavior",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKNode member, availability as the spec row gives it",
+      "reason": "the focus engine is iOS 11 and goes in the object of that release",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "SKNode.attributeValues",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)attributeValues, ios=10.0",
+      "reason": "the attribute values are iOS 10 and go with SKAttribute in the object of that release",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "-[SKNode valueForAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)valueForAttributeNamed:, ios=10.0",
+      "reason": "the attribute values are iOS 10 and go with SKAttribute in the object of that release",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode setValue:forAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)setValue:forAttributeNamed:, ios=10.0",
+      "reason": "the attribute values are iOS 10 and go with SKAttribute in the object of that release",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode runAction:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "running an action needs SKAction and its clock, which is step 3; the action clock reads speed and paused",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode runAction:completion:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "running an action needs SKAction and its clock, which is step 3",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode runAction:withKey:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "running an action needs SKAction and its clock, which is step 3",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode hasActions]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "answers whether an action is running, which needs the action clock of step 3",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode actionForKey:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "keyed actions need SKAction, which is step 3",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode removeActionForKey:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "keyed actions need SKAction, which is step 3",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode removeAllActions]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "removes running actions, which need SKAction, which is step 3",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKNode initWithCoder:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "decoding a node needs the archive format of the host, which is not measured for SKNode; the port's SKUniform archive keys are its own and are not claimed for nodes",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "+[SKNode nodeWithFileNamed:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "reason": "loads a .sks scene file, which needs the scene and the archive format; the scene is step 1b",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "+[SKNode nodeWithFileNamed:securelyWithClasses:andError:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKNode member, availability as the spec row gives it",
+      "reason": "the secure loader is iOS 12 and goes in the object of that release, after the file loader",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "SKScene",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKScene, superclass SKEffectNode); SpriteKit/CharonSpriteKit.h",
+      "effect": "the root of a tree of nodes, presented in a view: the viewport size, the scale mode, the anchor point, the background colour and the frame it gives"
+    },
+    {
+      "api": "+[SKScene sceneWithSize:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, sceneWithSize:, instancetype",
+      "effect": "a new scene of the size given; it calls didChangeSize: once with the size as the old one (measured)"
+    },
+    {
+      "api": "-[SKScene initWithSize:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, initWithSize:, instancetype",
+      "effect": "a new scene of the size given, as sceneWithSize: makes it"
+    },
+    {
+      "api": "-[SKScene init]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK init of SKNode, overridden for the scene (measured: size (1,1))",
+      "effect": "a scene of size 1 by 1 (measured)"
+    },
+    {
+      "api": "SKScene.size",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, size, CGSize",
+      "effect": "the viewport of the scene; setting it calls didChangeSize: with the previous size, even when it is unchanged (measured)"
+    },
+    {
+      "api": "SKScene.scaleMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, scaleMode, SKSceneScaleMode",
+      "effect": "stored, defaulting to Fill (0, measured); the view's mapping of the scene by it is owed to the rendering step"
+    },
+    {
+      "api": "SKScene.anchorPoint",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, anchorPoint, CGPoint",
+      "effect": "the origin of the scene's coordinates in its viewport: the default is (0,0) and the frame follows it (measured)"
+    },
+    {
+      "api": "SKScene.backgroundColor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, backgroundColor, SKColor",
+      "effect": "the colour the view clears to; the default is the host's grey (measured on macOS; the iOS default is not measured)"
+    },
+    {
+      "api": "SKScene.frame",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.frame, overridden for the scene (measured formula)",
+      "effect": "the viewport in the scene's coordinates: origin (-anchor.x * width, -anchor.y * height), the size of the scene (measured)"
+    },
+    {
+      "api": "-[SKScene setPosition:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.position setter, overridden for the scene (measured refusal)",
+      "effect": "logs 'SKScene: Setting the position of a SKScene has no effect.' and keeps the position it had (measured)"
+    },
+    {
+      "api": "-[SKScene setXScale:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.xScale setter, overridden for the scene (measured refusal)",
+      "effect": "logs 'SKScene: Setting the scale of a SKScene has no effect.' and keeps the scale it had (measured)"
+    },
+    {
+      "api": "-[SKScene update:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, update:, void, NSTimeInterval",
+      "effect": "called once a frame, before the actions; the default does nothing, and a subclass overrides it"
+    },
+    {
+      "api": "-[SKScene didEvaluateActions]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, didEvaluateActions, void",
+      "effect": "called once a frame after the actions; the default does nothing; the actions are owed, so the call is the view's only"
+    },
+    {
+      "api": "-[SKScene didSimulatePhysics]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, didSimulatePhysics, void",
+      "effect": "called once a frame after the physics; the default does nothing; the physics is owed, so the call is the view's only"
+    },
+    {
+      "api": "-[SKScene didChangeSize:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, didChangeSize:, void, CGSize",
+      "effect": "called with the previous size each time the size is set (measured), and once from the initialiser"
+    },
+    {
+      "api": "SKScene.view",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, view, SKView (iOS only)",
+      "effect": "the view the scene is presented in, held weakly; nil until presentScene: (measured nil on a new scene)"
+    },
+    {
+      "api": "-[SKScene didMoveToView:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, didMoveToView:, void, SKView (iOS only)",
+      "effect": "called when the scene is presented in a view; the default does nothing"
+    },
+    {
+      "api": "-[SKScene willMoveFromView:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, willMoveFromView:, void, SKView (iOS only)",
+      "effect": "called before the scene leaves a view; the default does nothing"
+    },
+    {
+      "api": "SKScene.physicsWorld",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "reason": "the physics world is step 4 (Box2D); the host gives every scene a non-nil physics world (measured), which the port cannot give until physics is built",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "-[SKScene convertPointFromView:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, convertPointFromView:",
+      "reason": "the conversion goes through the scale mode and the view's size, and the scale mode's mapping is owed to the rendering step",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKScene convertPointToView:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, convertPointToView:",
+      "reason": "the conversion goes through the scale mode and the view's size, and the scale mode's mapping is owed to the rendering step",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "SKNode.scene",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, (py)scene, SKScene *; SpriteKitScene7.m, a category of SKNode",
+      "effect": "the nearest scene among the node and its ancestors: the scene itself for a scene, nil for a node in no scene (measured for both)"
+    },
+    {
+      "api": "SKView",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView class (UIView subclass, iOS); SpriteKit/CharonSpriteKit.h; SpriteKitView7.m",
+      "effect": "the UIView over a CAEAGLLayer that presents a scene: an OpenGL ES 2 framebuffer, a display link, and a frame that steps the scene and clears to its background colour. Device-unverified; the nodes' content is owed"
+    },
+    {
+      "api": "-[SKView presentScene:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, presentScene:",
+      "effect": "makes the scene the view's scene: the old one leaves (willMoveFromView:), the new one joins (didMoveToView:), and the view steps it each frame"
+    },
+    {
+      "api": "SKView.scene",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, scene, readonly",
+      "effect": "the presented scene, or nil"
+    },
+    {
+      "api": "SKView.paused",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, paused",
+      "effect": "stops the scene's steps while the view still clears and presents; the port's frame loop honours it"
+    },
+    {
+      "api": "SKView.showsFPS",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, showsFPS",
+      "effect": "stored; the port draws no overlay, so the flag changes nothing on screen"
+    },
+    {
+      "api": "SKView.showsDrawCount",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, showsDrawCount",
+      "effect": "stored; the port draws no overlay, so the flag changes nothing on screen"
+    },
+    {
+      "api": "SKView.showsNodeCount",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, showsNodeCount",
+      "effect": "stored; the port draws no overlay, so the flag changes nothing on screen"
+    },
+    {
+      "api": "SKView.asynchronous",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, asynchronous",
+      "effect": "stored; the port's frame runs on the main run loop whatever the flag says"
+    },
+    {
+      "api": "SKView.ignoresSiblingOrder",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, ignoresSiblingOrder",
+      "effect": "stored; the draw order is owed to the renderer"
+    },
+    {
+      "api": "SKView.frameInterval",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, frameInterval (deprecated 10.0)",
+      "effect": "the display link's frame interval: the view steps once every this many refreshes"
+    },
+    {
+      "api": "-[SKView presentScene:transition:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, presentScene:transition:",
+      "reason": "the transition is an SKTransition, which is owed with the actions (it animates the scene change over time)",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKView textureFromNode:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, textureFromNode:",
+      "reason": "renders a node to a texture, which needs the textures and the renderer (step 2)",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKView textureFromNode:crop:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, textureFromNode:crop:",
+      "reason": "renders a node to a texture, which needs the textures and the renderer (step 2)",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKView convertPoint:toScene:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, convertPoint:toScene:",
+      "reason": "the conversion goes through the scale mode, which is owed to the rendering step",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "-[SKView convertPoint:fromScene:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, convertPoint:fromScene:",
+      "reason": "the conversion goes through the scale mode, which is owed to the rendering step",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "SKTransition",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKTransition class and its enums",
+      "reason": "the scene transitions are owed with the actions",
+      "effect": "until built: the class is absent, and a presentScene:transition: call has no transition to use"
+    },
+    {
+      "api": "-[SKScene setYScale:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.yScale setter, overridden for the scene (measured refusal)",
+      "effect": "logs 'SKScene: Setting the scale of a SKScene has no effect.' and keeps the yScale it had (measured)"
+    },
+    {
+      "api": "-[SKScene setScale:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.setScale:, overridden for the scene (measured refusal)",
+      "effect": "logs 'SKScene: Setting the scale of a SKScene has no effect.' and keeps both scales (measured)"
+    },
+    {
+      "api": "-[SKScene setZRotation:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.zRotation setter, overridden for the scene (measured refusal)",
+      "effect": "logs 'SKScene: Setting the zRotation of a SKScene has no effect.' and keeps the zRotation it had (measured)"
+    },
+    {
+      "api": "-[SKScene setZPosition:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "SDK SKNode.zPosition setter, overridden for the scene (measured refusal)",
+      "effect": "logs 'SKScene: Setting the zPosition of a SKScene has no effect.' and keeps the zPosition it had (measured)"
+    },
+    {
+      "api": "SKTextureFilteringMode",
+      "kind": "type",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=7.0); declared in SpriteKit/CharonSpriteKit.h with the SDK's values",
+      "effect": "the enumeration names the filter of a texture"
+    },
+    {
+      "api": "SKTextureFilteringNearest",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 0",
+      "effect": "the nearest-pixel filter"
+    },
+    {
+      "api": "SKTextureFilteringLinear",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 1; measured as the default of a texture made from pixels",
+      "effect": "the linear filter, the default of a new texture"
+    },
+    {
+      "api": "SKBlendMode",
+      "kind": "type",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=7.0); declared in SpriteKit/CharonSpriteKit.h with the SDK's values",
+      "effect": "the enumeration names the blend mode of a node that draws"
+    },
+    {
+      "api": "SKBlendModeAlpha",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 0; measured as the default blend mode of a sprite",
+      "effect": "the default blend mode"
+    },
+    {
+      "api": "SKBlendModeAdd",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 1; measured as stored by the blend mode setter",
+      "effect": "the additive blend mode"
+    },
+    {
+      "api": "SKBlendModeSubtract",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 2",
+      "effect": "the subtractive blend mode"
+    },
+    {
+      "api": "SKBlendModeMultiply",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 3",
+      "effect": "the multiplicative blend mode"
+    },
+    {
+      "api": "SKBlendModeMultiplyX2",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 4",
+      "effect": "the doubled multiplicative blend mode"
+    },
+    {
+      "api": "SKBlendModeScreen",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 5",
+      "effect": "the screen blend mode"
+    },
+    {
+      "api": "SKBlendModeReplace",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 6",
+      "effect": "the replacing blend mode"
+    },
+    {
+      "api": "SKBlendModeMultiplyAlpha",
+      "kind": "case",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, value 7",
+      "effect": "the alpha-multiplied blend mode"
+    },
+    {
+      "api": "SKTexture",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKTexture, NSObject with NSCopying and NSSecureCoding on iOS); SpriteKit/CharonSpriteKit.h; SpriteKit/SpriteKitTexture7.m",
+      "effect": "a rectangle of an image with its size, filter and mipmap flag; a texture draws nothing until the renderer is carried"
+    },
+    {
+      "api": "+[SKTexture textureWithRect:inTexture:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)textureWithRect:inTexture:, instancetype",
+      "effect": "a texture of the given rectangle of the image of the texture given; the rectangle is in that image's unit square and the size is the rectangle times the image's size (measured); a nil texture is read without a check and dies by SIGSEGV, as the host does (a crash case, measured in facts/SpriteKit/SKTexture.md)"
+    },
+    {
+      "api": "+[SKTexture textureWithData:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)textureWithData:size:, instancetype",
+      "effect": "a texture of the whole of an image of the size given, linear filtered; nil pixels answer nil (measured), and short pixels are not checked (measured)"
+    },
+    {
+      "api": "-[SKTexture copyWithZone:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "the NSCopying conformance of SKTexture (spec/SpriteKit/declarations.tsv, conforms row)",
+      "effect": "a copy with the rectangle, the size and the filter, and without the mipmap flag (measured)"
+    },
+    {
+      "api": "SKTexture.textureRect",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)textureRect",
+      "effect": "the rectangle of the image the texture shows, in its unit square (0,0,1,1) for a whole image (measured)"
+    },
+    {
+      "api": "SKTexture.size",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)size",
+      "effect": "the size in pixels of the rectangle: its unit size times the image's size (measured)"
+    },
+    {
+      "api": "SKTexture.filteringMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, filteringMode (the property with the SKTextureFilteringMode type)",
+      "effect": "stores the filter; a new texture from pixels is linear (measured), and a copy keeps it (measured)"
+    },
+    {
+      "api": "SKTexture.usesMipmaps",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "source": "spec/SpriteKit/declarations.tsv, usesMipmaps",
+      "effect": "stores the mipmap flag; a new texture has none (measured), and a copy has none (measured)"
+    },
+    {
+      "api": "+[SKTexture textureWithImageNamed:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "loading an image by name is the image loader's, which the port does not carry yet; the host answers a 128 by 128 placeholder and logs an error, and the iOS answer is not measured",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "+[SKTexture textureWithImage:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "the image loader's pixels; owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "+[SKTexture textureWithCGImage:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "the image's pixels; owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "+[SKTexture textureWithData:size:flipped:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "the flipped and row-length forms are not measured on the host yet; owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "+[SKTexture textureWithData:size:rowLength:alignment:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "the row length and alignment are not measured on the host yet; owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKTexture textureByApplyingCIFilter:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "a Core Image filter on the texture's pixels, which needs the renderer; owed with the effects step",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "+[SKTexture preloadTextures:withCompletionHandler:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "the preload loads pixels; owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKTexture preloadWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKTexture.md",
+      "reason": "the preload loads pixels; owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "SKSpriteNode",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKSpriteNode, SKNode, conforms SKWarpable); SpriteKit/CharonSpriteKit.h; SpriteKit/SpriteKitSprite7.m",
+      "effect": "a node with a colour or a texture, a size, an anchor point, a centre rectangle and a blend; nothing draws until the renderer is carried"
+    },
+    {
+      "api": "+[SKSpriteNode spriteNodeWithColor:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)spriteNodeWithColor:size:, instancetype",
+      "effect": "a colour sprite of the size given, anchored at its centre; a negative size raises NSInvalidArgumentException 'Invalid size specified' (a crash case, measured)"
+    },
+    {
+      "api": "+[SKSpriteNode spriteNodeWithTexture:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)spriteNodeWithTexture:, instancetype",
+      "effect": "a texture sprite of the texture's size with a clear white colour (measured); a nil texture gives a zero-size sprite with no texture (measured)"
+    },
+    {
+      "api": "+[SKSpriteNode spriteNodeWithTexture:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)spriteNodeWithTexture:size:, instancetype",
+      "effect": "a texture sprite of the size given; a negative size raises NSInvalidArgumentException 'Invalid bounds specified' (a crash case, measured)"
+    },
+    {
+      "api": "-[SKSpriteNode initWithColor:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)initWithColor:size:, instancetype",
+      "effect": "as the class method; a negative size raises NSInvalidArgumentException 'Invalid size specified' (measured)"
+    },
+    {
+      "api": "-[SKSpriteNode initWithTexture:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)initWithTexture:, instancetype",
+      "effect": "as the class method without a size: the texture's size"
+    },
+    {
+      "api": "-[SKSpriteNode initWithTexture:color:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)initWithTexture:color:size:, instancetype",
+      "effect": "a texture sprite with the colour and size given; a negative size raises NSInvalidArgumentException 'Invalid size specified' (measured)"
+    },
+    {
+      "api": "SKSpriteNode.texture",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, texture",
+      "effect": "stores the texture; setting it does not change the size or the colour (measured)"
+    },
+    {
+      "api": "SKSpriteNode.color",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, color",
+      "effect": "stores the colour (measured)"
+    },
+    {
+      "api": "SKSpriteNode.colorBlendFactor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, colorBlendFactor",
+      "effect": "stores the blend factor; zero by default (measured)"
+    },
+    {
+      "api": "SKSpriteNode.blendMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, blendMode",
+      "effect": "stores the blend mode; alpha by default (measured)"
+    },
+    {
+      "api": "SKSpriteNode.anchorPoint",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, anchorPoint",
+      "effect": "stores the anchor point; (0.5, 0.5) by default (measured)"
+    },
+    {
+      "api": "SKSpriteNode.size",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, size",
+      "effect": "stores the size; the setter does not check it, so a negative size is stored (measured)"
+    },
+    {
+      "api": "SKSpriteNode.centerRect",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, centerRect",
+      "effect": "stores the centre rectangle; (0, 0, 1, 1) by default (measured)"
+    },
+    {
+      "api": "+[SKSpriteNode spriteNodeWithImageNamed:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "loading an image by name is the image loader's, owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKSpriteNode initWithImageNamed:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "loading an image by name is the image loader's, owed with the texture loading",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKSpriteNode initWithCoder:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "the archive of a sprite's members is the coding step, owed with the archive of the node tree",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "SKShapeNode",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKShapeNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitShape7.m",
+      "effect": "a node that draws a path with its stroke, fill and line style; nothing draws until the renderer is carried"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithPath:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithPath:, instancetype",
+      "effect": "a shape of the path given (the node keeps its own reference to the path)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithPath:centered:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithPath:centered:, instancetype",
+      "effect": "a shape of the path, shifted so that the centre of its bounding box is the origin when centred (measured for a path at the origin)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithRect:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithRect:, instancetype",
+      "effect": "a shape of the rectangle at its own place (measured)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithRectOfSize:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithRectOfSize:, instancetype",
+      "effect": "a shape of the rectangle of the size, centred on the origin (measured)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithRect:cornerRadius:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithRect:cornerRadius:, instancetype",
+      "effect": "a shape of the rectangle with its corners rounded by the radius, at its own place (ten path elements, measured)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithRectOfSize:cornerRadius:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithRectOfSize:cornerRadius:, instancetype",
+      "effect": "as the rounded rectangle, centred on the origin (measured)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithCircleOfRadius:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithCircleOfRadius:, instancetype",
+      "effect": "a circle of the radius centred on the origin (measured: six path elements)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithEllipseInRect:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithEllipseInRect:, instancetype",
+      "effect": "an ellipse in the rectangle, at its own place (measured)"
+    },
+    {
+      "api": "+[SKShapeNode shapeNodeWithEllipseOfSize:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)shapeNodeWithEllipseOfSize:, instancetype",
+      "effect": "an ellipse of the size centred on the origin (measured)"
+    },
+    {
+      "api": "SKShapeNode.path",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, path, nonatomic",
+      "effect": "the path the shape draws; a nil path gives a shape with no path (measured); the node keeps its own reference"
+    },
+    {
+      "api": "SKShapeNode.strokeColor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, strokeColor, retain",
+      "effect": "the stroke colour, white by default; read back in the sRGB space after a set (measured on macOS)"
+    },
+    {
+      "api": "SKShapeNode.fillColor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, fillColor, retain",
+      "effect": "the fill colour, clear by default; read back in the sRGB space after a set (measured on macOS)"
+    },
+    {
+      "api": "SKShapeNode.blendMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, blendMode",
+      "effect": "stores the blend mode; alpha by default (measured)"
+    },
+    {
+      "api": "SKShapeNode.antialiased",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, antialiased, getter isAntialiased",
+      "effect": "stores the flag; yes by default (measured)"
+    },
+    {
+      "api": "SKShapeNode.lineWidth",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, lineWidth",
+      "effect": "stores the width; 1 by default, and a negative width is stored (measured)"
+    },
+    {
+      "api": "SKShapeNode.glowWidth",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, glowWidth",
+      "effect": "stores the glow width; 0 by default (measured)"
+    },
+    {
+      "api": "SKShapeNode.lineCap",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, lineCap, CGLineCap",
+      "effect": "stores the cap; butt (0) by default (measured)"
+    },
+    {
+      "api": "SKShapeNode.lineJoin",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, lineJoin, CGLineJoin",
+      "effect": "stores the join; bevel (2) by default (measured)"
+    },
+    {
+      "api": "SKShapeNode.miterLimit",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, miterLimit",
+      "effect": "stores the miter limit; 0.5 by default (measured)"
+    },
+    {
+      "api": "SKLabelNode",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKLabelNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitLabel7.m",
+      "effect": "a text in a font, with its colour, its alignment and its layout; nothing is rasterised yet"
+    },
+    {
+      "api": "+[SKLabelNode labelNodeWithText:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)labelNodeWithText:, instancetype",
+      "effect": "a label with the text in the host's default font (measured on macOS; the iOS font is not measured)"
+    },
+    {
+      "api": "+[SKLabelNode labelNodeWithFontNamed:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (cm)labelNodeWithFontNamed:, instancetype",
+      "effect": "a label with no text in the font named (measured)"
+    },
+    {
+      "api": "-[SKLabelNode initWithFontNamed:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, (im)initWithFontNamed:, instancetype",
+      "effect": "as the class method, for an allocated label (measured)"
+    },
+    {
+      "api": "SKLabelNode.text",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, text, copy",
+      "effect": "stores the text; nil by default and when set to nil (measured)"
+    },
+    {
+      "api": "SKLabelNode.fontName",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, fontName, copy",
+      "effect": "stores the font name; the host's default for a label made from text (measured on macOS)"
+    },
+    {
+      "api": "SKLabelNode.fontSize",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, fontSize",
+      "effect": "stores the size; 32 by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.fontColor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, fontColor, retain",
+      "effect": "the font colour, white by default; read back in the sRGB space after a set (measured on macOS)"
+    },
+    {
+      "api": "SKLabelNode.color",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, color, retain",
+      "effect": "the colour, white in the device space by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.colorBlendFactor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, colorBlendFactor",
+      "effect": "stores the blend factor; 0 by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.blendMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, blendMode",
+      "effect": "stores the blend mode; alpha by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.horizontalAlignmentMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, horizontalAlignmentMode",
+      "effect": "stores the alignment; centre by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.verticalAlignmentMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, verticalAlignmentMode",
+      "effect": "stores the alignment; baseline by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.numberOfLines",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, numberOfLines",
+      "effect": "stores the number of lines; 1 by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.lineBreakMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, lineBreakMode",
+      "effect": "stores the line break mode; truncating tail by default (measured)"
+    },
+    {
+      "api": "SKLabelNode.preferredMaxLayoutWidth",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKLabelNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, preferredMaxLayoutWidth",
+      "effect": "stores the width; 0 by default (measured)"
+    },
+    {
+      "api": "SKCropNode",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKCropNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKCropNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitCrop7.m",
+      "effect": "a node that shows its children where its mask has content; the crop is not drawn yet"
+    },
+    {
+      "api": "SKCropNode.maskNode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKCropNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, maskNode, retain",
+      "effect": "stores the mask; nil by default (measured)"
+    },
+    {
+      "api": "SKEffectNode",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKEffectNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitEffect7.m",
+      "effect": "a node that draws its children through an effect; the effect is not run yet"
+    },
+    {
+      "api": "SKEffectNode.filter",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, filter, retain",
+      "effect": "stores the filter; nil by default, and the filter it is given is read back (measured)"
+    },
+    {
+      "api": "SKEffectNode.shouldCenterFilter",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, shouldCenterFilter",
+      "effect": "stores the flag; yes by default (measured)"
+    },
+    {
+      "api": "SKEffectNode.shouldEnableEffects",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, shouldEnableEffects",
+      "effect": "stores the flag; yes by default (measured)"
+    },
+    {
+      "api": "SKEffectNode.shouldRasterize",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, shouldRasterize",
+      "effect": "stores the flag; no by default (measured)"
+    },
+    {
+      "api": "SKEffectNode.blendMode",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "source": "spec/SpriteKit/declarations.tsv, blendMode",
+      "effect": "stores the blend mode; alpha by default (measured)"
+    },
+    {
+      "api": "SKShapeNode.lineLength",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "reason": "the host reads 0 in every case measured: a shape not yet presented, and shapes in a presented SKView after 120 frames, with and without a stroke texture; no case with a non-zero value has been found, so the member stays owed",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "SKEffectNode.shader",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "reason": "the shader is SKShader's, owed with the shader step",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    }
+
+  ]
+}

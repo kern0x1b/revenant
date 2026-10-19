@@ -1,0 +1,151 @@
+{
+  "framework": "SpriteKit",
+  "note": "SpriteKit's iOS 10 surface that the scene and the view owe: the scene's sceneDidLoad, the view's frame rate and its delegate. The rest of iOS 10 (SKAttribute, SKAttributeValue, the vector and matrix uniforms) is in the rows of the release files that name it.",
+  "entries": [
+    {
+      "api": "-[SKScene sceneDidLoad]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKScene member, sceneDidLoad (ios 10.0)",
+      "reason": "called once after a scene is loaded from a file, which needs the file loader owed with SKNode's nodeWithFileNamed:",
+      "effect": "until built: the selector is not implemented"
+    },
+    {
+      "api": "SKView.preferredFramesPerSecond",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, preferredFramesPerSecond (ios 10.0)",
+      "reason": "the frame rate is an iOS 10 property of the view, owed to that release's object; the port's view runs its display link at the frame interval of iOS 7",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "SKView.delegate",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, delegate (ios 10.0), weak",
+      "reason": "the view delegate's shouldRenderAtTime: is iOS 10, and is owed with the rest of that release",
+      "effect": "until built: the property is not implemented"
+    },
+    {
+      "api": "SKViewDelegate",
+      "kind": "protocol",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKScene.md",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView member, SKViewDelegate (ios 10.0)",
+      "reason": "the view delegate protocol is iOS 10, owed with SKView.delegate",
+      "effect": "until built: the protocol is absent"
+    },
+    {
+      "api": "SKSpriteNode.attributeValues",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKSpriteNode valueForAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKSpriteNode setValue:forAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKSpriteNode scaleToSize:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKSpriteNode.md",
+      "reason": "the scale to a size is the renderer's, owed with the renderer",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "SKShapeNode.attributeValues",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKShapeNode valueForAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKShapeNode setValue:forAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKShapeNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "SKEffectNode.attributeValues",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKEffectNode valueForAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    },
+    {
+      "api": "-[SKEffectNode setValue:forAttributeNamed:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/SpriteKit/SKEffectNode.md",
+      "reason": "the attributes are the shader's, owed with SKAttribute",
+      "effect": "until built: the selector is not implemented and an application that sends it gets the runtime's unrecognised-selector error"
+    }
+
+  ]
+}

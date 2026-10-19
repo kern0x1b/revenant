@@ -1,0 +1,4 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+CryptoTokenKit	method	TKSmartCard.send(ins:p1:p2:data:le:reply:)	9.0				container
+CryptoTokenKit	method	TKSmartCard.send(ins:p1:p2:data:le:)	10.0				own
+CryptoTokenKit	method	TKSmartCard.withSession(_:)	10.0				own

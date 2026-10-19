@@ -1,0 +1,313 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_422YpCbYpCr8ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422YpCbYpCr8, the yuvs shape: Yp, Cb, Yp, Cr four bytes to two pixels",
+      "effect": "the luma of each of the two pixels, the chroma of the pair shared, through the matrix the generator built, each channel rounded once to the destination's own full scale and clamped, then the four ARGB channels through the permutation map; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_422CbYpCrYp8ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp8, the 2vuy shape: Cb, Yp, Cr, Yp",
+      "effect": "the same arithmetic as its mirror, with the luma at the odd byte of the pair and the chroma at the even one; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_422CbYpCrYp8_AA8ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp8_AA8, the a2vy shape, whose alpha is a plane of its own half a sample wide",
+      "effect": "the same, with the alpha of each of the two pixels read from the alpha plane at its own index rather than taken from a parameter; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444AYpCbCr8ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444AYpCbCr8, the r408 shape: A, Yp, Cb, Cr, one chroma per pixel",
+      "effect": "each pixel's own chroma, its luma, and the alpha the shape carries, rounded once and clamped, then permuted; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444CbYpCrA8ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CbYpCrA8, the v408 shape: Cb, Yp, Cr, A",
+      "effect": "the same, with the alpha last in the shape and not first; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444CrYpCb8ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CrYpCb8, the v308 shape: Cr, Yp, Cb, which drops the alpha and takes the caller's",
+      "effect": "each pixel's own chroma and luma, the alpha the caller passes, rounded once and clamped, then permuted; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444AYpCbCr16ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444AYpCbCr16, the y416 shape, four sixteen-bit words to one pixel",
+      "effect": "the eight-bit answer's arithmetic over sixteen-bit samples, each channel rounded once to 255 and clamped; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444AYpCbCr16ToARGB16U()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444AYpCbCr16 into a sixteen-bit destination, which the header's own table pairs with it",
+      "effect": "the same, each channel rounded once to 65535; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_422CbYpCrYp16ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp16, the v216 shape, four sixteen-bit words to two pixels",
+      "effect": "the eight-bit 2vuy answer's arithmetic over sixteen-bit samples, the chroma of the pair shared; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_422CbYpCrYp16ToARGB16U()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp16 into a sixteen-bit destination",
+      "effect": "the same, each channel rounded once to 65535; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444CrYpCb10ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CrYpCb10, the v410 shape: one word to one pixel, Cb in bits 0-9, Yp in 10-19, Cr in 20-29",
+      "effect": "the three ten-bit channels unpacked from the word by those exact bit positions, then the same matrix, rounding and clamping as the eight-bit shapes; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 NOT YET VERIFIED against the system for the shapes whose samples are 10 or 16 bits wide: the differential records 1377 failures over the family, every one of them in a ten-bit or sixteen-bit shape, and this entry is one of them. The eight-bit shapes agree to within the last bit. facts/Accelerate/vImageYpCbCr.md holds the counts and what has been fixed Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_444CrYpCb10ToARGB16Q12()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CrYpCb10 into a Q12 destination, which the header's own table pairs with it",
+      "effect": "the same, each channel rounded once to 4096; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 NOT YET VERIFIED against the system for the shapes whose samples are 10 or 16 bits wide: the differential records 1377 failures over the family, every one of them in a ten-bit or sixteen-bit shape, and this entry is one of them. The eight-bit shapes agree to within the last bit. facts/Accelerate/vImageYpCbCr.md holds the counts and what has been fixed Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB8888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10, the v210 shape: six luma and three of each chroma in sixteen words",
+      "effect": "the header's four word diagrams taken literally - Cb0, Y0, Cr0; Y1, Cb1, Y2; Cr1, Y3, Cb2; Y4, Cr2, Y5 - so each of the six pixels gets its own luma and each pair of them its own chroma, then the same matrix, rounding and clamping; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB16Q12()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "v210 into a Q12 destination",
+      "effect": "the same, each channel rounded once to 4096; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To422YpCbYpCr8()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422YpCbYpCr8, the yuvs shape",
+      "effect": "each of the two pixels' luma, and the chroma of the pair the mean of the two pixels' own three dot products, each rounded once and clamped to the pixel range's own limits; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To422CbYpCrYp8()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp8, the 2vuy shape",
+      "effect": "the same, with the luma at the odd byte of the pair and the chroma at the even one; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To422CbYpCrYp8_AA8()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp8_AA8, whose alpha the caller asks for in a plane of its own",
+      "effect": "the same, and the two pixels' alpha written to the alpha plane as the luma is written, half a byte per pixel; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To444AYpCbCr8()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444AYpCbCr8, the r408 shape",
+      "effect": "each pixel's own luma and chroma and the alpha the permutation map names, each rounded once and clamped; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To444AYpCbCr16()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444AYpCbCr16, the y416 shape, into four sixteen-bit words",
+      "effect": "the same, each channel rounded once and clamped to the range's limits; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To444CbYpCrA8()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CbYpCrA8, the v408 shape",
+      "effect": "the same, with the alpha last in the shape and not first; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To444CrYpCb8()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CrYpCb8, the v308 shape, which drops the alpha",
+      "effect": "each pixel's own luma and chroma, three bytes to a pixel, rounded once and clamped; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To444CrYpCb10()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage444CrYpCb10, the v410 shape: one word to one pixel",
+      "effect": "each pixel's own luma and chroma packed into the word by the header's diagram, Cb in bits 0-9, Yp in 10-19, Cr in 20-29, each rounded once and clamped to the ten-bit range; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 NOT YET VERIFIED against the system for the shapes whose samples are 10 or 16 bits wide: the differential records 1377 failures over the family, every one of them in a ten-bit or sixteen-bit shape, and this entry is one of them. The eight-bit shapes agree to within the last bit. facts/Accelerate/vImageYpCbCr.md holds the counts and what has been fixed Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To422CbYpCrYp16()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "kvImage422CbYpCrYp16, the v216 shape, four sixteen-bit words to two pixels",
+      "effect": "the same arithmetic as the eight-bit 2vuy shape over sixteen-bit samples, the chroma of the pair the mean of the two pixels' own; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB8888To422CrYpCbYpCbYpCbYpCrYpCrYp10()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "v210, where each of the six pixels' luma and each pair's chroma is packed into sixteen words by the header's four diagrams",
+      "effect": "six luma and three of each chroma, the chroma of each pair the mean of the pair's two dot products, each rounded once and clamped to the ten-bit range; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB16UTo444AYpCbCr16()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "y416 from a sixteen-bit source, which the header's own table pairs with it",
+      "effect": "the same arithmetic as the eight-bit source's, over samples the caller scaled from 0 to 65535; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB16UTo422CbYpCrYp16()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "v216 from a sixteen-bit source",
+      "effect": "the same, the chroma of the pair the mean of the pair's two dot products over sixteen-bit samples; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 Held to the system byte for byte: the sixteen-bit alpha narrows with (A*255+32767)/65535 into an eight-bit destination and widens by 257 out of one, and a caller's alpha arrives at the width its own signature declares - all three measured",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared byte for byte in tests/backports/host/ypcbcr8, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB16Q12To444CrYpCb10()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "v410 from a Q12 source, which the header's own table pairs with it",
+      "effect": "the same arithmetic as the eight-bit source's, over samples the caller scaled from 0 to 4096, packed into the word by the header's diagram; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 This one answers Conversion.h's formula, not the system's: the system does not clamp a Q12 source, wraps each ten-bit channel modulo 1024 instead, and puts 258 on the luma of a zero pixel where the formula gives the bias. Measured over 11200 words, the two differ on 95.71 per cent, widest 2146876419 on a word read as a signed difference; facts/Accelerate/vImageYpCbCr.md holds the sweep and the differential holds the port to the header's formula, written out a third time in the test NOT YET VERIFIED against the system for the shapes whose samples are 10 or 16 bits wide: the differential records 1377 failures over the family, every one of them in a ten-bit or sixteen-bit shape, and this entry is one of them. The eight-bit shapes agree to within the last bit. facts/Accelerate/vImageYpCbCr.md holds the counts and what has been fixed Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared in tests/backports/host/ypcbcr8, and for this one against the formula written out independently in the test because the system does not follow it, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    },
+    {
+      "api": "vImageConvert_ARGB16Q12To422CrYpCbYpCbYpCbYpCrYpCrYp10()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "v210 from a Q12 source",
+      "effect": "the same, the chroma of each pair the mean of the pair's two dot products over Q12 samples; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, kvImageUnknownFlagsBit for a flag outside DoNotTile and PrintDiagnosticsToConsole, and kvImageInvalidParameter for a permutation map that is not a permutation of 0 to 3 This one answers Conversion.h's formula, not the system's: the system does not clamp a Q12 source, wraps each ten-bit channel modulo 1024 instead, and puts 258 on the luma of a zero pixel where the formula gives the bias. Measured over 11200 words, the two differ on 95.71 per cent, widest 2146876419 on a word read as a signed difference; facts/Accelerate/vImageYpCbCr.md holds the sweep and the differential holds the port to the header's formula, written out a third time in the test Answers Conversion.h's formula, and the system does not. Measured: the layout is exactly the header's drawing (a bit-by-bit sweep shows Cb in bits 0-9 moving only the green, Cr in bits 20-29 the red and green, Yp in bits 10-19 the green and the blue, and each field's own sweep smooth and monotonic), and the path is NOT affine: a least-squares fit of the full 3x3 and bias over 10000 random pixels has a worst residual of 175-178, and a search of 2304 rules of the form each field read 8 to 16 bits wide and divided by 1 to 16 bottoms out at a residual of 82. It is a fixed-point pipeline whose coefficients are not published, and a fitted rule would be reproducing an 82-unit error. Over 760480 samples of the two ten-bit shapes the two differ on 63.4 per cent, and the differential holds the port to the formula written out independently in the test (facts/Accelerate/vImageYpCbCr.md)",
+      "facts": "facts/Accelerate/vImageYpCbCr.md",
+      "source": "Conversion.h of SDK 16.5, whose own per-pixel text the arithmetic follows, and whose generator documentation gives the table of which Y'CbCr type pairs with which ARGB type; the host's own vImage, compared in tests/backports/host/ypcbcr8, and for this one against the formula written out independently in the test because the system does not follow it, over both matrices, the four pixel ranges of vImage_YpCbCrPixelRange's own documentation, four permutation maps and four picture sizes"
+    }
+  ]
+}

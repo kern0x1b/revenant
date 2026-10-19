@@ -1,0 +1,194 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@UInt8	-			unsigned char	-	-	-	-	a9ef2eddf94d7e81	-
+typedef	c:@T@SInt8	-			signed char	-	-	-	-	d4686dd34cd8283f	-
+typedef	c:@T@UInt16	-			unsigned short	-	-	-	-	89acd83db7a94864	-
+typedef	c:@T@SInt16	-			short	-	-	-	-	3eec647098d9543c	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+struct	c:@S@wide	-			-	-	-	-	-	dc338aa38da8f01b	-
+field	c:@S@wide@FI@lo	wide			UInt32	-	-	-	-	b42aeb34ea3ae512	-
+field	c:@S@wide@FI@hi	wide			SInt32	-	-	-	-	933c81d76dd64733	-
+typedef	c:@T@wide	-			struct wide	-	-	-	-	32e0b9b7cf93b136	-
+struct	c:@S@UnsignedWide	-			-	-	-	-	-	a36d077fed338a44	-
+field	c:@S@UnsignedWide@FI@lo	UnsignedWide			UInt32	-	-	-	-	92242cdeee8eb679	-
+field	c:@S@UnsignedWide@FI@hi	UnsignedWide			UInt32	-	-	-	-	c01ccd1f82e5c13b	-
+typedef	c:@T@UnsignedWide	-			struct UnsignedWide	-	-	-	-	2a380b4d75ee0487	-
+typedef	c:@T@SInt64	-			long long	-	-	-	-	4a13131456fbd4c5	-
+typedef	c:@T@UInt64	-			unsigned long long	-	-	-	-	b41c42eb5e2605ba	-
+typedef	c:@T@Fixed	-			SInt32	-	-	-	-	19c8622dfca32d2c	-
+typedef	c:@T@FixedPtr	-			Fixed *	-	-	-	-	22ffc08f387f5ef4	-
+typedef	c:@T@Fract	-			SInt32	-	-	-	-	b2f1fff1bd7581bd	-
+typedef	c:@T@FractPtr	-			Fract *	-	-	-	-	08fc28230a117421	-
+typedef	c:@T@UnsignedFixed	-			UInt32	-	-	-	-	9e1a217ad3df9cf8	-
+typedef	c:@T@UnsignedFixedPtr	-			UnsignedFixed *	-	-	-	-	d3ebff0b24fd4150	-
+typedef	c:@T@ShortFixed	-			short	-	-	-	-	25d33680d6b91cd6	-
+typedef	c:@T@ShortFixedPtr	-			ShortFixed *	-	-	-	-	3c8832025574881a	-
+typedef	c:@T@Float32	-			float	-	-	-	-	a7e06278f3a06d05	-
+typedef	c:@T@Float64	-			double	-	-	-	-	9076708dddf40870	-
+struct	c:@S@Float80	-			-	-	-	-	-	8c3d79f2daa2ea72	-
+field	c:@S@Float80@FI@exp	Float80			SInt16	-	-	-	-	4a7997ecf12342ae	-
+field	c:@S@Float80@FI@man	Float80			UInt16[4]	-	-	-	-	ac03f4992d853aed	-
+typedef	c:@T@Float80	-			struct Float80	-	-	-	-	f205ef888befaac8	-
+struct	c:@S@Float96	-			-	-	-	-	-	e01b52d1a47bf1af	-
+field	c:@S@Float96@FI@exp	Float96			SInt16[2]	-	-	-	-	7ad5ea431a59acf8	-
+field	c:@S@Float96@FI@man	Float96			UInt16[4]	-	-	-	-	c4dcfda54564625d	-
+typedef	c:@T@Float96	-			struct Float96	-	-	-	-	77486f6b0546028c	-
+struct	c:@S@Float32Point	-			-	-	-	-	-	6bbb73ca75b99ad3	-
+field	c:@S@Float32Point@FI@x	Float32Point			Float32	-	-	-	-	b548bf52f42e1359	-
+field	c:@S@Float32Point@FI@y	Float32Point			Float32	-	-	-	-	0e2b95a99c446ed6	-
+typedef	c:@T@Float32Point	-			struct Float32Point	-	-	-	-	4f73698433ff33c9	-
+typedef	c:@T@Ptr	-			char *	-	-	-	-	e11459ee98bf50f7	-
+typedef	c:@T@Handle	-			Ptr *	-	-	-	-	767f6fa2dee09cef	-
+typedef	c:@T@Size	-			long	-	-	-	-	9a9c678231b2a974	-
+typedef	c:@T@OSErr	-			SInt16	-	-	-	-	14eb35c1b03cb1cf	-
+typedef	c:@T@OSStatus	-			SInt32	-	-	-	-	c9d4cae3c2778a27	-
+typedef	c:@T@LogicalAddress	-			void *	-	-	-	-	5f9fd8bd0ece362d	-
+typedef	c:@T@ConstLogicalAddress	-			const void *	-	-	-	-	608ba711bff91d52	-
+typedef	c:@T@PhysicalAddress	-			void *	-	-	-	-	ca13ebca69f62ea2	-
+typedef	c:@T@BytePtr	-			UInt8 *	-	-	-	-	49f85a073b61ad37	-
+typedef	c:@T@ByteCount	-			unsigned long	-	-	-	-	92f839e17ecc01e5	-
+typedef	c:@T@ByteOffset	-			unsigned long	-	-	-	-	f1afc81c06519e05	-
+typedef	c:@T@Duration	-			SInt32	-	-	-	-	a6147da6423c57e9	-
+typedef	c:@T@AbsoluteTime	-			UnsignedWide	-	-	-	-	bc36fd01427a6043	-
+typedef	c:@T@OptionBits	-			UInt32	-	-	-	-	4fed8030b708cd62	-
+typedef	c:@T@ItemCount	-			unsigned long	-	-	-	-	13c8ece98084342d	-
+typedef	c:@T@PBVersion	-			UInt32	-	-	-	-	192ebc20d0e01111	-
+typedef	c:@T@ScriptCode	-			SInt16	-	-	-	-	dd35ad2505f5d050	-
+typedef	c:@T@LangCode	-			SInt16	-	-	-	-	a8cd6a062e1a2f2e	-
+typedef	c:@T@RegionCode	-			SInt16	-	-	-	-	ae31dc30786d413c	-
+typedef	c:@T@FourCharCode	-			UInt32	-	-	-	-	a0f4e71a4dbfcb9b	-
+typedef	c:@T@OSType	-			FourCharCode	-	-	-	-	01d4dcaaf78349ee	-
+typedef	c:@T@ResType	-			FourCharCode	-	-	-	-	a8e53a887401fbc3	-
+typedef	c:@T@OSTypePtr	-			OSType *	-	-	-	-	1dc889f2cf700f07	-
+typedef	c:@T@ResTypePtr	-			ResType *	-	-	-	-	73c227a958289c4a	-
+typedef	c:@T@Boolean	-			unsigned char	-	-	-	-	693cf733304c39d9	-
+typedef	c:@T@ProcPtr	-			long (*)(void)	-	-	-	-	d232aa1504822778	-
+typedef	c:@T@Register68kProcPtr	-			void (*)(void)	-	-	-	-	a659f73c124f38d1	-
+typedef	c:@T@UniversalProcPtr	-			ProcPtr	-	-	-	-	29484c8b17f40641	-
+typedef	c:@T@ProcHandle	-			ProcPtr *	-	-	-	-	b888769acfbe494c	-
+typedef	c:@T@UniversalProcHandle	-			UniversalProcPtr *	-	-	-	-	20c9bbfc212d929a	-
+typedef	c:@T@PRefCon	-			void *	-	-	-	-	417f11cf3cb00219	-
+typedef	c:@T@URefCon	-			void *	-	-	-	-	b3e04d45f93aa719	-
+typedef	c:@T@SRefCon	-			void *	-	-	-	-	5a5c96b19fdf17d2	-
+enum	c:@Ea@noErr	-	-		unsigned int	-	-	-	-	f2bc99a86668252f	-
+enumconst	c:@Ea@noErr@noErr	-			-	-	-	-	-	571d7f6e9a24e381	0
+enum	c:@Ea@kNilOptions	-	-		unsigned int	-	-	-	-	d304c5e8f12e2a47	-
+enumconst	c:@Ea@kNilOptions@kNilOptions	-			-	-	-	-	-	b4ab033b469ce916	0
+enum	c:@Ea@kVariableLengthArray	-	-		unsigned int	-	-	-	-	7215584e4f36b40e	-
+enumconst	c:@Ea@kVariableLengthArray@kVariableLengthArray	-			-	-	-	*deprecated	-	0c66338eab157822	1
+enum	c:@Ea@kUnknownType	-	-		unsigned int	-	-	-	-	629b5c76508a82b6	-
+enumconst	c:@Ea@kUnknownType@kUnknownType	-			-	-	-	-	-	e3351252797ad436	1061109567
+typedef	c:@T@UnicodeScalarValue	-			UInt32	-	-	-	-	f2fb2201f023d705	-
+typedef	c:@T@UTF32Char	-			UInt32	-	-	-	-	abbc698dd840f1c4	-
+typedef	c:@T@UniChar	-			UInt16	-	-	-	-	2b0687e238bdd241	-
+typedef	c:@T@UTF16Char	-			UInt16	-	-	-	-	2e41f20b56ac8838	-
+typedef	c:@T@UTF8Char	-			UInt8	-	-	-	-	596d7e1154dce76e	-
+typedef	c:@T@UniCharPtr	-			UniChar *	-	-	-	-	28d86b8d9e9b9912	-
+typedef	c:@T@UniCharCount	-			unsigned long	-	-	-	-	be4adc0edecf746b	-
+typedef	c:@T@UniCharCountPtr	-			UniCharCount *	-	-	-	-	6e1ab842298b08dc	-
+typedef	c:@T@Str255	-			unsigned char[256]	-	-	-	-	11d29f6cb91257a2	-
+typedef	c:@T@Str63	-			unsigned char[64]	-	-	-	-	b3e9f6ba1ae990b2	-
+typedef	c:@T@Str32	-			unsigned char[33]	-	-	-	-	43db62ad05bc30dd	-
+typedef	c:@T@Str31	-			unsigned char[32]	-	-	-	-	e4fc003e863ec6de	-
+typedef	c:@T@Str27	-			unsigned char[28]	-	-	-	-	c20f17dab6c1002a	-
+typedef	c:@T@Str15	-			unsigned char[16]	-	-	-	-	f1fb4b9145ad8f02	-
+typedef	c:@T@Str32Field	-			unsigned char[34]	-	-	-	-	66bfab0f4ec98bc8	-
+typedef	c:@T@StrFileName	-			Str63	-	-	-	-	e5e31bc29e88b9eb	-
+typedef	c:@T@StringPtr	-			unsigned char *	-	-	-	-	bf38975115449fdc	-
+typedef	c:@T@StringHandle	-			StringPtr *	-	-	-	-	926429367f3179b5	-
+typedef	c:@T@ConstStringPtr	-			const unsigned char *	-	-	-	-	55d9f10e0e71dec3	-
+typedef	c:@T@ConstStr255Param	-			const unsigned char *	-	-	-	-	164eda4689626ba7	-
+typedef	c:@T@ConstStr63Param	-			const unsigned char *	-	-	-	-	fff15122f33ed9a9	-
+typedef	c:@T@ConstStr32Param	-			const unsigned char *	-	-	-	-	c7073f4814f96bc5	-
+typedef	c:@T@ConstStr31Param	-			const unsigned char *	-	-	-	-	d39b14bc289d49ff	-
+typedef	c:@T@ConstStr27Param	-			const unsigned char *	-	-	-	-	d4b67dfea3203932	-
+typedef	c:@T@ConstStr15Param	-			const unsigned char *	-	-	-	-	8f6190b295a00509	-
+typedef	c:@T@ConstStrFileNameParam	-			ConstStr63Param	-	-	-	-	d46b862aa4a5533a	-
+struct	c:@S@ProcessSerialNumber	-			-	-	-	-	-	1deb464522840c7a	-
+field	c:@S@ProcessSerialNumber@FI@highLongOfPSN	ProcessSerialNumber			UInt32	-	-	-	-	5bac016af87c2e3e	-
+field	c:@S@ProcessSerialNumber@FI@lowLongOfPSN	ProcessSerialNumber			UInt32	-	-	-	-	aa047426e921f376	-
+typedef	c:@T@ProcessSerialNumber	-			struct ProcessSerialNumber	-	-	-	-	030207e871c6f793	-
+typedef	c:@T@ProcessSerialNumberPtr	-			ProcessSerialNumber *	-	-	-	-	af0b36830db8c79f	-
+struct	c:@S@Point	-			-	-	-	-	-	a6e6fb77d091abed	-
+field	c:@S@Point@FI@v	Point			short	-	-	-	-	026aed6a9ed379c4	-
+field	c:@S@Point@FI@h	Point			short	-	-	-	-	4551ce3616c7c006	-
+typedef	c:@T@Point	-			struct Point	-	-	-	-	215a7e22d3298a49	-
+typedef	c:@T@PointPtr	-			Point *	-	-	-	-	02abefdbd5ca5b85	-
+struct	c:@S@Rect	-			-	-	-	-	-	e1a96e9649e76079	-
+field	c:@S@Rect@FI@top	Rect			short	-	-	-	-	482977f9c44b2c58	-
+field	c:@S@Rect@FI@left	Rect			short	-	-	-	-	c6acf8c376ed6e58	-
+field	c:@S@Rect@FI@bottom	Rect			short	-	-	-	-	26111f96a2765893	-
+field	c:@S@Rect@FI@right	Rect			short	-	-	-	-	1b86ce9b331abc5e	-
+typedef	c:@T@Rect	-			struct Rect	-	-	-	-	4c921b4e5b28bed5	-
+typedef	c:@T@RectPtr	-			Rect *	-	-	-	-	36875cb778f37362	-
+struct	c:@S@FixedPoint	-			-	-	-	-	-	6c2fd1266439942c	-
+field	c:@S@FixedPoint@FI@x	FixedPoint			Fixed	-	-	-	-	14f33740ab3fbcd3	-
+field	c:@S@FixedPoint@FI@y	FixedPoint			Fixed	-	-	-	-	a95c2836e2e3259b	-
+typedef	c:@T@FixedPoint	-			struct FixedPoint	-	-	-	-	fda65867620e33e9	-
+struct	c:@S@FixedRect	-			-	-	-	-	-	a959d9258aee5204	-
+field	c:@S@FixedRect@FI@left	FixedRect			Fixed	-	-	-	-	fbd66d615e12060b	-
+field	c:@S@FixedRect@FI@top	FixedRect			Fixed	-	-	-	-	e17e208651d2018d	-
+field	c:@S@FixedRect@FI@right	FixedRect			Fixed	-	-	-	-	42a52f383cc09a8c	-
+field	c:@S@FixedRect@FI@bottom	FixedRect			Fixed	-	-	-	-	c732752dd11a0a9a	-
+typedef	c:@T@FixedRect	-			struct FixedRect	-	-	-	-	3c772d8a07e0d927	-
+typedef	c:@T@CharParameter	-			short	-	-	-	-	a4762fa6ae34fb63	-
+enum	c:@Ea@normal	-	-		unsigned int	-	-	-	-	9388ea9cf55320c0	-
+enumconst	c:@Ea@normal@normal	-			-	-	-	-	-	34c874f27175d9fe	0
+enumconst	c:@Ea@normal@bold	-			-	-	-	-	-	cd750d8caf2469a9	1
+enumconst	c:@Ea@normal@italic	-			-	-	-	-	-	4a06b416e737d08e	2
+enumconst	c:@Ea@normal@underline	-			-	-	-	-	-	1d2a92ba421022e8	4
+enumconst	c:@Ea@normal@outline	-			-	-	-	-	-	b1069fc189e33a5c	8
+enumconst	c:@Ea@normal@shadow	-			-	-	-	-	-	5890896ca9522e13	16
+enumconst	c:@Ea@normal@condense	-			-	-	-	-	-	90ddcfa17949423f	32
+enumconst	c:@Ea@normal@extend	-			-	-	-	-	-	4b72d59fb48c341a	64
+typedef	c:@T@Style	-			unsigned char	-	-	-	-	937f00f408844724	-
+typedef	c:@T@StyleParameter	-			short	-	-	-	-	ca3c0d852820136c	-
+typedef	c:@T@StyleField	-			Style	-	-	-	-	a024cf9e0bcb7589	-
+typedef	c:@T@TimeValue	-			SInt32	-	-	-	-	8fedaada91b0ab08	-
+typedef	c:@T@TimeScale	-			SInt32	-	-	-	-	e7030ee82761d5bf	-
+typedef	c:@T@CompTimeValue	-			wide	-	-	-	-	e43f5b46c12ed6c6	-
+typedef	c:@T@TimeValue64	-			SInt64	-	-	-	-	9b631d8dcd1e0559	-
+struct	c:@S@TimeBaseRecord	-			-	-	-	-	-	041573f420a450e5	-
+typedef	c:@T@TimeBase	-			struct TimeBaseRecord *	-	-	-	-	d59d321c9a2ce7cb	-
+struct	c:@S@TimeRecord	-			-	-	-	-	-	ca44aaa12d7e6a6f	-
+field	c:@S@TimeRecord@FI@value	TimeRecord			CompTimeValue	-	-	-	-	00e892531010b28e	-
+field	c:@S@TimeRecord@FI@scale	TimeRecord			TimeScale	-	-	-	-	f0d46ddf82eb4e25	-
+field	c:@S@TimeRecord@FI@base	TimeRecord			TimeBase	-	-	-	-	c9d7d514777576a9	-
+typedef	c:@T@TimeRecord	-			struct TimeRecord	-	-	-	-	e44e9af039943c8a	-
+struct	c:@S@NumVersion	-			-	-	-	-	-	0754ab0fcf621ca3	-
+field	c:@S@NumVersion@FI@nonRelRev	NumVersion			UInt8	-	-	-	-	b1bb235da96e1a38	-
+field	c:@S@NumVersion@FI@stage	NumVersion			UInt8	-	-	-	-	b062c2269c990554	-
+field	c:@S@NumVersion@FI@minorAndBugRev	NumVersion			UInt8	-	-	-	-	fb62c6ec200c4e99	-
+field	c:@S@NumVersion@FI@majorRev	NumVersion			UInt8	-	-	-	-	8946d20026acc076	-
+typedef	c:@T@NumVersion	-			struct NumVersion	-	-	-	-	15d0ce3b76d1bd97	-
+enum	c:@Ea@developStage	-	-		unsigned int	-	-	-	-	4cb3f4f5902c142e	-
+enumconst	c:@Ea@developStage@developStage	-			-	-	-	-	-	871f84e7c9e2b1d9	32
+enumconst	c:@Ea@developStage@alphaStage	-			-	-	-	-	-	b862e04b14da9e26	64
+enumconst	c:@Ea@developStage@betaStage	-			-	-	-	-	-	9c288122576d03a5	96
+enumconst	c:@Ea@developStage@finalStage	-			-	-	-	-	-	06e33715d924c0a2	128
+union	c:@U@NumVersionVariant	-			-	-	-	-	-	1c1ef4d998147e43	-
+field	c:@U@NumVersionVariant@FI@parts	NumVersionVariant			NumVersion	-	-	-	-	1d6b2502c87042f4	-
+field	c:@U@NumVersionVariant@FI@whole	NumVersionVariant			UInt32	-	-	-	-	f1a224c9ec147716	-
+typedef	c:@T@NumVersionVariant	-			union NumVersionVariant	-	-	-	-	37824d9bbe44cedd	-
+typedef	c:@T@NumVersionVariantPtr	-			NumVersionVariant *	-	-	-	-	d66e78cb67b9cde2	-
+typedef	c:@T@NumVersionVariantHandle	-			NumVersionVariantPtr *	-	-	-	-	65c123de5eb824a1	-
+struct	c:@S@VersRec	-			-	-	-	-	-	2bedeb33ccceebc6	-
+field	c:@S@VersRec@FI@numericVersion	VersRec			NumVersion	-	-	-	-	9e42dfe9d5e7d30f	-
+field	c:@S@VersRec@FI@countryCode	VersRec			short	-	-	-	-	fb6c9f9c9a3d1253	-
+field	c:@S@VersRec@FI@shortVersion	VersRec			Str255	-	-	-	-	f3e46e0541432acd	-
+field	c:@S@VersRec@FI@reserved	VersRec			Str255	-	-	-	-	738909e7fc63b07d	-
+typedef	c:@T@VersRec	-			struct VersRec	-	-	-	-	ac2b57ecc900d477	-
+typedef	c:@T@VersRecPtr	-			VersRec *	-	-	-	-	5c84bf6587ec876e	-
+typedef	c:@T@VersRecHndl	-			VersRecPtr *	-	-	-	-	7688c9fa52f02893	-
+typedef	c:@T@Byte	-			UInt8	-	-	-	-	44100adc069c5789	-
+typedef	c:@T@SignedByte	-			SInt8	-	-	-	-	cc006a49968807ed	-
+typedef	c:@T@WidePtr	-			wide *	-	-	-	-	96d97baabf8bc625	-
+typedef	c:@T@UnsignedWidePtr	-			UnsignedWide *	-	-	-	-	be29d931b95973d5	-
+typedef	c:@T@extended80	-			Float80	-	-	-	-	83e3c40352508543	-
+typedef	c:@T@extended96	-			Float96	-	-	-	-	27f474782f8acd42	-
+typedef	c:@T@VHSelect	-			SInt8	-	-	-	-	6284e13910778d35	-
+function	c:@F@Debugger	-			void (void)	-	-	ios=-/-/-/1	-	eaf460fa59341a31	-
+function	c:@F@DebugStr	-			void (ConstStr255Param)	ConstStr255Param debuggerMsg	-	ios=-/-/-/1	-	80e68d68eb37123f	-
+function	c:@F@SysBreak	-			void (void)	-	-	ios=-/-/-/1	-	0cc73047b01cd9dd	-
+function	c:@F@SysBreakStr	-			void (ConstStr255Param)	ConstStr255Param debuggerMsg	-	ios=-/-/-/1	-	15e6c6ec4adf52fa	-
+function	c:@F@SysBreakFunc	-			void (ConstStr255Param)	ConstStr255Param debuggerMsg	-	ios=-/-/-/1	-	cec97699ffdfeeb9	-

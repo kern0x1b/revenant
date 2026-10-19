@@ -1,0 +1,16 @@
+{
+  "framework": "CoreBluetooth",
+  "entries": [
+    {
+      "api": "CBAdvertisementDataIsConnectable",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 CoreBluetooth exports no such symbol and no kCBAdvDataIsConnectable string, so an application that names the key on 6.1.3 binds to nothing",
+      "effect": "the constant is the NSString kCBAdvDataIsConnectable, the text the host's CoreBluetooth gives it; an advertisement dictionary of the release carries no such key, so an application reading it there finds nil and the port's Matter stack treats the advertisement as connectable",
+      "facts": "facts/CoreBluetooth/CBAdvertisementDataIsConnectable.md",
+      "source": "CoreBluetooth.framework/Headers/CBAdvertisementData.h:83 of the iOS 26.2 SDK, CB_EXTERN NSString * const CBAdvertisementDataIsConnectable NS_AVAILABLE(10_9, 7_0); the string read from the host's dyld shared cache (dyld_shared_cache_arm64e.07, macOS 27.0.1, grep -a of kCBAdvDataIsConnectable, NUL-terminated); the 6.1.3 armv7 cache has no such string (tools/image-exports.lua 6.1.3 armv7 CoreBluetooth.framework/CoreBluetooth IsConnectable: 0 of 92 exports)"
+    }
+  ]
+}

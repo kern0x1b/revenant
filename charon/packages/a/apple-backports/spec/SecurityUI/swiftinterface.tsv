@@ -1,0 +1,2 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+SecurityUI	method	SwiftUICore.View.certificateSheet(trust:title:message:help:)	18.4				container

@@ -1,0 +1,185 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIFont.fontDescriptor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "UIFontDescriptor.postscriptName",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "UIFontDescriptor.pointSize",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "UIFontDescriptor.matrix",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "UIFontDescriptor.symbolicTraits",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "UIFontDescriptor.fontAttributes",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor objectForKey:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor matchingFontDescriptorsWithMandatoryKeys:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor initWithFontAttributes:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor fontDescriptorByAddingAttributes:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor fontDescriptorWithSize:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor fontDescriptorWithMatrix:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor fontDescriptorWithFace:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor fontDescriptorWithFamily:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "-[UIFontDescriptor fontDescriptorWithSymbolicTraits:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "+[UIFontDescriptor fontDescriptorWithFontAttributes:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "+[UIFontDescriptor fontDescriptorWithName:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "+[UIFontDescriptor fontDescriptorWithName:matrix:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "+[UIFontDescriptor preferredFontDescriptorWithTextStyle:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "+[UIFontDescriptor preferredFontDescriptorWithTextStyle:compatibleWithTraitCollection:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), and tests/backports/device/fontdesc.m on iOS 6"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+diff --git a/stdlib/public/runtime/SwiftObject.mm b/stdlib/public/runtime/SwiftObject.mm
+index 052914a..b8f9a6c 100644
+--- a/stdlib/public/runtime/SwiftObject.mm
++++ b/stdlib/public/runtime/SwiftObject.mm
+@@ -1403,8 +1403,19 @@ static bool objcSupportsLazyRealization() {
+     [class_getSuperclass(c) class];
+   }
+ 
++  // objc_readClassPair arrived in objc4-646 (iOS 8, OS X 10.10); objc4-532 (iOS 6) and objc4-551 (iOS 7) do not have it, and
++  // neither exposes another way to realize a class the compiler laid out in place: readClass and realizeClass are static
++  // there, and objc_registerClassPair wants a class under construction. A method lookup realizes the class it looks in, so
++  // asking whether the class answers a selector runs the same realization (attaching categories, adding it to its
++  // superclass's subclasses) without the +initialize a message would run. The class is not added to the runtime's table of
++  // named classes, so NSClassFromString and objc_getClass do not find a generic class the runtime instantiated.
++  if (!SWIFT_RUNTIME_WEAK_CHECK(objc_readClassPair)) {
++    class_respondsToSelector(c, @selector(class));
++    return;
++  }
++
+   // Register the class.
+-  Class registered = objc_readClassPair(c, &ImageInfo);
++  Class registered = SWIFT_RUNTIME_WEAK_USE(objc_readClassPair(c, &ImageInfo));
+   assert(registered == c
+          && "objc_readClassPair failed to instantiate the class in-place");
+   (void)registered;

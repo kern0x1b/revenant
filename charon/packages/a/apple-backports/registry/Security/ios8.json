@@ -1,0 +1,159 @@
+{
+  "framework": "Security",
+  "entries": [
+    {
+      "api": "SecAccessControlCreateWithFlags()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 8.0 in what it does: the release has no access control objects and no service that keeps shared web credentials",
+      "effect": "answers NULL, and sets the error to errSecUnimplemented of NSOSStatusErrorDomain when one is asked for",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "SecAddSharedWebCredential()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 8.0 in what it does: the release has no access control objects and no service that keeps shared web credentials",
+      "effect": "calls the block once, off the calling thread, with an errSecUnimplemented error; nothing is saved; a nil block is allowed",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "SecCreateSharedWebCredentialPassword()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 8.0 in what it does: the release has no access control objects and no service that keeps shared web credentials",
+      "effect": "gives a new string of fifteen characters, xxx-xxx-xxx-xxx, twelve at random from the digits 2 to 9 and the letters A to Z without I and O and a to z without i, j and l, with at least one digit, one capital and one small letter",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "SecRequestSharedWebCredential()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 8.0 in what it does: the release has no access control objects and no service that keeps shared web credentials",
+      "effect": "calls the block once, off the calling thread, with an empty array and no error; a nil block is allowed",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecAttrAccessControl",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string accc; the keychain of iOS 6.1.3 answers -50 to an item that holds it",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string akpu; the keychain of iOS 6.1.3 answers -50 to an add that holds it",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecSharedPassword",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string spwd; the release's keychain has no shared web credential to name it for",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseNoAuthenticationUI",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_NoAuthUI; the release was not asked what its keychain does with it",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseOperationPrompt",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_OpPrompt; the keychain of iOS 6.1.3 answers -50 to a query that holds it",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseAuthenticationContext",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_AuthCtx; the keychain of iOS 6.1.3 answers -50 to a query that holds it",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseAuthenticationUI",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_AuthUI; the keychain of iOS 6.1.3 answers -50 to a query that holds it, whatever its value",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseAuthenticationUIAllow",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_AuthUIA",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseAuthenticationUIFail",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_AuthUIF",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    },
+    {
+      "api": "kSecUseAuthenticationUISkip",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's keychain has no such key: the name is carried so that a dictionary of the application can hold it and the keychain refuses the dictionary with -50, not so that it works",
+      "effect": "the constant is the string u_AuthUIS",
+      "source": "Security of the arm64 shared cache of iOS 12.0 for the values; the host's Security sampled fifty thousand times for the passwords; an iPad 2 running 6.1.3 for what the keychain and the release answer",
+      "facts": "facts/Security/KeychainAccessControl.md"
+    }
+  ]
+}

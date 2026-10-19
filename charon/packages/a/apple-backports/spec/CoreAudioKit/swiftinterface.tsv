@@ -1,0 +1,17 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+CoreAudioKit	typealias	AUGenericViewInternalBase					none
+CoreAudioKit	class	AUGenericViewInternal	14.0				own
+CoreAudioKit	property	AUGenericViewInternal.auAudioUnit	14.0				container
+CoreAudioKit	property	AUGenericViewInternal.owningController	14.0				container
+CoreAudioKit	property	AUGenericViewInternal.paramObserverToken	14.0				container
+CoreAudioKit	property	AUGenericViewInternal.showSingleClumpIndex	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.init(frame:)	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.init?(coder:)	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.traitCollectionDidChange(_:)	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.removeFromSuperview()	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.removeScheduledUpdatesTimer()	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.collectionView(_:willDisplaySupplementaryView:forElementKind:at:)	14.0				container
+CoreAudioKit	method	AUGenericViewInternal.collectionView(_:willDisplay:forItemAt:)	14.0				container
+CoreAudioKit	class	AUAppleCustomViewLoader	17				own
+CoreAudioKit	method	AUAppleCustomViewLoader.customViewController(for:audioUnit:v3AU:)	17				container
+CoreAudioKit	method	AUAppleCustomViewLoader.init()	17				container

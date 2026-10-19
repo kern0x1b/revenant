@@ -1,0 +1,4 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@LAPresentationContext	-			UIWindow *	-	-	-	-	0f07b1cc2a739056	-
+category	c:objc(cy)LARight@UI	-			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	081411ff30046121	-
+method	c:objc(cs)LARight(im)authorizeWithLocalizedReason:inPresentationContext:completion:	UI			void	NSString * localizedReason | LAPresentationContext presentationContext | void (^)(NSError * _Nullable) handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	109e8b81ef8399f8	-

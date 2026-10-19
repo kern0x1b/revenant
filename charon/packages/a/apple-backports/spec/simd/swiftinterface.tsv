@@ -1,0 +1,1405 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+simd	method	SIMD.init(_:)					none
+simd	typealias	float2					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	function	sign(_:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	fmin(_:_:)					none
+simd	function	fmax(_:_:)					none
+simd	function	ceil(_:)					none
+simd	function	floor(_:)					none
+simd	function	trunc(_:)					none
+simd	function	fract(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	smoothstep(_:edge0:edge1:)					none
+simd	function	dot(_:_:)					none
+simd	function	project(_:_:)					none
+simd	function	length_squared(_:)					none
+simd	function	length(_:)					none
+simd	function	norm_one(_:)					none
+simd	function	norm_inf(_:)					none
+simd	function	distance_squared(_:_:)					none
+simd	function	distance(_:_:)					none
+simd	function	normalize(_:)					none
+simd	function	reflect(_:n:)					none
+simd	function	refract(_:n:eta:)					none
+simd	typealias	float3					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	function	sign(_:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	fmin(_:_:)					none
+simd	function	fmax(_:_:)					none
+simd	function	ceil(_:)					none
+simd	function	floor(_:)					none
+simd	function	trunc(_:)					none
+simd	function	fract(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	smoothstep(_:edge0:edge1:)					none
+simd	function	dot(_:_:)					none
+simd	function	project(_:_:)					none
+simd	function	length_squared(_:)					none
+simd	function	length(_:)					none
+simd	function	norm_one(_:)					none
+simd	function	norm_inf(_:)					none
+simd	function	distance_squared(_:_:)					none
+simd	function	distance(_:_:)					none
+simd	function	normalize(_:)					none
+simd	function	reflect(_:n:)					none
+simd	function	refract(_:n:eta:)					none
+simd	typealias	float4					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	function	sign(_:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	fmin(_:_:)					none
+simd	function	fmax(_:_:)					none
+simd	function	ceil(_:)					none
+simd	function	floor(_:)					none
+simd	function	trunc(_:)					none
+simd	function	fract(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	smoothstep(_:edge0:edge1:)					none
+simd	function	dot(_:_:)					none
+simd	function	project(_:_:)					none
+simd	function	length_squared(_:)					none
+simd	function	length(_:)					none
+simd	function	norm_one(_:)					none
+simd	function	norm_inf(_:)					none
+simd	function	distance_squared(_:_:)					none
+simd	function	distance(_:_:)					none
+simd	function	normalize(_:)					none
+simd	function	reflect(_:n:)					none
+simd	function	refract(_:n:eta:)					none
+simd	function	sign(_:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	cross(_:_:)					none
+simd	function	cross(_:_:)					none
+simd	typealias	double2					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	function	sign(_:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	fmin(_:_:)					none
+simd	function	fmax(_:_:)					none
+simd	function	ceil(_:)					none
+simd	function	floor(_:)					none
+simd	function	trunc(_:)					none
+simd	function	fract(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	smoothstep(_:edge0:edge1:)					none
+simd	function	dot(_:_:)					none
+simd	function	project(_:_:)					none
+simd	function	length_squared(_:)					none
+simd	function	length(_:)					none
+simd	function	norm_one(_:)					none
+simd	function	norm_inf(_:)					none
+simd	function	distance_squared(_:_:)					none
+simd	function	distance(_:_:)					none
+simd	function	normalize(_:)					none
+simd	function	reflect(_:n:)					none
+simd	function	refract(_:n:eta:)					none
+simd	typealias	double3					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	function	sign(_:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	fmin(_:_:)					none
+simd	function	fmax(_:_:)					none
+simd	function	ceil(_:)					none
+simd	function	floor(_:)					none
+simd	function	trunc(_:)					none
+simd	function	fract(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	smoothstep(_:edge0:edge1:)					none
+simd	function	dot(_:_:)					none
+simd	function	project(_:_:)					none
+simd	function	length_squared(_:)					none
+simd	function	length(_:)					none
+simd	function	norm_one(_:)					none
+simd	function	norm_inf(_:)					none
+simd	function	distance_squared(_:_:)					none
+simd	function	distance(_:_:)					none
+simd	function	normalize(_:)					none
+simd	function	reflect(_:n:)					none
+simd	function	refract(_:n:eta:)					none
+simd	typealias	double4					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	function	sign(_:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	mix(_:_:t:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	fmin(_:_:)					none
+simd	function	fmax(_:_:)					none
+simd	function	ceil(_:)					none
+simd	function	floor(_:)					none
+simd	function	trunc(_:)					none
+simd	function	fract(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	smoothstep(_:edge0:edge1:)					none
+simd	function	dot(_:_:)					none
+simd	function	project(_:_:)					none
+simd	function	length_squared(_:)					none
+simd	function	length(_:)					none
+simd	function	norm_one(_:)					none
+simd	function	norm_inf(_:)					none
+simd	function	distance_squared(_:_:)					none
+simd	function	distance(_:_:)					none
+simd	function	normalize(_:)					none
+simd	function	reflect(_:n:)					none
+simd	function	refract(_:n:eta:)					none
+simd	function	sign(_:)					none
+simd	function	recip(_:)					none
+simd	function	rsqrt(_:)					none
+simd	function	step(_:edge:)					none
+simd	function	cross(_:_:)					none
+simd	function	cross(_:_:)					none
+simd	typealias	int2					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	typealias	int3					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	typealias	int4					none
+simd	function	abs(_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	typealias	uint2					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	typealias	uint3					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	typealias	uint4					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	min(_:_:)					none
+simd	function	max(_:_:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	clamp(_:min:max:)					none
+simd	function	reduce_add(_:)					none
+simd	function	reduce_min(_:)					none
+simd	function	reduce_max(_:)					none
+simd	typealias	float2x2					none
+simd	method	simd_float2x2.init(_:)					none
+simd	method	simd_float2x2.init(diagonal:)					none
+simd	method	simd_float2x2.init(_:)					none
+simd	method	simd_float2x2.init(rows:)					none
+simd	method	simd_float2x2.init(_:_:)					none
+simd	method	simd_float2x2.init(_:)					none
+simd	property	simd_float2x2.cmatrix					none
+simd	method	simd_float2x2.subscript(column:)					none
+simd	method	simd_float2x2.subscript(column:row:)					none
+simd	property	simd_float2x2.debugDescription					none
+simd	method	simd_float2x2.==(lhs:rhs:)					none
+simd	property	simd_float2x2.transpose					none
+simd	property	simd_float2x2.inverse	8.0				own
+simd	property	simd_float2x2.determinant					none
+simd	method	simd_float2x2.+(lhs:rhs:)					none
+simd	method	simd_float2x2.-(lhs:rhs:)					none
+simd	method	simd_float2x2.+=(lhs:rhs:)					none
+simd	method	simd_float2x2.-=(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*=(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*(lhs:rhs:)					none
+simd	method	simd_float2x2.*=(lhs:rhs:)					none
+simd	function	matrix_from_diagonal(_:)					none
+simd	function	matrix_invert(_:)	8.0				own
+simd	function	matrix_determinant(_:)					none
+simd	function	matrix_from_columns(_:_:)					none
+simd	function	matrix_from_rows(_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float3x2					none
+simd	method	simd_float3x2.init(_:)					none
+simd	method	simd_float3x2.init(diagonal:)					none
+simd	method	simd_float3x2.init(_:)					none
+simd	method	simd_float3x2.init(rows:)					none
+simd	method	simd_float3x2.init(_:_:_:)					none
+simd	method	simd_float3x2.init(_:)					none
+simd	property	simd_float3x2.cmatrix					none
+simd	method	simd_float3x2.subscript(column:)					none
+simd	method	simd_float3x2.subscript(column:row:)					none
+simd	property	simd_float3x2.debugDescription					none
+simd	method	simd_float3x2.==(lhs:rhs:)					none
+simd	property	simd_float3x2.transpose					none
+simd	method	simd_float3x2.+(lhs:rhs:)					none
+simd	method	simd_float3x2.-(lhs:rhs:)					none
+simd	method	simd_float3x2.+=(lhs:rhs:)					none
+simd	method	simd_float3x2.-=(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*=(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*(lhs:rhs:)					none
+simd	method	simd_float3x2.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:)					none
+simd	function	matrix_from_rows(_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float4x2					none
+simd	method	simd_float4x2.init(_:)					none
+simd	method	simd_float4x2.init(diagonal:)					none
+simd	method	simd_float4x2.init(_:)					none
+simd	method	simd_float4x2.init(rows:)					none
+simd	method	simd_float4x2.init(_:_:_:_:)					none
+simd	method	simd_float4x2.init(_:)					none
+simd	property	simd_float4x2.cmatrix					none
+simd	method	simd_float4x2.subscript(column:)					none
+simd	method	simd_float4x2.subscript(column:row:)					none
+simd	property	simd_float4x2.debugDescription					none
+simd	method	simd_float4x2.==(lhs:rhs:)					none
+simd	property	simd_float4x2.transpose					none
+simd	method	simd_float4x2.+(lhs:rhs:)					none
+simd	method	simd_float4x2.-(lhs:rhs:)					none
+simd	method	simd_float4x2.+=(lhs:rhs:)					none
+simd	method	simd_float4x2.-=(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*=(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*(lhs:rhs:)					none
+simd	method	simd_float4x2.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:_:)					none
+simd	function	matrix_from_rows(_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float2x3					none
+simd	method	simd_float2x3.init(_:)					none
+simd	method	simd_float2x3.init(diagonal:)					none
+simd	method	simd_float2x3.init(_:)					none
+simd	method	simd_float2x3.init(rows:)					none
+simd	method	simd_float2x3.init(_:_:)					none
+simd	method	simd_float2x3.init(_:)					none
+simd	property	simd_float2x3.cmatrix					none
+simd	method	simd_float2x3.subscript(column:)					none
+simd	method	simd_float2x3.subscript(column:row:)					none
+simd	property	simd_float2x3.debugDescription					none
+simd	method	simd_float2x3.==(lhs:rhs:)					none
+simd	property	simd_float2x3.transpose					none
+simd	method	simd_float2x3.+(lhs:rhs:)					none
+simd	method	simd_float2x3.-(lhs:rhs:)					none
+simd	method	simd_float2x3.+=(lhs:rhs:)					none
+simd	method	simd_float2x3.-=(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*=(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*(lhs:rhs:)					none
+simd	method	simd_float2x3.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:)					none
+simd	function	matrix_from_rows(_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float3x3					none
+simd	method	simd_float3x3.init(_:)					none
+simd	method	simd_float3x3.init(diagonal:)					none
+simd	method	simd_float3x3.init(_:)					none
+simd	method	simd_float3x3.init(rows:)					none
+simd	method	simd_float3x3.init(_:_:_:)					none
+simd	method	simd_float3x3.init(_:)					none
+simd	property	simd_float3x3.cmatrix					none
+simd	method	simd_float3x3.subscript(column:)					none
+simd	method	simd_float3x3.subscript(column:row:)					none
+simd	property	simd_float3x3.debugDescription					none
+simd	method	simd_float3x3.==(lhs:rhs:)					none
+simd	property	simd_float3x3.transpose					none
+simd	property	simd_float3x3.inverse	8.0				own
+simd	property	simd_float3x3.determinant					none
+simd	method	simd_float3x3.+(lhs:rhs:)					none
+simd	method	simd_float3x3.-(lhs:rhs:)					none
+simd	method	simd_float3x3.+=(lhs:rhs:)					none
+simd	method	simd_float3x3.-=(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*=(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*(lhs:rhs:)					none
+simd	method	simd_float3x3.*=(lhs:rhs:)					none
+simd	function	matrix_from_diagonal(_:)					none
+simd	function	matrix_invert(_:)	8.0				own
+simd	function	matrix_determinant(_:)					none
+simd	function	matrix_from_columns(_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float4x3					none
+simd	method	simd_float4x3.init(_:)					none
+simd	method	simd_float4x3.init(diagonal:)					none
+simd	method	simd_float4x3.init(_:)					none
+simd	method	simd_float4x3.init(rows:)					none
+simd	method	simd_float4x3.init(_:_:_:_:)					none
+simd	method	simd_float4x3.init(_:)					none
+simd	property	simd_float4x3.cmatrix					none
+simd	method	simd_float4x3.subscript(column:)					none
+simd	method	simd_float4x3.subscript(column:row:)					none
+simd	property	simd_float4x3.debugDescription					none
+simd	method	simd_float4x3.==(lhs:rhs:)					none
+simd	property	simd_float4x3.transpose					none
+simd	method	simd_float4x3.+(lhs:rhs:)					none
+simd	method	simd_float4x3.-(lhs:rhs:)					none
+simd	method	simd_float4x3.+=(lhs:rhs:)					none
+simd	method	simd_float4x3.-=(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*=(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*(lhs:rhs:)					none
+simd	method	simd_float4x3.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float2x4					none
+simd	method	simd_float2x4.init(_:)					none
+simd	method	simd_float2x4.init(diagonal:)					none
+simd	method	simd_float2x4.init(_:)					none
+simd	method	simd_float2x4.init(rows:)					none
+simd	method	simd_float2x4.init(_:_:)					none
+simd	method	simd_float2x4.init(_:)					none
+simd	property	simd_float2x4.cmatrix					none
+simd	method	simd_float2x4.subscript(column:)					none
+simd	method	simd_float2x4.subscript(column:row:)					none
+simd	property	simd_float2x4.debugDescription					none
+simd	method	simd_float2x4.==(lhs:rhs:)					none
+simd	property	simd_float2x4.transpose					none
+simd	method	simd_float2x4.+(lhs:rhs:)					none
+simd	method	simd_float2x4.-(lhs:rhs:)					none
+simd	method	simd_float2x4.+=(lhs:rhs:)					none
+simd	method	simd_float2x4.-=(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*=(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*(lhs:rhs:)					none
+simd	method	simd_float2x4.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:)					none
+simd	function	matrix_from_rows(_:_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float3x4					none
+simd	method	simd_float3x4.init(_:)					none
+simd	method	simd_float3x4.init(diagonal:)					none
+simd	method	simd_float3x4.init(_:)					none
+simd	method	simd_float3x4.init(rows:)					none
+simd	method	simd_float3x4.init(_:_:_:)					none
+simd	method	simd_float3x4.init(_:)					none
+simd	property	simd_float3x4.cmatrix					none
+simd	method	simd_float3x4.subscript(column:)					none
+simd	method	simd_float3x4.subscript(column:row:)					none
+simd	property	simd_float3x4.debugDescription					none
+simd	method	simd_float3x4.==(lhs:rhs:)					none
+simd	property	simd_float3x4.transpose					none
+simd	method	simd_float3x4.+(lhs:rhs:)					none
+simd	method	simd_float3x4.-(lhs:rhs:)					none
+simd	method	simd_float3x4.+=(lhs:rhs:)					none
+simd	method	simd_float3x4.-=(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*=(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*(lhs:rhs:)					none
+simd	method	simd_float3x4.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	float4x4					none
+simd	method	simd_float4x4.init(_:)					none
+simd	method	simd_float4x4.init(diagonal:)					none
+simd	method	simd_float4x4.init(_:)					none
+simd	method	simd_float4x4.init(rows:)					none
+simd	method	simd_float4x4.init(_:_:_:_:)					none
+simd	method	simd_float4x4.init(_:)					none
+simd	property	simd_float4x4.cmatrix					none
+simd	method	simd_float4x4.subscript(column:)					none
+simd	method	simd_float4x4.subscript(column:row:)					none
+simd	property	simd_float4x4.debugDescription					none
+simd	method	simd_float4x4.==(lhs:rhs:)					none
+simd	property	simd_float4x4.transpose					none
+simd	property	simd_float4x4.inverse	8.0				own
+simd	property	simd_float4x4.determinant					none
+simd	method	simd_float4x4.+(lhs:rhs:)					none
+simd	method	simd_float4x4.-(lhs:rhs:)					none
+simd	method	simd_float4x4.+=(lhs:rhs:)					none
+simd	method	simd_float4x4.-=(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*=(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*(lhs:rhs:)					none
+simd	method	simd_float4x4.*=(lhs:rhs:)					none
+simd	function	matrix_from_diagonal(_:)					none
+simd	function	matrix_invert(_:)	8.0				own
+simd	function	matrix_determinant(_:)					none
+simd	function	matrix_from_columns(_:_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double2x2					none
+simd	method	simd_double2x2.init(_:)					none
+simd	method	simd_double2x2.init(diagonal:)					none
+simd	method	simd_double2x2.init(_:)					none
+simd	method	simd_double2x2.init(rows:)					none
+simd	method	simd_double2x2.init(_:_:)					none
+simd	method	simd_double2x2.init(_:)					none
+simd	property	simd_double2x2.cmatrix					none
+simd	method	simd_double2x2.subscript(column:)					none
+simd	method	simd_double2x2.subscript(column:row:)					none
+simd	property	simd_double2x2.debugDescription					none
+simd	method	simd_double2x2.==(lhs:rhs:)					none
+simd	property	simd_double2x2.transpose					none
+simd	property	simd_double2x2.inverse	8.0				own
+simd	property	simd_double2x2.determinant					none
+simd	method	simd_double2x2.+(lhs:rhs:)					none
+simd	method	simd_double2x2.-(lhs:rhs:)					none
+simd	method	simd_double2x2.+=(lhs:rhs:)					none
+simd	method	simd_double2x2.-=(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*=(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*(lhs:rhs:)					none
+simd	method	simd_double2x2.*=(lhs:rhs:)					none
+simd	function	matrix_from_diagonal(_:)					none
+simd	function	matrix_invert(_:)	8.0				own
+simd	function	matrix_determinant(_:)					none
+simd	function	matrix_from_columns(_:_:)					none
+simd	function	matrix_from_rows(_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double3x2					none
+simd	method	simd_double3x2.init(_:)					none
+simd	method	simd_double3x2.init(diagonal:)					none
+simd	method	simd_double3x2.init(_:)					none
+simd	method	simd_double3x2.init(rows:)					none
+simd	method	simd_double3x2.init(_:_:_:)					none
+simd	method	simd_double3x2.init(_:)					none
+simd	property	simd_double3x2.cmatrix					none
+simd	method	simd_double3x2.subscript(column:)					none
+simd	method	simd_double3x2.subscript(column:row:)					none
+simd	property	simd_double3x2.debugDescription					none
+simd	method	simd_double3x2.==(lhs:rhs:)					none
+simd	property	simd_double3x2.transpose					none
+simd	method	simd_double3x2.+(lhs:rhs:)					none
+simd	method	simd_double3x2.-(lhs:rhs:)					none
+simd	method	simd_double3x2.+=(lhs:rhs:)					none
+simd	method	simd_double3x2.-=(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*=(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*(lhs:rhs:)					none
+simd	method	simd_double3x2.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:)					none
+simd	function	matrix_from_rows(_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double4x2					none
+simd	method	simd_double4x2.init(_:)					none
+simd	method	simd_double4x2.init(diagonal:)					none
+simd	method	simd_double4x2.init(_:)					none
+simd	method	simd_double4x2.init(rows:)					none
+simd	method	simd_double4x2.init(_:_:_:_:)					none
+simd	method	simd_double4x2.init(_:)					none
+simd	property	simd_double4x2.cmatrix					none
+simd	method	simd_double4x2.subscript(column:)					none
+simd	method	simd_double4x2.subscript(column:row:)					none
+simd	property	simd_double4x2.debugDescription					none
+simd	method	simd_double4x2.==(lhs:rhs:)					none
+simd	property	simd_double4x2.transpose					none
+simd	method	simd_double4x2.+(lhs:rhs:)					none
+simd	method	simd_double4x2.-(lhs:rhs:)					none
+simd	method	simd_double4x2.+=(lhs:rhs:)					none
+simd	method	simd_double4x2.-=(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*=(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*(lhs:rhs:)					none
+simd	method	simd_double4x2.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:_:)					none
+simd	function	matrix_from_rows(_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double2x3					none
+simd	method	simd_double2x3.init(_:)					none
+simd	method	simd_double2x3.init(diagonal:)					none
+simd	method	simd_double2x3.init(_:)					none
+simd	method	simd_double2x3.init(rows:)					none
+simd	method	simd_double2x3.init(_:_:)					none
+simd	method	simd_double2x3.init(_:)					none
+simd	property	simd_double2x3.cmatrix					none
+simd	method	simd_double2x3.subscript(column:)					none
+simd	method	simd_double2x3.subscript(column:row:)					none
+simd	property	simd_double2x3.debugDescription					none
+simd	method	simd_double2x3.==(lhs:rhs:)					none
+simd	property	simd_double2x3.transpose					none
+simd	method	simd_double2x3.+(lhs:rhs:)					none
+simd	method	simd_double2x3.-(lhs:rhs:)					none
+simd	method	simd_double2x3.+=(lhs:rhs:)					none
+simd	method	simd_double2x3.-=(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*=(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*(lhs:rhs:)					none
+simd	method	simd_double2x3.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:)					none
+simd	function	matrix_from_rows(_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double3x3					none
+simd	method	simd_double3x3.init(_:)					none
+simd	method	simd_double3x3.init(diagonal:)					none
+simd	method	simd_double3x3.init(_:)					none
+simd	method	simd_double3x3.init(rows:)					none
+simd	method	simd_double3x3.init(_:_:_:)					none
+simd	method	simd_double3x3.init(_:)					none
+simd	property	simd_double3x3.cmatrix					none
+simd	method	simd_double3x3.subscript(column:)					none
+simd	method	simd_double3x3.subscript(column:row:)					none
+simd	property	simd_double3x3.debugDescription					none
+simd	method	simd_double3x3.==(lhs:rhs:)					none
+simd	property	simd_double3x3.transpose					none
+simd	property	simd_double3x3.inverse	8.0				own
+simd	property	simd_double3x3.determinant					none
+simd	method	simd_double3x3.+(lhs:rhs:)					none
+simd	method	simd_double3x3.-(lhs:rhs:)					none
+simd	method	simd_double3x3.+=(lhs:rhs:)					none
+simd	method	simd_double3x3.-=(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*=(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*(lhs:rhs:)					none
+simd	method	simd_double3x3.*=(lhs:rhs:)					none
+simd	function	matrix_from_diagonal(_:)					none
+simd	function	matrix_invert(_:)	8.0				own
+simd	function	matrix_determinant(_:)					none
+simd	function	matrix_from_columns(_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double4x3					none
+simd	method	simd_double4x3.init(_:)					none
+simd	method	simd_double4x3.init(diagonal:)					none
+simd	method	simd_double4x3.init(_:)					none
+simd	method	simd_double4x3.init(rows:)					none
+simd	method	simd_double4x3.init(_:_:_:_:)					none
+simd	method	simd_double4x3.init(_:)					none
+simd	property	simd_double4x3.cmatrix					none
+simd	method	simd_double4x3.subscript(column:)					none
+simd	method	simd_double4x3.subscript(column:row:)					none
+simd	property	simd_double4x3.debugDescription					none
+simd	method	simd_double4x3.==(lhs:rhs:)					none
+simd	property	simd_double4x3.transpose					none
+simd	method	simd_double4x3.+(lhs:rhs:)					none
+simd	method	simd_double4x3.-(lhs:rhs:)					none
+simd	method	simd_double4x3.+=(lhs:rhs:)					none
+simd	method	simd_double4x3.-=(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*=(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*(lhs:rhs:)					none
+simd	method	simd_double4x3.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double2x4					none
+simd	method	simd_double2x4.init(_:)					none
+simd	method	simd_double2x4.init(diagonal:)					none
+simd	method	simd_double2x4.init(_:)					none
+simd	method	simd_double2x4.init(rows:)					none
+simd	method	simd_double2x4.init(_:_:)					none
+simd	method	simd_double2x4.init(_:)					none
+simd	property	simd_double2x4.cmatrix					none
+simd	method	simd_double2x4.subscript(column:)					none
+simd	method	simd_double2x4.subscript(column:row:)					none
+simd	property	simd_double2x4.debugDescription					none
+simd	method	simd_double2x4.==(lhs:rhs:)					none
+simd	property	simd_double2x4.transpose					none
+simd	method	simd_double2x4.+(lhs:rhs:)					none
+simd	method	simd_double2x4.-(lhs:rhs:)					none
+simd	method	simd_double2x4.+=(lhs:rhs:)					none
+simd	method	simd_double2x4.-=(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*=(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*(lhs:rhs:)					none
+simd	method	simd_double2x4.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:)					none
+simd	function	matrix_from_rows(_:_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double3x4					none
+simd	method	simd_double3x4.init(_:)					none
+simd	method	simd_double3x4.init(diagonal:)					none
+simd	method	simd_double3x4.init(_:)					none
+simd	method	simd_double3x4.init(rows:)					none
+simd	method	simd_double3x4.init(_:_:_:)					none
+simd	method	simd_double3x4.init(_:)					none
+simd	property	simd_double3x4.cmatrix					none
+simd	method	simd_double3x4.subscript(column:)					none
+simd	method	simd_double3x4.subscript(column:row:)					none
+simd	property	simd_double3x4.debugDescription					none
+simd	method	simd_double3x4.==(lhs:rhs:)					none
+simd	property	simd_double3x4.transpose					none
+simd	method	simd_double3x4.+(lhs:rhs:)					none
+simd	method	simd_double3x4.-(lhs:rhs:)					none
+simd	method	simd_double3x4.+=(lhs:rhs:)					none
+simd	method	simd_double3x4.-=(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*=(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*(lhs:rhs:)					none
+simd	method	simd_double3x4.*=(lhs:rhs:)					none
+simd	function	matrix_from_columns(_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	typealias	double4x4					none
+simd	method	simd_double4x4.init(_:)					none
+simd	method	simd_double4x4.init(diagonal:)					none
+simd	method	simd_double4x4.init(_:)					none
+simd	method	simd_double4x4.init(rows:)					none
+simd	method	simd_double4x4.init(_:_:_:_:)					none
+simd	method	simd_double4x4.init(_:)					none
+simd	property	simd_double4x4.cmatrix					none
+simd	method	simd_double4x4.subscript(column:)					none
+simd	method	simd_double4x4.subscript(column:row:)					none
+simd	property	simd_double4x4.debugDescription					none
+simd	method	simd_double4x4.==(lhs:rhs:)					none
+simd	property	simd_double4x4.transpose					none
+simd	property	simd_double4x4.inverse	8.0				own
+simd	property	simd_double4x4.determinant					none
+simd	method	simd_double4x4.+(lhs:rhs:)					none
+simd	method	simd_double4x4.-(lhs:rhs:)					none
+simd	method	simd_double4x4.+=(lhs:rhs:)					none
+simd	method	simd_double4x4.-=(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*=(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*(lhs:rhs:)					none
+simd	method	simd_double4x4.*=(lhs:rhs:)					none
+simd	function	matrix_from_diagonal(_:)					none
+simd	function	matrix_invert(_:)	8.0				own
+simd	function	matrix_determinant(_:)					none
+simd	function	matrix_from_columns(_:_:_:_:)					none
+simd	function	matrix_from_rows(_:_:_:_:)					none
+simd	function	matrix_transpose(_:)					none
+simd	function	matrix_equal(_:_:)					none
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	sincos(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	sincospi(_:)	17.0				own
+simd	constant	sinResult					none
+simd	constant	cosResult					none
+simd	function	cos(_:)	15.0				own
+simd	function	cosh(_:)	15.0				own
+simd	function	cospi(_:)	15.0				own
+simd	function	acos(_:)	15.0				own
+simd	function	acosh(_:)	15.0				own
+simd	function	sin(_:)	15.0				own
+simd	function	sinh(_:)	15.0				own
+simd	function	sinpi(_:)	15.0				own
+simd	function	asin(_:)	15.0				own
+simd	function	asinh(_:)	15.0				own
+simd	function	tan(_:)	15.0				own
+simd	function	tanh(_:)	15.0				own
+simd	function	tanpi(_:)	15.0				own
+simd	function	atan(_:)	15.0				own
+simd	function	atanh(_:)	15.0				own
+simd	function	atan2(_:_:)	15.0				own
+simd	function	exp(_:)	15.0				own
+simd	function	exp2(_:)	15.0				own
+simd	function	exp10(_:)	15.0				own
+simd	function	expm1(_:)	15.0				own
+simd	function	log(_:)	15.0				own
+simd	function	log2(_:)	15.0				own
+simd	function	log10(_:)	15.0				own
+simd	function	log1p(_:)	15.0				own
+simd	function	lgamma(_:)	15.0				own
+simd	function	tgamma(_:)	15.0				own
+simd	function	erf(_:)	15.0				own
+simd	function	erfc(_:)	15.0				own
+simd	function	cbrt(_:)	15.0				own
+simd	function	pow(_:_:)	15.0				own
+simd	function	hypot(_:_:)	15.0				own
+simd	function	fma(_:_:_:)	15.0				own
+simd	function	round(_:)	15.0				own
+simd	function	fmod(_:_:)	15.0				own
+simd	function	remainder(_:_:)	15.0				own
+simd	function	nextafter(_:_:)	15.0				own
+simd	function	isfinite(_:)	15.0				own
+simd	function	isinf(_:)	15.0				own
+simd	function	isnan(_:)	15.0				own
+simd	function	isnormal(_:)	15.0				own
+simd	function	ceil(_:)	18.0				own
+simd	function	floor(_:)	18.0				own
+simd	function	trunc(_:)	18.0				own
+simd	function	rint(_:)	18.0				own
+simd	function	sqrt(_:)	18.0				own
+simd	function	abs(_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	ceil(_:)	18.0				own
+simd	function	floor(_:)	18.0				own
+simd	function	trunc(_:)	18.0				own
+simd	function	rint(_:)	18.0				own
+simd	function	sqrt(_:)	18.0				own
+simd	function	abs(_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	ceil(_:)	18.0				own
+simd	function	floor(_:)	18.0				own
+simd	function	trunc(_:)	18.0				own
+simd	function	rint(_:)	18.0				own
+simd	function	sqrt(_:)	18.0				own
+simd	function	abs(_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	ceil(_:)	18.0				own
+simd	function	floor(_:)	18.0				own
+simd	function	trunc(_:)	18.0				own
+simd	function	rint(_:)	18.0				own
+simd	function	sqrt(_:)	18.0				own
+simd	function	abs(_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	ceil(_:)	18.0				own
+simd	function	floor(_:)	18.0				own
+simd	function	trunc(_:)	18.0				own
+simd	function	rint(_:)	18.0				own
+simd	function	sqrt(_:)	18.0				own
+simd	function	abs(_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	ceil(_:)	18.0				own
+simd	function	floor(_:)	18.0				own
+simd	function	trunc(_:)	18.0				own
+simd	function	rint(_:)	18.0				own
+simd	function	sqrt(_:)	18.0				own
+simd	function	abs(_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	function	min(_:_:)	18.0				own
+simd	function	max(_:_:)	18.0				own
+simd	method	simd_quatf.init(ix:iy:iz:r:)					none
+simd	method	simd_quatf.init(real:imag:)					none
+simd	method	simd_quatf.init(angle:axis:)					none
+simd	method	simd_quatf.init(from:to:)					none
+simd	method	simd_quatf.init(_:)					none
+simd	method	simd_quatf.init(_:)					none
+simd	property	simd_quatf.real					none
+simd	property	simd_quatf.imag					none
+simd	property	simd_quatf.angle					none
+simd	property	simd_quatf.axis					none
+simd	property	simd_quatf.conjugate					none
+simd	property	simd_quatf.inverse					none
+simd	property	simd_quatf.normalized					none
+simd	property	simd_quatf.length					none
+simd	method	simd_quatf.act(_:)					none
+simd	method	simd_float3x3.init(_:)					none
+simd	method	simd_float4x4.init(_:)					none
+simd	property	simd_quatf.debugDescription					none
+simd	method	simd_quatf.==(lhs:rhs:)					none
+simd	method	simd_quatf.hash(into:)	17.0				container
+simd	property	simd_quatf.hashValue	17.0				container
+simd	method	simd_quatf.+(lhs:rhs:)					none
+simd	method	simd_quatf.+=(lhs:rhs:)					none
+simd	method	simd_quatf.-(lhs:rhs:)					none
+simd	method	simd_quatf.-=(lhs:rhs:)					none
+simd	method	simd_quatf.*(lhs:rhs:)					none
+simd	method	simd_quatf.*(lhs:rhs:)					none
+simd	method	simd_quatf.*(lhs:rhs:)					none
+simd	method	simd_quatf.*=(lhs:rhs:)					none
+simd	method	simd_quatf.*=(lhs:rhs:)					none
+simd	method	simd_quatf./(lhs:rhs:)					none
+simd	method	simd_quatf./(lhs:rhs:)					none
+simd	method	simd_quatf./=(lhs:rhs:)					none
+simd	method	simd_quatf./=(lhs:rhs:)					none
+simd	function	dot(_:_:)					none
+simd	function	log(_:)					none
+simd	function	exp(_:)					none
+simd	method	simd_quatd.init(ix:iy:iz:r:)					none
+simd	method	simd_quatd.init(real:imag:)					none
+simd	method	simd_quatd.init(angle:axis:)					none
+simd	method	simd_quatd.init(from:to:)					none
+simd	method	simd_quatd.init(_:)					none
+simd	method	simd_quatd.init(_:)					none
+simd	property	simd_quatd.real					none
+simd	property	simd_quatd.imag					none
+simd	property	simd_quatd.angle					none
+simd	property	simd_quatd.axis					none
+simd	property	simd_quatd.conjugate					none
+simd	property	simd_quatd.inverse					none
+simd	property	simd_quatd.normalized					none
+simd	property	simd_quatd.length					none
+simd	method	simd_quatd.act(_:)					none
+simd	method	simd_double3x3.init(_:)					none
+simd	method	simd_double4x4.init(_:)					none
+simd	property	simd_quatd.debugDescription					none
+simd	method	simd_quatd.==(lhs:rhs:)					none
+simd	method	simd_quatd.hash(into:)	17.0				container
+simd	property	simd_quatd.hashValue	17.0				container
+simd	method	simd_quatd.+(lhs:rhs:)					none
+simd	method	simd_quatd.+=(lhs:rhs:)					none
+simd	method	simd_quatd.-(lhs:rhs:)					none
+simd	method	simd_quatd.-=(lhs:rhs:)					none
+simd	method	simd_quatd.*(lhs:rhs:)					none
+simd	method	simd_quatd.*(lhs:rhs:)					none
+simd	method	simd_quatd.*(lhs:rhs:)					none
+simd	method	simd_quatd.*=(lhs:rhs:)					none
+simd	method	simd_quatd.*=(lhs:rhs:)					none
+simd	method	simd_quatd./(lhs:rhs:)					none
+simd	method	simd_quatd./(lhs:rhs:)					none
+simd	method	simd_quatd./=(lhs:rhs:)					none
+simd	method	simd_quatd./=(lhs:rhs:)					none
+simd	function	dot(_:_:)					none
+simd	function	log(_:)					none
+simd	function	exp(_:)					none

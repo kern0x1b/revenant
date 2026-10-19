@@ -1,0 +1,5 @@
+{
+  "framework": "GameplayKit",
+  "note": "The skeleton for the library, added with the library line and no source in it. It carries no row yet: nothing here is decided until a source is compiled for it and a differential has held it against the host. The families owed, in the order the extractor's rows give them, are the random sources, the distributions, the state machine and entity/component, the minmax strategist, the graphs and paths, the rules and goals, the obstacle graphs and the noise sources; the surface-diff ledger is tools/corpus/surface-diff-latest.py --rows GameplayKit against SDK 26.2, 407 rows undecided at the time this file was written.",
+  "entries": []
+}

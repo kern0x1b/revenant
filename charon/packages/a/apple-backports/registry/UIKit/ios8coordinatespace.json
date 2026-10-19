@@ -1,0 +1,68 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UICoordinateSpace",
+      "kind": "protocol",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    },
+    {
+      "api": "UIScreen.coordinateSpace",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    },
+    {
+      "api": "UIScreen.fixedCoordinateSpace",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    },
+    {
+      "api": "-[UIView convertPoint:toCoordinateSpace:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    },
+    {
+      "api": "-[UIView convertPoint:fromCoordinateSpace:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    },
+    {
+      "api": "-[UIView convertRect:toCoordinateSpace:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    },
+    {
+      "api": "-[UIView convertRect:fromCoordinateSpace:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICoordinateSpace.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/coordspace (29 answers over nested views, the window and both screen spaces), and tests/backports/device/coordspace.m on iOS 6"
+    }
+  ]
+}

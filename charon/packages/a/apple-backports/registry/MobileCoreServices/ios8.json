@@ -1,0 +1,36 @@
+{
+  "framework": "MobileCoreServices",
+  "entries": [
+    {
+      "api": "kUTTypeScalableVectorGraphics",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried as the identifier of iOS 8 for SVG images, which the type database of the release may not declare",
+      "effect": "the constant is the string public.svg-image",
+      "facts": "facts/CoreImage/InputKeysAndSVG.md",
+      "source": "CoreImage and MobileCoreServices of the arm64 shared cache of iOS 12.0, the constant strings; an iPad 2 and the iOS 6.0 emulator for the exports of the release"
+    },
+    {
+      "api": "UTTypeIsDynamic()",
+      "kind": "function",
+      "introduced": "8.0",
+      "status": "implemented",
+      "reason": "rank 29 of the frameworks demand table, LOAD-FAIL for provenance and yattee; a dynamic identifier is a spelling (\"dyn.\" and an encoded tail), which 6.1.3 already makes for tags it has no type for",
+      "effect": "true for \"dyn.\" in any case followed by dot-separated components of ASCII letters, digits and inner hyphens, false for anything else and for NULL",
+      "facts": "facts/MobileCoreServices/UTTypeDynamic.md",
+      "source": "the host's CoreServices, which the port is held against by tests/backports/host/uttype; an iPad 2 on 6.1.3; the armv7 cache ladder, which first exports the function at 8.0"
+    },
+    {
+      "api": "UTTypeIsDeclared()",
+      "kind": "function",
+      "introduced": "8.0",
+      "status": "implemented",
+      "reason": "rank 29's pair, which UTType.m calls beside UTTypeIsDynamic; 6.1.3 exports UTTypeCopyDeclaration, whose answer is what declared means",
+      "effect": "true when the release's type database has a declaration for the identifier (UTTypeCopyDeclaration is not NULL), false otherwise and for NULL",
+      "facts": "facts/MobileCoreServices/UTTypeDynamic.md",
+      "source": "the host's CoreServices, held against by tests/backports/host/uttype; an iPad 2 on 6.1.3; the armv7 cache ladder, which first exports the function at 8.0"
+    }
+  ]
+}

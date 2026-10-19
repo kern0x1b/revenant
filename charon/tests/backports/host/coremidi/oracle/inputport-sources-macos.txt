@@ -1,0 +1,49 @@
+connect A with refCon 1: status 0
+connect B with refCon 2: status 0
+== run 1: arrival order A, B, A
+send from A: F0 01 (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes F0 01
+send from B: 90 3C 7F (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 2, 1 packet(s)
+      packet ts=0 bytes 90 3C 7F
+send from A: 02 F7 (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes 02 F7
+== run 2: arrival order A, A, B, A
+send from A: F0 (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes F0
+send from A: 01 (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes 01
+send from B: 90 3C 7F (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 2, 1 packet(s)
+      packet ts=0 bytes 90 3C 7F
+send from A: 02 F7 (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes 02 F7
+== run 3 (extra): running status test, A note then A data-only, then B data-only
+send from A: 90 3C 7F (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes 90 3C 7F
+send from A: 40 7F (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 1, 1 packet(s)
+      packet ts=0 bytes 40 7F
+send from B: 41 7F (MIDIPacketListAdd ok)
+    MIDIReceived status 0
+    read block: srcConnRefCon 2, 1 packet(s)
+      packet ts=0 bytes 41 7F
+== disconnect, dispose
+disconnect A: status 0
+disconnect B: status 0
+== done

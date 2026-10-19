@@ -1,0 +1,12 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	-	-	-	-	-	-
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	required	method	yes	objectForKey:	- (__kindof id<CKRecordValue> _Nullable)objectForKey:(CKRecordFieldKey  _Nonnull)key;	yes
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	required	method	yes	setObject:forKey:	- (void)setObject:(__kindof id<CKRecordValue>  _Nullable)object forKey:(CKRecordFieldKey  _Nonnull)key;	yes
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	required	method	yes	objectForKeyedSubscript:	- (__kindof id<CKRecordValue> _Nullable)objectForKeyedSubscript:(CKRecordFieldKey  _Nonnull)key;	yes
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	required	method	yes	setObject:forKeyedSubscript:	- (void)setObject:(__kindof id<CKRecordValue>  _Nullable)object forKeyedSubscript:(CKRecordFieldKey  _Nonnull)key;	yes
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	required	method	yes	allKeys	- (NSArray<CKRecordFieldKey> * _Nonnull)allKeys;	yes
+CKRecordKeyValueSetting	9.0	sdk16 body		NSObject	required	method	yes	changedKeys	- (NSArray<CKRecordFieldKey> * _Nonnull)changedKeys;	yes
+CKSyncEngineDelegate	17.0	hand header		NSObject	-	-	-	-	-	-
+CKSyncEngineDelegate	17.0	hand header		NSObject	required	method	yes	syncEngine:handleEvent:	- (void)syncEngine:(CKSyncEngine * _Nonnull)syncEngine handleEvent:(CKSyncEngineEvent * _Nonnull)event;	-
+CKSyncEngineDelegate	17.0	hand header		NSObject	required	method	yes	syncEngine:nextRecordZoneChangeBatchForContext:	- (CKSyncEngineRecordZoneChangeBatch * _Nullable)syncEngine:(CKSyncEngine * _Nonnull)syncEngine nextRecordZoneChangeBatchForContext:(CKSyncEngineSendChangesContext * _Nonnull)context;	-
+CKSyncEngineDelegate	17.0	hand header		NSObject	optional	method	yes	syncEngine:nextFetchChangesOptionsForContext:	- (CKSyncEngineFetchChangesOptions * _Nonnull)syncEngine:(CKSyncEngine * _Nonnull)syncEngine nextFetchChangesOptionsForContext:(CKSyncEngineFetchChangesContext * _Nonnull)context;	-

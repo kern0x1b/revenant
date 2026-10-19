@@ -1,0 +1,72 @@
+diff --git a/stdlib/public/Darwin/CoreGraphics/Geometry.swift b/stdlib/public/Darwin/CoreGraphics/Geometry.swift
+new file mode 100644
+--- /dev/null
++++ b/stdlib/public/Darwin/CoreGraphics/Geometry.swift
+@@ -0,0 +1,67 @@
++//===----------------------------------------------------------------------===//
++//
++// The members of the geometry types that this overlay's release took from the SDK of its day, which gave the C calls
++// Swift names. The SDK of today gives them no names; its own overlay spells the members out in Swift instead, and has an
++// interface only for arm64. Each member here is the same call under the name Swift code writes, and every call is one
++// CoreGraphics has had since the first iPhone OS.
++//
++//===----------------------------------------------------------------------===//
++
++import CoreFoundation
++
++extension CGRect {
++  public static var null: CGRect { @inlinable get { return CGRectNull } }
++  public static var infinite: CGRect { @inlinable get { return CGRectInfinite } }
++
++  public var minX: CGFloat { @inlinable get { return CGRectGetMinX(self) } }
++  public var midX: CGFloat { @inlinable get { return CGRectGetMidX(self) } }
++  public var maxX: CGFloat { @inlinable get { return CGRectGetMaxX(self) } }
++  public var minY: CGFloat { @inlinable get { return CGRectGetMinY(self) } }
++  public var midY: CGFloat { @inlinable get { return CGRectGetMidY(self) } }
++  public var maxY: CGFloat { @inlinable get { return CGRectGetMaxY(self) } }
++  public var width: CGFloat { @inlinable get { return CGRectGetWidth(self) } }
++  public var height: CGFloat { @inlinable get { return CGRectGetHeight(self) } }
++
++  public var isNull: Bool { @inlinable get { return CGRectIsNull(self) } }
++  public var isEmpty: Bool { @inlinable get { return CGRectIsEmpty(self) } }
++  public var isInfinite: Bool { @inlinable get { return CGRectIsInfinite(self) } }
++  public var standardized: CGRect { @inlinable get { return CGRectStandardize(self) } }
++  public var integral: CGRect { @inlinable get { return CGRectIntegral(self) } }
++  public var dictionaryRepresentation: CFDictionary { @inlinable get { return CGRectCreateDictionaryRepresentation(self) } }
++
++  @inlinable public func insetBy(dx: CGFloat, dy: CGFloat) -> CGRect { return CGRectInset(self, dx, dy) }
++  @inlinable public func offsetBy(dx: CGFloat, dy: CGFloat) -> CGRect { return CGRectOffset(self, dx, dy) }
++  @inlinable public func union(_ r2: CGRect) -> CGRect { return CGRectUnion(self, r2) }
++  @inlinable public func intersection(_ r2: CGRect) -> CGRect { return CGRectIntersection(self, r2) }
++  @inlinable public func intersects(_ rect2: CGRect) -> Bool { return CGRectIntersectsRect(self, rect2) }
++  @inlinable public func contains(_ point: CGPoint) -> Bool { return CGRectContainsPoint(self, point) }
++  @inlinable public func contains(_ rect2: CGRect) -> Bool { return CGRectContainsRect(self, rect2) }
++  @inlinable public func applying(_ t: CGAffineTransform) -> CGRect { return CGRectApplyAffineTransform(self, t) }
++  @inlinable public func equalTo(_ rect2: CGRect) -> Bool { return CGRectEqualToRect(self, rect2) }
++}
++
++extension CGPoint {
++  public var dictionaryRepresentation: CFDictionary { @inlinable get { return CGPointCreateDictionaryRepresentation(self) } }
++  @inlinable public func applying(_ t: CGAffineTransform) -> CGPoint { return CGPointApplyAffineTransform(self, t) }
++  @inlinable public func equalTo(_ point2: CGPoint) -> Bool { return CGPointEqualToPoint(self, point2) }
++}
++
++extension CGSize {
++  public var dictionaryRepresentation: CFDictionary { @inlinable get { return CGSizeCreateDictionaryRepresentation(self) } }
++  @inlinable public func applying(_ t: CGAffineTransform) -> CGSize { return CGSizeApplyAffineTransform(self, t) }
++  @inlinable public func equalTo(_ size2: CGSize) -> Bool { return CGSizeEqualToSize(self, size2) }
++}
++
++extension CGAffineTransform {
++  @inlinable public init(translationX tx: CGFloat, y ty: CGFloat) { self = CGAffineTransformMakeTranslation(tx, ty) }
++  @inlinable public init(scaleX sx: CGFloat, y sy: CGFloat) { self = CGAffineTransformMakeScale(sx, sy) }
++  @inlinable public init(rotationAngle angle: CGFloat) { self = CGAffineTransformMakeRotation(angle) }
++
++  public var isIdentity: Bool { @inlinable get { return CGAffineTransformIsIdentity(self) } }
++
++  @inlinable public func translatedBy(x tx: CGFloat, y ty: CGFloat) -> CGAffineTransform { return CGAffineTransformTranslate(self, tx, ty) }
++  @inlinable public func scaledBy(x sx: CGFloat, y sy: CGFloat) -> CGAffineTransform { return CGAffineTransformScale(self, sx, sy) }
++  @inlinable public func rotated(by angle: CGFloat) -> CGAffineTransform { return CGAffineTransformRotate(self, angle) }
++  @inlinable public func inverted() -> CGAffineTransform { return CGAffineTransformInvert(self) }
++  @inlinable public func concatenating(_ t2: CGAffineTransform) -> CGAffineTransform { return CGAffineTransformConcat(self, t2) }
++}

@@ -1,0 +1,1250 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_Concurrency	typealias	AnyActor	13.0	yes			own
+_Concurrency	protocol	Actor	13.0				own
+_Concurrency	property	Actor.unownedExecutor	13.0				container
+_Concurrency	function	_defaultActorInitialize(_:)	13.0				own
+_Concurrency	function	_nonDefaultDistributedActorInitialize(_:)	17.0				own
+_Concurrency	function	_defaultActorDestroy(_:)	13.0				own
+_Concurrency	function	extractIsolation(_:)	13.0	yes			own
+_Concurrency	function	_asyncLetStart(asyncLet:options:operation:)	13.0				own
+_Concurrency	function	_asyncLetGet(asyncLet:)	13.0				own
+_Concurrency	function	_asyncLetGetThrowing(asyncLet:)	13.0				own
+_Concurrency	function	_asyncLetEnd(asyncLet:)	13.0				own
+_Concurrency	function	_asyncLet_get(_:_:)	13.0				own
+_Concurrency	function	_asyncLet_get_throwing(_:_:)	13.0				own
+_Concurrency	function	_asyncLet_finish(_:_:)	13.0				own
+_Concurrency	struct	CheckedContinuation	13.0				own
+_Concurrency	method	CheckedContinuation.init(continuation:function:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(returning:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(returning:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(throwing:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(with:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(with:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(with:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume(with:)	13.0				container
+_Concurrency	method	CheckedContinuation.resume()	13.0				container
+_Concurrency	function	withCheckedContinuation(isolation:function:_:)	13.0				own
+_Concurrency	constant	unsafeContinuation					none
+_Concurrency	function	withCheckedContinuation(isolation:function:_:)	13.0				own
+_Concurrency	constant	unsafeContinuation					none
+_Concurrency	function	_unsafeInheritExecutor_withCheckedContinuation(function:_:)	13.0				own
+_Concurrency	function	withCheckedThrowingContinuation(isolation:function:_:)	13.0				own
+_Concurrency	constant	unsafeContinuation					none
+_Concurrency	function	withCheckedThrowingContinuation(isolation:function:_:)	13.0				own
+_Concurrency	constant	unsafeContinuation					none
+_Concurrency	function	_unsafeInheritExecutor_withCheckedThrowingContinuation(function:_:)	13.0				own
+_Concurrency	protocol	Executor	13.0				own
+_Concurrency	method	Executor.enqueue(_:)	13.0				own
+_Concurrency	method	Executor.enqueue(_:)	17.0	yes			own
+_Concurrency	method	Executor.enqueue(_:)	17.0				own
+_Concurrency	method	Actor._withSerialExecutor(_:)	13.0				own
+_Concurrency	method	Actor._withSerialExecutor(_:)	13.0				own
+_Concurrency	protocol	SerialExecutor	13.0				own
+_Concurrency	method	SerialExecutor.enqueue(_:)	13.0	yes			own
+_Concurrency	method	SerialExecutor.enqueue(_:)	17.0	yes			own
+_Concurrency	method	SerialExecutor.enqueue(_:)	17.0				own
+_Concurrency	method	SerialExecutor.asUnownedSerialExecutor()	13.0				container
+_Concurrency	method	SerialExecutor.asUnownedSerialExecutor()	13.0				container
+_Concurrency	method	SerialExecutor.isSameExclusiveExecutionContext(other:)	17.0				own
+_Concurrency	method	SerialExecutor.checkIsolated()	18.0				own
+_Concurrency	method	SerialExecutor.isIsolatingCurrentContext()	26.0				own
+_Concurrency	method	SerialExecutor.checkIsolated()	18.0				own
+_Concurrency	method	SerialExecutor.isIsolatingCurrentContext()	26.0				own
+_Concurrency	protocol	TaskExecutor	18.0				own
+_Concurrency	method	TaskExecutor.enqueue(_:)	18.0				container
+_Concurrency	method	TaskExecutor.enqueue(_:)	18.0	yes			container
+_Concurrency	method	TaskExecutor.enqueue(_:)	18.0				container
+_Concurrency	method	TaskExecutor.asUnownedTaskExecutor()	18.0				container
+_Concurrency	method	TaskExecutor.asUnownedTaskExecutor()	18.0				container
+_Concurrency	method	Executor.enqueue(_:)	17.0				container
+_Concurrency	method	Executor.enqueue(_:)	17.0				container
+_Concurrency	method	Executor.enqueue(_:)	17.0				container
+_Concurrency	method	SerialExecutor.asUnownedSerialExecutor()	17.0				own
+_Concurrency	method	SerialExecutor.isSameExclusiveExecutionContext(other:)	17.0				own
+_Concurrency	method	SerialExecutor.isSameExclusiveExecutionContext(other:)	26.0				own
+_Concurrency	struct	UnownedSerialExecutor	13.0				own
+_Concurrency	property	UnownedSerialExecutor._executor	17.0				own
+_Concurrency	method	UnownedSerialExecutor.init(_:)	13.0				container
+_Concurrency	method	UnownedSerialExecutor.init(ordinary:)	13.0				container
+_Concurrency	method	UnownedSerialExecutor.init(complexEquality:)	17.0				own
+_Concurrency	method	UnownedSerialExecutor.init(_:)	26.0				own
+_Concurrency	struct	UnownedSerialExecutor	13.0				own
+_Concurrency	property	UnownedSerialExecutor._executor	17.0				own
+_Concurrency	method	UnownedSerialExecutor.init(_:)	13.0				container
+_Concurrency	method	UnownedSerialExecutor.init(ordinary:)	13.0				container
+_Concurrency	method	UnownedSerialExecutor.init(complexEquality:)	17.0				own
+_Concurrency	method	UnownedSerialExecutor.init(_:)	26.0				own
+_Concurrency	struct	UnownedTaskExecutor	18.0				own
+_Concurrency	property	UnownedTaskExecutor._executor	18.0				own
+_Concurrency	method	UnownedTaskExecutor.init(_:)	18.0				container
+_Concurrency	method	UnownedTaskExecutor.init(ordinary:)	18.0				container
+_Concurrency	method	UnownedTaskExecutor.init(_:)	26.0				own
+_Concurrency	struct	UnownedTaskExecutor	18.0				own
+_Concurrency	property	UnownedTaskExecutor._executor	18.0				own
+_Concurrency	method	UnownedTaskExecutor.init(_:)	18.0				container
+_Concurrency	method	UnownedTaskExecutor.init(ordinary:)	18.0				container
+_Concurrency	method	UnownedTaskExecutor.init(_:)	26.0				own
+_Concurrency	method	UnownedTaskExecutor.==(lhs:rhs:)	18.0				container
+_Concurrency	function	_checkExpectedExecutor(_filenameStart:_filenameLength:_filenameIsASCII:_line:_executor:)	13.0				own
+_Concurrency	method	SerialExecutor.preconditionIsolated(_:file:line:)	13.0				own
+_Concurrency	property	SerialExecutor.expectationCheck	13.0				container
+_Concurrency	method	Actor.preconditionIsolated(_:file:line:)	13.0				own
+_Concurrency	property	Actor.expectationCheck	13.0				container
+_Concurrency	method	GlobalActor.preconditionIsolated(_:file:line:)	13.0				own
+_Concurrency	method	SerialExecutor.assertIsolated(_:file:line:)	13.0				own
+_Concurrency	property	SerialExecutor.msg	13.0				container
+_Concurrency	method	Actor.assertIsolated(_:file:line:)	13.0				own
+_Concurrency	property	Actor.msg	13.0				container
+_Concurrency	method	GlobalActor.assertIsolated(_:file:line:)	13.0				own
+_Concurrency	method	Actor.assumeIsolated(_:file:line:)	13.0				own
+_Concurrency	typealias	Actor.YesActor	13.0				container
+_Concurrency	typealias	Actor.NoActor	13.0				container
+_Concurrency	property	Actor.executor	13.0				container
+_Concurrency	property	Actor.rawFn	13.0				container
+_Concurrency	struct	AsyncCompactMapSequence	13.0				own
+_Concurrency	typealias	AsyncCompactMapSequence.Element	13.0				container
+_Concurrency	typealias	AsyncCompactMapSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncCompactMapSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncCompactMapSequence.Iterator	13.0				container
+_Concurrency	typealias	AsyncCompactMapSequence.Iterator.Element	13.0				container
+_Concurrency	method	AsyncCompactMapSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncCompactMapSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncCompactMapSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncCompactMapSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncDropFirstSequence	13.0				own
+_Concurrency	typealias	AsyncDropFirstSequence.Element	13.0				container
+_Concurrency	typealias	AsyncDropFirstSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncDropFirstSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncDropFirstSequence.Iterator	13.0				container
+_Concurrency	method	AsyncDropFirstSequence.Iterator.next()	13.0				container
+_Concurrency	property	AsyncDropFirstSequence.Iterator.remainingToDrop	13.0				container
+_Concurrency	method	AsyncDropFirstSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	property	AsyncDropFirstSequence.Iterator.remainingToDrop	13.0				container
+_Concurrency	typealias	AsyncDropFirstSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncDropFirstSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncDropFirstSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncDropWhileSequence	13.0				own
+_Concurrency	typealias	AsyncDropWhileSequence.Element	13.0				container
+_Concurrency	typealias	AsyncDropWhileSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncDropWhileSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncDropWhileSequence.Iterator	13.0				container
+_Concurrency	method	AsyncDropWhileSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncDropWhileSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncDropWhileSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncDropWhileSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncDropWhileSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncFilterSequence	13.0				own
+_Concurrency	typealias	AsyncFilterSequence.Element	13.0				container
+_Concurrency	typealias	AsyncFilterSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncFilterSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncFilterSequence.Iterator	13.0				container
+_Concurrency	method	AsyncFilterSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncFilterSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncFilterSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncFilterSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncFilterSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncFlatMapSequence	13.0				own
+_Concurrency	typealias	AsyncFlatMapSequence.Element	13.0				container
+_Concurrency	typealias	AsyncFlatMapSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncFlatMapSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncFlatMapSequence.Iterator	13.0				container
+_Concurrency	method	AsyncFlatMapSequence.Iterator.next()	13.0				container
+_Concurrency	property	AsyncFlatMapSequence.Iterator.segment	13.0				container
+_Concurrency	property	AsyncFlatMapSequence.Iterator.iterator	13.0				container
+_Concurrency	method	AsyncFlatMapSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	property	AsyncFlatMapSequence.Iterator.optElement	13.0				container
+_Concurrency	property	AsyncFlatMapSequence.Iterator.optItem	13.0				container
+_Concurrency	property	AsyncFlatMapSequence.Iterator.segment	13.0				container
+_Concurrency	property	AsyncFlatMapSequence.Iterator.iterator	13.0				container
+_Concurrency	property	AsyncFlatMapSequence.Iterator.optElement	13.0				container
+_Concurrency	typealias	AsyncFlatMapSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncFlatMapSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncFlatMapSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	protocol	AsyncIteratorProtocol	13.0				own
+_Concurrency	method	AsyncIteratorProtocol.next()	13.0				container
+_Concurrency	method	AsyncIteratorProtocol.next(isolation:)	18.0				own
+_Concurrency	method	AsyncIteratorProtocol.next(isolation:)	18.0				own
+_Concurrency	method	AsyncIteratorProtocol.next()	18.0				own
+_Concurrency	struct	AsyncMapSequence	13.0				own
+_Concurrency	typealias	AsyncMapSequence.Element	13.0				container
+_Concurrency	typealias	AsyncMapSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncMapSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncMapSequence.Iterator	13.0				container
+_Concurrency	method	AsyncMapSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncMapSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncMapSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncMapSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncMapSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncPrefixSequence	13.0				own
+_Concurrency	typealias	AsyncPrefixSequence.Element	13.0				container
+_Concurrency	typealias	AsyncPrefixSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncPrefixSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncPrefixSequence.Iterator	13.0				container
+_Concurrency	method	AsyncPrefixSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncPrefixSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncPrefixSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncPrefixSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncPrefixSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncPrefixWhileSequence	13.0				own
+_Concurrency	typealias	AsyncPrefixWhileSequence.Element	13.0				container
+_Concurrency	typealias	AsyncPrefixWhileSequence.Failure	18.0				own
+_Concurrency	typealias	AsyncPrefixWhileSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncPrefixWhileSequence.Iterator	13.0				container
+_Concurrency	method	AsyncPrefixWhileSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncPrefixWhileSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncPrefixWhileSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncPrefixWhileSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncPrefixWhileSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	protocol	AsyncSequence	13.0				own
+_Concurrency	method	AsyncSequence.reduce(_:_:)	13.0				container
+_Concurrency	property	AsyncSequence.accumulator	13.0				container
+_Concurrency	property	AsyncSequence.iterator	13.0				container
+_Concurrency	method	AsyncSequence.reduce(into:_:)	13.0				container
+_Concurrency	property	AsyncSequence.accumulator	13.0				container
+_Concurrency	property	AsyncSequence.iterator	13.0				container
+_Concurrency	method	AsyncSequence.contains(where:)	13.0				container
+_Concurrency	method	AsyncSequence.allSatisfy(_:)	13.0				container
+_Concurrency	method	AsyncSequence.contains(_:)	13.0				container
+_Concurrency	method	AsyncSequence.first(where:)	13.0				container
+_Concurrency	method	AsyncSequence.min(by:)	13.0				container
+_Concurrency	property	AsyncSequence.it	13.0				container
+_Concurrency	method	AsyncSequence.max(by:)	13.0				container
+_Concurrency	property	AsyncSequence.it	13.0				container
+_Concurrency	method	AsyncSequence.min()	13.0				container
+_Concurrency	method	AsyncSequence.max()	13.0				container
+_Concurrency	struct	AsyncThrowingCompactMapSequence	13.0				own
+_Concurrency	typealias	AsyncThrowingCompactMapSequence.Element	13.0				container
+_Concurrency	typealias	AsyncThrowingCompactMapSequence.Failure	13.0				container
+_Concurrency	typealias	AsyncThrowingCompactMapSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncThrowingCompactMapSequence.Iterator	13.0				container
+_Concurrency	typealias	AsyncThrowingCompactMapSequence.Iterator.Element	13.0				container
+_Concurrency	method	AsyncThrowingCompactMapSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncThrowingCompactMapSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncThrowingCompactMapSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncThrowingCompactMapSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncThrowingDropWhileSequence	13.0				own
+_Concurrency	typealias	AsyncThrowingDropWhileSequence.Element	13.0				container
+_Concurrency	typealias	AsyncThrowingDropWhileSequence.Failure	13.0				container
+_Concurrency	typealias	AsyncThrowingDropWhileSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncThrowingDropWhileSequence.Iterator	13.0				container
+_Concurrency	method	AsyncThrowingDropWhileSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncThrowingDropWhileSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncThrowingDropWhileSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncThrowingDropWhileSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncThrowingDropWhileSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncThrowingFilterSequence	13.0				own
+_Concurrency	typealias	AsyncThrowingFilterSequence.Element	13.0				container
+_Concurrency	typealias	AsyncThrowingFilterSequence.Failure	13.0				container
+_Concurrency	typealias	AsyncThrowingFilterSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncThrowingFilterSequence.Iterator	13.0				container
+_Concurrency	method	AsyncThrowingFilterSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncThrowingFilterSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncThrowingFilterSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncThrowingFilterSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncThrowingFilterSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncThrowingFlatMapSequence	13.0				own
+_Concurrency	typealias	AsyncThrowingFlatMapSequence.Element	13.0				container
+_Concurrency	typealias	AsyncThrowingFlatMapSequence.Failure	13.0				container
+_Concurrency	typealias	AsyncThrowingFlatMapSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncThrowingFlatMapSequence.Iterator	13.0				container
+_Concurrency	method	AsyncThrowingFlatMapSequence.Iterator.next()	13.0				container
+_Concurrency	property	AsyncThrowingFlatMapSequence.Iterator.segment	13.0				container
+_Concurrency	property	AsyncThrowingFlatMapSequence.Iterator.iterator	13.0				container
+_Concurrency	method	AsyncThrowingFlatMapSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	property	AsyncThrowingFlatMapSequence.Iterator.segment	13.0				container
+_Concurrency	property	AsyncThrowingFlatMapSequence.Iterator.iterator	13.0				container
+_Concurrency	typealias	AsyncThrowingFlatMapSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncThrowingFlatMapSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncThrowingFlatMapSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncThrowingMapSequence	13.0				own
+_Concurrency	typealias	AsyncThrowingMapSequence.Element	13.0				container
+_Concurrency	typealias	AsyncThrowingMapSequence.Failure	13.0				container
+_Concurrency	typealias	AsyncThrowingMapSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncThrowingMapSequence.Iterator	13.0				container
+_Concurrency	method	AsyncThrowingMapSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncThrowingMapSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncThrowingMapSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncThrowingMapSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncThrowingMapSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	AsyncThrowingPrefixWhileSequence	13.0				own
+_Concurrency	typealias	AsyncThrowingPrefixWhileSequence.Element	13.0				container
+_Concurrency	typealias	AsyncThrowingPrefixWhileSequence.Failure	13.0				container
+_Concurrency	typealias	AsyncThrowingPrefixWhileSequence.AsyncIterator	13.0				container
+_Concurrency	struct	AsyncThrowingPrefixWhileSequence.Iterator	13.0				container
+_Concurrency	method	AsyncThrowingPrefixWhileSequence.Iterator.next()	13.0				container
+_Concurrency	method	AsyncThrowingPrefixWhileSequence.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncThrowingPrefixWhileSequence.Iterator.Element	13.0				own
+_Concurrency	typealias	AsyncThrowingPrefixWhileSequence.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	AsyncThrowingPrefixWhileSequence.__AsyncSequence_Failure	18.0				own
+_Concurrency	struct	UnownedJob	13.0				own
+_Concurrency	method	UnownedJob.init(_:)	17.0				own
+_Concurrency	method	UnownedJob.init(_:)	17.0				own
+_Concurrency	property	UnownedJob.priority	17.0				own
+_Concurrency	method	UnownedJob._runSynchronously(on:)	13.0	yes			container
+_Concurrency	method	UnownedJob.runSynchronously(on:)	13.0				container
+_Concurrency	method	UnownedJob.runSynchronously(on:)	18.0				own
+_Concurrency	method	UnownedJob.runSynchronously(isolatedTo:taskExecutor:)	18.0				own
+_Concurrency	property	UnownedJob.description	17.0				own
+_Concurrency	struct	Job	17.0	yes			own
+_Concurrency	method	Job.init(_:)	17.0				container
+_Concurrency	method	Job.init(_:)	17.0				container
+_Concurrency	property	Job.priority	17.0				container
+_Concurrency	property	Job.description	17.0				container
+_Concurrency	struct	ExecutorJob	17.0				own
+_Concurrency	method	ExecutorJob.init(_:)	17.0				container
+_Concurrency	method	ExecutorJob.init(_:)	17.0				container
+_Concurrency	property	ExecutorJob.priority	17.0				container
+_Concurrency	method	ExecutorJob.withUnsafeExecutorPrivateData(body:)	26.0				own
+_Concurrency	struct	ExecutorJob.Kind	26.0				own
+_Concurrency	typealias	ExecutorJob.Kind.RawValue	26.0				container
+_Concurrency	property	ExecutorJob.Kind.rawValue	26.0				container
+_Concurrency	method	ExecutorJob.Kind.init?(rawValue:)	26.0				container
+_Concurrency	property	ExecutorJob.Kind.task	26.0				container
+_Concurrency	property	ExecutorJob.Kind.firstReserved	26.0				container
+_Concurrency	property	ExecutorJob.kind	26.0				own
+_Concurrency	property	ExecutorJob.description	17.0				container
+_Concurrency	property	ExecutorJob.allocator	26.0				container
+_Concurrency	struct	ExecutorJob.LocalAllocator	26.0				container
+_Concurrency	method	ExecutorJob.LocalAllocator.allocate(capacity:)	26.0				container
+_Concurrency	method	ExecutorJob.LocalAllocator.allocate(as:)	26.0				container
+_Concurrency	method	ExecutorJob.LocalAllocator.allocate(capacity:as:)	26.0				container
+_Concurrency	method	ExecutorJob.LocalAllocator.deallocate(_:)	26.0				container
+_Concurrency	method	ExecutorJob.LocalAllocator.deallocate(_:)	26.0				container
+_Concurrency	method	ExecutorJob.LocalAllocator.deallocate(_:)	26.0				container
+_Concurrency	struct	JobPriority	17.0				own
+_Concurrency	typealias	JobPriority.RawValue	17.0				container
+_Concurrency	property	JobPriority.rawValue	17.0				container
+_Concurrency	method	TaskPriority.init?(_:)	17.0				own
+_Concurrency	method	JobPriority.==(lhs:rhs:)	17.0				container
+_Concurrency	method	JobPriority.!=(lhs:rhs:)	17.0				container
+_Concurrency	method	JobPriority.<(lhs:rhs:)	17.0				container
+_Concurrency	method	JobPriority.<=(lhs:rhs:)	17.0				container
+_Concurrency	method	JobPriority.>(lhs:rhs:)	17.0				container
+_Concurrency	method	JobPriority.>=(lhs:rhs:)	17.0				container
+_Concurrency	struct	UnsafeContinuation	13.0				own
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(throwing:)	13.0				container
+_Concurrency	struct	UnsafeContinuation	13.0				own
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(returning:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(throwing:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(with:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(with:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(with:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume(with:)	13.0				container
+_Concurrency	method	UnsafeContinuation.resume()	13.0				container
+_Concurrency	function	withUnsafeContinuation(isolation:_:)	13.0				own
+_Concurrency	function	withUnsafeContinuation(isolation:_:)	13.0				own
+_Concurrency	function	withUnsafeContinuation(isolation:_:)	13.0				own
+_Concurrency	function	withUnsafeThrowingContinuation(isolation:_:)	13.0				own
+_Concurrency	function	withUnsafeThrowingContinuation(isolation:_:)	13.0				own
+_Concurrency	function	withUnsafeThrowingContinuation(isolation:_:)	13.0				own
+_Concurrency	function	_unsafeInheritExecutor_withUnsafeContinuation(_:)	13.0				own
+_Concurrency	function	_unsafeInheritExecutor_withUnsafeContinuation(_:)	13.0				own
+_Concurrency	function	_unsafeInheritExecutor_withUnsafeThrowingContinuation(_:)	13.0				own
+_Concurrency	function	_unsafeInheritExecutor_withUnsafeThrowingContinuation(_:)	13.0				own
+_Concurrency	function	_abiEnableAwaitContinuation()	13.0				own
+_Concurrency	protocol	GlobalActor	13.0				own
+_Concurrency	property	GlobalActor.shared	13.0				container
+_Concurrency	property	GlobalActor.sharedUnownedExecutor	13.0				container
+_Concurrency	property	GlobalActor.sharedUnownedExecutor	13.0				container
+_Concurrency	constant	globalConcurrentExecutor	18.0				own
+_Concurrency	class	MainActor	13.0				own
+_Concurrency	property	MainActor.shared	13.0				container
+_Concurrency	property	MainActor.unownedExecutor	13.0				container
+_Concurrency	property	MainActor.sharedUnownedExecutor	13.0				container
+_Concurrency	method	MainActor.enqueue(_:)	13.0				container
+_Concurrency	typealias	MainActor.ActorType	13.0				own
+_Concurrency	method	MainActor.run(resultType:body:)	13.0				container
+_Concurrency	method	MainActor.assumeIsolated(_:file:line:)	13.0				own
+_Concurrency	typealias	MainActor.YesActor	13.0				container
+_Concurrency	typealias	MainActor.NoActor	13.0				container
+_Concurrency	property	MainActor.executor	13.0				container
+_Concurrency	property	MainActor.rawFn	13.0				container
+_Concurrency	function	_deinitOnExecutorMainActorBackDeploy(_:_:_:_:)	13.0				own
+_Concurrency	constant	stolenObject					none
+_Concurrency	typealias	Task.Priority	13.0	yes			container
+_Concurrency	typealias	Task.Handle	13.0	yes			container
+_Concurrency	method	Task.CancellationError()	13.0	yes			container
+_Concurrency	method	Task.suspend()	13.0	yes			container
+_Concurrency	property	TaskPriority.unspecified	13.0	yes			container
+_Concurrency	property	TaskPriority.userInteractive	13.0	yes			container
+_Concurrency	function	withTaskCancellationHandler(handler:operation:)	13.0	yes			own
+_Concurrency	function	_unsafeInheritExecutor_withTaskCancellationHandler(handler:operation:)	13.0	yes			own
+_Concurrency	method	Task.withCancellationHandler(handler:operation:)	13.0	yes			container
+_Concurrency	typealias	Task.Group	13.0	yes			container
+_Concurrency	method	Task.withGroup(resultType:returning:body:)	13.0	yes			container
+_Concurrency	method	Task.get()	13.0	yes			container
+_Concurrency	method	Task.getResult()	13.0	yes			container
+_Concurrency	method	Task.get()	13.0	yes			container
+_Concurrency	method	TaskGroup.add(priority:operation:)	13.0	yes			container
+_Concurrency	method	TaskGroup.spawn(priority:operation:)	13.0	yes			container
+_Concurrency	method	TaskGroup.spawnUnlessCancelled(priority:operation:)	13.0	yes			container
+_Concurrency	method	TaskGroup.async(priority:operation:)	13.0	yes			container
+_Concurrency	method	TaskGroup.asyncUnlessCancelled(priority:operation:)	13.0	yes			container
+_Concurrency	method	ThrowingTaskGroup.add(priority:operation:)	13.0	yes			container
+_Concurrency	method	ThrowingTaskGroup.spawn(priority:operation:)	13.0	yes			container
+_Concurrency	method	ThrowingTaskGroup.spawnUnlessCancelled(priority:operation:)	13.0	yes			container
+_Concurrency	method	ThrowingTaskGroup.async(priority:operation:)	13.0	yes			container
+_Concurrency	method	ThrowingTaskGroup.asyncUnlessCancelled(priority:operation:)	13.0	yes			container
+_Concurrency	typealias	UnsafeThrowingContinuation	13.0	yes			own
+_Concurrency	typealias	PartialAsyncTask	13.0	yes			own
+_Concurrency	struct	Task	13.0				own
+_Concurrency	property	Task.value	13.0				container
+_Concurrency	property	Task.result	13.0				container
+_Concurrency	method	Task.cancel()	13.0				container
+_Concurrency	property	Task.value	13.0				container
+_Concurrency	method	Task.hash(into:)	13.0				container
+_Concurrency	property	Task.hashValue	13.0				container
+_Concurrency	method	Task.==(lhs:rhs:)	13.0				container
+_Concurrency	struct	TaskPriority	13.0				own
+_Concurrency	typealias	TaskPriority.RawValue	13.0				container
+_Concurrency	property	TaskPriority.rawValue	13.0				container
+_Concurrency	method	TaskPriority.init(rawValue:)	13.0				container
+_Concurrency	property	TaskPriority.high	13.0				container
+_Concurrency	property	TaskPriority.medium	13.0				container
+_Concurrency	property	TaskPriority.low	13.0				container
+_Concurrency	property	TaskPriority.userInitiated	13.0				container
+_Concurrency	property	TaskPriority.utility	13.0				container
+_Concurrency	property	TaskPriority.background	13.0				container
+_Concurrency	method	TaskPriority.==(lhs:rhs:)	13.0				container
+_Concurrency	method	TaskPriority.!=(lhs:rhs:)	13.0				container
+_Concurrency	method	TaskPriority.<(lhs:rhs:)	13.0				container
+_Concurrency	method	TaskPriority.<=(lhs:rhs:)	13.0				container
+_Concurrency	method	TaskPriority.>(lhs:rhs:)	13.0				container
+_Concurrency	method	TaskPriority.>=(lhs:rhs:)	13.0				container
+_Concurrency	property	TaskPriority.description	17.0				own
+_Concurrency	property	Task.currentPriority	13.0				container
+_Concurrency	property	Task.basePriority	16.0				own
+_Concurrency	constant	bits					none
+_Concurrency	property	Task.name	26.0				own
+_Concurrency	method	Task.yield()	13.0				container
+_Concurrency	function	withUnsafeCurrentTask(body:)	13.0				own
+_Concurrency	function	withUnsafeCurrentTask(body:)	18.0				own
+_Concurrency	struct	UnsafeCurrentTask	13.0				own
+_Concurrency	property	UnsafeCurrentTask.isCancelled	13.0				container
+_Concurrency	property	UnsafeCurrentTask.priority	13.0				container
+_Concurrency	property	UnsafeCurrentTask.basePriority	17.0				own
+_Concurrency	method	UnsafeCurrentTask.cancel()	13.0				container
+_Concurrency	struct	UnsafeCurrentTask	13.0				own
+_Concurrency	property	UnsafeCurrentTask.isCancelled	13.0				container
+_Concurrency	property	UnsafeCurrentTask.priority	13.0				container
+_Concurrency	property	UnsafeCurrentTask.basePriority	17.0				own
+_Concurrency	method	UnsafeCurrentTask.cancel()	13.0				container
+_Concurrency	method	UnsafeCurrentTask.hash(into:)	13.0				container
+_Concurrency	property	UnsafeCurrentTask.hashValue	13.0				container
+_Concurrency	method	UnsafeCurrentTask.hash(into:)	13.0				container
+_Concurrency	property	UnsafeCurrentTask.hashValue	13.0				container
+_Concurrency	method	UnsafeCurrentTask.==(lhs:rhs:)	13.0				container
+_Concurrency	function	_getCurrentAsyncTask()	13.0				own
+_Concurrency	function	_taskFutureGet(_:)	13.0				own
+_Concurrency	function	_taskFutureGetThrowing(_:)	13.0				own
+_Concurrency	function	_taskCancel(_:)	13.0				own
+_Concurrency	method	Task.escalatePriority(to:)	26.0				own
+_Concurrency	method	UnsafeCurrentTask.escalatePriority(to:)	26.0				own
+_Concurrency	function	withTaskPriorityEscalationHandler(operation:onPriorityEscalated:isolation:)	26.0				own
+_Concurrency	constant	record					none
+_Concurrency	function	withTaskExecutorPreference(_:isolation:operation:)	18.0				own
+_Concurrency	function	_unsafeInheritExecutor_withTaskExecutorPreference(_:operation:)	18.0				own
+_Concurrency	property	UnsafeCurrentTask.unownedTaskExecutor	18.0				own
+_Concurrency	function	withTaskCancellationHandler(operation:onCancel:isolation:)	13.0				own
+_Concurrency	constant	record					none
+_Concurrency	function	_unsafeInheritExecutor_withTaskCancellationHandler(operation:onCancel:)	13.0				own
+_Concurrency	property	Task.isCancelled	13.0				container
+_Concurrency	property	Task.isCancelled	13.0				container
+_Concurrency	method	Task.checkCancellation()	13.0				container
+_Concurrency	struct	CancellationError	13.0				own
+_Concurrency	method	CancellationError.init()	13.0				container
+_Concurrency	function	withTaskGroup(of:returning:isolation:body:)	13.0				own
+_Concurrency	constant	_group					none
+_Concurrency	constant	group					none
+_Concurrency	constant	result					none
+_Concurrency	function	_unsafeInheritExecutor_withTaskGroup(of:returning:body:)	13.0				own
+_Concurrency	constant	_group					none
+_Concurrency	constant	group					none
+_Concurrency	constant	result					none
+_Concurrency	function	withThrowingTaskGroup(of:returning:isolation:body:)	13.0				own
+_Concurrency	constant	_group					none
+_Concurrency	constant	group					none
+_Concurrency	constant	result					none
+_Concurrency	function	_unsafeInheritExecutor_withThrowingTaskGroup(of:returning:body:)	13.0				own
+_Concurrency	struct	TaskGroup	13.0				own
+_Concurrency	method	TaskGroup.next(isolation:)	13.0				own
+_Concurrency	method	TaskGroup.next()	13.0				own
+_Concurrency	method	TaskGroup.waitForAll(isolation:)	13.0				container
+_Concurrency	property	TaskGroup.isEmpty	13.0				container
+_Concurrency	method	TaskGroup.cancelAll()	13.0				container
+_Concurrency	property	TaskGroup.isCancelled	13.0				container
+_Concurrency	struct	ThrowingTaskGroup	13.0				own
+_Concurrency	method	ThrowingTaskGroup.waitForAll(isolation:)	13.0				container
+_Concurrency	property	ThrowingTaskGroup.firstError	13.0				container
+_Concurrency	method	ThrowingTaskGroup.next(isolation:)	13.0				own
+_Concurrency	method	ThrowingTaskGroup.next()	13.0				own
+_Concurrency	method	ThrowingTaskGroup.nextResult(isolation:)	13.0				container
+_Concurrency	property	ThrowingTaskGroup.isEmpty	13.0				container
+_Concurrency	method	ThrowingTaskGroup.cancelAll()	13.0				container
+_Concurrency	property	ThrowingTaskGroup.isCancelled	13.0				container
+_Concurrency	typealias	TaskGroup.AsyncIterator	13.0				container
+_Concurrency	typealias	TaskGroup.Element	13.0				container
+_Concurrency	method	TaskGroup.makeAsyncIterator()	13.0				container
+_Concurrency	struct	TaskGroup.Iterator	13.0				own
+_Concurrency	typealias	TaskGroup.Iterator.Element	13.0				container
+_Concurrency	method	TaskGroup.Iterator.next()	13.0				container
+_Concurrency	method	TaskGroup.Iterator.next(isolation:)	18.0				own
+_Concurrency	method	TaskGroup.Iterator.cancel()	13.0				container
+_Concurrency	typealias	TaskGroup.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	TaskGroup.__AsyncSequence_Failure	18.0				own
+_Concurrency	typealias	ThrowingTaskGroup.AsyncIterator	13.0				container
+_Concurrency	typealias	ThrowingTaskGroup.Element	13.0				container
+_Concurrency	method	ThrowingTaskGroup.makeAsyncIterator()	13.0				container
+_Concurrency	struct	ThrowingTaskGroup.Iterator	13.0				own
+_Concurrency	typealias	ThrowingTaskGroup.Iterator.Element	13.0				container
+_Concurrency	method	ThrowingTaskGroup.Iterator.next()	13.0				container
+_Concurrency	method	ThrowingTaskGroup.Iterator.next(isolation:)	18.0				own
+_Concurrency	method	ThrowingTaskGroup.Iterator.cancel()	13.0				container
+_Concurrency	typealias	ThrowingTaskGroup.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	typealias	ThrowingTaskGroup.__AsyncSequence_Failure	18.0				own
+_Concurrency	function	_taskGroupWaitNext(group:)	13.0				own
+_Concurrency	constant	bits					none
+_Concurrency	function	withDiscardingTaskGroup(returning:isolation:body:)	17.0				own
+_Concurrency	constant	flags					none
+_Concurrency	constant	_group					none
+_Concurrency	constant	group					none
+_Concurrency	constant	result					none
+_Concurrency	function	_unsafeInheritExecutor_withDiscardingTaskGroup(returning:body:)	17.0				own
+_Concurrency	struct	DiscardingTaskGroup	17.0				own
+_Concurrency	property	DiscardingTaskGroup.isEmpty	17.0				container
+_Concurrency	method	DiscardingTaskGroup.cancelAll()	17.0				container
+_Concurrency	property	DiscardingTaskGroup.isCancelled	17.0				container
+_Concurrency	function	withThrowingDiscardingTaskGroup(returning:isolation:body:)	17.0				own
+_Concurrency	constant	flags					none
+_Concurrency	constant	_group					none
+_Concurrency	constant	group					none
+_Concurrency	constant	result					none
+_Concurrency	function	_unsafeInheritExecutor_withThrowingDiscardingTaskGroup(returning:body:)	17.0				own
+_Concurrency	struct	ThrowingDiscardingTaskGroup	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.isEmpty	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.cancelAll()	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.isCancelled	17.0				container
+_Concurrency	class	TaskLocal	13.0				own
+_Concurrency	method	TaskLocal.init(wrappedValue:)	13.0				container
+_Concurrency	method	TaskLocal.get()	13.0				container
+_Concurrency	method	TaskLocal.withValue(_:operation:isolation:file:line:)	13.0				own
+_Concurrency	method	TaskLocal._unsafeInheritExecutor_withValue(_:operation:file:line:)	13.0				own
+_Concurrency	method	TaskLocal.withValue(_:operation:file:line:)	13.0				container
+_Concurrency	property	TaskLocal.projectedValue	13.0				container
+_Concurrency	method	TaskLocal.subscript(_enclosingInstance:wrapped:storage:)	13.0			yes	container
+_Concurrency	property	TaskLocal.wrappedValue	13.0				container
+_Concurrency	property	TaskLocal.description	13.0				container
+_Concurrency	method	Task.sleep(_:)	13.0	yes			container
+_Concurrency	method	Task.sleep(nanoseconds:)	13.0				container
+_Concurrency	struct	AsyncStream	13.0				own
+_Concurrency	struct	AsyncStream.Continuation	13.0				container
+_Concurrency	enum	AsyncStream.Continuation.Termination	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.Termination.finished	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.Termination.cancelled	13.0				container
+_Concurrency	method	AsyncStream.Continuation.Termination.==(a:b:)	13.0				container
+_Concurrency	method	AsyncStream.Continuation.Termination.hash(into:)	13.0				container
+_Concurrency	property	AsyncStream.Continuation.Termination.hashValue	13.0				container
+_Concurrency	enum	AsyncStream.Continuation.YieldResult	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.YieldResult.enqueued	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.YieldResult.dropped	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.YieldResult.terminated	13.0				container
+_Concurrency	enum	AsyncStream.Continuation.BufferingPolicy	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.BufferingPolicy.unbounded	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.BufferingPolicy.bufferingOldest	13.0				container
+_Concurrency	constant	AsyncStream.Continuation.BufferingPolicy.bufferingNewest	13.0				container
+_Concurrency	method	AsyncStream.Continuation.yield(_:)	13.0				container
+_Concurrency	method	AsyncStream.Continuation.yield(_:)	13.0				container
+_Concurrency	method	AsyncStream.Continuation.finish()	13.0				container
+_Concurrency	property	AsyncStream.Continuation.onTermination	13.0				container
+_Concurrency	method	AsyncStream.init(_:bufferingPolicy:_:)	13.0				container
+_Concurrency	method	AsyncStream.init(unfolding:onCancel:)	13.0				container
+_Concurrency	struct	AsyncStream.Iterator	13.0				container
+_Concurrency	method	AsyncStream.Iterator.next()	13.0				container
+_Concurrency	method	AsyncStream.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncStream.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	method	AsyncStream.makeAsyncIterator()	13.0				container
+_Concurrency	typealias	AsyncStream.AsyncIterator	13.0				own
+_Concurrency	typealias	AsyncStream.__AsyncSequence_Failure	18.0				own
+_Concurrency	method	AsyncStream.Continuation.yield(with:)	13.0				container
+_Concurrency	method	AsyncStream.Continuation.yield(with:)	13.0				container
+_Concurrency	method	AsyncStream.Continuation.yield()	13.0				container
+_Concurrency	method	AsyncStream.makeStream(of:bufferingPolicy:)	13.0				own
+_Concurrency	property	AsyncStream.continuation	13.0				container
+_Concurrency	property	AsyncStream.stream	13.0				container
+_Concurrency	method	AsyncStream.Continuation.hash(into:)	26.0				own
+_Concurrency	property	AsyncStream.Continuation.hashValue	26.0				own
+_Concurrency	method	AsyncStream.Continuation.==(lhs:rhs:)	26.0				own
+_Concurrency	struct	AsyncThrowingStream	13.0				own
+_Concurrency	struct	AsyncThrowingStream.Continuation	13.0				container
+_Concurrency	enum	AsyncThrowingStream.Continuation.Termination	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.Termination.finished	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.Termination.cancelled	13.0				container
+_Concurrency	enum	AsyncThrowingStream.Continuation.YieldResult	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.YieldResult.enqueued	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.YieldResult.dropped	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.YieldResult.terminated	13.0				container
+_Concurrency	enum	AsyncThrowingStream.Continuation.BufferingPolicy	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.BufferingPolicy.unbounded	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.BufferingPolicy.bufferingOldest	13.0				container
+_Concurrency	constant	AsyncThrowingStream.Continuation.BufferingPolicy.bufferingNewest	13.0				container
+_Concurrency	method	AsyncThrowingStream.Continuation.yield(_:)	13.0				container
+_Concurrency	method	AsyncThrowingStream.Continuation.yield(_:)	13.0				container
+_Concurrency	method	AsyncThrowingStream.Continuation.finish(throwing:)	13.0				container
+_Concurrency	property	AsyncThrowingStream.Continuation.onTermination	13.0				container
+_Concurrency	method	AsyncThrowingStream.init(_:bufferingPolicy:_:)	13.0				container
+_Concurrency	method	AsyncThrowingStream.init(unfolding:)	13.0				container
+_Concurrency	struct	AsyncThrowingStream.Iterator	13.0				container
+_Concurrency	method	AsyncThrowingStream.Iterator.next()	13.0				container
+_Concurrency	method	AsyncThrowingStream.Iterator.next(isolation:)	18.0				own
+_Concurrency	typealias	AsyncThrowingStream.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+_Concurrency	method	AsyncThrowingStream.makeAsyncIterator()	13.0				container
+_Concurrency	typealias	AsyncThrowingStream.AsyncIterator	13.0				own
+_Concurrency	typealias	AsyncThrowingStream.__AsyncSequence_Failure	18.0				own
+_Concurrency	method	AsyncThrowingStream.Continuation.yield(with:)	13.0				container
+_Concurrency	method	AsyncThrowingStream.Continuation.yield(with:)	13.0				container
+_Concurrency	method	AsyncThrowingStream.Continuation.yield()	13.0				container
+_Concurrency	method	AsyncThrowingStream.makeStream(of:throwing:bufferingPolicy:)	13.0				own
+_Concurrency	property	AsyncThrowingStream.continuation	13.0				container
+_Concurrency	property	AsyncThrowingStream.stream	13.0				container
+_Concurrency	method	AsyncThrowingStream.Continuation.hash(into:)	26.0				own
+_Concurrency	property	AsyncThrowingStream.Continuation.hashValue	26.0				own
+_Concurrency	method	AsyncThrowingStream.Continuation.==(lhs:rhs:)	26.0				own
+_Concurrency	protocol	Clock	16.0				own
+_Concurrency	property	Clock.now	16.0				container
+_Concurrency	property	Clock.minimumResolution	16.0				container
+_Concurrency	method	Clock.sleep(until:tolerance:)	16.0				container
+_Concurrency	method	Clock.measure(_:)	16.0				own
+_Concurrency	method	Clock.measure(isolation:_:)	16.0				own
+_Concurrency	property	Clock.start	16.0				container
+_Concurrency	property	Clock.end	16.0				container
+_Concurrency	method	Clock._unsafeInheritExecutor_measure(_:)	16.0				own
+_Concurrency	method	Clock.sleep(for:tolerance:)	16.0				own
+_Concurrency	struct	ContinuousClock	16.0				own
+_Concurrency	struct	ContinuousClock.Instant	16.0				container
+_Concurrency	method	ContinuousClock.init()	16.0				container
+_Concurrency	method	ContinuousClock.Instant.encode(to:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.init(from:)	16.0				container
+_Concurrency	property	Clock.continuous	16.0				own
+_Concurrency	property	ContinuousClock.now	16.0				container
+_Concurrency	property	ContinuousClock.minimumResolution	16.0				container
+_Concurrency	property	ContinuousClock.now	16.0				container
+_Concurrency	method	ContinuousClock.sleep(until:tolerance:)	16.0				container
+_Concurrency	typealias	ContinuousClock.Duration	16.0				own
+_Concurrency	property	ContinuousClock.Instant.now	16.0				container
+_Concurrency	method	ContinuousClock.Instant.advanced(by:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.duration(to:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.hash(into:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.==(lhs:rhs:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.<(lhs:rhs:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.+(lhs:rhs:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.+=(lhs:rhs:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.-(lhs:rhs:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.-=(lhs:rhs:)	16.0				container
+_Concurrency	method	ContinuousClock.Instant.-(lhs:rhs:)	16.0				container
+_Concurrency	typealias	ContinuousClock.Instant.Duration	16.0				own
+_Concurrency	property	ContinuousClock.Instant.hashValue	16.0				container
+_Concurrency	struct	SuspendingClock	16.0				own
+_Concurrency	struct	SuspendingClock.Instant	16.0				container
+_Concurrency	method	SuspendingClock.init()	16.0				container
+_Concurrency	method	SuspendingClock.Instant.encode(to:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.init(from:)	16.0				container
+_Concurrency	property	Clock.suspending	16.0				own
+_Concurrency	property	SuspendingClock.now	16.0				own
+_Concurrency	property	SuspendingClock.now	16.0				own
+_Concurrency	property	SuspendingClock.minimumResolution	16.0				own
+_Concurrency	method	SuspendingClock.sleep(until:tolerance:)	16.0				own
+_Concurrency	typealias	SuspendingClock.Duration	16.0				own
+_Concurrency	property	SuspendingClock.Instant.now	16.0				container
+_Concurrency	method	SuspendingClock.Instant.advanced(by:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.duration(to:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.hash(into:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.==(lhs:rhs:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.<(lhs:rhs:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.+(lhs:rhs:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.+=(lhs:rhs:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.-(lhs:rhs:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.-=(lhs:rhs:)	16.0				container
+_Concurrency	method	SuspendingClock.Instant.-(lhs:rhs:)	16.0				container
+_Concurrency	typealias	SuspendingClock.Instant.Duration	16.0				own
+_Concurrency	property	SuspendingClock.Instant.hashValue	16.0				container
+_Concurrency	method	Task.sleep(until:tolerance:clock:)	16.0				own
+_Concurrency	method	Task.sleep(for:tolerance:clock:)	16.0				own
+_Concurrency	method	Task.init(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.init(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.init(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.init(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.detached(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.detached(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.detached(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.detached(name:priority:operation:)	13.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.init(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.init(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.init(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.init(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.detached(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.detached(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.detached(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	method	Task.detached(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.task					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	property	Task.executorBuiltin					none
+_Concurrency	function	detach(priority:operation:)	13.0	yes			own
+_Concurrency	constant	flags					none
+_Concurrency	constant	builtinSerialExecutor					none
+_Concurrency	constant	task					none
+_Concurrency	function	detach(priority:operation:)	13.0	yes			own
+_Concurrency	constant	flags					none
+_Concurrency	constant	builtinSerialExecutor					none
+_Concurrency	constant	task					none
+_Concurrency	method	Task.runDetached(priority:operation:)	13.0	yes			own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	method	Task.runDetached(priority:operation:)	13.0	yes			own
+_Concurrency	property	Task.flags					none
+_Concurrency	property	Task.builtinSerialExecutor					none
+_Concurrency	property	Task.task					none
+_Concurrency	function	asyncDetached(priority:operation:)	13.0	yes			own
+_Concurrency	constant	flags					none
+_Concurrency	constant	builtinSerialExecutor					none
+_Concurrency	constant	task					none
+_Concurrency	function	asyncDetached(priority:operation:)	13.0	yes			own
+_Concurrency	constant	flags					none
+_Concurrency	constant	builtinSerialExecutor					none
+_Concurrency	constant	task					none
+_Concurrency	function	async(priority:operation:)	13.0	yes			own
+_Concurrency	constant	flags					none
+_Concurrency	constant	builtinSerialExecutor					none
+_Concurrency	constant	task					none
+_Concurrency	function	async(priority:operation:)	13.0	yes			own
+_Concurrency	constant	flags					none
+_Concurrency	constant	builtinSerialExecutor					none
+_Concurrency	constant	task					none
+_Concurrency	method	TaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.canAdd	18.0				container
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.canAdd	18.0				container
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(name:executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTask(name:priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	TaskGroup.addTask(name:priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(name:priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.canAdd	13.0				container
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(name:priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.canAdd	13.0				container
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(name:priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(name:priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(name:priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	13.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(name:priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	13.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(name:priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(name:priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(name:priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(name:priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(name:priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(name:priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(name:priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(name:priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	TaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.canAdd	18.0				container
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	TaskGroup.canAdd	18.0				container
+_Concurrency	property	TaskGroup.flags	18.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	TaskGroup.task	18.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	DiscardingTaskGroup.task	18.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(executorPreference:priority:operation:)	18.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	18.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	18.0				container
+_Concurrency	method	TaskGroup.addTask(priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	TaskGroup.addTask(priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.canAdd	13.0				container
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	TaskGroup.addTaskUnlessCancelled(priority:operation:)	13.0				own
+_Concurrency	property	TaskGroup.canAdd	13.0				container
+_Concurrency	property	TaskGroup.flags	13.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	TaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTask(priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	13.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	ThrowingTaskGroup.addTaskUnlessCancelled(priority:operation:)	13.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	13.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	13.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	13.0				container
+_Concurrency	property	ThrowingTaskGroup.task	13.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	DiscardingTaskGroup.addTask(priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	DiscardingTaskGroup.addTaskUnlessCancelled(priority:operation:)	17.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	DiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTask(priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addTaskUnlessCancelled(priority:operation:)	17.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	17.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	17.0				container
+_Concurrency	method	Task.startSynchronously(name:priority:_:)	26.0	yes			own
+_Concurrency	method	Task.startSynchronously(name:priority:_:)	26.0	yes			own
+_Concurrency	method	Task.startSynchronously(name:priority:_:)	26.0	yes			own
+_Concurrency	method	Task.startSynchronously(name:priority:_:)	26.0	yes			own
+_Concurrency	method	Task.immediate(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediate(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediate(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediate(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediateDetached(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediateDetached(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediateDetached(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	Task.immediateDetached(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	Task.builtinSerialExecutor	26.0				container
+_Concurrency	property	Task.flagsMustNotCrash	26.0				container
+_Concurrency	property	Task.canRunSynchronously	26.0				container
+_Concurrency	property	Task.flags	26.0				container
+_Concurrency	property	Task.task	26.0				container
+_Concurrency	property	Task.executorBuiltin	26.0				container
+_Concurrency	method	TaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	TaskGroup.flags	26.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	TaskGroup.task	26.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	TaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	TaskGroup.flags	26.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	TaskGroup.task	26.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	TaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	TaskGroup.canAdd	26.0				container
+_Concurrency	property	TaskGroup.flags	26.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	TaskGroup.task	26.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	TaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	TaskGroup.canAdd	26.0				container
+_Concurrency	property	TaskGroup.flags	26.0				container
+_Concurrency	property	TaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	TaskGroup.task	26.0				container
+_Concurrency	property	TaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingTaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingTaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingTaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	26.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingTaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingTaskGroup.canAdd	26.0				container
+_Concurrency	property	ThrowingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	DiscardingTaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	DiscardingTaskGroup.task	26.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	DiscardingTaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	DiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	DiscardingTaskGroup.task	26.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	DiscardingTaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	26.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	DiscardingTaskGroup.task	26.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	DiscardingTaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	DiscardingTaskGroup.canAdd	26.0				container
+_Concurrency	property	DiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	DiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	DiscardingTaskGroup.task	26.0				container
+_Concurrency	property	DiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addImmediateTask(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	26.0				container
+_Concurrency	method	ThrowingDiscardingTaskGroup.addImmediateTaskUnlessCancelled(name:priority:executorPreference:operation:)	26.0				own
+_Concurrency	property	ThrowingDiscardingTaskGroup.canAdd	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.flags	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.builtinSerialExecutor	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.task	26.0				container
+_Concurrency	property	ThrowingDiscardingTaskGroup.executorBuiltin	26.0				container

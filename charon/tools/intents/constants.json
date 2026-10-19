@@ -1,0 +1,338 @@
+{
+  "constants": {
+    "INAnswerCallIntentIdentifier": {
+      "introduced": "16.2",
+      "rung": "16.2"
+    },
+    "INCancelWorkoutIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INCarChargingConnectorTypeCCS1": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeCCS2": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeCHAdeMO": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeGBTAC": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeGBTDC": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeJ1772": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeMennekes": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INCarChargingConnectorTypeNACSAC": {
+      "introduced": "17.4",
+      "rung": "17.4"
+    },
+    "INCarChargingConnectorTypeNACSDC": {
+      "introduced": "17.4",
+      "rung": "17.4"
+    },
+    "INCarChargingConnectorTypeTesla": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INEndWorkoutIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INGetRideStatusIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INHangUpCallIntentIdentifier": {
+      "introduced": "16.2",
+      "rung": "16.2"
+    },
+    "INIntentErrorDomain": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INListRideOptionsIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INPauseWorkoutIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INPersonHandleLabelHome": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelHomeFax": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelMain": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelMobile": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelOther": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelPager": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelSchool": {
+      "introduced": "14.0",
+      "rung": "14.0"
+    },
+    "INPersonHandleLabelWork": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabelWorkFax": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonHandleLabeliPhone": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipAssistant": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipBrother": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipChild": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipDaughter": {
+      "introduced": "13.0",
+      "rung": "13.4"
+    },
+    "INPersonRelationshipFather": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipFriend": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipManager": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipMother": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipParent": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipPartner": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipSister": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INPersonRelationshipSon": {
+      "introduced": "13.0",
+      "rung": "13.4"
+    },
+    "INPersonRelationshipSpouse": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INRequestPaymentIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INRequestRideIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INResumeWorkoutIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSaveProfileInCarIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSearchCallHistoryIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSearchForMessagesIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSearchForPhotosIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSendMessageIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSendPaymentIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetAudioSourceInCarIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetClimateSettingsInCarIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetDefrosterSettingsInCarIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetMessageAttributeIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetProfileInCarIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetRadioStationIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INSetSeatSettingsInCarIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INStartAudioCallIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INStartCallIntentIdentifier": {
+      "introduced": "13.0",
+      "rung": "16.0"
+    },
+    "INStartPhotoPlaybackIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INStartVideoCallIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INStartWorkoutIntentIdentifier": {
+      "introduced": "10.0",
+      "rung": "10.0"
+    },
+    "INWorkoutNameIdentifierCrosstraining": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierCycle": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierDance": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierElliptical": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierExercise": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierHighIntensityIntervalTraining": {
+      "introduced": "12.0",
+      "rung": "12.0"
+    },
+    "INWorkoutNameIdentifierHike": {
+      "introduced": "12.0",
+      "rung": "12.0"
+    },
+    "INWorkoutNameIdentifierIndoorcycle": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierIndoorrun": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierIndoorwalk": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierMove": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierOther": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierRower": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierRun": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierSit": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierStairs": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierStand": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierSteps": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierSwim": {
+      "introduced": "12.0",
+      "rung": "12.0"
+    },
+    "INWorkoutNameIdentifierWalk": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    },
+    "INWorkoutNameIdentifierYoga": {
+      "introduced": "10.2",
+      "rung": "10.2"
+    }
+  },
+  "note": "the extern Intents constants this package DEFINES and exports, with the release each first appears in; gen-registry.py reads this so a regeneration does not drop their rows",
+  "source": "tools/intents/emit-intents-constants.lua"
+}

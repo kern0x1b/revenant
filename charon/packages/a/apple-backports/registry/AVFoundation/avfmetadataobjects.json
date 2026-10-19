@@ -1,0 +1,38 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "+[AVMetadataItem metadataItemsFromArray:filteredByIdentifier:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's own AVMetadataItem has this key, value, keySpace and locale - the port's 8.0 file reads all four without defining them - so the member is added as a category with its storage attached, and the filtering is over identifiers the 8.0 file computes",
+      "effect": "the items whose identifier equals the one given, in order; an empty array in gives an empty array out and nil in gives nil, both measured against the host",
+      "facts": "facts/AVFoundation/AVMetadataObjects.md",
+      "source": "whether any held release already carries it: every held cache, all fifteen: 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e), dumped with tools/corpus/dump-cache.lua and searched for the row's own symbol - a class and its metaclass, a method's _OBJC_METHOD_$_ name, an ivar's _OBJC_IVAR_$_ name - with _NSFileSize planted as a control, which answers 4.3 on this set so a run that answers nothing for it is a broken measurement; and the behaviour, and every default: the differential in tests/backports/host/avf-metadata, which links one probe twice - Apple's framework alone, and the port's objects beside it in one binary with the port's own classes renamed - and joins the two tables row by row, holding a ~ row about the port's own construction against the unmutated baseline"
+    },
+    {
+      "api": "-[AVTimedMetadataGroup copyFormatDescription]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVTimedMetadataGroup's own class is the port's, in the same object as AVMetadataGroup, and these two members are what a sample buffer of timed metadata would fill; no test in this tree builds one yet, so both are carried and answer the documented case of no buffer",
+      "effect": "NULL, which says there is no track behind this group; a format description describes the track a group came off and no asset is read on this port",
+      "facts": "facts/AVFoundation/AVMetadataObjects.md",
+      "source": "whether any held release already carries it: every held cache, all fifteen: 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e), dumped with tools/corpus/dump-cache.lua and searched for the row's own symbol - a class and its metaclass, a method's _OBJC_METHOD_$_ name, an ivar's _OBJC_IVAR_$_ name - with _NSFileSize planted as a control, which answers 4.3 on this set so a run that answers nothing for it is a broken measurement; and the behaviour, and every default: the differential in tests/backports/host/avf-metadata, which links one probe twice - Apple's framework alone, and the port's objects beside it in one binary with the port's own classes renamed - and joins the two tables row by row, holding a ~ row about the port's own construction against the unmutated baseline"
+    },
+    {
+      "api": "-[AVTimedMetadataGroup initWithSampleBuffer:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVTimedMetadataGroup's own class is the port's, in the same object as AVMetadataGroup, and these two members are what a sample buffer of timed metadata would fill; no test in this tree builds one yet, so both are carried and answer the documented case of no buffer",
+      "effect": "an empty group over the invalid range when handed no sample buffer, and the buffer's presentation timestamp as its range when handed one; no producer of timed metadata exists in this tree yet, so only the no-buffer case is reachable and measured",
+      "facts": "facts/AVFoundation/AVMetadataObjects.md",
+      "source": "whether any held release already carries it: every held cache, all fifteen: 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 (armv7), 8.1.3, 8.2 and 8.4.1 (armv7s), 9.3.6 (armv7), 10.0.1, 11.0 and 12.0 (arm64) and 16.0 (arm64e), dumped with tools/corpus/dump-cache.lua and searched for the row's own symbol - a class and its metaclass, a method's _OBJC_METHOD_$_ name, an ivar's _OBJC_IVAR_$_ name - with _NSFileSize planted as a control, which answers 4.3 on this set so a run that answers nothing for it is a broken measurement; and the behaviour, and every default: the differential in tests/backports/host/avf-metadata, which links one probe twice - Apple's framework alone, and the port's objects beside it in one binary with the port's own classes renamed - and joins the two tables row by row, holding a ~ row about the port's own construction against the unmutated baseline"
+    }
+  ]
+}

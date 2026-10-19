@@ -1,0 +1,16 @@
+# Host answers for the features the port's device lacks (features.m), run on the host (an Apple M4 Pro) with
+# Apple's default.metallib. Measured 2026-10-17; the run output is the source. The port's device has neither feature.
+device.present=1
+device.name=Apple M4 Pro
+device.supportsRaytracing=1
+device.supportsFamilyApple7=1
+device.supportsFamilyMac1=1
+device.sparseTileSize=64x64x1
+factory.accelerationStructureCommandEncoder.present=1
+factory.resourceStateCommandEncoderWithDescriptor.present=1
+library.present=1
+# The intersection line asks for the kernel composite as an intersection function. The host returns a function with
+# no error, which is not the documented failure: this run does not test the nil the port answers for an intersection
+# function, only what the host answers for a request of that shape on a device with ray tracing.
+intersection.function.present=1
+intersection.error=(nil)

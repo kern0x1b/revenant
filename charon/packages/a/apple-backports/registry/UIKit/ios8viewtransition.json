@@ -1,0 +1,68 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UIViewController viewWillTransitionToSize:withTransitionCoordinator:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    },
+    {
+      "api": "-[UIViewController willTransitionToTraitCollection:withTransitionCoordinator:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    },
+    {
+      "api": "-[UIViewController sizeForChildContentContainer:withParentContainerSize:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    },
+    {
+      "api": "UIContentContainer",
+      "kind": "protocol",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    },
+    {
+      "api": "-[UIContentContainer viewWillTransitionToSize:withTransitionCoordinator:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    },
+    {
+      "api": "-[UIContentContainer willTransitionToTraitCollection:withTransitionCoordinator:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    },
+    {
+      "api": "-[UIContentContainer sizeForChildContentContainer:withParentContainerSize:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewWillTransition.md",
+      "source": "the header of SDK 16.4 (what the default forwards and when), and tests/backports/device/viewtransition.m on iOS 6 with the interface really rotated"
+    }
+  ]
+}

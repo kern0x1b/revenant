@@ -1,0 +1,408 @@
+diff --git a/stdlib/public/Darwin/Foundation/Calendar.swift b/stdlib/public/Darwin/Foundation/Calendar.swift
+index 00e5453..5cfe96d 100644
+--- a/stdlib/public/Darwin/Foundation/Calendar.swift
++++ b/stdlib/public/Darwin/Foundation/Calendar.swift
+@@ -913,6 +913,7 @@ public struct Calendar : Hashable, Equatable, ReferenceConvertible, _MutableBoxi
+     // MARK: Conversion Functions
+     
+     /// Turn our more-specific options into the big bucket option set of NSCalendar
++    @available(macOS 10.9, iOS 7.0, *)
+     private static func _toCalendarOptions(matchingPolicy: MatchingPolicy, repeatedTimePolicy: RepeatedTimePolicy, direction: SearchDirection) -> NSCalendar.Options {
+         var result : NSCalendar.Options = []
+         
+diff --git a/stdlib/public/Darwin/Foundation/Data.swift b/stdlib/public/Darwin/Foundation/Data.swift
+index 7f69ded..9e94568 100644
+--- a/stdlib/public/Darwin/Foundation/Data.swift
++++ b/stdlib/public/Darwin/Foundation/Data.swift
+@@ -48,6 +48,8 @@ internal func __NSDataIsCompact(_ data: NSData) -> Bool {
+     if #available(OSX 10.10, iOS 8.0, tvOS 9.0, watchOS 2.0, *) {
+         return data._isCompact()
+     } else {
++        // Before iOS 7 an NSData is one run of bytes; enumerateBytes, and data made of several runs, came with it.
++        guard #available(OSX 10.9, iOS 7.0, *) else { return true }
+         var compact = true
+         let len = data.length
+         data.enumerateBytes { (_, byteRange, stop) in
+@@ -642,7 +644,9 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
+     public typealias ReadingOptions = NSData.ReadingOptions
+     public typealias WritingOptions = NSData.WritingOptions
+     public typealias SearchOptions = NSData.SearchOptions
++    @available(macOS 10.9, iOS 7.0, *)
+     public typealias Base64EncodingOptions = NSData.Base64EncodingOptions
++    @available(macOS 10.9, iOS 7.0, *)
+     public typealias Base64DecodingOptions = NSData.Base64DecodingOptions
+ 
+     public typealias Index = Int
+@@ -1906,6 +1910,21 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
+                 return b
+             }
+ #else
++            guard #available(macOS 10.9, iOS 7.0, *) else {
++                // Before iOS 7 Foundation exports none of its deallocators; each one is the call it names.
++                switch self {
++                case .virtualMemory:
++                    return { vm_deallocate(mach_task_self_, vm_address_t(UInt(bitPattern: $0)), vm_size_t($1)) }
++                case .unmap:
++                    return { munmap($0, $1) }
++                case .free:
++                    return { Darwin.free($0); _ = $1 }
++                case .none:
++                    return { _, _ in }
++                case .custom(let b):
++                    return b
++                }
++            }
+             switch self {
+             case .virtualMemory:
+                 return { NSDataDeallocatorVM($0, $1) }
+@@ -2025,6 +2044,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
+     /// - parameter base64String: The string to parse.
+     /// - parameter options: Encoding options. Default value is `[]`.
+     @inlinable // This is @inlinable as a convenience initializer.
++    @available(macOS 10.9, iOS 7.0, *)
+     public init?(base64Encoded base64String: __shared String, options: Data.Base64DecodingOptions = []) {
+         if let d = NSData(base64Encoded: base64String, options: Base64DecodingOptions(rawValue: options.rawValue)) {
+             self.init(referencing: d)
+@@ -2040,6 +2060,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
+     /// - parameter base64Data: Base-64, UTF-8 encoded input data.
+     /// - parameter options: Decoding options. Default value is `[]`.
+     @inlinable // This is @inlinable as a convenience initializer.
++    @available(macOS 10.9, iOS 7.0, *)
+     public init?(base64Encoded base64Data: __shared Data, options: Data.Base64DecodingOptions = []) {
+         if let d = NSData(base64Encoded: base64Data, options: Base64DecodingOptions(rawValue: options.rawValue)) {
+             self.init(referencing: d)
+@@ -2519,6 +2540,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
+     /// - parameter options: The options to use for the encoding. Default value is `[]`.
+     /// - returns: The Base-64 encoded string.
+     @inlinable // This is @inlinable as trivially forwarding.
++    @available(macOS 10.9, iOS 7.0, *)
+     public func base64EncodedString(options: Data.Base64EncodingOptions = []) -> String {
+         return _representation.withInteriorPointerReference {
+             return $0.base64EncodedString(options: options)
+@@ -2530,6 +2552,7 @@ public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessColl
+     /// - parameter options: The options to use for the encoding. Default value is `[]`.
+     /// - returns: The Base-64 encoded data.
+     @inlinable // This is @inlinable as trivially forwarding.
++    @available(macOS 10.9, iOS 7.0, *)
+     public func base64EncodedData(options: Data.Base64EncodingOptions = []) -> Data {
+         return _representation.withInteriorPointerReference {
+             return $0.base64EncodedData(options: options)
+diff --git a/stdlib/public/Darwin/Foundation/DataThunks.m b/stdlib/public/Darwin/Foundation/DataThunks.m
+index a919323..177bbf4 100644
+--- a/stdlib/public/Darwin/Foundation/DataThunks.m
++++ b/stdlib/public/Darwin/Foundation/DataThunks.m
+@@ -13,7 +13,8 @@
+ #import <Foundation/Foundation.h>
+ #import <sys/fcntl.h>
+ 
+-#include "swift/Runtime/Config.h"
++/* The runtime's visibility macros; the header of its configuration wants a file its own build generates. */
++#include "swift/shims/Visibility.h"
+ 
+ #if TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
+ static int __NSFileProtectionClassForOptions(NSUInteger options) {
+@@ -141,7 +142,7 @@ BOOL __NSDataWriteToURL(NSData * _Nonnull data NS_RELEASES_ARGUMENT, NSURL * _No
+     __block BOOL writingFailed = NO;
+     __block int32_t saveerr = 0;
+     NSUInteger dataLength = [data length];
+-    [data enumerateByteRangesUsingBlock:^(const void *bytes, NSRange byteRange, BOOL *stop) {
++    void (^writeRange)(const void *, NSRange, BOOL *) = ^(const void *bytes, NSRange byteRange, BOOL *stop) {
+         NSUInteger length = byteRange.length;
+         BOOL success = NO;
+         if (length > 0) {
+@@ -155,7 +156,14 @@ BOOL __NSDataWriteToURL(NSData * _Nonnull data NS_RELEASES_ARGUMENT, NSURL * _No
+             writingFailed = YES;
+             *stop = YES;
+         }
+-    }];
++    };
++    if ([data respondsToSelector:@selector(enumerateByteRangesUsingBlock:)]) {
++        [data enumerateByteRangesUsingBlock:writeRange];
++    } else {
++        // Before iOS 7 an NSData is one run of bytes, and enumerateByteRangesUsingBlock: came with the other kind.
++        BOOL stop = NO;
++        writeRange([data bytes], NSMakeRange(0, dataLength), &stop);
++    }
+     if (dataLength && !writingFailed) {
+         if (fsync(fd) < 0) {
+             writingFailed = YES;
+@@ -173,3 +181,17 @@ BOOL __NSDataWriteToURL(NSData * _Nonnull data NS_RELEASES_ARGUMENT, NSURL * _No
+     close(fd);
+     return YES;
+ }
++
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wdeprecated-declarations"
++// iOS 7 deprecated these for the calls with options; before it they are the encoding, without line breaks.
++SWIFT_RUNTIME_STDLIB_INTERNAL
++NSString *__NSDataBase64EncodingBeforeiOS7(NSData *data) {
++    return [data base64Encoding];
++}
++
++SWIFT_RUNTIME_STDLIB_INTERNAL
++NSData *__NSDataWithBase64EncodingBeforeiOS7(NSString *string) {
++    return [[[NSData alloc] initWithBase64Encoding:string] autorelease];
++}
++#pragma clang diagnostic pop
+diff --git a/stdlib/public/Darwin/Foundation/IndexPath.swift b/stdlib/public/Darwin/Foundation/IndexPath.swift
+index 5c5d89d..253ad88 100644
+--- a/stdlib/public/Darwin/Foundation/IndexPath.swift
++++ b/stdlib/public/Darwin/Foundation/IndexPath.swift
+@@ -626,7 +626,12 @@ public struct IndexPath : ReferenceConvertible, Equatable, Hashable, MutableColl
+             _indexes = .pair(nsIndexPath.index(atPosition: 0), nsIndexPath.index(atPosition: 1))
+         default:
+             let indexes = Array<Int>(unsafeUninitializedCapacity: count) { buffer, initializedCount in
+-                nsIndexPath.getIndexes(buffer.baseAddress!, range: NSRange(location: 0, length: count))
++                if #available(macOS 10.9, iOS 7.0, *) {
++                    nsIndexPath.getIndexes(buffer.baseAddress!, range: NSRange(location: 0, length: count))
++                } else {
++                    // A release before iOS 7 copies them all, which is the whole range asked for here.
++                    nsIndexPath.getIndexes(buffer.baseAddress!)
++                }
+                 initializedCount = count
+             }
+             _indexes = .array(indexes)
+diff --git a/stdlib/public/Darwin/Foundation/JSONEncoder.swift b/stdlib/public/Darwin/Foundation/JSONEncoder.swift
+index e149c98..e476742 100644
+--- a/stdlib/public/Darwin/Foundation/JSONEncoder.swift
++++ b/stdlib/public/Darwin/Foundation/JSONEncoder.swift
+@@ -10,6 +10,8 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++@_implementationOnly import _SwiftFoundationOverlayShims
++
+ /// A marker protocol used to determine whether a value is a `String`-keyed `Dictionary`
+ /// containing `Encodable` values (in which case it should be exempt from key conversion strategies).
+ ///
+@@ -850,6 +852,10 @@ private extension __JSONEncoder {
+             return self.storage.popContainer()
+ 
+         case .base64:
++            guard #available(macOS 10.9, iOS 7.0, *) else {
++                // Before iOS 7 the same encoding, without line breaks, is base64Encoding, which iOS 4 brought.
++                return NSString(string: __NSDataBase64EncodingBeforeiOS7(data))
++            }
+             return NSString(string: data.base64EncodedString())
+ 
+         case .custom(let closure):
+@@ -2438,7 +2444,13 @@ private extension __JSONDecoder {
+                 throw DecodingError._typeMismatch(at: self.codingPath, expectation: type, reality: value)
+             }
+ 
+-            guard let data = Data(base64Encoded: string) else {
++            let decoded: Data?
++            if #available(macOS 10.9, iOS 7.0, *) {
++                decoded = Data(base64Encoded: string)
++            } else {
++                decoded = __NSDataWithBase64EncodingBeforeiOS7(string)
++            }
++            guard let data = decoded else {
+                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: self.codingPath, debugDescription: "Encountered Data is not valid Base64."))
+             }
+ 
+diff --git a/stdlib/public/Darwin/Foundation/NSData+DataProtocol.swift b/stdlib/public/Darwin/Foundation/NSData+DataProtocol.swift
+index f01ee86..588a0e3 100644
+--- a/stdlib/public/Darwin/Foundation/NSData+DataProtocol.swift
++++ b/stdlib/public/Darwin/Foundation/NSData+DataProtocol.swift
+@@ -31,6 +31,12 @@ extension NSData : DataProtocol {
+ 
+     @nonobjc
+     public var regions: [Data] {
++        // Before iOS 7 an NSData is one run of bytes, the one it answers with bytes and length.
++        guard #available(macOS 10.9, iOS 7.0, *) else {
++            return [Data(bytesNoCopy: UnsafeMutableRawPointer(mutating: bytes), count: length, deallocator: .custom({ (_: UnsafeMutableRawPointer, _: Int) -> Void in
++                withExtendedLifetime(self) { }
++            }))]
++        }
+         var datas = [Data]()
+         enumerateBytes { (ptr, range, stop) in
+             datas.append(Data(bytesNoCopy: UnsafeMutableRawPointer(mutating: ptr), count: range.length, deallocator: .custom({ (ptr: UnsafeMutableRawPointer, count: Int) -> Void in
+@@ -42,6 +48,9 @@ extension NSData : DataProtocol {
+ 
+     @nonobjc
+     public subscript(position: Int) -> UInt8 {
++        guard #available(macOS 10.9, iOS 7.0, *) else {
++            return bytes.load(fromByteOffset: position, as: UInt8.self)
++        }
+         var byte = UInt8(0)
+         var offset = position
+         enumerateBytes { (ptr, range, stop) in
+diff --git a/stdlib/public/Darwin/Foundation/NSStringAPI.swift b/stdlib/public/Darwin/Foundation/NSStringAPI.swift
+index 38a923c..add8bb1 100644
+--- a/stdlib/public/Darwin/Foundation/NSStringAPI.swift
++++ b/stdlib/public/Darwin/Foundation/NSStringAPI.swift
+@@ -1010,6 +1010,7 @@ extension StringProtocol where Index == String.Index {
+ 
+   /// Returns a new string created by replacing all characters in the string
+   /// not in the specified set with percent encoded characters.
++  @available(macOS 10.9, iOS 7.0, *)
+   public func addingPercentEncoding(
+     withAllowedCharacters allowedCharacters: CharacterSet
+   ) -> String? {
+@@ -1082,6 +1083,7 @@ extension StringProtocol where Index == String.Index {
+ 
+   /// A new string made from the string by replacing all percent encoded
+   /// sequences with the matching UTF-8 characters.
++  @available(macOS 10.9, iOS 7.0, *)
+   public var removingPercentEncoding: String? {
+     return _ns.removingPercentEncoding
+   }
+diff --git a/stdlib/public/Darwin/Foundation/Progress.swift b/stdlib/public/Darwin/Foundation/Progress.swift
+index 6164d11..b23128c 100644
+--- a/stdlib/public/Darwin/Foundation/Progress.swift
++++ b/stdlib/public/Darwin/Foundation/Progress.swift
+@@ -12,6 +12,7 @@
+ 
+ @_exported import Foundation // Clang module
+ 
++@available(macOS 10.9, iOS 7.0, *)
+ extension Progress {
+     @available(macOS 10.13, iOS 11.0, watchOS 4.0, tvOS 11.0, *)
+     public var estimatedTimeRemaining: TimeInterval? {
+diff --git a/stdlib/public/Darwin/Foundation/URL.swift b/stdlib/public/Darwin/Foundation/URL.swift
+index 76b2643..52ee536 100644
+--- a/stdlib/public/Darwin/Foundation/URL.swift
++++ b/stdlib/public/Darwin/Foundation/URL.swift
+@@ -448,12 +448,15 @@ public struct URLResourceValues {
+     public var ubiquitousItemIsUploading : Bool? { return _get(.ubiquitousItemIsUploadingKey) }
+     
+     /// returns the download status of this item.
++    @available(macOS 10.9, iOS 7.0, *)
+     public var ubiquitousItemDownloadingStatus : URLUbiquitousItemDownloadingStatus? { return _get(.ubiquitousItemDownloadingStatusKey) }
+     
+     /// returns the error when downloading the item from iCloud failed, see the NSUbiquitousFile section in FoundationErrors.h
++    @available(macOS 10.9, iOS 7.0, *)
+     public var ubiquitousItemDownloadingError : NSError? { return _get(.ubiquitousItemDownloadingErrorKey) }
+ 
+     /// returns the error when uploading the item to iCloud failed, see the NSUbiquitousFile section in FoundationErrors.h
++    @available(macOS 10.9, iOS 7.0, *)
+     public var ubiquitousItemUploadingError : NSError? { return _get(.ubiquitousItemUploadingErrorKey) }
+     
+     /// returns whether a download of this item has already been requested with an API like `startDownloadingUbiquitousItem(at:) throws`.
+@@ -618,6 +621,7 @@ public struct URL : ReferenceConvertible, Equatable {
+     }
+ 
+     /// Initializes a newly created URL referencing the local file or directory at the file system representation of the path. File system representation is a null-terminated C string with canonical UTF-8 encoding.
++    @available(macOS 10.9, iOS 7.0, *)
+     public init(fileURLWithFileSystemRepresentation path: UnsafePointer<Int8>, isDirectory: Bool, relativeTo baseURL: __shared URL?) {
+         _url = URL._converted(from: NSURL(fileURLWithFileSystemRepresentation: path, isDirectory: isDirectory, relativeTo: baseURL))
+     }
+@@ -825,7 +829,9 @@ public struct URL : ReferenceConvertible, Equatable {
+         if let result = _url.appendingPathComponent(pathComponent, isDirectory: isDirectory) {
+             return result
+         } else {
+-            // Now we need to do something more expensive
++            // Now we need to do something more expensive; URLComponents came with iOS 7, and before it this is the
++            // ultimate fallback below.
++            guard #available(macOS 10.9, iOS 7.0, *) else { return self }
+             if var c = URLComponents(url: self, resolvingAgainstBaseURL: true) {
+                 let path = (c.path as NSString).appendingPathComponent(pathComponent)
+                 c.path = isDirectory ? path + "/" : path
+@@ -851,7 +857,9 @@ public struct URL : ReferenceConvertible, Equatable {
+         if let result = _url.appendingPathComponent(pathComponent) {
+             return result
+         } else {
+-            // Now we need to do something more expensive
++            // Now we need to do something more expensive; URLComponents came with iOS 7, and before it this is the
++            // ultimate fallback below.
++            guard #available(macOS 10.9, iOS 7.0, *) else { return self }
+             if var c = URLComponents(url: self, resolvingAgainstBaseURL: true) {
+                 c.path = (c.path as NSString).appendingPathComponent(pathComponent)
+                 
+@@ -1036,6 +1044,7 @@ public struct URL : ReferenceConvertible, Equatable {
+     /// Temporary resource values are for client use. Temporary resource values exist only in memory and are never written to the resource's backing store. Once set, a temporary resource value can be copied from the URL object with `func resourceValues(forKeys:)`. The values are stored in the loosely-typed `allValues` dictionary property.
+     ///
+     /// To remove a temporary resource value from the URL object, use `func removeCachedResourceValue(forKey:)`. Care should be taken to ensure the key that identifies a temporary resource value is unique and does not conflict with system defined keys (using reverse domain name notation in your temporary resource value keys is recommended). This method is currently applicable only to URLs for file system resources.
++    @available(macOS 10.9, iOS 7.0, *)
+     public mutating func setTemporaryResourceValue(_ value : Any, forKey key: URLResourceKey) {
+         _url.setTemporaryResourceValue(value, forKey: key)
+     }
+@@ -1043,6 +1052,7 @@ public struct URL : ReferenceConvertible, Equatable {
+     /// Removes all cached resource values and all temporary resource values from the URL object.
+     /// 
+     /// This method is currently applicable only to URLs for file system resources.
++    @available(macOS 10.9, iOS 7.0, *)
+     public mutating func removeAllCachedResourceValues() {
+         _url.removeAllCachedResourceValues()
+     }
+@@ -1050,6 +1060,7 @@ public struct URL : ReferenceConvertible, Equatable {
+     /// Removes the cached resource value identified by a given resource value key from the URL object.
+     /// 
+     /// Removing a cached resource value may remove other cached resource values because some resource values are cached as a set of values, and because some resource values depend on other resource values (temporary resource values have no dependencies). This method is currently applicable only to URLs for file system resources.
++    @available(macOS 10.9, iOS 7.0, *)
+     public mutating func removeCachedResourceValue(forKey key: URLResourceKey) {
+         _url.removeCachedResourceValue(forKey: key)
+     }
+diff --git a/stdlib/public/Darwin/Foundation/URLComponents.swift b/stdlib/public/Darwin/Foundation/URLComponents.swift
+index 9c7c545..32d0b40 100644
+--- a/stdlib/public/Darwin/Foundation/URLComponents.swift
++++ b/stdlib/public/Darwin/Foundation/URLComponents.swift
+@@ -15,6 +15,7 @@
+ /// A structure designed to parse URLs based on RFC 3986 and to construct URLs from their constituent parts. 
+ /// 
+ /// Its behavior differs subtly from the `URL` struct, which conforms to older RFCs. However, you can easily obtain a `URL` based on the contents of a `URLComponents` or vice versa.
++@available(macOS 10.9, iOS 7.0, *)
+ public struct URLComponents : ReferenceConvertible, Hashable, Equatable, _MutableBoxing {
+     public typealias ReferenceType = NSURLComponents
+     
+@@ -308,6 +309,7 @@ public struct URLComponents : ReferenceConvertible, Hashable, Equatable, _Mutabl
+     }
+ }
+ 
++@available(macOS 10.9, iOS 7.0, *)
+ extension URLComponents : CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+     
+     public var description: String {
+@@ -343,6 +345,7 @@ extension URLComponents : CustomStringConvertible, CustomDebugStringConvertible,
+     }
+ }
+ 
++@available(macOS 10.9, iOS 7.0, *)
+ extension URLComponents : _ObjectiveCBridgeable {
+     public static func _getObjectiveCType() -> Any.Type {
+         return NSURLComponents.self
+@@ -371,6 +374,7 @@ extension URLComponents : _ObjectiveCBridgeable {
+     }
+ }
+ 
++@available(macOS 10.9, iOS 7.0, *)
+ extension NSURLComponents : _HasCustomAnyHashableRepresentation {
+     // Must be @nonobjc to avoid infinite recursion during bridging.
+     @nonobjc
+@@ -477,6 +481,7 @@ extension NSURLQueryItem : _HasCustomAnyHashableRepresentation {
+     }
+ }
+ 
++@available(macOS 10.9, iOS 7.0, *)
+ extension URLComponents : Codable {
+     private enum CodingKeys : Int, CodingKey {
+         case scheme
+diff --git a/stdlib/public/SwiftShims/NSDataShims.h b/stdlib/public/SwiftShims/NSDataShims.h
+index 770c7d8..66a8aef 100644
+--- a/stdlib/public/SwiftShims/NSDataShims.h
++++ b/stdlib/public/SwiftShims/NSDataShims.h
+@@ -15,15 +15,20 @@
+ NS_BEGIN_DECLS
+ 
+ typedef void (^NSDataDeallocator)(void * _Null_unspecified, NSUInteger);
+-FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorVM;
+-FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorUnmap;
+-FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorFree;
++/* Foundation exports these from iOS 7; 6.0 and 6.1.3 do not have them. */
++FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorVM API_AVAILABLE(macos(10.9), ios(7.0));
++FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorUnmap API_AVAILABLE(macos(10.9), ios(7.0));
++FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorFree API_AVAILABLE(macos(10.9), ios(7.0));
+ FOUNDATION_EXPORT const NSDataDeallocator NSDataDeallocatorNone;
+ 
+ @interface NSData (FoundationSPI)
+ - (BOOL)_isCompact API_AVAILABLE(macos(10.10), ios(8.0), watchos(2.0), tvos(9.0));
+ @end
+ 
++/* Base64 without line breaks on a release before iOS 7, through the calls iOS 4 brought for it (DataThunks.m). */
++NSString * _Nonnull __NSDataBase64EncodingBeforeiOS7(NSData * _Nonnull data);
++NSData * _Nullable __NSDataWithBase64EncodingBeforeiOS7(NSString * _Nonnull string);
++
+ BOOL __NSDataWriteToURL(NS_NON_BRIDGED(NSData *) _Nonnull data NS_RELEASES_ARGUMENT, NSURL * _Nonnull url NS_RELEASES_ARGUMENT, NSDataWritingOptions writingOptions, NSError **errorPtr);
+ 
+ NS_END_DECLS

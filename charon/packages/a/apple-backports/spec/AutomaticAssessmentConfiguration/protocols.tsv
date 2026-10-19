@@ -1,0 +1,8 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	-	-	-	-	-	-
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	optional	method	yes	assessmentSessionDidBegin:	- (void)assessmentSessionDidBegin:(AEAssessmentSession * _Nonnull)session;	yes
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	optional	method	yes	assessmentSession:failedToBeginWithError:	- (void)assessmentSession:(AEAssessmentSession * _Nonnull)session failedToBeginWithError:(NSError * _Nonnull)error;	yes
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	optional	method	yes	assessmentSession:wasInterruptedWithError:	- (void)assessmentSession:(AEAssessmentSession * _Nonnull)session wasInterruptedWithError:(NSError * _Nonnull)error;	yes
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	optional	method	yes	assessmentSessionDidEnd:	- (void)assessmentSessionDidEnd:(AEAssessmentSession * _Nonnull)session;	yes
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	optional	method	yes	assessmentSessionDidUpdate:	- (void)assessmentSessionDidUpdate:(AEAssessmentSession * _Nonnull)session API_AVAILABLE(ios(17.5));	yes
+AEAssessmentSessionDelegate	13.4	sdk16 body		NSObject	optional	method	yes	assessmentSession:failedToUpdateToConfiguration:error:	- (void)assessmentSession:(AEAssessmentSession * _Nonnull)session failedToUpdateToConfiguration:(AEAssessmentConfiguration * _Nonnull)configuration error:(NSError * _Nonnull)error API_AVAILABLE(ios(17.5));	yes

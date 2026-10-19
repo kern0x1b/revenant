@@ -1,0 +1,13 @@
+symbol	release
+SKCloudServiceCapabilitiesDidChangeNotification	9.3
+SKReceiptPropertyIsExpired	7.0
+SKReceiptPropertyIsRevoked	7.0
+SKReceiptPropertyIsVolumePurchase	7.0
+SKStoreProductParameterAdvertisingPartnerToken	9.3
+SKStoreProductParameterAffiliateToken	8.0
+SKStoreProductParameterCampaignToken	8.0
+SKStoreProductParameterCustomProductPageIdentifier	16.0
+SKStoreProductParameterProductIdentifier	11.0
+SKStoreProductParameterProviderToken	8.3
+SKStorefrontCountryCodeDidChangeNotification	11.0
+SKStorefrontIdentifierDidChangeNotification	9.3

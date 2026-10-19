@@ -1,0 +1,269 @@
+{
+  "framework": "GameplayKit",
+  "entries": [
+    {
+      "api": "GKBillowNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKBillowNoiseSource.persistence",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCheckerboardNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCheckerboardNoiseSource.squareSize",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCoherentNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCoherentNoiseSource.frequency",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCoherentNoiseSource.lacunarity",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCoherentNoiseSource.octaveCount",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCoherentNoiseSource.seed",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKConstantNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKConstantNoiseSource.value",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCylindersNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKCylindersNoiseSource.frequency",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKPerlinNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKPerlinNoiseSource.persistence",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKRidgedNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKSpheresNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKSpheresNoiseSource.frequency",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKVoronoiNoiseSource",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKVoronoiNoiseSource.displacement",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKVoronoiNoiseSource.distanceEnabled",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKVoronoiNoiseSource.frequency",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    },
+    {
+      "api": "GKVoronoiNoiseSource.seed",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a description of a noise field, and nothing more: GKNoiseSource declares no member at all and the value at a position is GKNoise's, which waits for SpriteKit because GKNoise.h imports it. Nothing here needs the device",
+      "effect": "each factory hands back the class it names with the numbers it was given, every property hands them back and a property set afterwards is read back, nothing validates a value, and the five numbers of a coherent source are one description with three different rules attached -- which is where the header puts persistence, on the two subclasses that declare it rather than on the class all three share",
+      "facts": "facts/GameplayKit/Noise.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-noise/measure.m"
+    }
+  ]
+}

@@ -1,0 +1,684 @@
+ModelIO	method	+[MDLAsset canExportFileExtension:]	9.0
+ModelIO	method	+[MDLAsset canImportFileExtension:]	9.0
+ModelIO	method	+[MDLAsset placeLightProbesWithDensity:heuristic:usingIrradianceDataSource:]	
+ModelIO	method	+[MDLLightProbe lightProbeWithTextureSize:forLocation:lightsToConsider:objectsToConsider:reflectiveCubemap:irradianceCubemap:]	
+ModelIO	method	+[MDLMesh newBoxWithDimensions:segments:geometryType:inwardNormals:allocator:]	
+ModelIO	method	+[MDLMesh newCapsuleWithHeight:radii:radialSegments:verticalSegments:hemisphereSegments:geometryType:inwardNormals:allocator:]	11.0
+ModelIO	method	+[MDLMesh newCylinderWithHeight:radii:radialSegments:verticalSegments:geometryType:inwardNormals:allocator:]	
+ModelIO	method	+[MDLMesh newEllipsoidWithRadii:radialSegments:verticalSegments:geometryType:inwardNormals:hemisphere:allocator:]	
+ModelIO	method	+[MDLMesh newEllipticalConeWithHeight:radii:radialSegments:verticalSegments:geometryType:inwardNormals:allocator:]	
+ModelIO	method	+[MDLMesh newIcosahedronWithRadius:inwardNormals:allocator:]	
+ModelIO	method	+[MDLMesh newIcosahedronWithRadius:inwardNormals:geometryType:allocator:]	11.0
+ModelIO	method	+[MDLMesh newPlaneWithDimensions:segments:geometryType:allocator:]	
+ModelIO	method	+[MDLMesh newSubdividedMesh:submeshIndex:subdivisionLevels:]	
+ModelIO	method	+[MDLTexture irradianceTextureCubeWithTexture:name:dimensions:]	9.0
+ModelIO	method	+[MDLTexture irradianceTextureCubeWithTexture:name:dimensions:roughness:]	9.0
+ModelIO	method	+[MDLTexture textureCubeWithImagesNamed:]	9.0
+ModelIO	method	+[MDLTexture textureCubeWithImagesNamed:bundle:]	9.0
+ModelIO	method	+[MDLTexture textureNamed:]	9.0
+ModelIO	method	+[MDLTexture textureNamed:assetResolver:]	12.0
+ModelIO	method	+[MDLTexture textureNamed:bundle:]	9.0
+ModelIO	method	+[MDLTransformComponent globalTransformWithObject:atTime:]	9.0
+ModelIO	method	+[MDLUtility convertToUSDZ:writeToURL:]	18.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 double4x4AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 float4x4AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 getDouble4x4Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 getFloat4x4Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 resetWithDouble4x4Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 resetWithFloat4x4Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 setDouble4x4:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedMatrix4x4 setFloat4x4:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternion doubleQuaternionAtTime:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion floatQuaternionAtTime:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion getDoubleQuaternionArray:maxCount:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion getFloatQuaternionArray:maxCount:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion resetWithDoubleQuaternionArray:atTimes:count:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion resetWithFloatQuaternionArray:atTimes:count:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion setDoubleQuaternion:atTime:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternion setFloatQuaternion:atTime:]	12.0
+ModelIO	method	-[MDLAnimatedQuaternionArray getDoubleQuaternionArray:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray getDoubleQuaternionArray:maxCount:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray getFloatQuaternionArray:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray getFloatQuaternionArray:maxCount:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray initWithElementCount:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray resetWithDoubleQuaternionArray:count:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray resetWithFloatQuaternionArray:count:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray setDoubleQuaternionArray:count:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedQuaternionArray setFloatQuaternionArray:count:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalar doubleAtTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalar floatAtTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalar getDoubleArray:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedScalar getFloatArray:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedScalar resetWithDoubleArray:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedScalar resetWithFloatArray:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedScalar setDouble:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalar setFloat:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray getDoubleArray:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray getDoubleArray:maxCount:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray getFloatArray:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray getFloatArray:maxCount:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray initWithElementCount:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray resetWithDoubleArray:count:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray resetWithFloatArray:count:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray setDoubleArray:count:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedScalarArray setFloatArray:count:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedValue clear]	11.0
+ModelIO	method	-[MDLAnimatedValue getTimes:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedValue isAnimated]	11.0
+ModelIO	method	-[MDLAnimatedVector2 double2AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 float2AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 getDouble2Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 getFloat2Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 resetWithDouble2Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 resetWithFloat2Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 setDouble2:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector2 setFloat2:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 double3AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 float3AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 getDouble3Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 getFloat3Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 resetWithDouble3Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 resetWithFloat3Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 setDouble3:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3 setFloat3:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array getDouble3Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array getDouble3Array:maxCount:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array getFloat3Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array getFloat3Array:maxCount:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array initWithElementCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array resetWithDouble3Array:count:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array resetWithFloat3Array:count:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array setDouble3Array:count:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector3Array setFloat3Array:count:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 double4AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 float4AtTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 getDouble4Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 getFloat4Array:maxCount:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 resetWithDouble4Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 resetWithFloat4Array:atTimes:count:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 setDouble4:atTime:]	11.0
+ModelIO	method	-[MDLAnimatedVector4 setFloat4:atTime:]	11.0
+ModelIO	method	-[MDLAsset addObject:]	9.0
+ModelIO	method	-[MDLAsset boundingBoxAtTime:]	9.0
+ModelIO	method	-[MDLAsset childObjectsOfClass:]	9.0
+ModelIO	method	-[MDLAsset exportAssetToURL:]	9.0
+ModelIO	method	-[MDLAsset exportAssetToURL:error:]	9.0
+ModelIO	method	-[MDLAsset initWithBufferAllocator:]	9.0
+ModelIO	method	-[MDLAsset initWithURL:]	9.0
+ModelIO	method	-[MDLAsset initWithURL:vertexDescriptor:bufferAllocator:]	9.0
+ModelIO	method	-[MDLAsset initWithURL:vertexDescriptor:bufferAllocator:preserveTopology:error:]	9.0
+ModelIO	method	-[MDLAsset loadTextures]	11.0
+ModelIO	method	-[MDLAsset objectAtIndex:]	9.0
+ModelIO	method	-[MDLAsset objectAtIndexedSubscript:]	9.0
+ModelIO	method	-[MDLAsset objectAtPath:]	11.0
+ModelIO	method	-[MDLAsset removeObject:]	9.0
+ModelIO	method	-[MDLAssetResolver canResolveAssetNamed:]	11.0
+ModelIO	method	-[MDLAssetResolver resolveAssetNamed:]	11.0
+ModelIO	method	-[MDLBundleAssetResolver initWithBundle:]	11.0
+ModelIO	method	-[MDLCamera bokehKernelWithSize:]	9.0
+ModelIO	method	-[MDLCamera frameBoundingBox:setNearAndFar:]	9.0
+ModelIO	method	-[MDLCamera lookAt:]	9.0
+ModelIO	method	-[MDLCamera lookAt:from:]	9.0
+ModelIO	method	-[MDLCamera rayTo:forViewPort:]	9.0
+ModelIO	method	-[MDLCheckerboardTexture initWithDivisions:name:dimensions:channelCount:channelEncoding:color1:color2:]	9.0
+ModelIO	method	-[MDLColorSwatchTexture initWithColorGradientFrom:toColor:name:textureDimensions:]	9.0
+ModelIO	method	-[MDLColorSwatchTexture initWithColorTemperatureGradientFrom:toColorTemperature:name:textureDimensions:]	9.0
+ModelIO	method	-[MDLLight irradianceAtPoint:]	9.0
+ModelIO	method	-[MDLLight irradianceAtPoint:colorSpace:]	9.0
+ModelIO	method	-[MDLLightProbe generateSphericalHarmonicsFromIrradiance:]	9.0
+ModelIO	method	-[MDLLightProbe initWithReflectiveTexture:irradianceTexture:]	9.0
+ModelIO	method	-[MDLLightProbeIrradianceDataSource sphericalHarmonicsCoefficientsAtPosition:]	
+ModelIO	method	-[MDLMaterial initWithName:scatteringFunction:]	9.0
+ModelIO	method	-[MDLMaterial loadTexturesUsingResolver:]	11.0
+ModelIO	method	-[MDLMaterial objectAtIndexedSubscript:]	9.0
+ModelIO	method	-[MDLMaterial objectForKeyedSubscript:]	9.0
+ModelIO	method	-[MDLMaterial propertiesWithSemantic:]	11.0
+ModelIO	method	-[MDLMaterial propertyNamed:]	9.0
+ModelIO	method	-[MDLMaterial propertyWithSemantic:]	9.0
+ModelIO	method	-[MDLMaterial removeAllProperties]	9.0
+ModelIO	method	-[MDLMaterial removeProperty:]	9.0
+ModelIO	method	-[MDLMaterial resolveTexturesWithResolver:]	11.0
+ModelIO	method	-[MDLMaterial setProperty:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:URL:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:color:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:float2:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:float3:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:float4:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:float:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:matrix4x4:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:string:]	9.0
+ModelIO	method	-[MDLMaterialProperty initWithName:semantic:textureSampler:]	9.0
+ModelIO	method	-[MDLMaterialProperty init]	9.0
+ModelIO	method	-[MDLMaterialProperty setProperties:]	9.0
+ModelIO	method	-[MDLMaterialPropertyConnection initWithOutput:input:]	10.0
+ModelIO	method	-[MDLMaterialPropertyConnection init]	10.0
+ModelIO	method	-[MDLMaterialPropertyGraph evaluate]	10.0
+ModelIO	method	-[MDLMaterialPropertyGraph initWithNodes:connections:]	10.0
+ModelIO	method	-[MDLMaterialPropertyGraph init]	10.0
+ModelIO	method	-[MDLMaterialPropertyNode initWithInputs:outputs:evaluationFunction:]	10.0
+ModelIO	method	-[MDLMaterialPropertyNode init]	10.0
+ModelIO	method	-[MDLMatrix4x4Array clear]	11.0
+ModelIO	method	-[MDLMatrix4x4Array getDouble4x4Array:maxCount:]	11.0
+ModelIO	method	-[MDLMatrix4x4Array getFloat4x4Array:maxCount:]	11.0
+ModelIO	method	-[MDLMatrix4x4Array initWithElementCount:]	11.0
+ModelIO	method	-[MDLMatrix4x4Array setDouble4x4Array:count:]	11.0
+ModelIO	method	-[MDLMatrix4x4Array setFloat4x4Array:count:]	11.0
+ModelIO	method	-[MDLMesh addAttributeWithName:format:]	
+ModelIO	method	-[MDLMesh addAttributeWithName:format:type:data:stride:]	
+ModelIO	method	-[MDLMesh addAttributeWithName:format:type:data:stride:time:]	
+ModelIO	method	-[MDLMesh addNormalsWithAttributeNamed:creaseThreshold:]	
+ModelIO	method	-[MDLMesh addOrthTanBasisForTextureCoordinateAttributeNamed:normalAttributeNamed:tangentAttributeNamed:]	11.0
+ModelIO	method	-[MDLMesh addTangentBasisForTextureCoordinateAttributeNamed:normalAttributeNamed:tangentAttributeNamed:]	
+ModelIO	method	-[MDLMesh addTangentBasisForTextureCoordinateAttributeNamed:tangentAttributeNamed:bitangentAttributeNamed:]	
+ModelIO	method	-[MDLMesh addUnwrappedTextureCoordinatesForAttributeNamed:]	
+ModelIO	method	-[MDLMesh flipTextureCoordinatesInAttributeNamed:]	11.0
+ModelIO	method	-[MDLMesh generateAmbientOcclusionTextureWithQuality:attenuationFactor:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:]	
+ModelIO	method	-[MDLMesh generateAmbientOcclusionTextureWithSize:raysPerSample:attenuationFactor:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:]	
+ModelIO	method	-[MDLMesh generateAmbientOcclusionVertexColorsWithQuality:attenuationFactor:objectsToConsider:vertexAttributeNamed:]	
+ModelIO	method	-[MDLMesh generateAmbientOcclusionVertexColorsWithRaysPerSample:attenuationFactor:objectsToConsider:vertexAttributeNamed:]	
+ModelIO	method	-[MDLMesh generateLightMapTextureWithQuality:lightsToConsider:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:]	
+ModelIO	method	-[MDLMesh generateLightMapTextureWithTextureSize:lightsToConsider:objectsToConsider:vertexAttributeNamed:materialPropertyNamed:]	
+ModelIO	method	-[MDLMesh generateLightMapVertexColorsWithLightsToConsider:objectsToConsider:vertexAttributeNamed:]	
+ModelIO	method	-[MDLMesh initBoxWithExtent:segments:inwardNormals:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initCapsuleWithExtent:cylinderSegments:hemisphereSegments:inwardNormals:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initConeWithExtent:segments:inwardNormals:cap:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initCylinderWithExtent:segments:inwardNormals:topCap:bottomCap:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initHemisphereWithExtent:segments:inwardNormals:cap:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initIcosahedronWithExtent:inwardNormals:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initMeshBySubdividingMesh:submeshIndex:subdivisionLevels:allocator:]	
+ModelIO	method	-[MDLMesh initPlaneWithExtent:segments:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initSphereWithExtent:segments:inwardNormals:geometryType:allocator:]	
+ModelIO	method	-[MDLMesh initWithBufferAllocator:]	9.0
+ModelIO	method	-[MDLMesh initWithVertexBuffer:vertexCount:descriptor:submeshes:]	9.0
+ModelIO	method	-[MDLMesh initWithVertexBuffers:vertexCount:descriptor:submeshes:]	9.0
+ModelIO	method	-[MDLMesh makeVerticesUniqueAndReturnError:]	11.0
+ModelIO	method	-[MDLMesh makeVerticesUnique]	9.0
+ModelIO	method	-[MDLMesh removeAttributeNamed:]	
+ModelIO	method	-[MDLMesh replaceAttributeNamed:withData:]	
+ModelIO	method	-[MDLMesh updateAttributeNamed:withData:]	
+ModelIO	method	-[MDLMesh vertexAttributeDataForAttributeNamed:]	9.0
+ModelIO	method	-[MDLMesh vertexAttributeDataForAttributeNamed:asFormat:]	9.0
+ModelIO	method	-[MDLMeshBuffer fillData:offset:]	9.0
+ModelIO	method	-[MDLMeshBuffer map]	9.0
+ModelIO	method	-[MDLMeshBufferAllocator newBuffer:type:]	9.0
+ModelIO	method	-[MDLMeshBufferAllocator newBufferFromZone:data:type:]	9.0
+ModelIO	method	-[MDLMeshBufferAllocator newBufferFromZone:length:type:]	9.0
+ModelIO	method	-[MDLMeshBufferAllocator newBufferWithData:type:]	9.0
+ModelIO	method	-[MDLMeshBufferAllocator newZone:]	9.0
+ModelIO	method	-[MDLMeshBufferAllocator newZoneForBuffersWithSize:andType:]	9.0
+ModelIO	method	-[MDLMeshBufferData initWithType:data:]	9.0
+ModelIO	method	-[MDLMeshBufferData initWithType:length:]	9.0
+ModelIO	method	-[MDLMeshBufferMap initWithBytes:deallocator:]	9.0
+ModelIO	method	-[MDLNoiseTexture initCellularNoiseWithFrequency:name:textureDimensions:channelEncoding:]	11.0
+ModelIO	method	-[MDLNoiseTexture initScalarNoiseWithSmoothness:name:textureDimensions:channelCount:channelEncoding:grayscale:]	9.0
+ModelIO	method	-[MDLNoiseTexture initVectorNoiseWithSmoothness:name:textureDimensions:channelEncoding:]	9.0
+ModelIO	method	-[MDLNormalMapTexture initByGeneratingNormalMapWithTexture:name:smoothness:contrast:]	9.0
+ModelIO	method	-[MDLObject addChild:]	9.0
+ModelIO	method	-[MDLObject boundingBoxAtTime:]	9.0
+ModelIO	method	-[MDLObject componentConformingToProtocol:]	9.0
+ModelIO	method	-[MDLObject enumerateChildObjectsOfClass:root:usingBlock:stopPointer:]	11.0
+ModelIO	method	-[MDLObject objectAtPath:]	9.0
+ModelIO	method	-[MDLObject objectForKeyedSubscript:]	9.0
+ModelIO	method	-[MDLObject setComponent:forProtocol:]	9.0
+ModelIO	method	-[MDLObject setObject:forKeyedSubscript:]	9.0
+ModelIO	method	-[MDLObjectContainerComponent addObject:]	9.0
+ModelIO	method	-[MDLObjectContainerComponent objectAtIndexedSubscript:]	11.0
+ModelIO	method	-[MDLObjectContainerComponent removeObject:]	9.0
+ModelIO	method	-[MDLPackedJointAnimation initWithName:jointPaths:]	11.0
+ModelIO	method	-[MDLPathAssetResolver initWithPath:]	11.0
+ModelIO	method	-[MDLPhotometricLight generateCubemapFromLight:]	9.0
+ModelIO	method	-[MDLPhotometricLight generateSphericalHarmonicsFromLight:]	9.0
+ModelIO	method	-[MDLPhotometricLight generateTexture:]	11.0
+ModelIO	method	-[MDLPhotometricLight initWithIESProfile:]	9.0
+ModelIO	method	-[MDLPhysicallyPlausibleLight setColorByTemperature:]	9.0
+ModelIO	method	-[MDLRelativeAssetResolver initWithAsset:]	11.0
+ModelIO	method	-[MDLSkeleton initWithName:jointPaths:]	11.0
+ModelIO	method	-[MDLSkyCubeTexture initWithName:channelEncoding:textureDimensions:turbidity:sunElevation:sunAzimuth:upperAtmosphereScattering:groundAlbedo:]	11.0
+ModelIO	method	-[MDLSkyCubeTexture initWithName:channelEncoding:textureDimensions:turbidity:sunElevation:upperAtmosphereScattering:groundAlbedo:]	9.0
+ModelIO	method	-[MDLSkyCubeTexture updateTexture]	9.0
+ModelIO	method	-[MDLSubmesh indexBufferAsIndexType:]	9.0
+ModelIO	method	-[MDLSubmesh initWithIndexBuffer:indexCount:indexType:geometryType:material:]	9.0
+ModelIO	method	-[MDLSubmesh initWithMDLSubmesh:indexType:geometryType:]	9.0
+ModelIO	method	-[MDLSubmesh initWithName:indexBuffer:indexCount:indexType:geometryType:material:]	9.0
+ModelIO	method	-[MDLSubmesh initWithName:indexBuffer:indexCount:indexType:geometryType:material:topology:]	9.0
+ModelIO	method	-[MDLSubmeshTopology initWithSubmesh:]	9.0
+ModelIO	method	-[MDLTexture imageFromTextureAtLevel:]	11.0
+ModelIO	method	-[MDLTexture imageFromTexture]	9.0
+ModelIO	method	-[MDLTexture initWithData:topLeftOrigin:name:dimensions:rowStride:channelCount:channelEncoding:isCube:]	9.0
+ModelIO	method	-[MDLTexture init]	9.0
+ModelIO	method	-[MDLTexture texelDataWithBottomLeftOriginAtMipLevel:create:]	9.0
+ModelIO	method	-[MDLTexture texelDataWithBottomLeftOrigin]	9.0
+ModelIO	method	-[MDLTexture texelDataWithTopLeftOriginAtMipLevel:create:]	9.0
+ModelIO	method	-[MDLTexture texelDataWithTopLeftOrigin]	9.0
+ModelIO	method	-[MDLTexture writeToURL:]	9.0
+ModelIO	method	-[MDLTexture writeToURL:level:]	11.0
+ModelIO	method	-[MDLTexture writeToURL:type:]	9.0
+ModelIO	method	-[MDLTexture writeToURL:type:level:]	11.0
+ModelIO	method	-[MDLTransform initWithIdentity]	9.0
+ModelIO	method	-[MDLTransform initWithMatrix:]	9.0
+ModelIO	method	-[MDLTransform initWithMatrix:resetsTransform:]	9.0
+ModelIO	method	-[MDLTransform initWithTransformComponent:]	9.0
+ModelIO	method	-[MDLTransform initWithTransformComponent:resetsTransform:]	9.0
+ModelIO	method	-[MDLTransform init]	9.0
+ModelIO	method	-[MDLTransform rotationAtTime:]	9.0
+ModelIO	method	-[MDLTransform rotationMatrixAtTime:]	9.0
+ModelIO	method	-[MDLTransform scaleAtTime:]	9.0
+ModelIO	method	-[MDLTransform setIdentity]	9.0
+ModelIO	method	-[MDLTransform setMatrix:forTime:]	11.0
+ModelIO	method	-[MDLTransform setRotation:forTime:]	9.0
+ModelIO	method	-[MDLTransform setScale:forTime:]	9.0
+ModelIO	method	-[MDLTransform setShear:forTime:]	9.0
+ModelIO	method	-[MDLTransform setTranslation:forTime:]	9.0
+ModelIO	method	-[MDLTransform shearAtTime:]	9.0
+ModelIO	method	-[MDLTransform translationAtTime:]	9.0
+ModelIO	method	-[MDLTransformComponent localTransformAtTime:]	9.0
+ModelIO	method	-[MDLTransformComponent setLocalTransform:]	9.0
+ModelIO	method	-[MDLTransformComponent setLocalTransform:forTime:]	9.0
+ModelIO	method	-[MDLTransformOp IsInverseOp]	11.0
+ModelIO	method	-[MDLTransformOp double4x4AtTime:]	11.0
+ModelIO	method	-[MDLTransformOp float4x4AtTime:]	11.0
+ModelIO	method	-[MDLTransformStack addMatrixOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addOrientOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addRotateOp:order:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addRotateXOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addRotateYOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addRotateZOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addScaleOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack addTranslateOp:inverse:]	11.0
+ModelIO	method	-[MDLTransformStack animatedValueWithName:]	11.0
+ModelIO	method	-[MDLTransformStack count]	11.0
+ModelIO	method	-[MDLTransformStack double4x4AtTime:]	11.0
+ModelIO	method	-[MDLTransformStack float4x4AtTime:]	11.0
+ModelIO	method	-[MDLTransformStack init]	11.0
+ModelIO	method	-[MDLURLTexture initWithURL:name:]	9.0
+ModelIO	method	-[MDLVertexAttribute initWithName:format:offset:bufferIndex:]	9.0
+ModelIO	method	-[MDLVertexBufferLayout initWithStride:]	9.0
+ModelIO	method	-[MDLVertexDescriptor addOrReplaceAttribute:]	9.0
+ModelIO	method	-[MDLVertexDescriptor attributeNamed:]	9.0
+ModelIO	method	-[MDLVertexDescriptor initWithVertexDescriptor:]	9.0
+ModelIO	method	-[MDLVertexDescriptor removeAttributeNamed:]	9.0
+ModelIO	method	-[MDLVertexDescriptor reset]	9.0
+ModelIO	method	-[MDLVertexDescriptor setPackedOffsets]	9.0
+ModelIO	method	-[MDLVertexDescriptor setPackedStrides]	9.0
+ModelIO	method	-[MDLVoxelArray coarseMeshUsingAllocator:]	9.0
+ModelIO	method	-[MDLVoxelArray coarseMesh]	9.0
+ModelIO	method	-[MDLVoxelArray convertToSignedShellField]	9.0
+ModelIO	method	-[MDLVoxelArray differenceWithVoxels:]	9.0
+ModelIO	method	-[MDLVoxelArray indexOfSpatialLocation:]	9.0
+ModelIO	method	-[MDLVoxelArray initWithAsset:divisions:interiorNBWidth:exteriorNBWidth:patchRadius:]	
+ModelIO	method	-[MDLVoxelArray initWithAsset:divisions:interiorShells:exteriorShells:patchRadius:]	
+ModelIO	method	-[MDLVoxelArray initWithAsset:divisions:patchRadius:]	9.0
+ModelIO	method	-[MDLVoxelArray initWithData:boundingBox:voxelExtent:]	9.0
+ModelIO	method	-[MDLVoxelArray intersectWithVoxels:]	9.0
+ModelIO	method	-[MDLVoxelArray meshUsingAllocator:]	9.0
+ModelIO	method	-[MDLVoxelArray setVoxelAtIndex:]	9.0
+ModelIO	method	-[MDLVoxelArray setVoxelsForMesh:divisions:interiorNBWidth:exteriorNBWidth:patchRadius:]	
+ModelIO	method	-[MDLVoxelArray setVoxelsForMesh:divisions:interiorShells:exteriorShells:patchRadius:]	
+ModelIO	method	-[MDLVoxelArray setVoxelsForMesh:divisions:patchRadius:]	9.0
+ModelIO	method	-[MDLVoxelArray spatialLocationOfIndex:]	9.0
+ModelIO	method	-[MDLVoxelArray unionWithVoxels:]	9.0
+ModelIO	method	-[MDLVoxelArray voxelBoundingBoxAtIndex:]	9.0
+ModelIO	method	-[MDLVoxelArray voxelExistsAtIndex:allowAnyX:allowAnyY:allowAnyZ:allowAnyShell:]	9.0
+ModelIO	method	-[MDLVoxelArray voxelIndices]	9.0
+ModelIO	method	-[MDLVoxelArray voxelsWithinExtent:]	9.0
+ModelIO	class	MDLAnimatedMatrix4x4	11.0
+ModelIO	class	MDLAnimatedQuaternion	12.0
+ModelIO	class	MDLAnimatedQuaternionArray	11.0
+ModelIO	property	MDLAnimatedQuaternionArray.elementCount	11.0
+ModelIO	class	MDLAnimatedScalar	11.0
+ModelIO	class	MDLAnimatedScalarArray	11.0
+ModelIO	property	MDLAnimatedScalarArray.elementCount	11.0
+ModelIO	class	MDLAnimatedValue	11.0
+ModelIO	property	MDLAnimatedValue.interpolation	11.0
+ModelIO	property	MDLAnimatedValue.keyTimes	11.0
+ModelIO	property	MDLAnimatedValue.maximumTime	11.0
+ModelIO	property	MDLAnimatedValue.minimumTime	11.0
+ModelIO	property	MDLAnimatedValue.precision	11.0
+ModelIO	property	MDLAnimatedValue.timeSampleCount	11.0
+ModelIO	class	MDLAnimatedVector2	11.0
+ModelIO	class	MDLAnimatedVector3	11.0
+ModelIO	class	MDLAnimatedVector3Array	11.0
+ModelIO	property	MDLAnimatedVector3Array.elementCount	11.0
+ModelIO	class	MDLAnimatedVector4	11.0
+ModelIO	class	MDLAnimationBindComponent	11.0
+ModelIO	property	MDLAnimationBindComponent.geometryBindTransform	11.0
+ModelIO	property	MDLAnimationBindComponent.jointAnimation	11.0
+ModelIO	property	MDLAnimationBindComponent.jointPaths	11.0
+ModelIO	property	MDLAnimationBindComponent.skeleton	11.0
+ModelIO	class	MDLAreaLight	9.0
+ModelIO	property	MDLAreaLight.areaRadius	9.0
+ModelIO	property	MDLAreaLight.aspect	9.0
+ModelIO	property	MDLAreaLight.superEllipticPower	9.0
+ModelIO	class	MDLAsset	9.0
+ModelIO	property	MDLAsset.URL	9.0
+ModelIO	property	MDLAsset.animations	11.0
+ModelIO	property	MDLAsset.boundingBox	9.0
+ModelIO	property	MDLAsset.bufferAllocator	9.0
+ModelIO	property	MDLAsset.count	9.0
+ModelIO	property	MDLAsset.endTime	9.0
+ModelIO	property	MDLAsset.frameInterval	9.0
+ModelIO	property	MDLAsset.masters	10.0
+ModelIO	property	MDLAsset.originals	15.0
+ModelIO	property	MDLAsset.resolver	11.0
+ModelIO	property	MDLAsset.startTime	9.0
+ModelIO	property	MDLAsset.upAxis	11.0
+ModelIO	property	MDLAsset.vertexDescriptor	9.0
+ModelIO	protocol	MDLAssetResolver	11.0
+ModelIO	class	MDLBundleAssetResolver	11.0
+ModelIO	property	MDLBundleAssetResolver.path	11.0
+ModelIO	class	MDLCamera	9.0
+ModelIO	property	MDLCamera.apertureBladeCount	9.0
+ModelIO	property	MDLCamera.barrelDistortion	9.0
+ModelIO	property	MDLCamera.chromaticAberration	9.0
+ModelIO	property	MDLCamera.exposure	9.0
+ModelIO	property	MDLCamera.exposureCompression	9.0
+ModelIO	property	MDLCamera.fStop	9.0
+ModelIO	property	MDLCamera.farVisibilityDistance	9.0
+ModelIO	property	MDLCamera.fieldOfView	9.0
+ModelIO	property	MDLCamera.fisheyeDistortion	9.0
+ModelIO	property	MDLCamera.flash	9.0
+ModelIO	property	MDLCamera.focalLength	9.0
+ModelIO	property	MDLCamera.focusDistance	9.0
+ModelIO	property	MDLCamera.maximumCircleOfConfusion	9.0
+ModelIO	property	MDLCamera.nearVisibilityDistance	9.0
+ModelIO	property	MDLCamera.opticalVignetting	9.0
+ModelIO	property	MDLCamera.projection	9.0
+ModelIO	property	MDLCamera.projectionMatrix	9.0
+ModelIO	property	MDLCamera.sensorAspect	9.0
+ModelIO	property	MDLCamera.sensorEnlargement	9.0
+ModelIO	property	MDLCamera.sensorShift	9.0
+ModelIO	property	MDLCamera.sensorVerticalAperture	9.0
+ModelIO	property	MDLCamera.shutterOpenInterval	9.0
+ModelIO	property	MDLCamera.worldToMetersConversionScale	9.0
+ModelIO	class	MDLCheckerboardTexture	9.0
+ModelIO	property	MDLCheckerboardTexture.color1	9.0
+ModelIO	property	MDLCheckerboardTexture.color2	9.0
+ModelIO	property	MDLCheckerboardTexture.divisions	9.0
+ModelIO	class	MDLColorSpec	
+ModelIO	class	MDLColorSwatchTexture	9.0
+ModelIO	protocol	MDLComponent	9.0
+ModelIO	protocol	MDLJointAnimation	11.0
+ModelIO	class	MDLLight	9.0
+ModelIO	property	MDLLight.colorSpace	9.0
+ModelIO	property	MDLLight.lightType	9.0
+ModelIO	class	MDLLightProbe	9.0
+ModelIO	property	MDLLightProbe.irradianceTexture	9.0
+ModelIO	property	MDLLightProbe.reflectiveTexture	9.0
+ModelIO	property	MDLLightProbe.sphericalHarmonicsCoefficients	9.0
+ModelIO	property	MDLLightProbe.sphericalHarmonicsLevel	9.0
+ModelIO	protocol	MDLLightProbeIrradianceDataSource	
+ModelIO	property	MDLLightProbeIrradianceDataSource.boundingBox	
+ModelIO	property	MDLLightProbeIrradianceDataSource.sphericalHarmonicsLevel	
+ModelIO	class	MDLMaterial	9.0
+ModelIO	property	MDLMaterial.baseMaterial	9.0
+ModelIO	property	MDLMaterial.count	9.0
+ModelIO	property	MDLMaterial.materialFace	9.0
+ModelIO	property	MDLMaterial.name	9.0
+ModelIO	property	MDLMaterial.scatteringFunction	9.0
+ModelIO	class	MDLMaterialProperty	9.0
+ModelIO	property	MDLMaterialProperty.URLValue	9.0
+ModelIO	property	MDLMaterialProperty.color	9.0
+ModelIO	property	MDLMaterialProperty.float2Value	9.0
+ModelIO	property	MDLMaterialProperty.float3Value	9.0
+ModelIO	property	MDLMaterialProperty.float4Value	9.0
+ModelIO	property	MDLMaterialProperty.floatValue	9.0
+ModelIO	property	MDLMaterialProperty.luminance	9.0
+ModelIO	property	MDLMaterialProperty.matrix4x4	9.0
+ModelIO	property	MDLMaterialProperty.name	9.0
+ModelIO	property	MDLMaterialProperty.semantic	9.0
+ModelIO	property	MDLMaterialProperty.stringValue	9.0
+ModelIO	property	MDLMaterialProperty.textureSamplerValue	9.0
+ModelIO	property	MDLMaterialProperty.type	9.0
+ModelIO	class	MDLMaterialPropertyConnection	10.0
+ModelIO	property	MDLMaterialPropertyConnection.input	10.0
+ModelIO	property	MDLMaterialPropertyConnection.output	10.0
+ModelIO	class	MDLMaterialPropertyGraph	10.0
+ModelIO	property	MDLMaterialPropertyGraph.connections	10.0
+ModelIO	property	MDLMaterialPropertyGraph.nodes	10.0
+ModelIO	class	MDLMaterialPropertyNode	10.0
+ModelIO	property	MDLMaterialPropertyNode.evaluationFunction	10.0
+ModelIO	property	MDLMaterialPropertyNode.inputs	10.0
+ModelIO	property	MDLMaterialPropertyNode.outputs	10.0
+ModelIO	class	MDLMatrix4x4Array	11.0
+ModelIO	property	MDLMatrix4x4Array.elementCount	11.0
+ModelIO	property	MDLMatrix4x4Array.precision	11.0
+ModelIO	class	MDLMesh	9.0
+ModelIO	property	MDLMesh.allocator	9.0
+ModelIO	property	MDLMesh.boundingBox	9.0
+ModelIO	property	MDLMesh.submeshes	9.0
+ModelIO	property	MDLMesh.vertexBuffers	9.0
+ModelIO	property	MDLMesh.vertexCount	9.0
+ModelIO	property	MDLMesh.vertexDescriptor	9.0
+ModelIO	protocol	MDLMeshBuffer	9.0
+ModelIO	property	MDLMeshBuffer.allocator	9.0
+ModelIO	property	MDLMeshBuffer.length	9.0
+ModelIO	property	MDLMeshBuffer.type	9.0
+ModelIO	property	MDLMeshBuffer.zone	9.0
+ModelIO	protocol	MDLMeshBufferAllocator	9.0
+ModelIO	class	MDLMeshBufferData	9.0
+ModelIO	property	MDLMeshBufferData.data	9.0
+ModelIO	class	MDLMeshBufferDataAllocator	9.0
+ModelIO	class	MDLMeshBufferMap	9.0
+ModelIO	property	MDLMeshBufferMap.bytes	9.0
+ModelIO	protocol	MDLMeshBufferZone	9.0
+ModelIO	property	MDLMeshBufferZone.allocator	9.0
+ModelIO	property	MDLMeshBufferZone.capacity	9.0
+ModelIO	class	MDLMeshBufferZoneDefault	11.0
+ModelIO	property	MDLMeshBufferZoneDefault.allocator	11.0
+ModelIO	property	MDLMeshBufferZoneDefault.capacity	11.0
+ModelIO	protocol	MDLNamed	9.0
+ModelIO	property	MDLNamed.name	9.0
+ModelIO	class	MDLNoiseTexture	9.0
+ModelIO	class	MDLNormalMapTexture	9.0
+ModelIO	class	MDLObject	9.0
+ModelIO	property	MDLObject.children	9.0
+ModelIO	property	MDLObject.components	9.0
+ModelIO	property	MDLObject.hidden	9.0
+ModelIO	property	MDLObject.instance	9.0
+ModelIO	property	MDLObject.parent	9.0
+ModelIO	property	MDLObject.path	9.0
+ModelIO	property	MDLObject.transform	9.0
+ModelIO	class	MDLObjectContainer	9.0
+ModelIO	protocol	MDLObjectContainerComponent	9.0
+ModelIO	property	MDLObjectContainerComponent.count	11.0
+ModelIO	property	MDLObjectContainerComponent.objects	9.0
+ModelIO	class	MDLPackedJointAnimation	11.0
+ModelIO	property	MDLPackedJointAnimation.jointPaths	11.0
+ModelIO	property	MDLPackedJointAnimation.rotations	11.0
+ModelIO	property	MDLPackedJointAnimation.scales	11.0
+ModelIO	property	MDLPackedJointAnimation.translations	11.0
+ModelIO	class	MDLPathAssetResolver	11.0
+ModelIO	property	MDLPathAssetResolver.path	11.0
+ModelIO	class	MDLPhotometricLight	9.0
+ModelIO	property	MDLPhotometricLight.lightCubeMap	9.0
+ModelIO	property	MDLPhotometricLight.sphericalHarmonicsCoefficients	9.0
+ModelIO	property	MDLPhotometricLight.sphericalHarmonicsLevel	9.0
+ModelIO	class	MDLPhysicallyPlausibleLight	9.0
+ModelIO	property	MDLPhysicallyPlausibleLight.attenuationEndDistance	9.0
+ModelIO	property	MDLPhysicallyPlausibleLight.attenuationStartDistance	9.0
+ModelIO	property	MDLPhysicallyPlausibleLight.color	9.0
+ModelIO	property	MDLPhysicallyPlausibleLight.innerConeAngle	9.0
+ModelIO	property	MDLPhysicallyPlausibleLight.lumens	9.0
+ModelIO	property	MDLPhysicallyPlausibleLight.outerConeAngle	9.0
+ModelIO	class	MDLPhysicallyPlausibleScatteringFunction	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.anisotropic	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.anisotropicRotation	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.clearcoat	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.clearcoatGloss	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.metallic	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.roughness	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.sheen	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.sheenTint	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.specularAmount	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.specularTint	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.subsurface	9.0
+ModelIO	property	MDLPhysicallyPlausibleScatteringFunction.version	9.0
+ModelIO	class	MDLRelativeAssetResolver	11.0
+ModelIO	property	MDLRelativeAssetResolver.asset	11.0
+ModelIO	class	MDLScatteringFunction	9.0
+ModelIO	property	MDLScatteringFunction.ambientOcclusion	9.0
+ModelIO	property	MDLScatteringFunction.ambientOcclusionScale	9.0
+ModelIO	property	MDLScatteringFunction.baseColor	9.0
+ModelIO	property	MDLScatteringFunction.emission	9.0
+ModelIO	property	MDLScatteringFunction.interfaceIndexOfRefraction	9.0
+ModelIO	property	MDLScatteringFunction.materialIndexOfRefraction	9.0
+ModelIO	property	MDLScatteringFunction.name	9.0
+ModelIO	property	MDLScatteringFunction.normal	9.0
+ModelIO	property	MDLScatteringFunction.specular	9.0
+ModelIO	class	MDLSkeleton	11.0
+ModelIO	property	MDLSkeleton.jointBindTransforms	11.0
+ModelIO	property	MDLSkeleton.jointPaths	11.0
+ModelIO	property	MDLSkeleton.jointRestTransforms	11.0
+ModelIO	class	MDLSkyCubeTexture	9.0
+ModelIO	property	MDLSkyCubeTexture.brightness	9.0
+ModelIO	property	MDLSkyCubeTexture.contrast	9.0
+ModelIO	property	MDLSkyCubeTexture.exposure	9.0
+ModelIO	property	MDLSkyCubeTexture.gamma	9.0
+ModelIO	property	MDLSkyCubeTexture.groundAlbedo	9.0
+ModelIO	property	MDLSkyCubeTexture.groundColor	9.0
+ModelIO	property	MDLSkyCubeTexture.highDynamicRangeCompression	9.0
+ModelIO	property	MDLSkyCubeTexture.horizonElevation	9.0
+ModelIO	property	MDLSkyCubeTexture.saturation	9.0
+ModelIO	property	MDLSkyCubeTexture.sunAzimuth	11.0
+ModelIO	property	MDLSkyCubeTexture.sunElevation	9.0
+ModelIO	property	MDLSkyCubeTexture.turbidity	9.0
+ModelIO	property	MDLSkyCubeTexture.upperAtmosphereScattering	9.0
+ModelIO	class	MDLStereoscopicCamera	9.0
+ModelIO	property	MDLStereoscopicCamera.interPupillaryDistance	9.0
+ModelIO	property	MDLStereoscopicCamera.leftProjectionMatrix	9.0
+ModelIO	property	MDLStereoscopicCamera.leftVergence	9.0
+ModelIO	property	MDLStereoscopicCamera.leftViewMatrix	9.0
+ModelIO	property	MDLStereoscopicCamera.overlap	9.0
+ModelIO	property	MDLStereoscopicCamera.rightProjectionMatrix	9.0
+ModelIO	property	MDLStereoscopicCamera.rightVergence	9.0
+ModelIO	property	MDLStereoscopicCamera.rightViewMatrix	9.0
+ModelIO	class	MDLSubmesh	9.0
+ModelIO	property	MDLSubmesh.geometryType	9.0
+ModelIO	property	MDLSubmesh.indexBuffer	9.0
+ModelIO	property	MDLSubmesh.indexCount	9.0
+ModelIO	property	MDLSubmesh.indexType	9.0
+ModelIO	property	MDLSubmesh.material	9.0
+ModelIO	property	MDLSubmesh.name	9.0
+ModelIO	property	MDLSubmesh.topology	9.0
+ModelIO	class	MDLSubmeshTopology	9.0
+ModelIO	property	MDLSubmeshTopology.edgeCreaseCount	9.0
+ModelIO	property	MDLSubmeshTopology.edgeCreaseIndices	9.0
+ModelIO	property	MDLSubmeshTopology.edgeCreases	9.0
+ModelIO	property	MDLSubmeshTopology.faceCount	9.0
+ModelIO	property	MDLSubmeshTopology.faceTopology	9.0
+ModelIO	property	MDLSubmeshTopology.holeCount	9.0
+ModelIO	property	MDLSubmeshTopology.holes	9.0
+ModelIO	property	MDLSubmeshTopology.vertexCreaseCount	9.0
+ModelIO	property	MDLSubmeshTopology.vertexCreaseIndices	9.0
+ModelIO	property	MDLSubmeshTopology.vertexCreases	9.0
+ModelIO	class	MDLTexture	9.0
+ModelIO	property	MDLTexture.channelCount	9.0
+ModelIO	property	MDLTexture.channelEncoding	9.0
+ModelIO	property	MDLTexture.dimensions	9.0
+ModelIO	property	MDLTexture.hasAlphaValues	9.0
+ModelIO	property	MDLTexture.isCube	9.0
+ModelIO	property	MDLTexture.mipLevelCount	9.0
+ModelIO	property	MDLTexture.rowStride	9.0
+ModelIO	class	MDLTextureFilter	9.0
+ModelIO	property	MDLTextureFilter.magFilter	9.0
+ModelIO	property	MDLTextureFilter.minFilter	9.0
+ModelIO	property	MDLTextureFilter.mipFilter	9.0
+ModelIO	property	MDLTextureFilter.rWrapMode	9.0
+ModelIO	property	MDLTextureFilter.sWrapMode	9.0
+ModelIO	property	MDLTextureFilter.tWrapMode	9.0
+ModelIO	class	MDLTextureSampler	9.0
+ModelIO	property	MDLTextureSampler.hardwareFilter	9.0
+ModelIO	property	MDLTextureSampler.texture	9.0
+ModelIO	property	MDLTextureSampler.transform	9.0
+ModelIO	class	MDLTransform	9.0
+ModelIO	property	MDLTransform.rotation	9.0
+ModelIO	property	MDLTransform.scale	9.0
+ModelIO	property	MDLTransform.shear	9.0
+ModelIO	property	MDLTransform.translation	9.0
+ModelIO	protocol	MDLTransformComponent	9.0
+ModelIO	property	MDLTransformComponent.keyTimes	9.0
+ModelIO	property	MDLTransformComponent.matrix	9.0
+ModelIO	property	MDLTransformComponent.maximumTime	9.0
+ModelIO	property	MDLTransformComponent.minimumTime	9.0
+ModelIO	property	MDLTransformComponent.resetsTransform	9.0
+ModelIO	class	MDLTransformMatrixOp	11.0
+ModelIO	property	MDLTransformMatrixOp.animatedValue	11.0
+ModelIO	property	MDLTransformMatrixOp.name	11.0
+ModelIO	protocol	MDLTransformOp	11.0
+ModelIO	property	MDLTransformOp.name	11.0
+ModelIO	class	MDLTransformOrientOp	12.0
+ModelIO	property	MDLTransformOrientOp.animatedValue	12.0
+ModelIO	property	MDLTransformOrientOp.name	12.0
+ModelIO	class	MDLTransformRotateOp	11.0
+ModelIO	property	MDLTransformRotateOp.animatedValue	11.0
+ModelIO	property	MDLTransformRotateOp.name	11.0
+ModelIO	class	MDLTransformRotateXOp	11.0
+ModelIO	property	MDLTransformRotateXOp.animatedValue	11.0
+ModelIO	property	MDLTransformRotateXOp.name	11.0
+ModelIO	class	MDLTransformRotateYOp	11.0
+ModelIO	property	MDLTransformRotateYOp.animatedValue	11.0
+ModelIO	property	MDLTransformRotateYOp.name	11.0
+ModelIO	class	MDLTransformRotateZOp	11.0
+ModelIO	property	MDLTransformRotateZOp.animatedValue	11.0
+ModelIO	property	MDLTransformRotateZOp.name	11.0
+ModelIO	class	MDLTransformScaleOp	11.0
+ModelIO	property	MDLTransformScaleOp.animatedValue	11.0
+ModelIO	property	MDLTransformScaleOp.name	11.0
+ModelIO	class	MDLTransformStack	11.0
+ModelIO	property	MDLTransformStack.keyTimes	11.0
+ModelIO	property	MDLTransformStack.transformOps	11.0
+ModelIO	class	MDLTransformTranslateOp	11.0
+ModelIO	property	MDLTransformTranslateOp.animatedValue	11.0
+ModelIO	property	MDLTransformTranslateOp.name	11.0
+ModelIO	class	MDLURLTexture	9.0
+ModelIO	property	MDLURLTexture.URL	9.0
+ModelIO	class	MDLUtility	18.0
+ModelIO	class	MDLVertexAttribute	9.0
+ModelIO	property	MDLVertexAttribute.bufferIndex	9.0
+ModelIO	property	MDLVertexAttribute.format	9.0
+ModelIO	property	MDLVertexAttribute.initializationValue	9.0
+ModelIO	property	MDLVertexAttribute.name	9.0
+ModelIO	property	MDLVertexAttribute.offset	9.0
+ModelIO	property	MDLVertexAttribute.time	9.0
+ModelIO	constant	MDLVertexAttributeAnisotropy	
+ModelIO	constant	MDLVertexAttributeBinormal	
+ModelIO	constant	MDLVertexAttributeBitangent	
+ModelIO	constant	MDLVertexAttributeColor	
+ModelIO	class	MDLVertexAttributeData	9.0
+ModelIO	property	MDLVertexAttributeData.bufferSize	11.0
+ModelIO	property	MDLVertexAttributeData.dataStart	9.0
+ModelIO	property	MDLVertexAttributeData.format	9.0
+ModelIO	property	MDLVertexAttributeData.map	9.0
+ModelIO	property	MDLVertexAttributeData.stride	9.0
+ModelIO	constant	MDLVertexAttributeEdgeCrease	
+ModelIO	constant	MDLVertexAttributeJointIndices	
+ModelIO	constant	MDLVertexAttributeJointWeights	
+ModelIO	constant	MDLVertexAttributeNormal	
+ModelIO	constant	MDLVertexAttributeOcclusionValue	
+ModelIO	constant	MDLVertexAttributePosition	
+ModelIO	constant	MDLVertexAttributeShadingBasisU	
+ModelIO	constant	MDLVertexAttributeShadingBasisV	
+ModelIO	constant	MDLVertexAttributeSubdivisionStencil	
+ModelIO	constant	MDLVertexAttributeTangent	
+ModelIO	constant	MDLVertexAttributeTextureCoordinate	
+ModelIO	class	MDLVertexBufferLayout	9.0
+ModelIO	property	MDLVertexBufferLayout.stride	9.0
+ModelIO	class	MDLVertexDescriptor	9.0
+ModelIO	property	MDLVertexDescriptor.attributes	9.0
+ModelIO	property	MDLVertexDescriptor.layouts	9.0
+ModelIO	class	MDLVoxelArray	9.0
+ModelIO	property	MDLVoxelArray.boundingBox	9.0
+ModelIO	property	MDLVoxelArray.count	9.0
+ModelIO	property	MDLVoxelArray.isValidSignedShellField	9.0
+ModelIO	property	MDLVoxelArray.shellFieldExteriorThickness	9.0
+ModelIO	property	MDLVoxelArray.shellFieldInteriorThickness	9.0
+ModelIO	property	MDLVoxelArray.voxelIndexExtent	9.0
+ModelIO	class	NSString	
+ModelIO	class	NSURL	
+ModelIO	constant	kUTType3dObject	9.0
+ModelIO	constant	kUTTypeAlembic	9.0
+ModelIO	constant	kUTTypePolygon	9.0
+ModelIO	constant	kUTTypeStereolithography	9.0
+ModelIO	constant	kUTTypeUniversalSceneDescription	10.0
+ModelIO	constant	kUTTypeUniversalSceneDescriptionMobile	14.0

@@ -1,0 +1,7 @@
+$ xcrun swiftc -O -o preprocessing-estimator-host preprocessing-estimator-host.swift
+$ ./preprocessing-estimator-host
+after fitted(to:): preprocessor scale=1.0 offset=0.0
+   and the estimator was fitted 1 time(s), first seen Optional(1.0)
+after preprocessed(from:): the values are [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+   1, 2, 3 ... would mean the identity preprocessor was used; anything else means it was fitted.
+EXIT=0

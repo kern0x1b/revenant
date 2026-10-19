@@ -1,0 +1,24 @@
+[
+  {
+    "api": "BEAvailability",
+    "kind": "class",
+    "introduced": "18.4",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "an application that asks the question names this class, and a strong reference to a class that is not there stops it at launch",
+    "effect": "the class exists and its one method answers as facts/BrowserKit/BEAvailability.md says",
+    "facts": "facts/BrowserKit/BEAvailability.md",
+    "source": "the header of BrowserKit/BEAvailability.h in the SDK 26.2 (the SDK the port builds against, 16.4, has no BrowserKit); the armv7 shared cache of iOS 6.1.3, which has no BrowserKit image and no such class"
+  },
+  {
+    "api": "+[BEAvailability isEligibleForContext:completionHandler:]",
+    "kind": "method",
+    "introduced": "18.4",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "eligibility is the system's to decide, from an entitlement to a browser engine of one's own and a release that supports it; iOS 6.1.3 has neither, so nothing on it can be eligible",
+    "effect": "the handler is called once with eligible NO and a nil error, on the thread that asked and before the call returns, for every context; a nil handler is allowed",
+    "facts": "facts/BrowserKit/BEAvailability.md",
+    "source": "the header of BrowserKit/BEAvailability.h in the SDK 26.2, which says the handler is given the status and the error if the call fails - and ineligibility is an answer, not a failure"
+  }
+]

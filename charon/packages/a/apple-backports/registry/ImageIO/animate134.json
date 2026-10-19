@@ -1,0 +1,16 @@
+{
+  "framework": "ImageIO",
+  "entries": [
+    {
+      "api": "CharonImageAnimation",
+      "kind": "class",
+      "introduced": "13.4",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "export the class CharonImageAnimation: its methods are built in Graphics/ImageIOAnimation134.m, but the 6.1.3 library links the class symbol local (nm of the built libGraphicsBackports.dylib shows _OBJC_CLASS_$_CharonImageAnimation as s, not S), and the registry check counts only exported class symbols",
+      "effect": "until the class symbol is exported, the registry check reports the class as not built; the two animation functions are unaffected",
+      "source": "no SDK header declares this name; the band is this port's own, the release whose object carries it, and the two functions it carries are first held at 13.4 (tools/cache-index/first-rung.lua over the 54 held rungs, 2026-10-18); the export state measured by nm on the gate's 6.1.3 build (2026-10-18)",
+      "facts": "facts/ImageIO/Animation.md"
+    }
+  ]
+}

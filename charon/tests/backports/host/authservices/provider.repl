@@ -1,0 +1,5 @@
+- (void)provideCredentialWithoutUserInteractionForIdentity:(ASPasswordCredentialIdentity *)credentialIdentity
+{
+    // MUTANT: a base class that REACHES FOR THE STORE, which is the one thing it must never do.
+    [[ASCredentialIdentityStore sharedCredentialIdentityStore]
+        saveCredentialIdentities:@[ credentialIdentity ] completion:nil];

@@ -1,0 +1,22 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@notify_post	-			uint32_t (const char *)	const char * name	-	-	-	c5f62a03cdee6fbc	-
+typedef	c:@T@notify_handler_t	-			void ((^))(int)	-	-	-	-	343b36a5d3407459	-
+function	c:@F@notify_register_dispatch	-			uint32_t (const char *, int *, dispatch_queue_t, notify_handler_t)	const char * name | int * out_token | dispatch_queue_t queue | notify_handler_t handler	-	ios=3.2/-/-/0	-	9d408008a780ebd3	-
+function	c:@F@notify_register_check	-			uint32_t (const char *, int *)	const char * name | int * out_token	-	-	-	9c6d790bc7c1b0a6	-
+function	c:@F@notify_register_signal	-			uint32_t (const char *, int, int *)	const char * name | int sig | int * out_token	-	-	-	47d0235627527968	-
+function	c:@F@notify_register_mach_port	-			uint32_t (const char *, mach_port_t *, int, int *)	const char * name | mach_port_t * notify_port | int flags | int * out_token	-	-	-	03cb0d4163fd167c	-
+function	c:@F@notify_register_file_descriptor	-			uint32_t (const char *, int *, int, int *)	const char * name | int * notify_fd | int flags | int * out_token	-	-	-	9e7a0397bceda54b	-
+function	c:@F@notify_check	-			uint32_t (int, int *)	int token | int * check	-	-	-	9a158348b24582f9	-
+function	c:@F@notify_cancel	-			uint32_t (int)	int token	-	-	-	3fcf71996840a403	-
+function	c:@F@notify_suspend	-			uint32_t (int)	int token	-	ios=4.0/-/-/0	-	aec29709644aaea4	-
+function	c:@F@notify_resume	-			uint32_t (int)	int token	-	ios=4.0/-/-/0	-	0d1fcc1db1e60a80	-
+function	c:@F@notify_set_state	-			uint32_t (int, uint64_t)	int token | uint64_t state64	-	ios=2.0/-/-/0	-	8339fefeed5c407d	-
+function	c:@F@notify_get_state	-			uint32_t (int, uint64_t *)	int token | uint64_t * state64	-	ios=2.0/-/-/0	-	655389b2c4fcb7c0	-
+function	c:@F@notify_is_valid_token	-			_Bool (int)	int val	-	ios=8.0/-/-/0	-	20c44c991e703cd8	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-

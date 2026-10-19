@@ -1,0 +1,1149 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@NEAppProxyFlowError	-			enum NEAppProxyFlowError	-	-	-	-	6a051c08030fa011	-
+enum	c:@E@NEAppProxyFlowError	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	b94b97e98febfe05	-
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorNotConnected	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	139abb6f621e2717	1
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorPeerReset	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	e50b854a70b0a667	2
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorHostUnreachable	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	867a4ccfe034990f	3
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorInvalidArgument	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	8c520537c1269ae0	4
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorAborted	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	eb450a520798bf48	5
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorRefused	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	0e6eeb46cdd1b8ea	6
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorTimedOut	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	f7919d128e9e5790	7
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorInternal	NEAppProxyFlowError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	b990a93f16581367	8
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorDatagramTooLarge	NEAppProxyFlowError			-	-	-	ios=9.3/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d852c2e1fd0ad3a2	9
+enumconst	c:@E@NEAppProxyFlowError@NEAppProxyFlowErrorReadAlreadyPending	NEAppProxyFlowError			-	-	-	ios=9.3/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cb4ba07d0f086d9f	10
+var	c:@NEAppProxyErrorDomain	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2ba1647ee6b85335	-
+interface	c:objc(cs)NEAppProxyFlow	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use openWithLocalFlowEndpoint:completionHandler: instead	eabf7c206e3eb9b1	-
+super	-	NEAppProxyFlow	NSObject		-	-	-	-	-	375247c748f3cfd2	-
+method	c:objc(cs)NEAppProxyFlow(im)openWithLocalFlowEndpoint:completionHandler:	-			void	nw_endpoint_t localEndpoint | void (^)(NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	e399d8f153c9575a	-
+method	c:objc(cs)NEAppProxyFlow(im)openWithLocalEndpoint:completionHandler:	-			void	NWHostEndpoint * localEndpoint | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use openWithLocalFlowEndpoint:completionHandler: instead	e4c662a6584ca458	-
+method	c:objc(cs)NEAppProxyFlow(im)closeReadWithError:	-			void	NSError * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	91e35f49a45d19b4	-
+method	c:objc(cs)NEAppProxyFlow(im)closeWriteWithError:	-			void	NSError * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c16df0dc4e321ab5	-
+method	c:objc(cs)NEAppProxyFlow(im)setMetadata:	-			void	nw_parameters_t parameters	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	476f77c67c06d718	-
+property	c:objc(cs)NEAppProxyFlow(py)metaData	-			NEFlowMetaData *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	99f2439a76d6f7c4	-
+property	c:objc(cs)NEAppProxyFlow(py)networkInterface	-			nw_interface_t	-	copy	ios=13.4/-/-/0,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1d1e476f6fe2b388	-
+property	c:objc(cs)NEAppProxyFlow(py)remoteHostname	-			NSString *	-	readonly	ios=14.2/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3e6ae9cb6fdc68a3	-
+property	c:objc(cs)NEAppProxyFlow(py)isBound	-			BOOL	-	readonly	ios=14.3/-/-/0,macos=11.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	94b5595e7d77220c	-
+typedef	c:@T@NEProviderStopReason	-			enum NEProviderStopReason	-	-	-	-	269f818849ee7591	-
+enum	c:@E@NEProviderStopReason	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d84ffe779d393606	-
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonNone	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e23310bafcaf463b	0
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonUserInitiated	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	364ffb151e5f0142	1
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonProviderFailed	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7c1738637f1232e2	2
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonNoNetworkAvailable	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aa53b2f7d4c83458	3
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonUnrecoverableNetworkChange	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c20e9f04685d854c	4
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonProviderDisabled	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4c5a0e008186a8bd	5
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonAuthenticationCanceled	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	afb31dbcbdd6aa28	6
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonConfigurationFailed	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e1ce20e3b00505b2	7
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonIdleTimeout	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	213d04e6dc27fd69	8
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonConfigurationDisabled	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	08d574555a22fc2d	9
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonConfigurationRemoved	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bb8fbf4ee5290152	10
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonSuperceded	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	232969d66febeb15	11
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonUserLogout	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	adb82d35b2a2a4eb	12
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonUserSwitch	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8cd7a78241387cc9	13
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonConnectionFailed	NEProviderStopReason			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b3a8ece396808d01	14
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonSleep	NEProviderStopReason			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=17.0/-/-/0	-	a2417e2ef1e4e954	15
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonAppUpdate	NEProviderStopReason			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=17.0/-/-/0	-	978724fb829a0e9e	16
+enumconst	c:@E@NEProviderStopReason@NEProviderStopReasonInternalError	NEProviderStopReason			-	-	-	ios=18.1/-/-/0,macos=15.1/-/-/0,tvos=18.1/-/-/0	-	7f50b0f0a2f107be	17
+interface	c:objc(cs)NEProvider	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	deprecated: Use nw_connection_t in Network framework instead	05f4b6100ff20497	-
+super	-	NEProvider	NSObject		-	-	-	-	-	d76b01dabe78f075	-
+method	c:objc(cs)NEProvider(im)sleepWithCompletionHandler:	-			void	void (^)(void) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3696d1f4d875d7cd	-
+method	c:objc(cs)NEProvider(im)wake	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3fc63d5e2c231567	-
+method	c:objc(cs)NEProvider(im)createTCPConnectionToEndpoint:enableTLS:TLSParameters:delegate:	-			NWTCPConnection *	NWEndpoint * remoteEndpoint | BOOL enableTLS | NWTLSParameters * TLSParameters | id delegate	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use nw_connection_t in Network framework instead	15be1b10dab139db	-
+method	c:objc(cs)NEProvider(im)createUDPSessionToEndpoint:fromEndpoint:	-			NWUDPSession *	NWEndpoint * remoteEndpoint | NWHostEndpoint * localEndpoint	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use nw_connection_t in Network framework instead	e4200343681ca399	-
+method	c:objc(cs)NEProvider(im)displayMessage:completionHandler:	-			void	NSString * message | void (^)(BOOL) completionHandler	-	ios=10.0/12.0/-/0,macos=10.12/10.14/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use UILocalNotification instead	064b50917efd32cf	-
+method	c:objc(cs)NEProvider(cm)startSystemExtensionMode	-			void	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8e9a0a2f452666e2	-
+property	c:objc(cs)NEProvider(py)defaultPath	-			NWPath *	-	readonly	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	e3fcf4074c283eec	-
+typedef	c:@T@NETunnelProviderError	-			enum NETunnelProviderError	-	-	-	-	58145b2686d9fa0d	-
+enum	c:@E@NETunnelProviderError	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d37e304b86c3b992	-
+enumconst	c:@E@NETunnelProviderError@NETunnelProviderErrorNetworkSettingsInvalid	NETunnelProviderError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e602260a4ba5f230	1
+enumconst	c:@E@NETunnelProviderError@NETunnelProviderErrorNetworkSettingsCanceled	NETunnelProviderError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5408a5585f1a327e	2
+enumconst	c:@E@NETunnelProviderError@NETunnelProviderErrorNetworkSettingsFailed	NETunnelProviderError			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c0862615e4940886	3
+typedef	c:@T@NETunnelProviderRoutingMethod	-			enum NETunnelProviderRoutingMethod	-	-	-	-	e56f0bf40688b2dc	-
+enum	c:@E@NETunnelProviderRoutingMethod	-			NSInteger	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8bd7fceb7df80e6b	-
+enumconst	c:@E@NETunnelProviderRoutingMethod@NETunnelProviderRoutingMethodDestinationIP	NETunnelProviderRoutingMethod			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0b6f9fe1f9f42237	1
+enumconst	c:@E@NETunnelProviderRoutingMethod@NETunnelProviderRoutingMethodSourceApplication	NETunnelProviderRoutingMethod			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dfec2908df62ae09	2
+enumconst	c:@E@NETunnelProviderRoutingMethod@NETunnelProviderRoutingMethodNetworkRule	NETunnelProviderRoutingMethod			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6d1d989aa16649a0	3
+var	c:@NETunnelProviderErrorDomain	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ae6802e23c7d8655	-
+interface	c:objc(cs)NETunnelProvider	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	35c5c159e9474adb	-
+super	-	NETunnelProvider	NEProvider		-	-	-	-	-	bc21086f6571618b	-
+method	c:objc(cs)NETunnelProvider(im)handleAppMessage:completionHandler:	-			void	NSData * messageData | void (^)(NSData * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7717b2f57f06b930	-
+method	c:objc(cs)NETunnelProvider(im)setTunnelNetworkSettings:completionHandler:	-			void	NETunnelNetworkSettings * tunnelNetworkSettings | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cb21047636bcdb55	-
+property	c:objc(cs)NETunnelProvider(py)protocolConfiguration	-			NEVPNProtocol *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	12ba21d73f1ea44c	-
+property	c:objc(cs)NETunnelProvider(py)appRules	-			NSArray<NEAppRule *> *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	26457adc1bb155fa	-
+property	c:objc(cs)NETunnelProvider(py)routingMethod	-			NETunnelProviderRoutingMethod	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6d386d1207101019	-
+property	c:objc(cs)NETunnelProvider(py)reasserting	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7821cfada0c267ce	-
+interface	c:objc(cs)NEAppProxyProvider	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use handleNewUDPFlow:initialRemoteFlowEndpoint: instead	340820a955938f13	-
+super	-	NEAppProxyProvider	NETunnelProvider		-	-	-	-	-	1e19d28a057cf1d9	-
+method	c:objc(cs)NEAppProxyProvider(im)startProxyWithOptions:completionHandler:	-			void	NSDictionary<NSString *,id> * options | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c728145b402b8be1	-
+method	c:objc(cs)NEAppProxyProvider(im)stopProxyWithReason:completionHandler:	-			void	NEProviderStopReason reason | void (^)(void) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9b144df87963c42a	-
+method	c:objc(cs)NEAppProxyProvider(im)cancelProxyWithError:	-			void	NSError * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0dfc8cfb190684b2	-
+method	c:objc(cs)NEAppProxyProvider(im)handleNewFlow:	-			BOOL	NEAppProxyFlow * flow	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9e8d41a70d0d9ca3	-
+method	c:objc(cs)NEAppProxyProvider(im)handleNewUDPFlow:initialRemoteFlowEndpoint:	-			BOOL	NEAppProxyUDPFlow * flow | nw_endpoint_t remoteEndpoint	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	f485eba5c5b5b877	-
+method	c:objc(cs)NEAppProxyProvider(im)handleNewUDPFlow:initialRemoteEndpoint:	-			BOOL	NEAppProxyUDPFlow * flow | NWEndpoint * remoteEndpoint	-	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use handleNewUDPFlow:initialRemoteFlowEndpoint: instead	2b2b420b70fa5abe	-
+typedef	c:@T@NEVPNError	-			enum NEVPNError	-	-	-	-	61e58d20f11446ba	-
+enum	c:@E@NEVPNError	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	45c7bff84f94a365	-
+enumconst	c:@E@NEVPNError@NEVPNErrorConfigurationInvalid	NEVPNError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3493615a5e0bcbd3	1
+enumconst	c:@E@NEVPNError@NEVPNErrorConfigurationDisabled	NEVPNError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	55fa59c099deea85	2
+enumconst	c:@E@NEVPNError@NEVPNErrorConnectionFailed	NEVPNError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	66d5efac25012b75	3
+enumconst	c:@E@NEVPNError@NEVPNErrorConfigurationStale	NEVPNError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c551c9c71f43e1bd	4
+enumconst	c:@E@NEVPNError@NEVPNErrorConfigurationReadWriteFailed	NEVPNError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	901a0935cb1a4e82	5
+enumconst	c:@E@NEVPNError@NEVPNErrorConfigurationUnknown	NEVPNError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	91e8f577b931a9aa	6
+var	c:@NEVPNErrorDomain	-			NSString *const	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b1e2fce17e6e970f	-
+var	c:@NEVPNConfigurationChangeNotification	-			NSString *const	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	226c6c09cd2ab276	-
+interface	c:objc(cs)NEVPNManager	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	deprecated: Use protocolConfiguration instead	ff4bd8e7c8525faa	-
+super	-	NEVPNManager	NSObject		-	-	-	-	-	03e43102905426fe	-
+method	c:objc(cs)NEVPNManager(cm)sharedManager	-			NEVPNManager *	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	dc0348140677dab9	-
+method	c:objc(cs)NEVPNManager(im)loadFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	18d4e073cf267e28	-
+method	c:objc(cs)NEVPNManager(im)removeFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f9f1505105ed91e5	-
+method	c:objc(cs)NEVPNManager(im)saveToPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4776d1a3f5356b0e	-
+property	c:objc(cs)NEVPNManager(py)onDemandRules	-			NSArray<NEOnDemandRule *> *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	17e29e56b67d41a5	-
+property	c:objc(cs)NEVPNManager(py)onDemandEnabled	-			BOOL	-	getter=isOnDemandEnabled	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cc498aee1fd99f10	-
+property	c:objc(cs)NEVPNManager(py)localizedDescription	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f0c930bf5bb5fbc5	-
+property	c:objc(cs)NEVPNManager(py)protocol	-			NEVPNProtocol *	-	strong	ios=8.0/9.0/-/0,macos=10.11/10.11/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a06c9e81c9b81264	-
+property	c:objc(cs)NEVPNManager(py)protocolConfiguration	-			NEVPNProtocol *	-	strong	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6b4b8140685cc629	-
+property	c:objc(cs)NEVPNManager(py)connection	-			NEVPNConnection *	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ce5a7635e050788f	-
+property	c:objc(cs)NEVPNManager(py)enabled	-			BOOL	-	getter=isEnabled	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4b3b5b4c0c9db1b6	-
+interface	c:objc(cs)NETunnelProviderManager	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	00c3562ae299d5e4	-
+super	-	NETunnelProviderManager	NEVPNManager		-	-	-	-	-	cc3ef6133f6681d9	-
+method	c:objc(cs)NETunnelProviderManager(cm)loadAllFromPreferencesWithCompletionHandler:	-			void	void (^)(NSArray<NETunnelProviderManager *> * _Nullable, NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7529279fcc8f772e	-
+method	c:objc(cs)NETunnelProviderManager(cm)forPerAppVPN	-			instancetype	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	76960b8d8fb2d5ed	-
+method	c:objc(cs)NETunnelProviderManager(im)copyAppRules	-			NSArray<NEAppRule *> *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	397fc549bedfaf5e	-
+property	c:objc(cs)NETunnelProviderManager(py)routingMethod	-			NETunnelProviderRoutingMethod	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	eb37978db598f6e2	-
+property	c:objc(cs)NETunnelProviderManager(py)safariDomains	-			NSArray<NSString *> *	-	copy	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4fd32b88451b572c	-
+property	c:objc(cs)NETunnelProviderManager(py)mailDomains	-			NSArray<NSString *> *	-	copy	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1ad9d292e012a0c5	-
+property	c:objc(cs)NETunnelProviderManager(py)calendarDomains	-			NSArray<NSString *> *	-	copy	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d74e7ff9deeb2e63	-
+property	c:objc(cs)NETunnelProviderManager(py)contactsDomains	-			NSArray<NSString *> *	-	copy	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ecba17b1f0c4889d	-
+property	c:objc(cs)NETunnelProviderManager(py)appRules	-			NSArray<NEAppRule *> *	-	copy	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0a206e29213701ac	-
+property	c:objc(cs)NETunnelProviderManager(py)excludedDomains	-			NSArray<NSString *> *	-	copy	ios=-/-/-/1,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a977d8f48d1fde5c	-
+property	c:objc(cs)NETunnelProviderManager(py)associatedDomains	-			NSArray<NSString *> *	-	copy	ios=-/-/-/1,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5f0160807f282c0a	-
+interface	c:objc(cs)NEAppProxyProviderManager	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9bbebceee10d48cd	-
+super	-	NEAppProxyProviderManager	NETunnelProviderManager		-	-	-	-	-	f1e4e7978c898aa6	-
+method	c:objc(cs)NEAppProxyProviderManager(cm)loadAllFromPreferencesWithCompletionHandler:	-			void	void (^)(NSArray<NEAppProxyProviderManager *> * _Nullable, NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,watchos=-/-/-/1	-	d426656e2dfdb075	-
+interface	c:objc(cs)NEAppProxyTCPFlow	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use remoteFlowEndpoint instead	9250b5d41bfdcb0d	-
+super	-	NEAppProxyTCPFlow	NEAppProxyFlow		-	-	-	-	-	45e6f7121e6f4ec7	-
+method	c:objc(cs)NEAppProxyTCPFlow(im)readDataWithCompletionHandler:	-			void	void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	593aaaffffff3f65	-
+method	c:objc(cs)NEAppProxyTCPFlow(im)writeData:withCompletionHandler:	-			void	NSData * data | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b402b6164ab93d82	-
+property	c:objc(cs)NEAppProxyTCPFlow(py)remoteFlowEndpoint	-			nw_endpoint_t	-	readonly	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	d372e8f2447efc4f	-
+property	c:objc(cs)NEAppProxyTCPFlow(py)remoteEndpoint	-			NWEndpoint *	-	readonly	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	8a6dcc1810a76dd9	-
+typedef	c:@T@NWEndpointArray	-			NSArray<nw_endpoint_t>	-	-	-	-	a8bee2e2c8905f57	-
+interface	c:objc(cs)NEAppProxyUDPFlow	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use readDatagramsAndFlowEndpointsWithCompletionHandler: instead	2f26b7a84de3e798	-
+super	-	NEAppProxyUDPFlow	NEAppProxyFlow		-	-	-	-	-	efd1fbc9aef80e71	-
+method	c:objc(cs)NEAppProxyUDPFlow(im)readDatagramsAndFlowEndpointsWithCompletionHandler:	-			void	void (^)(NSArray<NSData *> * _Nullable, NWEndpointArray * _Nullable, NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	7c97bf6bf152cc8c	-
+method	c:objc(cs)NEAppProxyUDPFlow(im)readDatagramsWithCompletionHandler:	-			void	void (^)(NSArray<NSData *> * _Nullable, NSArray<NWEndpoint *> * _Nullable, NSError * _Nullable) completionHandler	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use readDatagramsAndFlowEndpointsWithCompletionHandler: instead	1a4bc8ca07cca66b	-
+method	c:objc(cs)NEAppProxyUDPFlow(im)writeDatagrams:sentByFlowEndpoints:completionHandler:	-			void	NSArray<NSData *> * datagrams | NWEndpointArray * remoteEndpoints | void (^)(NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	acf45a4fad5cda2c	-
+method	c:objc(cs)NEAppProxyUDPFlow(im)writeDatagrams:sentByEndpoints:completionHandler:	-			void	NSArray<NSData *> * datagrams | NSArray<NWEndpoint *> * remoteEndpoints | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use writeDatagrams:sentByFlowEndpoints:completionHandler: instead	943166c811f4f098	-
+property	c:objc(cs)NEAppProxyUDPFlow(py)localFlowEndpoint	-			nw_endpoint_t	-	readonly	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	eb4bc838b4402008	-
+property	c:objc(cs)NEAppProxyUDPFlow(py)localEndpoint	-			NWEndpoint *	-	readonly	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	fa9fe584bf568b87	-
+interface	c:objc(cs)NEAppRule	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dc24a617dd161c36	-
+super	-	NEAppRule	NSObject		-	-	-	-	-	fd49060f04094047	-
+conforms	c:objc(cs)NEAppRule	NEAppRule	NSSecureCoding		-	-	-	-	-	b3b36d99badf3f0f	-
+conforms	c:objc(cs)NEAppRule	NEAppRule	NSCopying		-	-	-	-	-	78b7b417fae79f73	-
+method	c:objc(cs)NEAppRule(im)initWithSigningIdentifier:	-			instancetype	NSString * signingIdentifier	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1098cb9622de0885	-
+method	c:objc(cs)NEAppRule(im)initWithSigningIdentifier:designatedRequirement:	-			instancetype	NSString * signingIdentifier | NSString * designatedRequirement	-	ios=-/-/-/1,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9d72b884875eafa5	-
+property	c:objc(cs)NEAppRule(py)matchSigningIdentifier	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ab3ac184538ae9d9	-
+property	c:objc(cs)NEAppRule(py)matchDesignatedRequirement	-			NSString *	-	readonly	ios=-/-/-/1,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	00c36afb538b20db	-
+property	c:objc(cs)NEAppRule(py)matchPath	-			NSString *	-	copy	ios=9.3/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ce986c8123c3121e	-
+property	c:objc(cs)NEAppRule(py)matchDomains	-			NSArray *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	efd5dc9f6e06a4ed	-
+property	c:objc(cs)NEAppRule(py)matchTools	-			NSArray<NEAppRule *> *	-	copy	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7fa8eac4b8c45fda	-
+typedef	c:@T@NEDNSProxyManagerError	-			enum NEDNSProxyManagerError	-	-	-	-	4bd98938a4ece66b	-
+enum	c:@E@NEDNSProxyManagerError	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3955483d3eaf1876	-
+enumconst	c:@E@NEDNSProxyManagerError@NEDNSProxyManagerErrorConfigurationInvalid	NEDNSProxyManagerError			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	47c12d05a5171c20	1
+enumconst	c:@E@NEDNSProxyManagerError@NEDNSProxyManagerErrorConfigurationDisabled	NEDNSProxyManagerError			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a3acb731c3681629	2
+enumconst	c:@E@NEDNSProxyManagerError@NEDNSProxyManagerErrorConfigurationStale	NEDNSProxyManagerError			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	edda11b548c559d2	3
+enumconst	c:@E@NEDNSProxyManagerError@NEDNSProxyManagerErrorConfigurationCannotBeRemoved	NEDNSProxyManagerError			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	91b459ca2f32c09f	4
+var	c:@NEDNSProxyErrorDomain	-			NSString *const	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	563ddbada46c4235	-
+var	c:@NEDNSProxyConfigurationDidChangeNotification	-			NSString *const	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9c2447c5a568ed4d	-
+interface	c:objc(cs)NEDNSProxyManager	-			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b8556eab3ae7aa43	-
+super	-	NEDNSProxyManager	NSObject		-	-	-	-	-	e1f7167073112434	-
+method	c:objc(cs)NEDNSProxyManager(cm)sharedManager	-			NEDNSProxyManager *	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c1650d15be78c281	-
+method	c:objc(cs)NEDNSProxyManager(im)loadFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	86a053d386214bf4	-
+method	c:objc(cs)NEDNSProxyManager(im)removeFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6878e933161f8c64	-
+method	c:objc(cs)NEDNSProxyManager(im)saveToPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b08769426a27c8cd	-
+property	c:objc(cs)NEDNSProxyManager(py)localizedDescription	-			NSString *	-	copy	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1842cbdfa0e864ea	-
+property	c:objc(cs)NEDNSProxyManager(py)providerProtocol	-			NEDNSProxyProviderProtocol *	-	strong	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3d777e69062c7240	-
+property	c:objc(cs)NEDNSProxyManager(py)enabled	-			BOOL	-	getter=isEnabled	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	01e5805bf95f8584	-
+interface	c:objc(cs)NEDNSProxyProvider	-			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use handleNewUDPFlow:initialRemoteFlowEndpoint: instead	463e320d1d811de7	-
+super	-	NEDNSProxyProvider	NEProvider		-	-	-	-	-	2277c5bcd255e408	-
+method	c:objc(cs)NEDNSProxyProvider(im)startProxyWithOptions:completionHandler:	-			void	NSDictionary<NSString *,id> * options | void (^)(NSError * _Nullable) completionHandler	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	08c60c7756859678	-
+method	c:objc(cs)NEDNSProxyProvider(im)stopProxyWithReason:completionHandler:	-			void	NEProviderStopReason reason | void (^)(void) completionHandler	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e57f2ed585c54491	-
+method	c:objc(cs)NEDNSProxyProvider(im)cancelProxyWithError:	-			void	NSError * error	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	83f5dcdcb4f0604c	-
+method	c:objc(cs)NEDNSProxyProvider(im)handleNewFlow:	-			BOOL	NEAppProxyFlow * flow	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c71f5af7e9bbeeb8	-
+method	c:objc(cs)NEDNSProxyProvider(im)handleNewUDPFlow:initialRemoteFlowEndpoint:	-			BOOL	NEAppProxyUDPFlow * flow | nw_endpoint_t remoteEndpoint	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	89afd5eddb57f05b	-
+method	c:objc(cs)NEDNSProxyProvider(im)handleNewUDPFlow:initialRemoteEndpoint:	-			BOOL	NEAppProxyUDPFlow * flow | NWEndpoint * remoteEndpoint	-	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use handleNewUDPFlow:initialRemoteFlowEndpoint: instead	31a6fb58a30abf1c	-
+property	c:objc(cs)NEDNSProxyProvider(py)systemDNSSettings	-			NSArray<NEDNSSettings *> *	-	readonly	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2da1c8e7916d6608	-
+interface	c:objc(cs)NEProxyServer	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	325e60e14096207b	-
+super	-	NEProxyServer	NSObject		-	-	-	-	-	250cc483e98105c1	-
+conforms	c:objc(cs)NEProxyServer	NEProxyServer	NSSecureCoding		-	-	-	-	-	576872aeaf53a139	-
+conforms	c:objc(cs)NEProxyServer	NEProxyServer	NSCopying		-	-	-	-	-	7701b33f780e1509	-
+method	c:objc(cs)NEProxyServer(im)initWithAddress:port:	-			instancetype	NSString * address | NSInteger port	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	98a1f2ac4e1fa75e	-
+property	c:objc(cs)NEProxyServer(py)address	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	65a6ccad016de523	-
+property	c:objc(cs)NEProxyServer(py)port	-			NSInteger	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0a85a552a8018b68	-
+property	c:objc(cs)NEProxyServer(py)authenticationRequired	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5c6e4a11850b6367	-
+property	c:objc(cs)NEProxyServer(py)username	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8ba9495bfd262de3	-
+property	c:objc(cs)NEProxyServer(py)password	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2511e74ab31f4074	-
+interface	c:objc(cs)NEProxySettings	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	588143a39a277d1f	-
+super	-	NEProxySettings	NSObject		-	-	-	-	-	32d6030e4766d8ee	-
+conforms	c:objc(cs)NEProxySettings	NEProxySettings	NSSecureCoding		-	-	-	-	-	50d1c23026983f65	-
+conforms	c:objc(cs)NEProxySettings	NEProxySettings	NSCopying		-	-	-	-	-	6748a835ee70aa56	-
+property	c:objc(cs)NEProxySettings(py)autoProxyConfigurationEnabled	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0d4188a33af1970e	-
+property	c:objc(cs)NEProxySettings(py)proxyAutoConfigurationURL	-			NSURL *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a95789e64822eb39	-
+property	c:objc(cs)NEProxySettings(py)proxyAutoConfigurationJavaScript	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9891dcb6ad282294	-
+property	c:objc(cs)NEProxySettings(py)HTTPEnabled	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2c1a68befb28cb56	-
+property	c:objc(cs)NEProxySettings(py)HTTPServer	-			NEProxyServer *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5b7668bcced31868	-
+property	c:objc(cs)NEProxySettings(py)HTTPSEnabled	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6f23e07d051942c6	-
+property	c:objc(cs)NEProxySettings(py)HTTPSServer	-			NEProxyServer *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f33d0ceb50203e18	-
+property	c:objc(cs)NEProxySettings(py)excludeSimpleHostnames	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ddc050e26a470ad3	-
+property	c:objc(cs)NEProxySettings(py)exceptionList	-			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	62c12587cae8a7d2	-
+property	c:objc(cs)NEProxySettings(py)matchDomains	-			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aa31b973a2a57bc8	-
+interface	c:objc(cs)NEVPNProtocol	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ab4d77c86048f4c3	-
+super	-	NEVPNProtocol	NSObject		-	-	-	-	-	0939d0cd68ccd0e2	-
+conforms	c:objc(cs)NEVPNProtocol	NEVPNProtocol	NSCopying		-	-	-	-	-	94709f79a0fb8962	-
+conforms	c:objc(cs)NEVPNProtocol	NEVPNProtocol	NSSecureCoding		-	-	-	-	-	c5fdeccc712f8cee	-
+property	c:objc(cs)NEVPNProtocol(py)serverAddress	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8ed143d56babb28a	-
+property	c:objc(cs)NEVPNProtocol(py)username	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9a59b1fe0af043bd	-
+property	c:objc(cs)NEVPNProtocol(py)passwordReference	-			NSData *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3e5bc39035ea16a0	-
+property	c:objc(cs)NEVPNProtocol(py)identityReference	-			NSData *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b08f574fb295d123	-
+property	c:objc(cs)NEVPNProtocol(py)identityData	-			NSData *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e18faa391561cab5	-
+property	c:objc(cs)NEVPNProtocol(py)identityDataPassword	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e6ad094195ea8e58	-
+property	c:objc(cs)NEVPNProtocol(py)disconnectOnSleep	-			BOOL	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	452335e33c9e0b66	-
+property	c:objc(cs)NEVPNProtocol(py)proxySettings	-			NEProxySettings *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e0d77c8ddb483649	-
+property	c:objc(cs)NEVPNProtocol(py)includeAllNetworks	-			BOOL	-	-	ios=14.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	874f8ab60cc00463	-
+property	c:objc(cs)NEVPNProtocol(py)excludeLocalNetworks	-			BOOL	-	-	ios=14.2/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0195b07c87319872	-
+property	c:objc(cs)NEVPNProtocol(py)excludeCellularServices	-			BOOL	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	60e3c48e09c5d45b	-
+property	c:objc(cs)NEVPNProtocol(py)excludeAPNs	-			BOOL	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	98cd61246969a2ad	-
+property	c:objc(cs)NEVPNProtocol(py)excludeDeviceCommunication	-			BOOL	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	79e69a29f87eb6ee	-
+property	c:objc(cs)NEVPNProtocol(py)enforceRoutes	-			BOOL	-	-	ios=14.2/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	21055c271535ae75	-
+property	c:objc(cs)NEVPNProtocol(py)sliceUUID	-			NSString *	-	copy	ios=18.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	357148b31e5b747d	-
+interface	c:objc(cs)NEDNSProxyProviderProtocol	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7eda0ebbb5c6cba4	-
+super	-	NEDNSProxyProviderProtocol	NEVPNProtocol		-	-	-	-	-	2aa7b5c07155603d	-
+property	c:objc(cs)NEDNSProxyProviderProtocol(py)providerConfiguration	-			NSDictionary<NSString *,id> *	-	copy	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1cad567c0cbc1c96	-
+property	c:objc(cs)NEDNSProxyProviderProtocol(py)providerBundleIdentifier	-			NSString *	-	copy	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5d40be3f92546147	-
+typedef	c:@T@NEDNSProtocol	-			enum NEDNSProtocol	-	-	-	-	71066ee82a7ff06e	-
+enum	c:@E@NEDNSProtocol	-			NSInteger	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bf6d9d9217b1e64d	-
+enumconst	c:@E@NEDNSProtocol@NEDNSProtocolCleartext	NEDNSProtocol			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d15eb49e6f509ba7	1
+enumconst	c:@E@NEDNSProtocol@NEDNSProtocolTLS	NEDNSProtocol			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f8a947fd4d1daf9e	2
+enumconst	c:@E@NEDNSProtocol@NEDNSProtocolHTTPS	NEDNSProtocol			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f57065594fcc4862	3
+interface	c:objc(cs)NEDNSSettings	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	76baafd5b4bde93b	-
+super	-	NEDNSSettings	NSObject		-	-	-	-	-	9a84b8b224fa6cae	-
+conforms	c:objc(cs)NEDNSSettings	NEDNSSettings	NSSecureCoding		-	-	-	-	-	f0d107bb122369ce	-
+conforms	c:objc(cs)NEDNSSettings	NEDNSSettings	NSCopying		-	-	-	-	-	1bc28834d2ebfd58	-
+property	c:objc(cs)NEDNSSettings(py)dnsProtocol	-			NEDNSProtocol	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e5ab86fdfb15c454	-
+method	c:objc(cs)NEDNSSettings(im)initWithServers:	-			instancetype	NSArray<NSString *> * servers	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2a976d2b4e9a9393	-
+property	c:objc(cs)NEDNSSettings(py)servers	-			NSArray<NSString *> *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a3f440639ac739fe	-
+property	c:objc(cs)NEDNSSettings(py)searchDomains	-			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2768c0245456011d	-
+property	c:objc(cs)NEDNSSettings(py)domainName	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7cec4ee82cc03d53	-
+property	c:objc(cs)NEDNSSettings(py)matchDomains	-			NSArray<NSString *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fe9a8750b8b5cd2a	-
+property	c:objc(cs)NEDNSSettings(py)matchDomainsNoSearch	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c939c56dcc307fea	-
+property	c:objc(cs)NEDNSSettings(py)allowFailover	-			BOOL	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1	-	56936b4cf27b783a	-
+interface	c:objc(cs)NEDNSOverTLSSettings	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	dec9af8738033996	-
+super	-	NEDNSOverTLSSettings	NEDNSSettings		-	-	-	-	-	fd95560d3bf6b750	-
+property	c:objc(cs)NEDNSOverTLSSettings(py)serverName	-			NSString *	-	copy	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af71e9b20644456e	-
+property	c:objc(cs)NEDNSOverTLSSettings(py)identityReference	-			NSData *	-	copy	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a439b88f4adca8fb	-
+interface	c:objc(cs)NEDNSOverHTTPSSettings	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aade5a4f3a69e595	-
+super	-	NEDNSOverHTTPSSettings	NEDNSSettings		-	-	-	-	-	2ad198c5701aae41	-
+property	c:objc(cs)NEDNSOverHTTPSSettings(py)serverURL	-			NSURL *	-	copy	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6260aa36c587b7ba	-
+property	c:objc(cs)NEDNSOverHTTPSSettings(py)identityReference	-			NSData *	-	copy	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	feae18994ad0dbeb	-
+typedef	c:@T@NEDNSSettingsManagerError	-			enum NEDNSSettingsManagerError	-	-	-	-	80c4793e02ed1c2e	-
+enum	c:@E@NEDNSSettingsManagerError	-			NSInteger	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	53b49fbd72a9d2e2	-
+enumconst	c:@E@NEDNSSettingsManagerError@NEDNSSettingsManagerErrorConfigurationInvalid	NEDNSSettingsManagerError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	efec2cb84e5029ea	1
+enumconst	c:@E@NEDNSSettingsManagerError@NEDNSSettingsManagerErrorConfigurationDisabled	NEDNSSettingsManagerError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	44a0b108bf9b24d6	2
+enumconst	c:@E@NEDNSSettingsManagerError@NEDNSSettingsManagerErrorConfigurationStale	NEDNSSettingsManagerError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3b1ef43244b98436	3
+enumconst	c:@E@NEDNSSettingsManagerError@NEDNSSettingsManagerErrorConfigurationCannotBeRemoved	NEDNSSettingsManagerError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	720e7c5b05d32109	4
+var	c:@NEDNSSettingsErrorDomain	-			NSString *const	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dc9ab62d8a63a73e	-
+var	c:@NEDNSSettingsConfigurationDidChangeNotification	-			NSString *const	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	97f07e432e1bcf8a	-
+interface	c:objc(cs)NEDNSSettingsManager	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	315afabd63471f11	-
+super	-	NEDNSSettingsManager	NSObject		-	-	-	-	-	f4c0a93d1358cfb2	-
+method	c:objc(cs)NEDNSSettingsManager(cm)sharedManager	-			NEDNSSettingsManager *	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9aa0c974d95b489e	-
+method	c:objc(cs)NEDNSSettingsManager(im)loadFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	97e10eb06b1bc9e2	-
+method	c:objc(cs)NEDNSSettingsManager(im)removeFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9312684302c7b44b	-
+method	c:objc(cs)NEDNSSettingsManager(im)saveToPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	16cd657d86342305	-
+property	c:objc(cs)NEDNSSettingsManager(py)localizedDescription	-			NSString *	-	copy	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dac1247aee9737e6	-
+property	c:objc(cs)NEDNSSettingsManager(py)dnsSettings	-			NEDNSSettings *	-	strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dd38a3cd6a72d78c	-
+property	c:objc(cs)NEDNSSettingsManager(py)onDemandRules	-			NSArray<NEOnDemandRule *> *	-	copy	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f8cd5e7d4f012c67	-
+property	c:objc(cs)NEDNSSettingsManager(py)enabled	-			BOOL	-	readonly,getter=isEnabled	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	411bfd454d1e9217	-
+typedef	c:@T@NENetworkRuleProtocol	-			enum NENetworkRuleProtocol	-	-	-	-	10fde2453c758894	-
+enum	c:@E@NENetworkRuleProtocol	-			NSInteger	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3049b7061f6cca7d	-
+enumconst	c:@E@NENetworkRuleProtocol@NENetworkRuleProtocolAny	NENetworkRuleProtocol			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5c3e109f04c63419	0
+enumconst	c:@E@NENetworkRuleProtocol@NENetworkRuleProtocolTCP	NENetworkRuleProtocol			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	05d8cc91fe8551e3	1
+enumconst	c:@E@NENetworkRuleProtocol@NENetworkRuleProtocolUDP	NENetworkRuleProtocol			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fdbd9864528b1b39	2
+typedef	c:@T@NETrafficDirection	-			enum NETrafficDirection	-	-	-	-	60c7802506331f02	-
+enum	c:@E@NETrafficDirection	-			NSInteger	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	45d9f95d9b5dd22f	-
+enumconst	c:@E@NETrafficDirection@NETrafficDirectionAny	NETrafficDirection			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f4d2da418377b210	0
+enumconst	c:@E@NETrafficDirection@NETrafficDirectionInbound	NETrafficDirection			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	345adedc3a02c3bf	1
+enumconst	c:@E@NETrafficDirection@NETrafficDirectionOutbound	NETrafficDirection			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c832d04464e9215f	2
+interface	c:objc(cs)NENetworkRule	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use initWithDestinationNetworkEndpoint:prefix:protocol: instead	c356320528839c58	-
+super	-	NENetworkRule	NSObject		-	-	-	-	-	f2a5e0c854a63c85	-
+conforms	c:objc(cs)NENetworkRule	NENetworkRule	NSSecureCoding		-	-	-	-	-	fe7016f30b2b403e	-
+conforms	c:objc(cs)NENetworkRule	NENetworkRule	NSCopying		-	-	-	-	-	51732a439bd4a876	-
+method	c:objc(cs)NENetworkRule(im)initWithDestinationNetworkEndpoint:prefix:protocol:	-			instancetype	nw_endpoint_t networkEndpoint | NSUInteger destinationPrefix | NENetworkRuleProtocol protocol	-	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	6bce2cf62ffa3f84	-
+method	c:objc(cs)NENetworkRule(im)initWithDestinationNetwork:prefix:protocol:	-			instancetype	NWHostEndpoint * networkEndpoint | NSUInteger destinationPrefix | NENetworkRuleProtocol protocol	-	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=13.0/18.0/-/0,watchos=6.0/11.0/-/0,xros=1.0/2.0/-/0	deprecated: Use initWithDestinationNetworkEndpoint:prefix:protocol: instead	33b1cce8e49ce8ce	-
+method	c:objc(cs)NENetworkRule(im)initWithDestinationHostEndpoint:protocol:	-			instancetype	nw_endpoint_t hostEndpoint | NENetworkRuleProtocol protocol	-	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e7c4d4075f94b18f	-
+method	c:objc(cs)NENetworkRule(im)initWithDestinationHost:protocol:	-			instancetype	NWHostEndpoint * hostEndpoint | NENetworkRuleProtocol protocol	-	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=13.0/18.0/-/0,watchos=6.0/11.0/-/0,xros=1.0/2.0/-/0	deprecated: Use initWithDestinationHostEndpoint:protocol: instead	3683c6c208a63432	-
+method	c:objc(cs)NENetworkRule(im)initWithRemoteNetworkEndpoint:remotePrefix:localNetworkEndpoint:localPrefix:protocol:direction:	-			instancetype	nw_endpoint_t remoteNetwork | NSUInteger remotePrefix | nw_endpoint_t localNetwork | NSUInteger localPrefix | NENetworkRuleProtocol protocol | NETrafficDirection direction	-	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9c34ec3ffd72d238	-
+method	c:objc(cs)NENetworkRule(im)initWithRemoteNetwork:remotePrefix:localNetwork:localPrefix:protocol:direction:	-			instancetype	NWHostEndpoint * remoteNetwork | NSUInteger remotePrefix | NWHostEndpoint * localNetwork | NSUInteger localPrefix | NENetworkRuleProtocol protocol | NETrafficDirection direction	-	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=13.0/18.0/-/0,watchos=6.0/11.0/-/0,xros=1.0/2.0/-/0	deprecated: Use initWithRemoteNetworkEndpoint:remotePrefix:localNetworkEndpoint:localPrefix:protocol:direction: instead	1222615c057b331e	-
+property	c:objc(cs)NENetworkRule(py)matchRemoteHostOrNetworkEndpoint	-			nw_endpoint_t	-	readonly	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7d76e92452eb10a9	-
+property	c:objc(cs)NENetworkRule(py)matchRemoteEndpoint	-			NWHostEndpoint *	-	readonly	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=13.0/18.0/-/0,watchos=6.0/11.0/-/0,xros=1.0/2.0/-/0	-	994a4ae9b6fcaa58	-
+property	c:objc(cs)NENetworkRule(py)matchRemotePrefix	-			NSUInteger	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9455591104e30a90	-
+property	c:objc(cs)NENetworkRule(py)matchLocalNetworkEndpoint	-			nw_endpoint_t	-	readonly	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ddc99023f6ce5b37	-
+property	c:objc(cs)NENetworkRule(py)matchLocalNetwork	-			NWHostEndpoint *	-	readonly	ios=13.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=13.0/18.0/-/0,watchos=6.0/11.0/-/0,xros=1.0/2.0/-/0	-	1940c83551b1633e	-
+property	c:objc(cs)NENetworkRule(py)matchLocalPrefix	-			NSUInteger	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	854220be23396b32	-
+property	c:objc(cs)NENetworkRule(py)matchProtocol	-			NENetworkRuleProtocol	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c06b018873f925b7	-
+property	c:objc(cs)NENetworkRule(py)matchDirection	-			NETrafficDirection	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ea83c26c2139e269	-
+interface	c:objc(cs)NEFilterFlow	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	235b51128c99473e	-
+super	-	NEFilterFlow	NSObject		-	-	-	-	-	db8476235778a648	-
+conforms	c:objc(cs)NEFilterFlow	NEFilterFlow	NSSecureCoding		-	-	-	-	-	da6a90c34a583e36	-
+conforms	c:objc(cs)NEFilterFlow	NEFilterFlow	NSCopying		-	-	-	-	-	92bc8c82ad8613f2	-
+property	c:objc(cs)NEFilterFlow(py)URL	-			NSURL *	-	readonly	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ecb324a9f5267f73	-
+property	c:objc(cs)NEFilterFlow(py)sourceAppUniqueIdentifier	-			NSData *	-	readonly	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4300fdba961fef9b	-
+property	c:objc(cs)NEFilterFlow(py)sourceAppIdentifier	-			NSString *	-	readonly	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7a30583610dc6483	-
+property	c:objc(cs)NEFilterFlow(py)sourceAppVersion	-			NSString *	-	readonly	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	557a1db9e13e9d4a	-
+property	c:objc(cs)NEFilterFlow(py)direction	-			NETrafficDirection	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	518f0f4d269dfcb5	-
+property	c:objc(cs)NEFilterFlow(py)sourceAppAuditToken	-			NSData *	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7206807e454c4c8b	-
+property	c:objc(cs)NEFilterFlow(py)sourceProcessAuditToken	-			NSData *	-	readonly	ios=-/-/-/1,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5090bb4bb625b260	-
+property	c:objc(cs)NEFilterFlow(py)identifier	-			NSUUID *	-	readonly	ios=13.1/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	762f01fbc7c9c4c5	-
+interface	c:objc(cs)NEFilterBrowserFlow	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bcc5ace8c921d8a0	-
+super	-	NEFilterBrowserFlow	NEFilterFlow		-	-	-	-	-	4d5acc986c74a3b6	-
+conforms	c:objc(cs)NEFilterBrowserFlow	NEFilterBrowserFlow	NSSecureCoding		-	-	-	-	-	310c72bb65dbb98a	-
+conforms	c:objc(cs)NEFilterBrowserFlow	NEFilterBrowserFlow	NSCopying		-	-	-	-	-	29a4fd222ce8c47e	-
+property	c:objc(cs)NEFilterBrowserFlow(py)request	-			NSURLRequest *	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ea199f10f3a214a8	-
+property	c:objc(cs)NEFilterBrowserFlow(py)response	-			NSURLResponse *	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b1ca8efdb9e6cf71	-
+property	c:objc(cs)NEFilterBrowserFlow(py)parentURL	-			NSURL *	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	df99c58aaf217a11	-
+interface	c:objc(cs)NEFilterSocketFlow	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use remoteFlowEndpoint instead	f6db2c3ead6c349a	-
+super	-	NEFilterSocketFlow	NEFilterFlow		-	-	-	-	-	67767a03e19f9df3	-
+conforms	c:objc(cs)NEFilterSocketFlow	NEFilterSocketFlow	NSSecureCoding		-	-	-	-	-	c49fb14f487dd333	-
+conforms	c:objc(cs)NEFilterSocketFlow	NEFilterSocketFlow	NSCopying		-	-	-	-	-	fb763e68ea54cd0e	-
+property	c:objc(cs)NEFilterSocketFlow(py)remoteFlowEndpoint	-			nw_endpoint_t	-	readonly	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	ac76163f7f4ea3a9	-
+property	c:objc(cs)NEFilterSocketFlow(py)remoteEndpoint	-			NWEndpoint *	-	readonly	ios=9.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	082e1b1f3025a463	-
+property	c:objc(cs)NEFilterSocketFlow(py)remoteHostname	-			NSString *	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	975b8162d5325385	-
+property	c:objc(cs)NEFilterSocketFlow(py)localFlowEndpoint	-			nw_endpoint_t	-	readonly	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	32a58532f25ad563	-
+property	c:objc(cs)NEFilterSocketFlow(py)localEndpoint	-			NWEndpoint *	-	readonly	ios=9.0/18.0/-/0,macos=10.15/15.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	23edff6fea1d0432	-
+property	c:objc(cs)NEFilterSocketFlow(py)socketFamily	-			int	-	readonly	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bfac50da2e4266ce	-
+property	c:objc(cs)NEFilterSocketFlow(py)socketType	-			int	-	readonly	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	71e047ac4bd3ea70	-
+property	c:objc(cs)NEFilterSocketFlow(py)socketProtocol	-			int	-	readonly	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7781faf6a42eeed1	-
+var	c:@NEFilterProviderRemediationMapRemediationURLs	-			const NSString *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8d2855e9871b90a1	-
+var	c:@NEFilterProviderRemediationMapRemediationButtonTexts	-			const NSString *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4161b9c65c3f8ad1	-
+interface	c:objc(cs)NEFilterProvider	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e8bfdd4f0ac4b31d	-
+super	-	NEFilterProvider	NEProvider		-	-	-	-	-	359eeae90432a3db	-
+method	c:objc(cs)NEFilterProvider(im)startFilterWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0b3e9e9c1e87f592	-
+method	c:objc(cs)NEFilterProvider(im)stopFilterWithReason:completionHandler:	-			void	NEProviderStopReason reason | void (^)(void) completionHandler	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0a72ab27f0d66201	-
+property	c:objc(cs)NEFilterProvider(py)filterConfiguration	-			NEFilterProviderConfiguration *	-	readonly	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4c2851076fcb24e4	-
+method	c:objc(cs)NEFilterProvider(im)handleReport:	-			void	NEFilterReport * report	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6636f8da966f23fb	-
+typedef	c:@T@NEFilterReportFrequency	-			enum NEFilterReportFrequency	-	-	-	-	55ca37c22bdd688a	-
+enum	c:@E@NEFilterReportFrequency	-			NSInteger	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c68ec07ac25264d2	-
+enumconst	c:@E@NEFilterReportFrequency@NEFilterReportFrequencyNone	NEFilterReportFrequency			-	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3f7bfe5cb33b1e41	0
+enumconst	c:@E@NEFilterReportFrequency@NEFilterReportFrequencyLow	NEFilterReportFrequency			-	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f813790367143f7a	1
+enumconst	c:@E@NEFilterReportFrequency@NEFilterReportFrequencyMedium	NEFilterReportFrequency			-	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	62537f753517d2ef	2
+enumconst	c:@E@NEFilterReportFrequency@NEFilterReportFrequencyHigh	NEFilterReportFrequency			-	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7f891c3dedf73abd	3
+interface	c:objc(cs)NEFilterVerdict	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8f3389f3b21f6e21	-
+super	-	NEFilterVerdict	NSObject		-	-	-	-	-	d41896fd2c32877f	-
+conforms	c:objc(cs)NEFilterVerdict	NEFilterVerdict	NSSecureCoding		-	-	-	-	-	ab51697a6d189f82	-
+conforms	c:objc(cs)NEFilterVerdict	NEFilterVerdict	NSCopying		-	-	-	-	-	9c00dba136c08c5f	-
+property	c:objc(cs)NEFilterVerdict(py)shouldReport	-			BOOL	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7636dfafecf8cccd	-
+interface	c:objc(cs)NEFilterNewFlowVerdict	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5143cec78750f73b	-
+super	-	NEFilterNewFlowVerdict	NEFilterVerdict		-	-	-	-	-	06e76bd968319d8f	-
+conforms	c:objc(cs)NEFilterNewFlowVerdict	NEFilterNewFlowVerdict	NSSecureCoding		-	-	-	-	-	e303575f825f6c3f	-
+conforms	c:objc(cs)NEFilterNewFlowVerdict	NEFilterNewFlowVerdict	NSCopying		-	-	-	-	-	1c92ce8ab73550bc	-
+property	c:objc(cs)NEFilterNewFlowVerdict(py)statisticsReportFrequency	-			NEFilterReportFrequency	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	724c267ad316357a	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)needRulesVerdict	-			NEFilterNewFlowVerdict *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b8547d548254c521	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)allowVerdict	-			NEFilterNewFlowVerdict *	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	61610ddd0810b2d7	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)dropVerdict	-			NEFilterNewFlowVerdict *	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5f6565fc6f994594	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)remediateVerdictWithRemediationURLMapKey:remediationButtonTextMapKey:	-			NEFilterNewFlowVerdict *	NSString * remediationURLMapKey | NSString * remediationButtonTextMapKey	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4a763002b21b1c1f	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)URLAppendStringVerdictWithMapKey:	-			NEFilterNewFlowVerdict *	NSString * urlAppendMapKey	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	81ea3ec7fca775e3	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)filterDataVerdictWithFilterInbound:peekInboundBytes:filterOutbound:peekOutboundBytes:	-			NEFilterNewFlowVerdict *	BOOL filterInbound | NSUInteger peekInboundBytes | BOOL filterOutbound | NSUInteger peekOutboundBytes	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1efff03898bf7d7f	-
+method	c:objc(cs)NEFilterNewFlowVerdict(cm)pauseVerdict	-			NEFilterNewFlowVerdict *	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	64bdfe881ffb93a3	-
+interface	c:objc(cs)NEFilterControlVerdict	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eedca93ba2ad64e8	-
+super	-	NEFilterControlVerdict	NEFilterNewFlowVerdict		-	-	-	-	-	3bf77c7b96ee4dee	-
+conforms	c:objc(cs)NEFilterControlVerdict	NEFilterControlVerdict	NSSecureCoding		-	-	-	-	-	983bcf729dd41b34	-
+conforms	c:objc(cs)NEFilterControlVerdict	NEFilterControlVerdict	NSCopying		-	-	-	-	-	336d5940522218ad	-
+method	c:objc(cs)NEFilterControlVerdict(cm)allowVerdictWithUpdateRules:	-			NEFilterControlVerdict *	BOOL updateRules	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3aaf8f3df6fe4a5d	-
+method	c:objc(cs)NEFilterControlVerdict(cm)dropVerdictWithUpdateRules:	-			NEFilterControlVerdict *	BOOL updateRules	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	edc76a50e19c63a9	-
+method	c:objc(cs)NEFilterControlVerdict(cm)updateRules	-			NEFilterControlVerdict *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	386bb08f66779e7f	-
+typedef	c:@T@NEFilterAction	-			enum NEFilterAction	-	-	-	-	a31c48f98123e1a2	-
+enum	c:@E@NEFilterAction	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2db4960d560e87a6	-
+enumconst	c:@E@NEFilterAction@NEFilterActionInvalid	NEFilterAction			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0	-	2fbc1bbebaa7546a	0
+enumconst	c:@E@NEFilterAction@NEFilterActionAllow	NEFilterAction			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0	-	8559b0878c2e4c08	1
+enumconst	c:@E@NEFilterAction@NEFilterActionDrop	NEFilterAction			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0	-	cd9a2625aabce574	2
+enumconst	c:@E@NEFilterAction@NEFilterActionRemediate	NEFilterAction			-	-	-	ios=11.0/-/-/0	-	b669a9b73577d200	3
+enumconst	c:@E@NEFilterAction@NEFilterActionFilterData	NEFilterAction			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0	-	a1e0a033197d413f	4
+typedef	c:@T@NEFilterReportEvent	-			enum NEFilterReportEvent	-	-	-	-	5fa819b7da995a48	-
+enum	c:@E@NEFilterReportEvent	-			NSInteger	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b0a59ffffc342c2b	-
+enumconst	c:@E@NEFilterReportEvent@NEFilterReportEventNewFlow	NEFilterReportEvent			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3e2f405a7902db11	1
+enumconst	c:@E@NEFilterReportEvent@NEFilterReportEventDataDecision	NEFilterReportEvent			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b476612751519746	2
+enumconst	c:@E@NEFilterReportEvent@NEFilterReportEventFlowClosed	NEFilterReportEvent			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9e5c06400263c252	3
+enumconst	c:@E@NEFilterReportEvent@NEFilterReportEventStatistics	NEFilterReportEvent			-	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	da180d8923513f85	4
+interface	c:objc(cs)NEFilterReport	-			-	-	-	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1fbdb8317a27ee2c	-
+super	-	NEFilterReport	NSObject		-	-	-	-	-	ec9963252c0b37e7	-
+conforms	c:objc(cs)NEFilterReport	NEFilterReport	NSSecureCoding		-	-	-	-	-	4fd5464ff5533b36	-
+conforms	c:objc(cs)NEFilterReport	NEFilterReport	NSCopying		-	-	-	-	-	634f58e2e0b48e0e	-
+property	c:objc(cs)NEFilterReport(py)flow	-			NEFilterFlow *	-	readonly	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2a24e7954a843280	-
+property	c:objc(cs)NEFilterReport(py)action	-			NEFilterAction	-	readonly	ios=11.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	759f7b3b0c07f78d	-
+property	c:objc(cs)NEFilterReport(py)event	-			NEFilterReportEvent	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0bca7566e3a86bdc	-
+property	c:objc(cs)NEFilterReport(py)bytesInboundCount	-			NSUInteger	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9da7265cd1873c60	-
+property	c:objc(cs)NEFilterReport(py)bytesOutboundCount	-			NSUInteger	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d77a6375e2738b20	-
+interface	c:objc(cs)NEFilterControlProvider	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	026317d9aabad6e3	-
+super	-	NEFilterControlProvider	NEFilterProvider		-	-	-	-	-	26caa6395b11e749	-
+property	c:objc(cs)NEFilterControlProvider(py)remediationMap	-			NSDictionary<NSString *,NSDictionary<NSString *,NSObject *> *> *	-	copy	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	57ac38822ab0d75f	-
+property	c:objc(cs)NEFilterControlProvider(py)URLAppendStringMap	-			NSDictionary<NSString *,NSString *> *	-	copy	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	890a916262d620d6	-
+method	c:objc(cs)NEFilterControlProvider(im)handleRemediationForFlow:completionHandler:	-			void	NEFilterFlow * flow | void (^)(NEFilterControlVerdict * _Nonnull) completionHandler	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8ff28dd49f1f4467	-
+method	c:objc(cs)NEFilterControlProvider(im)handleNewFlow:completionHandler:	-			void	NEFilterFlow * flow | void (^)(NEFilterControlVerdict * _Nonnull) completionHandler	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	63da2b911aa2889d	-
+method	c:objc(cs)NEFilterControlProvider(im)notifyRulesChanged	-			void	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5507d83f19a5d290	-
+typedef	c:@T@NEFilterDataAttribute	-			enum NEFilterDataAttribute	-	-	-	-	a1434085b62da382	-
+enum	c:@E@NEFilterDataAttribute	-			NSInteger	-	-	ios=-/-/-/1,macos=10.15.5/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	620bb261e6601ebb	-
+enumconst	c:@E@NEFilterDataAttribute@NEFilterDataAttributeHasIPHeader	NEFilterDataAttribute			-	-	-	ios=-/-/-/1,macos=10.15.5/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	38b4f3f3afee872c	1
+interface	c:objc(cs)NEFilterDataProvider	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fa0f1d49d3051471	-
+super	-	NEFilterDataProvider	NEFilterProvider		-	-	-	-	-	218874e556789b87	-
+method	c:objc(cs)NEFilterDataProvider(im)handleNewFlow:	-			NEFilterNewFlowVerdict *	NEFilterFlow * flow	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	411722cf5dd63810	-
+method	c:objc(cs)NEFilterDataProvider(im)handleInboundDataFromFlow:readBytesStartOffset:readBytes:	-			NEFilterDataVerdict *	NEFilterFlow * flow | NSUInteger offset | NSData * readBytes	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8fa545948ff34067	-
+method	c:objc(cs)NEFilterDataProvider(im)handleOutboundDataFromFlow:readBytesStartOffset:readBytes:	-			NEFilterDataVerdict *	NEFilterFlow * flow | NSUInteger offset | NSData * readBytes	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	496ac81cac789955	-
+method	c:objc(cs)NEFilterDataProvider(im)handleInboundDataCompleteForFlow:	-			NEFilterDataVerdict *	NEFilterFlow * flow	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5eff53375f61a178	-
+method	c:objc(cs)NEFilterDataProvider(im)handleOutboundDataCompleteForFlow:	-			NEFilterDataVerdict *	NEFilterFlow * flow	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a6dda59943773ab4	-
+method	c:objc(cs)NEFilterDataProvider(im)handleRemediationForFlow:	-			NEFilterRemediationVerdict *	NEFilterFlow * flow	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0ed2a2f392c4d912	-
+method	c:objc(cs)NEFilterDataProvider(im)handleRulesChanged	-			void	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eee1684c074013c1	-
+method	c:objc(cs)NEFilterDataProvider(im)applySettings:completionHandler:	-			void	NEFilterSettings * settings | void (^)(NSError * _Nullable) completionHandler	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ac44135925e2e629	-
+method	c:objc(cs)NEFilterDataProvider(im)resumeFlow:withVerdict:	-			void	NEFilterFlow * flow | NEFilterVerdict * verdict	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1236d801f4273906	-
+method	c:objc(cs)NEFilterDataProvider(im)updateFlow:usingVerdict:forDirection:	-			void	NEFilterSocketFlow * flow | NEFilterDataVerdict * verdict | NETrafficDirection direction	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f9c420ce99433853	-
+interface	c:objc(cs)NEFilterDataVerdict	-			-	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	049af3153bf53a04	-
+super	-	NEFilterDataVerdict	NEFilterVerdict		-	-	-	-	-	8a45657203d53fb9	-
+conforms	c:objc(cs)NEFilterDataVerdict	NEFilterDataVerdict	NSSecureCoding		-	-	-	-	-	b472cebcd5314c78	-
+conforms	c:objc(cs)NEFilterDataVerdict	NEFilterDataVerdict	NSCopying		-	-	-	-	-	d03a3a078a72c47f	-
+property	c:objc(cs)NEFilterDataVerdict(py)statisticsReportFrequency	-			NEFilterReportFrequency	-	-	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2fe41df1ef21bacc	-
+method	c:objc(cs)NEFilterDataVerdict(cm)allowVerdict	-			NEFilterDataVerdict *	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bb1bfc5e175a303c	-
+method	c:objc(cs)NEFilterDataVerdict(cm)dropVerdict	-			NEFilterDataVerdict *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	77d4b6ba5d3684fc	-
+method	c:objc(cs)NEFilterDataVerdict(cm)remediateVerdictWithRemediationURLMapKey:remediationButtonTextMapKey:	-			NEFilterDataVerdict *	NSString * remediationURLMapKey | NSString * remediationButtonTextMapKey	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	14b790c566371edb	-
+method	c:objc(cs)NEFilterDataVerdict(cm)dataVerdictWithPassBytes:peekBytes:	-			NEFilterDataVerdict *	NSUInteger passBytes | NSUInteger peekBytes	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bf42fc1d4de88689	-
+method	c:objc(cs)NEFilterDataVerdict(cm)needRulesVerdict	-			NEFilterDataVerdict *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	15fffd55165a5b46	-
+method	c:objc(cs)NEFilterDataVerdict(cm)pauseVerdict	-			NEFilterDataVerdict *	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c9f52e03100de649	-
+interface	c:objc(cs)NEFilterRemediationVerdict	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ed3fd63097366e23	-
+super	-	NEFilterRemediationVerdict	NEFilterVerdict		-	-	-	-	-	c6ae580c63162771	-
+conforms	c:objc(cs)NEFilterRemediationVerdict	NEFilterRemediationVerdict	NSSecureCoding		-	-	-	-	-	aad573126aa563a3	-
+conforms	c:objc(cs)NEFilterRemediationVerdict	NEFilterRemediationVerdict	NSCopying		-	-	-	-	-	4c33e5e71da3984a	-
+method	c:objc(cs)NEFilterRemediationVerdict(cm)allowVerdict	-			NEFilterRemediationVerdict *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4db1e24bcbd84748	-
+method	c:objc(cs)NEFilterRemediationVerdict(cm)dropVerdict	-			NEFilterRemediationVerdict *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fbaaa973c6509707	-
+method	c:objc(cs)NEFilterRemediationVerdict(cm)needRulesVerdict	-			NEFilterRemediationVerdict *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bed68fc6dddc3298	-
+typedef	c:@T@NEFilterManagerError	-			enum NEFilterManagerError	-	-	-	-	469a18ac39ea66d3	-
+enum	c:@E@NEFilterManagerError	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d76e1f35bbe0935a	-
+enumconst	c:@E@NEFilterManagerError@NEFilterManagerErrorConfigurationInvalid	NEFilterManagerError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ff562df1a1baeef6	1
+enumconst	c:@E@NEFilterManagerError@NEFilterManagerErrorConfigurationDisabled	NEFilterManagerError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	376b654254fa18cc	2
+enumconst	c:@E@NEFilterManagerError@NEFilterManagerErrorConfigurationStale	NEFilterManagerError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1c1141d499a14c9d	3
+enumconst	c:@E@NEFilterManagerError@NEFilterManagerErrorConfigurationCannotBeRemoved	NEFilterManagerError			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d424f08014ba928c	4
+enumconst	c:@E@NEFilterManagerError@NEFilterManagerErrorConfigurationPermissionDenied	NEFilterManagerError			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8962261f996e5985	5
+enumconst	c:@E@NEFilterManagerError@NEFilterManagerErrorConfigurationInternalError	NEFilterManagerError			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a1c17f5fbb2c732d	6
+var	c:@NEFilterErrorDomain	-			NSString *const	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0ba4f11c1f3d613c	-
+var	c:@NEFilterConfigurationDidChangeNotification	-			NSString *const	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f9bb34adb3a2caf6	-
+typedef	c:@T@NEFilterManagerGrade	-			enum NEFilterManagerGrade	-	-	-	-	2ef03bb9f132e41a	-
+enum	c:@E@NEFilterManagerGrade	-			NSInteger	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1e75e38d092b2555	-
+enumconst	c:@E@NEFilterManagerGrade@NEFilterManagerGradeFirewall	NEFilterManagerGrade			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a6635cec8395ff95	1
+enumconst	c:@E@NEFilterManagerGrade@NEFilterManagerGradeInspector	NEFilterManagerGrade			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7528d76f39878f74	2
+interface	c:objc(cs)NEFilterManager	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	843c15d7727247d5	-
+super	-	NEFilterManager	NSObject		-	-	-	-	-	338ba155a3ed7e22	-
+method	c:objc(cs)NEFilterManager(cm)sharedManager	-			NEFilterManager *	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	51e9ff7be72e5819	-
+method	c:objc(cs)NEFilterManager(im)loadFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6e7786f94c2948be	-
+method	c:objc(cs)NEFilterManager(im)removeFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3480f0dc25b02d0c	-
+method	c:objc(cs)NEFilterManager(im)saveToPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	afd1639c8d1b81db	-
+property	c:objc(cs)NEFilterManager(py)localizedDescription	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6e1c7a262d141c10	-
+property	c:objc(cs)NEFilterManager(py)providerConfiguration	-			NEFilterProviderConfiguration *	-	strong	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9ccb834d43e727a3	-
+property	c:objc(cs)NEFilterManager(py)enabled	-			BOOL	-	getter=isEnabled	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	060001ece23b3921	-
+property	c:objc(cs)NEFilterManager(py)grade	-			NEFilterManagerGrade	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3ee93373deeb3ba8	-
+property	c:objc(cs)NEFilterManager(py)disableEncryptedDNSSettings	-			BOOL	-	assign	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2bb69443acfd3005	-
+interface	c:objc(cs)NEFilterPacketContext	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	aaa8e220bb6c4a50	-
+super	-	NEFilterPacketContext	NSObject		-	-	-	-	-	89c52e6ec27d964a	-
+typedef	c:@T@NEFilterPacketProviderVerdict	-			enum NEFilterPacketProviderVerdict	-	-	-	-	62dcbe1b2f82b385	-
+enum	c:@E@NEFilterPacketProviderVerdict	-			NSInteger	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c80c114bd6eb5966	-
+enumconst	c:@E@NEFilterPacketProviderVerdict@NEFilterPacketProviderVerdictAllow	NEFilterPacketProviderVerdict			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	818c020c8b94ddea	0
+enumconst	c:@E@NEFilterPacketProviderVerdict@NEFilterPacketProviderVerdictDrop	NEFilterPacketProviderVerdict			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bb7bcc69da1203ba	1
+enumconst	c:@E@NEFilterPacketProviderVerdict@NEFilterPacketProviderVerdictDelay	NEFilterPacketProviderVerdict			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	72ac6fcc72cfc7a1	2
+typedef	c:@T@NEFilterPacketHandler	-			NEFilterPacketProviderVerdict ((^))(NEFilterPacketContext *, nw_interface_t, NETrafficDirection, const void *, const size_t)	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	826c737b2615864e	-
+interface	c:objc(cs)NEFilterPacketProvider	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0f4344ad25c002fb	-
+super	-	NEFilterPacketProvider	NEFilterProvider		-	-	-	-	-	6ba45ed78c5122af	-
+property	c:objc(cs)NEFilterPacketProvider(py)packetHandler	-			NEFilterPacketHandler	-	strong	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dbedcfcd27d3cdf4	-
+method	c:objc(cs)NEFilterPacketProvider(im)delayCurrentPacket:	-			NEPacket *	NEFilterPacketContext * context	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	99ac2f26a5bdff71	-
+method	c:objc(cs)NEFilterPacketProvider(im)allowPacket:	-			void	NEPacket * packet	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5b59b19e9f1ebd45	-
+interface	c:objc(cs)NEFilterProviderConfiguration	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: filterBrowsers is not supported on macOS	fde7cdf1a90355c7	-
+super	-	NEFilterProviderConfiguration	NSObject		-	-	-	-	-	cfa79b9e1102e89f	-
+conforms	c:objc(cs)NEFilterProviderConfiguration	NEFilterProviderConfiguration	NSSecureCoding		-	-	-	-	-	ad8d8c64a4908a2b	-
+conforms	c:objc(cs)NEFilterProviderConfiguration	NEFilterProviderConfiguration	NSCopying		-	-	-	-	-	12ed0fef910b04a1	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)filterBrowsers	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ca6c98007f3fec03	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)filterSockets	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cead50d8a657df3e	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)filterPackets	-			BOOL	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	647a04456b52097d	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)vendorConfiguration	-			NSDictionary<NSString *,id> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	314a59d33c304630	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)serverAddress	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c3475da689e10295	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)username	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c4afbc4b7f09598e	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)organization	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ac4c3002acb50a10	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)passwordReference	-			NSData *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	11fea8d1d1393ebc	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)identityReference	-			NSData *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7fd73bbd0cadb5a8	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)filterDataProviderBundleIdentifier	-			NSString *	-	copy	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8dd448f066d676c2	-
+property	c:objc(cs)NEFilterProviderConfiguration(py)filterPacketProviderBundleIdentifier	-			NSString *	-	copy	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	60edef73a95daddd	-
+interface	c:objc(cs)NEFilterRule	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	101b3bdc2a258607	-
+super	-	NEFilterRule	NSObject		-	-	-	-	-	d3324698614d2a37	-
+conforms	c:objc(cs)NEFilterRule	NEFilterRule	NSSecureCoding		-	-	-	-	-	e98293c3af121726	-
+conforms	c:objc(cs)NEFilterRule	NEFilterRule	NSCopying		-	-	-	-	-	68f1f8b6c02d21d5	-
+method	c:objc(cs)NEFilterRule(im)initWithNetworkRule:action:	-			instancetype	NENetworkRule * networkRule | NEFilterAction action	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2596b46b45a2f97c	-
+property	c:objc(cs)NEFilterRule(py)networkRule	-			NENetworkRule *	-	readonly,copy	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4e1ffd3aca35f26f	-
+property	c:objc(cs)NEFilterRule(py)action	-			NEFilterAction	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3eca0746c413e96c	-
+interface	c:objc(cs)NEFilterSettings	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	21ab6cd0e0d2bb9a	-
+super	-	NEFilterSettings	NSObject		-	-	-	-	-	51d876f44b46b6cb	-
+conforms	c:objc(cs)NEFilterSettings	NEFilterSettings	NSSecureCoding		-	-	-	-	-	3e9f788d331c44ea	-
+conforms	c:objc(cs)NEFilterSettings	NEFilterSettings	NSCopying		-	-	-	-	-	f901dfd509a0246d	-
+method	c:objc(cs)NEFilterSettings(im)initWithRules:defaultAction:	-			instancetype	NSArray<NEFilterRule *> * rules | NEFilterAction defaultAction	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	352c9f0f22c3170a	-
+property	c:objc(cs)NEFilterSettings(py)rules	-			NSArray<NEFilterRule *> *	-	readonly,copy	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ee0d0f2918b54c03	-
+property	c:objc(cs)NEFilterSettings(py)defaultAction	-			NEFilterAction	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d3385cca0c00a74e	-
+interface	c:objc(cs)NEFlowMetaData	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	483c87b56fa7d17a	-
+super	-	NEFlowMetaData	NSObject		-	-	-	-	-	2557f85bb1b4c8ce	-
+conforms	c:objc(cs)NEFlowMetaData	NEFlowMetaData	NSCopying		-	-	-	-	-	a1c19f9e2a1eb394	-
+conforms	c:objc(cs)NEFlowMetaData	NEFlowMetaData	NSSecureCoding		-	-	-	-	-	383d8510da884237	-
+property	c:objc(cs)NEFlowMetaData(py)sourceAppUniqueIdentifier	-			NSData *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	029ee57b8817bcd3	-
+property	c:objc(cs)NEFlowMetaData(py)sourceAppSigningIdentifier	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9664d63d5f9cd537	-
+property	c:objc(cs)NEFlowMetaData(py)sourceAppAuditToken	-			NSData *	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bf5756ac1cc83641	-
+property	c:objc(cs)NEFlowMetaData(py)filterFlowIdentifier	-			NSUUID *	-	readonly	ios=-/-/-/1,macos=10.15.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c1979a8b1932d308	-
+typedef	c:@T@NEHotspotNetworkSecurityType	-			enum NEHotspotNetworkSecurityType	-	-	-	-	028388216df528e6	-
+enum	c:@E@NEHotspotNetworkSecurityType	-			NSInteger	-	-	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	87db7d9e0993d188	-
+enumconst	c:@E@NEHotspotNetworkSecurityType@NEHotspotNetworkSecurityTypeOpen	NEHotspotNetworkSecurityType			-	-	-	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	ea8cbe3b01399dd7	0
+enumconst	c:@E@NEHotspotNetworkSecurityType@NEHotspotNetworkSecurityTypeWEP	NEHotspotNetworkSecurityType			-	-	-	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	c0bced549d8751fe	1
+enumconst	c:@E@NEHotspotNetworkSecurityType@NEHotspotNetworkSecurityTypePersonal	NEHotspotNetworkSecurityType			-	-	-	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	466c3448f3052179	2
+enumconst	c:@E@NEHotspotNetworkSecurityType@NEHotspotNetworkSecurityTypeEnterprise	NEHotspotNetworkSecurityType			-	-	-	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	08fc40ed5d29019f	3
+enumconst	c:@E@NEHotspotNetworkSecurityType@NEHotspotNetworkSecurityTypeUnknown	NEHotspotNetworkSecurityType			-	-	-	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	97cf77d6dca67575	4
+interface	c:objc(cs)NEHotspotNetwork	-			-	-	-	ios=9.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	af6c0f973ae30cd1	-
+super	-	NEHotspotNetwork	NSObject		-	-	-	-	-	4a993b966a6dfb01	-
+property	c:objc(cs)NEHotspotNetwork(py)SSID	-			NSString *	-	readonly	ios=9.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	b7103656f1ab88cc	-
+property	c:objc(cs)NEHotspotNetwork(py)BSSID	-			NSString *	-	readonly	ios=9.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	729919a2773c049b	-
+property	c:objc(cs)NEHotspotNetwork(py)securityType	-			NEHotspotNetworkSecurityType	-	readonly	ios=15.0/-/-/0,maccatalyst=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=8.0/-/-/0	-	292a76b6a5f184cb	-
+method	c:objc(cs)NEHotspotNetwork(cm)fetchCurrentWithCompletionHandler:	-			void	void (^)(NEHotspotNetwork * _Nullable) completionHandler	-	ios=14.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	83f11910de8a0bbe	-
+typedef	c:@T@NEHotspotHelperCommandType	-			enum NEHotspotHelperCommandType	-	-	-	-	4883a2315d7d225a	-
+enum	c:@E@NEHotspotHelperCommandType	-			NSInteger	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	74c5ea1b1c578d94	-
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypeNone	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f6bc1f79551047c7	0
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypeFilterScanList	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fba4ea97a3c0d03b	1
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypeEvaluate	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d5a0db9a2fbe1241	2
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypeAuthenticate	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7265e7db82e19e8d	3
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypePresentUI	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5b27feb7bea9ed85	4
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypeMaintain	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0844e6bf11f76765	5
+enumconst	c:@E@NEHotspotHelperCommandType@kNEHotspotHelperCommandTypeLogoff	NEHotspotHelperCommandType			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	13a572032068b5e3	6
+typedef	c:@T@NEHotspotHelperResult	-			enum NEHotspotHelperResult	-	-	-	-	e9d52a0553b8bdcf	-
+enum	c:@E@NEHotspotHelperResult	-			NSInteger	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d66b226ab462f859	-
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultSuccess	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8022c1eecc70c928	0
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultFailure	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6f1d56f22d652846	1
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultUIRequired	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0bd114b8eb750c94	2
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultCommandNotRecognized	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	356d711b9bfa1cb5	3
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultAuthenticationRequired	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8e380813e074ae5c	4
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultUnsupportedNetwork	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	98af086f71cfc1c1	5
+enumconst	c:@E@NEHotspotHelperResult@kNEHotspotHelperResultTemporaryFailure	NEHotspotHelperResult			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	a9734f2d038677b5	6
+typedef	c:@T@NEHotspotHelperConfidence	-			enum NEHotspotHelperConfidence	-	-	-	-	ebd741b287f8ba7b	-
+enum	c:@E@NEHotspotHelperConfidence	-			NSInteger	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6979398a1a971a7c	-
+enumconst	c:@E@NEHotspotHelperConfidence@kNEHotspotHelperConfidenceNone	NEHotspotHelperConfidence			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d3702af18c6aae24	0
+enumconst	c:@E@NEHotspotHelperConfidence@kNEHotspotHelperConfidenceLow	NEHotspotHelperConfidence			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3b0d93c0f94d61ff	1
+enumconst	c:@E@NEHotspotHelperConfidence@kNEHotspotHelperConfidenceHigh	NEHotspotHelperConfidence			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	abaaf9b0a7be3335	2
+category	c:objc(cy)NEHotspotNetwork@HotspotHelper	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	796ca1f7cfcf3244	-
+property	c:objc(cs)NEHotspotNetwork(py)signalStrength	HotspotHelper			double	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c0a4841d7f4d6f23	-
+property	c:objc(cs)NEHotspotNetwork(py)secure	HotspotHelper			BOOL	-	readonly,getter=isSecure	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8cce0ada6a0010d7	-
+property	c:objc(cs)NEHotspotNetwork(py)autoJoined	HotspotHelper			BOOL	-	readonly,getter=didAutoJoin	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	28b989ddc5e9a678	-
+property	c:objc(cs)NEHotspotNetwork(py)justJoined	HotspotHelper			BOOL	-	readonly,getter=didJustJoin	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2652bada94a57463	-
+property	c:objc(cs)NEHotspotNetwork(py)chosenHelper	HotspotHelper			BOOL	-	readonly,getter=isChosenHelper	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6e144863a6e2df67	-
+method	c:objc(cs)NEHotspotNetwork(im)setConfidence:	HotspotHelper			void	NEHotspotHelperConfidence confidence	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	99cccbe0f635913a	-
+method	c:objc(cs)NEHotspotNetwork(im)setPassword:	HotspotHelper			void	NSString * password	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7e5d24f28b059623	-
+interface	c:objc(cs)NEHotspotHelperCommand	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use the `interface` property with `nw_parameters_require_interface`	a384c7e148364d5c	-
+super	-	NEHotspotHelperCommand	NSObject		-	-	-	-	-	3b015128ee05440e	-
+property	c:objc(cs)NEHotspotHelperCommand(py)commandType	-			NEHotspotHelperCommandType	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1d90573939cdeb2a	-
+property	c:objc(cs)NEHotspotHelperCommand(py)network	-			NEHotspotNetwork *	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	507511f869d5e25a	-
+property	c:objc(cs)NEHotspotHelperCommand(py)networkList	-			NSArray<NEHotspotNetwork *> *	-	readonly	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	778ca1e8b2d255fa	-
+method	c:objc(cs)NEHotspotHelperCommand(im)createResponse:	-			NEHotspotHelperResponse *	NEHotspotHelperResult result	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	9f5dcaa90c41005d	-
+property	c:objc(cs)NEHotspotHelperCommand(py)interface	-			nw_interface_t	-	readonly	ios=18.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=2.0/-/-/0	-	60c4a44a1aa28997	-
+method	c:objc(cs)NEHotspotHelperCommand(im)createTCPConnection:	-			NWTCPConnection *	NWEndpoint * endpoint	-	ios=9.0/18.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use the `interface` property with `nw_parameters_require_interface`	4056eafeeaff9cd4	-
+method	c:objc(cs)NEHotspotHelperCommand(im)createUDPSession:	-			NWUDPSession *	NWEndpoint * endpoint	-	ios=9.0/18.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use the `interface` property with `nw_parameters_require_interface`	0248382b9b747cef	-
+interface	c:objc(cs)NEHotspotHelperResponse	-			-	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use handleCommand in NEHotspotEvaluationProvider or NEHotspotAuthenticationProvider API	712f19ef2d3f76f1	-
+super	-	NEHotspotHelperResponse	NSObject		-	-	-	-	-	c26b30597d1ea6f2	-
+method	c:objc(cs)NEHotspotHelperResponse(im)setNetwork:	-			void	NEHotspotNetwork * network	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	74cd4afe134ad111	-
+method	c:objc(cs)NEHotspotHelperResponse(im)setNetworkList:	-			void	NSArray<NEHotspotNetwork *> * networkList	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6b2fc44fc7424d6a	-
+method	c:objc(cs)NEHotspotHelperResponse(im)deliver	-			void	-	-	ios=9.0/26.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use handleCommand in NEHotspotEvaluationProvider or NEHotspotAuthenticationProvider API	ef55b07412bc5949	-
+typedef	c:@T@NEHotspotHelperHandler	-			void ((^))(NEHotspotHelperCommand *)	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1deb76864621e73e	-
+var	c:@kNEHotspotHelperOptionDisplayName	-			const NSString *	-	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use the `interface` property with `nw_parameters_require_interface`	4c610dbd9e154eaa	-
+interface	c:objc(cs)NEHotspotHelper	-			-	-	-	ios=9.0/26.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use NEHotspotManager API	9798150584b49275	-
+super	-	NEHotspotHelper	NSObject		-	-	-	-	-	d44d2671fc6412d1	-
+method	c:objc(cs)NEHotspotHelper(cm)registerWithOptions:queue:handler:	-			BOOL	NSDictionary<NSString *,NSObject *> * options | dispatch_queue_t queue | NEHotspotHelperHandler handler	-	ios=9.0/26.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use NEHotspotManager API	6a7f6f5540556edc	-
+method	c:objc(cs)NEHotspotHelper(cm)logoff:	-			BOOL	NEHotspotNetwork * network	-	ios=9.0/26.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use NEHotspotManager API	c69bd1e28e81d37f	-
+method	c:objc(cs)NEHotspotHelper(cm)supportedNetworkInterfaces	-			NSArray *	-	-	ios=9.0/26.0/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use NEHotspotManager API	2ea376a139eea663	-
+category	c:objc(cy)NSMutableURLRequest@NEHotspotHelper	-			-	-	-	ios=2.0/-/-/0,macos=10.2/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	677adedd6f219bbb	-
+method	c:objc(cs)NSMutableURLRequest(im)bindToHotspotHelperCommand:	NEHotspotHelper			void	NEHotspotHelperCommand * command	-	ios=9.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b0cb9b15793dcdfa	-
+typedef	c:@T@NEHotspotConfigurationEAPType	-			enum NEHotspotConfigurationEAPType	-	-	-	-	257b293259522cc2	-
+enum	c:@E@NEHotspotConfigurationEAPType	-			NSInteger	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	88ee1e013b8e06e7	-
+enumconst	c:@E@NEHotspotConfigurationEAPType@NEHotspotConfigurationEAPTypeEAPTLS	NEHotspotConfigurationEAPType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	50f2db73ec3b930b	13
+enumconst	c:@E@NEHotspotConfigurationEAPType@NEHotspotConfigurationEAPTypeEAPTTLS	NEHotspotConfigurationEAPType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eebdc8cf12019bac	21
+enumconst	c:@E@NEHotspotConfigurationEAPType@NEHotspotConfigurationEAPTypeEAPPEAP	NEHotspotConfigurationEAPType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2b7cbccf5c7525a0	25
+enumconst	c:@E@NEHotspotConfigurationEAPType@NEHotspotConfigurationEAPTypeEAPFAST	NEHotspotConfigurationEAPType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	093a8039d4229d61	43
+typedef	c:@T@NEHotspotConfigurationTTLSInnerAuthenticationType	-			enum NEHotspotConfigurationTTLSInnerAuthenticationType	-	-	-	-	2a638c86dab4f220	-
+enum	c:@E@NEHotspotConfigurationTTLSInnerAuthenticationType	-			NSInteger	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	39a7debe41f3decf	-
+enumconst	c:@E@NEHotspotConfigurationTTLSInnerAuthenticationType@NEHotspotConfigurationEAPTTLSInnerAuthenticationPAP	NEHotspotConfigurationTTLSInnerAuthenticationType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0a79d385457c2cf0	0
+enumconst	c:@E@NEHotspotConfigurationTTLSInnerAuthenticationType@NEHotspotConfigurationEAPTTLSInnerAuthenticationCHAP	NEHotspotConfigurationTTLSInnerAuthenticationType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ced7f25a938c6c00	1
+enumconst	c:@E@NEHotspotConfigurationTTLSInnerAuthenticationType@NEHotspotConfigurationEAPTTLSInnerAuthenticationMSCHAP	NEHotspotConfigurationTTLSInnerAuthenticationType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	381f6eb1c1997209	2
+enumconst	c:@E@NEHotspotConfigurationTTLSInnerAuthenticationType@NEHotspotConfigurationEAPTTLSInnerAuthenticationMSCHAPv2	NEHotspotConfigurationTTLSInnerAuthenticationType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	effad5d3b2e061f6	3
+enumconst	c:@E@NEHotspotConfigurationTTLSInnerAuthenticationType@NEHotspotConfigurationEAPTTLSInnerAuthenticationEAP	NEHotspotConfigurationTTLSInnerAuthenticationType			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	9374a783d27af2d1	4
+typedef	c:@T@NEHotspotConfigurationEAPTLSVersion	-			enum NEHotspotConfigurationEAPTLSVersion	-	-	-	-	93d8f135fb3bea1d	-
+enum	c:@E@NEHotspotConfigurationEAPTLSVersion	-			NSInteger	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	daa4f2d614efaaf4	-
+enumconst	c:@E@NEHotspotConfigurationEAPTLSVersion@NEHotspotConfigurationEAPTLSVersion_1_0	NEHotspotConfigurationEAPTLSVersion			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	cb4b6ce09fcf7a53	0
+enumconst	c:@E@NEHotspotConfigurationEAPTLSVersion@NEHotspotConfigurationEAPTLSVersion_1_1	NEHotspotConfigurationEAPTLSVersion			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d3e4385ad1dfaf13	1
+enumconst	c:@E@NEHotspotConfigurationEAPTLSVersion@NEHotspotConfigurationEAPTLSVersion_1_2	NEHotspotConfigurationEAPTLSVersion			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bac0945ea4d49435	2
+interface	c:objc(cs)NEHotspotHS20Settings	-			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ad4f9aa6b44f4db5	-
+super	-	NEHotspotHS20Settings	NSObject		-	-	-	-	-	05b7cf572ad725b9	-
+conforms	c:objc(cs)NEHotspotHS20Settings	NEHotspotHS20Settings	NSCopying		-	-	-	-	-	376dc730d0b93a1c	-
+conforms	c:objc(cs)NEHotspotHS20Settings	NEHotspotHS20Settings	NSSecureCoding		-	-	-	-	-	0339feb694a32783	-
+property	c:objc(cs)NEHotspotHS20Settings(py)domainName	-			NSString *	-	readonly	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0f1b1b56fbfbe004	-
+property	c:objc(cs)NEHotspotHS20Settings(py)roamingEnabled	-			BOOL	-	getter=isRoamingEnabled	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d575b24d36b1e672	-
+property	c:objc(cs)NEHotspotHS20Settings(py)roamingConsortiumOIs	-			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e680460e5f085ec3	-
+property	c:objc(cs)NEHotspotHS20Settings(py)naiRealmNames	-			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	15240075d99cb589	-
+property	c:objc(cs)NEHotspotHS20Settings(py)MCCAndMNCs	-			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c342e178ea80cbd4	-
+method	c:objc(cs)NEHotspotHS20Settings(im)initWithDomainName:roamingEnabled:	-			instancetype	NSString * domainName | BOOL roamingEnabled	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	92d6d9b234a14a34	-
+interface	c:objc(cs)NEHotspotEAPSettings	-			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	59a905fd833d849e	-
+super	-	NEHotspotEAPSettings	NSObject		-	-	-	-	-	08b1aceedfaf8f00	-
+conforms	c:objc(cs)NEHotspotEAPSettings	NEHotspotEAPSettings	NSCopying		-	-	-	-	-	f682d49148396862	-
+conforms	c:objc(cs)NEHotspotEAPSettings	NEHotspotEAPSettings	NSSecureCoding		-	-	-	-	-	840b68d721aa3d1f	-
+property	c:objc(cs)NEHotspotEAPSettings(py)supportedEAPTypes	-			NSArray<NSNumber *> *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	20bac1acbcf709fa	-
+property	c:objc(cs)NEHotspotEAPSettings(py)username	-			NSString *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4dbec16acb9f8fea	-
+property	c:objc(cs)NEHotspotEAPSettings(py)outerIdentity	-			NSString *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	534bc5a60e153e63	-
+property	c:objc(cs)NEHotspotEAPSettings(py)ttlsInnerAuthenticationType	-			NEHotspotConfigurationTTLSInnerAuthenticationType	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	a54823c3a05790d5	-
+property	c:objc(cs)NEHotspotEAPSettings(py)password	-			NSString *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	99e47b4004046cde	-
+property	c:objc(cs)NEHotspotEAPSettings(py)trustedServerNames	-			NSArray<NSString *> *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	46a8d83d89f13860	-
+property	c:objc(cs)NEHotspotEAPSettings(py)tlsClientCertificateRequired	-			BOOL	-	getter=isTLSClientCertificateRequired	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	069e8c3e8b185fc7	-
+property	c:objc(cs)NEHotspotEAPSettings(py)preferredTLSVersion	-			NEHotspotConfigurationEAPTLSVersion	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	783ae5cf86c38c74	-
+method	c:objc(cs)NEHotspotEAPSettings(im)setIdentity:	-			BOOL	SecIdentityRef identity	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e4efa553addaf103	-
+method	c:objc(cs)NEHotspotEAPSettings(im)setTrustedServerCertificates:	-			BOOL	NSArray * certificates	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	20a865b3e9a6d9ef	-
+interface	c:objc(cs)NEHotspotConfiguration	-			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	a960bec4b95bdecc	-
+super	-	NEHotspotConfiguration	NSObject		-	-	-	-	-	a42e327fb4ca5b32	-
+conforms	c:objc(cs)NEHotspotConfiguration	NEHotspotConfiguration	NSCopying		-	-	-	-	-	05cf7099413af8a4	-
+conforms	c:objc(cs)NEHotspotConfiguration	NEHotspotConfiguration	NSSecureCoding		-	-	-	-	-	fe5b9deb7cbb3922	-
+property	c:objc(cs)NEHotspotConfiguration(py)SSID	-			NSString *	-	readonly	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	d7c81e5d0c155fdc	-
+property	c:objc(cs)NEHotspotConfiguration(py)SSIDPrefix	-			NSString *	-	readonly	ios=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	b2a413a97ce618f7	-
+property	c:objc(cs)NEHotspotConfiguration(py)joinOnce	-			BOOL	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	5f2d7ec844221858	-
+property	c:objc(cs)NEHotspotConfiguration(py)lifeTimeInDays	-			NSNumber *	-	copy	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	a2898f22de6bbc36	-
+property	c:objc(cs)NEHotspotConfiguration(py)hidden	-			BOOL	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	5c64ac6d0aa82414	-
+method	c:objc(cs)NEHotspotConfiguration(im)initWithSSID:	-			instancetype	NSString * SSID	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	98ea1fab595461e5	-
+method	c:objc(cs)NEHotspotConfiguration(im)initWithSSID:passphrase:isWEP:	-			instancetype	NSString * SSID | NSString * passphrase | BOOL isWEP	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	54f93c08d2e1777b	-
+method	c:objc(cs)NEHotspotConfiguration(im)initWithSSID:eapSettings:	-			instancetype	NSString * SSID | NEHotspotEAPSettings * eapSettings	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	47072d210858ebd4	-
+method	c:objc(cs)NEHotspotConfiguration(im)initWithHS20Settings:eapSettings:	-			instancetype	NEHotspotHS20Settings * hs20Settings | NEHotspotEAPSettings * eapSettings	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	a811fb0aa37eb3df	-
+method	c:objc(cs)NEHotspotConfiguration(im)initWithSSIDPrefix:	-			instancetype	NSString * SSIDPrefix	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	da163604c3cc9d35	-
+method	c:objc(cs)NEHotspotConfiguration(im)initWithSSIDPrefix:passphrase:isWEP:	-			instancetype	NSString * SSIDPrefix | NSString * passphrase | BOOL isWEP	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	35d2184aea386d39	-
+var	c:@NEHotspotConfigurationErrorDomain	-			NSString *const	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	257158c45892b153	-
+typedef	c:@T@NEHotspotConfigurationError	-			enum NEHotspotConfigurationError	-	-	-	-	51f0ab9bb1ecfb3a	-
+enum	c:@E@NEHotspotConfigurationError	-			NSInteger	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	69dd61b5434d8d92	-
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalid	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	625cab9a76aba09d	0
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidSSID	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	3a104b061bb74abf	1
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidWPAPassphrase	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	c5199a2569520cdc	2
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidWEPPassphrase	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	dc45ce08e5011276	3
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidEAPSettings	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	b559b75e86699c20	4
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidHS20Settings	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	f529a6289878dc4c	5
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidHS20DomainName	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	696f8fb7f9447a08	6
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorUserDenied	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	67e2426b7ac7d5e6	7
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInternal	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	b2d390bf0ba69ee4	8
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorPending	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	a25bce0c542f90f9	9
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorSystemConfiguration	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	fc931be807f94cf9	10
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorUnknown	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	b517a2d2e73ee659	11
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorJoinOnceNotSupported	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	329649ac3483bd32	12
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorAlreadyAssociated	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	9b842312bcc16128	13
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorApplicationIsNotInForeground	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	42c58dfe83d89ab5	14
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorInvalidSSIDPrefix	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	e0b27a5ef58b0d61	15
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorUserUnauthorized	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	f9f67ef6e5731cd9	16
+enumconst	c:@E@NEHotspotConfigurationError@NEHotspotConfigurationErrorSystemDenied	NEHotspotConfigurationError			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	c052ae721f708027	17
+interface	c:objc(cs)NEHotspotConfigurationManager	-			-	-	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	46914a607f8b5ace	-
+super	-	NEHotspotConfigurationManager	NSObject		-	-	-	-	-	0e0d2f7ef1246377	-
+property	c:objc(cs)NEHotspotConfigurationManager(cpy)sharedManager	-			NEHotspotConfigurationManager *	-	readonly,strong,class	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	a187417524bc4504	-
+method	c:objc(cs)NEHotspotConfigurationManager(im)applyConfiguration:completionHandler:	-			void	NEHotspotConfiguration * configuration | void (^)(NSError * _Nullable) completionHandler	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	c61aadbec72fb7e6	-
+method	c:objc(cs)NEHotspotConfigurationManager(im)removeConfigurationForSSID:	-			void	NSString * SSID	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	efdf1ee45be8a562	-
+method	c:objc(cs)NEHotspotConfigurationManager(im)removeConfigurationForHS20DomainName:	-			void	NSString * domainName	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	110c559f5825ecc0	-
+method	c:objc(cs)NEHotspotConfigurationManager(im)getConfiguredSSIDsWithCompletionHandler:	-			void	void (^)(NSArray<NSString *> * _Nonnull) completionHandler	-	ios=11.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=7.0/-/-/0	-	9111b5fc2efef46c	-
+method	c:objc(cs)NEHotspotConfigurationManager(im)joinAccessoryHotspot:passphrase:completionHandler:	-			void	ASAccessory * accessory | NSString * passphrase | void (^)(NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	256059c97989fb8b	-
+method	c:objc(cs)NEHotspotConfigurationManager(im)joinAccessoryHotspotWithoutSecurity:completionHandler:	-			void	ASAccessory * accessory | void (^)(NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2052fef7159964c1	-
+interface	c:objc(cs)NEIPv4Settings	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	16444f7379b7afb7	-
+super	-	NEIPv4Settings	NSObject		-	-	-	-	-	bd360cc040a665dd	-
+conforms	c:objc(cs)NEIPv4Settings	NEIPv4Settings	NSSecureCoding		-	-	-	-	-	6838240149c8fef8	-
+conforms	c:objc(cs)NEIPv4Settings	NEIPv4Settings	NSCopying		-	-	-	-	-	7747a9aad0824582	-
+method	c:objc(cs)NEIPv4Settings(im)initWithAddresses:subnetMasks:	-			instancetype	NSArray<NSString *> * addresses | NSArray<NSString *> * subnetMasks	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	09d7ae6eb5f302cb	-
+method	c:objc(cs)NEIPv4Settings(cm)settingsWithAutomaticAddressing	-			instancetype	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	622ce54a616c5302	-
+property	c:objc(cs)NEIPv4Settings(py)addresses	-			NSArray<NSString *> *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	20ea9433584bbffd	-
+property	c:objc(cs)NEIPv4Settings(py)subnetMasks	-			NSArray<NSString *> *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2a1ab8f00083b7c0	-
+property	c:objc(cs)NEIPv4Settings(py)router	-			NSString *	-	copy	ios=-/-/-/1,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9f7182105e84c50c	-
+property	c:objc(cs)NEIPv4Settings(py)includedRoutes	-			NSArray<NEIPv4Route *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6b8b8aeea112d31e	-
+property	c:objc(cs)NEIPv4Settings(py)excludedRoutes	-			NSArray<NEIPv4Route *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	53d3304c66e866c6	-
+interface	c:objc(cs)NEIPv4Route	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	579c32d9dc92ba6e	-
+super	-	NEIPv4Route	NSObject		-	-	-	-	-	b26634243cf62a09	-
+conforms	c:objc(cs)NEIPv4Route	NEIPv4Route	NSSecureCoding		-	-	-	-	-	ae417aa42c2d9a9c	-
+conforms	c:objc(cs)NEIPv4Route	NEIPv4Route	NSCopying		-	-	-	-	-	745b5ae5aaeaa480	-
+method	c:objc(cs)NEIPv4Route(im)initWithDestinationAddress:subnetMask:	-			instancetype	NSString * address | NSString * subnetMask	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0b904c777cd03e9b	-
+property	c:objc(cs)NEIPv4Route(py)destinationAddress	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d6a0fe76838ba621	-
+property	c:objc(cs)NEIPv4Route(py)destinationSubnetMask	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6a97a7ba4e711978	-
+property	c:objc(cs)NEIPv4Route(py)gatewayAddress	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	66f1b68754fb975a	-
+method	c:objc(cs)NEIPv4Route(cm)defaultRoute	-			NEIPv4Route *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af0f742fc30ce725	-
+interface	c:objc(cs)NEIPv6Settings	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3ef7134f0c422d95	-
+super	-	NEIPv6Settings	NSObject		-	-	-	-	-	f82e9988ca5f4a3e	-
+conforms	c:objc(cs)NEIPv6Settings	NEIPv6Settings	NSSecureCoding		-	-	-	-	-	5f0dbca3ad3a3198	-
+conforms	c:objc(cs)NEIPv6Settings	NEIPv6Settings	NSCopying		-	-	-	-	-	c3241de689acbf06	-
+method	c:objc(cs)NEIPv6Settings(im)initWithAddresses:networkPrefixLengths:	-			instancetype	NSArray<NSString *> * addresses | NSArray<NSNumber *> * networkPrefixLengths	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e9988cc519476bde	-
+method	c:objc(cs)NEIPv6Settings(cm)settingsWithAutomaticAddressing	-			instancetype	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4a66da18f647c561	-
+method	c:objc(cs)NEIPv6Settings(cm)settingsWithLinkLocalAddressing	-			instancetype	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	701fe007214eda4a	-
+property	c:objc(cs)NEIPv6Settings(py)addresses	-			NSArray<NSString *> *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	280f416b37e3518a	-
+property	c:objc(cs)NEIPv6Settings(py)networkPrefixLengths	-			NSArray<NSNumber *> *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e9572b7f2c228dde	-
+property	c:objc(cs)NEIPv6Settings(py)includedRoutes	-			NSArray<NEIPv6Route *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cff92fdf742ec0d6	-
+property	c:objc(cs)NEIPv6Settings(py)excludedRoutes	-			NSArray<NEIPv6Route *> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	10471a7c3704bc4c	-
+interface	c:objc(cs)NEIPv6Route	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	389f9a947efe5753	-
+super	-	NEIPv6Route	NSObject		-	-	-	-	-	ae06c21c049c5581	-
+conforms	c:objc(cs)NEIPv6Route	NEIPv6Route	NSSecureCoding		-	-	-	-	-	0262340811c75dbf	-
+conforms	c:objc(cs)NEIPv6Route	NEIPv6Route	NSCopying		-	-	-	-	-	850589ffe6525dd6	-
+method	c:objc(cs)NEIPv6Route(im)initWithDestinationAddress:networkPrefixLength:	-			instancetype	NSString * address | NSNumber * networkPrefixLength	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	19c1584604301807	-
+property	c:objc(cs)NEIPv6Route(py)destinationAddress	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b56281046eaf58c4	-
+property	c:objc(cs)NEIPv6Route(py)destinationNetworkPrefixLength	-			NSNumber *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1ec966b149670df2	-
+property	c:objc(cs)NEIPv6Route(py)gatewayAddress	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ec27d25b8d2d02b8	-
+method	c:objc(cs)NEIPv6Route(cm)defaultRoute	-			NEIPv6Route *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	28e584db57cd2cdf	-
+interface	c:objc(cs)NETunnelNetworkSettings	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4491d407b6084bfd	-
+super	-	NETunnelNetworkSettings	NSObject		-	-	-	-	-	821acf495eb383ad	-
+conforms	c:objc(cs)NETunnelNetworkSettings	NETunnelNetworkSettings	NSSecureCoding		-	-	-	-	-	eaa3188e74baf868	-
+conforms	c:objc(cs)NETunnelNetworkSettings	NETunnelNetworkSettings	NSCopying		-	-	-	-	-	136c340c1e9f035e	-
+method	c:objc(cs)NETunnelNetworkSettings(im)initWithTunnelRemoteAddress:	-			instancetype	NSString * address	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1119e5147afb6765	-
+property	c:objc(cs)NETunnelNetworkSettings(py)tunnelRemoteAddress	-			NSString *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b09701df74cca365	-
+property	c:objc(cs)NETunnelNetworkSettings(py)DNSSettings	-			NEDNSSettings *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	efc6d43797cd2da1	-
+property	c:objc(cs)NETunnelNetworkSettings(py)proxySettings	-			NEProxySettings *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cd022e25466eacae	-
+interface	c:objc(cs)NEPacketTunnelNetworkSettings	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	72a43d5c33ecb975	-
+super	-	NEPacketTunnelNetworkSettings	NETunnelNetworkSettings		-	-	-	-	-	9f2222cf8c81c534	-
+property	c:objc(cs)NEPacketTunnelNetworkSettings(py)IPv4Settings	-			NEIPv4Settings *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4715c1da48971c4a	-
+property	c:objc(cs)NEPacketTunnelNetworkSettings(py)IPv6Settings	-			NEIPv6Settings *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cd1114f2bce1af8f	-
+property	c:objc(cs)NEPacketTunnelNetworkSettings(py)tunnelOverheadBytes	-			NSNumber *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8d03fb6cc3bf670a	-
+property	c:objc(cs)NEPacketTunnelNetworkSettings(py)MTU	-			NSNumber *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ed39354c8cb48a83	-
+interface	c:objc(cs)NEEthernetTunnelNetworkSettings	-			-	-	-	ios=-/-/-/1,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d680031b26e41dbb	-
+super	-	NEEthernetTunnelNetworkSettings	NEPacketTunnelNetworkSettings		-	-	-	-	-	3521553bf851e61b	-
+method	c:objc(cs)NEEthernetTunnelNetworkSettings(im)initWithTunnelRemoteAddress:ethernetAddress:mtu:	-			instancetype	NSString * address | NSString * ethernetAddress | NSInteger mtu	-	ios=-/-/-/1,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c4f7dee4ee5bddd0	-
+property	c:objc(cs)NEEthernetTunnelNetworkSettings(py)ethernetAddress	-			NSString *	-	readonly	ios=-/-/-/1,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d61cb2739013e0f7	-
+interface	c:objc(cs)NEPacketTunnelProvider	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	deprecated: Use the `virtualInterface` property with `nw_parameters_require_interface`	e8861a2dd070fd28	-
+super	-	NEPacketTunnelProvider	NETunnelProvider		-	-	-	-	-	c62b78fbc6c09c33	-
+method	c:objc(cs)NEPacketTunnelProvider(im)startTunnelWithOptions:completionHandler:	-			void	NSDictionary<NSString *,NSObject *> * options | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	723df2a2b8285ab2	-
+method	c:objc(cs)NEPacketTunnelProvider(im)stopTunnelWithReason:completionHandler:	-			void	NEProviderStopReason reason | void (^)(void) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bb9c7b7d074222a6	-
+method	c:objc(cs)NEPacketTunnelProvider(im)cancelTunnelWithError:	-			void	NSError * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fe97459f045e7f37	-
+property	c:objc(cs)NEPacketTunnelProvider(py)packetFlow	-			NEPacketTunnelFlow *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	52b15a25eff668fa	-
+property	c:objc(cs)NEPacketTunnelProvider(py)virtualInterface	-			nw_interface_t	-	readonly	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	368901b3dc4782b8	-
+method	c:objc(cs)NEPacketTunnelProvider(im)createTCPConnectionThroughTunnelToEndpoint:enableTLS:TLSParameters:delegate:	-			NWTCPConnection *	NWEndpoint * remoteEndpoint | BOOL enableTLS | NWTLSParameters * TLSParameters | id delegate	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use the `virtualInterface` property with `nw_parameters_require_interface`	ef2129b37b4578fa	-
+method	c:objc(cs)NEPacketTunnelProvider(im)createUDPSessionThroughTunnelToEndpoint:fromEndpoint:	-			NWUDPSession *	NWEndpoint * remoteEndpoint | NWHostEndpoint * localEndpoint	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use the `virtualInterface` property with `nw_parameters_require_interface`	31eec47e8b921cc5	-
+interface	c:objc(cs)NEEthernetTunnelProvider	-			-	-	-	ios=-/-/-/1,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	492e71ac8179a85c	-
+super	-	NEEthernetTunnelProvider	NEPacketTunnelProvider		-	-	-	-	-	345dd49d3f825230	-
+typedef	c:@T@NEOnDemandRuleAction	-			enum NEOnDemandRuleAction	-	-	-	-	6283fbca346e130c	-
+enum	c:@E@NEOnDemandRuleAction	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9c8181d1a76a9e41	-
+enumconst	c:@E@NEOnDemandRuleAction@NEOnDemandRuleActionConnect	NEOnDemandRuleAction			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cf991748f160924b	1
+enumconst	c:@E@NEOnDemandRuleAction@NEOnDemandRuleActionDisconnect	NEOnDemandRuleAction			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f7ceb8593ae599e6	2
+enumconst	c:@E@NEOnDemandRuleAction@NEOnDemandRuleActionEvaluateConnection	NEOnDemandRuleAction			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	63bb4a1b56ef2599	3
+enumconst	c:@E@NEOnDemandRuleAction@NEOnDemandRuleActionIgnore	NEOnDemandRuleAction			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fa2f0ed5de4673bd	4
+typedef	c:@T@NEOnDemandRuleInterfaceType	-			enum NEOnDemandRuleInterfaceType	-	-	-	-	6ac2d411e564afce	-
+enum	c:@E@NEOnDemandRuleInterfaceType	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bd4c787c24d7e899	-
+enumconst	c:@E@NEOnDemandRuleInterfaceType@NEOnDemandRuleInterfaceTypeAny	NEOnDemandRuleInterfaceType			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d1f70aec00a97b22	0
+enumconst	c:@E@NEOnDemandRuleInterfaceType@NEOnDemandRuleInterfaceTypeEthernet	NEOnDemandRuleInterfaceType			-	-	-	ios=-/-/-/1,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6c098459ed108d94	1
+enumconst	c:@E@NEOnDemandRuleInterfaceType@NEOnDemandRuleInterfaceTypeWiFi	NEOnDemandRuleInterfaceType			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	51971138bbf612f6	2
+enumconst	c:@E@NEOnDemandRuleInterfaceType@NEOnDemandRuleInterfaceTypeCellular	NEOnDemandRuleInterfaceType			-	-	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	78f08db3e5108432	3
+interface	c:objc(cs)NEOnDemandRule	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	df56c230e356b514	-
+super	-	NEOnDemandRule	NSObject		-	-	-	-	-	dfe84eaa9c02046c	-
+conforms	c:objc(cs)NEOnDemandRule	NEOnDemandRule	NSSecureCoding		-	-	-	-	-	815eb594a6d8f1e8	-
+conforms	c:objc(cs)NEOnDemandRule	NEOnDemandRule	NSCopying		-	-	-	-	-	1503ca6e40e7812d	-
+property	c:objc(cs)NEOnDemandRule(py)action	-			NEOnDemandRuleAction	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	48319143998528a4	-
+property	c:objc(cs)NEOnDemandRule(py)DNSSearchDomainMatch	-			NSArray<NSString *> *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f393d0525bcd5661	-
+property	c:objc(cs)NEOnDemandRule(py)DNSServerAddressMatch	-			NSArray<NSString *> *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	378d7abeac1092d0	-
+property	c:objc(cs)NEOnDemandRule(py)interfaceTypeMatch	-			NEOnDemandRuleInterfaceType	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	adcd43d0d31859d2	-
+property	c:objc(cs)NEOnDemandRule(py)SSIDMatch	-			NSArray<NSString *> *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	eea164e436453181	-
+property	c:objc(cs)NEOnDemandRule(py)probeURL	-			NSURL *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	afb5cbeca7ec5fbe	-
+interface	c:objc(cs)NEOnDemandRuleConnect	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4ddc88eef050f274	-
+super	-	NEOnDemandRuleConnect	NEOnDemandRule		-	-	-	-	-	a6710fc67223132b	-
+interface	c:objc(cs)NEOnDemandRuleDisconnect	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bab5c0ed623353ea	-
+super	-	NEOnDemandRuleDisconnect	NEOnDemandRule		-	-	-	-	-	19a021e1a5198d28	-
+interface	c:objc(cs)NEOnDemandRuleIgnore	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e60b9f6c9bbda165	-
+super	-	NEOnDemandRuleIgnore	NEOnDemandRule		-	-	-	-	-	92147506712f8aab	-
+interface	c:objc(cs)NEOnDemandRuleEvaluateConnection	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	802d4834040ccded	-
+super	-	NEOnDemandRuleEvaluateConnection	NEOnDemandRule		-	-	-	-	-	206c613d12e27966	-
+property	c:objc(cs)NEOnDemandRuleEvaluateConnection(py)connectionRules	-			NSArray<NEEvaluateConnectionRule *> *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ff00a3c2f1bd0c54	-
+typedef	c:@T@NEEvaluateConnectionRuleAction	-			enum NEEvaluateConnectionRuleAction	-	-	-	-	10be0539e1d63986	-
+enum	c:@E@NEEvaluateConnectionRuleAction	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a0c85344a3a5bc35	-
+enumconst	c:@E@NEEvaluateConnectionRuleAction@NEEvaluateConnectionRuleActionConnectIfNeeded	NEEvaluateConnectionRuleAction			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ce3e653c2da40592	1
+enumconst	c:@E@NEEvaluateConnectionRuleAction@NEEvaluateConnectionRuleActionNeverConnect	NEEvaluateConnectionRuleAction			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4d54c5c1c462ba5d	2
+interface	c:objc(cs)NEEvaluateConnectionRule	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	76fd07aa84b47162	-
+super	-	NEEvaluateConnectionRule	NSObject		-	-	-	-	-	af62abbb23bf221a	-
+conforms	c:objc(cs)NEEvaluateConnectionRule	NEEvaluateConnectionRule	NSSecureCoding		-	-	-	-	-	b8ae6d077354ac8f	-
+conforms	c:objc(cs)NEEvaluateConnectionRule	NEEvaluateConnectionRule	NSCopying		-	-	-	-	-	f23f3377a30aba00	-
+method	c:objc(cs)NEEvaluateConnectionRule(im)initWithMatchDomains:andAction:	-			instancetype	NSArray<NSString *> * domains | NEEvaluateConnectionRuleAction action	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ad0d84d5318e96ae	-
+property	c:objc(cs)NEEvaluateConnectionRule(py)action	-			NEEvaluateConnectionRuleAction	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	40c119bb97227050	-
+property	c:objc(cs)NEEvaluateConnectionRule(py)matchDomains	-			NSArray<NSString *> *	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cb6177196e8482e5	-
+property	c:objc(cs)NEEvaluateConnectionRule(py)useDNSServers	-			NSArray<NSString *> *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f3a95d38cefc5d76	-
+property	c:objc(cs)NEEvaluateConnectionRule(py)probeURL	-			NSURL *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ad192fe9f31f99dd	-
+interface	c:objc(cs)NEPacket	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af7c9caac33fd21f	-
+super	-	NEPacket	NSObject		-	-	-	-	-	62f410be32b630d8	-
+conforms	c:objc(cs)NEPacket	NEPacket	NSCopying		-	-	-	-	-	840a7ab17ad1b4d2	-
+conforms	c:objc(cs)NEPacket	NEPacket	NSSecureCoding		-	-	-	-	-	c5aff79439c5f661	-
+method	c:objc(cs)NEPacket(im)initWithData:protocolFamily:	-			instancetype	NSData * data | sa_family_t protocolFamily	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a810809082e852a7	-
+property	c:objc(cs)NEPacket(py)data	-			NSData *	-	readonly,copy	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2d128d90c8b6b40e	-
+property	c:objc(cs)NEPacket(py)protocolFamily	-			sa_family_t	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3562061f1555e964	-
+property	c:objc(cs)NEPacket(py)direction	-			NETrafficDirection	-	readonly	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	939f6e84dc211c49	-
+property	c:objc(cs)NEPacket(py)metadata	-			NEFlowMetaData *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1dd2d19e15888a56	-
+interface	c:objc(cs)NEPacketTunnelFlow	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	47b4b034a6efae84	-
+super	-	NEPacketTunnelFlow	NSObject		-	-	-	-	-	e89f0bc9a1f4c541	-
+method	c:objc(cs)NEPacketTunnelFlow(im)readPacketsWithCompletionHandler:	-			void	void (^)(NSArray<NSData *> * _Nonnull, NSArray<NSNumber *> * _Nonnull) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cec6ec58fa47d74f	-
+method	c:objc(cs)NEPacketTunnelFlow(im)writePackets:withProtocols:	-			BOOL	NSArray<NSData *> * packets | NSArray<NSNumber *> * protocols	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b03b6beeabe85723	-
+method	c:objc(cs)NEPacketTunnelFlow(im)readPacketObjectsWithCompletionHandler:	-			void	void (^)(NSArray<NEPacket *> * _Nonnull) completionHandler	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3ba9db3dafacb830	-
+method	c:objc(cs)NEPacketTunnelFlow(im)writePacketObjects:	-			BOOL	NSArray<NEPacket *> * packets	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	73757a0300198473	-
+interface	c:objc(cs)NERelay	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f4ed248ba844d88f	-
+super	-	NERelay	NSObject		-	-	-	-	-	6c853040f16c569a	-
+conforms	c:objc(cs)NERelay	NERelay	NSCopying		-	-	-	-	-	fca9fb2704064b8a	-
+conforms	c:objc(cs)NERelay	NERelay	NSSecureCoding		-	-	-	-	-	c8b670c41083214b	-
+property	c:objc(cs)NERelay(py)HTTP3RelayURL	-			NSURL *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5d8851be1a0eac3b	-
+property	c:objc(cs)NERelay(py)HTTP2RelayURL	-			NSURL *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	82ead98a17ba6e73	-
+property	c:objc(cs)NERelay(py)dnsOverHTTPSURL	-			NSURL *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a1446742bda5275a	-
+property	c:objc(cs)NERelay(py)syntheticDNSAnswerIPv4Prefix	-			NSString *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7263c4c90d15fdca	-
+property	c:objc(cs)NERelay(py)syntheticDNSAnswerIPv6Prefix	-			NSString *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	36685a3efb89daad	-
+property	c:objc(cs)NERelay(py)additionalHTTPHeaderFields	-			NSDictionary<NSString *,NSString *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	318e94a6ef3157b6	-
+property	c:objc(cs)NERelay(py)rawPublicKeys	-			NSArray<NSData *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c6e9f0f41ee2a334	-
+property	c:objc(cs)NERelay(py)identityData	-			NSData *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bdf0e03535b878fa	-
+property	c:objc(cs)NERelay(py)identityDataPassword	-			NSString *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	817afd8c612363da	-
+typedef	c:@T@NERelayManagerError	-			enum NERelayManagerError	-	-	-	-	09cf60beec1852fb	-
+enum	c:@E@NERelayManagerError	-			NSInteger	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	948189234d63aa30	-
+enumconst	c:@E@NERelayManagerError@NERelayManagerErrorConfigurationInvalid	NERelayManagerError			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f8671813c6d61c01	1
+enumconst	c:@E@NERelayManagerError@NERelayManagerErrorConfigurationDisabled	NERelayManagerError			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	79ba6bdeca37e050	2
+enumconst	c:@E@NERelayManagerError@NERelayManagerErrorConfigurationStale	NERelayManagerError			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	eedf7e36ac7d65a1	3
+enumconst	c:@E@NERelayManagerError@NERelayManagerErrorConfigurationCannotBeRemoved	NERelayManagerError			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ca0146f6cd5fe792	4
+var	c:@NERelayErrorDomain	-			NSString *const	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	16dfdeaa4fc4ba2a	-
+typedef	c:@T@NERelayManagerClientError	-			enum NERelayManagerClientError	-	-	-	-	27ecfd8eb3318955	-
+enum	c:@E@NERelayManagerClientError	-			NSInteger	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	f4b47e517a7a35a7	-
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorNone	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	5b0690977798a866	1
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorDNSFailed	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	42d9725fee41664c	2
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorServerUnreachable	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	540c9bd48df679ab	3
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorServerDisconnected	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	da2e780833483dd4	4
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorCertificateMissing	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	9b3e7161a99b553c	5
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorCertificateInvalid	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	c03c6deee96430ce	6
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorCertificateExpired	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	0cf68690da534a82	7
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorServerCertificateInvalid	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	45e293f012737a7f	8
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorServerCertificateExpired	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	399cbffe8154298c	9
+enumconst	c:@E@NERelayManagerClientError@NERelayManagerClientErrorOther	NERelayManagerClientError			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	98a923f2aba021e6	10
+var	c:@NERelayClientErrorDomain	-			NSString *const	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	d6d32a43f385f8a7	-
+var	c:@NERelayConfigurationDidChangeNotification	-			NSString *const	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	067f682fbbafce3b	-
+interface	c:objc(cs)NERelayManager	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	00c66a0fa4b38ff2	-
+super	-	NERelayManager	NSObject		-	-	-	-	-	cedc6aeecc920801	-
+method	c:objc(cs)NERelayManager(cm)sharedManager	-			NERelayManager *	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ce02b8fc1eeaf61b	-
+method	c:objc(cs)NERelayManager(im)loadFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	533a7fc8caa295b4	-
+method	c:objc(cs)NERelayManager(im)removeFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	67142e9ed8146495	-
+method	c:objc(cs)NERelayManager(im)saveToPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ef8f44db2a5cb845	-
+method	c:objc(cs)NERelayManager(im)getLastClientErrors:completionHandler:	-			void	NSTimeInterval seconds | void (^)(NSArray<NSError *> * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	dd74a51dcc30e717	-
+property	c:objc(cs)NERelayManager(py)localizedDescription	-			NSString *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	271e386f119376d1	-
+property	c:objc(cs)NERelayManager(py)enabled	-			BOOL	-	getter=isEnabled	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d2b2090126ba3a80	-
+property	c:objc(cs)NERelayManager(py)UIToggleEnabled	-			BOOL	-	getter=isUIToggleEnabled	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ebca160f512c2dae	-
+property	c:objc(cs)NERelayManager(py)allowDNSFailover	-			BOOL	-	getter=isDNSFailoverAllowed	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1	-	b6142823e4cb74da	-
+property	c:objc(cs)NERelayManager(py)relays	-			NSArray<NERelay *> *	-	strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cb49487bba056d18	-
+property	c:objc(cs)NERelayManager(py)matchDomains	-			NSArray<NSString *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b36e2ec5887ae363	-
+property	c:objc(cs)NERelayManager(py)matchFQDNs	-			NSArray<NSString *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	122a40e8838a8427	-
+property	c:objc(cs)NERelayManager(py)excludedDomains	-			NSArray<NSString *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	430355102474733f	-
+property	c:objc(cs)NERelayManager(py)excludedFQDNs	-			NSArray<NSString *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2826f0758324e944	-
+property	c:objc(cs)NERelayManager(py)onDemandRules	-			NSArray<NEOnDemandRule *> *	-	copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8920567b09c5eedc	-
+method	c:objc(cs)NERelayManager(cm)loadAllManagersFromPreferencesWithCompletionHandler:	-			void	void (^)(NSArray<NERelayManager *> * _Nonnull, NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e5c2440d77878d6c	-
+interface	c:objc(cs)NETransparentProxyManager	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dcf34002dc2de5ed	-
+super	-	NETransparentProxyManager	NEVPNManager		-	-	-	-	-	4b2ed5522a23c7b0	-
+method	c:objc(cs)NETransparentProxyManager(cm)loadAllFromPreferencesWithCompletionHandler:	-			void	void (^)(NSArray<NETransparentProxyManager *> * _Nullable, NSError * _Nullable) completionHandler	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	de226f37266b1bff	-
+interface	c:objc(cs)NETransparentProxyNetworkSettings	-			-	-	-	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	585c82a70f01dc36	-
+super	-	NETransparentProxyNetworkSettings	NETunnelNetworkSettings		-	-	-	-	-	648b581602f2659b	-
+property	c:objc(cs)NETransparentProxyNetworkSettings(py)includedNetworkRules	-			NSArray<NENetworkRule *> *	-	copy	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e385bde53f804aff	-
+property	c:objc(cs)NETransparentProxyNetworkSettings(py)excludedNetworkRules	-			NSArray<NENetworkRule *> *	-	copy	ios=-/-/-/1,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a7bf1fb498432ef4	-
+interface	c:objc(cs)NETransparentProxyProvider	-			-	-	-	ios=-/-/-/1,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5ea4e4e4fd69e8a3	-
+super	-	NETransparentProxyProvider	NEAppProxyProvider		-	-	-	-	-	4d336a0e471717ea	-
+typedef	c:@T@NEVPNStatus	-			enum NEVPNStatus	-	-	-	-	f39315944cec42f1	-
+enum	c:@E@NEVPNStatus	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9812dfdbc9bf3871	-
+enumconst	c:@E@NEVPNStatus@NEVPNStatusInvalid	NEVPNStatus			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bb42ed1485fbd5de	0
+enumconst	c:@E@NEVPNStatus@NEVPNStatusDisconnected	NEVPNStatus			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	46b124340deaa2bd	1
+enumconst	c:@E@NEVPNStatus@NEVPNStatusConnecting	NEVPNStatus			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3c0fa5492cf2024a	2
+enumconst	c:@E@NEVPNStatus@NEVPNStatusConnected	NEVPNStatus			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b22f453a2ec0350d	3
+enumconst	c:@E@NEVPNStatus@NEVPNStatusReasserting	NEVPNStatus			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	104599aa5cf7d0b3	4
+enumconst	c:@E@NEVPNStatus@NEVPNStatusDisconnecting	NEVPNStatus			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c006c59a5d3f41bb	5
+var	c:@NEVPNStatusDidChangeNotification	-			NSString *const	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	dec73f8480ea4c64	-
+var	c:@NEVPNConnectionStartOptionUsername	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	520d7f387464398f	-
+var	c:@NEVPNConnectionStartOptionPassword	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bd59949b13f59b76	-
+typedef	c:@T@NEVPNConnectionError	-			enum NEVPNConnectionError	-	-	-	-	dc230f1b95b65d39	-
+enum	c:@E@NEVPNConnectionError	-			NSInteger	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	36afd6ffb36a74d6	-
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorOverslept	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2d169bfb07e0b68f	1
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorNoNetworkAvailable	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6410e7b50464df04	2
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorUnrecoverableNetworkChange	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1b0097aaba0bb705	3
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorConfigurationFailed	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7d1211c7de89c48d	4
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerAddressResolutionFailed	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	92e498b6b8d2c6f6	5
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerNotResponding	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2c59cbfa34622c16	6
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerDead	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	57f775edc2cc9a4b	7
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorAuthenticationFailed	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1950bd9d0766ba6a	8
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorClientCertificateInvalid	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3da3236e65e57ad5	9
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorClientCertificateNotYetValid	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ff0f7ee019323df5	10
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorClientCertificateExpired	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	deb1019421955ba6	11
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorPluginFailed	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aedba329bdfb7b16	12
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorConfigurationNotFound	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	06b8a594d01fc033	13
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorPluginDisabled	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e5404882044eed39	14
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorNegotiationFailed	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	108cef708182a97e	15
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerDisconnected	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b0fb2ec44cf747bb	16
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerCertificateInvalid	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6a0fb7d28074e540	17
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerCertificateNotYetValid	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9f0f4259141300de	18
+enumconst	c:@E@NEVPNConnectionError@NEVPNConnectionErrorServerCertificateExpired	NEVPNConnectionError			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a78afc964039a0f8	19
+var	c:@NEVPNConnectionErrorDomain	-			NSString *const	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9aef54cff492c65e	-
+interface	c:objc(cs)NEVPNConnection	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0dfe84712ed2e51a	-
+super	-	NEVPNConnection	NSObject		-	-	-	-	-	96ff786e27d9603d	-
+method	c:objc(cs)NEVPNConnection(im)startVPNTunnelAndReturnError:	-			BOOL	NSError * _Nullable * error	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a6633ffa411fa374	-
+method	c:objc(cs)NEVPNConnection(im)startVPNTunnelWithOptions:andReturnError:	-			BOOL	NSDictionary<NSString *,NSObject *> * options | NSError * _Nullable * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f65b9d485cd6a874	-
+method	c:objc(cs)NEVPNConnection(im)stopVPNTunnel	-			void	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ff3202245233c9c8	-
+method	c:objc(cs)NEVPNConnection(im)fetchLastDisconnectErrorWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	723eb0409a3f3c42	-
+property	c:objc(cs)NEVPNConnection(py)status	-			NEVPNStatus	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	037fa4d2e0945c6a	-
+property	c:objc(cs)NEVPNConnection(py)connectedDate	-			NSDate *	-	readonly	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	80d614bbd3ff5d12	-
+property	c:objc(cs)NEVPNConnection(py)manager	-			NEVPNManager *	-	readonly	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4c3c22b3c90e7bfb	-
+interface	c:objc(cs)NETunnelProviderSession	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7db6899144917aac	-
+super	-	NETunnelProviderSession	NEVPNConnection		-	-	-	-	-	850cecd335666370	-
+method	c:objc(cs)NETunnelProviderSession(im)startTunnelWithOptions:andReturnError:	-			BOOL	NSDictionary<NSString *,id> * options | NSError * _Nullable * error	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	903b93c40e1ec696	-
+method	c:objc(cs)NETunnelProviderSession(im)stopTunnel	-			void	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af3bb875f480f409	-
+method	c:objc(cs)NETunnelProviderSession(im)sendProviderMessage:returnError:responseHandler:	-			BOOL	NSData * messageData | NSError * _Nullable * error | void (^)(NSData * _Nullable) responseHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	12abe256300a855a	-
+interface	c:objc(cs)NETunnelProviderProtocol	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d11b04a060798a19	-
+super	-	NETunnelProviderProtocol	NEVPNProtocol		-	-	-	-	-	dd9b55571779fe0f	-
+property	c:objc(cs)NETunnelProviderProtocol(py)providerConfiguration	-			NSDictionary<NSString *,id> *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	24e8d333d259d103	-
+property	c:objc(cs)NETunnelProviderProtocol(py)providerBundleIdentifier	-			NSString *	-	copy	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	01d30d950300dd6f	-
+typedef	c:@T@NEVPNIKEAuthenticationMethod	-			enum NEVPNIKEAuthenticationMethod	-	-	-	-	e28bb1e878d18a80	-
+enum	c:@E@NEVPNIKEAuthenticationMethod	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	feb849550310f2ba	-
+enumconst	c:@E@NEVPNIKEAuthenticationMethod@NEVPNIKEAuthenticationMethodNone	NEVPNIKEAuthenticationMethod			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	067bd38b2a167f24	0
+enumconst	c:@E@NEVPNIKEAuthenticationMethod@NEVPNIKEAuthenticationMethodCertificate	NEVPNIKEAuthenticationMethod			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	307bcfe9b743fcb6	1
+enumconst	c:@E@NEVPNIKEAuthenticationMethod@NEVPNIKEAuthenticationMethodSharedSecret	NEVPNIKEAuthenticationMethod			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	404606ad30f9c419	2
+interface	c:objc(cs)NEVPNProtocolIPSec	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5d90dbbce55d7039	-
+super	-	NEVPNProtocolIPSec	NEVPNProtocol		-	-	-	-	-	f3132ea41fc5534e	-
+property	c:objc(cs)NEVPNProtocolIPSec(py)authenticationMethod	-			NEVPNIKEAuthenticationMethod	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8fe1ec1767063cab	-
+property	c:objc(cs)NEVPNProtocolIPSec(py)useExtendedAuthentication	-			BOOL	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2fc6d583dd68c0ef	-
+property	c:objc(cs)NEVPNProtocolIPSec(py)sharedSecretReference	-			NSData *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	57dae6b79324b92e	-
+property	c:objc(cs)NEVPNProtocolIPSec(py)localIdentifier	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	41d7df37ec49dfea	-
+property	c:objc(cs)NEVPNProtocolIPSec(py)remoteIdentifier	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	61c62be8bb4c8b15	-
+typedef	c:@T@NEVPNIKEv2EncryptionAlgorithm	-			enum NEVPNIKEv2EncryptionAlgorithm	-	-	-	-	a7aaa0d1ca5c38b7	-
+enum	c:@E@NEVPNIKEv2EncryptionAlgorithm	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4c06af290b7415ed	-
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithmDES	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	9745c83a81b8e692	1
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithm3DES	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	7684b4d0d420c6c4	2
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithmAES128	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=8.0/17.0/-/0,macos=10.11/14.0/-/0,tvos=17.0/17.0/-/0	deprecated: Use an encryption algorithm with 256-bit keys instead	26fb06812f32ee50	3
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithmAES256	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b487991bd076643d	4
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithmAES128GCM	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=8.3/17.0/-/0,macos=10.11/14.0/-/0,tvos=17.0/17.0/-/0,watchos=-/-/-/1	deprecated: Use an encryption algorithm with 256-bit keys instead	b9cabfec5081585c	5
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithmAES256GCM	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	924be2abe7141e1d	6
+enumconst	c:@E@NEVPNIKEv2EncryptionAlgorithm@NEVPNIKEv2EncryptionAlgorithmChaCha20Poly1305	NEVPNIKEv2EncryptionAlgorithm			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cf5f4147844a2e15	7
+typedef	c:@T@NEVPNIKEv2IntegrityAlgorithm	-			enum NEVPNIKEv2IntegrityAlgorithm	-	-	-	-	fc79d57ac58ac6d8	-
+enum	c:@E@NEVPNIKEv2IntegrityAlgorithm	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2f92ae467afcfbc4	-
+enumconst	c:@E@NEVPNIKEv2IntegrityAlgorithm@NEVPNIKEv2IntegrityAlgorithmSHA96	NEVPNIKEv2IntegrityAlgorithm			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	772d6a29f82ffc3d	1
+enumconst	c:@E@NEVPNIKEv2IntegrityAlgorithm@NEVPNIKEv2IntegrityAlgorithmSHA160	NEVPNIKEv2IntegrityAlgorithm			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	a562bbe0f0343cea	2
+enumconst	c:@E@NEVPNIKEv2IntegrityAlgorithm@NEVPNIKEv2IntegrityAlgorithmSHA256	NEVPNIKEv2IntegrityAlgorithm			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6a90ec9efde9ad65	3
+enumconst	c:@E@NEVPNIKEv2IntegrityAlgorithm@NEVPNIKEv2IntegrityAlgorithmSHA384	NEVPNIKEv2IntegrityAlgorithm			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9910262b77f1cc27	4
+enumconst	c:@E@NEVPNIKEv2IntegrityAlgorithm@NEVPNIKEv2IntegrityAlgorithmSHA512	NEVPNIKEv2IntegrityAlgorithm			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	88acd0b136826332	5
+typedef	c:@T@NEVPNIKEv2DeadPeerDetectionRate	-			enum NEVPNIKEv2DeadPeerDetectionRate	-	-	-	-	dcc772fcf0508886	-
+enum	c:@E@NEVPNIKEv2DeadPeerDetectionRate	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	76a37709b6edbcba	-
+enumconst	c:@E@NEVPNIKEv2DeadPeerDetectionRate@NEVPNIKEv2DeadPeerDetectionRateNone	NEVPNIKEv2DeadPeerDetectionRate			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aff057a9f2fce181	0
+enumconst	c:@E@NEVPNIKEv2DeadPeerDetectionRate@NEVPNIKEv2DeadPeerDetectionRateLow	NEVPNIKEv2DeadPeerDetectionRate			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a212f1b255742153	1
+enumconst	c:@E@NEVPNIKEv2DeadPeerDetectionRate@NEVPNIKEv2DeadPeerDetectionRateMedium	NEVPNIKEv2DeadPeerDetectionRate			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fd49d0ff655d541f	2
+enumconst	c:@E@NEVPNIKEv2DeadPeerDetectionRate@NEVPNIKEv2DeadPeerDetectionRateHigh	NEVPNIKEv2DeadPeerDetectionRate			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c34207ca0b45099d	3
+typedef	c:@T@NEVPNIKEv2DiffieHellmanGroup	-			enum NEVPNIKEv2DiffieHellmanGroup	-	-	-	-	c92ad8fcbb1f2d52	-
+enum	c:@E@NEVPNIKEv2DiffieHellmanGroup	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	61ad0619712a317e	-
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroupInvalid	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	82e2aa34b2d4b66a	0
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup1	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	69ade89d8d806fac	1
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup2	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	e2d18bebc6109bd4	2
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup5	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/17.0/26.0/0,macos=10.11/14.0/26.0/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=1.0/1.0/26.0/0	-	d22636229b26fbed	5
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup14	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9b14496facc58720	14
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup15	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7f362255e064362b	15
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup16	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	40e728cfd91b7991	16
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup17	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	50425b4ebea42edf	17
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup18	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	12e1b8e505976a24	18
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup19	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	daa0999593e54ac7	19
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup20	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8af6eae8a803a3b1	20
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup21	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e5a529ed2654664e	21
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup31	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	16ce4760ba338ad5	31
+enumconst	c:@E@NEVPNIKEv2DiffieHellmanGroup@NEVPNIKEv2DiffieHellmanGroup32	NEVPNIKEv2DiffieHellmanGroup			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8a56a8bb21359491	32
+typedef	c:@T@NEVPNIKEv2PostQuantumKeyExchangeMethod	-			enum NEVPNIKEv2PostQuantumKeyExchangeMethod	-	-	-	-	415bed9f75b39f2f	-
+enum	c:@E@NEVPNIKEv2PostQuantumKeyExchangeMethod	-			NSInteger	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	5086e151aed58485	-
+enumconst	c:@E@NEVPNIKEv2PostQuantumKeyExchangeMethod@NEVPNIKEv2PostQuantumKeyExchangeMethodNone	NEVPNIKEv2PostQuantumKeyExchangeMethod			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	dbfc06cbc1752dff	0
+enumconst	c:@E@NEVPNIKEv2PostQuantumKeyExchangeMethod@NEVPNIKEv2PostQuantumKeyExchangeMethod36	NEVPNIKEv2PostQuantumKeyExchangeMethod			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	775129635c6e8524	36
+enumconst	c:@E@NEVPNIKEv2PostQuantumKeyExchangeMethod@NEVPNIKEv2PostQuantumKeyExchangeMethod37	NEVPNIKEv2PostQuantumKeyExchangeMethod			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	4081e0dd83b735cf	37
+typedef	c:@T@NEVPNIKEv2CertificateType	-			enum NEVPNIKEv2CertificateType	-	-	-	-	ef718d1a2af7f422	-
+enum	c:@E@NEVPNIKEv2CertificateType	-			NSInteger	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a3a054f85496ddad	-
+enumconst	c:@E@NEVPNIKEv2CertificateType@NEVPNIKEv2CertificateTypeRSA	NEVPNIKEv2CertificateType			-	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0cf7a089d49d0b6a	1
+enumconst	c:@E@NEVPNIKEv2CertificateType@NEVPNIKEv2CertificateTypeECDSA256	NEVPNIKEv2CertificateType			-	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b3e0cf267048f7ad	2
+enumconst	c:@E@NEVPNIKEv2CertificateType@NEVPNIKEv2CertificateTypeECDSA384	NEVPNIKEv2CertificateType			-	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	95a1c58d10dcd47b	3
+enumconst	c:@E@NEVPNIKEv2CertificateType@NEVPNIKEv2CertificateTypeECDSA521	NEVPNIKEv2CertificateType			-	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8c8c7a7a49e6e288	4
+enumconst	c:@E@NEVPNIKEv2CertificateType@NEVPNIKEv2CertificateTypeEd25519	NEVPNIKEv2CertificateType			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2160a37635019519	5
+enumconst	c:@E@NEVPNIKEv2CertificateType@NEVPNIKEv2CertificateTypeRSAPSS	NEVPNIKEv2CertificateType			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ff0a6ad7867bf898	6
+typedef	c:@T@NEVPNIKEv2TLSVersion	-			enum NEVPNIKEv2TLSVersion	-	-	-	-	0e9d65da28b5002c	-
+enum	c:@E@NEVPNIKEv2TLSVersion	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	933281ce7dacf530	-
+enumconst	c:@E@NEVPNIKEv2TLSVersion@NEVPNIKEv2TLSVersionDefault	NEVPNIKEv2TLSVersion			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d55cf6e7d591b319	0
+enumconst	c:@E@NEVPNIKEv2TLSVersion@NEVPNIKEv2TLSVersion1_0	NEVPNIKEv2TLSVersion			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	67da1465d5a8899e	1
+enumconst	c:@E@NEVPNIKEv2TLSVersion@NEVPNIKEv2TLSVersion1_1	NEVPNIKEv2TLSVersion			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	83e70fd0eb64472b	2
+enumconst	c:@E@NEVPNIKEv2TLSVersion@NEVPNIKEv2TLSVersion1_2	NEVPNIKEv2TLSVersion			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7a30ad34c2d8d1d6	3
+interface	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	918a3e85685024c7	-
+super	-	NEVPNIKEv2SecurityAssociationParameters	NSObject		-	-	-	-	-	4a9a1fb784d65885	-
+conforms	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters	NEVPNIKEv2SecurityAssociationParameters	NSSecureCoding		-	-	-	-	-	a42a9406d580385a	-
+conforms	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters	NEVPNIKEv2SecurityAssociationParameters	NSCopying		-	-	-	-	-	d7cc4f05a71c2e41	-
+property	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters(py)encryptionAlgorithm	-			NEVPNIKEv2EncryptionAlgorithm	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cd3b596ded2615d3	-
+property	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters(py)integrityAlgorithm	-			NEVPNIKEv2IntegrityAlgorithm	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7dc9cf5ef2b93973	-
+property	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters(py)diffieHellmanGroup	-			NEVPNIKEv2DiffieHellmanGroup	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3907f6d9c8288cf2	-
+property	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters(py)postQuantumKeyExchangeMethods	-			NSArray<NSNumber *> *	-	copy	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	e4cbaa4a933ad3b1	-
+property	c:objc(cs)NEVPNIKEv2SecurityAssociationParameters(py)lifetimeMinutes	-			int32_t	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f9bea46c620d24c9	-
+interface	c:objc(cs)NEVPNIKEv2PPKConfiguration	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	cbc556718a7f07c9	-
+super	-	NEVPNIKEv2PPKConfiguration	NSObject		-	-	-	-	-	ee188fa9ed3eb1d2	-
+conforms	c:objc(cs)NEVPNIKEv2PPKConfiguration	NEVPNIKEv2PPKConfiguration	NSCopying		-	-	-	-	-	9dbef1f863e378f7	-
+method	c:objc(cs)NEVPNIKEv2PPKConfiguration(im)initWithIdentifier:keychainReference:	-			instancetype	NSString * identifier | NSData * keychainReference	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	4ca00065ab9bbb93	-
+property	c:objc(cs)NEVPNIKEv2PPKConfiguration(py)identifier	-			NSString *	-	readonly,copy	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	05f2f908334c4c4d	-
+property	c:objc(cs)NEVPNIKEv2PPKConfiguration(py)keychainReference	-			NSData *	-	readonly,copy	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	a72906ff0eeeed4f	-
+property	c:objc(cs)NEVPNIKEv2PPKConfiguration(py)isMandatory	-			BOOL	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	3c9ece7b5a56a51b	-
+interface	c:objc(cs)NEVPNProtocolIKEv2	-			-	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a9261246c85736a9	-
+super	-	NEVPNProtocolIKEv2	NEVPNProtocolIPSec		-	-	-	-	-	351283495cff1598	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)deadPeerDetectionRate	-			NEVPNIKEv2DeadPeerDetectionRate	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	10103c95a6df81c3	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)serverCertificateIssuerCommonName	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9fa79d34ccb33307	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)serverCertificateCommonName	-			NSString *	-	copy	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	abf455de203c17c1	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)certificateType	-			NEVPNIKEv2CertificateType	-	-	ios=8.3/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a941ff7c7d9baca0	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)useConfigurationAttributeInternalIPSubnet	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0d42b5fc42d14195	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)IKESecurityAssociationParameters	-			NEVPNIKEv2SecurityAssociationParameters *	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f6076ab7931cacef	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)childSecurityAssociationParameters	-			NEVPNIKEv2SecurityAssociationParameters *	-	readonly	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	30c138daf2a67dbb	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)disableMOBIKE	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	01d8de3b513200b0	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)disableRedirect	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d47d2c70f409b916	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)enablePFS	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4fec566b3ac4ca01	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)allowPostQuantumKeyExchangeFallback	-			BOOL	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	1ec7cc5376870515	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)enableRevocationCheck	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4fc640412a941ff3	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)strictRevocationCheck	-			BOOL	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9398d6072fce08b3	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)minimumTLSVersion	-			NEVPNIKEv2TLSVersion	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	846f36e2f97c45ff	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)maximumTLSVersion	-			NEVPNIKEv2TLSVersion	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7e2bff3dc38ad85f	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)enableFallback	-			BOOL	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1d1f5a887440d94c	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)mtu	-			NSUInteger	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	88d4a458d59ca8b2	-
+property	c:objc(cs)NEVPNProtocolIKEv2(py)ppkConfiguration	-			NEVPNIKEv2PPKConfiguration *	-	copy	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	4650ef4719ab4f3b	-
+var	c:@NEAppPushErrorDomain	-			const NSErrorDomain	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4ccf3408f6e36ef5	-
+typedef	c:@T@NEAppPushManagerError	-			enum NEAppPushManagerError	-	-	-	-	a7e33efd2ba1078a	-
+enum	c:@E@NEAppPushManagerError	-			NSInteger	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	050c83778c94a2a9	-
+enumconst	c:@E@NEAppPushManagerError@NEAppPushManagerErrorConfigurationInvalid	NEAppPushManagerError			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5f243cb95ee355ff	1
+enumconst	c:@E@NEAppPushManagerError@NEAppPushManagerErrorConfigurationNotLoaded	NEAppPushManagerError			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	64634b691ed81131	2
+enumconst	c:@E@NEAppPushManagerError@NEAppPushManagerErrorInternalError	NEAppPushManagerError			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	15a5c02905249f83	3
+enumconst	c:@E@NEAppPushManagerError@NEAppPushManagerErrorInactiveSession	NEAppPushManagerError			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	a6384e22988bed94	4
+interface	c:objc(cs)NEPrivateLTENetwork	-			-	-	-	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	21d28683ea2b060e	-
+super	-	NEPrivateLTENetwork	NSObject		-	-	-	-	-	641d8ace5e177c4e	-
+conforms	c:objc(cs)NEPrivateLTENetwork	NEPrivateLTENetwork	NSCopying		-	-	-	-	-	6307e0046a079323	-
+conforms	c:objc(cs)NEPrivateLTENetwork	NEPrivateLTENetwork	NSSecureCoding		-	-	-	-	-	21c26857e95e7e0a	-
+property	c:objc(cs)NEPrivateLTENetwork(py)mobileCountryCode	-			NSString *	-	copy	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4f96600d22da90d1	-
+property	c:objc(cs)NEPrivateLTENetwork(py)mobileNetworkCode	-			NSString *	-	copy	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	de8a2779cdf4b58d	-
+property	c:objc(cs)NEPrivateLTENetwork(py)trackingAreaCode	-			NSString *	-	copy	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	914cf92fb380a7e9	-
+interface	c:objc(cs)NEAppPushManager	-			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bcbcbdfb2c5d0ee7	-
+super	-	NEAppPushManager	NSObject		-	-	-	-	-	c6c572c86595b6db	-
+property	c:objc(cs)NEAppPushManager(py)matchSSIDs	-			NSArray<NSString *> *	-	copy	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	aed3767eb2055fbd	-
+property	c:objc(cs)NEAppPushManager(py)matchPrivateLTENetworks	-			NSArray<NEPrivateLTENetwork *> *	-	copy	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8cf218879a22f5e6	-
+property	c:objc(cs)NEAppPushManager(py)matchEthernet	-			BOOL	-	-	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7963234bee09f398	-
+property	c:objc(cs)NEAppPushManager(py)providerConfiguration	-			NSDictionary<NSString *,id> *	-	copy	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	53176c0a68150422	-
+property	c:objc(cs)NEAppPushManager(py)providerBundleIdentifier	-			NSString *	-	copy	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	361010b19a43362d	-
+property	c:objc(cs)NEAppPushManager(py)delegate	-			id<NEAppPushDelegate>	-	weak	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b77b1451c046fe36	-
+method	c:objc(cs)NEAppPushManager(cm)loadAllFromPreferencesWithCompletionHandler:	-			void	void (^)(NSArray<NEAppPushManager *> * _Nullable, NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bfbf1f4e111480b3	-
+method	c:objc(cs)NEAppPushManager(im)loadFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6e48237aafde3c08	-
+method	c:objc(cs)NEAppPushManager(im)removeFromPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bcf73ff3031ab7de	-
+method	c:objc(cs)NEAppPushManager(im)saveToPreferencesWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0a83cac11b80dc33	-
+property	c:objc(cs)NEAppPushManager(py)localizedDescription	-			NSString *	-	copy	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6940fe35b0060385	-
+property	c:objc(cs)NEAppPushManager(py)enabled	-			BOOL	-	getter=isEnabled	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	caf4c6bec43f272c	-
+property	c:objc(cs)NEAppPushManager(py)active	-			BOOL	-	readonly,getter=isActive	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	02a7f82bd3ad8266	-
+protocol	c:objc(pl)NEAppPushDelegate	-			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e88cd8deb4b7165a	-
+conforms	c:objc(pl)NEAppPushDelegate	NEAppPushDelegate	NSObject		-	-	-	-	-	61f3448b104e2ec6	-
+method	c:objc(pl)NEAppPushDelegate(im)appPushManager:didReceiveIncomingCallWithUserInfo:	-			void	NEAppPushManager * manager | NSDictionary * userInfo	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f6f5c575ebbf2302	-
+interface	c:objc(cs)NEAppPushProvider	-			-	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use start instead	da7b64e5818b349f	-
+super	-	NEAppPushProvider	NEProvider		-	-	-	-	-	4dd04f029d476bfe	-
+property	c:objc(cs)NEAppPushProvider(py)providerConfiguration	-			NSDictionary<NSString *,id> *	-	readonly	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b599c8a4d5dff098	-
+method	c:objc(cs)NEAppPushProvider(im)startWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=14.0/100000/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use start instead	21b02ccc1821ee81	-
+method	c:objc(cs)NEAppPushProvider(im)start	-			void	-	-	ios=15.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	70427c4d7885b3d4	-
+method	c:objc(cs)NEAppPushProvider(im)stopWithReason:completionHandler:	-			void	NEProviderStopReason reason | void (^)(void) completionHandler	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ab1ebe7e7c22088a	-
+method	c:objc(cs)NEAppPushProvider(im)reportIncomingCallWithUserInfo:	-			void	NSDictionary * userInfo	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b4dd790bb39d9e33	-
+method	c:objc(cs)NEAppPushProvider(im)reportPushToTalkMessageWithUserInfo:	-			void	NSDictionary * userInfo	-	ios=16.4/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	401303b4210392a2	-
+method	c:objc(cs)NEAppPushProvider(im)handleTimerEvent	-			void	-	-	ios=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	dbb01e9dcde85f05	-
+method	c:objc(cs)NEAppPushProvider(im)unmatchEthernet	-			void	-	-	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7159cebaea21ae9b	-
+interface	c:objc(cs)NWEndpoint	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	4e883395a8008995	-
+super	-	NWEndpoint	NSObject		-	-	-	-	-	1d2e0e97fb5dff70	-
+conforms	c:objc(cs)NWEndpoint	NWEndpoint	NSSecureCoding		-	-	-	-	-	ed7aba5ada63f302	-
+conforms	c:objc(cs)NWEndpoint	NWEndpoint	NSCopying		-	-	-	-	-	ae4cd94bf82b2639	-
+interface	c:objc(cs)NWHostEndpoint	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_endpoint_create_host` in Network framework instead, see deprecation notice in <NetworkExtension/NWHostEndpoint.h>	c1c49fe43b23a48c	-
+super	-	NWHostEndpoint	NWEndpoint		-	-	-	-	-	8e4bbf1348837165	-
+method	c:objc(cs)NWHostEndpoint(cm)endpointWithHostname:port:	-			instancetype	NSString * hostname | NSString * port	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_endpoint_create_host` in Network framework instead, see deprecation notice in <NetworkExtension/NWHostEndpoint.h>	c1f178e6769e6c3c	-
+property	c:objc(cs)NWHostEndpoint(py)hostname	-			NSString *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	81ba27e6ad2a2898	-
+property	c:objc(cs)NWHostEndpoint(py)port	-			NSString *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	ff3acde30967b07a	-
+interface	c:objc(cs)NWBonjourServiceEndpoint	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_endpoint_create_bonjour_service` in Network framework instead, see deprecation notice in <NetworkExtension/NWBonjourServiceEndpoint.h>	6971b51edd847c4c	-
+super	-	NWBonjourServiceEndpoint	NWEndpoint		-	-	-	-	-	91acc6ec94fc3557	-
+method	c:objc(cs)NWBonjourServiceEndpoint(cm)endpointWithName:type:domain:	-			instancetype	NSString * name | NSString * type | NSString * domain	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_endpoint_create_bonjour_service` in Network framework instead, see deprecation notice in <NetworkExtension/NWBonjourServiceEndpoint.h>	77df8f36d64e77de	-
+property	c:objc(cs)NWBonjourServiceEndpoint(py)name	-			NSString *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	b20562ee96d8f12a	-
+property	c:objc(cs)NWBonjourServiceEndpoint(py)type	-			NSString *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	7db0d02264a3f9d7	-
+property	c:objc(cs)NWBonjourServiceEndpoint(py)domain	-			NSString *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	4a9ce65a30a58494	-
+typedef	c:@T@NWPathStatus	-			enum NWPathStatus	-	-	-	-	6d3b76cc03d9f968	-
+enum	c:@E@NWPathStatus	-			NSInteger	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	0228ccfe353b9243	-
+enumconst	c:@E@NWPathStatus@NWPathStatusInvalid	NWPathStatus			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	8b3991b432f4d9ef	0
+enumconst	c:@E@NWPathStatus@NWPathStatusSatisfied	NWPathStatus			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	0ef0f591f38184e3	1
+enumconst	c:@E@NWPathStatus@NWPathStatusUnsatisfied	NWPathStatus			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	606eb2a0553641fc	2
+enumconst	c:@E@NWPathStatus@NWPathStatusSatisfiable	NWPathStatus			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	8280752cc0d94fd6	3
+interface	c:objc(cs)NWPath	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_path_get_status` in Network framework instead, see deprecation notice in <NetworkExtension/NWPath.h>	c95214e14eb0ca35	-
+super	-	NWPath	NSObject		-	-	-	-	-	2cc168c23a158ec8	-
+property	c:objc(cs)NWPath(py)status	-			NWPathStatus	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	dc9118651a8d35d0	-
+property	c:objc(cs)NWPath(py)expensive	-			BOOL	-	readonly,nonatomic,getter=isExpensive	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	254bc45884e42b76	-
+property	c:objc(cs)NWPath(py)constrained	-			BOOL	-	readonly,nonatomic,getter=isConstrained	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	885cd4f145442fb8	-
+method	c:objc(cs)NWPath(im)isEqualToPath:	-			BOOL	NWPath * path	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_path_is_equal` in Network framework instead, see deprecation notice in <NetworkExtension/NWPath.h>	8168d2eacc56142f	-
+typedef	c:@T@NWTCPConnectionState	-			enum NWTCPConnectionState	-	-	-	-	b157ccbb6062339c	-
+enum	c:@E@NWTCPConnectionState	-			NSInteger	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	a83de9a907c0b8a6	-
+enumconst	c:@E@NWTCPConnectionState@NWTCPConnectionStateInvalid	NWTCPConnectionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	5393902940dc5743	0
+enumconst	c:@E@NWTCPConnectionState@NWTCPConnectionStateConnecting	NWTCPConnectionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	3011f624028a88c4	1
+enumconst	c:@E@NWTCPConnectionState@NWTCPConnectionStateWaiting	NWTCPConnectionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	7c760fa3e5fbf333	2
+enumconst	c:@E@NWTCPConnectionState@NWTCPConnectionStateConnected	NWTCPConnectionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	d5bf08433136af2f	3
+enumconst	c:@E@NWTCPConnectionState@NWTCPConnectionStateDisconnected	NWTCPConnectionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	c8da6864a2990217	4
+enumconst	c:@E@NWTCPConnectionState@NWTCPConnectionStateCancelled	NWTCPConnectionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	77108ab1f5c72632	5
+interface	c:objc(cs)NWTCPConnection	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_create` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	d2bf84f949517a35	-
+super	-	NWTCPConnection	NSObject		-	-	-	-	-	751d299564934320	-
+method	c:objc(cs)NWTCPConnection(im)initWithUpgradeForConnection:	-			instancetype	NWTCPConnection * connection	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_create` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	1c09c279bad9581a	-
+property	c:objc(cs)NWTCPConnection(py)state	-			NWTCPConnectionState	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	cad864dd12fb6709	-
+property	c:objc(cs)NWTCPConnection(py)viable	-			BOOL	-	readonly,nonatomic,getter=isViable	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	2b87741f00060331	-
+property	c:objc(cs)NWTCPConnection(py)hasBetterPath	-			BOOL	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	0de089e1a2f9a3f3	-
+property	c:objc(cs)NWTCPConnection(py)endpoint	-			NWEndpoint *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	2463f06cdac6fe50	-
+property	c:objc(cs)NWTCPConnection(py)connectedPath	-			NWPath *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	78fa8f4506a2eb03	-
+property	c:objc(cs)NWTCPConnection(py)localAddress	-			NWEndpoint *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	e9889d6dc509e6ee	-
+property	c:objc(cs)NWTCPConnection(py)remoteAddress	-			NWEndpoint *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	00b0c31e64d6b437	-
+property	c:objc(cs)NWTCPConnection(py)txtRecord	-			NSData *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	20452e70dcf5c7bf	-
+property	c:objc(cs)NWTCPConnection(py)error	-			NSError *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	0c2b69c4f118bcc9	-
+method	c:objc(cs)NWTCPConnection(im)cancel	-			void	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_cancel` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	6164289937ae697c	-
+method	c:objc(cs)NWTCPConnection(im)readLength:completionHandler:	-			void	NSUInteger length | void (^)(NSData * _Nullable, NSError * _Nullable) completion	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_receive` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	769cde2ff6c6a911	-
+method	c:objc(cs)NWTCPConnection(im)readMinimumLength:maximumLength:completionHandler:	-			void	NSUInteger minimum | NSUInteger maximum | void (^)(NSData * _Nullable, NSError * _Nullable) completion	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_receive` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	4a1b1adec6c5dc16	-
+method	c:objc(cs)NWTCPConnection(im)write:completionHandler:	-			void	NSData * data | void (^)(NSError * _Nullable) completion	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_send` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	9f2ebc4fa14a0d39	-
+method	c:objc(cs)NWTCPConnection(im)writeClose	-			void	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_send` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	c80d6ad9c82a17ca	-
+protocol	c:objc(pl)NWTCPConnectionAuthenticationDelegate	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `sec_protocol_options_set_challenge_block` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	d84b692d3661e7ae	-
+conforms	c:objc(pl)NWTCPConnectionAuthenticationDelegate	NWTCPConnectionAuthenticationDelegate	NSObject		-	-	-	-	-	8517f51eb4831aec	-
+method	c:objc(pl)NWTCPConnectionAuthenticationDelegate(im)shouldProvideIdentityForConnection:	-			BOOL	NWTCPConnection * connection	optional	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `sec_protocol_options_set_challenge_block` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	fa07e7f8ff596774	-
+method	c:objc(pl)NWTCPConnectionAuthenticationDelegate(im)provideIdentityForConnection:completionHandler:	-			void	NWTCPConnection * connection | void (^)(SecIdentityRef _Nonnull, NSArray<id> * _Nonnull) completion	optional	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `sec_protocol_options_set_challenge_block` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	30ee0b3c1db2af41	-
+method	c:objc(pl)NWTCPConnectionAuthenticationDelegate(im)shouldEvaluateTrustForConnection:	-			BOOL	NWTCPConnection * connection	optional	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `sec_protocol_options_set_verify_block` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	70982284d7c79c23	-
+method	c:objc(pl)NWTCPConnectionAuthenticationDelegate(im)evaluateTrustForConnection:peerCertificateChain:completionHandler:	-			void	NWTCPConnection * connection | NSArray<id> * peerCertificateChain | void (^)(SecTrustRef _Nonnull) completion	optional	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `sec_protocol_options_set_verify_block` in Network framework instead, see deprecation notice in <NetworkExtension/NWTCPConnection.h>	d58eedd704aa25ac	-
+typedef	c:@T@NWUDPSessionState	-			enum NWUDPSessionState	-	-	-	-	27849e2aff6b98ad	-
+enum	c:@E@NWUDPSessionState	-			NSInteger	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	e627656184f6b398	-
+enumconst	c:@E@NWUDPSessionState@NWUDPSessionStateInvalid	NWUDPSessionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	b3c881476ca1be96	0
+enumconst	c:@E@NWUDPSessionState@NWUDPSessionStateWaiting	NWUDPSessionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	4f0adc5d00e12364	1
+enumconst	c:@E@NWUDPSessionState@NWUDPSessionStatePreparing	NWUDPSessionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	2d6fb670eafe0d88	2
+enumconst	c:@E@NWUDPSessionState@NWUDPSessionStateReady	NWUDPSessionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	c90d9c423ba75fab	3
+enumconst	c:@E@NWUDPSessionState@NWUDPSessionStateFailed	NWUDPSessionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	fbee41252f56841d	4
+enumconst	c:@E@NWUDPSessionState@NWUDPSessionStateCancelled	NWUDPSessionState			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	9e9c4c14c4560745	5
+interface	c:objc(cs)NWUDPSession	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_create` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	b39a05e92d45a29c	-
+super	-	NWUDPSession	NSObject		-	-	-	-	-	3d448a15af7532ff	-
+method	c:objc(cs)NWUDPSession(im)initWithUpgradeForSession:	-			instancetype	NWUDPSession * session	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_create` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	9825ff86f27b8a5a	-
+property	c:objc(cs)NWUDPSession(py)state	-			NWUDPSessionState	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	21f1ddba206f2e91	-
+property	c:objc(cs)NWUDPSession(py)endpoint	-			NWEndpoint *	-	readonly,atomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	91cd6500923c67e3	-
+property	c:objc(cs)NWUDPSession(py)resolvedEndpoint	-			NWEndpoint *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	b8b75c7786a18081	-
+property	c:objc(cs)NWUDPSession(py)viable	-			BOOL	-	readonly,nonatomic,getter=isViable	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	b2e171ea163b7457	-
+property	c:objc(cs)NWUDPSession(py)hasBetterPath	-			BOOL	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	648fa5e50aabe994	-
+property	c:objc(cs)NWUDPSession(py)currentPath	-			NWPath *	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	2d896c294aae697d	-
+method	c:objc(cs)NWUDPSession(im)tryNextResolvedEndpoint	-			void	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_cancel_current_endpoint` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	293beb98a0397686	-
+property	c:objc(cs)NWUDPSession(py)maximumDatagramLength	-			NSUInteger	-	readonly,nonatomic	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	ccea31928b58fdfd	-
+method	c:objc(cs)NWUDPSession(im)setReadHandler:maxDatagrams:	-			void	void (^)(NSArray<NSData *> * _Nullable, NSError * _Nullable) handler | NSUInteger maxDatagrams	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_receive` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	dce299c587877fbf	-
+method	c:objc(cs)NWUDPSession(im)writeMultipleDatagrams:completionHandler:	-			void	NSArray<NSData *> * datagramArray | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_send` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	a62f157b141ece14	-
+method	c:objc(cs)NWUDPSession(im)writeDatagram:completionHandler:	-			void	NSData * datagram | void (^)(NSError * _Nullable) completionHandler	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_send` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	f950289fc77246e8	-
+method	c:objc(cs)NWUDPSession(im)cancel	-			void	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `nw_connection_cancel` in Network framework instead, see deprecation notice in <NetworkExtension/NWUDPSession.h>	3fcc310d9441e88f	-
+interface	c:objc(cs)NWTLSParameters	-			-	-	-	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	deprecated: Use `sec_protocol_options_set_tls_resumption_enabled` in Security framework instead, see deprecation notice in <NetworkExtension/NWTLSParameters.h>	f5a3aac8b6273576	-
+super	-	NWTLSParameters	NSObject		-	-	-	-	-	008ef558cb9549f7	-
+property	c:objc(cs)NWTLSParameters(py)TLSSessionID	-			NSData *	-	copy	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	bbc6214ca74a45da	-
+property	c:objc(cs)NWTLSParameters(py)SSLCipherSuites	-			NSSet<NSNumber *> *	-	copy	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	4edea86742bee0e4	-
+property	c:objc(cs)NWTLSParameters(py)minimumSSLProtocolVersion	-			NSUInteger	-	assign	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	d6ea2745e5250dee	-
+property	c:objc(cs)NWTLSParameters(py)maximumSSLProtocolVersion	-			NSUInteger	-	assign	ios=9.0/18.0/-/0,macos=10.11/15.0/-/0,tvos=17.0/18.0/-/0,watchos=-/-/-/1,xros=1.0/2.0/-/0	-	681b63e0bcef1859	-
+typedef	c:@T@NEURLFilterVerdict	-			enum NEURLFilterVerdict	-	-	-	-	ae1122a5084432f0	-
+enum	c:@E@NEURLFilterVerdict	-			NSInteger	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	050bb40783e15329	-
+enumconst	c:@E@NEURLFilterVerdict@NEURLFilterVerdictUnknown	NEURLFilterVerdict			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1bb6dc1192ecf178	1
+enumconst	c:@E@NEURLFilterVerdict@NEURLFilterVerdictAllow	NEURLFilterVerdict			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	21708006dbfb5a6e	2
+enumconst	c:@E@NEURLFilterVerdict@NEURLFilterVerdictDeny	NEURLFilterVerdict			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2eb6307c0dba8de5	3
+interface	c:objc(cs)NEURLFilter	-			-	-	-	-	-	c7d7eff150567c99	-
+super	-	NEURLFilter	NSObject		-	-	-	-	-	f7324946ffdcdd72	-
+method	c:objc(cs)NEURLFilter(cm)verdictForURL:completionHandler:	-			void	NSURL * url | void (^)(NEURLFilterVerdict) completionHandler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2f2cdee7ae6fda84	-
+method	c:objc(cs)NEURLFilter(im)init	-			instancetype	-	-	*unavailable	-	de89dfc1807dd399	-
+typedef	c:@T@nw_endpoint_t	-			NSObject<OS_nw_endpoint> *	-	-	-	-	e3c79389d3a8da31	-
+typedef	c:@T@nw_parameters_t	-			NSObject<OS_nw_parameters> *	-	-	-	-	3e44c8ba053d5005	-
+typedef	c:@T@nw_interface_t	-			NSObject<OS_nw_interface> *	-	-	-	-	2f1c34a83187ba8c	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@size_t	-			__darwin_size_t	-	-	-	-	8ce79a13e58a1844	-
+typedef	c:@T@__darwin_size_t	-			unsigned long	-	-	-	-	0cd38a3df2217524	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@SecIdentityRef	-			struct __SecIdentity *	-	-	-	-	67e0fd928ac99a30	-
+typedef	c:@T@sa_family_t	-			__uint8_t	-	-	-	-	98191706cc738f70	-
+typedef	c:@T@__uint8_t	-			unsigned char	-	-	-	-	21c4a3e51470361c	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@SecTrustRef	-			struct __SecTrust *	-	-	-	-	793d9b19f5106e82	-

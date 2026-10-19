@@ -1,0 +1,15 @@
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="XMP Core 6.0.0">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:tiff="http://ns.adobe.com/tiff/1.0/"
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <tiff:Orientation>1</tiff:Orientation>
+         <dc:subject>
+            <rdf:Seq>
+               <rdf:li>one</rdf:li>
+               <rdf:li>two</rdf:li>
+            </rdf:Seq>
+         </dc:subject>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>

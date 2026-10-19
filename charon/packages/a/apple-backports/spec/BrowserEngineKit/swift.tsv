@@ -1,0 +1,98 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+BrowserEngineKit	swift-protocol	s:16BrowserEngineKit19WebContentExtensionP	-	WebContentExtension	-	-	-	ios=17.4,macos=14.3	-	5bb6ee9421e3b4dd
+BrowserEngineKit	swift-method	s:16BrowserEngineKit19WebContentExtensionP6handle13xpcConnectionySo03OS_H7_object_p_tF	WebContentExtension	handle(xpcConnection:)	-	()	XPC.xpc_connection_t	-	-	70404fd8b6274565
+BrowserEngineKit	swift-property	s:16BrowserEngineKit19WebContentExtensionPAAE13configurationAA0deF13ConfigurationVvp	WebContentExtension	configuration	-	BrowserEngineKit.WebContentExtensionConfiguration	-	-	-	047ccacab8b23e24
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit32WebContentExtensionConfigurationV	-	WebContentExtensionConfiguration	-	-	-	ios=17.4,macos=14.3	-	3cab20159d173357
+BrowserEngineKit	swift-method	s:16BrowserEngineKit32WebContentExtensionConfigurationV6accept10connectionSbSo15NSXPCConnectionC_tF	WebContentExtensionConfiguration	accept(connection:)	-	Swift.Bool	Foundation.NSXPCConnection	-	-	ae73be3e6ced872d
+BrowserEngineKit	swift-class	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor	-	BEDownloadMonitor	-	-	-	ios=18.2	-	a36769d64ec97ade
+BrowserEngineKit	swift-class	s:16BrowserEngineKit17BEDownloadMonitorC8LocationC	BEDownloadMonitor	Location	-	-	-	ios=18.2	-	5f8d9b0a74221575
+BrowserEngineKit	swift-property	s:16BrowserEngineKit17BEDownloadMonitorC8LocationC3url10Foundation3URLVvp	BEDownloadMonitor.Location	url	-	Foundation.URL	-	-	-	47141ec877b32dba
+BrowserEngineKit	swift-property	s:16BrowserEngineKit17BEDownloadMonitorC8LocationC12bookmarkData10Foundation0H0Vvp	BEDownloadMonitor.Location	bookmarkData	-	Foundation.Data	-	-	-	38accf36026a4442
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(im)initWithSourceURL:destinationURL:observedProgress:liveActivityAccessToken:	BEDownloadMonitor	init(sourceURL:destinationURL:observedProgress:liveActivityAccessToken:)	-	-	BrowserEngineKit.BEDownloadMonitor | Foundation.URL | Foundation.URL | Foundation.Progress | Foundation.Data	-	-	9aebb47ae32b7005
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(im)useDownloadsFolderWithPlaceholderType:finalFileCreatedHandler:	BEDownloadMonitor	useDownloadsFolder(placeholderType:finalFileCreatedHandler:)	-	()	UniformTypeIdentifiers.UTType? | (BrowserEngineKit.BEDownloadMonitor.Location?) -> Swift.Void	-	-	3628096777d4bb32
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(im)beginMonitoring:	BEDownloadMonitor	beginMonitoring()	-	BrowserEngineKit.BEDownloadMonitor.Location?	-	-	-	4b50b07db1d82b9a
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(im)resumeMonitoring:completionHandler:	BEDownloadMonitor	resumeMonitoring(placeholderURL:)	-	()	Foundation.URL	-	-	5717f5cf6217b87d
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(cm)createAccessToken	BEDownloadMonitor	createAccessToken()	+	Foundation.Data?	-	-	-	1f848dd5f3ffa7db
+BrowserEngineKit	swift-property	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(py)identifier	BEDownloadMonitor	id	-	Foundation.UUID	-	-	-	2de0c0c9504938e2
+BrowserEngineKit	swift-property	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(py)sourceURL	BEDownloadMonitor	sourceURL	-	Foundation.URL	-	-	-	9c309067513a8e1e
+BrowserEngineKit	swift-property	c:@M@BrowserEngineKit@objc(cs)BEDownloadMonitor(py)destinationURL	BEDownloadMonitor	destinationURL	-	Foundation.URL	-	-	-	115b6ae88c8ea3be
+BrowserEngineKit	swift-typealias	s:16BrowserEngineKit17BEDownloadMonitorC2IDa	BEDownloadMonitor	ID	-	-	-	ios=18.2	-	b0b5b57ab60857d7
+BrowserEngineKit	swift-enum	s:16BrowserEngineKit25RenderingExtensionFeatureO	-	RenderingExtensionFeature	-	-	-	ios=26.2,macos=26.2	-	731503eee250b0b2
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit25RenderingExtensionFeatureO6coreMLyA2CmF	RenderingExtensionFeature	coreML	-	-	-	-	-	d071bd961842fa59
+BrowserEngineKit	swift-method	s:16BrowserEngineKit25RenderingExtensionFeatureO2eeoiySbAC_ACtFZ	RenderingExtensionFeature	==(_:_:)	+	Swift.Bool	BrowserEngineKit.RenderingExtensionFeature | BrowserEngineKit.RenderingExtensionFeature	-	-	7583c8c1b4ba01b2
+BrowserEngineKit	swift-method	s:16BrowserEngineKit25RenderingExtensionFeatureO4hash4intoys6HasherVz_tF	RenderingExtensionFeature	hash(into:)	-	()	Swift.Hasher	-	-	4f541e01addcef8c
+BrowserEngineKit	swift-property	s:16BrowserEngineKit25RenderingExtensionFeatureO9hashValueSivp	RenderingExtensionFeature	hashValue	-	Swift.Int	-	-	-	883069df859faaef
+BrowserEngineKit	swift-protocol	s:16BrowserEngineKit18RenderingExtensionP	-	RenderingExtension	-	-	-	ios=17.4,macos=14.3	-	945283bc10d2a58f
+BrowserEngineKit	swift-method	s:16BrowserEngineKit18RenderingExtensionP6handle13xpcConnectionySo03OS_G7_object_p_tF	RenderingExtension	handle(xpcConnection:)	-	()	XPC.xpc_connection_t	-	-	9f32de213e7555a3
+BrowserEngineKit	swift-property	s:16BrowserEngineKit18RenderingExtensionPAAE13configurationAA0dE13ConfigurationVvp	RenderingExtension	configuration	-	BrowserEngineKit.RenderingExtensionConfiguration	-	-	-	094bd23975cbb58d
+BrowserEngineKit	swift-method	s:16BrowserEngineKit18RenderingExtensionPAAE13enableFeatureyyAA0deG0OF	RenderingExtension	enableFeature(_:)	-	()	BrowserEngineKit.RenderingExtensionFeature	ios=26.2,macos=26.2	-	3a03ee4a37e897e3
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit31RenderingExtensionConfigurationV	-	RenderingExtensionConfiguration	-	-	-	ios=17.4,macos=14.3	-	a693f04c8d045d4f
+BrowserEngineKit	swift-method	s:16BrowserEngineKit31RenderingExtensionConfigurationV6accept10connectionSbSo15NSXPCConnectionC_tF	RenderingExtensionConfiguration	accept(connection:)	-	Swift.Bool	Foundation.NSXPCConnection	-	-	1f6f84c826b82f64
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit17NetworkingProcessV	-	NetworkingProcess	-	-	-	ios=17.4,macos=14.3	-	286a4416cfc442be
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17NetworkingProcessV16bundleIdentifier14onInterruptionACSSSg_yyctYaKcfc	NetworkingProcess	init(bundleIdentifier:onInterruption:)	-	-	BrowserEngineKit.NetworkingProcess | Swift.String? | () -> Swift.Void	-	-	756f075cdc25e70e
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17NetworkingProcessV20makeLibXPCConnectionSo13OS_xpc_object_pyKF	NetworkingProcess	makeLibXPCConnection()	-	XPC.xpc_connection_t	-	-	-	05151929d6da6a80
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17NetworkingProcessV10invalidateyyF	NetworkingProcess	invalidate()	-	()	-	-	-	bea381f3038510c1
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17NetworkingProcessV15grantCapabilityyAA0eG0O5GrantVAFKF	NetworkingProcess	grantCapability(_:)	-	BrowserEngineKit.ProcessCapability.Grant	BrowserEngineKit.ProcessCapability	-	-	3846a2e9e6514e81
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17NetworkingProcessV15grantCapability_19invalidationHandlerAA0eG0O5GrantVAG_yyctKF	NetworkingProcess	grantCapability(_:invalidationHandler:)	-	BrowserEngineKit.ProcessCapability.Grant	BrowserEngineKit.ProcessCapability | () -> Swift.Void	ios=17.6	-	8601d9909ff75c14
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit17WebContentProcessV	-	WebContentProcess	-	-	-	ios=17.4,macos=14.3	-	a16c9444fba8f86d
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17WebContentProcessV16bundleIdentifier14onInterruptionACSSSg_yyctYaKcfc	WebContentProcess	init(bundleIdentifier:onInterruption:)	-	-	BrowserEngineKit.WebContentProcess | Swift.String? | () -> Swift.Void	-	-	9a5991ec291c82a7
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17WebContentProcessV20makeLibXPCConnectionSo13OS_xpc_object_pyKF	WebContentProcess	makeLibXPCConnection()	-	XPC.xpc_connection_t	-	-	-	f3f3dd87a4fe5cc0
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17WebContentProcessV38createVisibilityPropagationInteractionSo13UIInteraction_pyF	WebContentProcess	createVisibilityPropagationInteraction()	-	any UIKit.UIInteraction	-	-	-	f201ec0c52d12ec4
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17WebContentProcessV10invalidateyyF	WebContentProcess	invalidate()	-	()	-	-	-	a236867dcd6a0cab
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17WebContentProcessV15grantCapabilityyAA0fH0O5GrantVAFKF	WebContentProcess	grantCapability(_:)	-	BrowserEngineKit.ProcessCapability.Grant	BrowserEngineKit.ProcessCapability	-	-	2201af54b1162ec3
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17WebContentProcessV15grantCapability_19invalidationHandlerAA0fH0O5GrantVAG_yyctKF	WebContentProcess	grantCapability(_:invalidationHandler:)	-	BrowserEngineKit.ProcessCapability.Grant	BrowserEngineKit.ProcessCapability | () -> Swift.Void	ios=17.6	-	6aea5f6d5325c036
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit16RenderingProcessV	-	RenderingProcess	-	-	-	ios=17.4,macos=14.3	-	c086abbf8de1190c
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16RenderingProcessV16bundleIdentifier14onInterruptionACSSSg_yyctYaKcfc	RenderingProcess	init(bundleIdentifier:onInterruption:)	-	-	BrowserEngineKit.RenderingProcess | Swift.String? | () -> Swift.Void	-	-	4352cc69a805f617
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16RenderingProcessV20makeLibXPCConnectionSo13OS_xpc_object_pyKF	RenderingProcess	makeLibXPCConnection()	-	XPC.xpc_connection_t	-	-	-	23acc6f689ebb555
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16RenderingProcessV38createVisibilityPropagationInteractionSo13UIInteraction_pyF	RenderingProcess	createVisibilityPropagationInteraction()	-	any UIKit.UIInteraction	-	-	-	482e422576d46816
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16RenderingProcessV10invalidateyyF	RenderingProcess	invalidate()	-	()	-	-	-	381b94902791a3c1
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16RenderingProcessV15grantCapabilityyAA0eG0O5GrantVAFKF	RenderingProcess	grantCapability(_:)	-	BrowserEngineKit.ProcessCapability.Grant	BrowserEngineKit.ProcessCapability	-	-	52b0f72f84991f7e
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16RenderingProcessV15grantCapability_19invalidationHandlerAA0eG0O5GrantVAG_yyctKF	RenderingProcess	grantCapability(_:invalidationHandler:)	-	BrowserEngineKit.ProcessCapability.Grant	BrowserEngineKit.ProcessCapability | () -> Swift.Void	ios=17.6	-	f34653bfad1d762b
+BrowserEngineKit	swift-enum	s:16BrowserEngineKit25RestrictedSandboxRevisionO	-	RestrictedSandboxRevision	-	-	-	ios=17.4,macos=14.3	-	630372afa23b76fe
+BrowserEngineKit	swift-property	s:16BrowserEngineKit25RestrictedSandboxRevisionO8allCasesSayACGvpZ	RestrictedSandboxRevision	allCases	+	[BrowserEngineKit.RestrictedSandboxRevision]	-	-	-	6170542f8d3e4404
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit25RestrictedSandboxRevisionO9revision1yA2CmF	RestrictedSandboxRevision	revision1	-	-	-	-	-	ff6fa567d0d15a58
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit25RestrictedSandboxRevisionO9revision2yA2CmF	RestrictedSandboxRevision	revision2	-	-	-	ios=26.0,macos=26.0	-	09c3cf539b657744
+BrowserEngineKit	swift-method	s:16BrowserEngineKit25RestrictedSandboxRevisionO1loiySbAC_ACtFZ	RestrictedSandboxRevision	<(_:_:)	+	Swift.Bool	BrowserEngineKit.RestrictedSandboxRevision | BrowserEngineKit.RestrictedSandboxRevision	-	-	8b5200641c70c538
+BrowserEngineKit	swift-method	s:16BrowserEngineKit25RestrictedSandboxRevisionO2eeoiySbAC_ACtFZ	RestrictedSandboxRevision	==(_:_:)	+	Swift.Bool	BrowserEngineKit.RestrictedSandboxRevision | BrowserEngineKit.RestrictedSandboxRevision	-	-	0b4d04233ebaf073
+BrowserEngineKit	swift-typealias	s:16BrowserEngineKit25RestrictedSandboxRevisionO8AllCasesa	RestrictedSandboxRevision	AllCases	-	-	-	ios=17.4,macos=14.3	-	bb802b481dd45853
+BrowserEngineKit	swift-method	s:16BrowserEngineKit25RestrictedSandboxRevisionO4hash4intoys6HasherVz_tF	RestrictedSandboxRevision	hash(into:)	-	()	Swift.Hasher	-	-	e444743fa6228213
+BrowserEngineKit	swift-property	s:16BrowserEngineKit25RestrictedSandboxRevisionO9hashValueSivp	RestrictedSandboxRevision	hashValue	-	Swift.Int	-	-	-	3b5ce2ca5041abb8
+BrowserEngineKit	swift-protocol	s:16BrowserEngineKit26RestrictedSandboxAppliableP	-	RestrictedSandboxAppliable	-	-	-	ios=17.4,macos=14.3	-	06bb502ef77f0dad
+BrowserEngineKit	swift-method	s:16BrowserEngineKit26RestrictedSandboxAppliableP05applydE08revisionyAA0dE8RevisionO_tF	RestrictedSandboxAppliable	applyRestrictedSandbox(revision:)	-	()	BrowserEngineKit.RestrictedSandboxRevision	-	-	056432d9cdaa946d
+BrowserEngineKit	swift-method	s:16BrowserEngineKit26RestrictedSandboxAppliablePAAE05applydE08revisionyAA0dE8RevisionO_tF	RestrictedSandboxAppliable	applyRestrictedSandbox(revision:)	-	()	BrowserEngineKit.RestrictedSandboxRevision	-	-	c65726cd82efff96
+BrowserEngineKit	swift-method	s:16BrowserEngineKit26RestrictedSandboxAppliablePA2A19WebContentExtensionRzrlE05applydE08revisionyAA0dE8RevisionO_tF	RestrictedSandboxAppliable	applyRestrictedSandbox(revision:)	-	()	BrowserEngineKit.RestrictedSandboxRevision	-	-	5fa51cfe441a0590
+BrowserEngineKit	swift-enum	s:16BrowserEngineKit17ProcessCapabilityO	-	ProcessCapability	-	-	-	ios=17.4,macos=14.3	-	a7e5b9c62328c4fc
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit17ProcessCapabilityO10backgroundyA2CmF	ProcessCapability	background	-	-	-	-	-	d36668d97f3dfd86
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit17ProcessCapabilityO10foregroundyA2CmF	ProcessCapability	foreground	-	-	-	-	-	4f33b2f2f3d92173
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit17ProcessCapabilityO9suspendedyA2CmF	ProcessCapability	suspended	-	-	-	-	-	f7e46879183844c0
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit17ProcessCapabilityO23mediaPlaybackAndCaptureyAcA16MediaEnvironmentV_tcACmF	ProcessCapability	mediaPlaybackAndCapture	-	-	-	-	-	1051ac944b50696f
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit17ProcessCapabilityO5GrantV	ProcessCapability	Grant	-	-	-	-	-	d7855bfa1342d986
+BrowserEngineKit	swift-method	s:16BrowserEngineKit17ProcessCapabilityO5GrantV10invalidateyyF	ProcessCapability.Grant	invalidate()	-	()	-	-	-	03237390b0fe7ab8
+BrowserEngineKit	swift-property	s:16BrowserEngineKit17ProcessCapabilityO5GrantV7isValidSbvp	ProcessCapability.Grant	isValid	-	Swift.Bool	-	-	-	5a3d923e8b30c266
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit16MediaEnvironmentV	-	MediaEnvironment	-	-	-	ios=17.4	-	50db621fef050d19
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16MediaEnvironmentV7webPageAC10Foundation3URLV_tcfc	MediaEnvironment	init(webPage:)	-	-	BrowserEngineKit.MediaEnvironment | Foundation.URL	-	-	a2ed1d3ce233aadc
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16MediaEnvironmentV17xpcRepresentationACSo03OS_F7_object_p_tKcfc	MediaEnvironment	init(xpcRepresentation:)	-	-	BrowserEngineKit.MediaEnvironment | XPC.xpc_object_t	-	-	0b57ce393359b762
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16MediaEnvironmentV23createXPCRepresentationSo13OS_xpc_object_pyF	MediaEnvironment	createXPCRepresentation()	-	XPC.xpc_object_t	-	-	-	9a7eb46b8c258d63
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16MediaEnvironmentV8activateyyKF	MediaEnvironment	activate()	-	()	-	-	-	db882a4cac8d2ac2
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16MediaEnvironmentV7suspendyyKF	MediaEnvironment	suspend()	-	()	-	-	-	84a71330cd696b84
+BrowserEngineKit	swift-method	s:16BrowserEngineKit16MediaEnvironmentV18makeCaptureSessionSo09AVCaptureH0CyKF	MediaEnvironment	makeCaptureSession()	-	AVFoundation.AVCaptureSession	-	-	-	2b6fbda804ff359d
+BrowserEngineKit	swift-class	c:@M@BrowserEngineKit@objc(cs)BEMediaEnvironment	-	BEMediaEnvironment	-	-	-	ios=17.4	-	f97583259fc7c76f
+BrowserEngineKit	swift-class	c:@M@BrowserEngineKit@objc(cs)BEProcessCapability	-	BEProcessCapability	-	-	-	ios=17.4,macos=14.3	-	35be54d8814d8674
+BrowserEngineKit	swift-protocol	s:16BrowserEngineKit19NetworkingExtensionP	-	NetworkingExtension	-	-	-	ios=17.4,macos=14.3	-	65a89756cd1ef5a9
+BrowserEngineKit	swift-method	s:16BrowserEngineKit19NetworkingExtensionP6handle13xpcConnectionySo03OS_G7_object_p_tF	NetworkingExtension	handle(xpcConnection:)	-	()	XPC.xpc_connection_t	-	-	76679266758631ec
+BrowserEngineKit	swift-property	s:16BrowserEngineKit19NetworkingExtensionPAAE13configurationAA0dE13ConfigurationVvp	NetworkingExtension	configuration	-	BrowserEngineKit.NetworkingExtensionConfiguration	-	-	-	930c9824e2834272
+BrowserEngineKit	swift-struct	s:16BrowserEngineKit32NetworkingExtensionConfigurationV	-	NetworkingExtensionConfiguration	-	-	-	ios=17.4,macos=14.3	-	6d6a89b8fab05d29
+BrowserEngineKit	swift-method	s:16BrowserEngineKit32NetworkingExtensionConfigurationV6accept10connectionSbSo15NSXPCConnectionC_tF	NetworkingExtensionConfiguration	accept(connection:)	-	Swift.Bool	Foundation.NSXPCConnection	-	-	74566c12600be367
+BrowserEngineKit	swift-class	c:@M@BrowserEngineKit@objc(cs)BEWebContentProcess	-	__BEWebContentProcess	-	-	-	ios=17.4,macos=14.3	-	49eb627929f29f17
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEWebContentProcess(cm)webContentProcessWithInterruptionHandler:completion:	__BEWebContentProcess	webContentProcess(interruptionHandler:completion:)	+	()	() -> () | (BrowserEngineKit.__BEWebContentProcess?, Foundation.NSError?) -> ()	-	-	bf190541d1e453ae
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEWebContentProcess(im)invalidate	__BEWebContentProcess	invalidate()	-	()	-	-	-	af13f09ffe7272b6
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BEWebContentProcess(im)makeLibXPCConnectionError:	__BEWebContentProcess	makeLibXPCConnection()	-	any XPC.OS_xpc_object	-	-	-	715a31fe537b829f
+BrowserEngineKit	swift-class	c:@M@BrowserEngineKit@objc(cs)BERenderingProcess	-	__BERenderingProcess	-	-	-	ios=17.4,macos=14.3	-	6274179899c31227
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BERenderingProcess(cm)renderingProcessWithInterruptionHandler:completion:	__BERenderingProcess	renderingProcess(interruptionHandler:completion:)	+	()	() -> () | (BrowserEngineKit.__BERenderingProcess?, Foundation.NSError?) -> ()	-	-	d7b9a3ae7f355af3
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BERenderingProcess(im)invalidate	__BERenderingProcess	invalidate()	-	()	-	-	-	e42082e71ccc84a9
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BERenderingProcess(im)makeLibXPCConnectionError:	__BERenderingProcess	makeLibXPCConnection()	-	any XPC.OS_xpc_object	-	-	-	c5895947d68f2adf
+BrowserEngineKit	swift-class	c:@M@BrowserEngineKit@objc(cs)BENetworkingProcess	-	__BENetworkingProcess	-	-	-	ios=17.4,macos=14.3	-	ed38d8ff61fe5da4
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BENetworkingProcess(cm)networkProcessWithInterruptionHandler:completion:	__BENetworkingProcess	networkProcess(interruptionHandler:completion:)	+	()	() -> () | (BrowserEngineKit.__BENetworkingProcess?, Foundation.NSError?) -> ()	-	-	2bf19c02e7b2f094
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BENetworkingProcess(im)invalidate	__BENetworkingProcess	invalidate()	-	()	-	-	-	efbb41f73516d9e9
+BrowserEngineKit	swift-method	c:@M@BrowserEngineKit@objc(cs)BENetworkingProcess(im)makeLibXPCConnectionError:	__BENetworkingProcess	makeLibXPCConnection()	-	any XPC.OS_xpc_object	-	-	-	f1b5b515e5d20e45
+BrowserEngineKit	swift-constant	s:16BrowserEngineKit17ProcessCapabilityO10_assertionyACSS_SStcACmF	ProcessCapability	_assertion	-	-	-	-	-	7a0b7e22ac7d3012

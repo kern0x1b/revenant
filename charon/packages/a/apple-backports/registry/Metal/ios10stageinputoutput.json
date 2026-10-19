@@ -1,0 +1,60 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLStageInputOutputDescriptor",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the Tier 2 verdict on Metal/MetalKit: a layout descriptor needs no GPU to exist and compose",
+      "effect": "layouts and attributes hold real MTLBufferLayoutDescriptorArray/MTLAttributeDescriptorArray objects, indexType and indexBufferIndex hold what is set, reset clears both arrays back to empty",
+      "facts": "facts/Metal/StageInputOutputDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLBufferLayoutDescriptor",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried as MTLStageInputOutputDescriptor's own dependency: its layouts array is typed in terms of this class",
+      "effect": "stride, stepFunction and stepRate hold what is set",
+      "facts": "facts/Metal/StageInputOutputDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLBufferLayoutDescriptorArray",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried as MTLStageInputOutputDescriptor's own dependency",
+      "effect": "indexed subscripting reads and writes MTLBufferLayoutDescriptor entries; an unset index answers a fresh default descriptor, as the real array does",
+      "facts": "facts/Metal/StageInputOutputDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLAttributeDescriptor",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried as MTLStageInputOutputDescriptor's own dependency: its attributes array is typed in terms of this class",
+      "effect": "format, offset and bufferIndex hold what is set",
+      "facts": "facts/Metal/StageInputOutputDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLAttributeDescriptorArray",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried as MTLStageInputOutputDescriptor's own dependency",
+      "effect": "indexed subscripting reads and writes MTLAttributeDescriptor entries; an unset index answers a fresh default descriptor",
+      "facts": "facts/Metal/StageInputOutputDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    }
+  ]
+}

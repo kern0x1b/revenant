@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLCommandBufferDescriptor",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the Tier 2 verdict on Metal/MetalKit: a plain descriptor, real independently of the command buffer it configures",
+      "effect": "retainedReferences defaults to YES as the header documents; errorOptions holds what is set; nothing in this port reads errorOptions, since command buffer execution here never populates MTLCommandBufferEncoderInfoErrorKey to begin with",
+      "facts": "facts/Metal/CommandBufferDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLCommandBufferEncoderInfoErrorKey",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried alongside MTLCommandBufferDescriptor, whose errorOptions property names it; never populated in a userInfo dictionary by this port, since this port's command buffers never run the per-encoder execution status tracking the key names",
+      "effect": "answers \"MTLCommandBufferEncoderInfoErrorKey\"",
+      "facts": "facts/Metal/CommandBufferDescriptor.md",
+      "source": "the release's own literal value, unverified against the shared cache; see facts/Metal/CommandBufferDescriptor.md"
+    }
+  ]
+}

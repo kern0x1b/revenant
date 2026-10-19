@@ -1,0 +1,69 @@
+#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@FXSubtract	-			int (int, int)	int a | int b	-	-	-	49740040529ed9bb	-
+typedef	c:Repeat.h@T@FXCount	-			int	-	-	-	-	1f7328e81f8a9e5e	-
+function	c:@F@FXRun	-			void (int)	int total	-	-	-	0020c5ef8e076e6b	-
+function	c:@F@FXVersioned	-			void (void)	-	-	ios=17.0/-/-/0		8a738ebf802e0c1f	-
+function	c:@F@FXDouble	-			int (int)	int value	-	-	-	b09bf6570a7539bf	-
+struct	c:@S@FXString	-			-	-	-	-	-	f34b04db1043f8e6	-
+typedef	c:Repeat.h@T@FXStringRef	-			const struct FXString *	-	-	-	-	717a046ae5433c7b	-
+var	c:@FXConstName	-			const FXStringRef	-	-	-	-	ce443d994ea4ce0e	-
+var	c:@FXConstPointer	-			const char *const	-	-	-	-	632d333d49f41d4d	-
+var	c:@FXPointerConst	-			char *const	-	-	-	-	a6fb2c4ece3ca875	-
+var	c:@FXPointerToConst	-			const char *	-	-	-	-	0d028bed75bce768	-
+var	c:@FXConstInt	-			const int	-	-	-	-	0e620458124bfac1	-
+var	c:@FXMacroConst	-			const FXStringRef	-	-	ios=16.0/-/-/0	-	7ad999c2eaf96056	-
+var	c:@FXMacroPointer	-			char *const	-	-	ios=16.0/-/-/0	-	706ee8a95c202e67	-
+var	c:@FXRefinedName	-			const FXStringRef	-	-	-	-	b190bcd0cdd809bc	-
+typedef	c:Repeat.h@T@FXStringAlias	-			FXStringRef	-	-	ios=16.0/-/-/0	-	212fe52f025f745e	-
+function	c:@F@FXFetch	-			FXStringRef (const char *)	const char * key	-	ios=16.0/-/-/0	-	862d7a98b622928e	-
+interface	c:objc(cs)FXMacroBox	-			-	-	-	-	-	337fff37e1b6f2a7	-
+property	c:objc(cs)FXMacroBox(py)macroProperty	-			const FXStringRef	-	nonatomic	ios=16.0/-/-/0	-	738533ba377bb65e	-
+method	c:objc(cs)FXMacroBox(im)macroReturn	-			FXStringRef	-	-	-	-	280b98793114a330	-
+method	c:objc(cs)FXMacroBox(im)macroTake:	-			void	const char * value	-	-	-	d01c2a3f6b9fc834	-
+typedef	c:Repeat.h@T@FXBlock	-			id ((^))(int)	-	-	ios=16.0/-/-/0	-	0f378803a3e13b38	-
+function	c:@F@FXHalve	-			int (int)	int value	-	-	-	df46b5f8d4feaea8	-
+function	c:@F@FXManyPlatforms	-			int (void)	-	-	bridgeos=1.0/-/-/0,driverkit=1.0/-/-/0,ios=1.0/-/-/0,ios_app_extension=1.0/-/-/0,maccatalyst=1.0/-/-/0,maccatalyst_app_extension=1.0/-/-/0,macos=1.0/-/-/0,macos_app_extension=1.0/-/-/0,tvos=1.0/-/-/0,tvos_app_extension=1.0/-/-/0,watchos=1.0/-/-/0,watchos_app_extension=1.0/-/-/0,xros=1.0/-/-/0,xros_app_extension=1.0/-/-/0	-	ec0a2fe22235c24a	-
+var	c:@FXScale	-			const double	-	-	-	-	70e1ccb0f2967fb8	-
+struct	c:@S@FXPoint	-			-	-	-	-	-	79ac717304052e6e	-
+field	c:@S@FXPoint@FI@x	FXPoint			double	-	-	-	-	d57c6c524cc3877a	-
+field	c:@S@FXPoint@FI@y	FXPoint			double	-	-	-	-	aea8cdd159577569	-
+struct	c:@S@FXOpaque	-			-	-	-	-	-	2d3142c1f1a06c74	-
+typedef	c:Fixture.h@T@FXOpaque	-			struct FXOpaque	-	-	-	-	d084e5c93d8db134	-
+enum	c:@E@FXState	-			unsigned int	-	-	-	-	868e2214eb512deb	-
+enumconst	c:@E@FXState@FXStateOn	FXState			-	-	-	-	-	a1509e83c3907824	1
+enumconst	c:@E@FXState@FXStateOff	FXState			-	-	-	-	-	df0288ad9c043590	2
+enum	c:@Ea@FXLimit	-	-		unsigned int	-	-	-	-	71f9fa8c9398775b	-
+enumconst	c:@Ea@FXLimit@FXLimit	-			-	-	-	-	-	e85ecff37ce1ff37	9
+enum	c:@E@FXByte	-			unsigned char	-	-	-	-	0495998ad46ebad3	-
+enumconst	c:@E@FXByte@FXByteTop	FXByte			-	-	-	-	-	e69f5af7b7c1eafe	255
+enum	c:@E@FXWord	-			unsigned long	-	-	-	-	08641e38dd5d7599	-
+enumconst	c:@E@FXWord@FXWordAll	FXWord			-	-	-	-	-	1e20e8905aab4537	18446744073709551615
+enum	c:@E@FXWide	-			unsigned long long	-	-	-	-	339993ef54893a1b	-
+enumconst	c:@E@FXWide@FXWideTop	FXWide			-	-	-	-	-	02c63f69310c795e	9223372036854775808
+enum	c:@E@FXMask	-			unsigned int	-	-	-	-	74cbbb0359a70e17	-
+enumconst	c:@E@FXMask@FXMaskClass	FXMask			-	-	-	-	-	05b8949bf79a4ca7	4026531840
+enum	c:@E@FXSigned	-			int	-	-	-	-	2770f3e2f649e75c	-
+enumconst	c:@E@FXSigned@FXSignedBelow	FXSigned			-	-	-	-	-	b270b617551eb67f	-1
+function	c:@F@FXMove	-			void (fx_vector3, fx_family)	fx_vector3 at | fx_family family	-	-	-	46824690068e785f	-
+protocol	c:objc(pl)FXSource	-			-	-	-	-	-	5dd124b557c4904c	-
+method	c:objc(pl)FXSource(im)valueForKey:	-			id	id key	optional	-	-	e4095b7c1d8f3d61	-
+interface	c:objc(cs)FXWidget	-			-	-	-	-	-	00774d9345f1e0fe	-
+property	c:objc(cs)FXWidget(py)enabled	-			_Bool	-	readonly,nonatomic,getter=isEnabledNow	-	-	490dbde2fff05d89	-
+property	c:objc(cs)FXWidget(cpy)label	-			id	-	copy,nonatomic,class	-	-	b49c765f988436ce	-
+method	c:objc(cs)FXWidget(cm)widgetNamed:	-			instancetype	id name	-	ios=16.0/-/-/0	-	951adc7ea4238d0c	-
+method	c:objc(cs)FXWidget(im)init	-			instancetype	-	-	*unavailable	-	36eb21001b5d4408	-
+category	c:objc(ext)FXWidget	-	-		-	-	-	-	-	67f23112573e8ec6	-
+conforms	c:objc(ext)FXWidget@Fixture.h@1222	FXWidget	FXSource		-	-	-	-	-	ddc2787c83d3a2e4	-
+category	c:objc(cy)FXWidget@Extras	-			-	-	-	-	-	39fe4cee6a15a9f7	-
+method	c:objc(cs)FXWidget(im)extraAction	Extras			void	-	-	-	-	fd4bd3a3406bc2c7	-
+interface	c:objc(cs)FXLegacy	-			-	-	-	ios=14.0/-/-/0	-	236718cedc83a3bb	-
+method	c:objc(cs)FXLegacy(im)old	-			void	-	-	ios=16.0/-/-/0	-	a5563db05f86525d	-
+method	c:objc(cs)FXLegacy(im)tweak	-			void	-	-	ios=14.0/-/-/0	-	9bd075e036e7bd59	-
+category	c:objc(ext)FXLegacy	-	-		-	-	-	ios=14.0/-/-/0	-	988f1eaceef9e3b9	-
+function	c:@F@FXOld	-			void (void)	-	-	ios=2.0/9.0/-/0	deprecated: Use newWay	067690961a858a55	-
+function	c:@F@FXGone	-			void (void)	-	-	*unavailable	unavailable: removed in 2.0	8fa92eb3a8eba839	-
+typedef	c:@T@fx_vector3	-			fx_float3	-	-	-	-	be174807d9005ce0	-
+typedef	c:@T@fx_float3	-			float __attribute__((ext_vector_type(3)))	-	-	-	-	a48f30a1a7308738	-
+typedef	c:@T@fx_family	-			fx_byte	-	-	-	-	a6c746f6e3d7d9ce	-
+typedef	c:@T@fx_byte	-			unsigned char	-	-	-	-	130b861891e96d90	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-

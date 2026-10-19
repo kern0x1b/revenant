@@ -1,0 +1,55 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIFontWidthStandard",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the value of the release that has it, 0; no font of iOS 6 has another width, so a font is matched as standard whichever is asked",
+      "facts": "facts/UIKit/UIFontTextStyles.md",
+      "source": "the shared cache of iOS 8.0 exports the symbol (absent from iOS 7.1.2); the SDK 16.4 header's API_AVAILABLE(ios(16.0)) covers the whole width type and is wrong for this member specifically"
+    },
+    {
+      "api": "UIFontWidthExpanded",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the value of the release that has it, 0.2; no font of iOS 6 has another width, so a font is matched as standard whichever is asked",
+      "facts": "facts/UIKit/UIFontTextStyles.md",
+      "source": "the shared cache of iOS 8.0 exports the symbol (absent from iOS 7.1.2); the SDK 16.4 header's API_AVAILABLE(ios(16.0)) covers the whole width type and is wrong for this member specifically"
+    },
+    {
+      "api": "UIFontWidthCondensed",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the value of the release that has it, -0.2; no font of iOS 6 has another width, so a font is matched as standard whichever is asked",
+      "facts": "facts/UIKit/UIFontTextStyles.md",
+      "source": "the shared cache of iOS 8.0 exports the symbol (absent from iOS 7.1.2); the SDK 16.4 header's API_AVAILABLE(ios(16.0)) covers the whole width type and is wrong for this member specifically"
+    },
+    {
+      "api": "UIFontWidthCompressed",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the value of the release that has it, -0.3; no font of iOS 6 has another width, so a font is matched as standard whichever is asked",
+      "facts": "facts/UIKit/UIFontTextStyles.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), the header of SDK 16.4"
+    },
+    {
+      "api": "+[UIFont systemFontOfSize:weight:width:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the font of the weight, whichever width is asked, since no font of iOS 6 has another width",
+      "facts": "facts/UIKit/UIFontTextStyles.md",
+      "source": "the header of SDK 16.4; the host's UIKit for the weights"
+    }
+  ]
+}

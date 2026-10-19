@@ -1,0 +1,14 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UIView systemLayoutSizeFittingSize:withHorizontalFittingPriority:verticalFittingPriority:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewFittingPriority.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fitting, and tests/backports/device/fitting.m on iOS 6"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "framework": "Contacts",
+  "entries": [
+    {
+      "api": "CNContactPhoneticOrganizationNameKey",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant is a string a port writes into keysToFetch, and the port carries the key although the release's book has no field behind it",
+      "effect": "the symbol is there and holds the string Contacts of iOS 12.0 holds; a contact read out of the release's book never has a value under it",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of SDK 16.4 for the declarations; Contacts of the arm64 shared cache of iOS 12.0 for the value of every constant and for the shape of the classes; the resources of Contacts.framework on an iPhone4,1 running 9.3.6 for what the release answers; AddressBook of the armv7 shared cache of 6.1.3 for the store the port reads and writes"
+    },
+    {
+      "api": "CNPostalAddressSubAdministrativeAreaKey",
+      "kind": "constant",
+      "introduced": "10.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant is a string a port writes into keysToFetch, and the port carries the key although the release's book has no field behind it",
+      "effect": "the symbol is there and holds the string Contacts of iOS 12.0 holds; a contact read out of the release's book never has a value under it",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of SDK 16.4 for the declarations; Contacts of the arm64 shared cache of iOS 12.0 for the value of every constant and for the shape of the classes; the resources of Contacts.framework on an iPhone4,1 running 9.3.6 for what the release answers; AddressBook of the armv7 shared cache of 6.1.3 for the store the port reads and writes"
+    },
+    {
+      "api": "CNPostalAddressSubLocalityKey",
+      "kind": "constant",
+      "introduced": "10.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant is a string a port writes into keysToFetch, and the port carries the key although the release's book has no field behind it",
+      "effect": "the symbol is there and holds the string Contacts of iOS 12.0 holds; a contact read out of the release's book never has a value under it",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of SDK 16.4 for the declarations; Contacts of the arm64 shared cache of iOS 12.0 for the value of every constant and for the shape of the classes; the resources of Contacts.framework on an iPhone4,1 running 9.3.6 for what the release answers; AddressBook of the armv7 shared cache of 6.1.3 for the store the port reads and writes"
+    }
+  ]
+}

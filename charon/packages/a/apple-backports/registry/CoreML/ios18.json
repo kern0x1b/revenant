@@ -1,0 +1,55 @@
+{
+ "framework": "CoreML",
+ "entries": [
+  {
+   "api": "+[MLModelAsset modelAssetWithSpecificationData:blobMapping:error:]",
+   "kind": "method",
+   "introduced": "18.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model built in memory out of a container's bytes, and the two of its forms that name their blobs",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "+[MLModelAsset modelAssetWithURL:error:]",
+   "kind": "method",
+   "introduced": "18.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model built in memory out of a container's bytes, and the two of its forms that name their blobs",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLModelAsset functionNamesWithCompletionHandler:]",
+   "kind": "method",
+   "introduced": "18.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model built in memory out of a container's bytes, and the two of its forms that name their blobs",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLModelAsset modelDescriptionOfFunctionNamed:completionHandler:]",
+   "kind": "method",
+   "introduced": "18.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model built in memory out of a container's bytes, and the two of its forms that name their blobs",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLModelAsset modelDescriptionWithCompletionHandler:]",
+   "kind": "method",
+   "introduced": "18.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model built in memory out of a container's bytes, and the two of its forms that name their blobs",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+super VNHumanObservation VNDetectedObjectObservation
+class VNHumanObservation new
+instance VNHumanObservation init
+property VNHumanObservation upperBodyOnly
+instance VNHumanObservation upperBodyOnly

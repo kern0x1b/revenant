@@ -1,0 +1,17 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CoreAudioKit	swift-typealias	s:12CoreAudioKit25AUGenericViewInternalBasea	-	AUGenericViewInternalBase	-	-	-	-	-	b3e63ad1071b3d0a
+CoreAudioKit	swift-class	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal	-	AUGenericViewInternal	-	-	-	ios=14.0,macos=13.0	-	502176419b273001
+CoreAudioKit	swift-property	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(py)auAudioUnit	AUGenericViewInternal	auAudioUnit	-	AudioToolbox.AUAudioUnit?	-	-	-	2a9ae6e4176571a0
+CoreAudioKit	swift-property	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(py)owningController	AUGenericViewInternal	owningController	-	UIKit.UIViewController?	-	-	-	dcc4b446d0a8ec54
+CoreAudioKit	swift-property	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(py)paramObserverToken	AUGenericViewInternal	paramObserverToken	-	AudioToolbox.AUParameterObserverToken?	-	-	-	05388c90fd7693d7
+CoreAudioKit	swift-property	s:12CoreAudioKit21AUGenericViewInternalC20showSingleClumpIndexSiSgvp	AUGenericViewInternal	showSingleClumpIndex	-	Swift.Int?	-	-	-	2599d5a8be326b23
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(im)initWithFrame:	AUGenericViewInternal	init(frame:)	-	-	CoreAudioKit.AUGenericViewInternal | CoreFoundation.CGRect	-	-	64922c115b8a43a5
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(im)initWithCoder:	AUGenericViewInternal	init(coder:)	-	-	CoreAudioKit.AUGenericViewInternal? | Foundation.NSCoder	-	-	ca32afda4273427e
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(im)traitCollectionDidChange:	AUGenericViewInternal	traitCollectionDidChange(_:)	-	()	UIKit.UITraitCollection?	-	-	2ccb483a7669171d
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(im)removeFromSuperview	AUGenericViewInternal	removeFromSuperview()	-	()	-	-	-	109280e1a6acbf5e
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUGenericViewInternal(im)removeScheduledUpdatesTimer	AUGenericViewInternal	removeScheduledUpdatesTimer()	-	()	-	-	-	5926199c82440ff3
+CoreAudioKit	swift-method	c:@CM@CoreAudioKit@objc(cs)AUGenericViewInternal(im)collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:	AUGenericViewInternal	collectionView(_:willDisplaySupplementaryView:forElementKind:at:)	-	()	UIKit.UICollectionView | UIKit.UICollectionReusableView | Swift.StringLiteralType | Foundation.IndexPath	-	-	d24afd0ef9b87c1c
+CoreAudioKit	swift-method	c:@CM@CoreAudioKit@objc(cs)AUGenericViewInternal(im)collectionView:willDisplayCell:forItemAtIndexPath:	AUGenericViewInternal	collectionView(_:willDisplay:forItemAt:)	-	()	UIKit.UICollectionView | UIKit.UICollectionViewCell | Foundation.IndexPath	-	-	a2bf3d0acdc36f65
+CoreAudioKit	swift-class	c:@M@CoreAudioKit@objc(cs)AUAppleCustomViewLoader	-	AUAppleCustomViewLoader	-	-	-	ios=17	-	4c45877c0c6a4dcf
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUAppleCustomViewLoader(im)customViewControllerFor:audioUnit:v3AU:	AUAppleCustomViewLoader	customViewController(for:audioUnit:v3AU:)	-	UIKit.UIViewController?	AudioToolbox.AudioComponentDescription | AudioToolbox.AudioUnit | AudioToolbox.AUAudioUnit?	-	-	898461fcc6e9db2b
+CoreAudioKit	swift-method	c:@M@CoreAudioKit@objc(cs)AUAppleCustomViewLoader(im)init	AUAppleCustomViewLoader	init()	-	-	CoreAudioKit.AUAppleCustomViewLoader	-	-	83a036b1510745b0

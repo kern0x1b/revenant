@@ -1,0 +1,270 @@
+{
+  "framework": "GameplayKit",
+  "note": "The entity-component system: twenty-four rows for the three classes, one component per class, the hooks a component is told, and a component system that takes only its own class.",
+  "entries": [
+    {
+      "api": "+[GKEntity entity]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponent didAddToEntity]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponent updateWithDeltaTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponent willRemoveFromEntity]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem addComponent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem addComponentWithEntity:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem classForGenericArgumentAtIndex:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem initWithComponentClass:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem objectAtIndexedSubscript:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem removeComponent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem removeComponentWithEntity:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKComponentSystem updateWithDeltaTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKEntity addComponent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKEntity componentForClass:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKEntity init]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKEntity removeComponentForClass:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "-[GKEntity updateWithDeltaTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKComponent",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKComponent.entity",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKComponentSystem",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKComponentSystem.componentClass",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKComponentSystem.components",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKEntity",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    },
+    {
+      "api": "GKEntity.components",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the entity-component system is bookkeeping over the components and entities an application gives it, and needs nothing of the device",
+      "facts": "facts/GameplayKit/EntityComponent.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "one component per component class, a component told when it is added and taken off and updated, an update that reaches every component, and a component system that takes only its own class and raises for anything else, as the host's does; the archive's -addComponent: dropped a component of the wrong class silently and this one raises the host's own exception"
+    }
+  ]
+}

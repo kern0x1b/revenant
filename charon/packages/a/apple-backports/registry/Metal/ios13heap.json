@@ -1,0 +1,126 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLHeapDescriptor.type",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a descriptor is what the application fills in and the port reads: an automatic heap allocates, a placement heap is placed by the application, a sparse heap maps its pages in on demand",
+      "effect": "the type the heap is made with, read back as it was set; a sparse heap is refused at creation with an error and a line in the log, and a placement heap refuses the two allocations that carry no offset",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "MTLHeapDescriptor.hazardTrackingMode",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a descriptor is what the application fills in and the port reads",
+      "effect": "the mode the heap is made with, read back as it was set; nothing tracks hazards with it, because a command here is a call into OpenGL ES 2.0 that has already been made, so no resource can be read while another writes it (facts/Metal/Heaps.md)",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "MTLHeapDescriptor.resourceOptions",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a descriptor is what the application fills in and the port reads",
+      "effect": "the options a resource made from this heap would report; MTLStorageModeManaged is macOS only and is marked unavailable on iOS, so there is no case for it",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "MTLHeap.type",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a heap on this device is one allocation resources are taken out of, which is what a heap is where every resource is already CPU memory: a buffer from it is a view into those bytes and a texture from it takes its size out of them, so size, usedSize, currentAllocatedSize, maxAvailableSizeWithAlignment: and an explicit offset all mean what Apple's headers say they mean",
+      "effect": "the type the heap was made with, read back as it was set",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "MTLHeap.hazardTrackingMode",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "how the application asked for hazards across this heap's resources to be tracked",
+      "effect": "the mode the descriptor carried, read back as it was set, and not acted on: a command here has already been made by the time it is encoded, so there is no overlap of a write and a read to track (facts/Metal/Heaps.md)",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "MTLHeap.resourceOptions",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the heap's storage mode as a resource's options say the same thing, which is the same mask",
+      "effect": "MTLResourceStorageModeShared for a shared heap, MTLResourceStorageModePrivate for a private one, and the mode itself for anything else",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "-[MTLHeap newBufferWithLength:options:offset:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a heap on this device is one allocation resources are taken out of, which is what a heap is where every resource is already CPU memory: a buffer from it is a view into those bytes and a texture from it takes its size out of them, so size, usedSize, currentAllocatedSize, maxAvailableSizeWithAlignment: and an explicit offset all mean what Apple's headers say they mean",
+      "effect": "the resource is a view into the heap's allocation at the offset it was given, or at the next free aligned one at the offset the application chose, after checking that the offset is a multiple of the heap's alignment of 256 bytes and that the buffer fits; usedSize then reaches past it, so the next automatic allocation starts after it, and an offset that is not aligned or does not fit is refused with a line in the log and nil",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "-[MTLHeap newTextureWithDescriptor:offset:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a heap on this device is one allocation resources are taken out of, which is what a heap is where every resource is already CPU memory: a buffer from it is a view into those bytes and a texture from it takes its size out of them, so size, usedSize, currentAllocatedSize, maxAvailableSizeWithAlignment: and an explicit offset all mean what Apple's headers say they mean",
+      "effect": "a real texture placed at the offset the application chose, its whole mip chain's size checked against what is left of the heap; nil with a line in the log when the offset is not aligned or the texture does not fit",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "-[MTLRenderCommandEncoder useHeap:stages:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the heaps of the port are one allocation each, and the encoder is told which of them its resources come from and at which stages",
+      "effect": "the heap is recorded and a resource bound afterwards from another heap is named in the log; the stages change nothing here, because this port has one stage set and a command is a call into OpenGL ES 2.0 that has already been made, so every heap is visible to every stage",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "-[MTLRenderCommandEncoder useHeaps:count:stages:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the heaps of the port are one allocation each, and the encoder is told which of them its resources come from and at which stages",
+      "effect": "the heaps are recorded, up to the eight this port keeps, and a resource bound afterwards from another heap is named in the log; the stages change nothing here, for the reason the entry above gives",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "MTLResource.heapOffset",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the offset inside the heap a resource was created at is the offset the heap handed out, or the offset the application chose on a placement heap, and the heap keeps it with the resource so the resource answers it",
+      "effect": "the offset the resource was placed at, and zero for a resource not created on a heap, which is what the header says zero means here",
+      "facts": "facts/Metal/Heaps.md",
+      "source": "SDK 16.4, Metal, MTLResource.h"
+    }
+  ]
+}

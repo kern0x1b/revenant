@@ -1,0 +1,13 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UITableViewAutomaticDimension",
+      "kind": "constant",
+      "introduced": "5.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITableViewAutomaticDimension.md",
+      "source": "UIKit of the armv7 cache of iOS 5.0, the constant's bytes read through dyld.extract"
+    }
+  ]
+}

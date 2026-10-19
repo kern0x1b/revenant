@@ -1,0 +1,13 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSJSONSerialization",
+      "kind": "class",
+      "introduced": "5.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSJSONSerialization.md",
+      "source": "the armv7 caches of 4.3, 4.3.5, 5.0, 5.1.1 and 6.0 (NSJSONSerialization is absent below 5.0), the whole class measured against the host's own Foundation by tests/backports/host/json1 (3117 comparisons: every reading and writing rule, the exact wording and position of every error and exception, the number every literal comes out as, the five encodings and their marks, the nesting limit), and called whole on the release it runs on by tests/backports/device/json1.m through below6/"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+     "api": "UTTypeCSS",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeHEICS",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeEXR",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeDNG",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeJPEGXL",
+     "kind": "constant",
+     "introduced": "18.2",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeTarArchive",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeGeoJSON",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  },
+  {
+     "api": "UTTypeLinkPresentationMetadata",
+     "kind": "constant",
+     "introduced": "18.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the type is there under its own identifier, with the release's own UTI conformance, tags and description answered from it, so a document picker filtering on this type and a UTTypeCreatePreferredIdentifierForTag call for the same extension agree",
+     "facts": "facts/UIKit/UTTypeCatalogue.md",
+     "source": "the `UTI:` line of this constant's own doc comment in System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of SDK 26.2 (charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk), and for UTTypeInternetShortcut the host's own value instead of the header's; tests/backports/host/uttypeconstants reads every one of them back off the host's own UniformTypeIdentifiers"
+  }
+ ]
+}

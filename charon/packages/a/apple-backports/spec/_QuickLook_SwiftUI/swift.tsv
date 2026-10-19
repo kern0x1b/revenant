@@ -1,0 +1,4 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_QuickLook_SwiftUI	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
+_QuickLook_SwiftUI	swift-method	s:7SwiftUI4ViewP011_QuickLook_aB0E05quickE7Preview_2inQrAA7BindingVy10Foundation3URLVSgG_qd__tSkRd__AK7ElementRtd__lF	View	quickLookPreview(_:in:)	-	some SwiftUI.View	SwiftUI.Binding<Items.Element?> | Items	-	-	1e1bf49746aa870f
+_QuickLook_SwiftUI	swift-method	s:7SwiftUI4ViewP011_QuickLook_aB0E05quickE7PreviewyQrAA7BindingVy10Foundation3URLVSgGF	View	quickLookPreview(_:)	-	some SwiftUI.View	SwiftUI.Binding<Foundation.URL?>	-	-	96392f50d00f6b41

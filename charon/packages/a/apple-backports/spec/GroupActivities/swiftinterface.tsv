@@ -1,0 +1,294 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+GroupActivities	class	GroupSession	15				own
+GroupActivities	enum	GroupSession.State	15				container
+GroupActivities	constant	GroupSession.State.waiting	15				container
+GroupActivities	constant	GroupSession.State.joined	15				container
+GroupActivities	constant	GroupSession.State.invalidated	15				container
+GroupActivities	property	GroupSession.id	15				container
+GroupActivities	property	GroupSession.state	15				container
+GroupActivities	property	GroupSession.activity	15				container
+GroupActivities	property	GroupSession.activeParticipants	15				container
+GroupActivities	property	GroupSession.localParticipant	15				container
+GroupActivities	property	GroupSession.sceneSessionIdentifier	17				own
+GroupActivities	property	GroupSession.isLocallyInitiated	18.0				own
+GroupActivities	method	GroupSession.join()	15				container
+GroupActivities	method	GroupSession.leave()	15				container
+GroupActivities	method	GroupSession.end()	15				container
+GroupActivities	method	GroupSession.requestForegroundPresentation()	15				container
+GroupActivities	typealias	GroupSession.ObjectWillChangePublisher	15				own
+GroupActivities	method	GroupSession.State.==(lhs:rhs:)					none
+GroupActivities	property	GroupSession.description					none
+GroupActivities	struct	SpatialTemplatePreference				yes	none
+GroupActivities	property	SpatialTemplatePreference.description				yes	none
+GroupActivities	property	SpatialTemplatePreference.none				yes	none
+GroupActivities	property	SpatialTemplatePreference.sideBySide				yes	none
+GroupActivities	property	SpatialTemplatePreference.conversational				yes	none
+GroupActivities	property	SpatialTemplatePreference.surround				yes	none
+GroupActivities	method	SpatialTemplatePreference.custom(_:)				yes	none
+GroupActivities	method	SpatialTemplatePreference.contentExtent(_:)				yes	none
+GroupActivities	protocol	SpatialTemplateRole				yes	none
+GroupActivities	property	SpatialTemplateRole.roleIdentifier				yes	none
+GroupActivities	property	SpatialTemplateRole.roleIdentifier				yes	none
+GroupActivities	enum	GroupActivityActivationResult	15				own
+GroupActivities	constant	GroupActivityActivationResult.activationPreferred	15				container
+GroupActivities	constant	GroupActivityActivationResult.activationDisabled	15				container
+GroupActivities	constant	GroupActivityActivationResult.cancelled	15				container
+GroupActivities	method	GroupActivityActivationResult.==(a:b:)	15				container
+GroupActivities	method	GroupActivityActivationResult.hash(into:)	15				container
+GroupActivities	property	GroupActivityActivationResult.hashValue	15				container
+GroupActivities	protocol	GroupActivity	15				own
+GroupActivities	property	GroupActivity.activityIdentifier	15				container
+GroupActivities	property	GroupActivity.metadata	15				container
+GroupActivities	method	GroupActivity._identifiable(by:)	15				container
+GroupActivities	method	GroupActivity._identifiable(by:staticIdentifier:)	26.0				own
+GroupActivities	property	GroupActivity.activityIdentifier	15				container
+GroupActivities	method	GroupActivity._identifiable(by:)	15				container
+GroupActivities	method	GroupActivity._identifiable(by:staticIdentifier:)	26.0				own
+GroupActivities	method	GroupActivity.prepareForActivation()	15				container
+GroupActivities	method	GroupActivity.activate()	15				container
+GroupActivities	struct	GroupActivityTransferRepresentation	17				own
+GroupActivities	method	GroupActivityTransferRepresentation.init(exporting:)	17				container
+GroupActivities	property	GroupActivityTransferRepresentation.body	17				container
+GroupActivities	typealias	GroupActivityTransferRepresentation.Body	17				own
+GroupActivities	property	GroupActivity.transferRepresentation	17				container
+GroupActivities	protocol	SpatialTemplate				yes	none
+GroupActivities	property	SpatialTemplate.configuration				yes	none
+GroupActivities	property	SpatialTemplate.elements				yes	none
+GroupActivities	property	SpatialTemplate.configuration				yes	none
+GroupActivities	struct	SpatialTemplateConfiguration				yes	none
+GroupActivities	property	SpatialTemplateConfiguration.defaultInitiatorRole				yes	none
+GroupActivities	method	SpatialTemplateConfiguration.init(defaultInitiatorRole:)				yes	none
+GroupActivities	method	SpatialTemplateConfiguration.==(lhs:rhs:)				yes	none
+GroupActivities	method	SpatialTemplateConfiguration.hash(into:)				yes	none
+GroupActivities	property	SpatialTemplateConfiguration.hashValue				yes	none
+GroupActivities	class	GroupStateObserver	15				own
+GroupActivities	property	GroupStateObserver.isEligibleForGroupSession	15				container
+GroupActivities	method	GroupStateObserver.init()	15				container
+GroupActivities	typealias	GroupStateObserver.ObjectWillChangePublisher	15				own
+GroupActivities	class	GroupSessionJournal	17				own
+GroupActivities	property	GroupSessionJournal.attachments	17				container
+GroupActivities	method	GroupSessionJournal.add(_:)	17				container
+GroupActivities	method	GroupSessionJournal.add(_:metadata:)	17				container
+GroupActivities	method	GroupSessionJournal.remove(attachment:)	17				container
+GroupActivities	method	GroupSessionJournal.init(session:)	17				container
+GroupActivities	struct	GroupSessionJournal.Attachment	17				container
+GroupActivities	property	GroupSessionJournal.Attachment.id	17				container
+GroupActivities	method	GroupSessionJournal.Attachment.load(_:)	17				container
+GroupActivities	method	GroupSessionJournal.Attachment.loadMetadata(of:)	17				container
+GroupActivities	typealias	GroupSessionJournal.Attachment.ID	17				own
+GroupActivities	struct	GroupSessionJournal.Attachments	17				container
+GroupActivities	typealias	GroupSessionJournal.Attachments.Element	17				container
+GroupActivities	method	GroupSessionJournal.Attachments.makeAsyncIterator()	17				container
+GroupActivities	struct	GroupSessionJournal.Attachments.Iterator	17				container
+GroupActivities	method	GroupSessionJournal.Attachments.Iterator.next()	17				container
+GroupActivities	typealias	GroupSessionJournal.Attachments.Iterator.Element	17				own
+GroupActivities	typealias	GroupSessionJournal.Attachments.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+GroupActivities	typealias	GroupSessionJournal.Attachments.AsyncIterator	17				own
+GroupActivities	typealias	GroupSessionJournal.Attachments.__AsyncSequence_Failure	18.0				own
+GroupActivities	method	NSItemProvider.registerGroupActivity(preparationHandler:)	15.4				own
+GroupActivities	method	NSItemProvider.registerGroupActivity(_:)	15.4				own
+GroupActivities	struct	BroadcastOptions	15				own
+GroupActivities	property	BroadcastOptions.rawValue	15				container
+GroupActivities	method	BroadcastOptions.init(rawValue:)	15				container
+GroupActivities	property	BroadcastOptions.mirroredVideo	15				container
+GroupActivities	typealias	BroadcastOptions.ArrayLiteralElement	15				own
+GroupActivities	typealias	BroadcastOptions.Element	15				own
+GroupActivities	typealias	BroadcastOptions.RawValue	15				own
+GroupActivities	class	GroupSessionMessenger	15				own
+GroupActivities	property	GroupSessionMessenger.deliveryMode	16				own
+GroupActivities	method	GroupSessionMessenger.init(session:)	15				container
+GroupActivities	method	GroupSessionMessenger.init(session:deliveryMode:)	16				own
+GroupActivities	enum	GroupSessionMessenger.DeliveryMode	16				own
+GroupActivities	constant	GroupSessionMessenger.DeliveryMode.reliable	16				container
+GroupActivities	constant	GroupSessionMessenger.DeliveryMode.unreliable	16				container
+GroupActivities	method	GroupSessionMessenger.DeliveryMode.==(a:b:)	16				container
+GroupActivities	method	GroupSessionMessenger.DeliveryMode.hash(into:)	16				container
+GroupActivities	property	GroupSessionMessenger.DeliveryMode.hashValue	16				container
+GroupActivities	struct	GroupSessionMessenger.MessageContext	15				own
+GroupActivities	property	GroupSessionMessenger.MessageContext.source	15				container
+GroupActivities	method	GroupSessionMessenger.send(_:to:completion:)					none
+GroupActivities	method	GroupSessionMessenger.send(_:to:completion:)					none
+GroupActivities	protocol	CustomMessageIdentifiable	15				own
+GroupActivities	property	CustomMessageIdentifiable.messageIdentifier	15				container
+GroupActivities	struct	Participant	15				own
+GroupActivities	property	Participant.id	15				container
+GroupActivities	property	Participant.isNearbyWithLocalParticipant	26.0				own
+GroupActivities	method	Participant.==(a:b:)	15				container
+GroupActivities	typealias	Participant.ID	15				own
+GroupActivities	method	Participant.hash(into:)	15				container
+GroupActivities	property	Participant.hashValue	15				container
+GroupActivities	property	Participant.description					none
+GroupActivities	struct	SystemCoordinator.ParticipantState				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.isSpatial				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.seat				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.pose				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.role				yes	none
+GroupActivities	method	SystemCoordinator.ParticipantState.==(lhs:rhs:)				yes	none
+GroupActivities	struct	SystemCoordinator.ParticipantState.Seat				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.Seat.pose				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.Seat.role				yes	none
+GroupActivities	method	SystemCoordinator.ParticipantState.Seat.==(lhs:rhs:)				yes	none
+GroupActivities	method	SystemCoordinator.ParticipantState.Seat.hash(into:)				yes	none
+GroupActivities	property	SystemCoordinator.ParticipantState.Seat.hashValue				yes	none
+GroupActivities	struct	SystemCoordinator.ParticipantStates				yes	none
+GroupActivities	typealias	SystemCoordinator.ParticipantStates.Element				yes	none
+GroupActivities	method	SystemCoordinator.ParticipantStates.makeAsyncIterator()				yes	none
+GroupActivities	struct	SystemCoordinator.ParticipantStates.Iterator				yes	none
+GroupActivities	method	SystemCoordinator.ParticipantStates.Iterator.next()				yes	none
+GroupActivities	typealias	SystemCoordinator.ParticipantStates.Iterator.Element				yes	none
+GroupActivities	typealias	SystemCoordinator.ParticipantStates.Iterator.__AsyncIteratorProtocol_Failure	18.0			yes	own
+GroupActivities	typealias	SystemCoordinator.ParticipantStates.AsyncIterator				yes	none
+GroupActivities	typealias	SystemCoordinator.ParticipantStates.__AsyncSequence_Failure	18.0			yes	own
+GroupActivities	protocol	SpatialTemplateElement				yes	none
+GroupActivities	property	SpatialTemplateElement.position				yes	none
+GroupActivities	property	SpatialTemplateElement.direction				yes	none
+GroupActivities	property	SpatialTemplateElement.role				yes	none
+GroupActivities	property	SpatialTemplateElement._output				yes	none
+GroupActivities	struct	_SpatialTemplateElementOutput				yes	none
+GroupActivities	struct	SpatialTemplateSeatElement				yes	none
+GroupActivities	property	SpatialTemplateSeatElement.position				yes	none
+GroupActivities	property	SpatialTemplateSeatElement.direction				yes	none
+GroupActivities	property	SpatialTemplateSeatElement.role				yes	none
+GroupActivities	property	SpatialTemplateSeatElement._output				yes	none
+GroupActivities	method	SpatialTemplateSeatElement.init(position:direction:role:)				yes	none
+GroupActivities	method	SpatialTemplateSeatElement.==(lhs:rhs:)				yes	none
+GroupActivities	method	SpatialTemplateSeatElement.hash(into:)				yes	none
+GroupActivities	property	SpatialTemplateSeatElement.hashValue				yes	none
+GroupActivities	method	SpatialTemplateElement.seat(position:direction:role:)				yes	none
+GroupActivities	struct	SpatialTemplateElementDirection				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.lookingAt(_:)				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.lookingAt(_:)				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.alignedWith(appAxis:)				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.+(lhs:rhs:)				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.rotatedBy(_:)				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.==(a:b:)				yes	none
+GroupActivities	method	SpatialTemplateElementDirection.hash(into:)				yes	none
+GroupActivities	property	SpatialTemplateElementDirection.hashValue				yes	none
+GroupActivities	struct	SpatialTemplateElementAxis				yes	none
+GroupActivities	property	SpatialTemplateElementAxis.x				yes	none
+GroupActivities	property	SpatialTemplateElementAxis.z				yes	none
+GroupActivities	method	SpatialTemplateElementAxis.==(a:b:)				yes	none
+GroupActivities	method	SpatialTemplateElementAxis.hash(into:)				yes	none
+GroupActivities	property	SpatialTemplateElementAxis.hashValue				yes	none
+GroupActivities	struct	SpatialTemplateElementPosition				yes	none
+GroupActivities	property	SpatialTemplateElementPosition.app				yes	none
+GroupActivities	method	SpatialTemplateElementPosition.offsetBy(x:z:)				yes	none
+GroupActivities	method	SpatialTemplateElementPosition.==(a:b:)				yes	none
+GroupActivities	method	SpatialTemplateElementPosition.hash(into:)				yes	none
+GroupActivities	property	SpatialTemplateElementPosition.hashValue				yes	none
+GroupActivities	struct	GroupSessionEvent	15				own
+GroupActivities	property	GroupSessionEvent.originator	15				container
+GroupActivities	property	GroupSessionEvent.action	15				container
+GroupActivities	property	GroupSessionEvent.url	15				container
+GroupActivities	method	GroupSessionEvent.init(originator:action:url:)	15				container
+GroupActivities	struct	GroupSessionEvent.Action	15				container
+GroupActivities	property	GroupSessionEvent.Action.play	15				container
+GroupActivities	property	GroupSessionEvent.Action.pause	15				container
+GroupActivities	property	GroupSessionEvent.Action.seek	15				container
+GroupActivities	method	GroupSessionEvent.Action.skip(item:)	15				container
+GroupActivities	struct	GroupSessionEvent.Action.QueueChange					none
+GroupActivities	struct	GroupSessionEvent.Action.QueueChange.Item					none
+GroupActivities	method	GroupSessionEvent.Action.QueueChange.Item.song(_:)					none
+GroupActivities	method	GroupSessionEvent.Action.QueueChange.Item.container(_:)					none
+GroupActivities	method	GroupSessionEvent.Action.QueueChange.setUpNext(_:)					none
+GroupActivities	method	GroupSessionEvent.Action.QueueChange.added(_:)					none
+GroupActivities	property	GroupSessionEvent.Action.updatedQueue					none
+GroupActivities	method	GroupSessionEvent.Action.updatedQueue(_:)					none
+GroupActivities	method	GroupSession.showNotice(_:)	15				own
+GroupActivities	struct	GroupSession.Event	15	yes			own
+GroupActivities	property	GroupSession.Event.originator	15				container
+GroupActivities	method	GroupSession.postEvent(_:)	15	yes			own
+GroupActivities	property	GroupSession.Event.localizedDescription	15	15			own
+GroupActivities	method	GroupSession.Event.init(originator:localizedDescription:)	15	yes			container
+GroupActivities	enum	Participants	15				own
+GroupActivities	constant	Participants.all	15				container
+GroupActivities	constant	Participants.only	15				container
+GroupActivities	method	Participants.only(_:)					none
+GroupActivities	struct	GroupSessionMessenger.Messages	15				own
+GroupActivities	typealias	GroupSessionMessenger.Messages.Element	15				container
+GroupActivities	method	GroupSessionMessenger.Messages.makeAsyncIterator()	15				container
+GroupActivities	struct	GroupSessionMessenger.Messages.Iterator	15				own
+GroupActivities	method	GroupSessionMessenger.Messages.Iterator.next()	15				container
+GroupActivities	typealias	GroupSessionMessenger.Messages.Iterator.Element	15				own
+GroupActivities	typealias	GroupSessionMessenger.Messages.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+GroupActivities	typealias	GroupSessionMessenger.Messages.AsyncIterator	15				own
+GroupActivities	typealias	GroupSessionMessenger.Messages.__AsyncSequence_Failure	18.0				own
+GroupActivities	method	GroupSessionMessenger.send(_:to:)					none
+GroupActivities	method	GroupSessionMessenger.send(_:to:)					none
+GroupActivities	method	GroupSessionMessenger.messages(of:)					none
+GroupActivities	method	GroupSessionMessenger.messages(of:)					none
+GroupActivities	typealias	GroupActivity.Sessions	15				container
+GroupActivities	method	GroupActivity.sessions()	15				container
+GroupActivities	struct	GroupSession.Sessions	15				own
+GroupActivities	typealias	GroupSession.Sessions.Element	15				container
+GroupActivities	method	GroupSession.Sessions.makeAsyncIterator()	15				container
+GroupActivities	struct	GroupSession.Sessions.Iterator	15				own
+GroupActivities	method	GroupSession.Sessions.Iterator.next()	15				container
+GroupActivities	typealias	GroupSession.Sessions.Iterator.Element	15				own
+GroupActivities	typealias	GroupSession.Sessions.Iterator.__AsyncIteratorProtocol_Failure	18.0				own
+GroupActivities	typealias	GroupSession.Sessions.AsyncIterator	15				own
+GroupActivities	typealias	GroupSession.Sessions.__AsyncSequence_Failure	18.0				own
+GroupActivities	struct	SceneAssociationBehavior	17				own
+GroupActivities	method	SceneAssociationBehavior.==(a:b:)	17				container
+GroupActivities	method	SceneAssociationBehavior.content(_:)	17				container
+GroupActivities	property	SceneAssociationBehavior.none	17				container
+GroupActivities	property	GroupSession.systemCoordinator				yes	none
+GroupActivities	class	SystemCoordinator				yes	none
+GroupActivities	property	SystemCoordinator.localParticipantState				yes	none
+GroupActivities	property	SystemCoordinator.remoteParticipantStates				yes	none
+GroupActivities	property	SystemCoordinator.localParticipantStates				yes	none
+GroupActivities	struct	SystemCoordinator.Configuration				yes	none
+GroupActivities	property	SystemCoordinator.Configuration.spatialTemplatePreference				yes	none
+GroupActivities	property	SystemCoordinator.Configuration.supportsGroupImmersiveSpace				yes	none
+GroupActivities	method	SystemCoordinator.Configuration.init()				yes	none
+GroupActivities	property	SystemCoordinator.configuration				yes	none
+GroupActivities	method	SystemCoordinator.assignRole(_:)				yes	none
+GroupActivities	method	SystemCoordinator.resignRole()				yes	none
+GroupActivities	struct	GroupActivityAssociationKind				yes	none
+GroupActivities	method	GroupActivityAssociationKind.primary(_:)				yes	none
+GroupActivities	method	GroupActivityAssociationKind.==(a:b:)				yes	none
+GroupActivities	method	GroupActivityAssociationKind.hash(into:)				yes	none
+GroupActivities	property	GroupActivityAssociationKind.hashValue				yes	none
+GroupActivities	method	AVPlaybackCoordinator.coordinateWithSession(_:)	15				own
+GroupActivities	struct	GroupActivityMetadata	15				own
+GroupActivities	struct	GroupActivityMetadata.ActivityType	15				container
+GroupActivities	property	GroupActivityMetadata.ActivityType.generic	15				container
+GroupActivities	property	GroupActivityMetadata.ActivityType.listenTogether	15				container
+GroupActivities	property	GroupActivityMetadata.ActivityType.watchTogether	15				container
+GroupActivities	property	GroupActivityMetadata.ActivityType.workoutTogether	17				own
+GroupActivities	property	GroupActivityMetadata.ActivityType.shopTogether	17				own
+GroupActivities	property	GroupActivityMetadata.ActivityType.readTogether	17				own
+GroupActivities	property	GroupActivityMetadata.ActivityType.exploreTogether	17				own
+GroupActivities	property	GroupActivityMetadata.ActivityType.learnTogether	17				own
+GroupActivities	property	GroupActivityMetadata.ActivityType.createTogether	17				own
+GroupActivities	method	GroupActivityMetadata.ActivityType.==(a:b:)	15				container
+GroupActivities	method	GroupActivityMetadata.ActivityType.hash(into:)	15				container
+GroupActivities	property	GroupActivityMetadata.ActivityType.hashValue	15				container
+GroupActivities	struct	GroupActivityMetadata.LifetimePolicy	18				own
+GroupActivities	property	GroupActivityMetadata.LifetimePolicy.automatic	18				container
+GroupActivities	property	GroupActivityMetadata.LifetimePolicy.endsWhenInitiatorLeaves	18				container
+GroupActivities	method	GroupActivityMetadata.LifetimePolicy.==(a:b:)	18				container
+GroupActivities	method	GroupActivityMetadata.LifetimePolicy.hash(into:)	18				container
+GroupActivities	property	GroupActivityMetadata.LifetimePolicy.hashValue	18				container
+GroupActivities	property	GroupActivityMetadata.type	15				container
+GroupActivities	property	GroupActivityMetadata.title	15				container
+GroupActivities	property	GroupActivityMetadata.subtitle	15				container
+GroupActivities	property	GroupActivityMetadata.previewImage	15				container
+GroupActivities	property	GroupActivityMetadata.fallbackURL	15				container
+GroupActivities	property	GroupActivityMetadata.preferredBroadcastOptions	15				container
+GroupActivities	property	GroupActivityMetadata.supportsContinuationOnTV	15				container
+GroupActivities	property	GroupActivityMetadata.sceneAssociationBehavior	17				own
+GroupActivities	property	GroupActivityMetadata.lifetimePolicy	18				own
+GroupActivities	method	GroupActivityMetadata.init()	15				container
+GroupActivities	method	GroupActivityMetadata.==(a:b:)	15				container
+GroupActivities	method	GroupActivityMetadata.init(from:)					none
+GroupActivities	method	GroupActivityMetadata.encode(to:)					none
+GroupActivities	enum	GroupActivityMetadata.Experience	15	yes			container
+GroupActivities	constant	GroupActivityMetadata.Experience.watchTogether	15				container
+GroupActivities	constant	GroupActivityMetadata.Experience.listenTogether	15				container
+GroupActivities	method	GroupActivityMetadata.Experience.init?(rawValue:)	15				container
+GroupActivities	typealias	GroupActivityMetadata.Experience.RawValue	15	yes			own
+GroupActivities	property	GroupActivityMetadata.Experience.rawValue	15				container
+GroupActivities	property	GroupActivityMetadata.experience	15	yes			container
+GroupActivities	property	GroupActivityMetadata.localizedTitle	15	yes			container
+GroupActivities	property	GroupActivityMetadata.localizedSubtitle	15	yes			container

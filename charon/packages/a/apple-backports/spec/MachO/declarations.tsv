@@ -1,0 +1,966 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@S@NXArchInfo	-			-	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	328bdfa8cb7559d8	-
+field	c:@S@NXArchInfo@FI@name	NXArchInfo			const char *	-	-	-	-	e0ec86f2abf92adc	-
+field	c:@S@NXArchInfo@FI@cputype	NXArchInfo			cpu_type_t	-	-	-	-	b0bc96b0e579eba1	-
+field	c:@S@NXArchInfo@FI@cpusubtype	NXArchInfo			cpu_subtype_t	-	-	-	-	8d53214b81a555fb	-
+field	c:@S@NXArchInfo@FI@byteorder	NXArchInfo			enum NXByteOrder	-	-	-	-	4617a49fa7af0c19	-
+field	c:@S@NXArchInfo@FI@description	NXArchInfo			const char *	-	-	-	-	6b6c72f34d582c9c	-
+typedef	c:@T@NXArchInfo	-			struct NXArchInfo	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	6a58e423dddab237	-
+function	c:@F@NXGetAllArchInfos	-			const NXArchInfo * (void)	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	a05deccbce268ac5	-
+function	c:@F@NXGetLocalArchInfo	-			const NXArchInfo * (void)	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	49ab9a27ad9c7cf2	-
+function	c:@F@NXGetArchInfoFromName	-			const NXArchInfo * (const char *)	const char * name	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	68ef47a8d110f348	-
+function	c:@F@NXGetArchInfoFromCpuType	-			const NXArchInfo * (cpu_type_t, cpu_subtype_t)	cpu_type_t cputype | cpu_subtype_t cpusubtype	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	c824923b511620ac	-
+function	c:@F@NXFreeArchInfo	-			void (const NXArchInfo *)	const NXArchInfo * x	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	11475eb88a077a86	-
+function	c:@F@NXFindBestFatArch	-			struct fat_arch * (cpu_type_t, cpu_subtype_t, struct fat_arch *, uint32_t)	cpu_type_t cputype | cpu_subtype_t cpusubtype | struct fat_arch * fat_archs | uint32_t nfat_archs	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	2cb1138aabdf1a7f	-
+function	c:@F@NXFindBestFatArch_64	-			struct fat_arch_64 * (cpu_type_t, cpu_subtype_t, struct fat_arch_64 *, uint32_t)	cpu_type_t cputype | cpu_subtype_t cpusubtype | struct fat_arch_64 * fat_archs64 | uint32_t nfat_archs	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	d4af977ae68a461d	-
+function	c:@F@NXCombineCpuSubtypes	-			cpu_subtype_t (cpu_type_t, cpu_subtype_t, cpu_subtype_t)	cpu_type_t cputype | cpu_subtype_t cpusubtype1 | cpu_subtype_t cpusubtype2	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	d45ec45877d6265f	-
+enum	c:@E@reloc_type_arm	-			unsigned int	-	-	-	-	d852b4b64df7e0d5	-
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_VANILLA	reloc_type_arm			-	-	-	-	-	bd9eaf67418ae6f2	0
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_PAIR	reloc_type_arm			-	-	-	-	-	7b433b8bed7b185a	1
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_SECTDIFF	reloc_type_arm			-	-	-	-	-	23a7eb66b20f9b9c	2
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_LOCAL_SECTDIFF	reloc_type_arm			-	-	-	-	-	18434b078b66aabc	3
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_PB_LA_PTR	reloc_type_arm			-	-	-	-	-	624710da2db036ea	4
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_BR24	reloc_type_arm			-	-	-	-	-	5d9fc45fc35c6833	5
+enumconst	c:@E@reloc_type_arm@ARM_THUMB_RELOC_BR22	reloc_type_arm			-	-	-	-	-	6d779fe43861e00e	6
+enumconst	c:@E@reloc_type_arm@ARM_THUMB_32BIT_BRANCH	reloc_type_arm			-	-	-	-	-	eaaf6a3a69bdde18	7
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_HALF	reloc_type_arm			-	-	-	-	-	3e381e67d4294fcc	8
+enumconst	c:@E@reloc_type_arm@ARM_RELOC_HALF_SECTDIFF	reloc_type_arm			-	-	-	-	-	90c8a87b85f91abb	9
+enum	c:@E@reloc_type_arm64	-			unsigned int	-	-	-	-	fcc51be3413b0717	-
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_UNSIGNED	reloc_type_arm64			-	-	-	-	-	30aba5370ce77755	0
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_SUBTRACTOR	reloc_type_arm64			-	-	-	-	-	d303524f3d1a1268	1
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_BRANCH26	reloc_type_arm64			-	-	-	-	-	d1d3fdcf09eb88a5	2
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_PAGE21	reloc_type_arm64			-	-	-	-	-	d2e48bb91a7ec20f	3
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_PAGEOFF12	reloc_type_arm64			-	-	-	-	-	d539dab1a95362ff	4
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_GOT_LOAD_PAGE21	reloc_type_arm64			-	-	-	-	-	2c2a76e451660765	5
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_GOT_LOAD_PAGEOFF12	reloc_type_arm64			-	-	-	-	-	bf373fca6871e05f	6
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_POINTER_TO_GOT	reloc_type_arm64			-	-	-	-	-	db5197e3308e3479	7
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_TLVP_LOAD_PAGE21	reloc_type_arm64			-	-	-	-	-	864117bc5bfe88e4	8
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_TLVP_LOAD_PAGEOFF12	reloc_type_arm64			-	-	-	-	-	352e60a22a14bfde	9
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_ADDEND	reloc_type_arm64			-	-	-	-	-	dd560bb042147dd6	10
+enumconst	c:@E@reloc_type_arm64@ARM64_RELOC_AUTHENTICATED_POINTER	reloc_type_arm64			-	-	-	-	-	e73a398b0fedaf27	11
+typedef	c:@T@compact_unwind_encoding_t	-			uint32_t	-	-	-	-	93a9a459d1093754	-
+enum	c:@Ea@UNWIND_IS_NOT_FUNCTION_START	-	-		unsigned int	-	-	-	-	651f9f69d6bfac53	-
+enumconst	c:@Ea@UNWIND_IS_NOT_FUNCTION_START@UNWIND_IS_NOT_FUNCTION_START	-			-	-	-	-	-	ef70a19ef4b79717	2147483648
+enumconst	c:@Ea@UNWIND_IS_NOT_FUNCTION_START@UNWIND_HAS_LSDA	-			-	-	-	-	-	d2d261055703ec92	1073741824
+enumconst	c:@Ea@UNWIND_IS_NOT_FUNCTION_START@UNWIND_PERSONALITY_MASK	-			-	-	-	-	-	f18bdd9672e25705	805306368
+enum	c:@Ea@UNWIND_X86_MODE_MASK	-	-		unsigned int	-	-	-	-	a8efc82b4bfcfc7f	-
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_MODE_MASK	-			-	-	-	-	-	e37eb37456887545	251658240
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_MODE_EBP_FRAME	-			-	-	-	-	-	f37f00e849c96782	16777216
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_MODE_STACK_IMMD	-			-	-	-	-	-	7099a6cf95268d2b	33554432
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_MODE_STACK_IND	-			-	-	-	-	-	4a252fad11d20c7a	50331648
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_MODE_DWARF	-			-	-	-	-	-	9b4d33755584f666	67108864
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_EBP_FRAME_REGISTERS	-			-	-	-	-	-	fe204dd4729bcd8f	32767
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_EBP_FRAME_OFFSET	-			-	-	-	-	-	5fadd42c4d86e512	16711680
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_FRAMELESS_STACK_SIZE	-			-	-	-	-	-	5d00e7a16379e472	16711680
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_FRAMELESS_STACK_ADJUST	-			-	-	-	-	-	05ea5107dcec76b8	57344
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_FRAMELESS_STACK_REG_COUNT	-			-	-	-	-	-	e2928a52d93c406a	7168
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_FRAMELESS_STACK_REG_PERMUTATION	-			-	-	-	-	-	2ab1522f5021efa9	1023
+enumconst	c:@Ea@UNWIND_X86_MODE_MASK@UNWIND_X86_DWARF_SECTION_OFFSET	-			-	-	-	-	-	5f99888374c6505c	16777215
+enum	c:@Ea@UNWIND_X86_REG_NONE	-	-		unsigned int	-	-	-	-	abe06dfb6d2a61de	-
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_NONE	-			-	-	-	-	-	c4fbb679e52555dc	0
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_EBX	-			-	-	-	-	-	e308f85dc86467e7	1
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_ECX	-			-	-	-	-	-	d977ce3aa4de6a84	2
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_EDX	-			-	-	-	-	-	c6edeb581f5a4bcb	3
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_EDI	-			-	-	-	-	-	6ceadc025c2dd8d0	4
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_ESI	-			-	-	-	-	-	4172af931ffcde71	5
+enumconst	c:@Ea@UNWIND_X86_REG_NONE@UNWIND_X86_REG_EBP	-			-	-	-	-	-	7d1d120abe107eda	6
+enum	c:@Ea@UNWIND_X86_64_MODE_MASK	-	-		unsigned int	-	-	-	-	45a7baceba7c81be	-
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_MODE_MASK	-			-	-	-	-	-	8d4d5e1222e8e6ba	251658240
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_MODE_RBP_FRAME	-			-	-	-	-	-	93c329a6b7f68b1b	16777216
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_MODE_STACK_IMMD	-			-	-	-	-	-	c2680abe12bb3ca6	33554432
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_MODE_STACK_IND	-			-	-	-	-	-	6a14051791c91a00	50331648
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_MODE_DWARF	-			-	-	-	-	-	7fea480663768eb0	67108864
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_RBP_FRAME_REGISTERS	-			-	-	-	-	-	9a44c42387808ddb	32767
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_RBP_FRAME_OFFSET	-			-	-	-	-	-	d6ae84746adae7ec	16711680
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_FRAMELESS_STACK_SIZE	-			-	-	-	-	-	96494507ffc1fca4	16711680
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_FRAMELESS_STACK_ADJUST	-			-	-	-	-	-	e772bfb781136f94	57344
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_FRAMELESS_STACK_REG_COUNT	-			-	-	-	-	-	8eff03decc82afa1	7168
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_FRAMELESS_STACK_REG_PERMUTATION	-			-	-	-	-	-	e86d3f6f6d58df92	1023
+enumconst	c:@Ea@UNWIND_X86_64_MODE_MASK@UNWIND_X86_64_DWARF_SECTION_OFFSET	-			-	-	-	-	-	1199eb893eb641e1	16777215
+enum	c:@Ea@UNWIND_X86_64_REG_NONE	-	-		unsigned int	-	-	-	-	80038fa24dfb8df1	-
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_NONE	-			-	-	-	-	-	51e98749e699e7c9	0
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_RBX	-			-	-	-	-	-	b978d043148d2df0	1
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_R12	-			-	-	-	-	-	6d94a91921228d02	2
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_R13	-			-	-	-	-	-	19f09648c99c3141	3
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_R14	-			-	-	-	-	-	cb793176ff7c1683	4
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_R15	-			-	-	-	-	-	698725e7a296aa80	5
+enumconst	c:@Ea@UNWIND_X86_64_REG_NONE@UNWIND_X86_64_REG_RBP	-			-	-	-	-	-	ea5abf8e4d81e5ec	6
+enum	c:@Ea@UNWIND_ARM64_MODE_MASK	-	-		unsigned int	-	-	-	-	cac60e7ff535507f	-
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_MODE_MASK	-			-	-	-	-	-	c2d403a2c1d7ed9c	251658240
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_MODE_FRAMELESS	-			-	-	-	-	-	8739d0973b781c66	33554432
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_MODE_DWARF	-			-	-	-	-	-	7ae3f0049985b75f	50331648
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_MODE_FRAME	-			-	-	-	-	-	96668593ecde2bcb	67108864
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_X19_X20_PAIR	-			-	-	-	-	-	2e721762d048b179	1
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_X21_X22_PAIR	-			-	-	-	-	-	cb38769161f53c87	2
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_X23_X24_PAIR	-			-	-	-	-	-	8b5a72d7b0d30070	4
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_X25_X26_PAIR	-			-	-	-	-	-	3be09144b00e7402	8
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_X27_X28_PAIR	-			-	-	-	-	-	f3ae0533437106cf	16
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_D8_D9_PAIR	-			-	-	-	-	-	fb6aa57340349224	256
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_D10_D11_PAIR	-			-	-	-	-	-	b89d93edf0159aed	512
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_D12_D13_PAIR	-			-	-	-	-	-	caf3b5ae376afaeb	1024
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAME_D14_D15_PAIR	-			-	-	-	-	-	5256fdca18ee58ed	2048
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_FRAMELESS_STACK_SIZE_MASK	-			-	-	-	-	-	723b225ff1a6e299	16773120
+enumconst	c:@Ea@UNWIND_ARM64_MODE_MASK@UNWIND_ARM64_DWARF_SECTION_OFFSET	-			-	-	-	-	-	7e31e804eaf5a37e	16777215
+enum	c:@Ea@UNWIND_ARM_MODE_MASK	-	-		unsigned int	-	-	-	-	7ba78bdec3a2620b	-
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_MODE_MASK	-			-	-	-	-	-	09afb478136a51dd	251658240
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_MODE_FRAME	-			-	-	-	-	-	330d56eef3fe3607	16777216
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_MODE_FRAME_D	-			-	-	-	-	-	fe139533ac7c3e1d	33554432
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_MODE_DWARF	-			-	-	-	-	-	a588d1d723ba1977	67108864
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_STACK_ADJUST_MASK	-			-	-	-	-	-	7b253a910a8f97a8	12582912
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_FIRST_PUSH_R4	-			-	-	-	-	-	020fa3a0365c68dc	1
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_FIRST_PUSH_R5	-			-	-	-	-	-	86295838bb22b6b1	2
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_FIRST_PUSH_R6	-			-	-	-	-	-	e73d19ab1b0d8e16	4
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_SECOND_PUSH_R8	-			-	-	-	-	-	124b55fe438063c3	8
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_SECOND_PUSH_R9	-			-	-	-	-	-	b6ece6c9936f54db	16
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_SECOND_PUSH_R10	-			-	-	-	-	-	409863a2ce2b955d	32
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_SECOND_PUSH_R11	-			-	-	-	-	-	46ffceb8eda17288	64
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_SECOND_PUSH_R12	-			-	-	-	-	-	0bcd1992318b928a	128
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_FRAME_D_REG_COUNT_MASK	-			-	-	-	-	-	f01c74db85b6c917	1792
+enumconst	c:@Ea@UNWIND_ARM_MODE_MASK@UNWIND_ARM_DWARF_SECTION_OFFSET	-			-	-	-	-	-	a03f64941fdf12c1	16777215
+struct	c:@S@unwind_info_section_header	-			-	-	-	-	-	64da273ae805578a	-
+field	c:@S@unwind_info_section_header@FI@version	unwind_info_section_header			uint32_t	-	-	-	-	80cb248dda139f8b	-
+field	c:@S@unwind_info_section_header@FI@commonEncodingsArraySectionOffset	unwind_info_section_header			uint32_t	-	-	-	-	3dbc906d137a9420	-
+field	c:@S@unwind_info_section_header@FI@commonEncodingsArrayCount	unwind_info_section_header			uint32_t	-	-	-	-	8c0d0c152538eb34	-
+field	c:@S@unwind_info_section_header@FI@personalityArraySectionOffset	unwind_info_section_header			uint32_t	-	-	-	-	87446561b0467590	-
+field	c:@S@unwind_info_section_header@FI@personalityArrayCount	unwind_info_section_header			uint32_t	-	-	-	-	e6172689f86984c9	-
+field	c:@S@unwind_info_section_header@FI@indexSectionOffset	unwind_info_section_header			uint32_t	-	-	-	-	e9146b55c3980c6d	-
+field	c:@S@unwind_info_section_header@FI@indexCount	unwind_info_section_header			uint32_t	-	-	-	-	0cd21856e97dec4f	-
+struct	c:@S@unwind_info_section_header_index_entry	-			-	-	-	-	-	5bf6dc7801a06dd3	-
+field	c:@S@unwind_info_section_header_index_entry@FI@functionOffset	unwind_info_section_header_index_entry			uint32_t	-	-	-	-	4484e43db0b2c5a1	-
+field	c:@S@unwind_info_section_header_index_entry@FI@secondLevelPagesSectionOffset	unwind_info_section_header_index_entry			uint32_t	-	-	-	-	48a06af156295c8e	-
+field	c:@S@unwind_info_section_header_index_entry@FI@lsdaIndexArraySectionOffset	unwind_info_section_header_index_entry			uint32_t	-	-	-	-	fe758c9a01d2034b	-
+struct	c:@S@unwind_info_section_header_lsda_index_entry	-			-	-	-	-	-	176b0ef8fe668e80	-
+field	c:@S@unwind_info_section_header_lsda_index_entry@FI@functionOffset	unwind_info_section_header_lsda_index_entry			uint32_t	-	-	-	-	abebfc6f1653c437	-
+field	c:@S@unwind_info_section_header_lsda_index_entry@FI@lsdaOffset	unwind_info_section_header_lsda_index_entry			uint32_t	-	-	-	-	ea5859f972a31bf5	-
+struct	c:@S@unwind_info_regular_second_level_entry	-			-	-	-	-	-	f9083222e4427659	-
+field	c:@S@unwind_info_regular_second_level_entry@FI@functionOffset	unwind_info_regular_second_level_entry			uint32_t	-	-	-	-	a20418bdac765268	-
+field	c:@S@unwind_info_regular_second_level_entry@FI@encoding	unwind_info_regular_second_level_entry			compact_unwind_encoding_t	-	-	-	-	2704d788d25cb689	-
+struct	c:@S@unwind_info_regular_second_level_page_header	-			-	-	-	-	-	38774fa6b697c5d9	-
+field	c:@S@unwind_info_regular_second_level_page_header@FI@kind	unwind_info_regular_second_level_page_header			uint32_t	-	-	-	-	d4a0e34af97d38f9	-
+field	c:@S@unwind_info_regular_second_level_page_header@FI@entryPageOffset	unwind_info_regular_second_level_page_header			uint16_t	-	-	-	-	4194486904258dcb	-
+field	c:@S@unwind_info_regular_second_level_page_header@FI@entryCount	unwind_info_regular_second_level_page_header			uint16_t	-	-	-	-	ef8fae66aee3fd3f	-
+struct	c:@S@unwind_info_compressed_second_level_page_header	-			-	-	-	-	-	8db3ce138674d6f2	-
+field	c:@S@unwind_info_compressed_second_level_page_header@FI@kind	unwind_info_compressed_second_level_page_header			uint32_t	-	-	-	-	24626c46387e3cbf	-
+field	c:@S@unwind_info_compressed_second_level_page_header@FI@entryPageOffset	unwind_info_compressed_second_level_page_header			uint16_t	-	-	-	-	a36d3a9e2b82df0d	-
+field	c:@S@unwind_info_compressed_second_level_page_header@FI@entryCount	unwind_info_compressed_second_level_page_header			uint16_t	-	-	-	-	ef8f30eb0b5bb775	-
+field	c:@S@unwind_info_compressed_second_level_page_header@FI@encodingsPageOffset	unwind_info_compressed_second_level_page_header			uint16_t	-	-	-	-	2166850dbee77028	-
+field	c:@S@unwind_info_compressed_second_level_page_header@FI@encodingsCount	unwind_info_compressed_second_level_page_header			uint16_t	-	-	-	-	b0c734da20ecc7c0	-
+struct	c:@S@mach_header	-			-	-	-	-	-	67d1c2115d9002cf	-
+field	c:@S@mach_header@FI@magic	mach_header			uint32_t	-	-	-	-	d17e9f3bc0750a67	-
+field	c:@S@mach_header@FI@cputype	mach_header			int32_t	-	-	-	-	b35e6337cdb9b370	-
+field	c:@S@mach_header@FI@cpusubtype	mach_header			int32_t	-	-	-	-	d31f00cd05bf140f	-
+field	c:@S@mach_header@FI@filetype	mach_header			uint32_t	-	-	-	-	5417f0ca35ce6659	-
+field	c:@S@mach_header@FI@ncmds	mach_header			uint32_t	-	-	-	-	d49180a33461454e	-
+field	c:@S@mach_header@FI@sizeofcmds	mach_header			uint32_t	-	-	-	-	8112139a0fec0cb8	-
+field	c:@S@mach_header@FI@flags	mach_header			uint32_t	-	-	-	-	b731be9e064a7393	-
+struct	c:@S@mach_header_64	-			-	-	-	-	-	b90a862aeb212142	-
+field	c:@S@mach_header_64@FI@magic	mach_header_64			uint32_t	-	-	-	-	55b963cac5fc083b	-
+field	c:@S@mach_header_64@FI@cputype	mach_header_64			int32_t	-	-	-	-	185fc69b3b789716	-
+field	c:@S@mach_header_64@FI@cpusubtype	mach_header_64			int32_t	-	-	-	-	c53a304dd6440084	-
+field	c:@S@mach_header_64@FI@filetype	mach_header_64			uint32_t	-	-	-	-	24bc3f8f3a18cfd0	-
+field	c:@S@mach_header_64@FI@ncmds	mach_header_64			uint32_t	-	-	-	-	5bdcdc73a53f9e9a	-
+field	c:@S@mach_header_64@FI@sizeofcmds	mach_header_64			uint32_t	-	-	-	-	34cfe966e4c728c1	-
+field	c:@S@mach_header_64@FI@flags	mach_header_64			uint32_t	-	-	-	-	201a7390648ea3da	-
+field	c:@S@mach_header_64@FI@reserved	mach_header_64			uint32_t	-	-	-	-	61cc55e30ecbcf24	-
+struct	c:@S@load_command	-			-	-	-	-	-	7cc3431ddfb6247f	-
+field	c:@S@load_command@FI@cmd	load_command			uint32_t	-	-	-	-	44e3bfba710a214e	-
+field	c:@S@load_command@FI@cmdsize	load_command			uint32_t	-	-	-	-	0756c9ffa1b6021a	-
+union	c:@U@lc_str	-			-	-	-	-	-	b5b58f1b5efdd8be	-
+field	c:@U@lc_str@FI@offset	lc_str			uint32_t	-	-	-	-	8d7a9c67097be56b	-
+struct	c:@S@segment_command	-			-	-	-	-	-	bd670ca41a956f73	-
+field	c:@S@segment_command@FI@cmd	segment_command			uint32_t	-	-	-	-	2188dd1dbbae27ee	-
+field	c:@S@segment_command@FI@cmdsize	segment_command			uint32_t	-	-	-	-	b7415c9183fbc6d8	-
+field	c:@S@segment_command@FI@segname	segment_command			char[16]	-	-	-	-	c5f731cba9fd5052	-
+field	c:@S@segment_command@FI@vmaddr	segment_command			uint32_t	-	-	-	-	964f5dd2656c72d5	-
+field	c:@S@segment_command@FI@vmsize	segment_command			uint32_t	-	-	-	-	e47b94aabddcca96	-
+field	c:@S@segment_command@FI@fileoff	segment_command			uint32_t	-	-	-	-	f9b037cc5b6818bd	-
+field	c:@S@segment_command@FI@filesize	segment_command			uint32_t	-	-	-	-	e2bf3a653f364d21	-
+field	c:@S@segment_command@FI@maxprot	segment_command			int32_t	-	-	-	-	0ddbc1f73dbee63b	-
+field	c:@S@segment_command@FI@initprot	segment_command			int32_t	-	-	-	-	c606a5249c95f73c	-
+field	c:@S@segment_command@FI@nsects	segment_command			uint32_t	-	-	-	-	e6b3b8148affcaed	-
+field	c:@S@segment_command@FI@flags	segment_command			uint32_t	-	-	-	-	8fa6b2a356e4b3b3	-
+struct	c:@S@segment_command_64	-			-	-	-	-	-	b2c21b6864c44109	-
+field	c:@S@segment_command_64@FI@cmd	segment_command_64			uint32_t	-	-	-	-	88b706f72c7f4092	-
+field	c:@S@segment_command_64@FI@cmdsize	segment_command_64			uint32_t	-	-	-	-	bac74d6722ebe0f3	-
+field	c:@S@segment_command_64@FI@segname	segment_command_64			char[16]	-	-	-	-	f0ed3739e34660f7	-
+field	c:@S@segment_command_64@FI@vmaddr	segment_command_64			uint64_t	-	-	-	-	ed84a1b8c4d442f5	-
+field	c:@S@segment_command_64@FI@vmsize	segment_command_64			uint64_t	-	-	-	-	5f99085da5fa106c	-
+field	c:@S@segment_command_64@FI@fileoff	segment_command_64			uint64_t	-	-	-	-	bde471d2d6b69dbe	-
+field	c:@S@segment_command_64@FI@filesize	segment_command_64			uint64_t	-	-	-	-	571657719b0a6737	-
+field	c:@S@segment_command_64@FI@maxprot	segment_command_64			int32_t	-	-	-	-	81ec09c726a53f9f	-
+field	c:@S@segment_command_64@FI@initprot	segment_command_64			int32_t	-	-	-	-	788edcb0eeb32f47	-
+field	c:@S@segment_command_64@FI@nsects	segment_command_64			uint32_t	-	-	-	-	650f29609fd9ffc0	-
+field	c:@S@segment_command_64@FI@flags	segment_command_64			uint32_t	-	-	-	-	a99f63149c6b82b3	-
+struct	c:@S@section	-			-	-	-	-	-	332f2488462a5f9a	-
+field	c:@S@section@FI@sectname	section			char[16]	-	-	-	-	36530e23a9ca54ef	-
+field	c:@S@section@FI@segname	section			char[16]	-	-	-	-	d178f6c92f33a30f	-
+field	c:@S@section@FI@addr	section			uint32_t	-	-	-	-	e419c41f45da5af9	-
+field	c:@S@section@FI@size	section			uint32_t	-	-	-	-	c89aa14da372e337	-
+field	c:@S@section@FI@offset	section			uint32_t	-	-	-	-	a4bc27d6cf6e401d	-
+field	c:@S@section@FI@align	section			uint32_t	-	-	-	-	648aaf082ae351d8	-
+field	c:@S@section@FI@reloff	section			uint32_t	-	-	-	-	b3c9c1e5ce8a4219	-
+field	c:@S@section@FI@nreloc	section			uint32_t	-	-	-	-	4a27212e8ccf59e1	-
+field	c:@S@section@FI@flags	section			uint32_t	-	-	-	-	4ad2393bf0453af9	-
+field	c:@S@section@FI@reserved1	section			uint32_t	-	-	-	-	760548b8b482339d	-
+field	c:@S@section@FI@reserved2	section			uint32_t	-	-	-	-	476ca80aedb0057b	-
+struct	c:@S@section_64	-			-	-	-	-	-	ec6704f7015f633c	-
+field	c:@S@section_64@FI@sectname	section_64			char[16]	-	-	-	-	77d415fce16911ea	-
+field	c:@S@section_64@FI@segname	section_64			char[16]	-	-	-	-	7fb769469d5f4e50	-
+field	c:@S@section_64@FI@addr	section_64			uint64_t	-	-	-	-	c57c1052c14f05b4	-
+field	c:@S@section_64@FI@size	section_64			uint64_t	-	-	-	-	beb84c9501e6f266	-
+field	c:@S@section_64@FI@offset	section_64			uint32_t	-	-	-	-	6bc11b63ffccf58e	-
+field	c:@S@section_64@FI@align	section_64			uint32_t	-	-	-	-	aa2f5f564bdff124	-
+field	c:@S@section_64@FI@reloff	section_64			uint32_t	-	-	-	-	b57a2d296ad181cd	-
+field	c:@S@section_64@FI@nreloc	section_64			uint32_t	-	-	-	-	7702f57a45bf2039	-
+field	c:@S@section_64@FI@flags	section_64			uint32_t	-	-	-	-	d4b46eeb2b54bcbb	-
+field	c:@S@section_64@FI@reserved1	section_64			uint32_t	-	-	-	-	76b98e34c4c7a842	-
+field	c:@S@section_64@FI@reserved2	section_64			uint32_t	-	-	-	-	de4abc760b9d67ca	-
+field	c:@S@section_64@FI@reserved3	section_64			uint32_t	-	-	-	-	a4b28ead173585f8	-
+struct	c:@S@fvmlib	-			-	-	-	-	-	3968e3aace892b84	-
+field	c:@S@fvmlib@FI@name	fvmlib			union lc_str	-	-	-	-	c0cbe000b97bda84	-
+field	c:@S@fvmlib@FI@minor_version	fvmlib			uint32_t	-	-	-	-	129161a875e70248	-
+field	c:@S@fvmlib@FI@header_addr	fvmlib			uint32_t	-	-	-	-	951f4a72a03b79c4	-
+struct	c:@S@fvmlib_command	-			-	-	-	-	-	89f606a6b4b39cda	-
+field	c:@S@fvmlib_command@FI@cmd	fvmlib_command			uint32_t	-	-	-	-	1b82e6c33d3f5bf7	-
+field	c:@S@fvmlib_command@FI@cmdsize	fvmlib_command			uint32_t	-	-	-	-	2327098d8f2cb5e7	-
+field	c:@S@fvmlib_command@FI@fvmlib	fvmlib_command			struct fvmlib	-	-	-	-	41775739979ab01d	-
+struct	c:@S@dylib	-			-	-	-	-	-	7925da76c4fe10cf	-
+field	c:@S@dylib@FI@name	dylib			union lc_str	-	-	-	-	03bf7770717ac5ca	-
+field	c:@S@dylib@FI@timestamp	dylib			uint32_t	-	-	-	-	4f45595852eae424	-
+field	c:@S@dylib@FI@current_version	dylib			uint32_t	-	-	-	-	477d68d3b48614f0	-
+field	c:@S@dylib@FI@compatibility_version	dylib			uint32_t	-	-	-	-	752fdaefce4cac1f	-
+struct	c:@S@dylib_command	-			-	-	-	-	-	5a44f97d61e33880	-
+field	c:@S@dylib_command@FI@cmd	dylib_command			uint32_t	-	-	-	-	f4a270ea7e4625a1	-
+field	c:@S@dylib_command@FI@cmdsize	dylib_command			uint32_t	-	-	-	-	d932ad1e7ad84b9d	-
+field	c:@S@dylib_command@FI@dylib	dylib_command			struct dylib	-	-	-	-	d42896a63b63c532	-
+struct	c:@S@dylib_use_command	-			-	-	-	-	-	723ebb5c92e10480	-
+field	c:@S@dylib_use_command@FI@cmd	dylib_use_command			uint32_t	-	-	-	-	2c9d6873ecada173	-
+field	c:@S@dylib_use_command@FI@cmdsize	dylib_use_command			uint32_t	-	-	-	-	f53d932b4dd53e90	-
+field	c:@S@dylib_use_command@FI@nameoff	dylib_use_command			uint32_t	-	-	-	-	1e1a45052cc5c049	-
+field	c:@S@dylib_use_command@FI@marker	dylib_use_command			uint32_t	-	-	-	-	6b8acabfdef767ef	-
+field	c:@S@dylib_use_command@FI@current_version	dylib_use_command			uint32_t	-	-	-	-	f1f14512e814c94e	-
+field	c:@S@dylib_use_command@FI@compat_version	dylib_use_command			uint32_t	-	-	-	-	8c0e08b4ad2ee44a	-
+field	c:@S@dylib_use_command@FI@flags	dylib_use_command			uint32_t	-	-	-	-	2cb4bce5cfbe73c0	-
+struct	c:@S@sub_framework_command	-			-	-	-	-	-	35bb49fa7537a55d	-
+field	c:@S@sub_framework_command@FI@cmd	sub_framework_command			uint32_t	-	-	-	-	7c0cc6fa2dd4c027	-
+field	c:@S@sub_framework_command@FI@cmdsize	sub_framework_command			uint32_t	-	-	-	-	9ffca69184650b3b	-
+field	c:@S@sub_framework_command@FI@umbrella	sub_framework_command			union lc_str	-	-	-	-	8adcbcc03a27cc24	-
+struct	c:@S@sub_client_command	-			-	-	-	-	-	13756adc762abdd4	-
+field	c:@S@sub_client_command@FI@cmd	sub_client_command			uint32_t	-	-	-	-	93984e1303fb8b33	-
+field	c:@S@sub_client_command@FI@cmdsize	sub_client_command			uint32_t	-	-	-	-	a7a46160b39a1d4d	-
+field	c:@S@sub_client_command@FI@client	sub_client_command			union lc_str	-	-	-	-	0ee9b0866b0668de	-
+struct	c:@S@sub_umbrella_command	-			-	-	-	-	-	d2d22bbeb35bd3d3	-
+field	c:@S@sub_umbrella_command@FI@cmd	sub_umbrella_command			uint32_t	-	-	-	-	35d7fe23ead894e0	-
+field	c:@S@sub_umbrella_command@FI@cmdsize	sub_umbrella_command			uint32_t	-	-	-	-	95caaa687b64dd89	-
+field	c:@S@sub_umbrella_command@FI@sub_umbrella	sub_umbrella_command			union lc_str	-	-	-	-	b0be0762a1e0d305	-
+struct	c:@S@sub_library_command	-			-	-	-	-	-	816b9d56576ac16c	-
+field	c:@S@sub_library_command@FI@cmd	sub_library_command			uint32_t	-	-	-	-	a74d6046c772d561	-
+field	c:@S@sub_library_command@FI@cmdsize	sub_library_command			uint32_t	-	-	-	-	a7a3819722495b1a	-
+field	c:@S@sub_library_command@FI@sub_library	sub_library_command			union lc_str	-	-	-	-	293f7f673415545b	-
+struct	c:@S@prebound_dylib_command	-			-	-	-	-	-	7a8ea5b9bbf31a06	-
+field	c:@S@prebound_dylib_command@FI@cmd	prebound_dylib_command			uint32_t	-	-	-	-	67375e8f25e1e614	-
+field	c:@S@prebound_dylib_command@FI@cmdsize	prebound_dylib_command			uint32_t	-	-	-	-	1cf81e92c52197a1	-
+field	c:@S@prebound_dylib_command@FI@name	prebound_dylib_command			union lc_str	-	-	-	-	473d3904232d6baa	-
+field	c:@S@prebound_dylib_command@FI@nmodules	prebound_dylib_command			uint32_t	-	-	-	-	f1beab60d1387f6e	-
+field	c:@S@prebound_dylib_command@FI@linked_modules	prebound_dylib_command			union lc_str	-	-	-	-	f65c0dfe224f9eae	-
+struct	c:@S@dylinker_command	-			-	-	-	-	-	5ca6a5f827f688df	-
+field	c:@S@dylinker_command@FI@cmd	dylinker_command			uint32_t	-	-	-	-	258df70a9cabaab9	-
+field	c:@S@dylinker_command@FI@cmdsize	dylinker_command			uint32_t	-	-	-	-	8d491d0e86d3aa17	-
+field	c:@S@dylinker_command@FI@name	dylinker_command			union lc_str	-	-	-	-	260505509b78591c	-
+struct	c:@S@thread_command	-			-	-	-	-	-	c1ecde15c9a01718	-
+field	c:@S@thread_command@FI@cmd	thread_command			uint32_t	-	-	-	-	6f2095f05d189996	-
+field	c:@S@thread_command@FI@cmdsize	thread_command			uint32_t	-	-	-	-	5bea3b5830756f35	-
+struct	c:@S@routines_command	-			-	-	-	-	-	8738a6fc1214c75e	-
+field	c:@S@routines_command@FI@cmd	routines_command			uint32_t	-	-	-	-	dd7d9061c8494dc5	-
+field	c:@S@routines_command@FI@cmdsize	routines_command			uint32_t	-	-	-	-	b06dc79b3198f9ed	-
+field	c:@S@routines_command@FI@init_address	routines_command			uint32_t	-	-	-	-	bfbd74ef118d21d6	-
+field	c:@S@routines_command@FI@init_module	routines_command			uint32_t	-	-	-	-	369c3ed870064dec	-
+field	c:@S@routines_command@FI@reserved1	routines_command			uint32_t	-	-	-	-	d7fa6cdc2dfe15eb	-
+field	c:@S@routines_command@FI@reserved2	routines_command			uint32_t	-	-	-	-	8b6c16c3c95f0ac1	-
+field	c:@S@routines_command@FI@reserved3	routines_command			uint32_t	-	-	-	-	467bf48863bc9c3e	-
+field	c:@S@routines_command@FI@reserved4	routines_command			uint32_t	-	-	-	-	5267f7bbeafb89b2	-
+field	c:@S@routines_command@FI@reserved5	routines_command			uint32_t	-	-	-	-	b1fc6a6c8972bf87	-
+field	c:@S@routines_command@FI@reserved6	routines_command			uint32_t	-	-	-	-	768667b23ba8ab31	-
+struct	c:@S@routines_command_64	-			-	-	-	-	-	b7b9e1f09e9ff401	-
+field	c:@S@routines_command_64@FI@cmd	routines_command_64			uint32_t	-	-	-	-	c6d304f09077807a	-
+field	c:@S@routines_command_64@FI@cmdsize	routines_command_64			uint32_t	-	-	-	-	8936d479d9da0e26	-
+field	c:@S@routines_command_64@FI@init_address	routines_command_64			uint64_t	-	-	-	-	e38a158e7a909da3	-
+field	c:@S@routines_command_64@FI@init_module	routines_command_64			uint64_t	-	-	-	-	e6565452d3aacb44	-
+field	c:@S@routines_command_64@FI@reserved1	routines_command_64			uint64_t	-	-	-	-	0198fe4a347d4ba1	-
+field	c:@S@routines_command_64@FI@reserved2	routines_command_64			uint64_t	-	-	-	-	bbc391f370829fee	-
+field	c:@S@routines_command_64@FI@reserved3	routines_command_64			uint64_t	-	-	-	-	f6b5adbc10361d8c	-
+field	c:@S@routines_command_64@FI@reserved4	routines_command_64			uint64_t	-	-	-	-	5360dd2fe3b58fd3	-
+field	c:@S@routines_command_64@FI@reserved5	routines_command_64			uint64_t	-	-	-	-	24f66c2581c8317b	-
+field	c:@S@routines_command_64@FI@reserved6	routines_command_64			uint64_t	-	-	-	-	9531fd5e9e9671e7	-
+struct	c:@S@symtab_command	-			-	-	-	-	-	7bc01e575078e7c3	-
+field	c:@S@symtab_command@FI@cmd	symtab_command			uint32_t	-	-	-	-	ecbd7dc65f4625d8	-
+field	c:@S@symtab_command@FI@cmdsize	symtab_command			uint32_t	-	-	-	-	9e7ba858fca161d8	-
+field	c:@S@symtab_command@FI@symoff	symtab_command			uint32_t	-	-	-	-	af95fd40bafb955a	-
+field	c:@S@symtab_command@FI@nsyms	symtab_command			uint32_t	-	-	-	-	0c55edc95e9c2765	-
+field	c:@S@symtab_command@FI@stroff	symtab_command			uint32_t	-	-	-	-	ddedac0525a62e7b	-
+field	c:@S@symtab_command@FI@strsize	symtab_command			uint32_t	-	-	-	-	abc59c7c39113861	-
+struct	c:@S@dysymtab_command	-			-	-	-	-	-	b6ce03425c62f472	-
+field	c:@S@dysymtab_command@FI@cmd	dysymtab_command			uint32_t	-	-	-	-	7a555aee36f03993	-
+field	c:@S@dysymtab_command@FI@cmdsize	dysymtab_command			uint32_t	-	-	-	-	55c38128926683b2	-
+field	c:@S@dysymtab_command@FI@ilocalsym	dysymtab_command			uint32_t	-	-	-	-	f0c07816b8333ef5	-
+field	c:@S@dysymtab_command@FI@nlocalsym	dysymtab_command			uint32_t	-	-	-	-	547c1e541214ed83	-
+field	c:@S@dysymtab_command@FI@iextdefsym	dysymtab_command			uint32_t	-	-	-	-	1e946ec1e557951f	-
+field	c:@S@dysymtab_command@FI@nextdefsym	dysymtab_command			uint32_t	-	-	-	-	837b5262d47070ba	-
+field	c:@S@dysymtab_command@FI@iundefsym	dysymtab_command			uint32_t	-	-	-	-	425cbd2d0fce7c81	-
+field	c:@S@dysymtab_command@FI@nundefsym	dysymtab_command			uint32_t	-	-	-	-	86882a0cd9b00304	-
+field	c:@S@dysymtab_command@FI@tocoff	dysymtab_command			uint32_t	-	-	-	-	a153794837fdb7b0	-
+field	c:@S@dysymtab_command@FI@ntoc	dysymtab_command			uint32_t	-	-	-	-	5139ccf380370949	-
+field	c:@S@dysymtab_command@FI@modtaboff	dysymtab_command			uint32_t	-	-	-	-	3a596357fa31db6a	-
+field	c:@S@dysymtab_command@FI@nmodtab	dysymtab_command			uint32_t	-	-	-	-	5e5bcd11c27d701e	-
+field	c:@S@dysymtab_command@FI@extrefsymoff	dysymtab_command			uint32_t	-	-	-	-	49e169fdedb145b6	-
+field	c:@S@dysymtab_command@FI@nextrefsyms	dysymtab_command			uint32_t	-	-	-	-	86106d1f444593bf	-
+field	c:@S@dysymtab_command@FI@indirectsymoff	dysymtab_command			uint32_t	-	-	-	-	3816fb4dc617a9f7	-
+field	c:@S@dysymtab_command@FI@nindirectsyms	dysymtab_command			uint32_t	-	-	-	-	ff37de9b120ab6ec	-
+field	c:@S@dysymtab_command@FI@extreloff	dysymtab_command			uint32_t	-	-	-	-	426d846a649c5d13	-
+field	c:@S@dysymtab_command@FI@nextrel	dysymtab_command			uint32_t	-	-	-	-	70f7d466a4b7cf79	-
+field	c:@S@dysymtab_command@FI@locreloff	dysymtab_command			uint32_t	-	-	-	-	4486d5ca661a7a9d	-
+field	c:@S@dysymtab_command@FI@nlocrel	dysymtab_command			uint32_t	-	-	-	-	2e72e46e3761ec8a	-
+struct	c:@S@dylib_table_of_contents	-			-	-	-	-	-	72461014385b9d85	-
+field	c:@S@dylib_table_of_contents@FI@symbol_index	dylib_table_of_contents			uint32_t	-	-	-	-	9bdea3cccada0594	-
+field	c:@S@dylib_table_of_contents@FI@module_index	dylib_table_of_contents			uint32_t	-	-	-	-	0defc29532e03d61	-
+struct	c:@S@dylib_module	-			-	-	-	-	-	dae09c924b76ed15	-
+field	c:@S@dylib_module@FI@module_name	dylib_module			uint32_t	-	-	-	-	bf3f6e02df043959	-
+field	c:@S@dylib_module@FI@iextdefsym	dylib_module			uint32_t	-	-	-	-	dbf1549d33138310	-
+field	c:@S@dylib_module@FI@nextdefsym	dylib_module			uint32_t	-	-	-	-	7b04867cf42c77c2	-
+field	c:@S@dylib_module@FI@irefsym	dylib_module			uint32_t	-	-	-	-	f7c7088769b84220	-
+field	c:@S@dylib_module@FI@nrefsym	dylib_module			uint32_t	-	-	-	-	d4ba72bb2499117d	-
+field	c:@S@dylib_module@FI@ilocalsym	dylib_module			uint32_t	-	-	-	-	2e8e2c2c6395fe31	-
+field	c:@S@dylib_module@FI@nlocalsym	dylib_module			uint32_t	-	-	-	-	366bd927c3aae0f6	-
+field	c:@S@dylib_module@FI@iextrel	dylib_module			uint32_t	-	-	-	-	c913537a686cdb61	-
+field	c:@S@dylib_module@FI@nextrel	dylib_module			uint32_t	-	-	-	-	0c73f04a28aa97c3	-
+field	c:@S@dylib_module@FI@iinit_iterm	dylib_module			uint32_t	-	-	-	-	03bedb0f2be1a00f	-
+field	c:@S@dylib_module@FI@ninit_nterm	dylib_module			uint32_t	-	-	-	-	b910ae2ea46ddde0	-
+field	c:@S@dylib_module@FI@objc_module_info_addr	dylib_module			uint32_t	-	-	-	-	134e2a6c81052516	-
+field	c:@S@dylib_module@FI@objc_module_info_size	dylib_module			uint32_t	-	-	-	-	6bdbbe1f002539c7	-
+struct	c:@S@dylib_module_64	-			-	-	-	-	-	26a6252feec7c412	-
+field	c:@S@dylib_module_64@FI@module_name	dylib_module_64			uint32_t	-	-	-	-	5c8b8604299e2c96	-
+field	c:@S@dylib_module_64@FI@iextdefsym	dylib_module_64			uint32_t	-	-	-	-	ac46ddc211e631f6	-
+field	c:@S@dylib_module_64@FI@nextdefsym	dylib_module_64			uint32_t	-	-	-	-	68a5959ff9e12062	-
+field	c:@S@dylib_module_64@FI@irefsym	dylib_module_64			uint32_t	-	-	-	-	cff298bc3dbe57f2	-
+field	c:@S@dylib_module_64@FI@nrefsym	dylib_module_64			uint32_t	-	-	-	-	6812b4361492417f	-
+field	c:@S@dylib_module_64@FI@ilocalsym	dylib_module_64			uint32_t	-	-	-	-	8488e4257935f7d4	-
+field	c:@S@dylib_module_64@FI@nlocalsym	dylib_module_64			uint32_t	-	-	-	-	63e6538ee0252a8c	-
+field	c:@S@dylib_module_64@FI@iextrel	dylib_module_64			uint32_t	-	-	-	-	843217ca5a63d106	-
+field	c:@S@dylib_module_64@FI@nextrel	dylib_module_64			uint32_t	-	-	-	-	0518f9bcc78c5327	-
+field	c:@S@dylib_module_64@FI@iinit_iterm	dylib_module_64			uint32_t	-	-	-	-	c1470ed6e941c11d	-
+field	c:@S@dylib_module_64@FI@ninit_nterm	dylib_module_64			uint32_t	-	-	-	-	866619d81c6f18e0	-
+field	c:@S@dylib_module_64@FI@objc_module_info_size	dylib_module_64			uint32_t	-	-	-	-	8ff7ece38672db19	-
+field	c:@S@dylib_module_64@FI@objc_module_info_addr	dylib_module_64			uint64_t	-	-	-	-	777e3daa623e0af4	-
+struct	c:@S@dylib_reference	-			-	-	-	-	-	d2ebe9009092a833	-
+field	c:@S@dylib_reference@FI@isym	dylib_reference			uint32_t	-	-	-	-	28bc53f9612d99da	-
+field	c:@S@dylib_reference@FI@flags	dylib_reference			uint32_t	-	-	-	-	ddb83c98e8a8c112	-
+struct	c:@S@twolevel_hints_command	-			-	-	-	-	-	2be50a8b8f96051e	-
+field	c:@S@twolevel_hints_command@FI@cmd	twolevel_hints_command			uint32_t	-	-	-	-	d33119553d534871	-
+field	c:@S@twolevel_hints_command@FI@cmdsize	twolevel_hints_command			uint32_t	-	-	-	-	91bc5481abd1de22	-
+field	c:@S@twolevel_hints_command@FI@offset	twolevel_hints_command			uint32_t	-	-	-	-	cb08edb4ab3c164f	-
+field	c:@S@twolevel_hints_command@FI@nhints	twolevel_hints_command			uint32_t	-	-	-	-	69d22ad83698a970	-
+struct	c:@S@twolevel_hint	-			-	-	-	-	-	40fc95741ae5fd6a	-
+field	c:@S@twolevel_hint@FI@isub_image	twolevel_hint			uint32_t	-	-	-	-	0d285307068dc2ab	-
+field	c:@S@twolevel_hint@FI@itoc	twolevel_hint			uint32_t	-	-	-	-	f0f47b101078d294	-
+struct	c:@S@prebind_cksum_command	-			-	-	-	-	-	0e250154a27af232	-
+field	c:@S@prebind_cksum_command@FI@cmd	prebind_cksum_command			uint32_t	-	-	-	-	a60b864f019cf0ef	-
+field	c:@S@prebind_cksum_command@FI@cmdsize	prebind_cksum_command			uint32_t	-	-	-	-	6dfed788f98d2a69	-
+field	c:@S@prebind_cksum_command@FI@cksum	prebind_cksum_command			uint32_t	-	-	-	-	daabdfc02a76240d	-
+struct	c:@S@uuid_command	-			-	-	-	-	-	0d62a50391f5ef7f	-
+field	c:@S@uuid_command@FI@cmd	uuid_command			uint32_t	-	-	-	-	dfcca8d262c91454	-
+field	c:@S@uuid_command@FI@cmdsize	uuid_command			uint32_t	-	-	-	-	b473ec2dd01f2872	-
+field	c:@S@uuid_command@FI@uuid	uuid_command			uint8_t[16]	-	-	-	-	5ddb803204d006f0	-
+struct	c:@S@rpath_command	-			-	-	-	-	-	8ee506e207fdcdec	-
+field	c:@S@rpath_command@FI@cmd	rpath_command			uint32_t	-	-	-	-	daced6832079db51	-
+field	c:@S@rpath_command@FI@cmdsize	rpath_command			uint32_t	-	-	-	-	8a49cb8e42930e21	-
+field	c:@S@rpath_command@FI@path	rpath_command			union lc_str	-	-	-	-	06827098548b9612	-
+struct	c:@S@target_triple_command	-			-	-	-	-	-	839297e45208d127	-
+field	c:@S@target_triple_command@FI@cmd	target_triple_command			uint32_t	-	-	-	-	b7620e7d3f6eabe4	-
+field	c:@S@target_triple_command@FI@cmdsize	target_triple_command			uint32_t	-	-	-	-	f61f76d32edbead8	-
+field	c:@S@target_triple_command@FI@triple	target_triple_command			union lc_str	-	-	-	-	21099fb9f133116d	-
+struct	c:@S@linkedit_data_command	-			-	-	-	-	-	4c7a56b836f824d0	-
+field	c:@S@linkedit_data_command@FI@cmd	linkedit_data_command			uint32_t	-	-	-	-	3f27ce5841d61df0	-
+field	c:@S@linkedit_data_command@FI@cmdsize	linkedit_data_command			uint32_t	-	-	-	-	2d36308ca4adc09d	-
+field	c:@S@linkedit_data_command@FI@dataoff	linkedit_data_command			uint32_t	-	-	-	-	5176ed1b8292df02	-
+field	c:@S@linkedit_data_command@FI@datasize	linkedit_data_command			uint32_t	-	-	-	-	dd97a72b195ef615	-
+struct	c:@S@encryption_info_command	-			-	-	-	-	-	8b8406eef4365835	-
+field	c:@S@encryption_info_command@FI@cmd	encryption_info_command			uint32_t	-	-	-	-	db17dfa4fe27f919	-
+field	c:@S@encryption_info_command@FI@cmdsize	encryption_info_command			uint32_t	-	-	-	-	6589fe83fc89db17	-
+field	c:@S@encryption_info_command@FI@cryptoff	encryption_info_command			uint32_t	-	-	-	-	99b03a81ddd96171	-
+field	c:@S@encryption_info_command@FI@cryptsize	encryption_info_command			uint32_t	-	-	-	-	9a1984c7901a63f9	-
+field	c:@S@encryption_info_command@FI@cryptid	encryption_info_command			uint32_t	-	-	-	-	770789cc9c7c8575	-
+struct	c:@S@encryption_info_command_64	-			-	-	-	-	-	9e0ad06531767054	-
+field	c:@S@encryption_info_command_64@FI@cmd	encryption_info_command_64			uint32_t	-	-	-	-	e0ad759257fe0924	-
+field	c:@S@encryption_info_command_64@FI@cmdsize	encryption_info_command_64			uint32_t	-	-	-	-	72092649b6615ed9	-
+field	c:@S@encryption_info_command_64@FI@cryptoff	encryption_info_command_64			uint32_t	-	-	-	-	682477f6f92961f0	-
+field	c:@S@encryption_info_command_64@FI@cryptsize	encryption_info_command_64			uint32_t	-	-	-	-	c9ae631b288b2c1e	-
+field	c:@S@encryption_info_command_64@FI@cryptid	encryption_info_command_64			uint32_t	-	-	-	-	85f8607d63f167ab	-
+field	c:@S@encryption_info_command_64@FI@pad	encryption_info_command_64			uint32_t	-	-	-	-	4419e486fb94726e	-
+struct	c:@S@version_min_command	-			-	-	-	-	-	cafd000c09772935	-
+field	c:@S@version_min_command@FI@cmd	version_min_command			uint32_t	-	-	-	-	6fe7a70a0b1ccf63	-
+field	c:@S@version_min_command@FI@cmdsize	version_min_command			uint32_t	-	-	-	-	4bc850a308bc4921	-
+field	c:@S@version_min_command@FI@version	version_min_command			uint32_t	-	-	-	-	36a40cfbbc9f44e2	-
+field	c:@S@version_min_command@FI@sdk	version_min_command			uint32_t	-	-	-	-	23ebef68e8213ffd	-
+struct	c:@S@build_version_command	-			-	-	-	-	-	cba2cb8171353f70	-
+field	c:@S@build_version_command@FI@cmd	build_version_command			uint32_t	-	-	-	-	395fcad2a104e416	-
+field	c:@S@build_version_command@FI@cmdsize	build_version_command			uint32_t	-	-	-	-	5a22029a2ce8fff2	-
+field	c:@S@build_version_command@FI@platform	build_version_command			uint32_t	-	-	-	-	7816e9d023384987	-
+field	c:@S@build_version_command@FI@minos	build_version_command			uint32_t	-	-	-	-	5cd55577ff457970	-
+field	c:@S@build_version_command@FI@sdk	build_version_command			uint32_t	-	-	-	-	78db57a0bfbbc88e	-
+field	c:@S@build_version_command@FI@ntools	build_version_command			uint32_t	-	-	-	-	3754c0a80e15e371	-
+struct	c:@S@build_tool_version	-			-	-	-	-	-	95bcd683c20ba4dd	-
+field	c:@S@build_tool_version@FI@tool	build_tool_version			uint32_t	-	-	-	-	36c785ab3199faa0	-
+field	c:@S@build_tool_version@FI@version	build_tool_version			uint32_t	-	-	-	-	f03f93743edb1faa	-
+struct	c:@S@dyld_info_command	-			-	-	-	-	-	cb9538e3c9d43ab8	-
+field	c:@S@dyld_info_command@FI@cmd	dyld_info_command			uint32_t	-	-	-	-	487e3a5facdb097c	-
+field	c:@S@dyld_info_command@FI@cmdsize	dyld_info_command			uint32_t	-	-	-	-	2454adf0c151b010	-
+field	c:@S@dyld_info_command@FI@rebase_off	dyld_info_command			uint32_t	-	-	-	-	767a5d5cacf74d6e	-
+field	c:@S@dyld_info_command@FI@rebase_size	dyld_info_command			uint32_t	-	-	-	-	32c97b2d53b09751	-
+field	c:@S@dyld_info_command@FI@bind_off	dyld_info_command			uint32_t	-	-	-	-	9cd05c8d899c731f	-
+field	c:@S@dyld_info_command@FI@bind_size	dyld_info_command			uint32_t	-	-	-	-	3ab37fe7f31f7929	-
+field	c:@S@dyld_info_command@FI@weak_bind_off	dyld_info_command			uint32_t	-	-	-	-	4ba47c587fd193db	-
+field	c:@S@dyld_info_command@FI@weak_bind_size	dyld_info_command			uint32_t	-	-	-	-	8a7f028e00cb9072	-
+field	c:@S@dyld_info_command@FI@lazy_bind_off	dyld_info_command			uint32_t	-	-	-	-	ba0da37cd37ff995	-
+field	c:@S@dyld_info_command@FI@lazy_bind_size	dyld_info_command			uint32_t	-	-	-	-	a274f75d01119742	-
+field	c:@S@dyld_info_command@FI@export_off	dyld_info_command			uint32_t	-	-	-	-	335f12addd1cc38a	-
+field	c:@S@dyld_info_command@FI@export_size	dyld_info_command			uint32_t	-	-	-	-	08a69122178bfb77	-
+struct	c:@S@linker_option_command	-			-	-	-	-	-	ddebd03c0a51f194	-
+field	c:@S@linker_option_command@FI@cmd	linker_option_command			uint32_t	-	-	-	-	f85a11393a3ee930	-
+field	c:@S@linker_option_command@FI@cmdsize	linker_option_command			uint32_t	-	-	-	-	1b0003f84af1e200	-
+field	c:@S@linker_option_command@FI@count	linker_option_command			uint32_t	-	-	-	-	f11371bcc573c62e	-
+struct	c:@S@symseg_command	-			-	-	-	-	-	a0be39349629dfce	-
+field	c:@S@symseg_command@FI@cmd	symseg_command			uint32_t	-	-	-	-	57e559b58a5d90df	-
+field	c:@S@symseg_command@FI@cmdsize	symseg_command			uint32_t	-	-	-	-	3a969b8e4d6b953f	-
+field	c:@S@symseg_command@FI@offset	symseg_command			uint32_t	-	-	-	-	79b4934fc099c089	-
+field	c:@S@symseg_command@FI@size	symseg_command			uint32_t	-	-	-	-	a3fe6508d3cc5335	-
+struct	c:@S@ident_command	-			-	-	-	-	-	9db829d6a66b59de	-
+field	c:@S@ident_command@FI@cmd	ident_command			uint32_t	-	-	-	-	ece572c29f04e17f	-
+field	c:@S@ident_command@FI@cmdsize	ident_command			uint32_t	-	-	-	-	77e525a1ae42d3f4	-
+struct	c:@S@fvmfile_command	-			-	-	-	-	-	f0a8dbb2475e0562	-
+field	c:@S@fvmfile_command@FI@cmd	fvmfile_command			uint32_t	-	-	-	-	5ee57b1760f69364	-
+field	c:@S@fvmfile_command@FI@cmdsize	fvmfile_command			uint32_t	-	-	-	-	b6aee7e6de0d1840	-
+field	c:@S@fvmfile_command@FI@name	fvmfile_command			union lc_str	-	-	-	-	1d005812449afb19	-
+field	c:@S@fvmfile_command@FI@header_addr	fvmfile_command			uint32_t	-	-	-	-	1c9bfed5c1ef5033	-
+struct	c:@S@entry_point_command	-			-	-	-	-	-	623a51306e76487c	-
+field	c:@S@entry_point_command@FI@cmd	entry_point_command			uint32_t	-	-	-	-	9f47dc12cd7db84c	-
+field	c:@S@entry_point_command@FI@cmdsize	entry_point_command			uint32_t	-	-	-	-	2786ba472a6f5b4b	-
+field	c:@S@entry_point_command@FI@entryoff	entry_point_command			uint64_t	-	-	-	-	a5c83474f5c81c2a	-
+field	c:@S@entry_point_command@FI@stacksize	entry_point_command			uint64_t	-	-	-	-	2913bbed155cba7c	-
+struct	c:@S@source_version_command	-			-	-	-	-	-	2409f53837f977c5	-
+field	c:@S@source_version_command@FI@cmd	source_version_command			uint32_t	-	-	-	-	41195e08c2cadf96	-
+field	c:@S@source_version_command@FI@cmdsize	source_version_command			uint32_t	-	-	-	-	c7acf0cd8fab2b83	-
+field	c:@S@source_version_command@FI@version	source_version_command			uint64_t	-	-	-	-	1fc55a1644c05890	-
+struct	c:@S@data_in_code_entry	-			-	-	-	-	-	3e3f6bb348f9f910	-
+field	c:@S@data_in_code_entry@FI@offset	data_in_code_entry			uint32_t	-	-	-	-	b886433211a3dc1c	-
+field	c:@S@data_in_code_entry@FI@length	data_in_code_entry			uint16_t	-	-	-	-	2ed086d127d51b23	-
+field	c:@S@data_in_code_entry@FI@kind	data_in_code_entry			uint16_t	-	-	-	-	f9ec6d996e3013b7	-
+struct	c:@S@tlv_descriptor	-			-	-	-	-	-	c15dae2a2d12e1d1	-
+field	c:@S@tlv_descriptor@FI@thunk	tlv_descriptor			void *(*)(struct tlv_descriptor *)	-	-	-	-	bd03f48f57c83515	-
+field	c:@S@tlv_descriptor@FI@key	tlv_descriptor			unsigned long	-	-	-	-	a9d2b769365f6f2c	-
+field	c:@S@tlv_descriptor@FI@offset	tlv_descriptor			unsigned long	-	-	-	-	8b423f3d54dfe986	-
+struct	c:@S@note_command	-			-	-	-	-	-	c14fa802f3b9fa82	-
+field	c:@S@note_command@FI@cmd	note_command			uint32_t	-	-	-	-	02e4aec568cef619	-
+field	c:@S@note_command@FI@cmdsize	note_command			uint32_t	-	-	-	-	0e0b52777c0480b3	-
+field	c:@S@note_command@FI@data_owner	note_command			char[16]	-	-	-	-	707a30f22182983d	-
+field	c:@S@note_command@FI@offset	note_command			uint64_t	-	-	-	-	15ecf02b380c7595	-
+field	c:@S@note_command@FI@size	note_command			uint64_t	-	-	-	-	393e430b542937ef	-
+struct	c:@S@fileset_entry_command	-			-	-	-	-	-	e6a9a1196baeac65	-
+field	c:@S@fileset_entry_command@FI@cmd	fileset_entry_command			uint32_t	-	-	-	-	416899290a5f799b	-
+field	c:@S@fileset_entry_command@FI@cmdsize	fileset_entry_command			uint32_t	-	-	-	-	36311b64e3b33b6c	-
+field	c:@S@fileset_entry_command@FI@vmaddr	fileset_entry_command			uint64_t	-	-	-	-	13fdc1d21169216e	-
+field	c:@S@fileset_entry_command@FI@fileoff	fileset_entry_command			uint64_t	-	-	-	-	150034b1a4ca4be5	-
+field	c:@S@fileset_entry_command@FI@entry_id	fileset_entry_command			union lc_str	-	-	-	-	e4612bf7004b9562	-
+field	c:@S@fileset_entry_command@FI@reserved	fileset_entry_command			uint32_t	-	-	-	-	eff3b47375a71be0	-
+function	c:@F@_dyld_image_count	-			uint32_t (void)	-	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	5f781872f3ee98e5	-
+function	c:@F@_dyld_get_image_header	-			const struct mach_header * (uint32_t)	uint32_t image_index	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	367f7ab07138e323	-
+function	c:@F@_dyld_get_image_vmaddr_slide	-			intptr_t (uint32_t)	uint32_t image_index	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	fcc9d79ce775b3ba	-
+function	c:@F@_dyld_get_image_name	-			const char * (uint32_t)	uint32_t image_index	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	f14aaaaff909d8fc	-
+function	c:@F@_dyld_register_func_for_add_image	-			void (void (*)(const struct mach_header *, intptr_t))	void (*)(const struct mach_header *, intptr_t) func	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	38837d18d7a16c8a	-
+function	c:@F@_dyld_register_func_for_remove_image	-			void (void (*)(const struct mach_header *, intptr_t))	void (*)(const struct mach_header *, intptr_t) func	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	2a8157f4a7fde799	-
+function	c:@F@NSVersionOfRunTimeLibrary	-			int32_t (const char *)	const char * libraryName	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	95a1c590e7bbb5cd	-
+function	c:@F@NSVersionOfLinkTimeLibrary	-			int32_t (const char *)	const char * libraryName	-	ios=2.0/-/-/0,macos=10.1/-/-/0	-	47762a571aa31107	-
+function	c:@F@_NSGetExecutablePath	-			int (char *, uint32_t *)	char * buf | uint32_t * bufsize	-	ios=2.0/-/-/0,macos=10.2/-/-/0	-	b0c54542ec0dd6bd	-
+function	c:@F@_tlv_atexit	-			void (void (*)(void *), void *)	void (*)(void *) termFunc | void * objAddr	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	af70a2856358c16e	-
+function	c:@F@_tlv_bootstrap	-			void (void)	-	-	driverkit=-/-/-/1,ios=8.0/-/-/0,macos=10.10/-/-/0	-	f8b43edbe4e0f518	-
+function	c:@F@_dyld_shared_cache_contains_path	-			_Bool (const char *)	const char * path	-	driverkit=-/-/-/1,ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	b93f58e83a9087ff	-
+enum	c:@E@DYLD_BOOL	-			unsigned int	-	-	-	-	8b157c7181576249	-
+enumconst	c:@E@DYLD_BOOL@FALSE	DYLD_BOOL			-	-	-	-	-	80284a39c0ddd0ae	0
+enumconst	c:@E@DYLD_BOOL@TRUE	DYLD_BOOL			-	-	-	-	-	cf53bbf0272541bb	1
+enum	c:@EA@NSObjectFileImageReturnCode	-			unsigned int	-	-	-	-	7e69a195bb9ebf37	-
+enumconst	c:@EA@NSObjectFileImageReturnCode@NSObjectFileImageFailure	NSObjectFileImageReturnCode			-	-	-	-	-	cf3cfc424b840612	0
+enumconst	c:@EA@NSObjectFileImageReturnCode@NSObjectFileImageSuccess	NSObjectFileImageReturnCode			-	-	-	-	-	600ca0cf86860d69	1
+enumconst	c:@EA@NSObjectFileImageReturnCode@NSObjectFileImageInappropriateFile	NSObjectFileImageReturnCode			-	-	-	-	-	a5c81710f9db4378	2
+enumconst	c:@EA@NSObjectFileImageReturnCode@NSObjectFileImageArch	NSObjectFileImageReturnCode			-	-	-	-	-	f388c3cd4b1dfa65	3
+enumconst	c:@EA@NSObjectFileImageReturnCode@NSObjectFileImageFormat	NSObjectFileImageReturnCode			-	-	-	-	-	6de04b48716f98fd	4
+enumconst	c:@EA@NSObjectFileImageReturnCode@NSObjectFileImageAccess	NSObjectFileImageReturnCode			-	-	-	-	-	56897539d30c6537	5
+typedef	c:@T@NSObjectFileImageReturnCode	-			enum NSObjectFileImageReturnCode	-	-	-	-	e3ce5fb379441de0	-
+struct	c:@S@__NSObjectFileImage	-			-	-	-	-	-	b84c9a2acb1823f9	-
+typedef	c:@T@NSObjectFileImage	-			struct __NSObjectFileImage *	-	-	-	-	9c4a8e00c39d2e4e	-
+function	c:@F@NSCreateObjectFileImageFromFile	-			NSObjectFileImageReturnCode (const char *, NSObjectFileImage *)	const char * pathName | NSObjectFileImage * objectFileImage	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	971b9f70755127a1	-
+function	c:@F@NSCreateObjectFileImageFromMemory	-			NSObjectFileImageReturnCode (const void *, size_t, NSObjectFileImage *)	const void * address | size_t size | NSObjectFileImage * objectFileImage	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a22f333050db795c	-
+function	c:@F@NSDestroyObjectFileImage	-			_Bool (NSObjectFileImage)	NSObjectFileImage objectFileImage	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e7b4ff566108cbaa	-
+function	c:@F@NSSymbolDefinitionCountInObjectFileImage	-			uint32_t (NSObjectFileImage)	NSObjectFileImage objectFileImage	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	29ff62e878ab4b30	-
+function	c:@F@NSSymbolDefinitionNameInObjectFileImage	-			const char * (NSObjectFileImage, uint32_t)	NSObjectFileImage objectFileImage | uint32_t ordinal	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dd4111da2d3faff7	-
+function	c:@F@NSSymbolReferenceCountInObjectFileImage	-			uint32_t (NSObjectFileImage)	NSObjectFileImage objectFileImage	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	50d28b278ffb16f4	-
+function	c:@F@NSSymbolReferenceNameInObjectFileImage	-			const char * (NSObjectFileImage, uint32_t, _Bool *)	NSObjectFileImage objectFileImage | uint32_t ordinal | _Bool * tentative_definition	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b561147c20947646	-
+function	c:@F@NSIsSymbolDefinedInObjectFileImage	-			_Bool (NSObjectFileImage, const char *)	NSObjectFileImage objectFileImage | const char * symbolName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1b0715c524f4efc3	-
+function	c:@F@NSGetSectionDataInObjectFileImage	-			void * (NSObjectFileImage, const char *, const char *, size_t *)	NSObjectFileImage objectFileImage | const char * segmentName | const char * sectionName | size_t * size	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	398d3768ee8d34db	-
+struct	c:@S@__NSModule	-			-	-	-	-	-	be42890a13554b6e	-
+typedef	c:@T@NSModule	-			struct __NSModule *	-	-	-	-	44b4885f798d98ca	-
+function	c:@F@NSNameOfModule	-			const char * (NSModule)	NSModule m	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	409113d139ad969b	-
+function	c:@F@NSLibraryNameForModule	-			const char * (NSModule)	NSModule m	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4e151c6ba705a5a1	-
+function	c:@F@NSLinkModule	-			NSModule (NSObjectFileImage, const char *, uint32_t)	NSObjectFileImage objectFileImage | const char * moduleName | uint32_t options	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	73553b279cfe5a6d	-
+function	c:@F@NSUnLinkModule	-			_Bool (NSModule, uint32_t)	NSModule module | uint32_t options	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	53d49c18d6c42255	-
+struct	c:@S@__NSSymbol	-			-	-	-	-	-	d54a3f1969e4f71b	-
+typedef	c:@T@NSSymbol	-			struct __NSSymbol *	-	-	-	-	d1cab42d167159aa	-
+function	c:@F@NSIsSymbolNameDefined	-			_Bool (const char *)	const char * symbolName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	44291eb5572b0c99	-
+function	c:@F@NSIsSymbolNameDefinedWithHint	-			_Bool (const char *, const char *)	const char * symbolName | const char * libraryNameHint	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8969da47a2a1c29f	-
+function	c:@F@NSIsSymbolNameDefinedInImage	-			_Bool (const struct mach_header *, const char *)	const struct mach_header * image | const char * symbolName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3bfeb2c5bf0f3c65	-
+function	c:@F@NSLookupAndBindSymbol	-			NSSymbol (const char *)	const char * symbolName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1fc092e946a88560	-
+function	c:@F@NSLookupAndBindSymbolWithHint	-			NSSymbol (const char *, const char *)	const char * symbolName | const char * libraryNameHint	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	264cbe7501b4dcd2	-
+function	c:@F@NSLookupSymbolInModule	-			NSSymbol (NSModule, const char *)	NSModule module | const char * symbolName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7a75b847487b76f3	-
+function	c:@F@NSLookupSymbolInImage	-			NSSymbol (const struct mach_header *, const char *, uint32_t)	const struct mach_header * image | const char * symbolName | uint32_t options	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fad9dcb84920aad3	-
+function	c:@F@NSNameOfSymbol	-			const char * (NSSymbol)	NSSymbol symbol	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d782b3a24415881e	-
+function	c:@F@NSAddressOfSymbol	-			void * (NSSymbol)	NSSymbol symbol	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ec20b812230c108f	-
+function	c:@F@NSModuleForSymbol	-			NSModule (NSSymbol)	NSSymbol symbol	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	884f61f717633800	-
+enum	c:@EA@NSLinkEditErrors	-			unsigned int	-	-	-	-	b86182529383d9a5	-
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditFileAccessError	NSLinkEditErrors			-	-	-	-	-	50a9947cd0298132	0
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditFileFormatError	NSLinkEditErrors			-	-	-	-	-	df1e9e6ab7dd1dde	1
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditMachResourceError	NSLinkEditErrors			-	-	-	-	-	f847da657fb76f36	2
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditUnixResourceError	NSLinkEditErrors			-	-	-	-	-	e024ed3524f986cb	3
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditOtherError	NSLinkEditErrors			-	-	-	-	-	c114b2be54878bdc	4
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditWarningError	NSLinkEditErrors			-	-	-	-	-	674133919f1c2fa0	5
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditMultiplyDefinedError	NSLinkEditErrors			-	-	-	-	-	45a08c63a7b0ce0f	6
+enumconst	c:@EA@NSLinkEditErrors@NSLinkEditUndefinedError	NSLinkEditErrors			-	-	-	-	-	5694a417a1b9fc6c	7
+typedef	c:@T@NSLinkEditErrors	-			enum NSLinkEditErrors	-	-	-	-	6acd92a20767fd00	-
+enum	c:@EA@NSOtherErrorNumbers	-			unsigned int	-	-	-	-	135f0db6a3f5a283	-
+enumconst	c:@EA@NSOtherErrorNumbers@NSOtherErrorRelocation	NSOtherErrorNumbers			-	-	-	-	-	a6bc28bdd7a7d57e	0
+enumconst	c:@EA@NSOtherErrorNumbers@NSOtherErrorLazyBind	NSOtherErrorNumbers			-	-	-	-	-	5b0dd4cf16f44ab4	1
+enumconst	c:@EA@NSOtherErrorNumbers@NSOtherErrorIndrLoop	NSOtherErrorNumbers			-	-	-	-	-	ffca58697d99a837	2
+enumconst	c:@EA@NSOtherErrorNumbers@NSOtherErrorLazyInit	NSOtherErrorNumbers			-	-	-	-	-	6d19626b34fcecd9	3
+enumconst	c:@EA@NSOtherErrorNumbers@NSOtherErrorInvalidArgs	NSOtherErrorNumbers			-	-	-	-	-	1710e5ff2982e8f1	4
+typedef	c:@T@NSOtherErrorNumbers	-			enum NSOtherErrorNumbers	-	-	-	-	6bfd6224090e6618	-
+function	c:@F@NSLinkEditError	-			void (NSLinkEditErrors *, int *, const char **, const char **)	NSLinkEditErrors * c | int * errorNumber | const char ** fileName | const char ** errorString	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5e2eafb93a45ed1a	-
+struct	c:@SA@NSLinkEditErrorHandlers	-			-	-	-	-	-	adc6a2c9703150ff	-
+field	c:@SA@NSLinkEditErrorHandlers@FI@undefined	NSLinkEditErrorHandlers			void (*)(const char *)	-	-	-	-	483fe12c78142ec0	-
+field	c:@SA@NSLinkEditErrorHandlers@FI@multiple	NSLinkEditErrorHandlers			NSModule (*)(NSSymbol, NSModule, NSModule)	-	-	-	-	16925bf021033446	-
+field	c:@SA@NSLinkEditErrorHandlers@FI@linkEdit	NSLinkEditErrorHandlers			void (*)(NSLinkEditErrors, int, const char *, const char *)	-	-	-	-	0585fa6c835cd35c	-
+typedef	c:@T@NSLinkEditErrorHandlers	-			struct NSLinkEditErrorHandlers	-	-	-	-	ab372090b83764cf	-
+function	c:@F@NSInstallLinkEditErrorHandlers	-			void (const NSLinkEditErrorHandlers *)	const NSLinkEditErrorHandlers * handlers	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ca73fb493bf3a1cc	-
+function	c:@F@NSAddLibrary	-			_Bool (const char *)	const char * pathName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	605ee698fb1c8985	-
+function	c:@F@NSAddLibraryWithSearching	-			_Bool (const char *)	const char * pathName	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d72600fb55c0003b	-
+function	c:@F@NSAddImage	-			const struct mach_header * (const char *, uint32_t)	const char * image_name | uint32_t options	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c32d371c506788c2	-
+function	c:@F@_dyld_present	-			_Bool (void)	-	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	09aeb158051ca3bc	-
+function	c:@F@_dyld_launched_prebound	-			_Bool (void)	-	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6c31099fcb037930	-
+function	c:@F@_dyld_all_twolevel_modules_prebound	-			_Bool (void)	-	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.3/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0f9646356c777e05	-
+function	c:@F@_dyld_bind_fully_image_containing_address	-			_Bool (const void *)	const void * address	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1d8c61c797a03917	-
+function	c:@F@_dyld_image_containing_address	-			_Bool (const void *)	const void * address	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.3/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	46cf365bc46c053a	-
+function	c:@F@_dyld_lookup_and_bind	-			void (const char *, void **, NSModule *)	const char * symbol_name | void ** address | NSModule * module	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c4f5b79999961354	-
+function	c:@F@_dyld_lookup_and_bind_with_hint	-			void (const char *, const char *, void **, NSModule *)	const char * symbol_name | const char * library_name_hint | void ** address | NSModule * module	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.4/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a4fae75828820fca	-
+function	c:@F@_dyld_lookup_and_bind_fully	-			void (const char *, void **, NSModule *)	const char * symbol_name | void ** address | NSModule * module	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.1/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ea0146bf389af9e7	-
+function	c:@F@_dyld_get_image_header_containing_address	-			const struct mach_header * (const void *)	const void * address	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=10.3/10.5/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7fbfd04cf612f61a	-
+enum	c:@E@dyld_image_mode	-			unsigned int	-	-	-	-	30b93ff277c6466d	-
+enumconst	c:@E@dyld_image_mode@dyld_image_adding	dyld_image_mode			-	-	-	-	-	26bb9ecf1624079c	0
+enumconst	c:@E@dyld_image_mode@dyld_image_removing	dyld_image_mode			-	-	-	-	-	b3f3eb70edd9095c	1
+enumconst	c:@E@dyld_image_mode@dyld_image_info_change	dyld_image_mode			-	-	-	-	-	eb2f14c97fa43152	2
+enumconst	c:@E@dyld_image_mode@dyld_image_dyld_moved	dyld_image_mode			-	-	-	-	-	65ec7db88429fc9b	3
+struct	c:@S@dyld_image_info	-			-	-	-	-	-	c5150e6f3abc1426	-
+field	c:@S@dyld_image_info@FI@imageLoadAddress	dyld_image_info			const struct mach_header *	-	-	-	-	5bfa6023c90156cb	-
+field	c:@S@dyld_image_info@FI@imageFilePath	dyld_image_info			const char *	-	-	-	-	e5b0d817e99be5a2	-
+field	c:@S@dyld_image_info@FI@imageFileModDate	dyld_image_info			uintptr_t	-	-	-	-	ee8e7620d8f60bdc	-
+struct	c:@S@dyld_uuid_info	-			-	-	-	-	-	8dcf88ea2f9a868b	-
+field	c:@S@dyld_uuid_info@FI@imageLoadAddress	dyld_uuid_info			const struct mach_header *	-	-	-	-	b505724eb60c70d2	-
+field	c:@S@dyld_uuid_info@FI@imageUUID	dyld_uuid_info			uuid_t	-	-	-	-	f1cc9e9cd8bd6663	-
+struct	c:@S@dyld_aot_image_info	-			-	-	-	-	-	bae38ada890e07ae	-
+field	c:@S@dyld_aot_image_info@FI@x86LoadAddress	dyld_aot_image_info			const struct mach_header *	-	-	-	-	471ac2f12c81c4d4	-
+field	c:@S@dyld_aot_image_info@FI@aotLoadAddress	dyld_aot_image_info			const struct mach_header *	-	-	-	-	a4d9df123823e586	-
+field	c:@S@dyld_aot_image_info@FI@aotImageSize	dyld_aot_image_info			uint64_t	-	-	-	-	3ba5582792f04da1	-
+field	c:@S@dyld_aot_image_info@FI@aotImageKey	dyld_aot_image_info			uint8_t[32]	-	-	-	-	3dd04bdf4ddb2da4	-
+struct	c:@S@dyld_aot_shared_cache_info	-			-	-	-	-	-	59ab5b787f95c926	-
+field	c:@S@dyld_aot_shared_cache_info@FI@cacheBaseAddress	dyld_aot_shared_cache_info			const uintptr_t	-	-	-	-	cc8ac1420f8a63aa	-
+field	c:@S@dyld_aot_shared_cache_info@FI@cacheUUID	dyld_aot_shared_cache_info			uuid_t	-	-	-	-	7457d9d7d0d24853	-
+typedef	c:@T@dyld_image_notifier	-			void (*)(enum dyld_image_mode, uint32_t, const struct dyld_image_info *)	-	-	-	-	64248786d436fdea	-
+enum	c:@Ea@dyld_error_kind_none	-	-		unsigned int	-	-	-	-	09d5194c594b68b0	-
+enumconst	c:@Ea@dyld_error_kind_none@dyld_error_kind_none	-			-	-	-	-	-	1e431d2b64f0e683	0
+enumconst	c:@Ea@dyld_error_kind_none@dyld_error_kind_dylib_missing	-			-	-	-	-	-	967417e1a77372f3	1
+enumconst	c:@Ea@dyld_error_kind_none@dyld_error_kind_dylib_wrong_arch	-			-	-	-	-	-	008031470e3f478c	2
+enumconst	c:@Ea@dyld_error_kind_none@dyld_error_kind_dylib_version	-			-	-	-	-	-	e1dd0330cfc02bb1	3
+enumconst	c:@Ea@dyld_error_kind_none@dyld_error_kind_symbol_missing	-			-	-	-	-	-	107a537939406f89	4
+struct	c:@S@dyld_all_image_infos	-			-	-	-	-	-	c5c3246468880ef5	-
+field	c:@S@dyld_all_image_infos@FI@version	dyld_all_image_infos			uint32_t	-	-	-	-	d5526c74064ed7c4	-
+field	c:@S@dyld_all_image_infos@FI@infoArrayCount	dyld_all_image_infos			uint32_t	-	-	-	-	add94351e3bdab3c	-
+field	c:@S@dyld_all_image_infos@FI@infoArray	dyld_all_image_infos			const struct dyld_image_info *	-	-	-	-	e7c9dff0c44d835b	-
+field	c:@S@dyld_all_image_infos@FI@notification	dyld_all_image_infos			dyld_image_notifier	-	-	-	-	937bd093b6c30ff6	-
+field	c:@S@dyld_all_image_infos@FI@processDetachedFromSharedRegion	dyld_all_image_infos			_Bool	-	-	-	-	be88f62da4ea38ac	-
+field	c:@S@dyld_all_image_infos@FI@libSystemInitialized	dyld_all_image_infos			_Bool	-	-	-	-	c1b421adc5c0f1ca	-
+field	c:@S@dyld_all_image_infos@FI@dyldImageLoadAddress	dyld_all_image_infos			const struct mach_header *	-	-	-	-	86f6385435829a9d	-
+field	c:@S@dyld_all_image_infos@FI@jitInfo	dyld_all_image_infos			void *	-	-	-	-	2191ef9573129a0f	-
+field	c:@S@dyld_all_image_infos@FI@dyldVersion	dyld_all_image_infos			const char *	-	-	-	-	0501ef55d9b87f6d	-
+field	c:@S@dyld_all_image_infos@FI@errorMessage	dyld_all_image_infos			const char *	-	-	-	-	ff5b6a7aa4e91b09	-
+field	c:@S@dyld_all_image_infos@FI@terminationFlags	dyld_all_image_infos			uintptr_t	-	-	-	-	04584ae819078632	-
+field	c:@S@dyld_all_image_infos@FI@coreSymbolicationShmPage	dyld_all_image_infos			void *	-	-	-	-	287ed752ac8c4637	-
+field	c:@S@dyld_all_image_infos@FI@systemOrderFlag	dyld_all_image_infos			uintptr_t	-	-	-	-	35619bfda15a68e8	-
+field	c:@S@dyld_all_image_infos@FI@uuidArrayCount	dyld_all_image_infos			uintptr_t	-	-	-	-	c5f0d7460bc4aa16	-
+field	c:@S@dyld_all_image_infos@FI@uuidArray	dyld_all_image_infos			const struct dyld_uuid_info *	-	-	-	-	b0d2f042e9f853f6	-
+field	c:@S@dyld_all_image_infos@FI@dyldAllImageInfosAddress	dyld_all_image_infos			struct dyld_all_image_infos *	-	-	-	-	917a4fd634a761aa	-
+field	c:@S@dyld_all_image_infos@FI@initialImageCount	dyld_all_image_infos			uintptr_t	-	-	-	-	1d961869c908322c	-
+field	c:@S@dyld_all_image_infos@FI@errorKind	dyld_all_image_infos			uintptr_t	-	-	-	-	40b8504a79deb24d	-
+field	c:@S@dyld_all_image_infos@FI@errorClientOfDylibPath	dyld_all_image_infos			const char *	-	-	-	-	e8d7d947a2df6574	-
+field	c:@S@dyld_all_image_infos@FI@errorTargetDylibPath	dyld_all_image_infos			const char *	-	-	-	-	10dc5b57127c4b0b	-
+field	c:@S@dyld_all_image_infos@FI@errorSymbol	dyld_all_image_infos			const char *	-	-	-	-	02a1d41984d59b95	-
+field	c:@S@dyld_all_image_infos@FI@sharedCacheSlide	dyld_all_image_infos			uintptr_t	-	-	-	-	0562b9ec70539eed	-
+field	c:@S@dyld_all_image_infos@FI@sharedCacheUUID	dyld_all_image_infos			uint8_t[16]	-	-	-	-	c081de61d31dbfe8	-
+field	c:@S@dyld_all_image_infos@FI@sharedCacheBaseAddress	dyld_all_image_infos			uintptr_t	-	-	-	-	e94253c147e6ee37	-
+field	c:@S@dyld_all_image_infos@FI@infoArrayChangeTimestamp	dyld_all_image_infos			uint64_t	-	-	-	-	a643d10d71dd42da	-
+field	c:@S@dyld_all_image_infos@FI@dyldPath	dyld_all_image_infos			const char *	-	-	-	-	046827dc83129f96	-
+field	c:@S@dyld_all_image_infos@FI@notifyPorts	dyld_all_image_infos			mach_port_t[8]	-	-	-	-	b1e087b89928cedd	-
+field	c:@S@dyld_all_image_infos@FI@reserved	dyld_all_image_infos			uintptr_t[7]	-	-	-	-	03daffc1836de22b	-
+field	c:@S@dyld_all_image_infos@FI@sharedCacheFSID	dyld_all_image_infos			uint64_t	-	-	-	-	6bf7f77348734680	-
+field	c:@S@dyld_all_image_infos@FI@sharedCacheFSObjID	dyld_all_image_infos			uint64_t	-	-	-	-	3545c3621f69a70b	-
+field	c:@S@dyld_all_image_infos@FI@compact_dyld_image_info_addr	dyld_all_image_infos			uintptr_t	-	-	-	-	5dcd549a7cb6120d	-
+field	c:@S@dyld_all_image_infos@FI@compact_dyld_image_info_size	dyld_all_image_infos			size_t	-	-	-	-	2e25377a068914ad	-
+field	c:@S@dyld_all_image_infos@FI@platform	dyld_all_image_infos			uint32_t	-	-	-	-	39c73f6ecb2e8527	-
+field	c:@S@dyld_all_image_infos@FI@aotInfoCount	dyld_all_image_infos			uint32_t	-	-	-	-	81e1971d7c2450f9	-
+field	c:@S@dyld_all_image_infos@FI@aotInfoArray	dyld_all_image_infos			const struct dyld_aot_image_info *	-	-	-	-	8daf3a493fd4e825	-
+field	c:@S@dyld_all_image_infos@FI@aotInfoArrayChangeTimestamp	dyld_all_image_infos			uint64_t	-	-	-	-	025e7d451062696c	-
+field	c:@S@dyld_all_image_infos@FI@aotSharedCacheBaseAddress	dyld_all_image_infos			uintptr_t	-	-	-	-	75ac47d17ef3503d	-
+field	c:@S@dyld_all_image_infos@FI@aotSharedCacheUUID	dyld_all_image_infos			uint8_t[16]	-	-	-	-	23ae96f1ce810578	-
+struct	c:@S@dyld_shared_cache_ranges	-			-	-	-	-	-	03bb56048fa6a54c	-
+field	c:@S@dyld_shared_cache_ranges@FI@sharedRegionsCount	dyld_shared_cache_ranges			uintptr_t	-	-	-	-	ed4db813044ee7c1	-
+struct	c:@S@dyld_shared_cache_ranges@S@dyld_images.h@9204	-	-		-	-	-	-	-	1857c762dfc2cfed	-
+field	c:@S@dyld_shared_cache_ranges@S@dyld_images.h@9204@FI@start	-			uintptr_t	-	-	-	-	3e3362a9103a58f6	-
+field	c:@S@dyld_shared_cache_ranges@S@dyld_images.h@9204@FI@length	-			uintptr_t	-	-	-	-	9634565c3e14e8ac	-
+field	c:@S@dyld_shared_cache_ranges@FI@ranges	dyld_shared_cache_ranges			struct (unnamed)[4]	-	-	-	-	ef7c806429c28166	-
+var	c:@dyld_shared_cache_ranges	-			struct dyld_shared_cache_ranges	-	-	-	-	fbad7e186b24ae5a	-
+struct	c:@S@fat_header	-			-	-	-	-	-	e032bc29c842d62a	-
+field	c:@S@fat_header@FI@magic	fat_header			uint32_t	-	-	-	-	361a71f7bca3cf88	-
+field	c:@S@fat_header@FI@nfat_arch	fat_header			uint32_t	-	-	-	-	4c98206f411131d4	-
+struct	c:@S@fat_arch	-			-	-	-	-	-	7b0086c571b232bf	-
+field	c:@S@fat_arch@FI@cputype	fat_arch			int32_t	-	-	-	-	116f1bfbd4fb9f9d	-
+field	c:@S@fat_arch@FI@cpusubtype	fat_arch			int32_t	-	-	-	-	a57ef4bd41dd2616	-
+field	c:@S@fat_arch@FI@offset	fat_arch			uint32_t	-	-	-	-	99d88eb1710b5e2e	-
+field	c:@S@fat_arch@FI@size	fat_arch			uint32_t	-	-	-	-	77fea4566e6057fa	-
+field	c:@S@fat_arch@FI@align	fat_arch			uint32_t	-	-	-	-	67fa97e33ad013db	-
+struct	c:@S@fat_arch_64	-			-	-	-	-	-	4d3c00d11e42d392	-
+field	c:@S@fat_arch_64@FI@cputype	fat_arch_64			int32_t	-	-	-	-	3eac5a4c10b986e9	-
+field	c:@S@fat_arch_64@FI@cpusubtype	fat_arch_64			int32_t	-	-	-	-	54ac8a06c16ee565	-
+field	c:@S@fat_arch_64@FI@offset	fat_arch_64			uint64_t	-	-	-	-	2992f2df427a4f91	-
+field	c:@S@fat_arch_64@FI@size	fat_arch_64			uint64_t	-	-	-	-	ea8dc6af2f6355f3	-
+field	c:@S@fat_arch_64@FI@align	fat_arch_64			uint32_t	-	-	-	-	42db05d4fcc649fb	-
+field	c:@S@fat_arch_64@FI@reserved	fat_arch_64			uint32_t	-	-	-	-	adb2d9166457bd06	-
+struct	c:@S@dyld_chained_fixups_header	-			-	-	-	-	-	fdc0f88d81cb969a	-
+field	c:@S@dyld_chained_fixups_header@FI@fixups_version	dyld_chained_fixups_header			uint32_t	-	-	-	-	fc438937de2a7733	-
+field	c:@S@dyld_chained_fixups_header@FI@starts_offset	dyld_chained_fixups_header			uint32_t	-	-	-	-	881f764e600701f2	-
+field	c:@S@dyld_chained_fixups_header@FI@imports_offset	dyld_chained_fixups_header			uint32_t	-	-	-	-	fe329b204cabd51d	-
+field	c:@S@dyld_chained_fixups_header@FI@symbols_offset	dyld_chained_fixups_header			uint32_t	-	-	-	-	fe6d825a2b2f59ce	-
+field	c:@S@dyld_chained_fixups_header@FI@imports_count	dyld_chained_fixups_header			uint32_t	-	-	-	-	3762b6e6904b715f	-
+field	c:@S@dyld_chained_fixups_header@FI@imports_format	dyld_chained_fixups_header			uint32_t	-	-	-	-	4c2ebca0abc86ae6	-
+field	c:@S@dyld_chained_fixups_header@FI@symbols_format	dyld_chained_fixups_header			uint32_t	-	-	-	-	b1604aee3e62ffef	-
+struct	c:@S@dyld_chained_starts_in_image	-			-	-	-	-	-	5e3f6802769ad824	-
+field	c:@S@dyld_chained_starts_in_image@FI@seg_count	dyld_chained_starts_in_image			uint32_t	-	-	-	-	74fa46f2ba4a9b03	-
+field	c:@S@dyld_chained_starts_in_image@FI@seg_info_offset	dyld_chained_starts_in_image			uint32_t[1]	-	-	-	-	04cb0b2f0b7cd140	-
+struct	c:@S@dyld_chained_starts_in_segment	-			-	-	-	-	-	df0f9186d72b1786	-
+field	c:@S@dyld_chained_starts_in_segment@FI@size	dyld_chained_starts_in_segment			uint32_t	-	-	-	-	0168ed0eec75bd49	-
+field	c:@S@dyld_chained_starts_in_segment@FI@page_size	dyld_chained_starts_in_segment			uint16_t	-	-	-	-	23b662bfdd0777ae	-
+field	c:@S@dyld_chained_starts_in_segment@FI@pointer_format	dyld_chained_starts_in_segment			uint16_t	-	-	-	-	89585163a17afddd	-
+field	c:@S@dyld_chained_starts_in_segment@FI@segment_offset	dyld_chained_starts_in_segment			uint64_t	-	-	-	-	8bebddfbba87a6cf	-
+field	c:@S@dyld_chained_starts_in_segment@FI@max_valid_pointer	dyld_chained_starts_in_segment			uint32_t	-	-	-	-	a0b6146d44ebc0ec	-
+field	c:@S@dyld_chained_starts_in_segment@FI@page_count	dyld_chained_starts_in_segment			uint16_t	-	-	-	-	5cb57924eb337223	-
+field	c:@S@dyld_chained_starts_in_segment@FI@page_start	dyld_chained_starts_in_segment			uint16_t[1]	-	-	-	-	79fff5a5f29a819e	-
+enum	c:@Ea@DYLD_CHAINED_PTR_START_NONE	-	-		unsigned int	-	-	-	-	f6774fc10462f88f	-
+enumconst	c:@Ea@DYLD_CHAINED_PTR_START_NONE@DYLD_CHAINED_PTR_START_NONE	-			-	-	-	-	-	87746a0c34e2aa4d	65535
+enumconst	c:@Ea@DYLD_CHAINED_PTR_START_NONE@DYLD_CHAINED_PTR_START_MULTI	-			-	-	-	-	-	7c91eeedeb908bcb	32768
+enumconst	c:@Ea@DYLD_CHAINED_PTR_START_NONE@DYLD_CHAINED_PTR_START_LAST	-			-	-	-	-	-	14fe1b081a3752f0	32768
+struct	c:@S@dyld_chained_starts_offsets	-			-	-	-	-	-	67a16350a2dea470	-
+field	c:@S@dyld_chained_starts_offsets@FI@pointer_format	dyld_chained_starts_offsets			uint32_t	-	-	-	-	0a9527a46ff39a35	-
+field	c:@S@dyld_chained_starts_offsets@FI@starts_count	dyld_chained_starts_offsets			uint32_t	-	-	-	-	2887f124bf25b2ac	-
+field	c:@S@dyld_chained_starts_offsets@FI@chain_starts	dyld_chained_starts_offsets			uint32_t[1]	-	-	-	-	f7377df150fa7775	-
+enum	c:@Ea@DYLD_CHAINED_PTR_ARM64E	-	-		unsigned int	-	-	-	-	7f4913f151bfb28f	-
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E	-			-	-	-	-	-	8af63cbc416d3f13	1
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_64	-			-	-	-	-	-	faf1d635be9f4e8b	2
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_32	-			-	-	-	-	-	c77b9ca2230624e6	3
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_32_CACHE	-			-	-	-	-	-	5fa1a3e792754747	4
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_32_FIRMWARE	-			-	-	-	-	-	5137d0651e88f47f	5
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_64_OFFSET	-			-	-	-	-	-	9886b2d93f59935c	6
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_OFFSET	-			-	-	-	-	-	36ad2ade1c0f7d96	7
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_KERNEL	-			-	-	-	-	-	aa2ec514d7037984	7
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_64_KERNEL_CACHE	-			-	-	-	-	-	3c3b4b62943c31e4	8
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_USERLAND	-			-	-	-	-	-	6e1a30bea8e9dbfe	9
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_FIRMWARE	-			-	-	-	-	-	1eb0b3329b4d390f	10
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE	-			-	-	-	-	-	7ebc8b8a383169b4	11
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_USERLAND24	-			-	-	-	-	-	11d3db6e7bfa8850	12
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_SHARED_CACHE	-			-	-	-	-	-	ac156bcf0bd3e63d	13
+enumconst	c:@Ea@DYLD_CHAINED_PTR_ARM64E@DYLD_CHAINED_PTR_ARM64E_SEGMENTED	-			-	-	-	-	-	ba485ae259a3d257	14
+struct	c:@S@dyld_chained_ptr_arm64e_rebase	-			-	-	-	-	-	73f317c73a697832	-
+field	c:@S@dyld_chained_ptr_arm64e_rebase@FI@target	dyld_chained_ptr_arm64e_rebase			uint64_t	-	-	-	-	b3799054cbf787e9	-
+field	c:@S@dyld_chained_ptr_arm64e_rebase@FI@high8	dyld_chained_ptr_arm64e_rebase			uint64_t	-	-	-	-	0df8cbb2fc74c4bf	-
+field	c:@S@dyld_chained_ptr_arm64e_rebase@FI@next	dyld_chained_ptr_arm64e_rebase			uint64_t	-	-	-	-	2e16706f0a22b3ed	-
+field	c:@S@dyld_chained_ptr_arm64e_rebase@FI@bind	dyld_chained_ptr_arm64e_rebase			uint64_t	-	-	-	-	a3b048ab2d140a52	-
+field	c:@S@dyld_chained_ptr_arm64e_rebase@FI@auth	dyld_chained_ptr_arm64e_rebase			uint64_t	-	-	-	-	87e1842784a23e91	-
+struct	c:@S@dyld_chained_ptr_arm64e_bind	-			-	-	-	-	-	27c1723cb6e79f77	-
+field	c:@S@dyld_chained_ptr_arm64e_bind@FI@ordinal	dyld_chained_ptr_arm64e_bind			uint64_t	-	-	-	-	4936c293321db5c7	-
+field	c:@S@dyld_chained_ptr_arm64e_bind@FI@zero	dyld_chained_ptr_arm64e_bind			uint64_t	-	-	-	-	d3510af024c4ffea	-
+field	c:@S@dyld_chained_ptr_arm64e_bind@FI@addend	dyld_chained_ptr_arm64e_bind			uint64_t	-	-	-	-	03bd0d749e6385a3	-
+field	c:@S@dyld_chained_ptr_arm64e_bind@FI@next	dyld_chained_ptr_arm64e_bind			uint64_t	-	-	-	-	45dcb874d0be52a9	-
+field	c:@S@dyld_chained_ptr_arm64e_bind@FI@bind	dyld_chained_ptr_arm64e_bind			uint64_t	-	-	-	-	32d8d996d9254e36	-
+field	c:@S@dyld_chained_ptr_arm64e_bind@FI@auth	dyld_chained_ptr_arm64e_bind			uint64_t	-	-	-	-	0fed103b947d3040	-
+struct	c:@S@dyld_chained_ptr_arm64e_auth_rebase	-			-	-	-	-	-	44b9b1e016413acc	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@target	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	1b0dce4b5f4dcdf1	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@diversity	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	90f312d6533ed382	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@addrDiv	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	51c98fa4731d1e16	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@key	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	001f7d0534e8af84	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@next	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	7d53a05d0d90d336	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@bind	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	69cdc2e9fbf4e307	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_rebase@FI@auth	dyld_chained_ptr_arm64e_auth_rebase			uint64_t	-	-	-	-	fb22997667e23f30	-
+struct	c:@S@dyld_chained_ptr_arm64e_auth_bind	-			-	-	-	-	-	a07518630367fd17	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@ordinal	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	1ca32848838c3129	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@zero	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	bc3c89dbcf7cc8bd	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@diversity	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	43f70353e1a91050	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@addrDiv	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	ef7171d09b908ea5	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@key	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	c01be191b8c23426	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@next	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	06e3b5778c567227	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@bind	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	7597f555bcfc6358	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind@FI@auth	dyld_chained_ptr_arm64e_auth_bind			uint64_t	-	-	-	-	260745bfe5e12f2f	-
+struct	c:@S@dyld_chained_ptr_64_rebase	-			-	-	-	-	-	664eebc4bc8073b0	-
+field	c:@S@dyld_chained_ptr_64_rebase@FI@target	dyld_chained_ptr_64_rebase			uint64_t	-	-	-	-	c1cf7068cbddaa10	-
+field	c:@S@dyld_chained_ptr_64_rebase@FI@high8	dyld_chained_ptr_64_rebase			uint64_t	-	-	-	-	02db5a3ecf96c0c1	-
+field	c:@S@dyld_chained_ptr_64_rebase@FI@reserved	dyld_chained_ptr_64_rebase			uint64_t	-	-	-	-	b34a8e46e87d8da5	-
+field	c:@S@dyld_chained_ptr_64_rebase@FI@next	dyld_chained_ptr_64_rebase			uint64_t	-	-	-	-	3dce79c0bacbfb07	-
+field	c:@S@dyld_chained_ptr_64_rebase@FI@bind	dyld_chained_ptr_64_rebase			uint64_t	-	-	-	-	68883045207c8462	-
+struct	c:@S@dyld_chained_ptr_arm64e_bind24	-			-	-	-	-	-	6d4522e92dd71990	-
+field	c:@S@dyld_chained_ptr_arm64e_bind24@FI@ordinal	dyld_chained_ptr_arm64e_bind24			uint64_t	-	-	-	-	76108f9a2d30bd37	-
+field	c:@S@dyld_chained_ptr_arm64e_bind24@FI@zero	dyld_chained_ptr_arm64e_bind24			uint64_t	-	-	-	-	5dfd627640c789dd	-
+field	c:@S@dyld_chained_ptr_arm64e_bind24@FI@addend	dyld_chained_ptr_arm64e_bind24			uint64_t	-	-	-	-	f59d4189e9b644cd	-
+field	c:@S@dyld_chained_ptr_arm64e_bind24@FI@next	dyld_chained_ptr_arm64e_bind24			uint64_t	-	-	-	-	dbba76e90703ab6c	-
+field	c:@S@dyld_chained_ptr_arm64e_bind24@FI@bind	dyld_chained_ptr_arm64e_bind24			uint64_t	-	-	-	-	ef36be45a95835f8	-
+field	c:@S@dyld_chained_ptr_arm64e_bind24@FI@auth	dyld_chained_ptr_arm64e_bind24			uint64_t	-	-	-	-	180f80038b72d867	-
+struct	c:@S@dyld_chained_ptr_arm64e_auth_bind24	-			-	-	-	-	-	3792f23c5072ad7c	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@ordinal	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	90b8f4805c7bc6fa	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@zero	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	19785fc87b80f689	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@diversity	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	cd291d7811751128	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@addrDiv	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	5761255a61917ae8	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@key	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	e475550406619c16	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@next	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	ef86179a23a6379f	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@bind	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	75ee371118fe626a	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_bind24@FI@auth	dyld_chained_ptr_arm64e_auth_bind24			uint64_t	-	-	-	-	ac787df9ef25ddb3	-
+struct	c:@S@dyld_chained_ptr_arm64e_segmented_rebase	-			-	-	-	-	-	1a3812690aa35ab6	-
+field	c:@S@dyld_chained_ptr_arm64e_segmented_rebase@FI@targetSegOffset	dyld_chained_ptr_arm64e_segmented_rebase			uint32_t	-	-	-	-	1ed1c08fa55e8c10	-
+field	c:@S@dyld_chained_ptr_arm64e_segmented_rebase@FI@targetSegIndex	dyld_chained_ptr_arm64e_segmented_rebase			uint32_t	-	-	-	-	8ae6cf90becd3af4	-
+field	c:@S@dyld_chained_ptr_arm64e_segmented_rebase@FI@padding	dyld_chained_ptr_arm64e_segmented_rebase			uint32_t	-	-	-	-	ea4bc879a93cf410	-
+field	c:@S@dyld_chained_ptr_arm64e_segmented_rebase@FI@next	dyld_chained_ptr_arm64e_segmented_rebase			uint32_t	-	-	-	-	78bbfa89d1e2e9a4	-
+field	c:@S@dyld_chained_ptr_arm64e_segmented_rebase@FI@auth	dyld_chained_ptr_arm64e_segmented_rebase			uint32_t	-	-	-	-	e2aa88de0c947bc1	-
+struct	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase	-			-	-	-	-	-	ac3fdb6a392d0ac4	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@targetSegOffset	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	37a5d33f1a19b4af	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@targetSegIndex	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	f4119755e330e71e	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@diversity	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	11a5f7749ca9010b	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@addrDiv	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	7e79d5834d5c4fa5	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@key	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	c059c5540f629f44	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@next	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	e86ba712067f10fb	-
+field	c:@S@dyld_chained_ptr_arm64e_auth_segmented_rebase@FI@auth	dyld_chained_ptr_arm64e_auth_segmented_rebase			uint32_t	-	-	-	-	e2cbee77bc50601c	-
+struct	c:@S@dyld_chained_ptr_64_bind	-			-	-	-	-	-	14e24c9ec7600c38	-
+field	c:@S@dyld_chained_ptr_64_bind@FI@ordinal	dyld_chained_ptr_64_bind			uint64_t	-	-	-	-	b36fd724bcd73bf4	-
+field	c:@S@dyld_chained_ptr_64_bind@FI@addend	dyld_chained_ptr_64_bind			uint64_t	-	-	-	-	8e73e66199c59c13	-
+field	c:@S@dyld_chained_ptr_64_bind@FI@reserved	dyld_chained_ptr_64_bind			uint64_t	-	-	-	-	77a610e27356788a	-
+field	c:@S@dyld_chained_ptr_64_bind@FI@next	dyld_chained_ptr_64_bind			uint64_t	-	-	-	-	f94c741540f73d8f	-
+field	c:@S@dyld_chained_ptr_64_bind@FI@bind	dyld_chained_ptr_64_bind			uint64_t	-	-	-	-	f024a996b4da4500	-
+struct	c:@S@dyld_chained_ptr_64_kernel_cache_rebase	-			-	-	-	-	-	16f1217e3436ef38	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@target	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	98790eb5652ac72b	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@cacheLevel	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	8d9dfc712d54eb5b	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@diversity	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	5d243ab92e39ee57	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@addrDiv	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	1996897a301f75d9	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@key	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	b20b487f5f3a69ea	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@next	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	ebdb4de5dbdf68f3	-
+field	c:@S@dyld_chained_ptr_64_kernel_cache_rebase@FI@isAuth	dyld_chained_ptr_64_kernel_cache_rebase			uint64_t	-	-	-	-	db72d9a85a9ee725	-
+struct	c:@S@dyld_chained_ptr_32_rebase	-			-	-	-	-	-	c9882e9e3f835dae	-
+field	c:@S@dyld_chained_ptr_32_rebase@FI@target	dyld_chained_ptr_32_rebase			uint32_t	-	-	-	-	daafd5b1542407b3	-
+field	c:@S@dyld_chained_ptr_32_rebase@FI@next	dyld_chained_ptr_32_rebase			uint32_t	-	-	-	-	ce6892af97e7d19f	-
+field	c:@S@dyld_chained_ptr_32_rebase@FI@bind	dyld_chained_ptr_32_rebase			uint32_t	-	-	-	-	254e8968e7951681	-
+struct	c:@S@dyld_chained_ptr_32_bind	-			-	-	-	-	-	46775573524b6974	-
+field	c:@S@dyld_chained_ptr_32_bind@FI@ordinal	dyld_chained_ptr_32_bind			uint32_t	-	-	-	-	4d6a1c004a4d57d2	-
+field	c:@S@dyld_chained_ptr_32_bind@FI@addend	dyld_chained_ptr_32_bind			uint32_t	-	-	-	-	5c5e2e92c230293a	-
+field	c:@S@dyld_chained_ptr_32_bind@FI@next	dyld_chained_ptr_32_bind			uint32_t	-	-	-	-	088c42c66da24c63	-
+field	c:@S@dyld_chained_ptr_32_bind@FI@bind	dyld_chained_ptr_32_bind			uint32_t	-	-	-	-	51bb578619cd7a92	-
+struct	c:@S@dyld_chained_ptr_32_cache_rebase	-			-	-	-	-	-	6148286fe4cb935e	-
+field	c:@S@dyld_chained_ptr_32_cache_rebase@FI@target	dyld_chained_ptr_32_cache_rebase			uint32_t	-	-	-	-	2021536bbc9c963f	-
+field	c:@S@dyld_chained_ptr_32_cache_rebase@FI@next	dyld_chained_ptr_32_cache_rebase			uint32_t	-	-	-	-	6c2adb061ffbf6f0	-
+struct	c:@S@dyld_chained_ptr_32_firmware_rebase	-			-	-	-	-	-	e8bca6412df0ebc3	-
+field	c:@S@dyld_chained_ptr_32_firmware_rebase@FI@target	dyld_chained_ptr_32_firmware_rebase			uint32_t	-	-	-	-	64cdc024485e728a	-
+field	c:@S@dyld_chained_ptr_32_firmware_rebase@FI@next	dyld_chained_ptr_32_firmware_rebase			uint32_t	-	-	-	-	bdd79689fbe4273a	-
+struct	c:@S@dyld_chained_ptr_arm64e_shared_cache_rebase	-			-	-	-	-	-	30b4036726c56247	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_rebase@FI@runtimeOffset	dyld_chained_ptr_arm64e_shared_cache_rebase			uint64_t	-	-	-	-	68253affea1d54d6	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_rebase@FI@high8	dyld_chained_ptr_arm64e_shared_cache_rebase			uint64_t	-	-	-	-	320d9a8079c83041	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_rebase@FI@unused	dyld_chained_ptr_arm64e_shared_cache_rebase			uint64_t	-	-	-	-	03aa5f56bb03f32a	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_rebase@FI@next	dyld_chained_ptr_arm64e_shared_cache_rebase			uint64_t	-	-	-	-	e06abf83e5c34179	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_rebase@FI@auth	dyld_chained_ptr_arm64e_shared_cache_rebase			uint64_t	-	-	-	-	fd06fdd7eeccec3d	-
+struct	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase	-			-	-	-	-	-	3c64d0c10d697bbf	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase@FI@runtimeOffset	dyld_chained_ptr_arm64e_shared_cache_auth_rebase			uint64_t	-	-	-	-	a0267e071aa8f5a1	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase@FI@diversity	dyld_chained_ptr_arm64e_shared_cache_auth_rebase			uint64_t	-	-	-	-	aa0c224053563b58	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase@FI@addrDiv	dyld_chained_ptr_arm64e_shared_cache_auth_rebase			uint64_t	-	-	-	-	84e8a63e88e913e6	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase@FI@keyIsData	dyld_chained_ptr_arm64e_shared_cache_auth_rebase			uint64_t	-	-	-	-	7a2681a34d1a165d	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase@FI@next	dyld_chained_ptr_arm64e_shared_cache_auth_rebase			uint64_t	-	-	-	-	872342c1230763cd	-
+field	c:@S@dyld_chained_ptr_arm64e_shared_cache_auth_rebase@FI@auth	dyld_chained_ptr_arm64e_shared_cache_auth_rebase			uint64_t	-	-	-	-	79a45526081ac2d9	-
+enum	c:@Ea@DYLD_CHAINED_IMPORT	-	-		unsigned int	-	-	-	-	077b0d1a51d18060	-
+enumconst	c:@Ea@DYLD_CHAINED_IMPORT@DYLD_CHAINED_IMPORT	-			-	-	-	-	-	2bde761738453810	1
+enumconst	c:@Ea@DYLD_CHAINED_IMPORT@DYLD_CHAINED_IMPORT_ADDEND	-			-	-	-	-	-	aa048d72c86c8f1a	2
+enumconst	c:@Ea@DYLD_CHAINED_IMPORT@DYLD_CHAINED_IMPORT_ADDEND64	-			-	-	-	-	-	4459aded6dc523cf	3
+struct	c:@S@dyld_chained_import	-			-	-	-	-	-	3ca558821ecfda3e	-
+field	c:@S@dyld_chained_import@FI@lib_ordinal	dyld_chained_import			uint32_t	-	-	-	-	cbf5f096b35d14d8	-
+field	c:@S@dyld_chained_import@FI@weak_import	dyld_chained_import			uint32_t	-	-	-	-	92755f1ee92a618d	-
+field	c:@S@dyld_chained_import@FI@name_offset	dyld_chained_import			uint32_t	-	-	-	-	8808c94b40194154	-
+struct	c:@S@dyld_chained_import_addend	-			-	-	-	-	-	84a985cc6ce9e30b	-
+field	c:@S@dyld_chained_import_addend@FI@lib_ordinal	dyld_chained_import_addend			uint32_t	-	-	-	-	e6d47dbf31edf311	-
+field	c:@S@dyld_chained_import_addend@FI@weak_import	dyld_chained_import_addend			uint32_t	-	-	-	-	add069cbc4a397aa	-
+field	c:@S@dyld_chained_import_addend@FI@name_offset	dyld_chained_import_addend			uint32_t	-	-	-	-	c8b89546a8c82a89	-
+field	c:@S@dyld_chained_import_addend@FI@addend	dyld_chained_import_addend			int32_t	-	-	-	-	c15f13273b4e5d41	-
+struct	c:@S@dyld_chained_import_addend64	-			-	-	-	-	-	9b7ddcbd3078a065	-
+field	c:@S@dyld_chained_import_addend64@FI@lib_ordinal	dyld_chained_import_addend64			uint64_t	-	-	-	-	be0b38c55c31f573	-
+field	c:@S@dyld_chained_import_addend64@FI@weak_import	dyld_chained_import_addend64			uint64_t	-	-	-	-	7464ffa9b7326609	-
+field	c:@S@dyld_chained_import_addend64@FI@reserved	dyld_chained_import_addend64			uint64_t	-	-	-	-	9c8228605a7652d0	-
+field	c:@S@dyld_chained_import_addend64@FI@name_offset	dyld_chained_import_addend64			uint64_t	-	-	-	-	02130e0e86d9fcd2	-
+field	c:@S@dyld_chained_import_addend64@FI@addend	dyld_chained_import_addend64			uint64_t	-	-	-	-	fd0d1451b213f67a	-
+function	c:@F@getsectdata	-			char * (const char *, const char *, unsigned long *)	const char * segname | const char * sectname | unsigned long * size	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	d63fe86a65cb80f4	-
+function	c:@F@getsectdatafromFramework	-			char * (const char *, const char *, const char *, unsigned long *)	const char * FrameworkName | const char * segname | const char * sectname | unsigned long * size	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	18c262329c1d6c38	-
+function	c:@F@get_end	-			unsigned long (void)	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	02aa937577e1b2cb	-
+function	c:@F@get_etext	-			unsigned long (void)	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	bde5ef3d82f906ea	-
+function	c:@F@get_edata	-			unsigned long (void)	-	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	840656d57398918d	-
+function	c:@F@getsectbyname	-			const struct section_64 * (const char *, const char *)	const char * segname | const char * sectname	-	-	-	22b5ebe0625b72b9	-
+function	c:@F@getsectiondata	-			uint8_t * (const struct mach_header_64 *, const char *, const char *, unsigned long *)	const struct mach_header_64 * mhp | const char * segname | const char * sectname | unsigned long * size	-	-	-	db55cc1cf7eda25f	-
+function	c:@F@getsegbyname	-			const struct segment_command_64 * (const char *)	const char * segname	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	f6d115e2ae9ade31	-
+function	c:@F@getsegmentdata	-			uint8_t * (const struct mach_header_64 *, const char *, unsigned long *)	const struct mach_header_64 * mhp | const char * segname | unsigned long * size	-	-	-	c4ad67fe70ad72c2	-
+function	c:@F@getsectdatafromheader	-			char * (const struct mach_header *, const char *, const char *, uint32_t *)	const struct mach_header * mhp | const char * segname | const char * sectname | uint32_t * size	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	b003618aad90c2d4	-
+function	c:@F@getsectbynamefromheader	-			const struct section * (const struct mach_header *, const char *, const char *)	const struct mach_header * mhp | const char * segname | const char * sectname	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	fa3a8ffe8be28f3a	-
+function	c:@F@getsectbynamefromheaderwithswap	-			const struct section * (struct mach_header *, const char *, const char *, int)	struct mach_header * mhp | const char * segname | const char * sectname | int fSwap	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	2d84710cb7a6424c	-
+function	c:@F@getsectdatafromheader_64	-			char * (const struct mach_header_64 *, const char *, const char *, uint64_t *)	const struct mach_header_64 * mhp | const char * segname | const char * sectname | uint64_t * size	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	af59a828f5da2dd1	-
+function	c:@F@getsectbynamefromheader_64	-			const struct section_64 * (const struct mach_header_64 *, const char *, const char *)	const struct mach_header_64 * mhp | const char * segname | const char * sectname	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	6cc717e3fbe2f1c6	-
+function	c:@F@getsectbynamefromheaderwithswap_64	-			const struct section * (struct mach_header_64 *, const char *, const char *, int)	struct mach_header_64 * mhp | const char * segname | const char * sectname | int fSwap	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	e9dc8c7aaa48c2e0	-
+var	c:@_mh_execute_header	-			const struct mach_header_64	-	-	-	-	f2cfe080b680a3df	-
+var	c:@_mh_bundle_header	-			const struct mach_header_64	-	-	-	-	a69d02459e2f870d	-
+var	c:@_mh_dylib_header	-			const struct mach_header_64	-	-	-	-	88cf52718c819ee6	-
+var	c:@_mh_dylinker_header	-			const struct mach_header_64	-	-	-	-	288344d2d5d09c31	-
+struct	c:@S@nlist	-			-	-	-	-	-	ec13a33bbf4c6ffe	-
+union	c:@S@nlist@U@nlist.h@3717	-	-		-	-	-	-	-	82e79376b1c6b7a6	-
+field	c:@S@nlist@U@nlist.h@3717@FI@n_strx	-			uint32_t	-	-	-	-	fa1d876ada57e3d6	-
+field	c:@S@nlist@FI@n_un	nlist			union (unnamed)	-	-	-	-	889ea59ec159af8f	-
+field	c:@S@nlist@FI@n_type	nlist			uint8_t	-	-	-	-	00b3919c88b39fbb	-
+field	c:@S@nlist@FI@n_sect	nlist			uint8_t	-	-	-	-	21eaa1c753e0301a	-
+field	c:@S@nlist@FI@n_desc	nlist			int16_t	-	-	-	-	1ea4a71e36b6071a	-
+field	c:@S@nlist@FI@n_value	nlist			uint32_t	-	-	-	-	6dd1eeb635c8fd6a	-
+struct	c:@S@nlist_64	-			-	-	-	-	-	b41c5f63b1d04559	-
+union	c:@S@nlist_64@U@nlist.h@4159	-	-		-	-	-	-	-	9ff7b00f462f99f0	-
+field	c:@S@nlist_64@U@nlist.h@4159@FI@n_strx	-			uint32_t	-	-	-	-	7656c41ebfb6e8fc	-
+field	c:@S@nlist_64@FI@n_un	nlist_64			union (unnamed)	-	-	-	-	9610662f040ded98	-
+field	c:@S@nlist_64@FI@n_type	nlist_64			uint8_t	-	-	-	-	9e94ff92222ec7ed	-
+field	c:@S@nlist_64@FI@n_sect	nlist_64			uint8_t	-	-	-	-	7f9e652f4cb6702c	-
+field	c:@S@nlist_64@FI@n_desc	nlist_64			uint16_t	-	-	-	-	70314f34ee3d09b1	-
+field	c:@S@nlist_64@FI@n_value	nlist_64			uint64_t	-	-	-	-	0540c58cabc43ff5	-
+function	c:@F@nlist	-			int (const char *, struct nlist *)	const char * filename | struct nlist * list	-	-	-	b0969c8ee44eb7a4	-
+struct	c:@S@ranlib	-			-	-	-	-	-	ff29daea1ea5bb1d	-
+union	c:@S@ranlib@U@ranlib.h@2771	-	-		-	-	-	-	-	84544d0ea57e3f70	-
+field	c:@S@ranlib@U@ranlib.h@2771@FI@ran_strx	-			uint32_t	-	-	-	-	b780ec4025f2a8fc	-
+field	c:@S@ranlib@FI@ran_un	ranlib			union (unnamed)	-	-	-	-	8ceeac79ede616c1	-
+field	c:@S@ranlib@FI@ran_off	ranlib			uint32_t	-	-	-	-	a0299db0884564d8	-
+struct	c:@S@ranlib_64	-			-	-	-	-	-	77139b6ba4485603	-
+union	c:@S@ranlib_64@U@ranlib.h@3738	-	-		-	-	-	-	-	827d8440fd0e3591	-
+field	c:@S@ranlib_64@U@ranlib.h@3738@FI@ran_strx	-			uint64_t	-	-	-	-	d4f8880aaea5dff3	-
+field	c:@S@ranlib_64@FI@ran_un	ranlib_64			union (unnamed)	-	-	-	-	bb7f37c3678c0668	-
+field	c:@S@ranlib_64@FI@ran_off	ranlib_64			uint64_t	-	-	-	-	1b91acc5422ec971	-
+struct	c:@S@relocation_info	-			-	-	-	-	-	36f8201f121dcc6a	-
+field	c:@S@relocation_info@FI@r_address	relocation_info			int32_t	-	-	-	-	fc8b5d9556c1de97	-
+field	c:@S@relocation_info@FI@r_symbolnum	relocation_info			uint32_t	-	-	-	-	d2f0cb51c4303762	-
+field	c:@S@relocation_info@FI@r_pcrel	relocation_info			uint32_t	-	-	-	-	ef5f48ebfce35ae9	-
+field	c:@S@relocation_info@FI@r_length	relocation_info			uint32_t	-	-	-	-	b403b412808c9b81	-
+field	c:@S@relocation_info@FI@r_extern	relocation_info			uint32_t	-	-	-	-	e3932462f655e69b	-
+field	c:@S@relocation_info@FI@r_type	relocation_info			uint32_t	-	-	-	-	3ecb8f3c8c3bcb03	-
+struct	c:@S@scattered_relocation_info	-			-	-	-	-	-	a89d6a97dc0c6ced	-
+field	c:@S@scattered_relocation_info@FI@r_address	scattered_relocation_info			uint32_t	-	-	-	-	77a993700c785c80	-
+field	c:@S@scattered_relocation_info@FI@r_type	scattered_relocation_info			uint32_t	-	-	-	-	ebec9db190a2aa0e	-
+field	c:@S@scattered_relocation_info@FI@r_length	scattered_relocation_info			uint32_t	-	-	-	-	6c2590578ec26088	-
+field	c:@S@scattered_relocation_info@FI@r_pcrel	scattered_relocation_info			uint32_t	-	-	-	-	5d18ce36d49f25e5	-
+field	c:@S@scattered_relocation_info@FI@r_scattered	scattered_relocation_info			uint32_t	-	-	-	-	64f3c1e2462dc9d7	-
+field	c:@S@scattered_relocation_info@FI@r_value	scattered_relocation_info			int32_t	-	-	-	-	3afc9d3e43c179e0	-
+enum	c:@E@reloc_type_generic	-			unsigned int	-	-	-	-	37f98969cff063d8	-
+enumconst	c:@E@reloc_type_generic@GENERIC_RELOC_VANILLA	reloc_type_generic			-	-	-	-	-	b48e174aec1ca746	0
+enumconst	c:@E@reloc_type_generic@GENERIC_RELOC_PAIR	reloc_type_generic			-	-	-	-	-	515b7908a0d58825	1
+enumconst	c:@E@reloc_type_generic@GENERIC_RELOC_SECTDIFF	reloc_type_generic			-	-	-	-	-	d70ca9bc9656bb3e	2
+enumconst	c:@E@reloc_type_generic@GENERIC_RELOC_PB_LA_PTR	reloc_type_generic			-	-	-	-	-	5c3e6e61bc2c8fc5	3
+enumconst	c:@E@reloc_type_generic@GENERIC_RELOC_LOCAL_SECTDIFF	reloc_type_generic			-	-	-	-	-	6ac47d4120cbf79e	4
+enumconst	c:@E@reloc_type_generic@GENERIC_RELOC_TLV	reloc_type_generic			-	-	-	-	-	4ea0f03be23f57e1	5
+function	c:@F@swap_fat_header	-			void (struct fat_header *, enum NXByteOrder)	struct fat_header * fat_header | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	ac03ca7e0c344255	-
+function	c:@F@swap_fat_arch	-			void (struct fat_arch *, uint32_t, enum NXByteOrder)	struct fat_arch * fat_archs | uint32_t nfat_arch | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	7528a754ce0f02fc	-
+function	c:@F@swap_fat_arch_64	-			void (struct fat_arch_64 *, uint32_t, enum NXByteOrder)	struct fat_arch_64 * fat_archs64 | uint32_t nfat_arch | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	35b2cb606984deda	-
+function	c:@F@swap_mach_header	-			void (struct mach_header *, enum NXByteOrder)	struct mach_header * mh | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	264e146be6f464ba	-
+function	c:@F@swap_mach_header_64	-			void (struct mach_header_64 *, enum NXByteOrder)	struct mach_header_64 * mh | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	03fdfcc45663b007	-
+function	c:@F@swap_load_command	-			void (struct load_command *, enum NXByteOrder)	struct load_command * lc | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	82bd5f637e3cb4d1	-
+function	c:@F@swap_segment_command	-			void (struct segment_command *, enum NXByteOrder)	struct segment_command * sg | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	742931191b3227fd	-
+function	c:@F@swap_segment_command_64	-			void (struct segment_command_64 *, enum NXByteOrder)	struct segment_command_64 * sg | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	acac0f75c4d5730e	-
+function	c:@F@swap_section	-			void (struct section *, uint32_t, enum NXByteOrder)	struct section * s | uint32_t nsects | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	a38f68a6e94881c0	-
+function	c:@F@swap_section_64	-			void (struct section_64 *, uint32_t, enum NXByteOrder)	struct section_64 * s | uint32_t nsects | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	010d3e3fa7de1626	-
+function	c:@F@swap_symtab_command	-			void (struct symtab_command *, enum NXByteOrder)	struct symtab_command * st | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	9d9ceaccdd13d25e	-
+function	c:@F@swap_dysymtab_command	-			void (struct dysymtab_command *, enum NXByteOrder)	struct dysymtab_command * dyst | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	d9bb620b43b22f6f	-
+function	c:@F@swap_symseg_command	-			void (struct symseg_command *, enum NXByteOrder)	struct symseg_command * ss | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	3e1e7204d02130dd	-
+function	c:@F@swap_fvmlib_command	-			void (struct fvmlib_command *, enum NXByteOrder)	struct fvmlib_command * fl | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	e91f5f197d2ec856	-
+function	c:@F@swap_dylib_command	-			void (struct dylib_command *, enum NXByteOrder)	struct dylib_command * dl | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	5009fd0aa51a4b09	-
+function	c:@F@swap_sub_framework_command	-			void (struct sub_framework_command *, enum NXByteOrder)	struct sub_framework_command * sub | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	78f6f38d041f73f9	-
+function	c:@F@swap_sub_umbrella_command	-			void (struct sub_umbrella_command *, enum NXByteOrder)	struct sub_umbrella_command * usub | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	7aa9de97fae1e137	-
+function	c:@F@swap_sub_library_command	-			void (struct sub_library_command *, enum NXByteOrder)	struct sub_library_command * lsub | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	66fdd7a828791d1a	-
+function	c:@F@swap_sub_client_command	-			void (struct sub_client_command *, enum NXByteOrder)	struct sub_client_command * csub | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	01b1be0497642fa2	-
+function	c:@F@swap_prebound_dylib_command	-			void (struct prebound_dylib_command *, enum NXByteOrder)	struct prebound_dylib_command * pbdylib | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	6da71959d455c706	-
+function	c:@F@swap_dylinker_command	-			void (struct dylinker_command *, enum NXByteOrder)	struct dylinker_command * dyld | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	22c1e5acae168705	-
+function	c:@F@swap_fvmfile_command	-			void (struct fvmfile_command *, enum NXByteOrder)	struct fvmfile_command * ff | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	3acdc0bd5ea82776	-
+function	c:@F@swap_thread_command	-			void (struct thread_command *, enum NXByteOrder)	struct thread_command * ut | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	0fe008b30cb965ea	-
+function	c:@F@swap_ident_command	-			void (struct ident_command *, enum NXByteOrder)	struct ident_command * ident | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	846804fbeb279ce2	-
+function	c:@F@swap_routines_command	-			void (struct routines_command *, enum NXByteOrder)	struct routines_command * r_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	36ff2056d5596ef5	-
+function	c:@F@swap_routines_command_64	-			void (struct routines_command_64 *, enum NXByteOrder)	struct routines_command_64 * r_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	a1c694fa433eab4f	-
+function	c:@F@swap_twolevel_hints_command	-			void (struct twolevel_hints_command *, enum NXByteOrder)	struct twolevel_hints_command * hints_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	cd77b01dc9c08bc3	-
+function	c:@F@swap_prebind_cksum_command	-			void (struct prebind_cksum_command *, enum NXByteOrder)	struct prebind_cksum_command * cksum_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	75ea3bb14bc7feb0	-
+function	c:@F@swap_uuid_command	-			void (struct uuid_command *, enum NXByteOrder)	struct uuid_command * uuid_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	088992ef7a647875	-
+function	c:@F@swap_linkedit_data_command	-			void (struct linkedit_data_command *, enum NXByteOrder)	struct linkedit_data_command * ld | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	8866e6ba8204dc6e	-
+function	c:@F@swap_version_min_command	-			void (struct version_min_command *, enum NXByteOrder)	struct version_min_command * ver_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	dc1a4004f2cbd1d9	-
+function	c:@F@swap_rpath_command	-			void (struct rpath_command *, enum NXByteOrder)	struct rpath_command * rpath_cmd | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	cf9c9fea336627fe	-
+function	c:@F@swap_encryption_command	-			void (struct encryption_info_command *, enum NXByteOrder)	struct encryption_info_command * ec | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	cb31d890306d551f	-
+function	c:@F@swap_encryption_command_64	-			void (struct encryption_info_command_64 *, enum NXByteOrder)	struct encryption_info_command_64 * ec | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	57dabae085750d31	-
+function	c:@F@swap_linker_option_command	-			void (struct linker_option_command *, enum NXByteOrder)	struct linker_option_command * lo | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	d76cee4de839b203	-
+function	c:@F@swap_dyld_info_command	-			void (struct dyld_info_command *, enum NXByteOrder)	struct dyld_info_command * ed | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	c27f237d41797cfc	-
+function	c:@F@swap_entry_point_command	-			void (struct entry_point_command *, enum NXByteOrder)	struct entry_point_command * ep | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	4778301ba8ab111f	-
+function	c:@F@swap_source_version_command	-			void (struct source_version_command *, enum NXByteOrder)	struct source_version_command * sv | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	c7b4b0b56315661d	-
+function	c:@F@swap_note_command	-			void (struct note_command *, enum NXByteOrder)	struct note_command * nc | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	0ba4227128e96526	-
+function	c:@F@swap_build_version_command	-			void (struct build_version_command *, enum NXByteOrder)	struct build_version_command * bv | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	030bbd8a4898907d	-
+function	c:@F@swap_build_tool_version	-			void (struct build_tool_version *, uint32_t, enum NXByteOrder)	struct build_tool_version * bt | uint32_t ntools | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	f80856b31837447b	-
+function	c:@F@swap_twolevel_hint	-			void (struct twolevel_hint *, uint32_t, enum NXByteOrder)	struct twolevel_hint * hints | uint32_t nhints | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	d2ef9ad81809e51c	-
+function	c:@F@swap_fileset_entry_command	-			void (struct fileset_entry_command *, enum NXByteOrder)	struct fileset_entry_command * lc | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	906cf44c46c09a52	-
+function	c:@F@swap_nlist	-			void (struct nlist *, uint32_t, enum NXByteOrder)	struct nlist * symbols | uint32_t nsymbols | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	75f1d3c0624fcf57	-
+function	c:@F@swap_nlist_64	-			void (struct nlist_64 *, uint32_t, enum NXByteOrder)	struct nlist_64 * symbols | uint32_t nsymbols | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	63c311ec16571f35	-
+function	c:@F@swap_ranlib	-			void (struct ranlib *, uint32_t, enum NXByteOrder)	struct ranlib * ranlibs | uint32_t nranlibs | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	5a631dba0a681e7b	-
+function	c:@F@swap_ranlib_64	-			void (struct ranlib_64 *, uint64_t, enum NXByteOrder)	struct ranlib_64 * ranlibs | uint64_t nranlibs | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	0733b23f40df9839	-
+function	c:@F@swap_relocation_info	-			void (struct relocation_info *, uint32_t, enum NXByteOrder)	struct relocation_info * relocs | uint32_t nrelocs | enum NXByteOrder target_byte_order	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	ca2faedfae23c430	-
+function	c:@F@swap_indirect_symbols	-			void (uint32_t *, uint32_t, enum NXByteOrder)	uint32_t * indirect_symbols | uint32_t nindirect_symbols | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	21e607513d1280b3	-
+function	c:@F@swap_dylib_reference	-			void (struct dylib_reference *, uint32_t, enum NXByteOrder)	struct dylib_reference * refs | uint32_t nrefs | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	cfa8f490877b10eb	-
+function	c:@F@swap_dylib_module	-			void (struct dylib_module *, uint32_t, enum NXByteOrder)	struct dylib_module * mods | uint32_t nmods | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	3239a7d1b2d7fcdb	-
+function	c:@F@swap_dylib_module_64	-			void (struct dylib_module_64 *, uint32_t, enum NXByteOrder)	struct dylib_module_64 * mods | uint32_t nmods | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	9f599ac70794aa1d	-
+function	c:@F@swap_dylib_table_of_contents	-			void (struct dylib_table_of_contents *, uint32_t, enum NXByteOrder)	struct dylib_table_of_contents * tocs | uint32_t ntocs | enum NXByteOrder target_byte_sex	-	ios=1.0/16.0/-/0,macos=10.0/13.0/-/0,tvos=1.0/16.0/-/0,watchos=1.0/8.0/-/0	-	6c36f456d5a7f8da	-
+function	c:@F@macho_cpu_type_for_arch_name	-			_Bool (const char *, cpu_type_t *, cpu_subtype_t *)	const char * archName | cpu_type_t * type | cpu_subtype_t * subtype	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	6e5c17c15e81ea88	-
+function	c:@F@macho_arch_name_for_cpu_type	-			const char * (cpu_type_t, cpu_subtype_t)	cpu_type_t type | cpu_subtype_t subtype	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	a6a8a457df8c764d	-
+function	c:@F@macho_arch_name_for_mach_header	-			const char * (const struct mach_header *)	const struct mach_header * mh	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	b322d8fcf173a64b	-
+function	c:@F@macho_for_each_slice	-			int (const char *, void (^)(const struct mach_header * _Nonnull, uint64_t, size_t, _Bool * _Nonnull))	const char * path | void (^)(const struct mach_header * _Nonnull, uint64_t, size_t, _Bool * _Nonnull) callback	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	83186974694e367b	-
+function	c:@F@macho_for_each_slice_in_fd	-			int (int, void (^)(const struct mach_header * _Nonnull, uint64_t, size_t, _Bool * _Nonnull))	int fd | void (^)(const struct mach_header * _Nonnull, uint64_t, size_t, _Bool * _Nonnull) callback	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	43633ef6d11103e4	-
+function	c:@F@macho_best_slice	-			int (const char *, void (^)(const struct mach_header * _Nonnull, uint64_t, size_t))	const char * path | void (^)(const struct mach_header * _Nonnull, uint64_t, size_t) bestSlice	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	d8cf53affe54b1f4	-
+function	c:@F@macho_best_slice_in_fd	-			int (int, void (^)(const struct mach_header * _Nonnull, uint64_t, size_t))	int fd | void (^)(const struct mach_header * _Nonnull, uint64_t, size_t) bestSlice	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=8.0/-/-/0	-	eb6f422a0ff40d32	-
+typedef	c:@T@cpu_type_t	-			integer_t	-	-	-	-	2cbd61896e5ebc9d	-
+typedef	c:@T@integer_t	-			int	-	-	-	-	5338138e8400902d	-
+typedef	c:@T@cpu_subtype_t	-			integer_t	-	-	-	-	82ea7bcff603aaa7	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@intptr_t	-			__darwin_intptr_t	-	-	-	-	fdac1ab2f2a027a6	-
+typedef	c:@T@__darwin_intptr_t	-			long	-	-	-	-	e10930324992848e	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@uintptr_t	-			unsigned long	-	-	-	-	d45bca13aaee37a2	-
+typedef	c:@T@uuid_t	-			__darwin_uuid_t	-	-	-	-	9f32779f176ee30f	-
+typedef	c:@T@__darwin_uuid_t	-			unsigned char[16]	-	-	-	-	8e41facc8ea29412	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-
+typedef	c:@T@int16_t	-			short	-	-	-	-	a957af8a2c7c6b0a	-

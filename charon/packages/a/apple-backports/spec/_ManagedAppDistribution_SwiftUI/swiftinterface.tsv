@@ -1,0 +1,26 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_ManagedAppDistribution_SwiftUI	struct	ManagedContentStyle	17.2				own
+_ManagedAppDistribution_SwiftUI	property	ManagedContentStyle.automatic	17.2				own
+_ManagedAppDistribution_SwiftUI	property	ManagedContentStyle.compact	17.2				own
+_ManagedAppDistribution_SwiftUI	property	ManagedContentStyle.header	17.2				own
+_ManagedAppDistribution_SwiftUI	property	ManagedContentStyle.vertical	17.2			yes	container
+_ManagedAppDistribution_SwiftUI	struct	ManagedContentOfferState	17.2				own
+_ManagedAppDistribution_SwiftUI	property	ManagedContentOfferState.neverInstalled	17.2				container
+_ManagedAppDistribution_SwiftUI	property	ManagedContentOfferState.notInstalled	17.2				container
+_ManagedAppDistribution_SwiftUI	property	ManagedContentOfferState.installed	17.2				container
+_ManagedAppDistribution_SwiftUI	property	ManagedContentOfferState.noninteractive	17.2				container
+_ManagedAppDistribution_SwiftUI	method	ManagedContentOfferState.installing(progress:)	17.2				container
+_ManagedAppDistribution_SwiftUI	method	ManagedContentOfferState.custom(title:)	17.2				container
+_ManagedAppDistribution_SwiftUI	method	ManagedContentOfferState.==(a:b:)	17.2				container
+_ManagedAppDistribution_SwiftUI	method	ManagedContentOfferState.hash(into:)	17.2				container
+_ManagedAppDistribution_SwiftUI	property	ManagedContentOfferState.hashValue	17.2				container
+_ManagedAppDistribution_SwiftUI	struct	ManagedAppView	17.2				own
+_ManagedAppDistribution_SwiftUI	method	ManagedAppView.init(app:)	17.2				container
+_ManagedAppDistribution_SwiftUI	property	ManagedAppView.body	17.2				container
+_ManagedAppDistribution_SwiftUI	typealias	ManagedAppView.Body	17.2				own
+_ManagedAppDistribution_SwiftUI	struct	ManagedContentView	17.2				own
+_ManagedAppDistribution_SwiftUI	method	ManagedContentView.init(primaryLabel:secondaryLabel:tertiaryLabel:quaternaryLabel:offerState:offerAction:icon:)	17.2				container
+_ManagedAppDistribution_SwiftUI	method	ManagedContentView.init(primaryLabel:secondaryLabel:tertiaryLabel:quaternaryLabel:offerState:offerAction:icon:)	17.2				container
+_ManagedAppDistribution_SwiftUI	property	ManagedContentView.body	17.2				container
+_ManagedAppDistribution_SwiftUI	typealias	ManagedContentView.Body	17.2				own
+_ManagedAppDistribution_SwiftUI	method	SwiftUICore.View.managedContentStyle(_:)	17.2				container

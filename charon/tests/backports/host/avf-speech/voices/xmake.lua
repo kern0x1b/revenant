@@ -1,0 +1,24 @@
+set_project("avfspeechvoices")
+set_version("0.0.1")
+-- The guest probe of the speech voices the 6.1.3 image carries (probe.m): the classes and selectors VoiceServices
+-- answers and the voice files on the image, read in the guest. The probe names no voice itself. The run script
+-- (AVSPEECH_VOICES_ROOT names the working copy) copies this file and control beside the build, as the coreml test does.
+local root = os.getenv("AVSPEECH_VOICES_ROOT") or path.join(os.scriptdir(), "../../../../..")
+add_repositories("charon " .. root)
+add_addons("charon v0.8.16")
+set_config("apple_minimum", "6.1.3")
+includes("@addon/charon/apple-ios")
+includes("@addon/charon/emulate")
+set_allowedplats("iphoneos")
+set_allowedarchs("iphoneos|armv7")
+set_defaultplat("iphoneos")
+set_defaultarchs("iphoneos|armv7")
+
+target("avfspeechvoices")
+    add_rules("@addon/charon/daemon")
+    add_files(path.join(root, "tests/backports/host/avf-speech/voices/probe.m"))
+    add_mflags("-fobjc-arc", "-Wno-deprecated-declarations")
+    add_ldflags("-fobjc-arc", {force = true})
+    add_frameworks("Foundation")
+    set_values("charon.version", "1.0")
+    set_values("charon.control", "control")

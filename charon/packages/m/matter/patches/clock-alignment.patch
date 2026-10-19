@@ -1,0 +1,18 @@
+diff --git a/src/system/SystemClock.h b/src/system/SystemClock.h
+index 9dd6bb87..c12503d7 100644
+--- a/src/system/SystemClock.h
++++ b/src/system/SystemClock.h
+@@ -303,7 +303,12 @@ public:
+     virtual CHIP_ERROR SetClock_RealTime(Microseconds64 aNewCurTime) = 0;
+ 
+ protected:
+-    uint64_t mLastTimestamp = 0;
++    // Charon: aligned to 8 bytes where the target gives uint64_t only 4, which is every 32-bit ARM this port
++    // builds. GetMonotonicTimestamp() takes and replaces this with __atomic_load_n/__atomic_store_n on a
++    // 64-bit value, and a doubleword atomic on ARM has to be 8-byte aligned to be defined at all, so on such a
++    // target the member is aligned rather than the warning that says so turned off. Measured with clang for
++    // armv7-apple-ios: sizeof(struct { char c; uint64_t v; }) is 12 without this and 16 with it.
++    alignas(8) uint64_t mLastTimestamp = 0;
+ };
+ 
+ // Currently we have a single implementation class, ClockImpl, whose members are implemented in build-specific files.

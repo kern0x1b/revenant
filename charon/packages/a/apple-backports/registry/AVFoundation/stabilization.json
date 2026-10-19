@@ -1,0 +1,49 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "-[AVCaptureDeviceFormat isVideoStabilizationSupported]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.x formats answer their stabilization with the release's own -supportedStabilizationMethod, which 7.0 answers with this property as 2 or 0",
+      "effect": "YES exactly when the release's -supportedStabilizationMethod answers 2",
+      "facts": "facts/AVFoundation/VideoStabilization.md",
+      "source": "the armv7 caches of 6.0 to 8.0, the methods read from each image and disassembled; an iPad 2 running 6.1.3 for what its cameras answer"
+    },
+    {
+      "api": "-[AVCaptureDeviceFormat isVideoStabilizationModeSupported:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 65 of the frameworks demand table; the format's support of Standard is the release's own, and Off and Auto are always supported, as 8.0 answers",
+      "effect": "YES for Off and Auto, videoStabilizationSupported for Standard, NO for Cinematic and the modes of later releases, which 6.x does not do",
+      "facts": "facts/AVFoundation/VideoStabilization.md",
+      "source": "the armv7 caches of 6.0 to 8.0, the methods read from each image and disassembled; an iPad 2 running 6.1.3 for what its cameras answer"
+    },
+    {
+      "api": "AVCaptureConnection.preferredVideoStabilizationMode",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 65 of the frameworks demand table; 6.x stabilizes through enablesVideoStabilizationWhenAvailable, which 8.0 maps to Standard",
+      "effect": "kept on the connection; setting it resolves the mode as 8.0 does against the output and the device's active format and turns the release's switch on for Standard, off otherwise, where the connection supports stabilization; a value outside Auto to Cinematic raises NSInvalidArgumentException as 8.0 does; after the old switch is set it reads Standard or Off, as 8.0 does",
+      "facts": "facts/AVFoundation/VideoStabilization.md",
+      "source": "the armv7 caches of 6.0 to 8.0, the methods read from each image and disassembled; an iPad 2 running 6.1.3 for what its cameras answer"
+    },
+    {
+      "api": "AVCaptureConnection.activeVideoStabilizationMode",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 65 of the frameworks demand table; the release says whether it stabilizes with videoStabilizationEnabled, and its one kind of stabilization is the one 8.0 calls Standard",
+      "effect": "Standard when the release's videoStabilizationEnabled is YES, Off otherwise",
+      "facts": "facts/AVFoundation/VideoStabilization.md",
+      "source": "the armv7 caches of 6.0 to 8.0, the methods read from each image and disassembled; an iPad 2 running 6.1.3 for what its cameras answer"
+    }
+  ]
+}

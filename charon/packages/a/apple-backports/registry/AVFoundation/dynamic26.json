@@ -1,0 +1,148 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptureDevice.dynamicAspectRatio",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -dynamicAspectRatio, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "nil, by the header's own rule: \"This property is initialized to the first AVCaptureAspectRatio listed in the device's activeFormat's supportedDynamicAspectRatios property. If the activeFormat's supportedDynamicAspectRatios is an empty array, this property returns nil\" (:2722). That array is empty here (the row below), and measured empty on the host as well. AVCaptureAspectRatio's five constants are 26.0 code+lift rows of their own and are NOT carried, so nothing a caller can name is ever in it",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDevice.dynamicDimensions",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -dynamicDimensions, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "{ 0, 0 }, by the header's own rule for the same empty list: \"If the device's activeFormat's supportedDynamicAspectRatios is an empty array, this property returns {0,0}\" (:2728). Measured on the host: 0x0, for the same reason - its camera's list is empty",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "-[AVCaptureDevice setDynamicAspectRatio:completionHandler:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -setDynamicAspectRatio:completionHandler:, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache), and its argument names AVCaptureAspectRatio",
+      "effect": "raises NSInvalidArgumentException with Apple's own reason, measured on this host: \"*** -[AVCaptureDALDevice setDynamicAspectRatio:completionHandler:] Dynamic Aspect Ratio not supported by this device\". The header's own rule is the same: \"This method throws an NSInvalidArgumentException if dynamicAspectRatio is not a supported aspect ratio found in the device's activeFormat's supportedDynamicAspectRatios\" (:2735), and that list is empty. The tail after the class name is what the port raises verbatim; AVCaptureDALDevice is a private class of Apple's device-access layer that this port does not have. A completion handler is never called, and Apple's own does not call it either",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "-[AVCaptureDevice setCameraLensSmudgeDetectionEnabled:detectionInterval:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -setCameraLensSmudgeDetectionEnabled:detectionInterval:, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "raises NSInvalidArgumentException with Apple's own reason, measured on this host: \"*** -[AVCaptureDALDevice setCameraLensSmudgeDetectionEnabled:detectionInterval:] Not supported - use -activeFormat.isCameraLensSmudgeDetectionSupported\". The header's rule names the same member: \"AVCaptureDevice throws an NSInvalidArgumentException if the AVCaptureDeviceFormat/cameraLensSmudgeDetectionSupported property on the current active format returns false\" (:3866), and it is NO for every format",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDevice.cameraLensSmudgeDetectionEnabled",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -isCameraLensSmudgeDetectionEnabled, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "NO, the header's own default: \"By default, this property returns false\" (:3871), and the only setter refuses, so nothing can turn it on. Measured on the host: 0",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDevice.cameraLensSmudgeDetectionInterval",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -cameraLensSmudgeDetectionInterval, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "kCMTimeInvalid, the header's own default: \"By default, this property returns kCMTimeInvalid\" (:3877), and the only setter refuses. Measured on the host: kCMTimeInvalid",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDevice.cameraLensSmudgeDetectionStatus",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -cameraLensSmudgeDetectionStatus, and 6.1.3's AVCaptureDevice owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "AVCaptureCameraLensSmudgeDetectionStatusDisabled, the enum's first value, which is \"Indicates that the detection is not enabled\" (:3881) - which is the case, because the setter refuses and the format's support flag is NO. Measured on the host: 0, the same value. The enum's other three values are header-ok/lift rows and are not carried",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.cameraLensSmudgeDetectionSupported",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -isCameraLensSmudgeDetectionSupported, and 6.1.3's AVCaptureDeviceFormat owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "NO: the detection needs the frame a lens smudge would show, and no format of this hardware reports it. NO HOST VALUE for this row, and that is measured rather than assumed: sent to this host's OWN camera, -[AVCaptureDeviceFormat isCameraLensSmudgeDetectionSupported] raises NSInvalidArgumentException for all seven of its formats (\"-[__NSCFType mediaType]: unrecognized selector sent to instance\", raised inside Apple's own -figCaptureSourceVideoFormat), so there is no host answer to put in a table and tests/backports/host/avf-capabilities records the host cell as raised rather than comparing a value",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.defaultSimulatedAperture",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -defaultSimulatedAperture, and 6.1.3's AVCaptureDeviceFormat owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "0, by the header's own rule: \"This property return a non-zero value on devices that support the shallow depth of field effect\" (:3893) - a simulated depth of field, which is the Cinematic Video machinery of two lenses. Measured on the host: 0, for all seven of its formats",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.minSimulatedAperture",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -minSimulatedAperture, and 6.1.3's AVCaptureDeviceFormat owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "0, by the header's own rule for a device that cannot change it: \"On devices that do not support changing the simulated aperture value, this returns a value of 0\" (:3898). Measured on the host: 0. This is the value -setSimulatedAperture: reads before it refuses",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.maxSimulatedAperture",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -maxSimulatedAperture, and 6.1.3's AVCaptureDeviceFormat owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "0, by the same sentence (:3903). Measured on the host: 0",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.supportedDynamicAspectRatios",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -supportedDynamicAspectRatios, and 6.1.3's AVCaptureDeviceFormat owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "an empty array, the same array the header says nil and {0,0} come from. Measured on the host: 0 ratios, for all seven of its formats. AVCaptureAspectRatio's five constants are 26.0 code+lift rows of their own and are NOT carried, so nothing a caller can name is ever in it",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    },
+    {
+      "api": "AVCaptureDeviceInput.simulatedAperture",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -simulatedAperture, and 6.1.3's AVCaptureDeviceInput owns none of this feature's members (tools/corpus/objc-inventory.lua over the 6.1.3 armv7 cache)",
+      "effect": "0, and setting anything else raises with Apple's own reason, measured on this host: \"*** -[AVCaptureDeviceInput setSimulatedAperture:] Not supported - the source device must have an activeFormat.minSimulatedAperture greater than 0.\" The header's rule is the same and names the member: \"you may only set this property if AVCaptureDevice/activeFormat/minSimulatedAperture returns a non-zero value, otherwise an NSInvalidArgumentException is thrown\" (AVCaptureInput.h:450), and the port reads that format member before it refuses. Here the class in Apple's string IS the port's own class, so nothing is swapped",
+      "facts": "facts/AVFoundation/CaptureDeviceDynamic26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2698-2736 and :3862-3895, AVCaptureInput.h:443-452), transcribed into CharonAVCaptureDeviceDynamic26.h"
+    }
+  ]
+}

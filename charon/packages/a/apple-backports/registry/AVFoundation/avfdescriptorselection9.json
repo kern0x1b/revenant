@@ -1,0 +1,27 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVMediaSelection",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 9.3.6 rung is the first held rung that exports this class and its metaclass and no earlier held rung does, so the port defines it; the two classes share one object because the subclass is a subclass of the superclass and release-split measures per object file. The first held rung that exports it, measured over every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _nsfilesize planted as a control, which answers 4.3 on this set, with a nonsense symbol in none of the fifteen",
+      "effect": "the class resolves, an instance is constructible, and every member the header declares is answered: asked of an INSTANCE, because a class cluster's root does not declare what its private subclass implements. The differential in tests/backports/host/avf-descriptors links one probe twice and compares presence, superclass, instance size and the selectors an instance answers, host against port",
+      "facts": "facts/AVFoundation/AVFDescriptors.md",
+      "source": "whether a held release already carries it: the first HELD RUNG that exports it, measured over every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, which answers 4.3 on this set, with a nonsense symbol in none of the fifteen; and the behaviour, every default and the 12.0 initialiser's respondsToSelector: plus the call: the differential in tests/backports/host/avf-descriptors, host against port, with a mutant, a control and two plants"
+    },
+    {
+      "api": "AVMutableMediaSelection",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 9.3.6 rung is the first held rung that exports this class and its metaclass and no earlier held rung does, so the port defines it; the two classes share one object because the subclass is a subclass of the superclass and release-split measures per object file. The first held rung that exports it, measured over every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _nsfilesize planted as a control, which answers 4.3 on this set, with a nonsense symbol in none of the fifteen",
+      "effect": "the class resolves, an instance is constructible, and every member the header declares is answered: asked of an INSTANCE, because a class cluster's root does not declare what its private subclass implements. The differential in tests/backports/host/avf-descriptors links one probe twice and compares presence, superclass, instance size and the selectors an instance answers, host against port",
+      "facts": "facts/AVFoundation/AVFDescriptors.md",
+      "source": "whether a held release already carries it: the first HELD RUNG that exports it, measured over every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, which answers 4.3 on this set, with a nonsense symbol in none of the fifteen; and the behaviour, every default and the 12.0 initialiser's respondsToSelector: plus the call: the differential in tests/backports/host/avf-descriptors, host against port, with a mutant, a control and two plants"
+    }
+  ]
+}

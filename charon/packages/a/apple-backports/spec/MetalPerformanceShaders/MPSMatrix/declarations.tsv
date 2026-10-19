@@ -1,0 +1,158 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)MPSMatrixUnaryKernel	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6d9193fb41591b24	-
+super	-	MPSMatrixUnaryKernel	MPSKernel		-	-	-	-	-	0aa8464fdc68508f	-
+property	c:objc(cs)MPSMatrixUnaryKernel(py)sourceMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	24c2a1f7160fb46c	-
+property	c:objc(cs)MPSMatrixUnaryKernel(py)resultMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	91b54d51e9bc6608	-
+property	c:objc(cs)MPSMatrixUnaryKernel(py)batchStart	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d33eecdd940d2aab	-
+property	c:objc(cs)MPSMatrixUnaryKernel(py)batchSize	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	71ba718f24875287	-
+interface	c:objc(cs)MPSMatrixBinaryKernel	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e7427d07c4727c49	-
+super	-	MPSMatrixBinaryKernel	MPSKernel		-	-	-	-	-	de2e9d218740692c	-
+property	c:objc(cs)MPSMatrixBinaryKernel(py)primarySourceMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	bd4c4b914d259eef	-
+property	c:objc(cs)MPSMatrixBinaryKernel(py)secondarySourceMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	765806e433d3e3cf	-
+property	c:objc(cs)MPSMatrixBinaryKernel(py)resultMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5f9459053e274501	-
+property	c:objc(cs)MPSMatrixBinaryKernel(py)batchStart	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e03790419639dd20	-
+property	c:objc(cs)MPSMatrixBinaryKernel(py)batchSize	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	947a84e42055c639	-
+interface	c:objc(cs)MPSMatrixMultiplication	-			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	05524ac29bd394a3	-
+super	-	MPSMatrixMultiplication	MPSKernel		-	-	-	-	-	13bf2a1f9d718f96	-
+property	c:objc(cs)MPSMatrixMultiplication(py)resultMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	8851e9d03d34ca63	-
+property	c:objc(cs)MPSMatrixMultiplication(py)leftMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	1b3482215739c690	-
+property	c:objc(cs)MPSMatrixMultiplication(py)rightMatrixOrigin	-			MTLOrigin	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	bcc12ed87c73f216	-
+property	c:objc(cs)MPSMatrixMultiplication(py)batchStart	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	b640da74a8d2efc7	-
+property	c:objc(cs)MPSMatrixMultiplication(py)batchSize	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c47b9149e4cf411f	-
+method	c:objc(cs)MPSMatrixMultiplication(im)initWithDevice:transposeLeft:transposeRight:resultRows:resultColumns:interiorColumns:alpha:beta:	-			instancetype	id<MTLDevice> device | BOOL transposeLeft | BOOL transposeRight | NSUInteger resultRows | NSUInteger resultColumns | NSUInteger interiorColumns | double alpha | double beta	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	176967ca7a75d6f5	-
+method	c:objc(cs)MPSMatrixMultiplication(im)initWithDevice:resultRows:resultColumns:interiorColumns:	-			instancetype	id<MTLDevice> device | NSUInteger resultRows | NSUInteger resultColumns | NSUInteger interiorColumns	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	aeb820076a82bba3	-
+method	c:objc(cs)MPSMatrixMultiplication(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	03dccd9261c0cfc1	-
+method	c:objc(cs)MPSMatrixMultiplication(im)encodeToCommandBuffer:leftMatrix:rightMatrix:resultMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * leftMatrix | MPSMatrix * rightMatrix | MPSMatrix * resultMatrix	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	7e308283fa908d31	-
+interface	c:objc(cs)MPSMatrixVectorMultiplication	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a64f851be604930e	-
+super	-	MPSMatrixVectorMultiplication	MPSMatrixBinaryKernel		-	-	-	-	-	7ec05045d0bdf88b	-
+method	c:objc(cs)MPSMatrixVectorMultiplication(im)initWithDevice:transpose:rows:columns:alpha:beta:	-			instancetype	id<MTLDevice> device | BOOL transpose | NSUInteger rows | NSUInteger columns | double alpha | double beta	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e8806e6aad43cfd1	-
+method	c:objc(cs)MPSMatrixVectorMultiplication(im)initWithDevice:rows:columns:	-			instancetype	id<MTLDevice> device | NSUInteger rows | NSUInteger columns	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	bf1460271f14e450	-
+method	c:objc(cs)MPSMatrixVectorMultiplication(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	098d9cc00f5e5f25	-
+method	c:objc(cs)MPSMatrixVectorMultiplication(im)encodeToCommandBuffer:inputMatrix:inputVector:resultVector:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * inputMatrix | MPSVector * inputVector | MPSVector * resultVector	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d939d08f56ffb78e	-
+interface	c:objc(cs)MPSMatrixSolveTriangular	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d6030d094f989997	-
+super	-	MPSMatrixSolveTriangular	MPSMatrixBinaryKernel		-	-	-	-	-	735c327b8deaf306	-
+method	c:objc(cs)MPSMatrixSolveTriangular(im)initWithDevice:right:upper:transpose:unit:order:numberOfRightHandSides:alpha:	-			instancetype	id<MTLDevice> device | BOOL right | BOOL upper | BOOL transpose | BOOL unit | NSUInteger order | NSUInteger numberOfRightHandSides | double alpha	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cee751b75d6a3c6e	-
+method	c:objc(cs)MPSMatrixSolveTriangular(im)encodeToCommandBuffer:sourceMatrix:rightHandSideMatrix:solutionMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * sourceMatrix | MPSMatrix * rightHandSideMatrix | MPSMatrix * solutionMatrix	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b89a0f788b2d2740	-
+interface	c:objc(cs)MPSMatrixSolveLU	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6bd0dbf22d9b7623	-
+super	-	MPSMatrixSolveLU	MPSMatrixBinaryKernel		-	-	-	-	-	22a6471b8e5009c4	-
+method	c:objc(cs)MPSMatrixSolveLU(im)initWithDevice:transpose:order:numberOfRightHandSides:	-			instancetype	id<MTLDevice> device | BOOL transpose | NSUInteger order | NSUInteger numberOfRightHandSides	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	16ba248f8b52e736	-
+method	c:objc(cs)MPSMatrixSolveLU(im)encodeToCommandBuffer:sourceMatrix:rightHandSideMatrix:pivotIndices:solutionMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * sourceMatrix | MPSMatrix * rightHandSideMatrix | MPSMatrix * pivotIndices | MPSMatrix * solutionMatrix	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	249583eb33ef4a11	-
+interface	c:objc(cs)MPSMatrixSolveCholesky	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	faec2f27f668fac2	-
+super	-	MPSMatrixSolveCholesky	MPSMatrixBinaryKernel		-	-	-	-	-	cc6001664e21abea	-
+method	c:objc(cs)MPSMatrixSolveCholesky(im)initWithDevice:upper:order:numberOfRightHandSides:	-			instancetype	id<MTLDevice> device | BOOL upper | NSUInteger order | NSUInteger numberOfRightHandSides	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5987be117140f389	-
+method	c:objc(cs)MPSMatrixSolveCholesky(im)encodeToCommandBuffer:sourceMatrix:rightHandSideMatrix:solutionMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * sourceMatrix | MPSMatrix * rightHandSideMatrix | MPSMatrix * solutionMatrix	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e2828204c39d8df7	-
+typedef	c:MPSMatrixDecomposition.h@T@MPSMatrixDecompositionStatus	-			enum MPSMatrixDecompositionStatus	-	-	-	-	914b6bbdf04a5ecc	-
+enum	c:@E@MPSMatrixDecompositionStatus	-			int	-	-	-	-	8dfa84af7a5fe01d	-
+enumconst	c:@E@MPSMatrixDecompositionStatus@MPSMatrixDecompositionStatusSuccess	MPSMatrixDecompositionStatus			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	897faeef0dc2a49f	0
+enumconst	c:@E@MPSMatrixDecompositionStatus@MPSMatrixDecompositionStatusFailure	MPSMatrixDecompositionStatus			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cde8c1ea5b132c93	-1
+enumconst	c:@E@MPSMatrixDecompositionStatus@MPSMatrixDecompositionStatusSingular	MPSMatrixDecompositionStatus			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3dd50fa0ee23e653	-2
+enumconst	c:@E@MPSMatrixDecompositionStatus@MPSMatrixDecompositionStatusNonPositiveDefinite	MPSMatrixDecompositionStatus			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	03302e098d2d0086	-3
+interface	c:objc(cs)MPSMatrixDecompositionLU	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7a688a84565bc767	-
+super	-	MPSMatrixDecompositionLU	MPSMatrixUnaryKernel		-	-	-	-	-	a6bd1f020871f4e3	-
+method	c:objc(cs)MPSMatrixDecompositionLU(im)initWithDevice:rows:columns:	-			instancetype	id<MTLDevice> device | NSUInteger rows | NSUInteger columns	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d4ee79ff43157416	-
+method	c:objc(cs)MPSMatrixDecompositionLU(im)encodeToCommandBuffer:sourceMatrix:resultMatrix:pivotIndices:status:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * sourceMatrix | MPSMatrix * resultMatrix | MPSMatrix * pivotIndices | id<MTLBuffer> status	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7cba7e45c0a8c15e	-
+interface	c:objc(cs)MPSMatrixDecompositionCholesky	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	58da44cd6e7576ed	-
+super	-	MPSMatrixDecompositionCholesky	MPSMatrixUnaryKernel		-	-	-	-	-	5e58c235ce5441c7	-
+method	c:objc(cs)MPSMatrixDecompositionCholesky(im)initWithDevice:lower:order:	-			instancetype	id<MTLDevice> device | BOOL lower | NSUInteger order	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d16666de860dfc5b	-
+method	c:objc(cs)MPSMatrixDecompositionCholesky(im)encodeToCommandBuffer:sourceMatrix:resultMatrix:status:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * sourceMatrix | MPSMatrix * resultMatrix | id<MTLBuffer> status	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	4fd1358286bc1d66	-
+struct	c:@SA@MPSMatrixCopyOffsets	-			-	-	-	-	-	c6ebc99b179d932b	-
+field	c:@SA@MPSMatrixCopyOffsets@FI@sourceRowOffset	MPSMatrixCopyOffsets			uint32_t	-	-	-	-	0c1fca1a531c97a8	-
+field	c:@SA@MPSMatrixCopyOffsets@FI@sourceColumnOffset	MPSMatrixCopyOffsets			uint32_t	-	-	-	-	758f3a9f5f0772c1	-
+field	c:@SA@MPSMatrixCopyOffsets@FI@destinationRowOffset	MPSMatrixCopyOffsets			uint32_t	-	-	-	-	c872fff301326911	-
+field	c:@SA@MPSMatrixCopyOffsets@FI@destinationColumnOffset	MPSMatrixCopyOffsets			uint32_t	-	-	-	-	7396c780983c8c9f	-
+typedef	c:@T@MPSMatrixCopyOffsets	-			struct MPSMatrixCopyOffsets	-	-	-	-	149e3632c24a20ef	-
+interface	c:objc(cs)MPSMatrixCopyDescriptor	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	32f6850c07037244	-
+super	-	MPSMatrixCopyDescriptor	NSObject		-	-	-	-	-	03ae47bb1a124028	-
+method	c:objc(cs)MPSMatrixCopyDescriptor(cm)descriptorWithSourceMatrix:destinationMatrix:offsets:	-			instancetype	MPSMatrix * sourceMatrix | MPSMatrix * destinationMatrix | MPSMatrixCopyOffsets offsets	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	03bdd10be561f378	-
+method	c:objc(cs)MPSMatrixCopyDescriptor(im)initWithDevice:count:	-			instancetype	id<MTLDevice> device | NSUInteger count	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cc050b94b72f9b4c	-
+method	c:objc(cs)MPSMatrixCopyDescriptor(im)setCopyOperationAtIndex:sourceMatrix:destinationMatrix:offsets:	-			void	NSUInteger index | MPSMatrix * sourceMatrix | MPSMatrix * destinationMatrix | MPSMatrixCopyOffsets offsets	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fc56074e891e51ec	-
+method	c:objc(cs)MPSMatrixCopyDescriptor(im)initWithSourceMatrices:destinationMatrices:offsetVector:offset:	-			instancetype	NSArray<MPSMatrix *> * sourceMatrices | NSArray<MPSMatrix *> * destinationMatrices | MPSVector * offsets | NSUInteger byteOffset	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	99e7a5f2f8ed7ad3	-
+method	c:objc(cs)MPSMatrixCopyDescriptor(im)init	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c78ad5720f17e21c	-
+interface	c:objc(cs)MPSMatrixCopy	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3b352673dc5fa619	-
+super	-	MPSMatrixCopy	MPSKernel		-	-	-	-	-	9e646e77b25aba1e	-
+method	c:objc(cs)MPSMatrixCopy(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	98f7e9f9259a5975	-
+method	c:objc(cs)MPSMatrixCopy(im)initWithDevice:copyRows:copyColumns:sourcesAreTransposed:destinationsAreTransposed:	-			instancetype	id<MTLDevice> device | NSUInteger copyRows | NSUInteger copyColumns | BOOL sourcesAreTransposed | BOOL destinationsAreTransposed	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0584e78a1f56cacb	-
+property	c:objc(cs)MPSMatrixCopy(py)copyRows	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	397469b82c9e3230	-
+property	c:objc(cs)MPSMatrixCopy(py)copyColumns	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d4315be05c699a49	-
+property	c:objc(cs)MPSMatrixCopy(py)sourcesAreTransposed	-			BOOL	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ca1ed9bc56c03b7b	-
+property	c:objc(cs)MPSMatrixCopy(py)destinationsAreTransposed	-			BOOL	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f49eb92ab3cc1020	-
+method	c:objc(cs)MPSMatrixCopy(im)encodeToCommandBuffer:copyDescriptor:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrixCopyDescriptor * copyDescriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	262e065068e94bac	-
+method	c:objc(cs)MPSMatrixCopy(im)encodeToCommandBuffer:copyDescriptor:rowPermuteIndices:rowPermuteOffset:columnPermuteIndices:columnPermuteOffset:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrixCopyDescriptor * copyDescriptor | MPSVector * rowPermuteIndices | NSUInteger rowPermuteOffset | MPSVector * columnPermuteIndices | NSUInteger columnPermuteOffset	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c4e734b5255e5622	-
+method	c:objc(cs)MPSMatrixCopy(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	466e4ae15841af3a	-
+interface	c:objc(cs)MPSMatrixSoftMax	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0f46522c445bb107	-
+super	-	MPSMatrixSoftMax	MPSMatrixUnaryKernel		-	-	-	-	-	aa49f9a57efdf3f8	-
+property	c:objc(cs)MPSMatrixSoftMax(py)sourceRows	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2fd84f918cac1951	-
+property	c:objc(cs)MPSMatrixSoftMax(py)sourceColumns	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	256059fedb9c9e69	-
+method	c:objc(cs)MPSMatrixSoftMax(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	727a8d456b92f879	-
+method	c:objc(cs)MPSMatrixSoftMax(im)encodeToCommandBuffer:inputMatrix:resultMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * inputMatrix | MPSMatrix * resultMatrix	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a2ef9bed9911d256	-
+method	c:objc(cs)MPSMatrixSoftMax(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3de1843ba9cd954c	-
+method	c:objc(cs)MPSMatrixSoftMax(im)copyWithZone:device:	-			instancetype	NSZone * zone | id<MTLDevice> device	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2badd95c7f06e18a	-
+interface	c:objc(cs)MPSMatrixLogSoftMax	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9865ca9f69bb64ea	-
+super	-	MPSMatrixLogSoftMax	MPSMatrixSoftMax		-	-	-	-	-	66895decbf4ecbd0	-
+interface	c:objc(cs)MPSMatrixSoftMaxGradient	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	482177a42d6f11cf	-
+super	-	MPSMatrixSoftMaxGradient	MPSMatrixBinaryKernel		-	-	-	-	-	7857b187e617b749	-
+property	c:objc(cs)MPSMatrixSoftMaxGradient(py)sourceRows	-			NSUInteger	-	nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	2ebbbf9a97558fb9	-
+property	c:objc(cs)MPSMatrixSoftMaxGradient(py)sourceColumns	-			NSUInteger	-	nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	0d70e258159a4476	-
+method	c:objc(cs)MPSMatrixSoftMaxGradient(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	ef43b97beebcee62	-
+method	c:objc(cs)MPSMatrixSoftMaxGradient(im)encodeToCommandBuffer:gradientMatrix:forwardOutputMatrix:resultMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * gradientMatrix | MPSMatrix * forwardOutputMatrix | MPSMatrix * resultMatrix	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	79984c6f8442ac79	-
+method	c:objc(cs)MPSMatrixSoftMaxGradient(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	55937cf15565af83	-
+method	c:objc(cs)MPSMatrixSoftMaxGradient(im)copyWithZone:device:	-			instancetype	NSZone * zone | id<MTLDevice> device	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	0df75af97db35cba	-
+interface	c:objc(cs)MPSMatrixLogSoftMaxGradient	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	7447fd28327955c0	-
+super	-	MPSMatrixLogSoftMaxGradient	MPSMatrixSoftMaxGradient		-	-	-	-	-	2285223a5a8537fb	-
+interface	c:objc(cs)MPSMatrixFindTopK	-			-	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	201fce76a22c9c25	-
+super	-	MPSMatrixFindTopK	MPSMatrixUnaryKernel		-	-	-	-	-	b59f8f3507a77d2c	-
+property	c:objc(cs)MPSMatrixFindTopK(py)sourceRows	-			NSUInteger	-	nonatomic	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	b8fe55c602fae4c4	-
+property	c:objc(cs)MPSMatrixFindTopK(py)sourceColumns	-			NSUInteger	-	nonatomic	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	1831d56fbf991874	-
+property	c:objc(cs)MPSMatrixFindTopK(py)indexOffset	-			NSUInteger	-	nonatomic	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	c5c0ce66db5385f4	-
+property	c:objc(cs)MPSMatrixFindTopK(py)numberOfTopKValues	-			NSUInteger	-	nonatomic	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	96cfbc5877dadeb7	-
+method	c:objc(cs)MPSMatrixFindTopK(im)initWithDevice:numberOfTopKValues:	-			instancetype	id<MTLDevice> device | NSUInteger numberOfTopKValues	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	1d91508271dacfba	-
+method	c:objc(cs)MPSMatrixFindTopK(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	fa345e25d0cee306	-
+method	c:objc(cs)MPSMatrixFindTopK(im)encodeToCommandBuffer:inputMatrix:resultIndexMatrix:resultValueMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * inputMatrix | MPSMatrix * resultIndexMatrix | MPSMatrix * resultValueMatrix	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	80cf05de30e47121	-
+method	c:objc(cs)MPSMatrixFindTopK(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	db48df39a97a8c6c	-
+method	c:objc(cs)MPSMatrixFindTopK(im)copyWithZone:device:	-			instancetype	NSZone * zone | id<MTLDevice> device	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	055e37cd2615c206	-
+typedef	c:MPSMatrixRandom.h@T@MPSMatrixRandomDistribution	-			enum MPSMatrixRandomDistribution	-	-	-	-	bcc1c5db4a221789	-
+enum	c:@E@MPSMatrixRandomDistribution	-			NSUInteger	-	-	-	-	95881e88802baf78	-
+enumconst	c:@E@MPSMatrixRandomDistribution@MPSMatrixRandomDistributionDefault	MPSMatrixRandomDistribution			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	c3af430f04442ef9	1
+enumconst	c:@E@MPSMatrixRandomDistribution@MPSMatrixRandomDistributionUniform	MPSMatrixRandomDistribution			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	475e577347ea6e94	2
+enumconst	c:@E@MPSMatrixRandomDistribution@MPSMatrixRandomDistributionNormal	MPSMatrixRandomDistribution			-	-	-	ios=14/-/-/0,maccatalyst=14/-/-/0,macos=11.0/-/-/0,tvos=14/-/-/0	-	673aac2f6f75deeb	3
+interface	c:objc(cs)MPSMatrixRandomDistributionDescriptor	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ab40631cf7d505e4	-
+super	-	MPSMatrixRandomDistributionDescriptor	NSObject		-	-	-	-	-	9fca6d7230e67b55	-
+conforms	c:objc(cs)MPSMatrixRandomDistributionDescriptor	MPSMatrixRandomDistributionDescriptor	NSCopying		-	-	-	-	-	bff2adf59298fdee	-
+property	c:objc(cs)MPSMatrixRandomDistributionDescriptor(py)distributionType	-			MPSMatrixRandomDistribution	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3f67f2c7cb6706c0	-
+property	c:objc(cs)MPSMatrixRandomDistributionDescriptor(py)minimum	-			float	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	bcf0ee10fcf8b862	-
+property	c:objc(cs)MPSMatrixRandomDistributionDescriptor(py)maximum	-			float	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	720a5aad6ad78883	-
+property	c:objc(cs)MPSMatrixRandomDistributionDescriptor(py)mean	-			float	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	6bf9e26f9367dee3	-
+property	c:objc(cs)MPSMatrixRandomDistributionDescriptor(py)standardDeviation	-			float	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3e4592588f70b1b6	-
+method	c:objc(cs)MPSMatrixRandomDistributionDescriptor(cm)uniformDistributionDescriptorWithMinimum:maximum:	-			MPSMatrixRandomDistributionDescriptor *	float minimum | float maximum	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	7573a67c82a18d1f	-
+method	c:objc(cs)MPSMatrixRandomDistributionDescriptor(cm)normalDistributionDescriptorWithMean:standardDeviation:	-			MPSMatrixRandomDistributionDescriptor *	float mean | float standardDeviation	-	ios=14/-/-/0,maccatalyst=14/-/-/0,macos=11.0/-/-/0,tvos=14/-/-/0	-	9727c25e51d2ed04	-
+method	c:objc(cs)MPSMatrixRandomDistributionDescriptor(cm)normalDistributionDescriptorWithMean:standardDeviation:minimum:maximum:	-			MPSMatrixRandomDistributionDescriptor *	float mean | float standardDeviation | float minimum | float maximum	-	ios=14/-/-/0,maccatalyst=14/-/-/0,macos=11.0/-/-/0,tvos=14/-/-/0	-	6c4cdc07022f59f7	-
+method	c:objc(cs)MPSMatrixRandomDistributionDescriptor(cm)defaultDistributionDescriptor	-			MPSMatrixRandomDistributionDescriptor *	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	2528da063f850ca8	-
+interface	c:objc(cs)MPSMatrixRandom	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	e72c5d3b6516d2c2	-
+super	-	MPSMatrixRandom	MPSKernel		-	-	-	-	-	1d89ea20124b8d50	-
+property	c:objc(cs)MPSMatrixRandom(py)destinationDataType	-			MPSDataType	-	readonly,nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3f89ab6c49a09b36	-
+property	c:objc(cs)MPSMatrixRandom(py)distributionType	-			MPSMatrixRandomDistribution	-	readonly,nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	1cd07005b533b52f	-
+property	c:objc(cs)MPSMatrixRandom(py)batchStart	-			NSUInteger	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	43a5ef667e8e35af	-
+property	c:objc(cs)MPSMatrixRandom(py)batchSize	-			NSUInteger	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	8cd1b4321be7c5e4	-
+method	c:objc(cs)MPSMatrixRandom(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	e9afc058dba51f96	-
+method	c:objc(cs)MPSMatrixRandom(im)encodeToCommandBuffer:destinationVector:	-			void	id<MTLCommandBuffer> commandBuffer | MPSVector * destinationVector	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ac5d569febc84518	-
+method	c:objc(cs)MPSMatrixRandom(im)encodeToCommandBuffer:destinationMatrix:	-			void	id<MTLCommandBuffer> commandBuffer | MPSMatrix * destinationMatrix	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	633be784887fb017	-
+interface	c:objc(cs)MPSMatrixRandomMTGP32	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ac8e49c323c11065	-
+super	-	MPSMatrixRandomMTGP32	MPSMatrixRandom		-	-	-	-	-	61adc8de765bf993	-
+method	c:objc(cs)MPSMatrixRandomMTGP32(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	18558df687cb75da	-
+method	c:objc(cs)MPSMatrixRandomMTGP32(im)initWithDevice:destinationDataType:seed:distributionDescriptor:	-			instancetype	id<MTLDevice> device | MPSDataType destinationDataType | NSUInteger seed | MPSMatrixRandomDistributionDescriptor * distributionDescriptor	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	313200800159ba0d	-
+method	c:objc(cs)MPSMatrixRandomMTGP32(im)synchronizeStateOnCommandBuffer:	-			void	id<MTLCommandBuffer> commandBuffer	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	60771697c58b0b61	-
+method	c:objc(cs)MPSMatrixRandomMTGP32(im)initWithDevice:destinationDataType:seed:	-			instancetype	id<MTLDevice> device | MPSDataType destinationDataType | NSUInteger seed	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	24dd6255f0409f80	-
+method	c:objc(cs)MPSMatrixRandomMTGP32(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	8d61486ef2e420f7	-
+interface	c:objc(cs)MPSMatrixRandomPhilox	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	b5fc6160e87f1469	-
+super	-	MPSMatrixRandomPhilox	MPSMatrixRandom		-	-	-	-	-	e09f6d609a8dcc57	-
+method	c:objc(cs)MPSMatrixRandomPhilox(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	1f0ed326f97792de	-
+method	c:objc(cs)MPSMatrixRandomPhilox(im)initWithDevice:destinationDataType:seed:distributionDescriptor:	-			instancetype	id<MTLDevice> device | MPSDataType destinationDataType | NSUInteger seed | MPSMatrixRandomDistributionDescriptor * distributionDescriptor	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ef560b55defb7f5c	-
+method	c:objc(cs)MPSMatrixRandomPhilox(im)initWithDevice:destinationDataType:seed:	-			instancetype	id<MTLDevice> device | MPSDataType destinationDataType | NSUInteger seed	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	fa872c68350ab059	-
+method	c:objc(cs)MPSMatrixRandomPhilox(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	59bcf4e14b2042d5	-
+typedef	c:@T@MTLOrigin	-			struct MTLOrigin	-	-	-	-	178361b39c91a4fd	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@NSZone	-			struct _NSZone	-	-	-	-	a6dc1e3b1b8b2ac5	-
+typedef	c:MPSCoreTypes.h@T@MPSDataType	-			enum MPSDataType	-	-	-	-	99a17108960411fb	-

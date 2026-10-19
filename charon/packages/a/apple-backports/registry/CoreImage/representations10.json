@@ -1,0 +1,93 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "-[CIContext PNGRepresentationOfImage:format:colorSpace:options:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the image as PNG bytes of the format asked for, the image rendered to a CGImage of that format and encoded through ImageIO; a format the encoders cannot carry has no representation, which is nil rather than a file of something else",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext writePNGRepresentationOfImage:toURL:format:colorSpace:options:error:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the same bytes written to that URL, and an error out when there is nothing to write",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext TIFFRepresentationOfImage:format:colorSpace:options:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the image as TIFF bytes of the format asked for, the same two steps",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext writeTIFFRepresentationOfImage:toURL:format:colorSpace:options:error:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the same bytes written to that URL, and an error out when there is nothing to write",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext JPEGRepresentationOfImage:colorSpace:options:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the image as JPEG bytes, rendered as three channels without an alpha because that is what the format carries",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext writeJPEGRepresentationOfImage:toURL:colorSpace:options:error:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the same bytes written to that URL, and an error out when there is nothing to write",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext createCGImage:fromRect:format:colorSpace:deferred:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the image as a CGImage of the format asked for, over that rectangle, in the space named; the format is what decides how wide a pixel is",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIContext clearCaches]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 can represent an image as TIFF, PNG and JPEG, but it spells it the way it was spelt then: no format to ask for, no destination URL and no error out, so an application naming these finds nothing",
+      "effect": "the release's own reclaimResources, which is what it did before the name changed",
+      "facts": "facts/CoreImage/Representations.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which prints the length and checksum of the encoded bytes, the type, size and bit depth of the image those bytes decode to, and the checksum and four pixels of the decoded picture; the 6.1.3 armv7 dyld cache for what the release does not export"
+    }
+  ]
+}

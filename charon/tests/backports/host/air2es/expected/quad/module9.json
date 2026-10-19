@@ -1,0 +1,1 @@
+{"stage":"fragment","entry":"depthRead","usesVertexId":false,"attributes":[],"uniforms":[],"textures":[{"name":"t0","index":0,"depth":true,"compare":false}],"varyings":[{"name":"vary_generated_5coordDv2_f_","argument":1,"flat":false}],"constants":[],"inputs":[],"sizes":[],"outputs":[0],"fetches":[],"usesInstanceId":false}

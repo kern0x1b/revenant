@@ -1,0 +1,10 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+StickerKit	protocol	AvatarEditorViewControllerDelegate					none
+StickerKit	method	AvatarEditorViewControllerDelegate.avatarEditorRemoteViewControllerShouldDismiss()					none
+StickerKit	class	AvatarEditorViewController					none
+StickerKit	property	AvatarEditorViewController.delegate					none
+StickerKit	method	AvatarEditorViewController.viewDidLoad()					none
+StickerKit	method	AvatarEditorViewController.viewWillAppear(_:)					none
+StickerKit	method	AvatarEditorViewController.init(nibName:bundle:)					none
+StickerKit	method	AvatarEditorViewController.init?(coder:)					none
+StickerKit	property	PHLivePhotoView.intrinsicContentSize					none

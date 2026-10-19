@@ -1,0 +1,547 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@MLFeatureType	-			enum MLFeatureType	-	-	-	-	38a8d375831a82bd	-
+enum	c:@E@MLFeatureType	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	628bae974d355e0c	-
+enumconst	c:@E@MLFeatureType@MLFeatureTypeInvalid	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	bea851539d46f692	0
+enumconst	c:@E@MLFeatureType@MLFeatureTypeInt64	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	8c6de624cda2e4b2	1
+enumconst	c:@E@MLFeatureType@MLFeatureTypeDouble	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4724fc9c4a53ca39	2
+enumconst	c:@E@MLFeatureType@MLFeatureTypeString	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	edb7f185edb76054	3
+enumconst	c:@E@MLFeatureType@MLFeatureTypeImage	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	345d95f184ca3a11	4
+enumconst	c:@E@MLFeatureType@MLFeatureTypeMultiArray	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	5ec9f1cf124b24d4	5
+enumconst	c:@E@MLFeatureType@MLFeatureTypeDictionary	MLFeatureType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	077b9cde1867184e	6
+enumconst	c:@E@MLFeatureType@MLFeatureTypeSequence	MLFeatureType			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	5159cbbd55d620ca	7
+enumconst	c:@E@MLFeatureType@MLFeatureTypeState	MLFeatureType			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	78a26fecb62f796d	8
+typedef	c:@T@MLMultiArrayDataType	-			enum MLMultiArrayDataType	-	-	-	-	7ebc656632723c9f	-
+enum	c:@E@MLMultiArrayDataType	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	a916a9ec0d2b8dc2	-
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeDouble	MLMultiArrayDataType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	20fda8bdcb34cb27	65600
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeFloat64	MLMultiArrayDataType			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	083e7f585a561540	65600
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeFloat32	MLMultiArrayDataType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	8887e75388ce9600	65568
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeFloat16	MLMultiArrayDataType			-	-	-	ios=16.0/-/-/0,macos=12.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	879eb6db6b3fb98b	65552
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeFloat	MLMultiArrayDataType			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	6d55941722109fa9	65568
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeInt32	MLMultiArrayDataType			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	9a57e3b32d87e512	131104
+enumconst	c:@E@MLMultiArrayDataType@MLMultiArrayDataTypeInt8	MLMultiArrayDataType			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	b1b195c1ef1cc9c8	131080
+interface	c:objc(cs)MLMultiArray	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	deprecated: Use getBytesWithHandler or getMutableBytesWithHandler instead. For Swift, use withUnsafeBytes or withUnsafeMutableBytes.	8c4bb80f38b98959	-
+super	-	MLMultiArray	NSObject		-	-	-	-	-	397522c9d0353987	-
+conforms	c:objc(cs)MLMultiArray	MLMultiArray	NSSecureCoding		-	-	-	-	-	7b8d622fee9ce99f	-
+property	c:objc(cs)MLMultiArray(py)dataPointer	-			void *	-	readonly,nonatomic	ios=11.0/100000/-/0,macos=10.13/100000/-/0,tvos=11.0/100000/-/0,watchos=4.0/100000/-/0	-	d41d6495ac69aa3d	-
+property	c:objc(cs)MLMultiArray(py)dataType	-			MLMultiArrayDataType	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e9c982c24a0b63e0	-
+property	c:objc(cs)MLMultiArray(py)shape	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f5d4869ef57c911f	-
+property	c:objc(cs)MLMultiArray(py)strides	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	0c053bd0af580717	-
+property	c:objc(cs)MLMultiArray(py)count	-			NSInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	9b67c7d7b8c05e98	-
+property	c:objc(cs)MLMultiArray(py)pixelBuffer	-			CVPixelBufferRef	-	readonly,nonatomic	ios=16.0/-/-/0,macos=12.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	c858ff3f800e4528	-
+category	c:objc(cy)MLMultiArray@Creation	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	5d6b196fb91495d6	-
+method	c:objc(cs)MLMultiArray(im)initWithShape:dataType:error:	Creation			instancetype	NSArray<NSNumber *> * shape | MLMultiArrayDataType dataType | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	446c746770cdd5a9	-
+method	c:objc(cs)MLMultiArray(im)initWithShape:dataType:strides:	Creation			instancetype	NSArray<NSNumber *> * shape | MLMultiArrayDataType dataType | NSArray<NSNumber *> * strides	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	b13f1310ed6144a6	-
+method	c:objc(cs)MLMultiArray(im)initWithDataPointer:shape:dataType:strides:deallocator:error:	Creation			instancetype	void * dataPointer | NSArray<NSNumber *> * shape | MLMultiArrayDataType dataType | NSArray<NSNumber *> * strides | void (^)(void * _Nonnull) deallocator | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ae166ea15af33cb4	-
+method	c:objc(cs)MLMultiArray(im)initWithPixelBuffer:shape:	Creation			instancetype	CVPixelBufferRef pixelBuffer | NSArray<NSNumber *> * shape	-	ios=16.0/-/-/0,macos=12.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	00d1212ebc8b2f50	-
+category	c:objc(cy)MLMultiArray@ScopedBufferAccess	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	7ab46cd26cc4cce8	-
+method	c:objc(cs)MLMultiArray(im)getBytesWithHandler:	ScopedBufferAccess			void	void (^)(const void * _Nonnull, NSInteger) handler	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0	-	b5672496215064f4	-
+method	c:objc(cs)MLMultiArray(im)getMutableBytesWithHandler:	ScopedBufferAccess			void	void (^)(void * _Nonnull, NSInteger, NSArray<NSNumber *> * _Nonnull) handler	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0	-	c12d187d8f39c776	-
+category	c:objc(cy)MLMultiArray@Concatenating	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f8cd300df5d273e4	-
+method	c:objc(cs)MLMultiArray(cm)multiArrayByConcatenatingMultiArrays:alongAxis:dataType:	Concatenating			instancetype	NSArray<MLMultiArray *> * multiArrays | NSInteger axis | MLMultiArrayDataType dataType	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	0a4a87aee5c3110d	-
+category	c:objc(cy)MLMultiArray@NSNumberDataAccess	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	73dd6c13aecfb897	-
+method	c:objc(cs)MLMultiArray(im)objectAtIndexedSubscript:	NSNumberDataAccess			NSNumber *	NSInteger idx	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	815e933d3750e101	-
+method	c:objc(cs)MLMultiArray(im)objectForKeyedSubscript:	NSNumberDataAccess			NSNumber *	NSArray<NSNumber *> * key	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	a12103392ea6d645	-
+method	c:objc(cs)MLMultiArray(im)setObject:atIndexedSubscript:	NSNumberDataAccess			void	NSNumber * obj | NSInteger idx	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4743079f70d8aca1	-
+method	c:objc(cs)MLMultiArray(im)setObject:forKeyedSubscript:	NSNumberDataAccess			void	NSNumber * obj | NSArray<NSNumber *> * key	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	c2021c5c01115f98	-
+category	c:objc(cy)MLMultiArray@Transferring	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1dc15b0d49a5139c	-
+method	c:objc(cs)MLMultiArray(im)transferToMultiArray:	Transferring			void	MLMultiArray * destinationMultiArray	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	991736e7ec67ed2b	-
+interface	c:objc(cs)MLSequence	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	74faf5ffccd6af2b	-
+super	-	MLSequence	NSObject		-	-	-	-	-	623685c178fdc709	-
+conforms	c:objc(cs)MLSequence	MLSequence	NSSecureCoding		-	-	-	-	-	8c107c16d1959539	-
+property	c:objc(cs)MLSequence(py)type	-			MLFeatureType	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	ff31965ccc39312a	-
+method	c:objc(cs)MLSequence(cm)emptySequenceWithType:	-			instancetype	MLFeatureType type	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	7c751a25fedcf9fe	-
+method	c:objc(cs)MLSequence(cm)sequenceWithStringArray:	-			instancetype	NSArray<NSString *> * stringValues	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c2b9a8a994a26ddb	-
+property	c:objc(cs)MLSequence(py)stringValues	-			NSArray<NSString *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	a2f935b46cc7e317	-
+method	c:objc(cs)MLSequence(cm)sequenceWithInt64Array:	-			instancetype	NSArray<NSNumber *> * int64Values	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	9c281a0de469ca41	-
+property	c:objc(cs)MLSequence(py)int64Values	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f51a99016ed824e3	-
+interface	c:objc(cs)MLState	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	2ca5722dea3169ed	-
+super	-	MLState	NSObject		-	-	-	-	-	6b1110eb14a413ff	-
+method	c:objc(cs)MLState(im)getMultiArrayForStateNamed:handler:	-			void	NSString * stateName | void (^)(MLMultiArray * _Nonnull) handler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	f6d9ef15fbf6e405	-
+method	c:objc(cs)MLState(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	805a826575c09d5a	-
+method	c:objc(cs)MLState(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	0117cc59d80fd2e8	-
+interface	c:objc(cs)MLFeatureValue	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	069214b54dc43322	-
+super	-	MLFeatureValue	NSObject		-	-	-	-	-	2a649f5a2d0b5c30	-
+conforms	c:objc(cs)MLFeatureValue	MLFeatureValue	NSCopying		-	-	-	-	-	6358e92fcdfe8ade	-
+conforms	c:objc(cs)MLFeatureValue	MLFeatureValue	NSSecureCoding		-	-	-	-	-	2e3b6ae18c0bfa8b	-
+property	c:objc(cs)MLFeatureValue(py)type	-			MLFeatureType	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	7067dd1f036005da	-
+property	c:objc(cs)MLFeatureValue(py)undefined	-			BOOL	-	readonly,nonatomic,getter=isUndefined	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d3c49bc509459e5c	-
+property	c:objc(cs)MLFeatureValue(py)int64Value	-			int64_t	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4a16657ad2f3ba08	-
+property	c:objc(cs)MLFeatureValue(py)doubleValue	-			double	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6b04486cfb0d40f7	-
+property	c:objc(cs)MLFeatureValue(py)stringValue	-			NSString *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	dd27251b377cd03d	-
+property	c:objc(cs)MLFeatureValue(py)multiArrayValue	-			MLMultiArray *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4b732656a25f43d6	-
+property	c:objc(cs)MLFeatureValue(py)dictionaryValue	-			NSDictionary<id,NSNumber *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d73cc226c83ea7e6	-
+property	c:objc(cs)MLFeatureValue(py)imageBufferValue	-			CVPixelBufferRef	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	82187eb53e838db2	-
+property	c:objc(cs)MLFeatureValue(py)sequenceValue	-			MLSequence *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c26591b8decf0c19	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithInt64:	-			instancetype	int64_t value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	dffebe1c5d72e9ae	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithDouble:	-			instancetype	double value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	992211fae05fe4d2	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithString:	-			instancetype	NSString * value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	76684ffd74d00779	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithMultiArray:	-			instancetype	MLMultiArray * value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ce931875fe917753	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithPixelBuffer:	-			instancetype	CVPixelBufferRef value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	08d2dae6c962deef	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithSequence:	-			instancetype	MLSequence * sequence	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	d40545eba9c01fbd	-
+method	c:objc(cs)MLFeatureValue(cm)undefinedFeatureValueWithType:	-			instancetype	MLFeatureType type	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	575d74f357a41b7d	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithDictionary:error:	-			instancetype	NSDictionary<id,NSNumber *> * value | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	0d3e4a3eb7991265	-
+method	c:objc(cs)MLFeatureValue(im)isEqualToFeatureValue:	-			BOOL	MLFeatureValue * value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	66a45fff40b1fd8b	-
+interface	c:objc(cs)MLImageSize	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	b6db0232da12b488	-
+super	-	MLImageSize	NSObject		-	-	-	-	-	83ad978185ce65f1	-
+conforms	c:objc(cs)MLImageSize	MLImageSize	NSSecureCoding		-	-	-	-	-	41ce757fe8c3a7d3	-
+property	c:objc(cs)MLImageSize(py)pixelsWide	-			NSInteger	-	readonly	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	960048b0a5246850	-
+property	c:objc(cs)MLImageSize(py)pixelsHigh	-			NSInteger	-	readonly	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	dfd529668bad4931	-
+typedef	c:@T@MLImageSizeConstraintType	-			enum MLImageSizeConstraintType	-	-	-	-	46fb554e36a6f63c	-
+enum	c:@E@MLImageSizeConstraintType	-			NSInteger	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	295c5e1c42b727f7	-
+enumconst	c:@E@MLImageSizeConstraintType@MLImageSizeConstraintTypeUnspecified	MLImageSizeConstraintType			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	fedf267f6c70a3c2	0
+enumconst	c:@E@MLImageSizeConstraintType@MLImageSizeConstraintTypeEnumerated	MLImageSizeConstraintType			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f682e691bc9187f9	2
+enumconst	c:@E@MLImageSizeConstraintType@MLImageSizeConstraintTypeRange	MLImageSizeConstraintType			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	638f85bcd59f9509	3
+interface	c:objc(cs)MLImageSizeConstraint	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	89582c473195c364	-
+super	-	MLImageSizeConstraint	NSObject		-	-	-	-	-	8b40a45ccb6eb788	-
+conforms	c:objc(cs)MLImageSizeConstraint	MLImageSizeConstraint	NSSecureCoding		-	-	-	-	-	1aa668a48cabfb46	-
+property	c:objc(cs)MLImageSizeConstraint(py)type	-			MLImageSizeConstraintType	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	4d40590eb79e82f4	-
+property	c:objc(cs)MLImageSizeConstraint(py)pixelsWideRange	-			NSRange	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	80ac3d321a3f9906	-
+property	c:objc(cs)MLImageSizeConstraint(py)pixelsHighRange	-			NSRange	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c81647c04757ef8c	-
+property	c:objc(cs)MLImageSizeConstraint(py)enumeratedImageSizes	-			NSArray<MLImageSize *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	080473445e88ed38	-
+interface	c:objc(cs)MLImageConstraint	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	c58647bc789fe9a7	-
+super	-	MLImageConstraint	NSObject		-	-	-	-	-	53f9177ec4a901a3	-
+conforms	c:objc(cs)MLImageConstraint	MLImageConstraint	NSSecureCoding		-	-	-	-	-	18e6837b69aa4f47	-
+property	c:objc(cs)MLImageConstraint(py)pixelsHigh	-			NSInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6de7e64cf8b20584	-
+property	c:objc(cs)MLImageConstraint(py)pixelsWide	-			NSInteger	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3f7666d052c28cc0	-
+property	c:objc(cs)MLImageConstraint(py)pixelFormatType	-			OSType	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	da88cbc876825018	-
+property	c:objc(cs)MLImageConstraint(py)sizeConstraint	-			MLImageSizeConstraint *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	ab89777a6baf9717	-
+method	c:objc(cs)MLImageConstraint(im)init	-			instancetype	-	-	*unavailable swift=-/-/-/1	-	aac5cddf0777f7c5	-
+typedef	c:@T@MLFeatureValueImageOption	-			NSString *	-	-	-	-	6e797d28944d6f45	-
+var	c:@MLFeatureValueImageOptionCropRect	-			const MLFeatureValueImageOption	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	2cde2496006bc28f	-
+var	c:@MLFeatureValueImageOptionCropAndScale	-			const MLFeatureValueImageOption	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	db5612072a914eba	-
+category	c:objc(cy)MLFeatureValue@MLImageConversion	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	704440db953c1512	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithImageAtURL:pixelsWide:pixelsHigh:pixelFormatType:options:error:	MLImageConversion			instancetype	NSURL * url | NSInteger pixelsWide | NSInteger pixelsHigh | OSType pixelFormatType | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	cf3c7445d4e287bd	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithImageAtURL:constraint:options:error:	MLImageConversion			instancetype	NSURL * url | MLImageConstraint * constraint | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	07ed51f3ba8d4999	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithCGImage:pixelsWide:pixelsHigh:pixelFormatType:options:error:	MLImageConversion			instancetype	CGImageRef cgImage | NSInteger pixelsWide | NSInteger pixelsHigh | OSType pixelFormatType | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1cc705fecfd96119	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithCGImage:constraint:options:error:	MLImageConversion			instancetype	CGImageRef cgImage | MLImageConstraint * constraint | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	354017c31e85392e	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithImageAtURL:orientation:pixelsWide:pixelsHigh:pixelFormatType:options:error:	MLImageConversion			instancetype	NSURL * url | CGImagePropertyOrientation orientation | NSInteger pixelsWide | NSInteger pixelsHigh | OSType pixelFormatType | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	700756df2e3c70b2	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithImageAtURL:orientation:constraint:options:error:	MLImageConversion			instancetype	NSURL * url | CGImagePropertyOrientation orientation | MLImageConstraint * constraint | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	90f559a76b471caa	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithCGImage:orientation:pixelsWide:pixelsHigh:pixelFormatType:options:error:	MLImageConversion			instancetype	CGImageRef cgImage | CGImagePropertyOrientation orientation | NSInteger pixelsWide | NSInteger pixelsHigh | OSType pixelFormatType | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	5e8ae67cf5f7211c	-
+method	c:objc(cs)MLFeatureValue(cm)featureValueWithCGImage:orientation:constraint:options:error:	MLImageConversion			instancetype	CGImageRef cgImage | CGImagePropertyOrientation orientation | MLImageConstraint * constraint | NSDictionary<MLFeatureValueImageOption,id> * options | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	47a9456d895fc1e6	-
+interface	c:objc(cs)MLDictionaryConstraint	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	08650aa676a084b1	-
+super	-	MLDictionaryConstraint	NSObject		-	-	-	-	-	fb006ae03959601a	-
+conforms	c:objc(cs)MLDictionaryConstraint	MLDictionaryConstraint	NSSecureCoding		-	-	-	-	-	026f46486dd3ae7b	-
+property	c:objc(cs)MLDictionaryConstraint(py)keyType	-			MLFeatureType	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	bc26f43cba5923d4	-
+typedef	c:@T@MLMultiArrayShapeConstraintType	-			enum MLMultiArrayShapeConstraintType	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e2a5b2e7e5fd9587	-
+enum	c:@E@MLMultiArrayShapeConstraintType	-			NSInteger	-	-	-	-	184842b2d8b52f92	-
+enumconst	c:@E@MLMultiArrayShapeConstraintType@MLMultiArrayShapeConstraintTypeUnspecified	MLMultiArrayShapeConstraintType			-	-	-	-	-	31bd715e5161e7cc	1
+enumconst	c:@E@MLMultiArrayShapeConstraintType@MLMultiArrayShapeConstraintTypeEnumerated	MLMultiArrayShapeConstraintType			-	-	-	-	-	bc3c95ec85e1b598	2
+enumconst	c:@E@MLMultiArrayShapeConstraintType@MLMultiArrayShapeConstraintTypeRange	MLMultiArrayShapeConstraintType			-	-	-	-	-	11cb63b019d67b89	3
+interface	c:objc(cs)MLMultiArrayShapeConstraint	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	d0fedcaaf7bff51a	-
+super	-	MLMultiArrayShapeConstraint	NSObject		-	-	-	-	-	fa10ef350c8606db	-
+conforms	c:objc(cs)MLMultiArrayShapeConstraint	MLMultiArrayShapeConstraint	NSSecureCoding		-	-	-	-	-	235645158d287907	-
+property	c:objc(cs)MLMultiArrayShapeConstraint(py)type	-			MLMultiArrayShapeConstraintType	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	214e7fc72ff70bfe	-
+property	c:objc(cs)MLMultiArrayShapeConstraint(py)sizeRangeForDimension	-			NSArray<NSValue *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	9fef5fb8ccee6b5d	-
+property	c:objc(cs)MLMultiArrayShapeConstraint(py)enumeratedShapes	-			NSArray<NSArray<NSNumber *> *> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c1bf091e49cf1dfc	-
+interface	c:objc(cs)MLMultiArrayConstraint	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	89e561978de59bc6	-
+super	-	MLMultiArrayConstraint	NSObject		-	-	-	-	-	3053aea9dedffde1	-
+conforms	c:objc(cs)MLMultiArrayConstraint	MLMultiArrayConstraint	NSSecureCoding		-	-	-	-	-	44d4de5fab2793a3	-
+property	c:objc(cs)MLMultiArrayConstraint(py)shape	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cfc399646c69914c	-
+property	c:objc(cs)MLMultiArrayConstraint(py)dataType	-			MLMultiArrayDataType	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	191d6c0b6abbbed7	-
+property	c:objc(cs)MLMultiArrayConstraint(py)shapeConstraint	-			MLMultiArrayShapeConstraint *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	fe63e8b0c1240e93	-
+interface	c:objc(cs)MLSequenceConstraint	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c1b9ef01e1bc08d3	-
+super	-	MLSequenceConstraint	NSObject		-	-	-	-	-	bd0cb50b3fc1a83a	-
+conforms	c:objc(cs)MLSequenceConstraint	MLSequenceConstraint	NSSecureCoding		-	-	-	-	-	6264f3c757695979	-
+property	c:objc(cs)MLSequenceConstraint(py)valueDescription	-			MLFeatureDescription *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	154c14ab13c78bed	-
+property	c:objc(cs)MLSequenceConstraint(py)countRange	-			NSRange	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e8ce9842d3246205	-
+interface	c:objc(cs)MLStateConstraint	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	39a307e60b5b374a	-
+super	-	MLStateConstraint	NSObject		-	-	-	-	-	7f4ddee9123039ae	-
+conforms	c:objc(cs)MLStateConstraint	MLStateConstraint	NSSecureCoding		-	-	-	-	-	132ab6614d1b0112	-
+property	c:objc(cs)MLStateConstraint(py)bufferShape	-			NSArray<NSNumber *> *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	660da0247e25ebdb	-
+property	c:objc(cs)MLStateConstraint(py)dataType	-			MLMultiArrayDataType	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	231fdbfab061dae6	-
+interface	c:objc(cs)MLFeatureDescription	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	0f2c6251294de240	-
+super	-	MLFeatureDescription	NSObject		-	-	-	-	-	866f5b69aeb219fd	-
+conforms	c:objc(cs)MLFeatureDescription	MLFeatureDescription	NSCopying		-	-	-	-	-	5f98da9abe5a9678	-
+conforms	c:objc(cs)MLFeatureDescription	MLFeatureDescription	NSSecureCoding		-	-	-	-	-	5e58b4163bde932d	-
+property	c:objc(cs)MLFeatureDescription(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b252069dad394334	-
+property	c:objc(cs)MLFeatureDescription(py)type	-			MLFeatureType	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b1ece99b2137d432	-
+property	c:objc(cs)MLFeatureDescription(py)optional	-			BOOL	-	readonly,nonatomic,getter=isOptional	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	c9441cda84363370	-
+method	c:objc(cs)MLFeatureDescription(im)isAllowedValue:	-			BOOL	MLFeatureValue * value	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ee314ee1515f782c	-
+category	c:objc(cy)MLFeatureDescription@MLFeatureValueConstraints	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	949eb17217630ae6	-
+property	c:objc(cs)MLFeatureDescription(py)multiArrayConstraint	MLFeatureValueConstraints			MLMultiArrayConstraint *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e4f13766d71aec2d	-
+property	c:objc(cs)MLFeatureDescription(py)imageConstraint	MLFeatureValueConstraints			MLImageConstraint *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f74f166428f044f1	-
+property	c:objc(cs)MLFeatureDescription(py)dictionaryConstraint	MLFeatureValueConstraints			MLDictionaryConstraint *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	c8d2df07e62b4cd2	-
+property	c:objc(cs)MLFeatureDescription(py)sequenceConstraint	MLFeatureValueConstraints			MLSequenceConstraint *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	69f9cc7e38776072	-
+property	c:objc(cs)MLFeatureDescription(py)stateConstraint	MLFeatureValueConstraints			MLStateConstraint *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	11dbbf2333fea3e7	-
+protocol	c:objc(pl)MLFeatureProvider	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b2abf7040c81ea49	-
+property	c:objc(pl)MLFeatureProvider(py)featureNames	-			NSSet<NSString *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	513c701f353fa871	-
+method	c:objc(pl)MLFeatureProvider(im)featureValueForName:	-			MLFeatureValue *	NSString * featureName	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	c83bc8b62cb30f1b	-
+interface	c:objc(cs)MLDictionaryFeatureProvider	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	91d0d2b03ac77947	-
+super	-	MLDictionaryFeatureProvider	NSObject		-	-	-	-	-	14bb9d777200adc7	-
+conforms	c:objc(cs)MLDictionaryFeatureProvider	MLDictionaryFeatureProvider	MLFeatureProvider		-	-	-	-	-	fa99e3ea42f1e5e5	-
+conforms	c:objc(cs)MLDictionaryFeatureProvider	MLDictionaryFeatureProvider	NSFastEnumeration		-	-	-	-	-	4cadfcf994dfa229	-
+conforms	c:objc(cs)MLDictionaryFeatureProvider	MLDictionaryFeatureProvider	NSSecureCoding		-	-	-	-	-	dbabe8412f72d6b8	-
+property	c:objc(cs)MLDictionaryFeatureProvider(py)dictionary	-			NSDictionary<NSString *,MLFeatureValue *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	30037baac607c256	-
+method	c:objc(cs)MLDictionaryFeatureProvider(im)initWithDictionary:error:	-			instancetype	NSDictionary<NSString *,id> * dictionary | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cf9eb9f6136ae718	-
+method	c:objc(cs)MLDictionaryFeatureProvider(im)objectForKeyedSubscript:	-			MLFeatureValue *	NSString * featureName	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	82ca3205d3dafe12	-
+protocol	c:objc(pl)MLBatchProvider	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f1a227c1c4fa761f	-
+property	c:objc(pl)MLBatchProvider(py)count	-			NSInteger	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f3d66e0d82666d9a	-
+method	c:objc(pl)MLBatchProvider(im)featuresAtIndex:	-			id<MLFeatureProvider>	NSInteger index	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	da44ec8f8f8ea077	-
+interface	c:objc(cs)MLArrayBatchProvider	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	631962d7060cf9e8	-
+super	-	MLArrayBatchProvider	NSObject		-	-	-	-	-	3ba050bb972d71fa	-
+conforms	c:objc(cs)MLArrayBatchProvider	MLArrayBatchProvider	MLBatchProvider		-	-	-	-	-	d6dbc6f72da7ee39	-
+property	c:objc(cs)MLArrayBatchProvider(py)array	-			NSArray<id<MLFeatureProvider>> *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c3d5fbbe632067b3	-
+method	c:objc(cs)MLArrayBatchProvider(im)initWithFeatureProviderArray:	-			instancetype	NSArray<id<MLFeatureProvider>> * array	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	391da195d2ec3030	-
+method	c:objc(cs)MLArrayBatchProvider(im)initWithDictionary:error:	-			instancetype	NSDictionary<NSString *,NSArray *> * dictionary | NSError * _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e5e839c9bbb22410	-
+typedef	c:@T@MLModelMetadataKey	-			NSString *	-	-	-	-	79e20dc869765a8d	-
+var	c:@MLModelDescriptionKey	-			const MLModelMetadataKey	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	072d37c3ba3fd6f5	-
+var	c:@MLModelVersionStringKey	-			const MLModelMetadataKey	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1d4e982ff82684a7	-
+var	c:@MLModelAuthorKey	-			const MLModelMetadataKey	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	273f4ed60e82c188	-
+var	c:@MLModelLicenseKey	-			const MLModelMetadataKey	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f9c4635e653c9823	-
+var	c:@MLModelCreatorDefinedKey	-			const MLModelMetadataKey	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cf7b97bf3495a042	-
+interface	c:objc(cs)MLModelDescription	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	dc837509b5383ac4	-
+super	-	MLModelDescription	NSObject		-	-	-	-	-	2c0534f180a72f3d	-
+conforms	c:objc(cs)MLModelDescription	MLModelDescription	NSSecureCoding		-	-	-	-	-	a06427a8a1092f4b	-
+property	c:objc(cs)MLModelDescription(py)inputDescriptionsByName	-			NSDictionary<NSString *,MLFeatureDescription *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cce510294fe41039	-
+property	c:objc(cs)MLModelDescription(py)outputDescriptionsByName	-			NSDictionary<NSString *,MLFeatureDescription *> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	450433a276a6d86f	-
+property	c:objc(cs)MLModelDescription(py)stateDescriptionsByName	-			NSDictionary<NSString *,MLFeatureDescription *> *	-	readonly,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	f1ea8de21f20fbb5	-
+property	c:objc(cs)MLModelDescription(py)predictedFeatureName	-			NSString *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6e2fd6e0b1037b7f	-
+property	c:objc(cs)MLModelDescription(py)predictedProbabilitiesName	-			NSString *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	0657882471c23311	-
+property	c:objc(cs)MLModelDescription(py)metadata	-			NSDictionary<MLModelMetadataKey,id> *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	944b84316daca5e0	-
+property	c:objc(cs)MLModelDescription(py)classLabels	-			NSArray<id> *	-	readonly,copy,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	97a002bd4e370556	-
+category	c:objc(cy)MLModelDescription@MLUpdateAdditions	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	53f041a6b58cd021	-
+property	c:objc(cs)MLModelDescription(py)isUpdatable	MLUpdateAdditions			BOOL	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	af83fbf16d92625b	-
+property	c:objc(cs)MLModelDescription(py)trainingInputDescriptionsByName	MLUpdateAdditions			NSDictionary<NSString *,MLFeatureDescription *> *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	8303cef2a8fe3dd8	-
+category	c:objc(cy)MLModelDescription@MLParameters	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	3be5027267e01b75	-
+property	c:objc(cs)MLModelDescription(py)parameterDescriptionsByKey	MLParameters			NSDictionary<MLParameterKey *,MLParameterDescription *> *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	f6df1437efaea871	-
+interface	c:objc(cs)MLPredictionOptions	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	deprecated: Use Use -[MLModelConfiguration computeUnits] instead. instead	3e8d334121e37e4f	-
+super	-	MLPredictionOptions	NSObject		-	-	-	-	-	9b22c38a00538fa5	-
+property	c:objc(cs)MLPredictionOptions(py)usesCPUOnly	-			BOOL	-	nonatomic	ios=11.0/15.0/-/0,macos=10.13/12.0/-/0,tvos=11.0/15.0/-/0,watchos=4.0/8.0/-/0	-	83897bb9e990b087	-
+property	c:objc(cs)MLPredictionOptions(py)outputBackings	-			NSDictionary<NSString *,id> *	-	copy,nonatomic	ios=16.0/-/-/0,macos=11.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	9b3360b05156be11	-
+typedef	c:@T@MLReshapeFrequencyHint	-			enum MLReshapeFrequencyHint	-	-	-	-	a0f0c478e111acf9	-
+enum	c:@E@MLReshapeFrequencyHint	-			NSInteger	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	4d8a1d55177b4657	-
+enumconst	c:@E@MLReshapeFrequencyHint@MLReshapeFrequencyHintFrequent	MLReshapeFrequencyHint			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	1990f0c1e66ba13b	0
+enumconst	c:@E@MLReshapeFrequencyHint@MLReshapeFrequencyHintInfrequent	MLReshapeFrequencyHint			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ff213167bb4840f2	1
+typedef	c:@T@MLSpecializationStrategy	-			enum MLSpecializationStrategy	-	-	-	-	e1e7c4aaaa68a5f2	-
+enum	c:@E@MLSpecializationStrategy	-			NSInteger	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	3bf9b122d6f2f581	-
+enumconst	c:@E@MLSpecializationStrategy@MLSpecializationStrategyDefault	MLSpecializationStrategy			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	37c434cb3b372749	0
+enumconst	c:@E@MLSpecializationStrategy@MLSpecializationStrategyFastPrediction	MLSpecializationStrategy			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	3ceb3f929080e1d2	1
+interface	c:objc(cs)MLOptimizationHints	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	7e74d277ae031eec	-
+super	-	MLOptimizationHints	NSObject		-	-	-	-	-	411637afda90c508	-
+conforms	c:objc(cs)MLOptimizationHints	MLOptimizationHints	NSCopying		-	-	-	-	-	a6bfb5ec868c9332	-
+conforms	c:objc(cs)MLOptimizationHints	MLOptimizationHints	NSSecureCoding		-	-	-	-	-	cd018c39993ee859	-
+property	c:objc(cs)MLOptimizationHints(py)reshapeFrequency	-			MLReshapeFrequencyHint	-	assign,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ef978e626277fca0	-
+property	c:objc(cs)MLOptimizationHints(py)specializationStrategy	-			MLSpecializationStrategy	-	assign,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	1b448806ea2a75e5	-
+typedef	c:@T@MLComputeUnits	-			enum MLComputeUnits	-	-	-	-	68eaae5f7ab7d48e	-
+enum	c:@E@MLComputeUnits	-			NSInteger	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	3ce95d44f6d8576f	-
+enumconst	c:@E@MLComputeUnits@MLComputeUnitsCPUOnly	MLComputeUnits			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	fdaef6b444f4bee1	0
+enumconst	c:@E@MLComputeUnits@MLComputeUnitsCPUAndGPU	MLComputeUnits			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f59a22035987ca86	1
+enumconst	c:@E@MLComputeUnits@MLComputeUnitsAll	MLComputeUnits			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	da721365d2b7391a	2
+enumconst	c:@E@MLComputeUnits@MLComputeUnitsCPUAndNeuralEngine	MLComputeUnits			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	740f8ad05b222473	3
+interface	c:objc(cs)MLModelConfiguration	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e9399ab5bcd53540	-
+super	-	MLModelConfiguration	NSObject		-	-	-	-	-	8fde052bdadd9dd8	-
+conforms	c:objc(cs)MLModelConfiguration	MLModelConfiguration	NSCopying		-	-	-	-	-	ca1329b819955323	-
+conforms	c:objc(cs)MLModelConfiguration	MLModelConfiguration	NSSecureCoding		-	-	-	-	-	bb83f988de00f8df	-
+property	c:objc(cs)MLModelConfiguration(py)modelDisplayName	-			NSString *	-	copy	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	e870df409da82c0a	-
+property	c:objc(cs)MLModelConfiguration(py)computeUnits	-			MLComputeUnits	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	361b5d76049fd5dd	-
+property	c:objc(cs)MLModelConfiguration(py)optimizationHints	-			MLOptimizationHints *	-	copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	00859ba6ab6d90a7	-
+category	c:objc(cy)MLModelConfiguration@MLGPUConfigurationOptions	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	aea9bf94686fead5	-
+property	c:objc(cs)MLModelConfiguration(py)allowLowPrecisionAccumulationOnGPU	MLGPUConfigurationOptions			BOOL	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	d05aba3ec6eaec45	-
+property	c:objc(cs)MLModelConfiguration(py)preferredMetalDevice	MLGPUConfigurationOptions			id<MTLDevice>	-	nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	d0c33080e59ac72b	-
+category	c:objc(cy)MLModelConfiguration@MLModelParameterAdditions	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	82182bba9d0d4290	-
+property	c:objc(cs)MLModelConfiguration(py)parameters	MLModelParameterAdditions			NSDictionary<MLParameterKey *,id> *	-	nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	349da40ded6c9d7c	-
+category	c:objc(cy)MLModelConfiguration@MultiFunctions	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	4db7d29c5cbbd831	-
+property	c:objc(cs)MLModelConfiguration(py)functionName	MultiFunctions			NSString *	-	copy,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	160fec073262e28f	-
+interface	c:objc(cs)MLModelAsset	-			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	579d205b6eadfba6	-
+super	-	MLModelAsset	NSObject		-	-	-	-	-	706d21df8ab27350	-
+method	c:objc(cs)MLModelAsset(cm)modelAssetWithSpecificationData:error:	-			instancetype	NSData * specificationData | NSError * _Nullable * error	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=-/-/-/1	-	738e8eefe9df5115	-
+method	c:objc(cs)MLModelAsset(cm)modelAssetWithSpecificationData:blobMapping:error:	-			instancetype	NSData * specificationData | NSDictionary<NSURL *,NSData *> * blobMapping | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	18996456fb6f6c56	-
+method	c:objc(cs)MLModelAsset(cm)modelAssetWithURL:error:	-			instancetype	NSURL * compiledModelURL | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	748a27a0bacd3a15	-
+method	c:objc(cs)MLModelAsset(im)modelDescriptionWithCompletionHandler:	-			void	void (^)(MLModelDescription * _Nullable, NSError * _Nullable) handler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	0e5d1bbc07a9a9c4	-
+method	c:objc(cs)MLModelAsset(im)modelDescriptionOfFunctionNamed:completionHandler:	-			void	NSString * functionName | void (^)(MLModelDescription * _Nullable, NSError * _Nullable) handler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	ff1978762c93bb0b	-
+method	c:objc(cs)MLModelAsset(im)functionNamesWithCompletionHandler:	-			void	void (^)(NSArray<NSString *> * _Nullable, NSError * _Nullable) handler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	6eaa5230d7cafdb8	-
+method	c:objc(cs)MLModelAsset(im)init	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	1b93f7dd17702be3	-
+method	c:objc(cs)MLModelAsset(cm)new	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	60ec4876b985475e	-
+interface	c:objc(cs)MLModel	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	fccdfc1ef1bb225c	-
+super	-	MLModel	NSObject		-	-	-	-	-	4451e7b26050a600	-
+property	c:objc(cs)MLModel(py)modelDescription	-			MLModelDescription *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	75012343abcc9e3e	-
+property	c:objc(cs)MLModel(py)configuration	-			MLModelConfiguration *	-	readonly,nonatomic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	409a07cf80c6078d	-
+method	c:objc(cs)MLModel(cm)modelWithContentsOfURL:error:	-			instancetype	NSURL * url | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4914330d8f13402a	-
+method	c:objc(cs)MLModel(cm)modelWithContentsOfURL:configuration:error:	-			instancetype	NSURL * url | MLModelConfiguration * configuration | NSError * _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c75c9c93b54919ca	-
+method	c:objc(cs)MLModel(cm)loadContentsOfURL:configuration:completionHandler:	-			void	NSURL * url | MLModelConfiguration * configuration | void (^)(MLModel * _Nullable, NSError * _Nullable) handler	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	69d6a3caa82d2c26	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:error:	-			id<MLFeatureProvider>	id<MLFeatureProvider> input | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	cdd19eaadcbd0d8f	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:options:error:	-			id<MLFeatureProvider>	id<MLFeatureProvider> input | MLPredictionOptions * options | NSError * _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2976d80f4565e35c	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:completionHandler:	-			void	id<MLFeatureProvider> input | void (^)(id<MLFeatureProvider> _Nullable, NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	6347c5246994540a	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:options:completionHandler:	-			void	id<MLFeatureProvider> input | MLPredictionOptions * options | void (^)(id<MLFeatureProvider> _Nullable, NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	bff1ea27799ee73c	-
+method	c:objc(cs)MLModel(im)predictionsFromBatch:error:	-			id<MLBatchProvider>	id<MLBatchProvider> inputBatch | NSError * _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e7f652a405658736	-
+method	c:objc(cs)MLModel(im)predictionsFromBatch:options:error:	-			id<MLBatchProvider>	id<MLBatchProvider> inputBatch | MLPredictionOptions * options | NSError * _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c1c4602322cd0c59	-
+method	c:objc(cs)MLModel(im)parameterValueForKey:error:	-			id	MLParameterKey * key | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	640235387e5775ab	-
+method	c:objc(cs)MLModel(cm)loadModelAsset:configuration:completionHandler:	-			void	MLModelAsset * asset | MLModelConfiguration * configuration | void (^)(MLModel * _Nullable, NSError * _Nullable) handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	e13548cb75056a49	-
+category	c:objc(cy)MLModel@MLModelCompilation	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	deprecated: Use the asynchronous interface compileModelAtURL:completionHandler:error: instead.	ef5eb7881108fa17	-
+method	c:objc(cs)MLModel(cm)compileModelAtURL:error:	MLModelCompilation			NSURL *	NSURL * modelURL | NSError * _Nullable * error	-	ios=11.0/100000/-/0,macos=10.13/100000/-/0,tvos=11.0/100000/-/0,watchos=-/-/-/1	deprecated: Use the asynchronous interface compileModelAtURL:completionHandler:error: instead.	94a779e496b88976	-
+method	c:objc(cs)MLModel(cm)compileModelAtURL:completionHandler:	MLModelCompilation			void	NSURL * modelURL | void (^)(NSURL * _Nullable, NSError * _Nullable) handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=-/-/-/1	-	aa30bfd87437c41d	-
+category	c:objc(cy)MLModel@MLComputeDevice	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	32d7ea9d61fcd73d	-
+property	c:objc(cs)MLModel(cpy)availableComputeDevices	MLComputeDevice			NSArray<id<MLComputeDeviceProtocol>> *	-	readonly,copy,nonatomic,class	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	15b1d3c2028bc136	-
+category	c:objc(cy)MLModel@MLState	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	03d18d7d16abda6f	-
+method	c:objc(cs)MLModel(im)newState	MLState			MLState *	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	173d81446040725d	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:usingState:error:	MLState			id<MLFeatureProvider>	id<MLFeatureProvider> inputFeatures | MLState * state | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	0ff901bfc9071c3b	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:usingState:options:error:	MLState			id<MLFeatureProvider>	id<MLFeatureProvider> inputFeatures | MLState * state | MLPredictionOptions * options | NSError * _Nullable * error	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	4da659a47364801d	-
+method	c:objc(cs)MLModel(im)predictionFromFeatures:usingState:options:completionHandler:	MLState			void	id<MLFeatureProvider> inputFeatures | MLState * state | MLPredictionOptions * options | void (^)(id<MLFeatureProvider> _Nullable, NSError * _Nullable) completionHandler	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	e8118930fb0109cd	-
+var	c:@MLModelErrorDomain	-			NSString *const	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e7e2ba4f0176ead5	-
+typedef	c:@T@MLModelError	-			enum MLModelError	-	-	-	-	d44cc60756764c1b	-
+enum	c:@E@MLModelError	-			NSInteger	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6dc0ff2c59f0d085	-
+enumconst	c:@E@MLModelError@MLModelErrorGeneric	MLModelError			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	aadd47b67e8f2b70	0
+enumconst	c:@E@MLModelError@MLModelErrorFeatureType	MLModelError			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	92ab88cca219d255	1
+enumconst	c:@E@MLModelError@MLModelErrorIO	MLModelError			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	41dbd81248c50c14	3
+enumconst	c:@E@MLModelError@MLModelErrorCustomLayer	MLModelError			-	-	-	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	385e98540321bda6	4
+enumconst	c:@E@MLModelError@MLModelErrorCustomModel	MLModelError			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f6ddccc58d56981b	5
+enumconst	c:@E@MLModelError@MLModelErrorUpdate	MLModelError			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	0eedefb5d25dbb7e	6
+enumconst	c:@E@MLModelError@MLModelErrorParameters	MLModelError			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	bcb62b460b763f12	7
+enumconst	c:@E@MLModelError@MLModelErrorModelDecryptionKeyFetch	MLModelError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	982cd5ac6fcd9584	8
+enumconst	c:@E@MLModelError@MLModelErrorModelDecryption	MLModelError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	2ca873db85f88848	9
+enumconst	c:@E@MLModelError@MLModelErrorModelCollection	MLModelError			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	0ee324850fe4b362	10
+enumconst	c:@E@MLModelError@MLModelErrorPredictionCancelled	MLModelError			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	52874e3b99816054	11
+protocol	c:objc(pl)MLCustomLayer	-			-	-	-	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	b149050eac36856c	-
+method	c:objc(pl)MLCustomLayer(im)initWithParameterDictionary:error:	-			instancetype	NSDictionary<NSString *,id> * parameters | NSError * _Nullable * error	-	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	ffe0cdfe2b0f19aa	-
+method	c:objc(pl)MLCustomLayer(im)setWeightData:error:	-			BOOL	NSArray<NSData *> * weights | NSError * _Nullable * error	-	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	8a43315a19f38666	-
+method	c:objc(pl)MLCustomLayer(im)outputShapesForInputShapes:error:	-			NSArray<NSArray<NSNumber *> *> *	NSArray<NSArray<NSNumber *> *> * inputShapes | NSError * _Nullable * error	-	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	7d423ef69df9cc2d	-
+method	c:objc(pl)MLCustomLayer(im)evaluateOnCPUWithInputs:outputs:error:	-			BOOL	NSArray<MLMultiArray *> * inputs | NSArray<MLMultiArray *> * outputs | NSError * _Nullable * error	-	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	437ff09ed49be91e	-
+method	c:objc(pl)MLCustomLayer(im)encodeToCommandBuffer:inputs:outputs:error:	-			BOOL	id<MTLCommandBuffer> commandBuffer | NSArray<id<MTLTexture>> * inputs | NSArray<id<MTLTexture>> * outputs | NSError * _Nullable * error	optional	ios=11.2/-/-/0,macos=10.13.2/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0	-	9d79559add9bf48c	-
+protocol	c:objc(pl)MLCustomModel	-			-	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	5460925d0f9d64c7	-
+method	c:objc(pl)MLCustomModel(im)initWithModelDescription:parameterDictionary:error:	-			instancetype	MLModelDescription * modelDescription | NSDictionary<NSString *,id> * parameters | NSError * _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	059ff20bfba7d53b	-
+method	c:objc(pl)MLCustomModel(im)predictionFromFeatures:options:error:	-			id<MLFeatureProvider>	id<MLFeatureProvider> input | MLPredictionOptions * options | NSError * _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	bfc58a0cf1646e36	-
+method	c:objc(pl)MLCustomModel(im)predictionsFromBatch:options:error:	-			id<MLBatchProvider>	id<MLBatchProvider> inputBatch | MLPredictionOptions * options | NSError * _Nullable * error	optional	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	7ac664fa62ab5da9	-
+interface	c:objc(cs)MLKey	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	6597d7eaecfbf306	-
+super	-	MLKey	NSObject		-	-	-	-	-	7b3f42c36eb86cfb	-
+conforms	c:objc(cs)MLKey	MLKey	NSCopying		-	-	-	-	-	7c2a3b9265a343f4	-
+conforms	c:objc(cs)MLKey	MLKey	NSSecureCoding		-	-	-	-	-	d074f76bb64f3be3	-
+property	c:objc(cs)MLKey(py)name	-			NSString *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	f19f7be5a670f7d6	-
+property	c:objc(cs)MLKey(py)scope	-			NSString *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	2a1507193bac96fa	-
+method	c:objc(cs)MLKey(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	b3a827606d8d6a52	-
+method	c:objc(cs)MLKey(cm)new	-			id	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	192ed672f540c718	-
+typedef	c:@T@MLTaskState	-			enum MLTaskState	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	94a8e6c1e7e98314	-
+enum	c:@E@MLTaskState	-			NSInteger	-	-	-	-	4ed6811cf40ae870	-
+enumconst	c:@E@MLTaskState@MLTaskStateSuspended	MLTaskState			-	-	-	-	-	bc30a5e5875f2e85	1
+enumconst	c:@E@MLTaskState@MLTaskStateRunning	MLTaskState			-	-	-	-	-	2b4e73ac0ff8e6da	2
+enumconst	c:@E@MLTaskState@MLTaskStateCancelling	MLTaskState			-	-	-	-	-	5bc82f9965920333	3
+enumconst	c:@E@MLTaskState@MLTaskStateCompleted	MLTaskState			-	-	-	-	-	8d506ee01da0d5db	4
+enumconst	c:@E@MLTaskState@MLTaskStateFailed	MLTaskState			-	-	-	-	-	71b524f10230808c	5
+interface	c:objc(cs)MLTask	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	effdd3869c1a2c6f	-
+super	-	MLTask	NSObject		-	-	-	-	-	aecafb7ff860875a	-
+property	c:objc(cs)MLTask(py)taskIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	230743f77e81f22b	-
+property	c:objc(cs)MLTask(py)state	-			MLTaskState	-	readonly,assign,atomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ff7d41e17c31f90b	-
+property	c:objc(cs)MLTask(py)error	-			NSError *	-	readonly,copy,atomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	2e5f7b27d5a2cbdc	-
+method	c:objc(cs)MLTask(im)resume	-			void	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	1c09cfe81e380153	-
+method	c:objc(cs)MLTask(im)cancel	-			void	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	04fe72c237b34c42	-
+method	c:objc(cs)MLTask(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	8bd69d8fee69b018	-
+method	c:objc(cs)MLTask(cm)new	-			id	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	fb8671d6608a6922	-
+interface	c:objc(cs)MLUpdateTask	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	0462de2797e8f860	-
+super	-	MLUpdateTask	MLTask		-	-	-	-	-	c9a684f1b53b352a	-
+method	c:objc(cs)MLUpdateTask(cm)updateTaskForModelAtURL:trainingData:configuration:completionHandler:error:	-			instancetype	NSURL * modelURL | id<MLBatchProvider> trainingData | MLModelConfiguration * configuration | void (^)(MLUpdateContext * _Nonnull) completionHandler | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ca3eb4c1b95ab9ed	-
+method	c:objc(cs)MLUpdateTask(cm)updateTaskForModelAtURL:trainingData:completionHandler:error:	-			instancetype	NSURL * modelURL | id<MLBatchProvider> trainingData | void (^)(MLUpdateContext * _Nonnull) completionHandler | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	efb8aa2e28c84df0	-
+method	c:objc(cs)MLUpdateTask(cm)updateTaskForModelAtURL:trainingData:configuration:progressHandlers:error:	-			instancetype	NSURL * modelURL | id<MLBatchProvider> trainingData | MLModelConfiguration * configuration | MLUpdateProgressHandlers * progressHandlers | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	60d3b083c24eccbf	-
+method	c:objc(cs)MLUpdateTask(cm)updateTaskForModelAtURL:trainingData:progressHandlers:error:	-			instancetype	NSURL * modelURL | id<MLBatchProvider> trainingData | MLUpdateProgressHandlers * progressHandlers | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	6346ac6391062978	-
+method	c:objc(cs)MLUpdateTask(im)resumeWithParameters:	-			void	NSDictionary<MLParameterKey *,id> * updateParameters	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	d29352e7a989ea34	-
+method	c:objc(cs)MLUpdateTask(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	cffb16107219f4da	-
+method	c:objc(cs)MLUpdateTask(cm)new	-			id	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	02fcf6ad2043b266	-
+protocol	c:objc(pl)MLWritable	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	1706aa6fda7285bc	-
+conforms	c:objc(pl)MLWritable	MLWritable	NSObject		-	-	-	-	-	fe6a53e49fd930ae	-
+method	c:objc(pl)MLWritable(im)writeToURL:error:	-			BOOL	NSURL * url | NSError * _Nullable * error	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	30b77cafae801e03	-
+typedef	c:@T@MLUpdateProgressEvent	-			enum MLUpdateProgressEvent	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	4d1195a5533f2666	-
+enum	c:@E@MLUpdateProgressEvent	-			NSInteger	-	-	-	-	8565084f3366b2a5	-
+enumconst	c:@E@MLUpdateProgressEvent@MLUpdateProgressEventTrainingBegin	MLUpdateProgressEvent			-	-	-	-	-	b64c3d9c0063e9a3	1
+enumconst	c:@E@MLUpdateProgressEvent@MLUpdateProgressEventEpochEnd	MLUpdateProgressEvent			-	-	-	-	-	ec1fcbb657648ab5	2
+enumconst	c:@E@MLUpdateProgressEvent@MLUpdateProgressEventMiniBatchEnd	MLUpdateProgressEvent			-	-	-	-	-	eb4a8696ebc9df8b	4
+interface	c:objc(cs)MLUpdateContext	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ab6fc96795599c24	-
+super	-	MLUpdateContext	NSObject		-	-	-	-	-	167fbdde6f0a4136	-
+property	c:objc(cs)MLUpdateContext(py)task	-			MLUpdateTask *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	c2737ba8510abbba	-
+property	c:objc(cs)MLUpdateContext(py)model	-			MLModel<MLWritable> *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ab04a2fb46f501ea	-
+property	c:objc(cs)MLUpdateContext(py)event	-			MLUpdateProgressEvent	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	9e81fe0cae97d048	-
+property	c:objc(cs)MLUpdateContext(py)metrics	-			NSDictionary<MLMetricKey *,id> *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	1f507ea5ad1ee94a	-
+property	c:objc(cs)MLUpdateContext(py)parameters	-			NSDictionary<MLParameterKey *,id> *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	e3df4d4530340be6	-
+interface	c:objc(cs)MLUpdateProgressHandlers	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	5411f2ecbfb450ee	-
+super	-	MLUpdateProgressHandlers	NSObject		-	-	-	-	-	1f51cf5d95317ae1	-
+method	c:objc(cs)MLUpdateProgressHandlers(im)initForEvents:progressHandler:completionHandler:	-			instancetype	MLUpdateProgressEvent interestedEvents | void (^)(MLUpdateContext * _Nonnull) progressHandler | void (^)(MLUpdateContext * _Nonnull) completionHandler	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	5469ecd6ca3e8a32	-
+method	c:objc(cs)MLUpdateProgressHandlers(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	dc76620ffd3b4fe6	-
+method	c:objc(cs)MLUpdateProgressHandlers(cm)new	-			id	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	1cce1e5858862a5e	-
+interface	c:objc(cs)MLMetricKey	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	88e7808d98fa9ab2	-
+super	-	MLMetricKey	MLKey		-	-	-	-	-	345b1e2ba6d4cc14	-
+property	c:objc(cs)MLMetricKey(cpy)lossValue	-			MLMetricKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	981e4c5eec58d805	-
+property	c:objc(cs)MLMetricKey(cpy)epochIndex	-			MLMetricKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	8ae435ce04262feb	-
+property	c:objc(cs)MLMetricKey(cpy)miniBatchIndex	-			MLMetricKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	11bea4c3821a764f	-
+method	c:objc(cs)MLMetricKey(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	dcef0b7257aaabf9	-
+method	c:objc(cs)MLMetricKey(cm)new	-			id	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	175b0ac1d3d6fe54	-
+interface	c:objc(cs)MLNumericConstraint	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	53c1753cdb94d319	-
+super	-	MLNumericConstraint	NSObject		-	-	-	-	-	b2de125cf5b0e537	-
+conforms	c:objc(cs)MLNumericConstraint	MLNumericConstraint	NSSecureCoding		-	-	-	-	-	411311aab151d830	-
+property	c:objc(cs)MLNumericConstraint(py)minNumber	-			NSNumber *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ae6579d39b04a44b	-
+property	c:objc(cs)MLNumericConstraint(py)maxNumber	-			NSNumber *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ca33cb9be299d305	-
+property	c:objc(cs)MLNumericConstraint(py)enumeratedNumbers	-			NSSet<NSNumber *> *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	0b31362f53b93e2b	-
+interface	c:objc(cs)MLParameterDescription	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	4d432ad5cb2a240f	-
+super	-	MLParameterDescription	NSObject		-	-	-	-	-	793d5a0469940995	-
+conforms	c:objc(cs)MLParameterDescription	MLParameterDescription	NSSecureCoding		-	-	-	-	-	d86142f600340559	-
+property	c:objc(cs)MLParameterDescription(py)key	-			MLParameterKey *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	37b3d10e0fc28cbe	-
+property	c:objc(cs)MLParameterDescription(py)defaultValue	-			id	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ecb98aeff4c20be1	-
+property	c:objc(cs)MLParameterDescription(py)numericConstraint	-			MLNumericConstraint *	-	readonly,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	5d614969b3a098a7	-
+interface	c:objc(cs)MLParameterKey	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	2ccc501e7c27d927	-
+super	-	MLParameterKey	MLKey		-	-	-	-	-	50cd00fc55fbc73d	-
+property	c:objc(cs)MLParameterKey(cpy)learningRate	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	6cc31b85dc2af01d	-
+property	c:objc(cs)MLParameterKey(cpy)momentum	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ca44d8382e7b6de5	-
+property	c:objc(cs)MLParameterKey(cpy)miniBatchSize	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	e57f4d2ee90ef4e5	-
+property	c:objc(cs)MLParameterKey(cpy)beta1	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	867762ee43a17bc6	-
+property	c:objc(cs)MLParameterKey(cpy)beta2	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	fba3d7e658085937	-
+property	c:objc(cs)MLParameterKey(cpy)eps	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	dc63127e0b97af54	-
+property	c:objc(cs)MLParameterKey(cpy)epochs	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	bee7aa02f556ab5c	-
+property	c:objc(cs)MLParameterKey(cpy)shuffle	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	df2192d62a7b6d3d	-
+property	c:objc(cs)MLParameterKey(cpy)seed	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	7bfdd17ec827c30c	-
+property	c:objc(cs)MLParameterKey(cpy)numberOfNeighbors	-			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	a66e84f6f715de3c	-
+method	c:objc(cs)MLParameterKey(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	6a44054a0dde12eb	-
+method	c:objc(cs)MLParameterKey(cm)new	-			id	-	-	*unavailable ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	b6750bf325123206	-
+category	c:objc(cy)MLParameterKey@MLLinkedModelParameters	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	3ccf59a6b2e27b11	-
+property	c:objc(cs)MLParameterKey(cpy)linkedModelFileName	MLLinkedModelParameters			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	0c9b23b869a531b5	-
+property	c:objc(cs)MLParameterKey(cpy)linkedModelSearchPath	MLLinkedModelParameters			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	ab65d551793abf0c	-
+category	c:objc(cy)MLParameterKey@MLNeuralNetworkParameters	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	4b7d1d56be4fa610	-
+property	c:objc(cs)MLParameterKey(cpy)weights	MLNeuralNetworkParameters			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	2124e02d3a687bba	-
+property	c:objc(cs)MLParameterKey(cpy)biases	MLNeuralNetworkParameters			MLParameterKey *	-	readonly,nonatomic,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	dd2747287d4046ba	-
+category	c:objc(cy)MLParameterKey@MLScopedParameters	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	100384b99fb6fd88	-
+method	c:objc(cs)MLParameterKey(im)scopedTo:	MLScopedParameters			MLParameterKey *	NSString * scope	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=14.0/-/-/0	-	6e0ba31c0e96d20c	-
+interface	c:objc(cs)MLModelCollectionEntry	-			-	-	-	ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	45583634f235e410	-
+super	-	MLModelCollectionEntry	NSObject		-	-	-	-	-	f4450f81d60e50b7	-
+property	c:objc(cs)MLModelCollectionEntry(py)modelIdentifier	-			NSString *	-	readonly,nonatomic	ios=-/-/-/1	-	1ceef91cd88736b6	-
+property	c:objc(cs)MLModelCollectionEntry(py)modelURL	-			NSURL *	-	readonly,nonatomic	ios=-/-/-/1	-	d973d06352123313	-
+method	c:objc(cs)MLModelCollectionEntry(im)isEqualToModelCollectionEntry:	-			BOOL	MLModelCollectionEntry * entry	-	ios=-/-/-/1	-	c788a015b0dae740	-
+method	c:objc(cs)MLModelCollectionEntry(im)init	-			instancetype	-	-	*unavailable ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1b2c4e7e8508f15b	-
+method	c:objc(cs)MLModelCollectionEntry(cm)new	-			id	-	-	*unavailable ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1bc2c2190cc76b43	-
+interface	c:objc(cs)MLModelCollection	-			-	-	-	ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	869c52bf3a16afc4	-
+super	-	MLModelCollection	NSObject		-	-	-	-	-	d927137cad32bffb	-
+property	c:objc(cs)MLModelCollection(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=-/-/-/1	-	9c7f442009ee09da	-
+property	c:objc(cs)MLModelCollection(py)entries	-			NSDictionary<NSString *,MLModelCollectionEntry *> *	-	readonly,copy,nonatomic	ios=-/-/-/1	-	7d8cb575cb82939d	-
+property	c:objc(cs)MLModelCollection(py)deploymentID	-			NSString *	-	readonly,copy,nonatomic	ios=-/-/-/1	-	8daafad16858a94a	-
+method	c:objc(cs)MLModelCollection(cm)beginAccessingModelCollectionWithIdentifier:completionHandler:	-			NSProgress *	NSString * identifier | void (^)(MLModelCollection * _Nullable, NSError * _Nullable) completionHandler	-	ios=-/-/-/1	-	6f3bee07e002696e	-
+method	c:objc(cs)MLModelCollection(cm)endAccessingModelCollectionWithIdentifier:completionHandler:	-			void	NSString * identifier | void (^)(BOOL, NSError * _Nullable) completionHandler	-	ios=-/-/-/1	-	b341925595cb2284	-
+method	c:objc(cs)MLModelCollection(im)init	-			instancetype	-	-	*unavailable ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b4ce8ee77327120a	-
+method	c:objc(cs)MLModelCollection(cm)new	-			id	-	-	*unavailable ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	72cdb20da1da6a7a	-
+var	c:@MLModelCollectionDidChangeNotification	-			const NSNotificationName	-	-	ios=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6e4db029eda7fc25	-
+function	c:@F@MLAllComputeDevices	-			NSArray<id<MLComputeDeviceProtocol>> * (void)	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	a0ee23e60e521e8b	-
+protocol	c:objc(pl)MLComputeDeviceProtocol	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	aebd55e0a7408864	-
+conforms	c:objc(pl)MLComputeDeviceProtocol	MLComputeDeviceProtocol	NSObject		-	-	-	-	-	98421e6757befa4e	-
+interface	c:objc(cs)MLCPUComputeDevice	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	8af51f6fd368bc92	-
+super	-	MLCPUComputeDevice	NSObject		-	-	-	-	-	8eb87023e5ff40c5	-
+conforms	c:objc(cs)MLCPUComputeDevice	MLCPUComputeDevice	MLComputeDeviceProtocol		-	-	-	-	-	4e7de16916686847	-
+method	c:objc(cs)MLCPUComputeDevice(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	d2058705b6f39671	-
+method	c:objc(cs)MLCPUComputeDevice(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	413a09236e716dc9	-
+interface	c:objc(cs)MLGPUComputeDevice	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	aa3bb09a95d7b761	-
+super	-	MLGPUComputeDevice	NSObject		-	-	-	-	-	2f73f9345d0bf556	-
+conforms	c:objc(cs)MLGPUComputeDevice	MLGPUComputeDevice	MLComputeDeviceProtocol		-	-	-	-	-	9c39207776d26aec	-
+method	c:objc(cs)MLGPUComputeDevice(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	37c90ab8dbbdb4d1	-
+method	c:objc(cs)MLGPUComputeDevice(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	705a917f0b83cba9	-
+property	c:objc(cs)MLGPUComputeDevice(py)metalDevice	-			id<MTLDevice>	-	readonly,strong,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	77815b093f381a29	-
+interface	c:objc(cs)MLNeuralEngineComputeDevice	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	0eca1acb75373e92	-
+super	-	MLNeuralEngineComputeDevice	NSObject		-	-	-	-	-	a652c729ae11b465	-
+conforms	c:objc(cs)MLNeuralEngineComputeDevice	MLNeuralEngineComputeDevice	MLComputeDeviceProtocol		-	-	-	-	-	0a7cf1341a2fa0d8	-
+method	c:objc(cs)MLNeuralEngineComputeDevice(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	5b76dbd234f39793	-
+method	c:objc(cs)MLNeuralEngineComputeDevice(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	bf3cd89fe92bc2a1	-
+property	c:objc(cs)MLNeuralEngineComputeDevice(py)totalCoreCount	-			NSInteger	-	readonly,assign,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	1175abc1c23b3636	-
+interface	c:objc(cs)MLModelStructure	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	0161b26015ac33ac	-
+super	-	MLModelStructure	NSObject		-	-	-	-	-	36b0222d1d6868aa	-
+method	c:objc(cs)MLModelStructure(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	b8c79594589ff988	-
+method	c:objc(cs)MLModelStructure(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f9af65fe71074e38	-
+method	c:objc(cs)MLModelStructure(cm)loadContentsOfURL:completionHandler:	-			void	NSURL * url | void (^)(MLModelStructure * _Nullable, NSError * _Nullable) handler	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	1323f7fd0ac7df53	-
+method	c:objc(cs)MLModelStructure(cm)loadModelAsset:completionHandler:	-			void	MLModelAsset * asset | void (^)(MLModelStructure * _Nullable, NSError * _Nullable) handler	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	8e8b385751926f36	-
+property	c:objc(cs)MLModelStructure(py)neuralNetwork	-			MLModelStructureNeuralNetwork *	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	8ad934e3593c54eb	-
+property	c:objc(cs)MLModelStructure(py)program	-			MLModelStructureProgram *	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	08ba556ccf04ca3e	-
+property	c:objc(cs)MLModelStructure(py)pipeline	-			MLModelStructurePipeline *	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ac55b90e4762e330	-
+interface	c:objc(cs)MLModelStructureNeuralNetwork	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	d5ee37ea497f7ede	-
+super	-	MLModelStructureNeuralNetwork	NSObject		-	-	-	-	-	00dc8057dfedcf88	-
+method	c:objc(cs)MLModelStructureNeuralNetwork(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	e412aaaf5dbb4627	-
+method	c:objc(cs)MLModelStructureNeuralNetwork(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	4cf543b20eeb9ae6	-
+property	c:objc(cs)MLModelStructureNeuralNetwork(py)layers	-			NSArray<MLModelStructureNeuralNetworkLayer *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	7732a2c02a7386af	-
+interface	c:objc(cs)MLModelStructureNeuralNetworkLayer	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	9915cc6ca46a18ce	-
+super	-	MLModelStructureNeuralNetworkLayer	NSObject		-	-	-	-	-	b59441e2b1b57423	-
+method	c:objc(cs)MLModelStructureNeuralNetworkLayer(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ff6cfc79bea91aaf	-
+method	c:objc(cs)MLModelStructureNeuralNetworkLayer(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f54d7e7178a710cd	-
+property	c:objc(cs)MLModelStructureNeuralNetworkLayer(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	63dacb5d88f9375d	-
+property	c:objc(cs)MLModelStructureNeuralNetworkLayer(py)type	-			NSString *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	be292308ac5de435	-
+property	c:objc(cs)MLModelStructureNeuralNetworkLayer(py)inputNames	-			NSArray<NSString *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	9c2ae04926182096	-
+property	c:objc(cs)MLModelStructureNeuralNetworkLayer(py)outputNames	-			NSArray<NSString *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	8f385f2b3b0f401a	-
+interface	c:objc(cs)MLModelStructurePipeline	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	2f3b372a927046e1	-
+super	-	MLModelStructurePipeline	NSObject		-	-	-	-	-	d4e3583e5857271f	-
+method	c:objc(cs)MLModelStructurePipeline(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ac9be2d97417d730	-
+method	c:objc(cs)MLModelStructurePipeline(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	cd50808b21dc00f0	-
+property	c:objc(cs)MLModelStructurePipeline(py)subModelNames	-			NSArray<NSString *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	56e84d3267b31f34	-
+property	c:objc(cs)MLModelStructurePipeline(py)subModels	-			NSArray<MLModelStructure *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	4daf7c6ef18df01d	-
+interface	c:objc(cs)MLModelStructureProgram	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	eb3b648ad0f32a33	-
+super	-	MLModelStructureProgram	NSObject		-	-	-	-	-	5d2a64ccc695d249	-
+method	c:objc(cs)MLModelStructureProgram(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	244450c96631e2e3	-
+method	c:objc(cs)MLModelStructureProgram(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	068eead022c395d0	-
+property	c:objc(cs)MLModelStructureProgram(py)functions	-			NSDictionary<NSString *,MLModelStructureProgramFunction *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	3c5a0c903cc5e990	-
+interface	c:objc(cs)MLModelStructureProgramArgument	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	a71d1c09a38f4e08	-
+super	-	MLModelStructureProgramArgument	NSObject		-	-	-	-	-	799b22540166e669	-
+method	c:objc(cs)MLModelStructureProgramArgument(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	1bd71bf94ec1a7a4	-
+method	c:objc(cs)MLModelStructureProgramArgument(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f31fb88f8adef42f	-
+property	c:objc(cs)MLModelStructureProgramArgument(py)bindings	-			NSArray<MLModelStructureProgramBinding *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	45a3591a1c6f90b6	-
+interface	c:objc(cs)MLModelStructureProgramBinding	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	00c1027aebc19ba0	-
+super	-	MLModelStructureProgramBinding	NSObject		-	-	-	-	-	3c0a9535a99d835d	-
+method	c:objc(cs)MLModelStructureProgramBinding(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	4d85c1d52da28d4d	-
+method	c:objc(cs)MLModelStructureProgramBinding(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	83fc7c0539186c22	-
+property	c:objc(cs)MLModelStructureProgramBinding(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	e3df8d2d8d0e3a69	-
+property	c:objc(cs)MLModelStructureProgramBinding(py)value	-			MLModelStructureProgramValue *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	b8d331bd19173e6d	-
+interface	c:objc(cs)MLModelStructureProgramBlock	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	3f15536d226f40fa	-
+super	-	MLModelStructureProgramBlock	NSObject		-	-	-	-	-	4d169a231bf5dba6	-
+method	c:objc(cs)MLModelStructureProgramBlock(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	e88980f5eb905107	-
+method	c:objc(cs)MLModelStructureProgramBlock(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ca459fb767201db7	-
+property	c:objc(cs)MLModelStructureProgramBlock(py)inputs	-			NSArray<MLModelStructureProgramNamedValueType *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	c8885357ba74a1f9	-
+property	c:objc(cs)MLModelStructureProgramBlock(py)outputNames	-			NSArray<NSString *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	659a6b00555512d1	-
+property	c:objc(cs)MLModelStructureProgramBlock(py)operations	-			NSArray<MLModelStructureProgramOperation *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	d7a3475070ebdbf2	-
+interface	c:objc(cs)MLModelStructureProgramFunction	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	eab28e1641079b42	-
+super	-	MLModelStructureProgramFunction	NSObject		-	-	-	-	-	5d9b272320eb0f5e	-
+method	c:objc(cs)MLModelStructureProgramFunction(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	e71c960b7706bec3	-
+method	c:objc(cs)MLModelStructureProgramFunction(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	b56deaa1adf8bd93	-
+property	c:objc(cs)MLModelStructureProgramFunction(py)inputs	-			NSArray<MLModelStructureProgramNamedValueType *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	e58cd947b56e6ce5	-
+property	c:objc(cs)MLModelStructureProgramFunction(py)block	-			MLModelStructureProgramBlock *	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	d7c558ffc35840ef	-
+interface	c:objc(cs)MLModelStructureProgramNamedValueType	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	0c5e33050657731d	-
+super	-	MLModelStructureProgramNamedValueType	NSObject		-	-	-	-	-	81b6535716c025aa	-
+method	c:objc(cs)MLModelStructureProgramNamedValueType(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	3757585c21a00adf	-
+method	c:objc(cs)MLModelStructureProgramNamedValueType(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	cef98cf8d80e36f4	-
+property	c:objc(cs)MLModelStructureProgramNamedValueType(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	9d7f3de7c56c1247	-
+property	c:objc(cs)MLModelStructureProgramNamedValueType(py)type	-			MLModelStructureProgramValueType *	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	416a3f8f78a229c1	-
+interface	c:objc(cs)MLModelStructureProgramOperation	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	cd70b9ea9e23dec8	-
+super	-	MLModelStructureProgramOperation	NSObject		-	-	-	-	-	e0a7ad4cf4df25a5	-
+method	c:objc(cs)MLModelStructureProgramOperation(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	1689b1798af7342e	-
+method	c:objc(cs)MLModelStructureProgramOperation(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	594cab449c412742	-
+property	c:objc(cs)MLModelStructureProgramOperation(py)operatorName	-			NSString *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	19bdaa58b5de8da3	-
+property	c:objc(cs)MLModelStructureProgramOperation(py)inputs	-			NSDictionary<NSString *,MLModelStructureProgramArgument *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	dbc1abfc216b9e64	-
+property	c:objc(cs)MLModelStructureProgramOperation(py)outputs	-			NSArray<MLModelStructureProgramNamedValueType *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	5390aa14c0558ec8	-
+property	c:objc(cs)MLModelStructureProgramOperation(py)blocks	-			NSArray<MLModelStructureProgramBlock *> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f49f51c5d8ed1dca	-
+interface	c:objc(cs)MLModelStructureProgramValue	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f4a23398006e883e	-
+super	-	MLModelStructureProgramValue	NSObject		-	-	-	-	-	59c6708411955efc	-
+method	c:objc(cs)MLModelStructureProgramValue(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	60bb9baf4515a0a6	-
+method	c:objc(cs)MLModelStructureProgramValue(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f1d6a603c611e8b5	-
+interface	c:objc(cs)MLModelStructureProgramValueType	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	8f0394fd1df6b8e9	-
+super	-	MLModelStructureProgramValueType	NSObject		-	-	-	-	-	95cdff5e0bb20544	-
+method	c:objc(cs)MLModelStructureProgramValueType(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	2ab693dae95d890c	-
+method	c:objc(cs)MLModelStructureProgramValueType(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	972ce2de646952ed	-
+interface	c:objc(cs)MLComputePlan	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	1897fd2bfbcecf46	-
+super	-	MLComputePlan	NSObject		-	-	-	-	-	ba659a2360caac27	-
+method	c:objc(cs)MLComputePlan(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	7e65cd55c2dc0a50	-
+method	c:objc(cs)MLComputePlan(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	7cbe1f16dbc7f96a	-
+method	c:objc(cs)MLComputePlan(cm)loadContentsOfURL:configuration:completionHandler:	-			void	NSURL * url | MLModelConfiguration * configuration | void (^)(MLComputePlan * _Nullable, NSError * _Nullable) handler	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f9a9bc8cd525f326	-
+method	c:objc(cs)MLComputePlan(cm)loadModelAsset:configuration:completionHandler:	-			void	MLModelAsset * asset | MLModelConfiguration * configuration | void (^)(MLComputePlan * _Nullable, NSError * _Nullable) handler	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	6f4e41431fbcab01	-
+method	c:objc(cs)MLComputePlan(im)estimatedCostOfMLProgramOperation:	-			MLComputePlanCost *	MLModelStructureProgramOperation * operation	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	e2841a6836e4cf5d	-
+method	c:objc(cs)MLComputePlan(im)computeDeviceUsageForNeuralNetworkLayer:	-			MLComputePlanDeviceUsage *	MLModelStructureNeuralNetworkLayer * layer	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ff36e28765e65015	-
+method	c:objc(cs)MLComputePlan(im)computeDeviceUsageForMLProgramOperation:	-			MLComputePlanDeviceUsage *	MLModelStructureProgramOperation * operation	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	f33d81feb58a90cb	-
+property	c:objc(cs)MLComputePlan(py)modelStructure	-			MLModelStructure *	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	7cf998bd29611d0c	-
+interface	c:objc(cs)MLComputePlanCost	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	a2d2a23099aa0308	-
+super	-	MLComputePlanCost	NSObject		-	-	-	-	-	e929c4bb8ec4785b	-
+method	c:objc(cs)MLComputePlanCost(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	1fa3ee6940534669	-
+method	c:objc(cs)MLComputePlanCost(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	ccf6548a9628f6a5	-
+property	c:objc(cs)MLComputePlanCost(py)weight	-			double	-	readonly,assign,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	2d58c0a8052a18b0	-
+interface	c:objc(cs)MLComputePlanDeviceUsage	-			-	-	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	cd57c8f051d5230f	-
+super	-	MLComputePlanDeviceUsage	NSObject		-	-	-	-	-	da8659867612dc67	-
+method	c:objc(cs)MLComputePlanDeviceUsage(im)init	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	25782707c59645ac	-
+method	c:objc(cs)MLComputePlanDeviceUsage(cm)new	-			instancetype	-	-	*unavailable ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	34f948632cc52e86	-
+property	c:objc(cs)MLComputePlanDeviceUsage(py)supportedComputeDevices	-			NSArray<id<MLComputeDeviceProtocol>> *	-	readonly,copy,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	fb119f4d7d2287f1	-
+property	c:objc(cs)MLComputePlanDeviceUsage(py)preferredComputeDevice	-			id<MLComputeDeviceProtocol>	-	readonly,strong,nonatomic	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=17.4/-/-/0,watchos=10.4/-/-/0	-	bf6734c9a27d94c5	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@CVPixelBufferRef	-			CVImageBufferRef	-	-	-	-	2bcb62a122d941bf	-
+typedef	c:@T@CVImageBufferRef	-			CVBufferRef	-	-	-	-	04d1786654c45588	-
+typedef	c:@T@CVBufferRef	-			struct __CVBuffer *	-	-	-	-	42f0de1ee06186fb	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@NSRange	-			struct _NSRange	-	-	-	-	d109726d1ae61321	-
+typedef	c:@T@OSType	-			FourCharCode	-	-	-	-	01d4dcaaf78349ee	-
+typedef	c:@T@FourCharCode	-			UInt32	-	-	-	-	a0f4e71a4dbfcb9b	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@CGImageRef	-			struct CGImage *	-	-	-	-	61e7c30be1f5f379	-
+typedef	c:@T@CGImagePropertyOrientation	-			enum CGImagePropertyOrientation	-	-	-	-	7ec899c12b8313d6	-

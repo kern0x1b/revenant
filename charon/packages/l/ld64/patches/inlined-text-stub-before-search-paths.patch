@@ -1,0 +1,17 @@
+--- a/cctools-port/cctools/ld64/src/ld/Options.cpp
++++ b/cctools-port/cctools/ld64/src/ld/Options.cpp
+@@ -1298,6 +1298,14 @@
+ Options::FileInfo Options::findIndirectDylib(const std::string& installName, const ld::dylib::File* fromDylib) const
+ {
+ 	FileInfo result(*this);
++
++#ifdef TAPI_SUPPORT
++	if ( hasInlinedTAPIFile(installName) ) {
++		FileInfo inlinedFile(*this, installName.c_str());
++		inlinedFile.isInlined = true;
++		return inlinedFile;
++	}
++#endif /* TAPI_SUPPORT */
+ 
+ 	auto lastSlashPos = installName.find_last_of('/');
+ 	auto pos = ( lastSlashPos != std::string::npos ) ? lastSlashPos + 1 : 0;

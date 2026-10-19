@@ -1,0 +1,10 @@
+uppercase without the current locale	NSString+LocalizedCase.m	s/uppercaseStringWithLocale:\[NSLocale currentLocale\]/uppercaseStringWithLocale:nil/
+lowercase without the current locale	NSString+LocalizedCase.m	s/lowercaseStringWithLocale:\[NSLocale currentLocale\]/lowercaseStringWithLocale:nil/
+capitalized without the current locale	NSString+LocalizedCase.m	s/capitalizedStringWithLocale:\[NSLocale currentLocale\]/capitalizedStringWithLocale:nil/
+the standard search minds diacritics	NSString+LocalizedCase.m	s/NSCaseInsensitiveSearch \| NSDiacriticInsensitiveSearch/NSCaseInsensitiveSearch/
+the standard search minds case	NSString+LocalizedCase.m	s/NSCaseInsensitiveSearch \| NSDiacriticInsensitiveSearch/NSDiacriticInsensitiveSearch/
+the case-insensitive search minds case	NSString+Containment.m	s/options:NSCaseInsensitiveSearch range:/options:0 range:/
+the case-insensitive search without the current locale	NSString+Containment.m	s/range:NSMakeRange\(0, self\.length\) locale:\[NSLocale currentLocale\]/range:NSMakeRange(0, self.length) locale:nil/
+a match at the start not contained	NSString+Containment.m	s/return \[self rangeOfString:string\]\.location != NSNotFound;/return [self rangeOfString:string].location != NSNotFound \&\& [self rangeOfString:string].location > 0;/
+a transform applied forwards when asked in reverse	NSString+Transform.m	s/(\[self mutableCopy\];\n\s*if \(!CFStringTransform\(\(__bridge CFMutableStringRef\)transformed, NULL, identifier, )reversed\)/$1false)/
+an empty result answered as nil	NSString+Transform.m	s/return \[transformed copy\];/return transformed.length ? [transformed copy] : nil;/

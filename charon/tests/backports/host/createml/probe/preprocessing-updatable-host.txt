@@ -1,0 +1,12 @@
+$ xcrun swiftc -O -o preprocessing-updatable-host preprocessing-updatable-host.swift
+$ ./preprocessing-updatable-host
+after makeTransformer(): preprocessor scale=1.0 offset=0.0
+   scale=1 offset=0 means UNFITTED; anything else means the pipeline fitted it.
+after the first update(): the estimator saw Optional(1.0)
+   preprocessor scale=1.0 offset=0.0
+   and the preprocessor now does 1.0 -> 1.0
+after the second update(): the estimator saw Optional(1.0)
+   preprocessor scale=1.0 offset=0.0
+   and the preprocessor now does 1.0 -> 1.0
+   scale=1 offset=0 after two updates means the host NEVER fits this pipeline's preprocessor.
+EXIT=0

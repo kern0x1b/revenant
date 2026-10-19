@@ -1,0 +1,9 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+QuartzCore	method	CAFrameRateRange.init(minimum:maximum:preferred:)	15.0				container
+QuartzCore	property	CAFrameRateRange.preferred	15.0				container
+QuartzCore	method	CAFrameRateRange.==(lhs:rhs:)	15.0				container
+QuartzCore	method	CATransform3D._bridgeToObjectiveC()	7.0				container
+QuartzCore	method	CATransform3D._forceBridgeFromObjectiveC(_:result:)	7.0				container
+QuartzCore	method	CATransform3D._conditionallyBridgeFromObjectiveC(_:result:)	7.0				container
+QuartzCore	method	CATransform3D._unconditionallyBridgeFromObjectiveC(_:)	7.0				container
+QuartzCore	typealias	CATransform3D._ObjectiveCType	7.0				own

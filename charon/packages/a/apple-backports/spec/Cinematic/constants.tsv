@@ -1,0 +1,2 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	CNCinematicErrorDomain	-	CNCinematicErrorDomain	17.0	NSErrorDomain const	API_AVAILABLE(macos(14.0), ios(17.0), tvos(17.0)) API_UNAVAILABLE(watchos)	85ff5b0c806efab6	found	CNCinematicErrorDomain	CNCinematicErrorDomain	ios-26.2-cache	-	exported	ns	-

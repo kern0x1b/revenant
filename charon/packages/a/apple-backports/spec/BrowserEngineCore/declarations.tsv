@@ -1,0 +1,16 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)BEAudioSession	-			-	-	-	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fe79c40f437c9c74	-
+super	-	BEAudioSession	NSObject		-	-	-	-	-	486741213fce9738	-
+method	c:objc(cs)BEAudioSession(im)initWithAudioSession:	-			instancetype	AVAudioSession * audioSession	-	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	51161531c58f65cb	-
+property	c:objc(cs)BEAudioSession(py)availableOutputs	-			NSArray<AVAudioSessionPortDescription *> *	-	readonly	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	20b480173b88edec	-
+method	c:objc(cs)BEAudioSession(im)setPreferredOutput:error:	-			BOOL	AVAudioSessionPortDescription * outPort | NSError * _Nullable * outError	-	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	3a82878674e89bec	-
+property	c:objc(cs)BEAudioSession(py)preferredOutput	-			AVAudioSessionPortDescription *	-	readonly	ios=26.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f37f43bb92b1a9f6	-
+function	c:@F@be_memory_inline_jit_restrict_rwx_to_rw_with_witness_impl	-			void (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,maccatalyst=-/-/-/1,macos=14.3/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	aa05c7728b3d7d1d	-
+function	c:@F@be_memory_inline_jit_restrict_rwx_to_rx_with_witness_impl	-			void (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,maccatalyst=-/-/-/1,macos=14.3/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	342664b3c3dba0d5	-
+function	c:@F@be_memory_inline_jit_restrict_with_witness_supported	-			int (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,maccatalyst=-/-/-/1,macos=14.3/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	40d8101f2acf7b89	-
+function	c:@F@be_memory_inline_jit_restrict_rwx_to_rw_with_witness	-			void (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,maccatalyst=-/-/-/1,macos=14.3/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	9446646cf65cc301	-
+function	c:@F@be_memory_inline_jit_restrict_rwx_to_rx_with_witness	-			void (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,maccatalyst=-/-/-/1,macos=14.3/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	02045c1368312df1	-
+function	c:@F@be_kevent	-			int (int, const struct kevent *, int, struct kevent *, int, unsigned int)	int kq | const struct kevent * changelist | int nchanges | struct kevent * eventlist | int nevents | unsigned int be_flags	-	driverkit=-/-/-/1,ios=18.4/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	476158a46c0319f7	-
+function	c:@F@be_kevent64	-			int (int, const struct kevent64_s *, int, struct kevent64_s *, int, unsigned int)	int kq | const struct kevent64_s * changelist | int nchanges | struct kevent64_s * eventlist | int nevents | unsigned int flags	-	driverkit=-/-/-/1,ios=18.4/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	037c16f134a9dbd0	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

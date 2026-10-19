@@ -1,0 +1,27 @@
+{
+  "framework": "CoreGraphics",
+  "entries": [
+    {
+      "api": "CGAffineTransformDecompose()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived in iOS 16, and iOS 6 has nothing that answers it; the port computes the components from the matrix the way the release does, measured on the host: the rotation is the angle of the first row, the y scale is the second row's component across that angle, and a negative one is the flip, which negates the x scale and turns the rotation a half circle back into [-pi, pi). The sine and the cosine are taken through the one call the release makes for the pair",
+      "effect": "the components the release answers for every transform the host test holds (tests/backports/host/affine-components: 36 fixed transforms, including singular ones with two non-zero rows, and 2000 generated), to within a relative 1e-12 (the singular shear is a rounding quotient of about 1e16 and agrees to the same bound)",
+      "facts": "facts/CoreGraphics/AffineComponents.md",
+      "source": "CoreGraphics of the SDK 26.2 host (macOS 27), measured through tests/backports/host/affine-components; the SDK declaration in CGAffineTransform.h"
+    },
+    {
+      "api": "CGAffineTransformMakeWithComponents()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived in iOS 16, and iOS 6 has nothing that answers it; the port builds the matrix from the components as the release does, the first row being the x scale times the rotation's unit vector and the second the y scale times the shear and the perpendicular unit vector",
+      "effect": "the matrix the release builds for the components, to within a relative 1e-12 on every battery component the host test holds (tests/backports/host/affine-components); the translation passes through unchanged",
+      "facts": "facts/CoreGraphics/AffineComponents.md",
+      "source": "CoreGraphics of the SDK 26.2 host (macOS 27), measured through tests/backports/host/affine-components; the SDK declaration in CGAffineTransform.h"
+    }
+  ]
+}

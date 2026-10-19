@@ -1,0 +1,14 @@
+diff --git a/llvm-project/clang/lib/AST/ASTContext.cpp b/llvm-project/clang/lib/AST/ASTContext.cpp
+index 22288115..d85ff031 100644
+--- a/llvm-project/clang/lib/AST/ASTContext.cpp
++++ b/llvm-project/clang/lib/AST/ASTContext.cpp
+@@ -13932,8 +13932,7 @@ bool ASTContext::AtomicUsesUnsupportedLibcall(const AtomicExpr *E) const {
+   if (!T.isOSDarwin())
+     return false;
+ 
+-  if (!(T.isiOS() && T.isOSVersionLT(7)) &&
+-      !(T.isMacOSX() && T.isOSVersionLT(10, 9)))
++  if (!(T.isMacOSX() && T.isOSVersionLT(10, 9)))
+     return false;
+ 
+   QualType AtomicTy = E->getPtr()->getType()->getPointeeType();

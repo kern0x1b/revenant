@@ -1,0 +1,962 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@NSReadAccessURLDocumentOption	-			const NSAttributedStringDocumentReadingOptionKey	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	5e28af31e9409dae	-
+typedef	c:@T@NSAttributedStringCompletionHandler	-			void ((^))(NSAttributedString *, NSDictionary<NSAttributedStringDocumentAttributeKey,id> *, NSError *)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	5530694e16317f66	-
+category	c:objc(cy)NSAttributedString@NSAttributedStringWebKitAdditions	-			-	-	-	ios=3.2/-/-/0,macos=10.0/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	199d36663f1d06b8	-
+method	c:objc(cs)NSAttributedString(cm)loadFromHTMLWithRequest:options:completionHandler:	NSAttributedStringWebKitAdditions			void	NSURLRequest * request | NSDictionary<NSAttributedStringDocumentReadingOptionKey,id> * options | NSAttributedStringCompletionHandler completionHandler	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	74b37b8ccf73ed7f	-
+method	c:objc(cs)NSAttributedString(cm)loadFromHTMLWithFileURL:options:completionHandler:	NSAttributedStringWebKitAdditions			void	NSURL * fileURL | NSDictionary<NSAttributedStringDocumentReadingOptionKey,id> * options | NSAttributedStringCompletionHandler completionHandler	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	f55636ee053e8861	-
+method	c:objc(cs)NSAttributedString(cm)loadFromHTMLWithString:options:completionHandler:	NSAttributedStringWebKitAdditions			void	NSString * string | NSDictionary<NSAttributedStringDocumentReadingOptionKey,id> * options | NSAttributedStringCompletionHandler completionHandler	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	564308609a114d85	-
+method	c:objc(cs)NSAttributedString(cm)loadFromHTMLWithData:options:completionHandler:	NSAttributedStringWebKitAdditions			void	NSData * data | NSDictionary<NSAttributedStringDocumentReadingOptionKey,id> * options | NSAttributedStringCompletionHandler completionHandler	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	cb97fc509343468f	-
+interface	c:objc(cs)WKBackForwardListItem	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	3400119c7fd5123b	-
+super	-	WKBackForwardListItem	NSObject		-	-	-	-	-	fb711858d7a2ac8a	-
+method	c:objc(cs)WKBackForwardListItem(im)init	-			instancetype	-	-	*unavailable ios=8.0/-/-/0,macos=10.10/-/-/0	-	c7ccf3a22e3259d1	-
+property	c:objc(cs)WKBackForwardListItem(py)URL	-			NSURL *	-	readonly,copy	ios=8.0/-/-/0,macos=10.10/-/-/0	-	695ba5db01ae8d5a	-
+property	c:objc(cs)WKBackForwardListItem(py)title	-			NSString *	-	readonly,copy	ios=8.0/-/-/0,macos=10.10/-/-/0	-	c40a880c42a5934e	-
+property	c:objc(cs)WKBackForwardListItem(py)initialURL	-			NSURL *	-	readonly,copy	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ac84342c1ff39b1b	-
+interface	c:objc(cs)WKBackForwardList	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	5e90f90847021f32	-
+super	-	WKBackForwardList	NSObject		-	-	-	-	-	61254e9853d67828	-
+property	c:objc(cs)WKBackForwardList(py)currentItem	-			WKBackForwardListItem *	-	readonly,strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	4a1a101a4c782965	-
+property	c:objc(cs)WKBackForwardList(py)backItem	-			WKBackForwardListItem *	-	readonly,strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	70763e41df996069	-
+property	c:objc(cs)WKBackForwardList(py)forwardItem	-			WKBackForwardListItem *	-	readonly,strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b5d729725fb2aa48	-
+method	c:objc(cs)WKBackForwardList(im)itemAtIndex:	-			WKBackForwardListItem *	NSInteger index	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	a07e06f0963ebde2	-
+property	c:objc(cs)WKBackForwardList(py)backList	-			NSArray<WKBackForwardListItem *> *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	c025fb2b583ec5b4	-
+property	c:objc(cs)WKBackForwardList(py)forwardList	-			NSArray<WKBackForwardListItem *> *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b139a0c4bfecf7e9	-
+interface	c:objc(cs)WKContentRuleList	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	a2756def455abd0c	-
+super	-	WKContentRuleList	NSObject		-	-	-	-	-	b49376f3f07c2659	-
+property	c:objc(cs)WKContentRuleList(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0	-	1c508a46c0f6ba0a	-
+interface	c:objc(cs)WKContentRuleListStore	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	74cc22d4c5f5eb71	-
+super	-	WKContentRuleListStore	NSObject		-	-	-	-	-	fec44a8468f12f7b	-
+method	c:objc(cs)WKContentRuleListStore(cm)defaultStore	-			instancetype	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	daa86cedc9e25d52	-
+method	c:objc(cs)WKContentRuleListStore(cm)storeWithURL:	-			instancetype	NSURL * url	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	7ea71f506f71cbca	-
+method	c:objc(cs)WKContentRuleListStore(im)compileContentRuleListForIdentifier:encodedContentRuleList:completionHandler:	-			void	NSString * identifier | NSString * encodedContentRuleList | void (^)(WKContentRuleList *, NSError *) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	c45d19f1eaeac91e	-
+method	c:objc(cs)WKContentRuleListStore(im)lookUpContentRuleListForIdentifier:completionHandler:	-			void	NSString * identifier | void (^)(WKContentRuleList *, NSError *) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	c2bd815db478041b	-
+method	c:objc(cs)WKContentRuleListStore(im)removeContentRuleListForIdentifier:completionHandler:	-			void	NSString * identifier | void (^)(NSError *) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	4b48f4f1c178a659	-
+method	c:objc(cs)WKContentRuleListStore(im)getAvailableContentRuleListIdentifiers:	-			void	void (^)(NSArray<NSString *> *) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	681a83d4623a659e	-
+interface	c:objc(cs)WKContentWorld	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	6b95aa9b15241958	-
+super	-	WKContentWorld	NSObject		-	-	-	-	-	b0e1ad251b689563	-
+method	c:objc(cs)WKContentWorld(cm)new	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=11.0/-/-/0	-	b7121c45dda59b6e	-
+method	c:objc(cs)WKContentWorld(im)init	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=11.0/-/-/0	-	e4d589bc747d18cb	-
+property	c:objc(cs)WKContentWorld(cpy)pageWorld	-			WKContentWorld *	-	readonly,nonatomic,class	ios=14.0/-/-/0,macos=11.0/-/-/0	-	0eb6a4cac1af9ee8	-
+property	c:objc(cs)WKContentWorld(cpy)defaultClientWorld	-			WKContentWorld *	-	readonly,nonatomic,class	ios=14.0/-/-/0,macos=11.0/-/-/0	-	5f94bfd5cd1407b4	-
+method	c:objc(cs)WKContentWorld(cm)worldWithName:	-			WKContentWorld *	NSString * name	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	cc71ac47c89cebf6	-
+property	c:objc(cs)WKContentWorld(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0	-	9cbb0f0b1217086a	-
+interface	c:objc(cs)WKContextMenuElementInfo	-			-	-	-	ios=13.0/-/-/0	-	a275746a60e770db	-
+super	-	WKContextMenuElementInfo	NSObject		-	-	-	-	-	8d836712b358b237	-
+method	c:objc(cs)WKContextMenuElementInfo(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0	-	506bbf618d16f686	-
+property	c:objc(cs)WKContextMenuElementInfo(py)linkURL	-			NSURL *	-	readonly,nonatomic	ios=13.0/-/-/0	-	8c67c578f5936cbd	-
+interface	c:objc(cs)WKDownload	-			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	968680d158638507	-
+super	-	WKDownload	NSObject		-	-	-	-	-	fcba97406ec3d115	-
+conforms	c:objc(cs)WKDownload	WKDownload	NSProgressReporting		-	-	-	-	-	5c945c1f6427f42a	-
+property	c:objc(cs)WKDownload(py)originalRequest	-			NSURLRequest *	-	readonly,nonatomic	ios=14.5/-/-/0,macos=11.3/-/-/0	-	78b1b85fb8198bac	-
+property	c:objc(cs)WKDownload(py)webView	-			WKWebView *	-	readonly,weak,nonatomic	ios=14.5/-/-/0,macos=11.3/-/-/0	-	ccf2a2a365688012	-
+property	c:objc(cs)WKDownload(py)delegate	-			id<WKDownloadDelegate>	-	weak,nonatomic	ios=14.5/-/-/0,macos=11.3/-/-/0	-	a99a09c3d23b5112	-
+property	c:objc(cs)WKDownload(py)userInitiated	-			BOOL	-	readonly,nonatomic,getter=isUserInitiated	ios=18.2/-/-/0,macos=15.2/-/-/0	-	6694edc6845fafa9	-
+property	c:objc(cs)WKDownload(py)originatingFrame	-			WKFrameInfo *	-	readonly,nonatomic	ios=18.2/-/-/0,macos=15.2/-/-/0	-	4983e1559e32e968	-
+method	c:objc(cs)WKDownload(im)cancel:	-			void	void (^ _Nullable)(NSData * _Nullable) completionHandler	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	5ed1bbcd3c5f7d04	-
+typedef	c:@T@WKDownloadRedirectPolicy	-			enum WKDownloadRedirectPolicy	-	-	-	-	c371423c3f4235d8	-
+enum	c:@E@WKDownloadRedirectPolicy	-			NSInteger	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	b598582d1263db15	-
+enumconst	c:@E@WKDownloadRedirectPolicy@WKDownloadRedirectPolicyCancel	WKDownloadRedirectPolicy			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	041e02f149fdcc75	0
+enumconst	c:@E@WKDownloadRedirectPolicy@WKDownloadRedirectPolicyAllow	WKDownloadRedirectPolicy			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	de0f6934d32685d8	1
+typedef	c:@T@WKDownloadPlaceholderPolicy	-			enum WKDownloadPlaceholderPolicy	-	-	-	-	e1c16d177aff4dcd	-
+enum	c:@E@WKDownloadPlaceholderPolicy	-			NSInteger	-	-	ios=18.2/-/-/0,xros=2.2/-/-/0	-	4ed229d1acce1d08	-
+enumconst	c:@E@WKDownloadPlaceholderPolicy@WKDownloadPlaceholderPolicyDisable	WKDownloadPlaceholderPolicy			-	-	-	ios=18.2/-/-/0,xros=2.2/-/-/0	-	5063552d944ac57b	0
+enumconst	c:@E@WKDownloadPlaceholderPolicy@WKDownloadPlaceholderPolicyEnable	WKDownloadPlaceholderPolicy			-	-	-	ios=18.2/-/-/0,xros=2.2/-/-/0	-	bf9f31b5a8d651e7	1
+protocol	c:objc(pl)WKDownloadDelegate	-			-	-	-	-	-	aaeb8742a57ec1b7	-
+conforms	c:objc(pl)WKDownloadDelegate	WKDownloadDelegate	NSObject		-	-	-	-	-	9c72580f5f770ef0	-
+method	c:objc(pl)WKDownloadDelegate(im)download:decideDestinationUsingResponse:suggestedFilename:completionHandler:	-			void	WKDownload * download | NSURLResponse * response | NSString * suggestedFilename | void (^)(NSURL * _Nullable) completionHandler	-	-	-	ec9d8851bec827b1	-
+method	c:objc(pl)WKDownloadDelegate(im)download:willPerformHTTPRedirection:newRequest:decisionHandler:	-			void	WKDownload * download | NSHTTPURLResponse * response | NSURLRequest * request | void (^)(WKDownloadRedirectPolicy) decisionHandler	optional	-	-	276e0cf0ec235dc1	-
+method	c:objc(pl)WKDownloadDelegate(im)download:didReceiveAuthenticationChallenge:completionHandler:	-			void	WKDownload * download | NSURLAuthenticationChallenge * challenge | void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable) completionHandler	optional	-	-	9ec670bb30f33e6b	-
+method	c:objc(pl)WKDownloadDelegate(im)downloadDidFinish:	-			void	WKDownload * download	optional	-	-	98e634b528ab2633	-
+method	c:objc(pl)WKDownloadDelegate(im)download:didFailWithError:resumeData:	-			void	WKDownload * download | NSError * error | NSData * resumeData	optional	-	-	cc6c2b7329c35882	-
+method	c:objc(pl)WKDownloadDelegate(im)download:decidePlaceholderPolicy:	-			void	WKDownload * download | void (^)(WKDownloadPlaceholderPolicy, NSURL * _Nullable) completionHandler	optional	ios=18.2/-/-/0,xros=2.2/-/-/0	-	c116aec3590eaec6	-
+method	c:objc(pl)WKDownloadDelegate(im)download:didReceivePlaceholderURL:completionHandler:	-			void	WKDownload * download | NSURL * url | void (^)(void) completionHandler	optional	ios=18.2/-/-/0,xros=2.2/-/-/0	-	bfc8ef3d5aacd40e	-
+method	c:objc(pl)WKDownloadDelegate(im)download:didReceiveFinalURL:	-			void	WKDownload * download | NSURL * url	optional	ios=18.2/-/-/0,xros=2.2/-/-/0	-	2180cced55bfc938	-
+var	c:@WKErrorDomain	-			NSString *const	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	e79ec347ec4c5876	-
+typedef	c:@T@WKErrorCode	-			enum WKErrorCode	-	-	-	-	b5e496a3b1a4769f	-
+enum	c:@E@WKErrorCode	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	330a0470ef0bb713	-
+enumconst	c:@E@WKErrorCode@WKErrorUnknown	WKErrorCode			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	70e970aa1ca7143c	1
+enumconst	c:@E@WKErrorCode@WKErrorWebContentProcessTerminated	WKErrorCode			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ddcf7a7b2a6829e3	2
+enumconst	c:@E@WKErrorCode@WKErrorWebViewInvalidated	WKErrorCode			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ab7f01878574c804	3
+enumconst	c:@E@WKErrorCode@WKErrorJavaScriptExceptionOccurred	WKErrorCode			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	cebcd16dc6724189	4
+enumconst	c:@E@WKErrorCode@WKErrorJavaScriptResultTypeIsUnsupported	WKErrorCode			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	bf5061e1890a3e11	5
+enumconst	c:@E@WKErrorCode@WKErrorContentRuleListStoreCompileFailed	WKErrorCode			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	a2952a90941671cb	6
+enumconst	c:@E@WKErrorCode@WKErrorContentRuleListStoreLookUpFailed	WKErrorCode			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	bc1dbf4995403c70	7
+enumconst	c:@E@WKErrorCode@WKErrorContentRuleListStoreRemoveFailed	WKErrorCode			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	201825dd49229dd8	8
+enumconst	c:@E@WKErrorCode@WKErrorContentRuleListStoreVersionMismatch	WKErrorCode			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	13334c5cf7b5cf19	9
+enumconst	c:@E@WKErrorCode@WKErrorAttributedStringContentFailedToLoad	WKErrorCode			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	87f276ad9891484e	10
+enumconst	c:@E@WKErrorCode@WKErrorAttributedStringContentLoadTimedOut	WKErrorCode			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	e6cdd43540039f17	11
+enumconst	c:@E@WKErrorCode@WKErrorJavaScriptInvalidFrameTarget	WKErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	eff12659fdddc7e1	12
+enumconst	c:@E@WKErrorCode@WKErrorNavigationAppBoundDomain	WKErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	2422fce4d63af6fe	13
+enumconst	c:@E@WKErrorCode@WKErrorJavaScriptAppBoundDomain	WKErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	1b81c1f2b3963465	14
+enumconst	c:@E@WKErrorCode@WKErrorDuplicateCredential	WKErrorCode			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	37f9202f363fb8ad	15
+enumconst	c:@E@WKErrorCode@WKErrorMalformedCredential	WKErrorCode			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	e1bdb5c3619ea88f	16
+enumconst	c:@E@WKErrorCode@WKErrorCredentialNotFound	WKErrorCode			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	66d6b2a33733109b	17
+interface	c:objc(cs)WKFindConfiguration	-			-	-	-	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	bf594611529905ef	-
+super	-	WKFindConfiguration	NSObject		-	-	-	-	-	ae2f986dc52b1495	-
+conforms	c:objc(cs)WKFindConfiguration	WKFindConfiguration	NSCopying		-	-	-	-	-	9ca5a0a4e35700e8	-
+property	c:objc(cs)WKFindConfiguration(py)backwards	-			BOOL	-	nonatomic	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	1d04ec133dfc70ae	-
+property	c:objc(cs)WKFindConfiguration(py)caseSensitive	-			BOOL	-	nonatomic	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	ff8170df97bcae68	-
+property	c:objc(cs)WKFindConfiguration(py)wraps	-			BOOL	-	nonatomic	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	874066a259fb260e	-
+interface	c:objc(cs)WKFindResult	-			-	-	-	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	e40efe583f1229ef	-
+super	-	WKFindResult	NSObject		-	-	-	-	-	1f583a81dd9cd546	-
+conforms	c:objc(cs)WKFindResult	WKFindResult	NSCopying		-	-	-	-	-	e7ec87ff8755f357	-
+method	c:objc(cs)WKFindResult(im)init	-			instancetype	-	-	*unavailable ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	ee818eb39389abd7	-
+property	c:objc(cs)WKFindResult(py)matchFound	-			BOOL	-	readonly,nonatomic	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	5b8b5adb0c4a1633	-
+interface	c:objc(cs)WKSecurityOrigin	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	cf225057ac396078	-
+super	-	WKSecurityOrigin	NSObject		-	-	-	-	-	de549a62b0a6634b	-
+method	c:objc(cs)WKSecurityOrigin(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0,macos=10.11/-/-/0	-	46e817b5c885a949	-
+property	c:objc(cs)WKSecurityOrigin(py)protocol	-			NSString *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	df25b18fc8bac261	-
+property	c:objc(cs)WKSecurityOrigin(py)host	-			NSString *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	c1fe37ffd33017b5	-
+property	c:objc(cs)WKSecurityOrigin(py)port	-			NSInteger	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	8d777666aa7d961b	-
+interface	c:objc(cs)WKWebView	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	deprecated: Use closeAllMediaPresentationsWithCompletionHandler: instead	dfdd098d079522ec	-
+super	-	WKWebView	UIView		-	-	-	-	-	893f2e5d8f89e6b2	-
+property	c:objc(cs)WKWebView(py)configuration	-			WKWebViewConfiguration *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	353013a1119b5081	-
+property	c:objc(cs)WKWebView(py)navigationDelegate	-			id<WKNavigationDelegate>	-	weak,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	629f2b5ae6e0b360	-
+property	c:objc(cs)WKWebView(py)UIDelegate	-			id<WKUIDelegate>	-	weak,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	945d6e72043dc830	-
+property	c:objc(cs)WKWebView(py)backForwardList	-			WKBackForwardList *	-	readonly,strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	12e8f8d8eb043523	-
+method	c:objc(cs)WKWebView(im)initWithFrame:configuration:	-			instancetype	CGRect frame | WKWebViewConfiguration * configuration	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	a9ebb01e6343f000	-
+method	c:objc(cs)WKWebView(im)initWithCoder:	-			instancetype	NSCoder * coder	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	083290b74f635fb0	-
+method	c:objc(cs)WKWebView(im)loadRequest:	-			WKNavigation *	NSURLRequest * request	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	a3167466aaa9eec2	-
+method	c:objc(cs)WKWebView(im)loadFileURL:allowingReadAccessToURL:	-			WKNavigation *	NSURL * URL | NSURL * readAccessURL	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	ba25827d70451323	-
+method	c:objc(cs)WKWebView(im)loadHTMLString:baseURL:	-			WKNavigation *	NSString * string | NSURL * baseURL	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	155c8a07d3df1eb9	-
+method	c:objc(cs)WKWebView(im)loadData:MIMEType:characterEncodingName:baseURL:	-			WKNavigation *	NSData * data | NSString * MIMEType | NSString * characterEncodingName | NSURL * baseURL	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	fc4550365a008bfa	-
+method	c:objc(cs)WKWebView(im)goToBackForwardListItem:	-			WKNavigation *	WKBackForwardListItem * item	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b5cd50e654f49909	-
+property	c:objc(cs)WKWebView(py)title	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	4f6faf5adcc00d4d	-
+property	c:objc(cs)WKWebView(py)URL	-			NSURL *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f469e1e61a27c3c0	-
+property	c:objc(cs)WKWebView(py)loading	-			BOOL	-	readonly,nonatomic,getter=isLoading	ios=8.0/-/-/0,macos=10.10/-/-/0	-	9dc7130633e97129	-
+property	c:objc(cs)WKWebView(py)estimatedProgress	-			double	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	73da6a3fdac78662	-
+property	c:objc(cs)WKWebView(py)hasOnlySecureContent	-			BOOL	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	7ca9c1c70dfb259b	-
+property	c:objc(cs)WKWebView(py)serverTrust	-			SecTrustRef	-	readonly,nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0	-	895e105c5d7be14a	-
+property	c:objc(cs)WKWebView(py)canGoBack	-			BOOL	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	76215d0275a029ea	-
+property	c:objc(cs)WKWebView(py)canGoForward	-			BOOL	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	cffee4dca1d98c7d	-
+method	c:objc(cs)WKWebView(im)goBack	-			WKNavigation *	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	d8a8ca5a174633f0	-
+method	c:objc(cs)WKWebView(im)goForward	-			WKNavigation *	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	7d78a7f86a9b5b60	-
+method	c:objc(cs)WKWebView(im)reload	-			WKNavigation *	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	c4599c923ae3f54b	-
+method	c:objc(cs)WKWebView(im)reloadFromOrigin	-			WKNavigation *	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b86beba07d3a2160	-
+method	c:objc(cs)WKWebView(im)stopLoading	-			void	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	d65440d0fb2e2061	-
+method	c:objc(cs)WKWebView(im)evaluateJavaScript:completionHandler:	-			void	NSString * javaScriptString | void (^ _Nullable)(id _Nullable_result, NSError * _Nullable) completionHandler	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	60b1f93fc72be124	-
+method	c:objc(cs)WKWebView(im)evaluateJavaScript:inFrame:inContentWorld:completionHandler:	-			void	NSString * javaScriptString | WKFrameInfo * frame | WKContentWorld * contentWorld | void (^ _Nullable)(id _Nullable_result, NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	226c0600bea64555	-
+method	c:objc(cs)WKWebView(im)callAsyncJavaScript:arguments:inFrame:inContentWorld:completionHandler:	-			void	NSString * functionBody | NSDictionary<NSString *,id> * arguments | WKFrameInfo * frame | WKContentWorld * contentWorld | void (^ _Nullable)(id _Nullable_result, NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	a74c97e47ab4b182	-
+method	c:objc(cs)WKWebView(im)closeAllMediaPresentationsWithCompletionHandler:	-			void	void (^ _Nullable)(void) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	9a97a0509d46af3b	-
+method	c:objc(cs)WKWebView(im)closeAllMediaPresentations	-			void	-	-	ios=14.5/15.0/-/0,macos=11.3/12.0/-/0	deprecated: Use closeAllMediaPresentationsWithCompletionHandler: instead	9f348b237ebd2544	-
+method	c:objc(cs)WKWebView(im)pauseAllMediaPlaybackWithCompletionHandler:	-			void	void (^ _Nullable)(void) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	894247852c53eb5b	-
+method	c:objc(cs)WKWebView(im)pauseAllMediaPlayback:	-			void	void (^ _Nullable)(void) completionHandler	-	ios=14.5/15.0/-/0,macos=11.3/12.0/-/0	deprecated: Use pauseAllMediaPlaybackWithCompletionHandler: instead	876d7d61a6a3693c	-
+method	c:objc(cs)WKWebView(im)setAllMediaPlaybackSuspended:completionHandler:	-			void	BOOL suspended | void (^ _Nullable)(void) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	320de3978a8e52df	-
+method	c:objc(cs)WKWebView(im)resumeAllMediaPlayback:	-			void	void (^ _Nullable)(void) completionHandler	-	ios=14.5/15.0/-/0,macos=11.3/12.0/-/0	deprecated: Use setAllMediaPlaybackSuspended:completionHandler: instead	c48c2dfe61d77537	-
+method	c:objc(cs)WKWebView(im)suspendAllMediaPlayback:	-			void	void (^ _Nullable)(void) completionHandler	-	ios=14.5/15.0/-/0,macos=11.3/12.0/-/0	deprecated: Use setAllMediaPlaybackSuspended:completionHandler: instead	4e19427f194b9076	-
+method	c:objc(cs)WKWebView(im)requestMediaPlaybackStateWithCompletionHandler:	-			void	void (^)(WKMediaPlaybackState) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	12adceaedf7c85ee	-
+method	c:objc(cs)WKWebView(im)requestMediaPlaybackState:	-			void	void (^)(WKMediaPlaybackState) completionHandler	-	ios=14.5/15.0/-/0,macos=11.3/12.0/-/0	deprecated: Use requestMediaPlaybackStateWithCompletionHandler: instead	02dc8e06bdb9250b	-
+property	c:objc(cs)WKWebView(py)cameraCaptureState	-			WKMediaCaptureState	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0	-	449946f767aa1755	-
+property	c:objc(cs)WKWebView(py)microphoneCaptureState	-			WKMediaCaptureState	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0	-	5c557f1db7b6ce1e	-
+method	c:objc(cs)WKWebView(im)setCameraCaptureState:completionHandler:	-			void	WKMediaCaptureState state | void (^ _Nullable)(void) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	24a1a2972e4a02f2	-
+method	c:objc(cs)WKWebView(im)setMicrophoneCaptureState:completionHandler:	-			void	WKMediaCaptureState state | void (^ _Nullable)(void) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	02905a091b589a84	-
+method	c:objc(cs)WKWebView(im)takeSnapshotWithConfiguration:completionHandler:	-			void	WKSnapshotConfiguration * snapshotConfiguration | void (^)(UIImage * _Nullable, NSError * _Nullable) completionHandler	-	ios=11.0/-/-/0	-	a2d1d88646e47caf	-
+method	c:objc(cs)WKWebView(im)createPDFWithConfiguration:completionHandler:	-			void	WKPDFConfiguration * pdfConfiguration | void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	36d6826a50d3e320	-
+method	c:objc(cs)WKWebView(im)createWebArchiveDataWithCompletionHandler:	-			void	void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	c97fdec5432baddc	-
+property	c:objc(cs)WKWebView(py)allowsBackForwardNavigationGestures	-			BOOL	-	nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	c06c5825133fc601	-
+property	c:objc(cs)WKWebView(py)customUserAgent	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	f68735ecd9d4eb50	-
+property	c:objc(cs)WKWebView(py)allowsLinkPreview	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	29925f8aad284b0c	-
+property	c:objc(cs)WKWebView(py)scrollView	-			UIScrollView *	-	readonly,strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	bd2b27480e180fef	-
+property	c:objc(cs)WKWebView(py)pageZoom	-			CGFloat	-	nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0	-	cd3e3d018c1595b0	-
+method	c:objc(cs)WKWebView(im)findString:withConfiguration:completionHandler:	-			void	NSString * string | WKFindConfiguration * configuration | void (^)(WKFindResult * _Nonnull) completionHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	06630953b81ba733	-
+method	c:objc(cs)WKWebView(cm)handlesURLScheme:	-			BOOL	NSString * urlScheme	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	aa585e60926d9797	-
+method	c:objc(cs)WKWebView(im)startDownloadUsingRequest:completionHandler:	-			void	NSURLRequest * request | void (^)(WKDownload * _Nonnull) completionHandler	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	f6c43ead3492ffa1	-
+method	c:objc(cs)WKWebView(im)resumeDownloadFromResumeData:completionHandler:	-			void	NSData * resumeData | void (^)(WKDownload * _Nonnull) completionHandler	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	efd5ec37a57f30f3	-
+property	c:objc(cs)WKWebView(py)mediaType	-			NSString *	-	copy,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0	-	41ecd0e00c74fa94	-
+property	c:objc(cs)WKWebView(py)interactionState	-			id	-	copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0	-	0c57a581fe90d028	-
+property	c:objc(cs)WKWebView(py)isBlockedByScreenTime	-			BOOL	-	readonly,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=-/-/-/1	-	5bc74d89efccb249	-
+method	c:objc(cs)WKWebView(im)loadSimulatedRequest:response:responseData:	-			WKNavigation *	NSURLRequest * request | NSURLResponse * response | NSData * data	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	a382136e5e71a1a8	-
+method	c:objc(cs)WKWebView(im)loadSimulatedRequest:withResponse:responseData:	-			WKNavigation *	NSURLRequest * request | NSURLResponse * response | NSData * data	-	ios=15.0/15.0/-/0,macos=12.0/12.0/-/0	deprecated: Use loadSimulatedRequest:response:responseData: instead	d735c303ea000f86	-
+method	c:objc(cs)WKWebView(im)loadFileRequest:allowingReadAccessToURL:	-			WKNavigation *	NSURLRequest * request | NSURL * readAccessURL	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	fae987776892b0c8	-
+method	c:objc(cs)WKWebView(im)loadSimulatedRequest:responseHTMLString:	-			WKNavigation *	NSURLRequest * request | NSString * string	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	3e172f7fa7e44498	-
+method	c:objc(cs)WKWebView(im)loadSimulatedRequest:withResponseHTMLString:	-			WKNavigation *	NSURLRequest * request | NSString * string	-	ios=15.0/15.0/-/0,macos=12.0/12.0/-/0	deprecated: Use loadSimulatedRequest:responseHTMLString: instead	395b05c0e1537638	-
+property	c:objc(cs)WKWebView(py)themeColor	-			UIColor *	-	readonly,nonatomic	ios=15.0/-/-/0	-	3e777efb8cfa3c06	-
+property	c:objc(cs)WKWebView(py)underPageBackgroundColor	-			UIColor *	-	copy,nonatomic	ios=15.0/-/-/0	-	5a1023f414687684	-
+property	c:objc(cs)WKWebView(py)fullscreenState	-			WKFullscreenState	-	readonly,nonatomic	ios=16.0/-/-/0,macos=13.0/-/-/0	-	c005035a6e4def9f	-
+property	c:objc(cs)WKWebView(py)minimumViewportInset	-			UIEdgeInsets	-	readonly,nonatomic	ios=15.5/-/-/0	-	b688217159caf810	-
+property	c:objc(cs)WKWebView(py)maximumViewportInset	-			UIEdgeInsets	-	readonly,nonatomic	ios=15.5/-/-/0	-	7d4556c5bc0e4bb4	-
+method	c:objc(cs)WKWebView(im)setMinimumViewportInset:maximumViewportInset:	-			void	UIEdgeInsets minimumViewportInset | UIEdgeInsets maximumViewportInset	-	ios=15.5/-/-/0	-	fafd1c8b2589e700	-
+property	c:objc(cs)WKWebView(py)findInteractionEnabled	-			BOOL	-	nonatomic,getter=isFindInteractionEnabled	ios=16.0/-/-/0	-	3f5b2483a4594855	-
+property	c:objc(cs)WKWebView(py)findInteraction	-			UIFindInteraction *	-	readonly,nonatomic	ios=16.0/-/-/0	-	5dfc90f0e6a981ca	-
+property	c:objc(cs)WKWebView(py)conversationContext	-			UIConversationContext *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7783eadd2b636084	-
+property	c:objc(cs)WKWebView(py)inspectable	-			BOOL	-	nonatomic,getter=isInspectable	ios=16.4/-/-/0,macos=13.3/-/-/0	-	2ccab03c3975e400	-
+property	c:objc(cs)WKWebView(py)writingToolsActive	-			BOOL	-	readonly,nonatomic,getter=isWritingToolsActive	ios=18.0/-/-/0,macos=15.0/-/-/0,xros=2.4/-/-/0	-	4aeb72c3635fcb2f	-
+method	c:objc(cs)WKWebView(im)fetchDataOfTypes:completionHandler:	-			void	WKWebViewDataType dataTypes | void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	8da74377a69374f8	-
+method	c:objc(cs)WKWebView(im)restoreData:completionHandler:	-			void	NSData * data | void (^)(NSError * _Nullable) completionHandler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	5accd35679e297fb	-
+property	c:objc(cs)WKWebView(py)obscuredContentInsets	-			UIEdgeInsets	-	nonatomic	ios=26.0/-/-/0,xros=26.0/-/-/0	-	a66ed54cd9d6174f	-
+typedef	c:@T@WKMediaPlaybackState	-			enum WKMediaPlaybackState	-	-	-	-	8bf1912b058a18ec	-
+enum	c:@E@WKMediaPlaybackState	-			NSInteger	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	6e2c513e1d9c9894	-
+enumconst	c:@E@WKMediaPlaybackState@WKMediaPlaybackStateNone	WKMediaPlaybackState			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	2d57f24568190e64	0
+enumconst	c:@E@WKMediaPlaybackState@WKMediaPlaybackStatePlaying	WKMediaPlaybackState			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	a88a317dec007208	1
+enumconst	c:@E@WKMediaPlaybackState@WKMediaPlaybackStatePaused	WKMediaPlaybackState			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	c67576cd20389bec	2
+enumconst	c:@E@WKMediaPlaybackState@WKMediaPlaybackStateSuspended	WKMediaPlaybackState			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	501740915172f5fb	3
+typedef	c:@T@WKMediaCaptureState	-			enum WKMediaCaptureState	-	-	-	-	624d6929355f45d1	-
+enum	c:@E@WKMediaCaptureState	-			NSInteger	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	eac223f8425052fc	-
+enumconst	c:@E@WKMediaCaptureState@WKMediaCaptureStateNone	WKMediaCaptureState			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	aa8f189d15ce8870	0
+enumconst	c:@E@WKMediaCaptureState@WKMediaCaptureStateActive	WKMediaCaptureState			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	2e163fbd9957df68	1
+enumconst	c:@E@WKMediaCaptureState@WKMediaCaptureStateMuted	WKMediaCaptureState			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	a62ce57b44e5b88d	2
+typedef	c:@T@WKFullscreenState	-			enum WKFullscreenState	-	-	-	-	4a9fabf057112d29	-
+enum	c:@E@WKFullscreenState	-			NSInteger	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	4097d90f2142803e	-
+enumconst	c:@E@WKFullscreenState@WKFullscreenStateNotInFullscreen	WKFullscreenState			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	622e98d8f30910b8	0
+enumconst	c:@E@WKFullscreenState@WKFullscreenStateEnteringFullscreen	WKFullscreenState			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	84a2e14795d41eae	1
+enumconst	c:@E@WKFullscreenState@WKFullscreenStateInFullscreen	WKFullscreenState			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	bf7b398ec5bc944f	2
+enumconst	c:@E@WKFullscreenState@WKFullscreenStateExitingFullscreen	WKFullscreenState			-	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	c3f3a4d321ce14bc	3
+typedef	c:@T@WKWebViewDataType	-			enum WKWebViewDataType	-	-	-	-	709bf80ff3e9d5ff	-
+enum	c:@E@WKWebViewDataType	-			NSUInteger	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	526ea86ac38ad68f	-
+enumconst	c:@E@WKWebViewDataType@WKWebViewDataTypeSessionStorage	WKWebViewDataType			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	4717ee83e05fa882	1
+category	c:objc(cy)WKWebView@WKDeprecated	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	deprecated: Use serverTrust instead	4215c44f9bf185c8	-
+property	c:objc(cs)WKWebView(py)certificateChain	WKDeprecated			NSArray *	-	readonly,copy,nonatomic	ios=9.0/10.0/-/0,macos=10.11/10.12/-/0	-	5279bbcee18a0f2a	-
+interface	c:objc(cs)WKFrameInfo	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	d19b39ce743383ae	-
+super	-	WKFrameInfo	NSObject		-	-	-	-	-	7b10299681d1195f	-
+conforms	c:objc(cs)WKFrameInfo	WKFrameInfo	NSCopying		-	-	-	-	-	3eee01c11ca89c4b	-
+property	c:objc(cs)WKFrameInfo(py)mainFrame	-			BOOL	-	readonly,nonatomic,getter=isMainFrame	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f57933c12fe3acba	-
+property	c:objc(cs)WKFrameInfo(py)request	-			NSURLRequest *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	52611b484d8e8087	-
+property	c:objc(cs)WKFrameInfo(py)securityOrigin	-			WKSecurityOrigin *	-	readonly,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	eb5c25dd4b510119	-
+property	c:objc(cs)WKFrameInfo(py)webView	-			WKWebView *	-	readonly,weak,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0	-	f0d86fa6b799a2cc	-
+typedef	c:@T@WKCookiePolicy	-			enum WKCookiePolicy	-	-	-	-	d7399fe46df0f40d	-
+enum	c:@E@WKCookiePolicy	-			NSInteger	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	45473a232aedf4d0	-
+enumconst	c:@E@WKCookiePolicy@WKCookiePolicyAllow	WKCookiePolicy			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	a0d4a7396cee8b6d	0
+enumconst	c:@E@WKCookiePolicy@WKCookiePolicyDisallow	WKCookiePolicy			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	51ad7de4b4c5ddc0	1
+protocol	c:objc(pl)WKHTTPCookieStoreObserver	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	8b670ab8cc64602c	-
+conforms	c:objc(pl)WKHTTPCookieStoreObserver	WKHTTPCookieStoreObserver	NSObject		-	-	-	-	-	9720edd9ba4322dc	-
+method	c:objc(pl)WKHTTPCookieStoreObserver(im)cookiesDidChangeInCookieStore:	-			void	WKHTTPCookieStore * cookieStore	optional	ios=11.0/-/-/0,macos=10.13/-/-/0	-	5c01f0a8c69625d2	-
+interface	c:objc(cs)WKHTTPCookieStore	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	d396636cc67f7950	-
+super	-	WKHTTPCookieStore	NSObject		-	-	-	-	-	f365f72944719724	-
+method	c:objc(cs)WKHTTPCookieStore(im)init	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,macos=10.13/-/-/0	-	3873e6d684347c49	-
+method	c:objc(cs)WKHTTPCookieStore(im)getAllCookies:	-			void	void (^)(NSArray<NSHTTPCookie *> * _Nonnull) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	2781ebed9daf3e82	-
+method	c:objc(cs)WKHTTPCookieStore(im)setCookie:completionHandler:	-			void	NSHTTPCookie * cookie | void (^ _Nullable)(void) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	8048466930461d48	-
+method	c:objc(cs)WKHTTPCookieStore(im)setCookies:completionHandler:	-			void	NSArray<NSHTTPCookie *> * cookies | void (^ _Nullable)(void) completionHandler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	53ebf77ea1184e91	-
+method	c:objc(cs)WKHTTPCookieStore(im)deleteCookie:completionHandler:	-			void	NSHTTPCookie * cookie | void (^ _Nullable)(void) completionHandler	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	012c5a788eb9d628	-
+method	c:objc(cs)WKHTTPCookieStore(im)addObserver:	-			void	id<WKHTTPCookieStoreObserver> observer	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	fc797a7c44e5b995	-
+method	c:objc(cs)WKHTTPCookieStore(im)removeObserver:	-			void	id<WKHTTPCookieStoreObserver> observer	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	859c32d4bd2f961b	-
+method	c:objc(cs)WKHTTPCookieStore(im)setCookiePolicy:completionHandler:	-			void	WKCookiePolicy policy | void (^ _Nullable)(void) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	dfcbdecbd96fb682	-
+method	c:objc(cs)WKHTTPCookieStore(im)getCookiePolicy:	-			void	void (^)(WKCookiePolicy) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	37c66436a0396330	-
+typedef	c:@T@WKContentMode	-			enum WKContentMode	-	-	-	-	ce0701b4227ceabb	-
+enum	c:@E@WKContentMode	-			NSInteger	-	-	ios=13.0/-/-/0	-	992ca81c9b61c0c1	-
+enumconst	c:@E@WKContentMode@WKContentModeRecommended	WKContentMode			-	-	-	ios=13.0/-/-/0	-	073e5ab47033a1d3	0
+enumconst	c:@E@WKContentMode@WKContentModeMobile	WKContentMode			-	-	-	ios=13.0/-/-/0	-	3b67b5342264e389	1
+enumconst	c:@E@WKContentMode@WKContentModeDesktop	WKContentMode			-	-	-	ios=13.0/-/-/0	-	a7ee6a2fe6c94778	2
+typedef	c:@T@WKWebpagePreferencesUpgradeToHTTPSPolicy	-			enum WKWebpagePreferencesUpgradeToHTTPSPolicy	-	-	-	-	c962481af75ef933	-
+enum	c:@E@WKWebpagePreferencesUpgradeToHTTPSPolicy	-			NSInteger	-	-	ios=18.2/-/-/0,macos=15.2/-/-/0,xros=2.2/-/-/0	-	7306e3b478474073	-
+enumconst	c:@E@WKWebpagePreferencesUpgradeToHTTPSPolicy@WKWebpagePreferencesUpgradeToHTTPSPolicyKeepAsRequested	WKWebpagePreferencesUpgradeToHTTPSPolicy			-	-	-	ios=18.2/-/-/0,macos=15.2/-/-/0,xros=2.2/-/-/0	-	9ce2d91c6b7be515	0
+enumconst	c:@E@WKWebpagePreferencesUpgradeToHTTPSPolicy@WKWebpagePreferencesUpgradeToHTTPSPolicyAutomaticFallbackToHTTP	WKWebpagePreferencesUpgradeToHTTPSPolicy			-	-	-	ios=18.2/-/-/0,macos=15.2/-/-/0,xros=2.2/-/-/0	-	0319b60896479d23	1
+enumconst	c:@E@WKWebpagePreferencesUpgradeToHTTPSPolicy@WKWebpagePreferencesUpgradeToHTTPSPolicyUserMediatedFallbackToHTTP	WKWebpagePreferencesUpgradeToHTTPSPolicy			-	-	-	ios=18.2/-/-/0,macos=15.2/-/-/0,xros=2.2/-/-/0	-	cec9b64644ad0cc7	2
+enumconst	c:@E@WKWebpagePreferencesUpgradeToHTTPSPolicy@WKWebpagePreferencesUpgradeToHTTPSPolicyErrorOnFailure	WKWebpagePreferencesUpgradeToHTTPSPolicy			-	-	-	ios=18.2/-/-/0,macos=15.2/-/-/0,xros=2.2/-/-/0	-	689b6fa9ac46b069	3
+interface	c:objc(cs)WKWebpagePreferences	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	3de9d9040482691d	-
+super	-	WKWebpagePreferences	NSObject		-	-	-	-	-	7c7e33dcbf17b58a	-
+property	c:objc(cs)WKWebpagePreferences(py)preferredContentMode	-			WKContentMode	-	nonatomic	ios=13.0/-/-/0	-	eda2c0cdc19a2f3c	-
+property	c:objc(cs)WKWebpagePreferences(py)allowsContentJavaScript	-			BOOL	-	nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0	-	0f1921bf78ca8c49	-
+property	c:objc(cs)WKWebpagePreferences(py)lockdownModeEnabled	-			BOOL	-	nonatomic,getter=isLockdownModeEnabled	ios=16.0/-/-/0,macos=13.0/-/-/0	-	e1724872272599a9	-
+property	c:objc(cs)WKWebpagePreferences(py)preferredHTTPSNavigationPolicy	-			WKWebpagePreferencesUpgradeToHTTPSPolicy	-	nonatomic	ios=18.2/-/-/0,macos=15.2/-/-/0,xros=2.2/-/-/0	-	63ed881853d60c53	-
+interface	c:objc(cs)WKNavigation	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	09368aa5c37a637a	-
+super	-	WKNavigation	NSObject		-	-	-	-	-	1b8d855e24ef60ec	-
+property	c:objc(cs)WKNavigation(py)effectiveContentMode	-			WKContentMode	-	readonly,nonatomic	ios=13.0/-/-/0	-	c2b249f09bfa01c0	-
+typedef	c:@T@WKNavigationType	-			enum WKNavigationType	-	-	-	-	b279052ef8b95448	-
+enum	c:@E@WKNavigationType	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	0767a5285f90fc2b	-
+enumconst	c:@E@WKNavigationType@WKNavigationTypeLinkActivated	WKNavigationType			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ec3f4420810e31c5	0
+enumconst	c:@E@WKNavigationType@WKNavigationTypeFormSubmitted	WKNavigationType			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	72a1179735461125	1
+enumconst	c:@E@WKNavigationType@WKNavigationTypeBackForward	WKNavigationType			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	1f2425c09b0fd4b2	2
+enumconst	c:@E@WKNavigationType@WKNavigationTypeReload	WKNavigationType			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	12ecc5e99cc14076	3
+enumconst	c:@E@WKNavigationType@WKNavigationTypeFormResubmitted	WKNavigationType			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	86a6f6c777ddf2d6	4
+enumconst	c:@E@WKNavigationType@WKNavigationTypeOther	WKNavigationType			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	fb43abfebb1f7d73	-1
+interface	c:objc(cs)WKNavigationAction	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	1668048e8d9a9284	-
+super	-	WKNavigationAction	NSObject		-	-	-	-	-	ca244366b73d53df	-
+property	c:objc(cs)WKNavigationAction(py)sourceFrame	-			WKFrameInfo *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	82a6e94e0bd6d776	-
+property	c:objc(cs)WKNavigationAction(py)targetFrame	-			WKFrameInfo *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	aca7dde75ce0591b	-
+property	c:objc(cs)WKNavigationAction(py)navigationType	-			WKNavigationType	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	1197a97ea4bba4a3	-
+property	c:objc(cs)WKNavigationAction(py)request	-			NSURLRequest *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	9317f179c906f5b2	-
+property	c:objc(cs)WKNavigationAction(py)shouldPerformDownload	-			BOOL	-	readonly,nonatomic	ios=14.5/-/-/0,macos=11.3/-/-/0	-	b2b4cee116823ce0	-
+property	c:objc(cs)WKNavigationAction(py)isContentRuleListRedirect	-			BOOL	-	readonly,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	5365d5a46a3c59f1	-
+property	c:objc(cs)WKNavigationAction(py)modifierFlags	-			UIKeyModifierFlags	-	readonly,nonatomic	ios=18.4/-/-/0,xros=2.4/-/-/0	-	4125cf72b8ba98eb	-
+property	c:objc(cs)WKNavigationAction(py)buttonNumber	-			UIEventButtonMask	-	readonly,nonatomic	ios=18.4/-/-/0,xros=2.4/-/-/0	-	497b01e1fd9dd63f	-
+typedef	c:@T@WKNavigationActionPolicy	-			enum WKNavigationActionPolicy	-	-	-	-	ff53f5d48783b83c	-
+enum	c:@E@WKNavigationActionPolicy	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	df18da681f2bdd88	-
+enumconst	c:@E@WKNavigationActionPolicy@WKNavigationActionPolicyCancel	WKNavigationActionPolicy			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	9dab3a6a2f0b0319	0
+enumconst	c:@E@WKNavigationActionPolicy@WKNavigationActionPolicyAllow	WKNavigationActionPolicy			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b085250b518c85d2	1
+enumconst	c:@E@WKNavigationActionPolicy@WKNavigationActionPolicyDownload	WKNavigationActionPolicy			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	1488d5fa21ea6eba	2
+typedef	c:@T@WKNavigationResponsePolicy	-			enum WKNavigationResponsePolicy	-	-	-	-	754384828e0cbf29	-
+enum	c:@E@WKNavigationResponsePolicy	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f51402fcaa1f2e43	-
+enumconst	c:@E@WKNavigationResponsePolicy@WKNavigationResponsePolicyCancel	WKNavigationResponsePolicy			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	e83db8d8eb13e649	0
+enumconst	c:@E@WKNavigationResponsePolicy@WKNavigationResponsePolicyAllow	WKNavigationResponsePolicy			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	0739d4b50b795082	1
+enumconst	c:@E@WKNavigationResponsePolicy@WKNavigationResponsePolicyDownload	WKNavigationResponsePolicy			-	-	-	ios=14.5/-/-/0,macos=11.3/-/-/0	-	87e1b183545abe7c	2
+protocol	c:objc(pl)WKNavigationDelegate	-			-	-	-	-	-	21a7bb2712aa406f	-
+conforms	c:objc(pl)WKNavigationDelegate	WKNavigationDelegate	NSObject		-	-	-	-	-	f56500a8ff5197d9	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:decidePolicyForNavigationAction:decisionHandler:	-			void	WKWebView * webView | WKNavigationAction * navigationAction | void (^)(WKNavigationActionPolicy) decisionHandler	optional	-	-	73bfb3c4966da61a	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:decidePolicyForNavigationAction:preferences:decisionHandler:	-			void	WKWebView * webView | WKNavigationAction * navigationAction | WKWebpagePreferences * preferences | void (^)(WKNavigationActionPolicy, WKWebpagePreferences * _Nonnull) decisionHandler	optional	ios=13.0/-/-/0,macos=10.15/-/-/0	-	2ee2a9e61c4e628e	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:decidePolicyForNavigationResponse:decisionHandler:	-			void	WKWebView * webView | WKNavigationResponse * navigationResponse | void (^)(WKNavigationResponsePolicy) decisionHandler	optional	-	-	c085ac4baacc7af0	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didStartProvisionalNavigation:	-			void	WKWebView * webView | WKNavigation * navigation	optional	-	-	d3dc51ba3691dff3	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didReceiveServerRedirectForProvisionalNavigation:	-			void	WKWebView * webView | WKNavigation * navigation	optional	-	-	30fc1f4c229290a8	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didFailProvisionalNavigation:withError:	-			void	WKWebView * webView | WKNavigation * navigation | NSError * error	optional	-	-	c5c86584f23a300b	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didCommitNavigation:	-			void	WKWebView * webView | WKNavigation * navigation	optional	-	-	f711b86854042814	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didFinishNavigation:	-			void	WKWebView * webView | WKNavigation * navigation	optional	-	-	feecebdac5f66381	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didFailNavigation:withError:	-			void	WKWebView * webView | WKNavigation * navigation | NSError * error	optional	-	-	7302a367e11e636d	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:didReceiveAuthenticationChallenge:completionHandler:	-			void	WKWebView * webView | NSURLAuthenticationChallenge * challenge | void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable) completionHandler	optional	-	-	2ce745f15aae052a	-
+method	c:objc(pl)WKNavigationDelegate(im)webViewWebContentProcessDidTerminate:	-			void	WKWebView * webView	optional	ios=9.0/-/-/0,macos=10.11/-/-/0	-	aca69989bc252f56	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:authenticationChallenge:shouldAllowDeprecatedTLS:	-			void	WKWebView * webView | NSURLAuthenticationChallenge * challenge | void (^)(BOOL) decisionHandler	optional	ios=14.0/-/-/0,macos=11.0/-/-/0	-	d51984db04c4af27	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:navigationAction:didBecomeDownload:	-			void	WKWebView * webView | WKNavigationAction * navigationAction | WKDownload * download	optional	ios=14.5/-/-/0,macos=11.3/-/-/0	-	726cd40e6899ac5e	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:navigationResponse:didBecomeDownload:	-			void	WKWebView * webView | WKNavigationResponse * navigationResponse | WKDownload * download	optional	ios=14.5/-/-/0,macos=11.3/-/-/0	-	7ac9784af3a71fde	-
+method	c:objc(pl)WKNavigationDelegate(im)webView:shouldGoToBackForwardListItem:willUseInstantBack:completionHandler:	-			void	WKWebView * webView | WKBackForwardListItem * backForwardListItem | BOOL willUseInstantBack | void (^)(BOOL) completionHandler	optional	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	b44a36f8a3fbb209	-
+interface	c:objc(cs)WKNavigationResponse	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	d0e2bfd95c6c2156	-
+super	-	WKNavigationResponse	NSObject		-	-	-	-	-	faa44473a1ded26e	-
+property	c:objc(cs)WKNavigationResponse(py)forMainFrame	-			BOOL	-	readonly,nonatomic,getter=isForMainFrame	ios=8.0/-/-/0,macos=10.10/-/-/0	-	99e8b9d674421155	-
+property	c:objc(cs)WKNavigationResponse(py)response	-			NSURLResponse *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b286853917258a5e	-
+property	c:objc(cs)WKNavigationResponse(py)canShowMIMEType	-			BOOL	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	9ea792389e9b69ce	-
+interface	c:objc(cs)WKOpenPanelParameters	-			-	-	-	ios=18.4/-/-/0,macos=10.12/-/-/0,xros=2.4/-/-/0	-	3837327e978423e4	-
+super	-	WKOpenPanelParameters	NSObject		-	-	-	-	-	c2cbaaa876ad62c0	-
+property	c:objc(cs)WKOpenPanelParameters(py)allowsMultipleSelection	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=10.12/-/-/0,xros=2.4/-/-/0	-	6deaff741e4ef3af	-
+property	c:objc(cs)WKOpenPanelParameters(py)allowsDirectories	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=10.13.4/-/-/0,xros=2.4/-/-/0	-	d737ba398cfdf7b2	-
+interface	c:objc(cs)WKPDFConfiguration	-			-	-	-	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	3339ac2dd427c13a	-
+super	-	WKPDFConfiguration	NSObject		-	-	-	-	-	7c463d7d40ca364e	-
+conforms	c:objc(cs)WKPDFConfiguration	WKPDFConfiguration	NSCopying		-	-	-	-	-	d97808f4a86081ab	-
+property	c:objc(cs)WKPDFConfiguration(py)rect	-			CGRect	-	nonatomic	ios=13.4/-/-/0,macos=10.15.4/-/-/0	-	d20c4c8c04c80161	-
+property	c:objc(cs)WKPDFConfiguration(py)allowTransparentBackground	-			BOOL	-	nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0	-	fc217026aa256ad7	-
+interface	c:objc(cs)WKPreferences	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f1de437dd4406d28	-
+super	-	WKPreferences	NSObject		-	-	-	-	-	303721992db844a9	-
+conforms	c:objc(cs)WKPreferences	WKPreferences	NSSecureCoding		-	-	-	-	-	ba94d313f4c4971b	-
+property	c:objc(cs)WKPreferences(py)minimumFontSize	-			CGFloat	-	nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f43aaf4a7db87c49	-
+property	c:objc(cs)WKPreferences(py)javaScriptCanOpenWindowsAutomatically	-			BOOL	-	nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	0c589cbd77d146e7	-
+property	c:objc(cs)WKPreferences(py)fraudulentWebsiteWarningEnabled	-			BOOL	-	nonatomic,getter=isFraudulentWebsiteWarningEnabled	ios=13.0/-/-/0,macos=10.15/-/-/0	-	ef9f4ef302e8c228	-
+property	c:objc(cs)WKPreferences(py)shouldPrintBackgrounds	-			BOOL	-	nonatomic	ios=16.4/-/-/0,macos=13.3/-/-/0	-	c979d9b82021f27a	-
+property	c:objc(cs)WKPreferences(py)textInteractionEnabled	-			BOOL	-	nonatomic,getter=isTextInteractionEnabled	ios=14.5/-/-/0,macos=11.3/-/-/0	-	dd1f4d5ea8db4869	-
+property	c:objc(cs)WKPreferences(py)siteSpecificQuirksModeEnabled	-			BOOL	-	nonatomic,getter=isSiteSpecificQuirksModeEnabled	ios=15.4/-/-/0,macos=12.3/-/-/0	-	0b6b0b791c16932e	-
+property	c:objc(cs)WKPreferences(py)elementFullscreenEnabled	-			BOOL	-	nonatomic,getter=isElementFullscreenEnabled	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=17.0/-/-/0	-	0176955d2cd16721	-
+property	c:objc(cs)WKPreferences(py)inactiveSchedulingPolicy	-			WKInactiveSchedulingPolicy	-	nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0	-	65e4582ce17c4a40	-
+typedef	c:@T@WKInactiveSchedulingPolicy	-			enum WKInactiveSchedulingPolicy	-	-	-	-	19c93a9d777f626b	-
+enum	c:@E@WKInactiveSchedulingPolicy	-			NSInteger	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	ed3a5713acbd3aa8	-
+enumconst	c:@E@WKInactiveSchedulingPolicy@WKInactiveSchedulingPolicySuspend	WKInactiveSchedulingPolicy			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	bfe2f454292bafff	0
+enumconst	c:@E@WKInactiveSchedulingPolicy@WKInactiveSchedulingPolicyThrottle	WKInactiveSchedulingPolicy			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	50d15a9b95aa244e	1
+enumconst	c:@E@WKInactiveSchedulingPolicy@WKInactiveSchedulingPolicyNone	WKInactiveSchedulingPolicy			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	a989d969a2a11c72	2
+category	c:objc(cy)WKPreferences@WKDeprecated	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	deprecated: Java is no longer supported	d54d175067372e2b	-
+property	c:objc(cs)WKPreferences(py)javaScriptEnabled	WKDeprecated			BOOL	-	nonatomic	ios=8.0/14.0/-/0,macos=10.10/11.0/-/0	-	abd333c667d06b31	-
+property	c:objc(cs)WKPreferences(py)isLookToScrollEnabled	WKDeprecated			BOOL	-	nonatomic	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	41ec1c065a2b08b0	-
+protocol	c:objc(pl)WKPreviewActionItem	-			-	-	-	ios=10.0/13.0/-/0	-	134921c1c6722ba4	-
+conforms	c:objc(pl)WKPreviewActionItem	WKPreviewActionItem	UIPreviewActionItem		-	-	-	-	-	7ecee8a86b022565	-
+property	c:objc(pl)WKPreviewActionItem(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=10.0/13.0/-/0	-	6aa2494b3c352068	-
+var	c:@WKPreviewActionItemIdentifierOpen	-			NSString *const	-	-	ios=10.0/13.0/-/0	-	df22ce36dbd37c3a	-
+var	c:@WKPreviewActionItemIdentifierAddToReadingList	-			NSString *const	-	-	ios=10.0/13.0/-/0	-	3a45af094a5a8494	-
+var	c:@WKPreviewActionItemIdentifierCopy	-			NSString *const	-	-	ios=10.0/13.0/-/0	-	bc75a4b5f539bc1e	-
+var	c:@WKPreviewActionItemIdentifierShare	-			NSString *const	-	-	ios=10.0/13.0/-/0	-	d586502dcdeecde5	-
+interface	c:objc(cs)WKPreviewElementInfo	-			-	-	-	ios=10.0/13.0/-/0	-	d7ca1a21d317f112	-
+super	-	WKPreviewElementInfo	NSObject		-	-	-	-	-	8cbef6bcbf734248	-
+conforms	c:objc(cs)WKPreviewElementInfo	WKPreviewElementInfo	NSCopying		-	-	-	-	-	1081c3c96696557d	-
+property	c:objc(cs)WKPreviewElementInfo(py)linkURL	-			NSURL *	-	readonly,nonatomic	ios=10.0/13.0/-/0	-	58235640678e567d	-
+interface	c:objc(cs)WKProcessPool	-			-	-	-	ios=8.0/15.0/-/0,macos=10.10/12.0/-/0,xros=1.0/1.0/-/0	-	b829c21ad854ad78	-
+super	-	WKProcessPool	NSObject		-	-	-	-	-	25a37404d1ac6b21	-
+conforms	c:objc(cs)WKProcessPool	WKProcessPool	NSSecureCoding		-	-	-	-	-	4d2b9803f53a705b	-
+interface	c:objc(cs)WKScriptMessage	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	3b7baaa606a37fee	-
+super	-	WKScriptMessage	NSObject		-	-	-	-	-	e3afdcc89d07bc26	-
+property	c:objc(cs)WKScriptMessage(py)body	-			id	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f9f86cf72f1e1eef	-
+property	c:objc(cs)WKScriptMessage(py)webView	-			WKWebView *	-	readonly,weak,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	8d85f8c704f9392b	-
+property	c:objc(cs)WKScriptMessage(py)frameInfo	-			WKFrameInfo *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	efe6044ca47899b8	-
+property	c:objc(cs)WKScriptMessage(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f04b98b06e0e1107	-
+property	c:objc(cs)WKScriptMessage(py)world	-			WKContentWorld *	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0	-	99f89309ff192d38	-
+protocol	c:objc(pl)WKScriptMessageHandler	-			-	-	-	-	-	cb8674cce51d88ef	-
+conforms	c:objc(pl)WKScriptMessageHandler	WKScriptMessageHandler	NSObject		-	-	-	-	-	bbcd646efba270d1	-
+method	c:objc(pl)WKScriptMessageHandler(im)userContentController:didReceiveScriptMessage:	-			void	WKUserContentController * userContentController | WKScriptMessage * message	-	-	-	2508d1e4d2cf1b28	-
+protocol	c:objc(pl)WKScriptMessageHandlerWithReply	-			-	-	-	-	-	ae1ad6632ae8daec	-
+conforms	c:objc(pl)WKScriptMessageHandlerWithReply	WKScriptMessageHandlerWithReply	NSObject		-	-	-	-	-	e42b738e520d50e8	-
+method	c:objc(pl)WKScriptMessageHandlerWithReply(im)userContentController:didReceiveScriptMessage:replyHandler:	-			void	WKUserContentController * userContentController | WKScriptMessage * message | void (^)(id _Nullable, NSString * _Nullable) replyHandler	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	302a610c63f782ae	-
+interface	c:objc(cs)WKSnapshotConfiguration	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	85488fca8adb6f2b	-
+super	-	WKSnapshotConfiguration	NSObject		-	-	-	-	-	ae42b6bba49e7b5a	-
+conforms	c:objc(cs)WKSnapshotConfiguration	WKSnapshotConfiguration	NSCopying		-	-	-	-	-	ceee7e35f380dc85	-
+property	c:objc(cs)WKSnapshotConfiguration(py)rect	-			CGRect	-	nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0	-	0e532ab61d1da1fb	-
+property	c:objc(cs)WKSnapshotConfiguration(py)snapshotWidth	-			NSNumber *	-	copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0	-	a91fc5de7e7ce0b0	-
+property	c:objc(cs)WKSnapshotConfiguration(py)afterScreenUpdates	-			BOOL	-	nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0	-	cf0ebde90127ed7f	-
+typedef	c:@T@WKPermissionDecision	-			enum WKPermissionDecision	-	-	-	-	d0c31fdd6dd9c96e	-
+enum	c:@E@WKPermissionDecision	-			NSInteger	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	703bbcf2154359db	-
+enumconst	c:@E@WKPermissionDecision@WKPermissionDecisionPrompt	WKPermissionDecision			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	0dd9f9063f636a55	0
+enumconst	c:@E@WKPermissionDecision@WKPermissionDecisionGrant	WKPermissionDecision			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	e4af6d3672bacaad	1
+enumconst	c:@E@WKPermissionDecision@WKPermissionDecisionDeny	WKPermissionDecision			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	47a86a8e9149f9ef	2
+typedef	c:@T@WKMediaCaptureType	-			enum WKMediaCaptureType	-	-	-	-	25aa3b4e8438ed9b	-
+enum	c:@E@WKMediaCaptureType	-			NSInteger	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	e347dcf0e7346c46	-
+enumconst	c:@E@WKMediaCaptureType@WKMediaCaptureTypeCamera	WKMediaCaptureType			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	f408c6e80fbfcfe7	0
+enumconst	c:@E@WKMediaCaptureType@WKMediaCaptureTypeMicrophone	WKMediaCaptureType			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	e1deab443ba97b4a	1
+enumconst	c:@E@WKMediaCaptureType@WKMediaCaptureTypeCameraAndMicrophone	WKMediaCaptureType			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0	-	22cb75fb6fc3a683	2
+typedef	c:@T@WKDialogResult	-			enum WKDialogResult	-	-	-	-	4a1c5d0439e6e942	-
+enum	c:@E@WKDialogResult	-			NSInteger	-	-	ios=16.0/-/-/0	-	c0e746cd753844ce	-
+enumconst	c:@E@WKDialogResult@WKDialogResultShowDefault	WKDialogResult			-	-	-	ios=16.0/-/-/0	-	8597dcec04202b81	1
+enumconst	c:@E@WKDialogResult@WKDialogResultAskAgain	WKDialogResult			-	-	-	ios=16.0/-/-/0	-	92c60c1a1ba6c52c	2
+enumconst	c:@E@WKDialogResult@WKDialogResultHandled	WKDialogResult			-	-	-	ios=16.0/-/-/0	-	842143db9eda5187	3
+protocol	c:objc(pl)WKUIDelegate	-			-	-	-	-	deprecated: Use webView:contextMenuConfigurationForElement:completionHandler: instead	f678c43f105ef57f	-
+conforms	c:objc(pl)WKUIDelegate	WKUIDelegate	NSObject		-	-	-	-	-	f6d6e0699a4df414	-
+method	c:objc(pl)WKUIDelegate(im)webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:	-			WKWebView *	WKWebView * webView | WKWebViewConfiguration * configuration | WKNavigationAction * navigationAction | WKWindowFeatures * windowFeatures	optional	-	-	708a683af0aed193	-
+method	c:objc(pl)WKUIDelegate(im)webViewDidClose:	-			void	WKWebView * webView	optional	ios=9.0/-/-/0,macos=10.11/-/-/0	-	3977d99ab9623bce	-
+method	c:objc(pl)WKUIDelegate(im)webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:	-			void	WKWebView * webView | NSString * message | WKFrameInfo * frame | void (^)(void) completionHandler	optional	-	-	80ee0a864dfc4b94	-
+method	c:objc(pl)WKUIDelegate(im)webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:	-			void	WKWebView * webView | NSString * message | WKFrameInfo * frame | void (^)(BOOL) completionHandler	optional	-	-	0809054f86aa3855	-
+method	c:objc(pl)WKUIDelegate(im)webView:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:	-			void	WKWebView * webView | NSString * prompt | NSString * defaultText | WKFrameInfo * frame | void (^)(NSString * _Nullable) completionHandler	optional	-	-	8525fc1c5b4655a3	-
+method	c:objc(pl)WKUIDelegate(im)webView:requestMediaCapturePermissionForOrigin:initiatedByFrame:type:decisionHandler:	-			void	WKWebView * webView | WKSecurityOrigin * origin | WKFrameInfo * frame | WKMediaCaptureType type | void (^)(WKPermissionDecision) decisionHandler	optional	ios=15.0/-/-/0,macos=12.0/-/-/0	-	46858ef488c171da	-
+method	c:objc(pl)WKUIDelegate(im)webView:requestDeviceOrientationAndMotionPermissionForOrigin:initiatedByFrame:decisionHandler:	-			void	WKWebView * webView | WKSecurityOrigin * origin | WKFrameInfo * frame | void (^)(WKPermissionDecision) decisionHandler	optional	ios=15.0/-/-/0,macos=-/-/-/1	-	6e399b130c9bd9ed	-
+method	c:objc(pl)WKUIDelegate(im)webView:shouldPreviewElement:	-			BOOL	WKWebView * webView | WKPreviewElementInfo * elementInfo	optional	ios=10.0/13.0/-/0	deprecated: Use webView:contextMenuConfigurationForElement:completionHandler: instead	8f03e401fbf98479	-
+method	c:objc(pl)WKUIDelegate(im)webView:previewingViewControllerForElement:defaultActions:	-			UIViewController *	WKWebView * webView | WKPreviewElementInfo * elementInfo | NSArray<id<WKPreviewActionItem>> * previewActions	optional	ios=10.0/13.0/-/0	deprecated: Use webView:contextMenuConfigurationForElement:completionHandler: instead	320cfb6393cd03ca	-
+method	c:objc(pl)WKUIDelegate(im)webView:commitPreviewingViewController:	-			void	WKWebView * webView | UIViewController * previewingViewController	optional	ios=10.0/13.0/-/0	deprecated: Use webView:contextMenuForElement:willCommitWithAnimator: instead	769f1e978bdc7ac6	-
+method	c:objc(pl)WKUIDelegate(im)webView:contextMenuConfigurationForElement:completionHandler:	-			void	WKWebView * webView | WKContextMenuElementInfo * elementInfo | void (^)(UIContextMenuConfiguration * _Nullable) completionHandler	optional	ios=13.0/-/-/0	-	1502b936a16bef14	-
+method	c:objc(pl)WKUIDelegate(im)webView:contextMenuWillPresentForElement:	-			void	WKWebView * webView | WKContextMenuElementInfo * elementInfo	optional	ios=13.0/-/-/0	-	555b306c7723309b	-
+method	c:objc(pl)WKUIDelegate(im)webView:contextMenuForElement:willCommitWithAnimator:	-			void	WKWebView * webView | WKContextMenuElementInfo * elementInfo | id<UIContextMenuInteractionCommitAnimating> animator	optional	ios=13.0/-/-/0	-	e860eaf84805b5cf	-
+method	c:objc(pl)WKUIDelegate(im)webView:contextMenuDidEndForElement:	-			void	WKWebView * webView | WKContextMenuElementInfo * elementInfo	optional	ios=13.0/-/-/0	-	52d350e14b4fe61a	-
+method	c:objc(pl)WKUIDelegate(im)webView:showLockdownModeFirstUseMessage:completionHandler:	-			void	WKWebView * webView | NSString * message | void (^)(WKDialogResult) completionHandler	optional	ios=16.0/-/-/0	-	b4ff0872874f46d4	-
+method	c:objc(pl)WKUIDelegate(im)webView:willPresentEditMenuWithAnimator:	-			void	WKWebView * webView | id<UIEditMenuInteractionAnimating> animator	optional	ios=16.4/-/-/0	-	0f7bd3c7d7f966de	-
+method	c:objc(pl)WKUIDelegate(im)webView:willDismissEditMenuWithAnimator:	-			void	WKWebView * webView | id<UIEditMenuInteractionAnimating> animator	optional	ios=16.4/-/-/0	-	aec0334365bbfe41	-
+method	c:objc(pl)WKUIDelegate(im)webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:	-			void	WKWebView * webView | WKOpenPanelParameters * parameters | WKFrameInfo * frame | void (^)(NSArray<NSURL *> * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=10.12/-/-/0,xros=2.4/-/-/0	-	efa5269ffa8eb831	-
+method	c:objc(pl)WKUIDelegate(im)webView:insertInputSuggestion:	-			void	WKWebView * webView | UIInputSuggestion * inputSuggestion	optional	ios=26.0/-/-/0,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9f38173305b51872	-
+protocol	c:objc(pl)WKURLSchemeHandler	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	0e098c8363913a90	-
+conforms	c:objc(pl)WKURLSchemeHandler	WKURLSchemeHandler	NSObject		-	-	-	-	-	eea73a2c0492c895	-
+method	c:objc(pl)WKURLSchemeHandler(im)webView:startURLSchemeTask:	-			void	WKWebView * webView | id<WKURLSchemeTask> urlSchemeTask	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	902e83a1d24a3afc	-
+method	c:objc(pl)WKURLSchemeHandler(im)webView:stopURLSchemeTask:	-			void	WKWebView * webView | id<WKURLSchemeTask> urlSchemeTask	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	8c3c9c181e5d7423	-
+protocol	c:objc(pl)WKURLSchemeTask	-			-	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	cf87d7bd883f5135	-
+conforms	c:objc(pl)WKURLSchemeTask	WKURLSchemeTask	NSObject		-	-	-	-	-	1a5dc2d5883993a4	-
+property	c:objc(pl)WKURLSchemeTask(py)request	-			NSURLRequest *	-	readonly,copy,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0	-	e9d50126ffc45ae7	-
+method	c:objc(pl)WKURLSchemeTask(im)didReceiveResponse:	-			void	NSURLResponse * response	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	a9898bf4c689fd1f	-
+method	c:objc(pl)WKURLSchemeTask(im)didReceiveData:	-			void	NSData * data	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	c8be985906bfc344	-
+method	c:objc(pl)WKURLSchemeTask(im)didFinish	-			void	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	a93cc964dfebd040	-
+method	c:objc(pl)WKURLSchemeTask(im)didFailWithError:	-			void	NSError * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	9ac761ef28e1d57b	-
+interface	c:objc(cs)WKUserContentController	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	4d2bc85705c55a53	-
+super	-	WKUserContentController	NSObject		-	-	-	-	-	94f32eea4ad5fd41	-
+conforms	c:objc(cs)WKUserContentController	WKUserContentController	NSSecureCoding		-	-	-	-	-	5615b97c3a5a902b	-
+property	c:objc(cs)WKUserContentController(py)userScripts	-			NSArray<WKUserScript *> *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	57947261a63c9c94	-
+method	c:objc(cs)WKUserContentController(im)addUserScript:	-			void	WKUserScript * userScript	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	a31d726b1cba28e9	-
+method	c:objc(cs)WKUserContentController(im)removeAllUserScripts	-			void	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	835a9a304e7ca579	-
+method	c:objc(cs)WKUserContentController(im)addScriptMessageHandler:contentWorld:name:	-			void	id<WKScriptMessageHandler> scriptMessageHandler | WKContentWorld * world | NSString * name	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	e86d11d9603ee6b5	-
+method	c:objc(cs)WKUserContentController(im)addScriptMessageHandlerWithReply:contentWorld:name:	-			void	id<WKScriptMessageHandlerWithReply> scriptMessageHandlerWithReply | WKContentWorld * contentWorld | NSString * name	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	5e3000242e17bfdc	-
+method	c:objc(cs)WKUserContentController(im)addScriptMessageHandler:name:	-			void	id<WKScriptMessageHandler> scriptMessageHandler | NSString * name	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	8e7643eec5b34ca7	-
+method	c:objc(cs)WKUserContentController(im)removeScriptMessageHandlerForName:contentWorld:	-			void	NSString * name | WKContentWorld * contentWorld	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	28385ee1db500b9e	-
+method	c:objc(cs)WKUserContentController(im)removeScriptMessageHandlerForName:	-			void	NSString * name	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	44f27f523eb6146a	-
+method	c:objc(cs)WKUserContentController(im)removeAllScriptMessageHandlersFromContentWorld:	-			void	WKContentWorld * contentWorld	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	51e9273948f0d016	-
+method	c:objc(cs)WKUserContentController(im)removeAllScriptMessageHandlers	-			void	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	417f7c223c0bcf13	-
+method	c:objc(cs)WKUserContentController(im)addContentRuleList:	-			void	WKContentRuleList * contentRuleList	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	2adf904ea1579e43	-
+method	c:objc(cs)WKUserContentController(im)removeContentRuleList:	-			void	WKContentRuleList * contentRuleList	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	a9f4d6860b7755d4	-
+method	c:objc(cs)WKUserContentController(im)removeAllContentRuleLists	-			void	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	b6aa4f4e35ec73ca	-
+typedef	c:@T@WKUserScriptInjectionTime	-			enum WKUserScriptInjectionTime	-	-	-	-	2cbe28fe026daa8f	-
+enum	c:@E@WKUserScriptInjectionTime	-			NSInteger	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	19b54e09ff99a1cf	-
+enumconst	c:@E@WKUserScriptInjectionTime@WKUserScriptInjectionTimeAtDocumentStart	WKUserScriptInjectionTime			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	95f68a34693e49f4	0
+enumconst	c:@E@WKUserScriptInjectionTime@WKUserScriptInjectionTimeAtDocumentEnd	WKUserScriptInjectionTime			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ca5a5356912370ab	1
+interface	c:objc(cs)WKUserScript	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	db9e183196191234	-
+super	-	WKUserScript	NSObject		-	-	-	-	-	c0c0fae35fe0d8b8	-
+conforms	c:objc(cs)WKUserScript	WKUserScript	NSCopying		-	-	-	-	-	5ca81b4f1cfc3a7b	-
+property	c:objc(cs)WKUserScript(py)source	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	d2897c235c010a21	-
+property	c:objc(cs)WKUserScript(py)injectionTime	-			WKUserScriptInjectionTime	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	316aaba729fc2255	-
+property	c:objc(cs)WKUserScript(py)forMainFrameOnly	-			BOOL	-	readonly,nonatomic,getter=isForMainFrameOnly	ios=8.0/-/-/0,macos=10.10/-/-/0	-	37bc7db49b096edc	-
+method	c:objc(cs)WKUserScript(im)initWithSource:injectionTime:forMainFrameOnly:	-			instancetype	NSString * source | WKUserScriptInjectionTime injectionTime | BOOL forMainFrameOnly	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	8f8a8edc2d08bb90	-
+method	c:objc(cs)WKUserScript(im)initWithSource:injectionTime:forMainFrameOnly:inContentWorld:	-			instancetype	NSString * source | WKUserScriptInjectionTime injectionTime | BOOL forMainFrameOnly | WKContentWorld * contentWorld	-	ios=14.0/-/-/0,macos=11.0/-/-/0	-	0e78eafaab6031e4	-
+var	c:@WKWebExtensionMatchPatternErrorDomain	-			const NSErrorDomain	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a959ed911ade1fe4	-
+typedef	c:@T@WKWebExtensionMatchPatternError	-			enum WKWebExtensionMatchPatternError	-	-	-	-	59653206d5239234	-
+enum	c:@E@WKWebExtensionMatchPatternError	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	70ab4c5fdcf9477d	-
+enumconst	c:@E@WKWebExtensionMatchPatternError@WKWebExtensionMatchPatternErrorUnknown	WKWebExtensionMatchPatternError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9a8dc3321e4f24fd	1
+enumconst	c:@E@WKWebExtensionMatchPatternError@WKWebExtensionMatchPatternErrorInvalidScheme	WKWebExtensionMatchPatternError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ff1a4cc6859f9fef	2
+enumconst	c:@E@WKWebExtensionMatchPatternError@WKWebExtensionMatchPatternErrorInvalidHost	WKWebExtensionMatchPatternError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	957f1d41c779ddfa	3
+enumconst	c:@E@WKWebExtensionMatchPatternError@WKWebExtensionMatchPatternErrorInvalidPath	WKWebExtensionMatchPatternError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	33f7584b9e4de59d	4
+typedef	c:@T@WKWebExtensionMatchPatternOptions	-			enum WKWebExtensionMatchPatternOptions	-	-	-	-	1af698dcef0a53f2	-
+enum	c:@E@WKWebExtensionMatchPatternOptions	-			NSUInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1edeb66af723863a	-
+enumconst	c:@E@WKWebExtensionMatchPatternOptions@WKWebExtensionMatchPatternOptionsNone	WKWebExtensionMatchPatternOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7bc7d67181d554f0	0
+enumconst	c:@E@WKWebExtensionMatchPatternOptions@WKWebExtensionMatchPatternOptionsIgnoreSchemes	WKWebExtensionMatchPatternOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b978e6ef12968a5a	1
+enumconst	c:@E@WKWebExtensionMatchPatternOptions@WKWebExtensionMatchPatternOptionsIgnorePaths	WKWebExtensionMatchPatternOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	165ea3dfb1c9c485	2
+enumconst	c:@E@WKWebExtensionMatchPatternOptions@WKWebExtensionMatchPatternOptionsMatchBidirectionally	WKWebExtensionMatchPatternOptions			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c0b1592bab5ec94b	4
+interface	c:objc(cs)WKWebExtensionMatchPattern	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	bcbc9cb3075ec6cf	-
+super	-	WKWebExtensionMatchPattern	NSObject		-	-	-	-	-	6d6b3a57898ea16d	-
+conforms	c:objc(cs)WKWebExtensionMatchPattern	WKWebExtensionMatchPattern	NSSecureCoding		-	-	-	-	-	d257b4b06208b1d9	-
+conforms	c:objc(cs)WKWebExtensionMatchPattern	WKWebExtensionMatchPattern	NSCopying		-	-	-	-	-	3dbd0826ddf1477d	-
+method	c:objc(cs)WKWebExtensionMatchPattern(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2aebc1873780689e	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9a1646685f47f774	-
+method	c:objc(cs)WKWebExtensionMatchPattern(cm)registerCustomURLScheme:	-			void	NSString * urlScheme	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0659eefd1d9ddffe	-
+method	c:objc(cs)WKWebExtensionMatchPattern(cm)allURLsMatchPattern	-			instancetype	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9082a4ff47c2de09	-
+method	c:objc(cs)WKWebExtensionMatchPattern(cm)allHostsAndSchemesMatchPattern	-			instancetype	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	92ec7a6ac01a2092	-
+method	c:objc(cs)WKWebExtensionMatchPattern(cm)matchPatternWithString:	-			instancetype	NSString * string	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6ff3b5fb37bdf31e	-
+method	c:objc(cs)WKWebExtensionMatchPattern(cm)matchPatternWithScheme:host:path:	-			instancetype	NSString * scheme | NSString * host | NSString * path	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	84affad3f8cd66bc	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)initWithString:error:	-			instancetype	NSString * string | NSError * _Nullable * error	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	32e034b280ed58f3	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)initWithScheme:host:path:error:	-			instancetype	NSString * scheme | NSString * host | NSString * path | NSError * _Nullable * error	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e133ad8707ee5472	-
+property	c:objc(cs)WKWebExtensionMatchPattern(py)string	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	70a60d3a16c59899	-
+property	c:objc(cs)WKWebExtensionMatchPattern(py)scheme	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3d27f7693bc41767	-
+property	c:objc(cs)WKWebExtensionMatchPattern(py)host	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	157f7627a3c63d10	-
+property	c:objc(cs)WKWebExtensionMatchPattern(py)path	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4767d26c3397dfce	-
+property	c:objc(cs)WKWebExtensionMatchPattern(py)matchesAllURLs	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	adfa07a279145c73	-
+property	c:objc(cs)WKWebExtensionMatchPattern(py)matchesAllHosts	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4fe6efa05eb607a3	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)matchesURL:	-			BOOL	NSURL * url	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e05d8f0ccfc9e78d	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)matchesURL:options:	-			BOOL	NSURL * url | WKWebExtensionMatchPatternOptions options	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6e63fd58e5988a84	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)matchesPattern:	-			BOOL	WKWebExtensionMatchPattern * pattern	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	eeecc1c910297f6c	-
+method	c:objc(cs)WKWebExtensionMatchPattern(im)matchesPattern:options:	-			BOOL	WKWebExtensionMatchPattern * pattern | WKWebExtensionMatchPatternOptions options	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	395dc8201e7ec4f4	-
+typedef	c:@T@WKWebExtensionPermission	-			NSString *	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	57b10e14c36a214f	-
+var	c:@WKWebExtensionPermissionActiveTab	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a6a556e47c45edca	-
+var	c:@WKWebExtensionPermissionAlarms	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0b0ed1ebae66c738	-
+var	c:@WKWebExtensionPermissionClipboardWrite	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7173f48a96c8c899	-
+var	c:@WKWebExtensionPermissionContextMenus	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c58efce2382b4d52	-
+var	c:@WKWebExtensionPermissionCookies	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	625265268bca0b1c	-
+var	c:@WKWebExtensionPermissionDeclarativeNetRequest	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0add416481fe2c8d	-
+var	c:@WKWebExtensionPermissionDeclarativeNetRequestFeedback	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	fb4c7584dfde0a0b	-
+var	c:@WKWebExtensionPermissionDeclarativeNetRequestWithHostAccess	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8e88a968260b2f8c	-
+var	c:@WKWebExtensionPermissionMenus	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6ffa91bd4ce3ee23	-
+var	c:@WKWebExtensionPermissionNativeMessaging	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	906a8269c09b8c31	-
+var	c:@WKWebExtensionPermissionScripting	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b94db902cc77aaf3	-
+var	c:@WKWebExtensionPermissionStorage	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	746069598c1044c3	-
+var	c:@WKWebExtensionPermissionTabs	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1bec55aaaf616658	-
+var	c:@WKWebExtensionPermissionUnlimitedStorage	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	390d37167cb8b58d	-
+var	c:@WKWebExtensionPermissionWebNavigation	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	dbcaa42f55856a1e	-
+var	c:@WKWebExtensionPermissionWebRequest	-			const WKWebExtensionPermission	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	09c2b28050c0ec48	-
+var	c:@WKWebExtensionErrorDomain	-			const NSErrorDomain	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2d2fd0a4ce40fc04	-
+typedef	c:@T@WKWebExtensionError	-			enum WKWebExtensionError	-	-	-	-	50ce309d80b478ff	-
+enum	c:@E@WKWebExtensionError	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c13cc101aba9cc9f	-
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorUnknown	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	870eba10b33b3db0	1
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorResourceNotFound	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	46ebdd92678188a9	2
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorInvalidResourceCodeSignature	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8edff2748ff24e88	3
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorInvalidManifest	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	93ac4caf1fcb96a3	4
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorUnsupportedManifestVersion	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d737eb878590bfb9	5
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorInvalidManifestEntry	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f2ac6784f748d38e	6
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorInvalidDeclarativeNetRequestEntry	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	86d07f1c730d6f87	7
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorInvalidBackgroundPersistence	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c1326ff1d78b8bee	8
+enumconst	c:@E@WKWebExtensionError@WKWebExtensionErrorInvalidArchive	WKWebExtensionError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	69d2fd1587bc6efb	9
+interface	c:objc(cs)WKWebExtension	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6b25266888726d52	-
+super	-	WKWebExtension	NSObject		-	-	-	-	-	32aff5894c7a0c7b	-
+method	c:objc(cs)WKWebExtension(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	59f6aa4d7d6e8ea0	-
+method	c:objc(cs)WKWebExtension(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b64589b6d1ed37bf	-
+method	c:objc(cs)WKWebExtension(cm)extensionWithAppExtensionBundle:completionHandler:	-			void	NSBundle * appExtensionBundle | void (^)(WKWebExtension * _Nullable, NSError * _Nullable) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	22a008fae4c83b48	-
+method	c:objc(cs)WKWebExtension(cm)extensionWithResourceBaseURL:completionHandler:	-			void	NSURL * resourceBaseURL | void (^)(WKWebExtension * _Nullable, NSError * _Nullable) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	aaee35a1adb4c14d	-
+property	c:objc(cs)WKWebExtension(py)errors	-			NSArray<NSError *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2d2cb59734b8f90f	-
+property	c:objc(cs)WKWebExtension(py)manifest	-			NSDictionary<NSString *,id> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0f01ccfc2bc9b88d	-
+property	c:objc(cs)WKWebExtension(py)manifestVersion	-			double	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e5fdb87f6ae9f642	-
+method	c:objc(cs)WKWebExtension(im)supportsManifestVersion:	-			BOOL	double manifestVersion	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	96ebbc25bc17242f	-
+property	c:objc(cs)WKWebExtension(py)defaultLocale	-			NSLocale *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4d020f42d79189f9	-
+property	c:objc(cs)WKWebExtension(py)displayName	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8abb9312de2916a0	-
+property	c:objc(cs)WKWebExtension(py)displayShortName	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d7386c89435a95d1	-
+property	c:objc(cs)WKWebExtension(py)displayVersion	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c081048c55640be6	-
+property	c:objc(cs)WKWebExtension(py)displayDescription	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	bfe0bbd469a1f5f7	-
+property	c:objc(cs)WKWebExtension(py)displayActionLabel	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	863d358c538b5a3a	-
+property	c:objc(cs)WKWebExtension(py)version	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	18f483b115b047b6	-
+method	c:objc(cs)WKWebExtension(im)iconForSize:	-			UIImage *	CGSize size	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e8cbaf8c9168be10	-
+method	c:objc(cs)WKWebExtension(im)actionIconForSize:	-			UIImage *	CGSize size	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b1147fa7e1811925	-
+property	c:objc(cs)WKWebExtension(py)requestedPermissions	-			NSSet<WKWebExtensionPermission> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2477fc2c67785e9b	-
+property	c:objc(cs)WKWebExtension(py)optionalPermissions	-			NSSet<WKWebExtensionPermission> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	cfcba822b7e2790a	-
+property	c:objc(cs)WKWebExtension(py)requestedPermissionMatchPatterns	-			NSSet<WKWebExtensionMatchPattern *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6ec82525a5e26494	-
+property	c:objc(cs)WKWebExtension(py)optionalPermissionMatchPatterns	-			NSSet<WKWebExtensionMatchPattern *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e9ccf42b2750ad25	-
+property	c:objc(cs)WKWebExtension(py)allRequestedMatchPatterns	-			NSSet<WKWebExtensionMatchPattern *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9e9dc26c6d8418ce	-
+property	c:objc(cs)WKWebExtension(py)hasBackgroundContent	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6bcdfb6a6465bddb	-
+property	c:objc(cs)WKWebExtension(py)hasPersistentBackgroundContent	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	78d1d41ae437e1af	-
+property	c:objc(cs)WKWebExtension(py)hasInjectedContent	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9a3e7d98791a43d7	-
+property	c:objc(cs)WKWebExtension(py)hasOptionsPage	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	561aa90df89da202	-
+property	c:objc(cs)WKWebExtension(py)hasOverrideNewTabPage	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1bfe44f69ec4c853	-
+property	c:objc(cs)WKWebExtension(py)hasCommands	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f7e6e51c1b21e7e1	-
+property	c:objc(cs)WKWebExtension(py)hasContentModificationRules	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a4be773fadd0f4d7	-
+interface	c:objc(cs)WKWebExtensionAction	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	93224457cd3b3cc6	-
+super	-	WKWebExtensionAction	NSObject		-	-	-	-	-	12f9f475eeb25ade	-
+method	c:objc(cs)WKWebExtensionAction(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e89b8c40aef7b7c3	-
+method	c:objc(cs)WKWebExtensionAction(im)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5042200feae8b34b	-
+property	c:objc(cs)WKWebExtensionAction(py)webExtensionContext	-			WKWebExtensionContext *	-	readonly,weak,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	119616cc5b70201d	-
+property	c:objc(cs)WKWebExtensionAction(py)associatedTab	-			id<WKWebExtensionTab>	-	readonly,weak,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7f172c9b0477f71d	-
+method	c:objc(cs)WKWebExtensionAction(im)iconForSize:	-			UIImage *	CGSize size	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d6a22f41b6eeb71a	-
+property	c:objc(cs)WKWebExtensionAction(py)label	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5ccde3f07da5854a	-
+property	c:objc(cs)WKWebExtensionAction(py)badgeText	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	76e4ebc15120c550	-
+property	c:objc(cs)WKWebExtensionAction(py)hasUnreadBadgeText	-			BOOL	-	nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a01d7fd7fdda1d4f	-
+property	c:objc(cs)WKWebExtensionAction(py)inspectionName	-			NSString *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d9ec0a96863b5d24	-
+property	c:objc(cs)WKWebExtensionAction(py)enabled	-			BOOL	-	readonly,nonatomic,getter=isEnabled	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6d98a7e01aae17bb	-
+property	c:objc(cs)WKWebExtensionAction(py)menuItems	-			NSArray<UIMenuElement *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	83246b4d1814da61	-
+property	c:objc(cs)WKWebExtensionAction(py)presentsPopup	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4f082af8cd0172dc	-
+property	c:objc(cs)WKWebExtensionAction(py)popupViewController	-			UIViewController *	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e4553e92decf8cbf	-
+property	c:objc(cs)WKWebExtensionAction(py)popupWebView	-			WKWebView *	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6346b2f9884fe7cf	-
+method	c:objc(cs)WKWebExtensionAction(im)closePopup	-			void	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	88dc740c0a7292ca	-
+interface	c:objc(cs)WKWebExtensionCommand	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2a04640312ea1d5a	-
+super	-	WKWebExtensionCommand	NSObject		-	-	-	-	-	12124b99a9cdc961	-
+method	c:objc(cs)WKWebExtensionCommand(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b3d067b9a5770492	-
+method	c:objc(cs)WKWebExtensionCommand(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0f3b5de97bb0a6ab	-
+property	c:objc(cs)WKWebExtensionCommand(py)webExtensionContext	-			WKWebExtensionContext *	-	readonly,weak,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	adef0a648dea700c	-
+property	c:objc(cs)WKWebExtensionCommand(py)identifier	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f652d65a7a94b88b	-
+property	c:objc(cs)WKWebExtensionCommand(py)title	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4ba6e2b452a4aca3	-
+property	c:objc(cs)WKWebExtensionCommand(py)activationKey	-			NSString *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0823dbce4b70d78e	-
+property	c:objc(cs)WKWebExtensionCommand(py)modifierFlags	-			UIKeyModifierFlags	-	nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	95610cecddfb4522	-
+property	c:objc(cs)WKWebExtensionCommand(py)menuItem	-			UIMenuElement *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	fb44c341b4ce03bf	-
+property	c:objc(cs)WKWebExtensionCommand(py)keyCommand	-			UIKeyCommand *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	bd535a15cacb711e	-
+typedef	c:@T@WKWebExtensionTabChangedProperties	-			enum WKWebExtensionTabChangedProperties	-	-	-	-	118b415b99c752f3	-
+enum	c:@E@WKWebExtensionTabChangedProperties	-			NSUInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	09bf6f5553efd1b6	-
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesNone	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2a69a7785f37d913	0
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesLoading	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c5c40e6b95c9305e	2
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesMuted	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	abfacc7f253eeb2b	4
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesPinned	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c3f82c333e2a9827	8
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesPlayingAudio	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	acb0e4f74af4dfd8	16
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesReaderMode	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	733b7806b4ae5dd4	32
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesSize	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	49915da72fe93a62	64
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesTitle	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8748d4f4a2da085d	128
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesURL	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	969bf3798947e388	256
+enumconst	c:@E@WKWebExtensionTabChangedProperties@WKWebExtensionTabChangedPropertiesZoomFactor	WKWebExtensionTabChangedProperties			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ae6ead149eb1561f	512
+protocol	c:objc(pl)WKWebExtensionTab	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	22736e97902bd4cb	-
+conforms	c:objc(pl)WKWebExtensionTab	WKWebExtensionTab	NSObject		-	-	-	-	-	fced4c3da66b7101	-
+method	c:objc(pl)WKWebExtensionTab(im)windowForWebExtensionContext:	-			id<WKWebExtensionWindow>	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ead3b7c05784e7dd	-
+method	c:objc(pl)WKWebExtensionTab(im)indexInWindowForWebExtensionContext:	-			NSUInteger	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	57a831dce2cca2fe	-
+method	c:objc(pl)WKWebExtensionTab(im)parentTabForWebExtensionContext:	-			id<WKWebExtensionTab>	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3eee8f708f3d1b8f	-
+method	c:objc(pl)WKWebExtensionTab(im)setParentTab:forWebExtensionContext:completionHandler:	-			void	id<WKWebExtensionTab> parentTab | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	18b560b10041f4d4	-
+method	c:objc(pl)WKWebExtensionTab(im)webViewForWebExtensionContext:	-			WKWebView *	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a8feadc4e8f38b76	-
+method	c:objc(pl)WKWebExtensionTab(im)titleForWebExtensionContext:	-			NSString *	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6ccd5ea4c1158a9c	-
+method	c:objc(pl)WKWebExtensionTab(im)isPinnedForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e884b4f099511ae1	-
+method	c:objc(pl)WKWebExtensionTab(im)setPinned:forWebExtensionContext:completionHandler:	-			void	BOOL pinned | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	99c0c050a4157e96	-
+method	c:objc(pl)WKWebExtensionTab(im)isReaderModeAvailableForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	44ce9f9ccc2f5a01	-
+method	c:objc(pl)WKWebExtensionTab(im)isReaderModeActiveForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1bc88a8d8244a357	-
+method	c:objc(pl)WKWebExtensionTab(im)setReaderModeActive:forWebExtensionContext:completionHandler:	-			void	BOOL active | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	bd3aaf4f66db0d11	-
+method	c:objc(pl)WKWebExtensionTab(im)isPlayingAudioForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5b984a0c8e2c1654	-
+method	c:objc(pl)WKWebExtensionTab(im)isMutedForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	42237359b416d463	-
+method	c:objc(pl)WKWebExtensionTab(im)setMuted:forWebExtensionContext:completionHandler:	-			void	BOOL muted | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2a4b371ed35f97f9	-
+method	c:objc(pl)WKWebExtensionTab(im)sizeForWebExtensionContext:	-			CGSize	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3d79ea6083183a26	-
+method	c:objc(pl)WKWebExtensionTab(im)zoomFactorForWebExtensionContext:	-			double	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d92f87c0e5a14e76	-
+method	c:objc(pl)WKWebExtensionTab(im)setZoomFactor:forWebExtensionContext:completionHandler:	-			void	double zoomFactor | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ba7ca284c4889114	-
+method	c:objc(pl)WKWebExtensionTab(im)urlForWebExtensionContext:	-			NSURL *	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e0fea0fde41dc10e	-
+method	c:objc(pl)WKWebExtensionTab(im)pendingURLForWebExtensionContext:	-			NSURL *	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8fd6193a15d6a857	-
+method	c:objc(pl)WKWebExtensionTab(im)isLoadingCompleteForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	490abba02cc28f12	-
+method	c:objc(pl)WKWebExtensionTab(im)detectWebpageLocaleForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSLocale * _Nullable_result, NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d7e656358a68976d	-
+method	c:objc(pl)WKWebExtensionTab(im)takeSnapshotUsingConfiguration:forWebExtensionContext:completionHandler:	-			void	WKSnapshotConfiguration * configuration | WKWebExtensionContext * context | void (^)(UIImage * _Nullable_result, NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	874d11f4d09401b4	-
+method	c:objc(pl)WKWebExtensionTab(im)loadURL:forWebExtensionContext:completionHandler:	-			void	NSURL * url | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e30104a0b3d9cc58	-
+method	c:objc(pl)WKWebExtensionTab(im)reloadFromOrigin:forWebExtensionContext:completionHandler:	-			void	BOOL fromOrigin | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9d590fd8a2e42c8d	-
+method	c:objc(pl)WKWebExtensionTab(im)goBackForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a1efc64ea680858a	-
+method	c:objc(pl)WKWebExtensionTab(im)goForwardForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b2dbd06a835abe42	-
+method	c:objc(pl)WKWebExtensionTab(im)activateForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b1262c3f635c0f9f	-
+method	c:objc(pl)WKWebExtensionTab(im)isSelectedForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e9ebfd8d2f157cfb	-
+method	c:objc(pl)WKWebExtensionTab(im)setSelected:forWebExtensionContext:completionHandler:	-			void	BOOL selected | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7f9409f83a42fd8a	-
+method	c:objc(pl)WKWebExtensionTab(im)duplicateUsingConfiguration:forWebExtensionContext:completionHandler:	-			void	WKWebExtensionTabConfiguration * configuration | WKWebExtensionContext * context | void (^)(id<WKWebExtensionTab> _Nullable_result, NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a43669a2428169b7	-
+method	c:objc(pl)WKWebExtensionTab(im)closeForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	87c563d0e97ceaf9	-
+method	c:objc(pl)WKWebExtensionTab(im)shouldGrantPermissionsOnUserGestureForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	960e2b5890158e89	-
+method	c:objc(pl)WKWebExtensionTab(im)shouldBypassPermissionsForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6fb6ed93146feb0c	-
+var	c:@WKWebExtensionContextErrorDomain	-			const NSErrorDomain	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	61a97bec83d2b8d5	-
+typedef	c:@T@WKWebExtensionContextError	-			enum WKWebExtensionContextError	-	-	-	-	26c8dd47c2b385e5	-
+enum	c:@E@WKWebExtensionContextError	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0ebc94102ff91ada	-
+enumconst	c:@E@WKWebExtensionContextError@WKWebExtensionContextErrorUnknown	WKWebExtensionContextError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b1315bbf8f939c95	1
+enumconst	c:@E@WKWebExtensionContextError@WKWebExtensionContextErrorAlreadyLoaded	WKWebExtensionContextError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	048f0751e20a1c85	2
+enumconst	c:@E@WKWebExtensionContextError@WKWebExtensionContextErrorNotLoaded	WKWebExtensionContextError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0106fcd81196e5aa	3
+enumconst	c:@E@WKWebExtensionContextError@WKWebExtensionContextErrorBaseURLAlreadyInUse	WKWebExtensionContextError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d1d86e64b7ddc8a5	4
+enumconst	c:@E@WKWebExtensionContextError@WKWebExtensionContextErrorNoBackgroundContent	WKWebExtensionContextError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c7304137d495a3dc	5
+enumconst	c:@E@WKWebExtensionContextError@WKWebExtensionContextErrorBackgroundContentFailedToLoad	WKWebExtensionContextError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c823d075625da092	6
+var	c:@WKWebExtensionContextErrorsDidUpdateNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5627995152502216	-
+typedef	c:@T@WKWebExtensionContextPermissionStatus	-			enum WKWebExtensionContextPermissionStatus	-	-	-	-	18c06b072ffb9984	-
+enum	c:@E@WKWebExtensionContextPermissionStatus	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	dd01b75af1603cc1	-
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusDeniedExplicitly	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b91915eacb10cfd9	-3
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusDeniedImplicitly	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5d1e953994b85627	-2
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusRequestedImplicitly	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2a42ef8e0a697c2b	-1
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusUnknown	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7d184917cee24200	0
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusRequestedExplicitly	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	04296e60bfa3bd13	1
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusGrantedImplicitly	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	42bcdc4e9fbc9455	2
+enumconst	c:@E@WKWebExtensionContextPermissionStatus@WKWebExtensionContextPermissionStatusGrantedExplicitly	WKWebExtensionContextPermissionStatus			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c106f1526d7b72f0	3
+var	c:@WKWebExtensionContextPermissionsWereGrantedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	304f05a2d18b7058	-
+var	c:@WKWebExtensionContextPermissionsWereDeniedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0c46cc5993be7a12	-
+var	c:@WKWebExtensionContextGrantedPermissionsWereRemovedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	76fce1703bc5f3e2	-
+var	c:@WKWebExtensionContextDeniedPermissionsWereRemovedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b6abce4920175828	-
+var	c:@WKWebExtensionContextPermissionMatchPatternsWereGrantedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9f0d97c3cd29d865	-
+var	c:@WKWebExtensionContextPermissionMatchPatternsWereDeniedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	504967026614eb48	-
+var	c:@WKWebExtensionContextGrantedPermissionMatchPatternsWereRemovedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b4ea9381d36f9962	-
+var	c:@WKWebExtensionContextDeniedPermissionMatchPatternsWereRemovedNotification	-			const NSNotificationName	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8e18bd9952f87849	-
+typedef	c:@T@WKWebExtensionContextNotificationUserInfoKey	-			NSString *	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	847ecd5f66ed475b	-
+var	c:@WKWebExtensionContextNotificationUserInfoKeyPermissions	-			const WKWebExtensionContextNotificationUserInfoKey	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5518912fa9558712	-
+var	c:@WKWebExtensionContextNotificationUserInfoKeyMatchPatterns	-			const WKWebExtensionContextNotificationUserInfoKey	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	24e6d74f44acf43a	-
+interface	c:objc(cs)WKWebExtensionContext	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	fa907eb39b585595	-
+super	-	WKWebExtensionContext	NSObject		-	-	-	-	-	8bce1b790237e1e5	-
+method	c:objc(cs)WKWebExtensionContext(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7348bb169d00b8af	-
+method	c:objc(cs)WKWebExtensionContext(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	183d6722dc864122	-
+method	c:objc(cs)WKWebExtensionContext(cm)contextForExtension:	-			instancetype	WKWebExtension * extension	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	60f65835d2f8fc74	-
+method	c:objc(cs)WKWebExtensionContext(im)initForExtension:	-			instancetype	WKWebExtension * extension	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3514fa7b2fa8f0ab	-
+property	c:objc(cs)WKWebExtensionContext(py)webExtension	-			WKWebExtension *	-	readonly,strong,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b3dba768957dcf8b	-
+property	c:objc(cs)WKWebExtensionContext(py)webExtensionController	-			WKWebExtensionController *	-	readonly,weak,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f9699ec7d5f2a9e2	-
+property	c:objc(cs)WKWebExtensionContext(py)loaded	-			BOOL	-	readonly,nonatomic,getter=isLoaded	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	fd30a7b5748ee998	-
+property	c:objc(cs)WKWebExtensionContext(py)errors	-			NSArray<NSError *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	801d592de71e9fb4	-
+property	c:objc(cs)WKWebExtensionContext(py)baseURL	-			NSURL *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	636b7351995bed49	-
+property	c:objc(cs)WKWebExtensionContext(py)uniqueIdentifier	-			NSString *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7f70d347235045f2	-
+property	c:objc(cs)WKWebExtensionContext(py)inspectable	-			BOOL	-	nonatomic,getter=isInspectable	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e1c5e0539d752157	-
+property	c:objc(cs)WKWebExtensionContext(py)inspectionName	-			NSString *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a955f96af68349e3	-
+property	c:objc(cs)WKWebExtensionContext(py)unsupportedAPIs	-			NSSet<NSString *> *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	fc0e95afdf094117	-
+property	c:objc(cs)WKWebExtensionContext(py)webViewConfiguration	-			WKWebViewConfiguration *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	93f20dcb27f3cf36	-
+property	c:objc(cs)WKWebExtensionContext(py)optionsPageURL	-			NSURL *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3153b7a2f30b7e1f	-
+property	c:objc(cs)WKWebExtensionContext(py)overrideNewTabPageURL	-			NSURL *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a8ecf7281273300d	-
+property	c:objc(cs)WKWebExtensionContext(py)grantedPermissions	-			NSDictionary<WKWebExtensionPermission,NSDate *> *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3677a9e3ca3f5c36	-
+property	c:objc(cs)WKWebExtensionContext(py)grantedPermissionMatchPatterns	-			NSDictionary<WKWebExtensionMatchPattern *,NSDate *> *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a0cebc178d07bba2	-
+property	c:objc(cs)WKWebExtensionContext(py)deniedPermissions	-			NSDictionary<WKWebExtensionPermission,NSDate *> *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	53633c6b35e75db2	-
+property	c:objc(cs)WKWebExtensionContext(py)deniedPermissionMatchPatterns	-			NSDictionary<WKWebExtensionMatchPattern *,NSDate *> *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8390a36e82db7ecb	-
+property	c:objc(cs)WKWebExtensionContext(py)hasRequestedOptionalAccessToAllHosts	-			BOOL	-	nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	334fb2b43af333ad	-
+property	c:objc(cs)WKWebExtensionContext(py)hasAccessToPrivateData	-			BOOL	-	nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ace57e32a8cfd84c	-
+property	c:objc(cs)WKWebExtensionContext(py)currentPermissions	-			NSSet<WKWebExtensionPermission> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8ab89949780440af	-
+property	c:objc(cs)WKWebExtensionContext(py)currentPermissionMatchPatterns	-			NSSet<WKWebExtensionMatchPattern *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0f333c51f16b7c9a	-
+method	c:objc(cs)WKWebExtensionContext(im)hasPermission:	-			BOOL	WKWebExtensionPermission permission	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c8be19281da8c2ea	-
+method	c:objc(cs)WKWebExtensionContext(im)hasPermission:inTab:	-			BOOL	WKWebExtensionPermission permission | id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	09ee1450e50c7bd8	-
+method	c:objc(cs)WKWebExtensionContext(im)hasAccessToURL:	-			BOOL	NSURL * url	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0e38e6543f1ac721	-
+method	c:objc(cs)WKWebExtensionContext(im)hasAccessToURL:inTab:	-			BOOL	NSURL * url | id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6282fc52adcc52bd	-
+property	c:objc(cs)WKWebExtensionContext(py)hasAccessToAllURLs	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3cb71f8e79ba6823	-
+property	c:objc(cs)WKWebExtensionContext(py)hasAccessToAllHosts	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7a52655f75def054	-
+property	c:objc(cs)WKWebExtensionContext(py)hasInjectedContent	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c1f93533b9be0024	-
+method	c:objc(cs)WKWebExtensionContext(im)hasInjectedContentForURL:	-			BOOL	NSURL * url	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	567fc30d904b5164	-
+property	c:objc(cs)WKWebExtensionContext(py)hasContentModificationRules	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	407a28f508afbd43	-
+method	c:objc(cs)WKWebExtensionContext(im)permissionStatusForPermission:	-			WKWebExtensionContextPermissionStatus	WKWebExtensionPermission permission	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	73dad17641bd7eda	-
+method	c:objc(cs)WKWebExtensionContext(im)permissionStatusForPermission:inTab:	-			WKWebExtensionContextPermissionStatus	WKWebExtensionPermission permission | id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f920966b7ab00d89	-
+method	c:objc(cs)WKWebExtensionContext(im)setPermissionStatus:forPermission:	-			void	WKWebExtensionContextPermissionStatus status | WKWebExtensionPermission permission	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1de09d5495ef7e13	-
+method	c:objc(cs)WKWebExtensionContext(im)setPermissionStatus:forPermission:expirationDate:	-			void	WKWebExtensionContextPermissionStatus status | WKWebExtensionPermission permission | NSDate * expirationDate	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2284a44a0f6abfe6	-
+method	c:objc(cs)WKWebExtensionContext(im)permissionStatusForURL:	-			WKWebExtensionContextPermissionStatus	NSURL * url	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5df6273711978f27	-
+method	c:objc(cs)WKWebExtensionContext(im)permissionStatusForURL:inTab:	-			WKWebExtensionContextPermissionStatus	NSURL * url | id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1b78a5cf2f30615a	-
+method	c:objc(cs)WKWebExtensionContext(im)setPermissionStatus:forURL:	-			void	WKWebExtensionContextPermissionStatus status | NSURL * url	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	83f9199229f8d4b2	-
+method	c:objc(cs)WKWebExtensionContext(im)setPermissionStatus:forURL:expirationDate:	-			void	WKWebExtensionContextPermissionStatus status | NSURL * url | NSDate * expirationDate	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6fe6f1bf37e1913f	-
+method	c:objc(cs)WKWebExtensionContext(im)permissionStatusForMatchPattern:	-			WKWebExtensionContextPermissionStatus	WKWebExtensionMatchPattern * pattern	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	42e1c4f63c3e550f	-
+method	c:objc(cs)WKWebExtensionContext(im)permissionStatusForMatchPattern:inTab:	-			WKWebExtensionContextPermissionStatus	WKWebExtensionMatchPattern * pattern | id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9a153e14db768355	-
+method	c:objc(cs)WKWebExtensionContext(im)setPermissionStatus:forMatchPattern:	-			void	WKWebExtensionContextPermissionStatus status | WKWebExtensionMatchPattern * pattern	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	677a525313dfc757	-
+method	c:objc(cs)WKWebExtensionContext(im)setPermissionStatus:forMatchPattern:expirationDate:	-			void	WKWebExtensionContextPermissionStatus status | WKWebExtensionMatchPattern * pattern | NSDate * expirationDate	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1ed5ec8864c2eb70	-
+method	c:objc(cs)WKWebExtensionContext(im)loadBackgroundContentWithCompletionHandler:	-			void	void (^)(NSError * _Nullable) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e6b3e2940002ef3d	-
+method	c:objc(cs)WKWebExtensionContext(im)actionForTab:	-			WKWebExtensionAction *	id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6fc2efb4650bcd73	-
+method	c:objc(cs)WKWebExtensionContext(im)performActionForTab:	-			void	id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	06ee6e378ab50b72	-
+property	c:objc(cs)WKWebExtensionContext(py)commands	-			NSArray<WKWebExtensionCommand *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	40622e44645369f3	-
+method	c:objc(cs)WKWebExtensionContext(im)performCommand:	-			void	WKWebExtensionCommand * command	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2fd5338f24e94a79	-
+method	c:objc(cs)WKWebExtensionContext(im)performCommandForKeyCommand:	-			BOOL	UIKeyCommand * keyCommand	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	978729b1fd47f8a2	-
+method	c:objc(cs)WKWebExtensionContext(im)menuItemsForTab:	-			NSArray<UIMenuElement *> *	id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f2491cc7de74a784	-
+method	c:objc(cs)WKWebExtensionContext(im)userGesturePerformedInTab:	-			void	id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	33739c098008cbec	-
+method	c:objc(cs)WKWebExtensionContext(im)hasActiveUserGestureInTab:	-			BOOL	id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7c4ec80b948981da	-
+method	c:objc(cs)WKWebExtensionContext(im)clearUserGestureInTab:	-			void	id<WKWebExtensionTab> tab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9af806547aaa7dba	-
+property	c:objc(cs)WKWebExtensionContext(py)openWindows	-			NSArray<id<WKWebExtensionWindow>> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8542170b8d5063f0	-
+property	c:objc(cs)WKWebExtensionContext(py)focusedWindow	-			id<WKWebExtensionWindow>	-	readonly,weak,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	82d2139c0d1ffb05	-
+property	c:objc(cs)WKWebExtensionContext(py)openTabs	-			NSSet<id<WKWebExtensionTab>> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b938f404b3a6791a	-
+method	c:objc(cs)WKWebExtensionContext(im)didOpenWindow:	-			void	id<WKWebExtensionWindow> newWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f506cf0c97c73081	-
+method	c:objc(cs)WKWebExtensionContext(im)didCloseWindow:	-			void	id<WKWebExtensionWindow> closedWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3f69d9235e922eb3	-
+method	c:objc(cs)WKWebExtensionContext(im)didFocusWindow:	-			void	id<WKWebExtensionWindow> focusedWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	be399ba840d8061c	-
+method	c:objc(cs)WKWebExtensionContext(im)didOpenTab:	-			void	id<WKWebExtensionTab> newTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	da10a7d343ed8241	-
+method	c:objc(cs)WKWebExtensionContext(im)didCloseTab:windowIsClosing:	-			void	id<WKWebExtensionTab> closedTab | BOOL windowIsClosing	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	cd5400425b668af6	-
+method	c:objc(cs)WKWebExtensionContext(im)didActivateTab:previousActiveTab:	-			void	id<WKWebExtensionTab> activatedTab | id<WKWebExtensionTab> previousTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	42544c1d72d80a1c	-
+method	c:objc(cs)WKWebExtensionContext(im)didSelectTabs:	-			void	NSArray<id<WKWebExtensionTab>> * selectedTabs	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	312fb4728990022a	-
+method	c:objc(cs)WKWebExtensionContext(im)didDeselectTabs:	-			void	NSArray<id<WKWebExtensionTab>> * deselectedTabs	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f9eda58acf03f8bc	-
+method	c:objc(cs)WKWebExtensionContext(im)didMoveTab:fromIndex:inWindow:	-			void	id<WKWebExtensionTab> movedTab | NSUInteger index | id<WKWebExtensionWindow> oldWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4f60def82ec54b8e	-
+method	c:objc(cs)WKWebExtensionContext(im)didReplaceTab:withTab:	-			void	id<WKWebExtensionTab> oldTab | id<WKWebExtensionTab> newTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f22a8e6d71e4f9e1	-
+method	c:objc(cs)WKWebExtensionContext(im)didChangeTabProperties:forTab:	-			void	WKWebExtensionTabChangedProperties properties | id<WKWebExtensionTab> changedTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ae7e6c9b794d609a	-
+protocol	c:objc(pl)WKWebExtensionControllerDelegate	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b521bbf87b7e8d23	-
+conforms	c:objc(pl)WKWebExtensionControllerDelegate	WKWebExtensionControllerDelegate	NSObject		-	-	-	-	-	27f82504708d8f3d	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:openWindowsForExtensionContext:	-			NSArray<id<WKWebExtensionWindow>> *	WKWebExtensionController * controller | WKWebExtensionContext * extensionContext	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8a9ee35d2bc9e1d4	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:focusedWindowForExtensionContext:	-			id<WKWebExtensionWindow>	WKWebExtensionController * controller | WKWebExtensionContext * extensionContext	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	384ebca79993e134	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:openNewWindowUsingConfiguration:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | WKWebExtensionWindowConfiguration * configuration | WKWebExtensionContext * extensionContext | void (^)(id<WKWebExtensionWindow> _Nullable_result, NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	eb192b572c760685	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:openNewTabUsingConfiguration:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | WKWebExtensionTabConfiguration * configuration | WKWebExtensionContext * extensionContext | void (^)(id<WKWebExtensionTab> _Nullable_result, NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	787b65aea7850f42	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:openOptionsPageForExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | WKWebExtensionContext * extensionContext | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3c58259aae2fe46a	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:promptForPermissions:inTab:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | NSSet<WKWebExtensionPermission> * permissions | id<WKWebExtensionTab> tab | WKWebExtensionContext * extensionContext | void (^)(NSSet<WKWebExtensionPermission> * _Nonnull, NSDate * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a43a1da16a6ac9e5	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:promptForPermissionToAccessURLs:inTab:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | NSSet<NSURL *> * urls | id<WKWebExtensionTab> tab | WKWebExtensionContext * extensionContext | void (^)(NSSet<NSURL *> * _Nonnull, NSDate * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	32c27aa69b1942f8	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:promptForPermissionMatchPatterns:inTab:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | NSSet<WKWebExtensionMatchPattern *> * matchPatterns | id<WKWebExtensionTab> tab | WKWebExtensionContext * extensionContext | void (^)(NSSet<WKWebExtensionMatchPattern *> * _Nonnull, NSDate * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1cbbba01cae2c3a3	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:didUpdateAction:forExtensionContext:	-			void	WKWebExtensionController * controller | WKWebExtensionAction * action | WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	49141133a7305506	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:presentPopupForAction:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | WKWebExtensionAction * action | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	51d4f736505bae2b	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:sendMessage:toApplicationWithIdentifier:forExtensionContext:replyHandler:	-			void	WKWebExtensionController * controller | id message | NSString * applicationIdentifier | WKWebExtensionContext * extensionContext | void (^)(id _Nullable_result, NSError * _Nullable) replyHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c456ef69eb7a4747	-
+method	c:objc(pl)WKWebExtensionControllerDelegate(im)webExtensionController:connectUsingMessagePort:forExtensionContext:completionHandler:	-			void	WKWebExtensionController * controller | WKWebExtensionMessagePort * port | WKWebExtensionContext * extensionContext | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4b01adf6556c4a67	-
+typedef	c:@T@WKWebExtensionDataType	-			NSString *	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	929ccc970548d9c7	-
+var	c:@WKWebExtensionDataTypeLocal	-			const WKWebExtensionDataType	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	286ec7aa49ad2965	-
+var	c:@WKWebExtensionDataTypeSession	-			const WKWebExtensionDataType	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	dab60f1454959581	-
+var	c:@WKWebExtensionDataTypeSynchronized	-			const WKWebExtensionDataType	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f3c7faa14f901fb0	-
+typedef	c:@T@WKWebExtensionWindowType	-			enum WKWebExtensionWindowType	-	-	-	-	0c05061cdb96c026	-
+enum	c:@E@WKWebExtensionWindowType	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ef9da9e98e90a626	-
+enumconst	c:@E@WKWebExtensionWindowType@WKWebExtensionWindowTypeNormal	WKWebExtensionWindowType			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9b61599b5c7c4f02	0
+enumconst	c:@E@WKWebExtensionWindowType@WKWebExtensionWindowTypePopup	WKWebExtensionWindowType			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c02bc0c8c6d26e3e	1
+typedef	c:@T@WKWebExtensionWindowState	-			enum WKWebExtensionWindowState	-	-	-	-	93c936e9241cdd97	-
+enum	c:@E@WKWebExtensionWindowState	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	5cdf1a3d886a4f2c	-
+enumconst	c:@E@WKWebExtensionWindowState@WKWebExtensionWindowStateNormal	WKWebExtensionWindowState			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4d4fc2efa923980a	0
+enumconst	c:@E@WKWebExtensionWindowState@WKWebExtensionWindowStateMinimized	WKWebExtensionWindowState			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f0abb4f10b4c30c1	1
+enumconst	c:@E@WKWebExtensionWindowState@WKWebExtensionWindowStateMaximized	WKWebExtensionWindowState			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	aed0796b4c05e560	2
+enumconst	c:@E@WKWebExtensionWindowState@WKWebExtensionWindowStateFullscreen	WKWebExtensionWindowState			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	db15367519ec392c	3
+protocol	c:objc(pl)WKWebExtensionWindow	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f5f2c31a7766e00f	-
+conforms	c:objc(pl)WKWebExtensionWindow	WKWebExtensionWindow	NSObject		-	-	-	-	-	f770d7a4442d5dd9	-
+method	c:objc(pl)WKWebExtensionWindow(im)tabsForWebExtensionContext:	-			NSArray<id<WKWebExtensionTab>> *	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	202c76339088a10f	-
+method	c:objc(pl)WKWebExtensionWindow(im)activeTabForWebExtensionContext:	-			id<WKWebExtensionTab>	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d861ec279c930b18	-
+method	c:objc(pl)WKWebExtensionWindow(im)windowTypeForWebExtensionContext:	-			WKWebExtensionWindowType	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	300afc8622831664	-
+method	c:objc(pl)WKWebExtensionWindow(im)windowStateForWebExtensionContext:	-			WKWebExtensionWindowState	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9f80f51a65116355	-
+method	c:objc(pl)WKWebExtensionWindow(im)setWindowState:forWebExtensionContext:completionHandler:	-			void	WKWebExtensionWindowState state | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c12777269ea4c398	-
+method	c:objc(pl)WKWebExtensionWindow(im)isPrivateForWebExtensionContext:	-			BOOL	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	bd61c2d0a8949f96	-
+method	c:objc(pl)WKWebExtensionWindow(im)frameForWebExtensionContext:	-			CGRect	WKWebExtensionContext * context	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8ce298bf386f4f13	-
+method	c:objc(pl)WKWebExtensionWindow(im)setFrame:forWebExtensionContext:completionHandler:	-			void	CGRect frame | WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f5078372a6b56a13	-
+method	c:objc(pl)WKWebExtensionWindow(im)focusForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4113bbcd7c58f7c4	-
+method	c:objc(pl)WKWebExtensionWindow(im)closeForWebExtensionContext:completionHandler:	-			void	WKWebExtensionContext * context | void (^)(NSError * _Nullable) completionHandler	optional	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4a25a307d83b3714	-
+interface	c:objc(cs)WKWebExtensionController	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	dbd1de3999699181	-
+super	-	WKWebExtensionController	NSObject		-	-	-	-	-	534360d0ccb0411d	-
+method	c:objc(cs)WKWebExtensionController(im)init	-			instancetype	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	4514509acaa4ecdc	-
+method	c:objc(cs)WKWebExtensionController(im)initWithConfiguration:	-			instancetype	WKWebExtensionControllerConfiguration * configuration	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	68b52a77a8c6f6c6	-
+property	c:objc(cs)WKWebExtensionController(py)delegate	-			id<WKWebExtensionControllerDelegate>	-	weak,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	27c5b1dd52873786	-
+property	c:objc(cs)WKWebExtensionController(py)configuration	-			WKWebExtensionControllerConfiguration *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f2aecf3e4054e7df	-
+method	c:objc(cs)WKWebExtensionController(im)loadExtensionContext:error:	-			BOOL	WKWebExtensionContext * extensionContext | NSError * _Nullable * error	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	bd1e6ed552d83b0c	-
+method	c:objc(cs)WKWebExtensionController(im)unloadExtensionContext:error:	-			BOOL	WKWebExtensionContext * extensionContext | NSError * _Nullable * error	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7871576bbbacf666	-
+method	c:objc(cs)WKWebExtensionController(im)extensionContextForExtension:	-			WKWebExtensionContext *	WKWebExtension * extension	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	45fc8b762b804a4b	-
+method	c:objc(cs)WKWebExtensionController(im)extensionContextForURL:	-			WKWebExtensionContext *	NSURL * URL	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9fe22eb0a92629ca	-
+property	c:objc(cs)WKWebExtensionController(py)extensions	-			NSSet<WKWebExtension *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7c4ac54d2e79ef5f	-
+property	c:objc(cs)WKWebExtensionController(py)extensionContexts	-			NSSet<WKWebExtensionContext *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2a32e6656f3003f3	-
+property	c:objc(cs)WKWebExtensionController(cpy)allExtensionDataTypes	-			NSSet<WKWebExtensionDataType> *	-	readonly,copy,nonatomic,class	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	96497a50f0da3151	-
+method	c:objc(cs)WKWebExtensionController(im)fetchDataRecordsOfTypes:completionHandler:	-			void	NSSet<WKWebExtensionDataType> * dataTypes | void (^)(NSArray<WKWebExtensionDataRecord *> * _Nonnull) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	dff448f82e1fdc6c	-
+method	c:objc(cs)WKWebExtensionController(im)fetchDataRecordOfTypes:forExtensionContext:completionHandler:	-			void	NSSet<WKWebExtensionDataType> * dataTypes | WKWebExtensionContext * extensionContext | void (^)(WKWebExtensionDataRecord * _Nullable) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c1bf45ae615f2cef	-
+method	c:objc(cs)WKWebExtensionController(im)removeDataOfTypes:fromDataRecords:completionHandler:	-			void	NSSet<WKWebExtensionDataType> * dataTypes | NSArray<WKWebExtensionDataRecord *> * dataRecords | void (^)(void) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	44f925577e4405f9	-
+method	c:objc(cs)WKWebExtensionController(im)didOpenWindow:	-			void	id<WKWebExtensionWindow> newWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2c45d01cf24ce06c	-
+method	c:objc(cs)WKWebExtensionController(im)didCloseWindow:	-			void	id<WKWebExtensionWindow> closedWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f0a2315c38d525a5	-
+method	c:objc(cs)WKWebExtensionController(im)didFocusWindow:	-			void	id<WKWebExtensionWindow> focusedWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	0f944d077ab563bc	-
+method	c:objc(cs)WKWebExtensionController(im)didOpenTab:	-			void	id<WKWebExtensionTab> newTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	da22f70480142197	-
+method	c:objc(cs)WKWebExtensionController(im)didCloseTab:windowIsClosing:	-			void	id<WKWebExtensionTab> closedTab | BOOL windowIsClosing	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	773b208a4e27a82a	-
+method	c:objc(cs)WKWebExtensionController(im)didActivateTab:previousActiveTab:	-			void	id<WKWebExtensionTab> activatedTab | id<WKWebExtensionTab> previousTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	207c1fcac7a21a12	-
+method	c:objc(cs)WKWebExtensionController(im)didSelectTabs:	-			void	NSArray<id<WKWebExtensionTab>> * selectedTabs	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	71530652d8bf64b9	-
+method	c:objc(cs)WKWebExtensionController(im)didDeselectTabs:	-			void	NSArray<id<WKWebExtensionTab>> * deselectedTabs	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1abc67333c05cb0e	-
+method	c:objc(cs)WKWebExtensionController(im)didMoveTab:fromIndex:inWindow:	-			void	id<WKWebExtensionTab> movedTab | NSUInteger index | id<WKWebExtensionWindow> oldWindow	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	daa970e06542e665	-
+method	c:objc(cs)WKWebExtensionController(im)didReplaceTab:withTab:	-			void	id<WKWebExtensionTab> oldTab | id<WKWebExtensionTab> newTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	db934337af43a484	-
+method	c:objc(cs)WKWebExtensionController(im)didChangeTabProperties:forTab:	-			void	WKWebExtensionTabChangedProperties properties | id<WKWebExtensionTab> changedTab	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7c92d6cc6ebcd19f	-
+interface	c:objc(cs)WKWebExtensionControllerConfiguration	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c32bf76cf5432d3a	-
+super	-	WKWebExtensionControllerConfiguration	NSObject		-	-	-	-	-	b3bbbbfe047b0f71	-
+conforms	c:objc(cs)WKWebExtensionControllerConfiguration	WKWebExtensionControllerConfiguration	NSSecureCoding		-	-	-	-	-	72a3c3de239c3912	-
+conforms	c:objc(cs)WKWebExtensionControllerConfiguration	WKWebExtensionControllerConfiguration	NSCopying		-	-	-	-	-	c1d443fbc5e44a07	-
+method	c:objc(cs)WKWebExtensionControllerConfiguration(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6c524cbb0128db67	-
+method	c:objc(cs)WKWebExtensionControllerConfiguration(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ede0bda09ac269ba	-
+method	c:objc(cs)WKWebExtensionControllerConfiguration(cm)defaultConfiguration	-			instancetype	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	aeae4e554ffb4ef1	-
+method	c:objc(cs)WKWebExtensionControllerConfiguration(cm)nonPersistentConfiguration	-			instancetype	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c4b65a5a4fde0bf0	-
+method	c:objc(cs)WKWebExtensionControllerConfiguration(cm)configurationWithIdentifier:	-			instancetype	NSUUID * identifier	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f1f821959cb292cd	-
+property	c:objc(cs)WKWebExtensionControllerConfiguration(py)persistent	-			BOOL	-	readonly,nonatomic,getter=isPersistent	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7bdb3eaab3efd940	-
+property	c:objc(cs)WKWebExtensionControllerConfiguration(py)identifier	-			NSUUID *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c016a8259faa893e	-
+property	c:objc(cs)WKWebExtensionControllerConfiguration(py)webViewConfiguration	-			WKWebViewConfiguration *	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b07ab31e57ace8b3	-
+property	c:objc(cs)WKWebExtensionControllerConfiguration(py)defaultWebsiteDataStore	-			WKWebsiteDataStore *	-	retain,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	612a503dd280e1e4	-
+var	c:@WKWebExtensionDataRecordErrorDomain	-			const NSErrorDomain	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a86a630b05d7a88a	-
+typedef	c:@T@WKWebExtensionDataRecordError	-			enum WKWebExtensionDataRecordError	-	-	-	-	e8325b1f2772896d	-
+enum	c:@E@WKWebExtensionDataRecordError	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b581d184d3b8c8ec	-
+enumconst	c:@E@WKWebExtensionDataRecordError@WKWebExtensionDataRecordErrorUnknown	WKWebExtensionDataRecordError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	dc782b8593de72f5	1
+enumconst	c:@E@WKWebExtensionDataRecordError@WKWebExtensionDataRecordErrorLocalStorageFailed	WKWebExtensionDataRecordError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6b9df81ad7ab4868	2
+enumconst	c:@E@WKWebExtensionDataRecordError@WKWebExtensionDataRecordErrorSessionStorageFailed	WKWebExtensionDataRecordError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	078fff58f264d1ca	3
+enumconst	c:@E@WKWebExtensionDataRecordError@WKWebExtensionDataRecordErrorSynchronizedStorageFailed	WKWebExtensionDataRecordError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	a9026b49747128b5	4
+interface	c:objc(cs)WKWebExtensionDataRecord	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7fdaa2c292d09fde	-
+super	-	WKWebExtensionDataRecord	NSObject		-	-	-	-	-	153aa0d464930ac4	-
+method	c:objc(cs)WKWebExtensionDataRecord(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d2014eafcc13f2b2	-
+method	c:objc(cs)WKWebExtensionDataRecord(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	242536aaa4dbd936	-
+property	c:objc(cs)WKWebExtensionDataRecord(py)displayName	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	400061705e960e1a	-
+property	c:objc(cs)WKWebExtensionDataRecord(py)uniqueIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6783a26ca02c0d1a	-
+property	c:objc(cs)WKWebExtensionDataRecord(py)containedDataTypes	-			NSSet<WKWebExtensionDataType> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f3e74fbda9ef1e69	-
+property	c:objc(cs)WKWebExtensionDataRecord(py)errors	-			NSArray<NSError *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	925e2872cd99d427	-
+property	c:objc(cs)WKWebExtensionDataRecord(py)totalSizeInBytes	-			NSUInteger	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	406fc7e528522c15	-
+method	c:objc(cs)WKWebExtensionDataRecord(im)sizeInBytesOfTypes:	-			NSUInteger	NSSet<WKWebExtensionDataType> * dataTypes	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7c61385ef0bbeae2	-
+var	c:@WKWebExtensionMessagePortErrorDomain	-			const NSErrorDomain	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	e1c4b950ab68cac4	-
+typedef	c:@T@WKWebExtensionMessagePortError	-			enum WKWebExtensionMessagePortError	-	-	-	-	2e611601879969fd	-
+enum	c:@E@WKWebExtensionMessagePortError	-			NSInteger	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	10185ec48f4401c3	-
+enumconst	c:@E@WKWebExtensionMessagePortError@WKWebExtensionMessagePortErrorUnknown	WKWebExtensionMessagePortError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	cbccb9b58ad793a3	1
+enumconst	c:@E@WKWebExtensionMessagePortError@WKWebExtensionMessagePortErrorNotConnected	WKWebExtensionMessagePortError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	70fdd3e4a0f7f054	2
+enumconst	c:@E@WKWebExtensionMessagePortError@WKWebExtensionMessagePortErrorMessageInvalid	WKWebExtensionMessagePortError			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	99b4d73a6e2b38a5	3
+interface	c:objc(cs)WKWebExtensionMessagePort	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f461af0b6495e9be	-
+super	-	WKWebExtensionMessagePort	NSObject		-	-	-	-	-	8e3f9eafa81c378c	-
+method	c:objc(cs)WKWebExtensionMessagePort(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	50dc8e3ce84a71f6	-
+method	c:objc(cs)WKWebExtensionMessagePort(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	58638480bacea75d	-
+property	c:objc(cs)WKWebExtensionMessagePort(py)applicationIdentifier	-			NSString *	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	987a9421cc09ea9c	-
+property	c:objc(cs)WKWebExtensionMessagePort(py)messageHandler	-			void (^)(id _Nullable, NSError * _Nullable)	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c8c84dbf9211bfc3	-
+property	c:objc(cs)WKWebExtensionMessagePort(py)disconnectHandler	-			void (^)(NSError * _Nullable)	-	copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d0f0c1710c317c47	-
+property	c:objc(cs)WKWebExtensionMessagePort(py)disconnected	-			BOOL	-	readonly,nonatomic,getter=isDisconnected	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b8e6313597faa9df	-
+method	c:objc(cs)WKWebExtensionMessagePort(im)sendMessage:completionHandler:	-			void	id message | void (^)(NSError * _Nullable) completionHandler	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	3065f82a71194a7f	-
+method	c:objc(cs)WKWebExtensionMessagePort(im)disconnect	-			void	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d6953853ef671dbb	-
+method	c:objc(cs)WKWebExtensionMessagePort(im)disconnectWithError:	-			void	NSError * error	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	79c41fa20d6c2be4	-
+interface	c:objc(cs)WKWebExtensionTabConfiguration	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	ec43f2e4eafe3c81	-
+super	-	WKWebExtensionTabConfiguration	NSObject		-	-	-	-	-	06e2275816d0e639	-
+method	c:objc(cs)WKWebExtensionTabConfiguration(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	7b885e92f3c25e3f	-
+method	c:objc(cs)WKWebExtensionTabConfiguration(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c3b5f170e4c93c1d	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)window	-			id<WKWebExtensionWindow>	-	readonly,strong,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	c738afd71b980fde	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)index	-			NSUInteger	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	6acf8d08f504346f	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)parentTab	-			id<WKWebExtensionTab>	-	readonly,strong,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	303e5c526935c4b3	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)url	-			NSURL *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	42a04fbc18325869	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)shouldBeActive	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8962c50f88dc3768	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)shouldAddToSelection	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	8c964dec6b5f5875	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)shouldBePinned	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	fde8c5ba78a0bbd1	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)shouldBeMuted	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	d7989b4fc66179fc	-
+property	c:objc(cs)WKWebExtensionTabConfiguration(py)shouldReaderModeBeActive	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	04948a7ed7ed9798	-
+interface	c:objc(cs)WKWebExtensionWindowConfiguration	-			-	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	523dfb226c2456fd	-
+super	-	WKWebExtensionWindowConfiguration	NSObject		-	-	-	-	-	034477e067849906	-
+method	c:objc(cs)WKWebExtensionWindowConfiguration(cm)new	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	29c5b8d70ad4c45b	-
+method	c:objc(cs)WKWebExtensionWindowConfiguration(im)init	-			instancetype	-	-	*unavailable ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2805ea9da7d04dc9	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)windowType	-			WKWebExtensionWindowType	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b09bbc27dcf28a94	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)windowState	-			WKWebExtensionWindowState	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	b10318c335b823c5	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)frame	-			CGRect	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	073d65a5b6da9d0a	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)tabURLs	-			NSArray<NSURL *> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	9c6be855cdb57738	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)tabs	-			NSArray<id<WKWebExtensionTab>> *	-	readonly,copy,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	28741567c43e6925	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)shouldBeFocused	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	f566f366aa6366d9	-
+property	c:objc(cs)WKWebExtensionWindowConfiguration(py)shouldBePrivate	-			BOOL	-	readonly,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	1f5d9ced2614efbd	-
+typedef	c:@T@WKDataDetectorTypes	-			enum WKDataDetectorTypes	-	-	-	-	76f5584bd4404311	-
+enum	c:@E@WKDataDetectorTypes	-			NSUInteger	-	-	ios=10.0/-/-/0	-	6af5df202ee9b827	-
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeNone	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	7ea0d87d24429434	0
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypePhoneNumber	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	344d28ee0156e9f1	1
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeLink	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	7bf4b58a303f87f0	2
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeAddress	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	7ab97771a698a457	4
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeCalendarEvent	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	f5bfdcc232c82ca1	8
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeTrackingNumber	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	0e835f4e0b2c756e	16
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeFlightNumber	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	1bf4a003c6d420ee	32
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeLookupSuggestion	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	a0f2c94bcdf3817d	64
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeAll	WKDataDetectorTypes			-	-	-	ios=10.0/-/-/0	-	0418f47e321246ad	18446744073709551615
+enumconst	c:@E@WKDataDetectorTypes@WKDataDetectorTypeSpotlightSuggestion	WKDataDetectorTypes			-	-	-	ios=10.0/10.0/-/0	deprecated: Use WKDataDetectorTypeLookupSuggestion instead	75a4b06332f536f5	64
+typedef	c:@T@WKSelectionGranularity	-			enum WKSelectionGranularity	-	-	-	-	a2d97e4e50495289	-
+enum	c:@E@WKSelectionGranularity	-			NSInteger	-	-	ios=8.0/11.0/-/0,xros=1.0/1.0/-/0	-	e69e856db166b951	-
+enumconst	c:@E@WKSelectionGranularity@WKSelectionGranularityDynamic	WKSelectionGranularity			-	-	-	ios=8.0/11.0/-/0,xros=1.0/1.0/-/0	-	3a081cdf95cf92b1	0
+enumconst	c:@E@WKSelectionGranularity@WKSelectionGranularityCharacter	WKSelectionGranularity			-	-	-	ios=8.0/11.0/-/0,xros=1.0/1.0/-/0	-	8b449e0bd59133d9	1
+typedef	c:@T@WKAudiovisualMediaTypes	-			enum WKAudiovisualMediaTypes	-	-	-	-	a4d727e1082ea9a1	-
+enum	c:@E@WKAudiovisualMediaTypes	-			NSUInteger	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	1b73d22905cf3c65	-
+enumconst	c:@E@WKAudiovisualMediaTypes@WKAudiovisualMediaTypeNone	WKAudiovisualMediaTypes			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	bf74289c18ad2d9e	0
+enumconst	c:@E@WKAudiovisualMediaTypes@WKAudiovisualMediaTypeAudio	WKAudiovisualMediaTypes			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	b9ef21e4bc348fa7	1
+enumconst	c:@E@WKAudiovisualMediaTypes@WKAudiovisualMediaTypeVideo	WKAudiovisualMediaTypes			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	9daabff96f5c5633	2
+enumconst	c:@E@WKAudiovisualMediaTypes@WKAudiovisualMediaTypeAll	WKAudiovisualMediaTypes			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	d2e4a2cf5cf5316f	18446744073709551615
+interface	c:objc(cs)WKWebViewConfiguration	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	deprecated: Creating and using multiple instances of WKProcessPool no longer has any effect.	4506671b05f67048	-
+super	-	WKWebViewConfiguration	NSObject		-	-	-	-	-	9715f1f3ab964b04	-
+conforms	c:objc(cs)WKWebViewConfiguration	WKWebViewConfiguration	NSSecureCoding		-	-	-	-	-	cae95fde1d6c27b3	-
+conforms	c:objc(cs)WKWebViewConfiguration	WKWebViewConfiguration	NSCopying		-	-	-	-	-	dc5ef8df5056191b	-
+property	c:objc(cs)WKWebViewConfiguration(py)processPool	-			WKProcessPool *	-	strong,nonatomic	ios=8.0/15.0/-/0,macos=10.10/12.0/-/0,xros=1.0/1.0/-/0	-	ce982f0b8dd45ad3	-
+property	c:objc(cs)WKWebViewConfiguration(py)preferences	-			WKPreferences *	-	strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	2e56dc73e93330a1	-
+property	c:objc(cs)WKWebViewConfiguration(py)userContentController	-			WKUserContentController *	-	strong,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	aca182990966cd85	-
+property	c:objc(cs)WKWebViewConfiguration(py)webExtensionController	-			WKWebExtensionController *	-	strong,nonatomic	ios=18.4/-/-/0,macos=15.4/-/-/0,xros=2.4/-/-/0	-	2a25a1fe72d17160	-
+property	c:objc(cs)WKWebViewConfiguration(py)websiteDataStore	-			WKWebsiteDataStore *	-	strong,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	3d98a53c070044d8	-
+property	c:objc(cs)WKWebViewConfiguration(py)suppressesIncrementalRendering	-			BOOL	-	nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ea0715af2a95c5e0	-
+property	c:objc(cs)WKWebViewConfiguration(py)applicationNameForUserAgent	-			NSString *	-	copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	7cee69d53e0f0021	-
+property	c:objc(cs)WKWebViewConfiguration(py)allowsAirPlayForMediaPlayback	-			BOOL	-	nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	ba75b1a992e6f9d4	-
+property	c:objc(cs)WKWebViewConfiguration(py)showsSystemScreenTimeBlockingView	-			BOOL	-	nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0	-	1c7e7c4ccd5b7f40	-
+property	c:objc(cs)WKWebViewConfiguration(py)upgradeKnownHostsToHTTPS	-			BOOL	-	nonatomic	ios=14.5/-/-/0,macos=11.3/-/-/0	-	70c69737c50e254f	-
+property	c:objc(cs)WKWebViewConfiguration(py)mediaTypesRequiringUserActionForPlayback	-			WKAudiovisualMediaTypes	-	nonatomic	ios=10.0/-/-/0,macos=10.12/-/-/0	-	7634bb9a1c0dc938	-
+property	c:objc(cs)WKWebViewConfiguration(py)defaultWebpagePreferences	-			WKWebpagePreferences *	-	copy,nonatomic	ios=13.0/-/-/0,macos=10.15/-/-/0	-	38bea8642fc958d9	-
+property	c:objc(cs)WKWebViewConfiguration(py)limitsNavigationsToAppBoundDomains	-			BOOL	-	nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0	-	d9457923bf803b61	-
+property	c:objc(cs)WKWebViewConfiguration(py)allowsInlinePredictions	-			BOOL	-	nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0	-	c07cb74617364b3f	-
+property	c:objc(cs)WKWebViewConfiguration(py)allowsInlineMediaPlayback	-			BOOL	-	nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	5cc2dcf1114ed04d	-
+property	c:objc(cs)WKWebViewConfiguration(py)selectionGranularity	-			WKSelectionGranularity	-	nonatomic	ios=8.0/11.0/-/0,xros=1.0/1.0/-/0	-	a661d1de3d52f1f8	-
+property	c:objc(cs)WKWebViewConfiguration(py)allowsPictureInPictureMediaPlayback	-			BOOL	-	nonatomic	ios=9.0/-/-/0	-	78ad883f4730e97a	-
+property	c:objc(cs)WKWebViewConfiguration(py)dataDetectorTypes	-			WKDataDetectorTypes	-	nonatomic	ios=10.0/-/-/0	-	8ec72ead8092ab7c	-
+property	c:objc(cs)WKWebViewConfiguration(py)ignoresViewportScaleLimits	-			BOOL	-	nonatomic	ios=10.0/-/-/0	-	2d0642ebe5ec22d2	-
+method	c:objc(cs)WKWebViewConfiguration(im)setURLSchemeHandler:forURLScheme:	-			void	id<WKURLSchemeHandler> urlSchemeHandler | NSString * urlScheme	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	88981cbb8ef1ec00	-
+method	c:objc(cs)WKWebViewConfiguration(im)urlSchemeHandlerForURLScheme:	-			id<WKURLSchemeHandler>	NSString * urlScheme	-	ios=11.0/-/-/0,macos=10.13/-/-/0	-	5aa1d97e2aa338d6	-
+property	c:objc(cs)WKWebViewConfiguration(py)supportsAdaptiveImageGlyph	-			BOOL	-	nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,xros=2.0/-/-/0	-	60bdf9fc9c7819b5	-
+property	c:objc(cs)WKWebViewConfiguration(py)writingToolsBehavior	-			UIWritingToolsBehavior	-	nonatomic	ios=18.0/-/-/0,xros=2.4/-/-/0	-	7cc46923c92c7369	-
+category	c:objc(cy)WKWebViewConfiguration@WKDeprecated	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	deprecated: Use mediaTypesRequiringUserActionForPlayback instead	3f6b5eab98fd2edb	-
+property	c:objc(cs)WKWebViewConfiguration(py)mediaPlaybackRequiresUserAction	WKDeprecated			BOOL	-	nonatomic	ios=8.0/9.0/-/0	-	d8df44b8eff851ee	-
+property	c:objc(cs)WKWebViewConfiguration(py)mediaPlaybackAllowsAirPlay	WKDeprecated			BOOL	-	nonatomic	ios=8.0/9.0/-/0	-	8384f98199cc27c0	-
+property	c:objc(cs)WKWebViewConfiguration(py)requiresUserActionForMediaPlayback	WKDeprecated			BOOL	-	nonatomic	ios=9.0/10.0/-/0	-	4c6ff3da304577cf	-
+var	c:@WKWebsiteDataTypeFetchCache	-			NSString *const	-	-	ios=11.3/-/-/0,macos=10.13.4/-/-/0	-	215e5b8dafc2508f	-
+var	c:@WKWebsiteDataTypeDiskCache	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	e227a5a114525d4a	-
+var	c:@WKWebsiteDataTypeMemoryCache	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	3d22e3a821c8e530	-
+var	c:@WKWebsiteDataTypeOfflineWebApplicationCache	-			NSString *const	-	-	ios=9.0/26.2/-/0,macos=10.11/-/-/0	-	c821187a984cd8d8	-
+var	c:@WKWebsiteDataTypeCookies	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	a1cd5ed6076f4fbd	-
+var	c:@WKWebsiteDataTypeSessionStorage	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	da86a42880ea720b	-
+var	c:@WKWebsiteDataTypeLocalStorage	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	5746afd4fa10444b	-
+var	c:@WKWebsiteDataTypeWebSQLDatabases	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	09267ebed3de039e	-
+var	c:@WKWebsiteDataTypeIndexedDBDatabases	-			NSString *const	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	9d7982720b63de47	-
+var	c:@WKWebsiteDataTypeServiceWorkerRegistrations	-			NSString *const	-	-	ios=11.3/-/-/0,macos=10.13.4/-/-/0	-	d22e2496f67fb16d	-
+var	c:@WKWebsiteDataTypeFileSystem	-			NSString *const	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	22d7321fb8db2493	-
+var	c:@WKWebsiteDataTypeSearchFieldRecentSearches	-			NSString *const	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	ad4f11c53bf29cf9	-
+var	c:@WKWebsiteDataTypeMediaKeys	-			NSString *const	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	d9c02e01b16ca107	-
+var	c:@WKWebsiteDataTypeHashSalt	-			NSString *const	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	4184e7064eb04a7c	-
+var	c:@WKWebsiteDataTypeScreenTime	-			NSString *const	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=-/-/-/1	-	f83788edae189b7b	-
+interface	c:objc(cs)WKWebsiteDataRecord	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	84cb770edee36830	-
+super	-	WKWebsiteDataRecord	NSObject		-	-	-	-	-	7455b42e88997f90	-
+property	c:objc(cs)WKWebsiteDataRecord(py)displayName	-			NSString *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	ab4b8c47c5421091	-
+property	c:objc(cs)WKWebsiteDataRecord(py)dataTypes	-			NSSet<NSString *> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,macos=10.11/-/-/0	-	55b4764933dc41b0	-
+interface	c:objc(cs)WKWebsiteDataStore	-			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	bebf6a6e1399b76e	-
+super	-	WKWebsiteDataStore	NSObject		-	-	-	-	-	d944ff7c872f14fb	-
+conforms	c:objc(cs)WKWebsiteDataStore	WKWebsiteDataStore	NSSecureCoding		-	-	-	-	-	1de1068314cbaa4f	-
+method	c:objc(cs)WKWebsiteDataStore(cm)defaultDataStore	-			WKWebsiteDataStore *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	9a507a8c22073b45	-
+method	c:objc(cs)WKWebsiteDataStore(cm)nonPersistentDataStore	-			WKWebsiteDataStore *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	f78e11f8dee8bd36	-
+method	c:objc(cs)WKWebsiteDataStore(im)new	-			instancetype	-	-	*unavailable ios=9.0/-/-/0,macos=10.11/-/-/0	-	ad203bb356bbc6e5	-
+method	c:objc(cs)WKWebsiteDataStore(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0,macos=10.11/-/-/0	-	79ae42f98dfbcc62	-
+property	c:objc(cs)WKWebsiteDataStore(py)persistent	-			BOOL	-	readonly,nonatomic,getter=isPersistent	ios=9.0/-/-/0,macos=10.11/-/-/0	-	e5f50b67474783cf	-
+method	c:objc(cs)WKWebsiteDataStore(cm)allWebsiteDataTypes	-			NSSet<NSString *> *	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	a41a8451c55144a0	-
+method	c:objc(cs)WKWebsiteDataStore(im)fetchDataRecordsOfTypes:completionHandler:	-			void	NSSet<NSString *> * dataTypes | void (^)(NSArray<WKWebsiteDataRecord *> * _Nonnull) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	31d5d6b3a401c1e5	-
+method	c:objc(cs)WKWebsiteDataStore(im)removeDataOfTypes:forDataRecords:completionHandler:	-			void	NSSet<NSString *> * dataTypes | NSArray<WKWebsiteDataRecord *> * dataRecords | void (^)(void) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	8f3767d7ed4de818	-
+method	c:objc(cs)WKWebsiteDataStore(im)removeDataOfTypes:modifiedSince:completionHandler:	-			void	NSSet<NSString *> * dataTypes | NSDate * date | void (^)(void) completionHandler	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	d9f52b8b7137f270	-
+property	c:objc(cs)WKWebsiteDataStore(py)httpCookieStore	-			WKHTTPCookieStore *	-	readonly,nonatomic	ios=11.0/-/-/0,macos=10.13/-/-/0	-	b7f064b9a6c7f2a4	-
+property	c:objc(cs)WKWebsiteDataStore(py)identifier	-			NSUUID *	-	readonly,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0	-	992fc72000a52221	-
+method	c:objc(cs)WKWebsiteDataStore(im)fetchDataOfTypes:completionHandler:	-			void	NSSet<NSString *> * dataTypes | void (^)(NSData * _Nullable, NSError * _Nullable) completionHandler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	08def4c5007a0bb4	-
+method	c:objc(cs)WKWebsiteDataStore(im)restoreData:completionHandler:	-			void	NSData * data | void (^)(NSError * _Nullable) completionHandler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,xros=26.0/-/-/0	-	1d00f290a8d35adb	-
+method	c:objc(cs)WKWebsiteDataStore(cm)dataStoreForIdentifier:	-			WKWebsiteDataStore *	NSUUID * identifier	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	b58cb04a9eebf53a	-
+method	c:objc(cs)WKWebsiteDataStore(cm)removeDataStoreForIdentifier:completionHandler:	-			void	NSUUID * identifier | void (^)(NSError * _Nullable) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	7b0522d62a25c5b8	-
+method	c:objc(cs)WKWebsiteDataStore(cm)fetchAllDataStoreIdentifiers:	-			void	void (^)(NSArray<NSUUID *> * _Nonnull) completionHandler	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	183bb4d2478c763e	-
+property	c:objc(cs)WKWebsiteDataStore(py)proxyConfigurations	-			NSArray<nw_proxy_config_t> *	-	copy,nonatomic	ios=17.0/-/-/0,macos=14.0/-/-/0	-	5365575b52b0b080	-
+interface	c:objc(cs)WKWindowFeatures	-			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	97c837196ee9ef1c	-
+super	-	WKWindowFeatures	NSObject		-	-	-	-	-	f43c180ebba56cec	-
+property	c:objc(cs)WKWindowFeatures(py)menuBarVisibility	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	5649e064cfb03d4a	-
+property	c:objc(cs)WKWindowFeatures(py)statusBarVisibility	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	59c501361e1314af	-
+property	c:objc(cs)WKWindowFeatures(py)toolbarsVisibility	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	de7f5fae9d71fbcd	-
+property	c:objc(cs)WKWindowFeatures(py)allowsResizing	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	09ac7635838f3f07	-
+property	c:objc(cs)WKWindowFeatures(py)x	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	57a53c6b4d018e28	-
+property	c:objc(cs)WKWindowFeatures(py)y	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	d8edb7b8bc515c92	-
+property	c:objc(cs)WKWindowFeatures(py)width	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	bcaf48bd9c763fd6	-
+property	c:objc(cs)WKWindowFeatures(py)height	-			NSNumber *	-	readonly,nonatomic	ios=8.0/-/-/0,macos=10.10/-/-/0	-	6567ef995f6166cc	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@CGRect	-			struct CGRect	-	-	-	-	57cc4af4879304a9	-
+typedef	c:@T@SecTrustRef	-			struct __SecTrust *	-	-	-	-	793d9b19f5106e82	-
+typedef	c:@T@CGFloat	-			double	-	-	-	-	29e11a71cfda882e	-
+typedef	c:@T@UIEdgeInsets	-			struct UIEdgeInsets	-	-	-	-	dd3bc2433c254675	-
+typedef	c:@T@UIKeyModifierFlags	-			enum UIKeyModifierFlags	-	-	-	-	67b11e725fdebe94	-
+typedef	c:@T@UIEventButtonMask	-			enum UIEventButtonMask	-	-	-	-	f78349f3ba9fc16c	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@UIWritingToolsBehavior	-			enum UIWritingToolsBehavior	-	-	-	-	3588b4c0e79bbcd0	-

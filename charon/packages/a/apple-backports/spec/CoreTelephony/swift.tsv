@@ -1,0 +1,3 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CoreTelephony	swift-class	c:objc(cs)CTCellularPlanProperties	-	CTCellularPlanProperties	-	-	-	ios=26.0	-	1c40facbb7d41075
+CoreTelephony	swift-property	s:So24CTCellularPlanPropertiesC13CoreTelephonyE20supportedRegionCodesSay10Foundation6LocaleV0G0VGvp	CTCellularPlanProperties	supportedRegionCodes	-	[Foundation.Locale.Region]	-	-	-	137237cb176e74c8

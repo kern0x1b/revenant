@@ -1,0 +1,12 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_AVKit_SwiftUI	method	SwiftUICore.View.onCameraCaptureEvent(isEnabled:primaryAction:secondaryAction:)	18.0				container
+_AVKit_SwiftUI	method	SwiftUICore.View.onCameraCaptureEvent(isEnabled:action:)	18.0				container
+_AVKit_SwiftUI	method	SwiftUICore.View.onCameraCaptureEvent(isEnabled:defaultSoundDisabled:primaryAction:secondaryAction:)	26.0				container
+_AVKit_SwiftUI	method	SwiftUICore.View.onCameraCaptureEvent(isEnabled:defaultSoundDisabled:action:)	26.0				container
+_AVKit_SwiftUI	method	SwiftUICore.View.onCameraCaptureEvent(isEnabled:defaultSoundDisabled:primaryAction:secondaryAction:)	26.0				container
+_AVKit_SwiftUI	method	SwiftUICore.View.onCameraCaptureEvent(isEnabled:defaultSoundDisabled:action:)	26.0				container
+_AVKit_SwiftUI	struct	VideoPlayer	14.0				own
+_AVKit_SwiftUI	method	VideoPlayer.init(player:videoOverlay:)	14.0				container
+_AVKit_SwiftUI	property	VideoPlayer.body	14.0				container
+_AVKit_SwiftUI	typealias	VideoPlayer.Body	14.0				own
+_AVKit_SwiftUI	method	VideoPlayer.init(player:)	14.0				container

@@ -1,0 +1,633 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@PHASEUpdateMode	-			enum PHASEUpdateMode	-	-	-	-	4465ab81c2ac1773	-
+enum	c:@E@PHASEUpdateMode	-			NSInteger	-	-	-	-	ec583fde40797991	-
+enumconst	c:@E@PHASEUpdateMode@PHASEUpdateModeAutomatic	PHASEUpdateMode			-	-	-	-	-	6781dcf227f40f6f	0
+enumconst	c:@E@PHASEUpdateMode@PHASEUpdateModeManual	PHASEUpdateMode			-	-	-	-	-	78cc4a5adb8891ea	1
+typedef	c:@T@PHASERenderingMode	-			enum PHASERenderingMode	-	-	-	-	5f515cef37f0fcb7	-
+enum	c:@E@PHASERenderingMode	-			NSInteger	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	960e5b3956e884c9	-
+enumconst	c:@E@PHASERenderingMode@PHASERenderingModeLocal	PHASERenderingMode			-	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	54db24e420f8adfb	0
+enumconst	c:@E@PHASERenderingMode@PHASERenderingModeClient	PHASERenderingMode			-	-	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	ffb00767add2d8a4	1
+typedef	c:@T@PHASERenderingState	-			enum PHASERenderingState	-	-	-	-	ebd3534d7a8d98c5	-
+enum	c:@E@PHASERenderingState	-			NSInteger	-	-	-	-	4b62570e06f93712	-
+enumconst	c:@E@PHASERenderingState@PHASERenderingStateStopped	PHASERenderingState			-	-	-	-	-	9f2a2e9837e22dee	0
+enumconst	c:@E@PHASERenderingState@PHASERenderingStateStarted	PHASERenderingState			-	-	-	-	-	cdad13fb45bcf0a7	1
+enumconst	c:@E@PHASERenderingState@PHASERenderingStatePaused	PHASERenderingState			-	-	-	-	-	e216974f8526699c	2
+typedef	c:@T@PHASESpatializationMode	-			enum PHASESpatializationMode	-	-	-	-	c27ff26b955f9043	-
+enum	c:@E@PHASESpatializationMode	-			NSInteger	-	-	-	-	eeb34cf3dd01b76a	-
+enumconst	c:@E@PHASESpatializationMode@PHASESpatializationModeAutomatic	PHASESpatializationMode			-	-	-	-	-	a31b2788b93103d4	0
+enumconst	c:@E@PHASESpatializationMode@PHASESpatializationModeAlwaysUseBinaural	PHASESpatializationMode			-	-	-	-	-	dc9efb4aeade1d78	1
+enumconst	c:@E@PHASESpatializationMode@PHASESpatializationModeAlwaysUseChannelBased	PHASESpatializationMode			-	-	-	-	-	2aa319e8ac9f34b3	2
+typedef	c:@T@PHASEReverbPreset	-			enum PHASEReverbPreset	-	-	-	-	c3cc84af1fff76e5	-
+enum	c:@E@PHASEReverbPreset	-			NSInteger	-	-	-	-	550dc6691143b352	-
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetNone	PHASEReverbPreset			-	-	-	-	-	f342788d3e92a6ed	1917742958
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetSmallRoom	PHASEReverbPreset			-	-	-	-	-	ff433cad310803ab	1918063213
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetMediumRoom	PHASEReverbPreset			-	-	-	-	-	ae57b6ac3b82362e	1917669997
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetLargeRoom	PHASEReverbPreset			-	-	-	-	-	1b2d6baf239d2ad8	1917604401
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetLargeRoom2	PHASEReverbPreset			-	-	-	-	-	7c69b585eea12f0c	1917604402
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetMediumChamber	PHASEReverbPreset			-	-	-	-	-	a3c47a69b718f77a	1917666152
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetLargeChamber	PHASEReverbPreset			-	-	-	-	-	c85870845b500ea8	1917600616
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetMediumHall	PHASEReverbPreset			-	-	-	-	-	18360c858a684dda	1917667377
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetMediumHall2	PHASEReverbPreset			-	-	-	-	-	50fa51b5a1171f34	1917667378
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetMediumHall3	PHASEReverbPreset			-	-	-	-	-	dc15ff9bce4bd476	1917667379
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetLargeHall	PHASEReverbPreset			-	-	-	-	-	e2ea907e2d9c0f37	1917601841
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetLargeHall2	PHASEReverbPreset			-	-	-	-	-	a0aeab74da7ed1d1	1917601842
+enumconst	c:@E@PHASEReverbPreset@PHASEReverbPresetCathedral	PHASEReverbPreset			-	-	-	-	-	edc5e23bba2faa0b	1917023336
+var	c:@PHASEErrorDomain	-			const NSErrorDomain	-	-	-	-	fe3b33a74dd385e1	-
+typedef	c:@T@PHASEError	-			enum PHASEError	-	-	-	-	8076fe15fc4c2f8f	-
+enum	c:@E@PHASEError	-			NSInteger	-	-	-	-	714a26d8df8fc5ef	-
+enumconst	c:@E@PHASEError@PHASEErrorInitializeFailed	PHASEError			-	-	-	-	-	1cad2b2ed1a26b8f	1346913633
+enumconst	c:@E@PHASEError@PHASEErrorInvalidObject	PHASEError			-	-	-	-	-	6a95b332fa6c322c	1346913634
+var	c:@PHASESoundEventErrorDomain	-			const NSErrorDomain	-	-	-	-	9f58366aaa4d64a0	-
+typedef	c:@T@PHASESoundEventError	-			enum PHASESoundEventError	-	-	-	-	d6d3cd8a25763e07	-
+enum	c:@E@PHASESoundEventError	-			NSInteger	-	-	-	-	5d3befb56a0cb5ab	-
+enumconst	c:@E@PHASESoundEventError@PHASESoundEventErrorNotFound	PHASESoundEventError			-	-	-	-	-	d9cc4365ae357a58	1346925665
+enumconst	c:@E@PHASESoundEventError@PHASESoundEventErrorBadData	PHASESoundEventError			-	-	-	-	-	2c8f34a121f581b3	1346925666
+enumconst	c:@E@PHASESoundEventError@PHASESoundEventErrorInvalidInstance	PHASESoundEventError			-	-	-	-	-	bebd8053110a43b1	1346925667
+enumconst	c:@E@PHASESoundEventError@PHASESoundEventErrorAPIMisuse	PHASESoundEventError			-	-	-	-	-	4dfe9318a0015be4	1346925668
+enumconst	c:@E@PHASESoundEventError@PHASESoundEventErrorSystemNotInitialized	PHASESoundEventError			-	-	-	-	-	9f98292f31a58860	1346925669
+enumconst	c:@E@PHASESoundEventError@PHASESoundEventErrorOutOfMemory	PHASESoundEventError			-	-	-	-	-	d82514644fb41773	1346925670
+var	c:@PHASEAssetErrorDomain	-			const NSErrorDomain	-	-	-	-	f9503fc1d9bb3072	-
+typedef	c:@T@PHASEAssetError	-			enum PHASEAssetError	-	-	-	-	35febfa5314f7b0e	-
+enum	c:@E@PHASEAssetError	-			NSInteger	-	-	-	-	9e1af0842b7e8d98	-
+enumconst	c:@E@PHASEAssetError@PHASEAssetErrorFailedToLoad	PHASEAssetError			-	-	-	-	-	25ac7aee93d8eb44	1346920801
+enumconst	c:@E@PHASEAssetError@PHASEAssetErrorInvalidEngineInstance	PHASEAssetError			-	-	-	-	-	1c9ae3054e6b24ec	1346920802
+enumconst	c:@E@PHASEAssetError@PHASEAssetErrorBadParameters	PHASEAssetError			-	-	-	-	-	aa4a489a2889f04b	1346920803
+enumconst	c:@E@PHASEAssetError@PHASEAssetErrorAlreadyExists	PHASEAssetError			-	-	-	-	-	bacbefcaab914c2d	1346920804
+enumconst	c:@E@PHASEAssetError@PHASEAssetErrorGeneralError	PHASEAssetError			-	-	-	-	-	e237a83e8f79134a	1346920805
+enumconst	c:@E@PHASEAssetError@PHASEAssetErrorMemoryAllocation	PHASEAssetError			-	-	-	-	-	ff6b9884bebf6e23	1346920806
+typedef	c:@T@PHASESoundEventPrepareHandlerReason	-			enum PHASESoundEventPrepareHandlerReason	-	-	-	-	91435ebbba40cd24	-
+enum	c:@E@PHASESoundEventPrepareHandlerReason	-			NSInteger	-	-	-	-	8c6b7d3f447af928	-
+enumconst	c:@E@PHASESoundEventPrepareHandlerReason@PHASESoundEventPrepareHandlerReasonFailure	PHASESoundEventPrepareHandlerReason			-	-	-	-	-	12832b2570286c7d	0
+enumconst	c:@E@PHASESoundEventPrepareHandlerReason@PHASESoundEventPrepareHandlerReasonPrepared	PHASESoundEventPrepareHandlerReason			-	-	-	-	-	a0ac90eb5ff1b82c	1
+enumconst	c:@E@PHASESoundEventPrepareHandlerReason@PHASESoundEventPrepareHandlerReasonTerminated	PHASESoundEventPrepareHandlerReason			-	-	-	-	-	4518bf12fbf97052	2
+typedef	c:@T@PHASESoundEventStartHandlerReason	-			enum PHASESoundEventStartHandlerReason	-	-	-	-	1f0bee0b21e2c65a	-
+enum	c:@E@PHASESoundEventStartHandlerReason	-			NSInteger	-	-	-	-	0b30c7061d3d5a4f	-
+enumconst	c:@E@PHASESoundEventStartHandlerReason@PHASESoundEventStartHandlerReasonFailure	PHASESoundEventStartHandlerReason			-	-	-	-	-	8589d0e3055bb08b	0
+enumconst	c:@E@PHASESoundEventStartHandlerReason@PHASESoundEventStartHandlerReasonFinishedPlaying	PHASESoundEventStartHandlerReason			-	-	-	-	-	486897be1fcc71d9	1
+enumconst	c:@E@PHASESoundEventStartHandlerReason@PHASESoundEventStartHandlerReasonTerminated	PHASESoundEventStartHandlerReason			-	-	-	-	-	2abcfdf4ea106ccb	2
+typedef	c:@T@PHASESoundEventSeekHandlerReason	-			enum PHASESoundEventSeekHandlerReason	-	-	-	-	5333d5cfd528dc35	-
+enum	c:@E@PHASESoundEventSeekHandlerReason	-			NSInteger	-	-	-	-	da7e9c2d432fa73b	-
+enumconst	c:@E@PHASESoundEventSeekHandlerReason@PHASESoundEventSeekHandlerReasonFailure	PHASESoundEventSeekHandlerReason			-	-	-	-	-	59639687347fbe0a	0
+enumconst	c:@E@PHASESoundEventSeekHandlerReason@PHASESoundEventSeekHandlerReasonFailureSeekAlreadyInProgress	PHASESoundEventSeekHandlerReason			-	-	-	-	-	12ab89fd8a5ecb40	1
+enumconst	c:@E@PHASESoundEventSeekHandlerReason@PHASESoundEventSeekHandlerReasonSeekSuccessful	PHASESoundEventSeekHandlerReason			-	-	-	-	-	4d216d1d99aeca5a	2
+typedef	c:@T@PHASESoundEventPrepareState	-			enum PHASESoundEventPrepareState	-	-	-	-	68f2acf159fb722c	-
+enum	c:@E@PHASESoundEventPrepareState	-			NSInteger	-	-	-	-	ae716e336b765db0	-
+enumconst	c:@E@PHASESoundEventPrepareState@PHASESoundEventPrepareStatePrepareNotStarted	PHASESoundEventPrepareState			-	-	-	-	-	7b6f175eab57b058	0
+enumconst	c:@E@PHASESoundEventPrepareState@PHASESoundEventPrepareStatePrepareInProgress	PHASESoundEventPrepareState			-	-	-	-	-	ff3365007255410b	1
+enumconst	c:@E@PHASESoundEventPrepareState@PHASESoundEventPrepareStatePrepared	PHASESoundEventPrepareState			-	-	-	-	-	a6735067c10ead80	2
+typedef	c:@T@PHASEAssetType	-			enum PHASEAssetType	-	-	-	-	ba7442e274465c35	-
+enum	c:@E@PHASEAssetType	-			NSInteger	-	-	-	-	bf44ae71fcf66b95	-
+enumconst	c:@E@PHASEAssetType@PHASEAssetTypeResident	PHASEAssetType			-	-	-	-	-	c36dd62b2200506c	0
+enumconst	c:@E@PHASEAssetType@PHASEAssetTypeStreamed	PHASEAssetType			-	-	-	-	-	4ea2dbc567113ab9	1
+typedef	c:@T@PHASECurveType	-			enum PHASECurveType	-	-	-	-	0ac0f2a5d4a3a4cd	-
+enum	c:@E@PHASECurveType	-			NSInteger	-	-	-	-	08a89dd16fd9e907	-
+enumconst	c:@E@PHASECurveType@PHASECurveTypeLinear	PHASECurveType			-	-	-	-	-	28e4cc99727db24c	1668435054
+enumconst	c:@E@PHASECurveType@PHASECurveTypeSquared	PHASECurveType			-	-	-	-	-	1ce409de7a0aa189	1668436849
+enumconst	c:@E@PHASECurveType@PHASECurveTypeInverseSquared	PHASECurveType			-	-	-	-	-	294c6b86ef2f3a34	1668434257
+enumconst	c:@E@PHASECurveType@PHASECurveTypeCubed	PHASECurveType			-	-	-	-	-	b605fed8e6e7f6dc	1668432757
+enumconst	c:@E@PHASECurveType@PHASECurveTypeInverseCubed	PHASECurveType			-	-	-	-	-	8befc58274b03199	1668434243
+enumconst	c:@E@PHASECurveType@PHASECurveTypeSine	PHASECurveType			-	-	-	-	-	93a8a0a25d3df23f	1668436846
+enumconst	c:@E@PHASECurveType@PHASECurveTypeInverseSine	PHASECurveType			-	-	-	-	-	102a837bfd1b5d7a	1668434259
+enumconst	c:@E@PHASECurveType@PHASECurveTypeSigmoid	PHASECurveType			-	-	-	-	-	76433acec33408d1	1668436839
+enumconst	c:@E@PHASECurveType@PHASECurveTypeInverseSigmoid	PHASECurveType			-	-	-	-	-	586a94fec50a0289	1668434247
+enumconst	c:@E@PHASECurveType@PHASECurveTypeHoldStartValue	PHASECurveType			-	-	-	-	-	94f8c232b9cb8cd9	1668434003
+enumconst	c:@E@PHASECurveType@PHASECurveTypeJumpToEndValue	PHASECurveType			-	-	-	-	-	dfacd8f1142ed814	1668434501
+typedef	c:@T@PHASECullOption	-			enum PHASECullOption	-	-	-	-	b2cccf52f7868be6	-
+enum	c:@E@PHASECullOption	-			NSInteger	-	-	-	-	7201ded94a2b15b5	-
+enumconst	c:@E@PHASECullOption@PHASECullOptionTerminate	PHASECullOption			-	-	-	-	-	1d15dbaa22cec2f5	0
+enumconst	c:@E@PHASECullOption@PHASECullOptionSleepWakeAtZero	PHASECullOption			-	-	-	-	-	fcdc539e4986b5d8	1
+enumconst	c:@E@PHASECullOption@PHASECullOptionSleepWakeAtRandomOffset	PHASECullOption			-	-	-	-	-	618a8444073a6233	2
+enumconst	c:@E@PHASECullOption@PHASECullOptionSleepWakeAtRealtimeOffset	PHASECullOption			-	-	-	-	-	8e3ae25ec2208bcf	3
+enumconst	c:@E@PHASECullOption@PHASECullOptionDoNotCull	PHASECullOption			-	-	-	-	-	4d1e00613500ebde	4
+typedef	c:@T@PHASEPlaybackMode	-			enum PHASEPlaybackMode	-	-	-	-	a7c7f1d17767c7b7	-
+enum	c:@E@PHASEPlaybackMode	-			NSInteger	-	-	-	-	c8eca0c59461e598	-
+enumconst	c:@E@PHASEPlaybackMode@PHASEPlaybackModeOneShot	PHASEPlaybackMode			-	-	-	-	-	174a4731b2cb7861	0
+enumconst	c:@E@PHASEPlaybackMode@PHASEPlaybackModeLooping	PHASEPlaybackMode			-	-	-	-	-	452523b17d652a37	1
+typedef	c:@T@PHASENormalizationMode	-			enum PHASENormalizationMode	-	-	-	-	e63b6a78778a5cb0	-
+enum	c:@E@PHASENormalizationMode	-			NSInteger	-	-	-	-	7ea3b93cd48b1559	-
+enumconst	c:@E@PHASENormalizationMode@PHASENormalizationModeNone	PHASENormalizationMode			-	-	-	-	-	5dcba0adf7f326a3	0
+enumconst	c:@E@PHASENormalizationMode@PHASENormalizationModeDynamic	PHASENormalizationMode			-	-	-	-	-	c66f18a9cfe1acbd	1
+typedef	c:@T@PHASECalibrationMode	-			enum PHASECalibrationMode	-	-	-	-	ca81ad420f721d3e	-
+enum	c:@E@PHASECalibrationMode	-			NSInteger	-	-	-	-	9e4da0b69e70442c	-
+enumconst	c:@E@PHASECalibrationMode@PHASECalibrationModeNone	PHASECalibrationMode			-	-	-	-	-	2e8544127f740d4f	0
+enumconst	c:@E@PHASECalibrationMode@PHASECalibrationModeRelativeSpl	PHASECalibrationMode			-	-	-	-	-	d723985e5642df72	1
+enumconst	c:@E@PHASECalibrationMode@PHASECalibrationModeAbsoluteSpl	PHASECalibrationMode			-	-	-	-	-	e17759dce88291b2	2
+typedef	c:@T@PHASEAutomaticHeadTrackingFlags	-			enum PHASEAutomaticHeadTrackingFlags	-	-	-	-	de1ba954f309396e	-
+enum	c:@E@PHASEAutomaticHeadTrackingFlags	-			NSUInteger	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	e6b7f0543fb943fc	-
+enumconst	c:@E@PHASEAutomaticHeadTrackingFlags@PHASEAutomaticHeadTrackingFlagOrientation	PHASEAutomaticHeadTrackingFlags			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	02572c959ad86a92	1
+enumconst	c:@E@PHASEAutomaticHeadTrackingFlags@PHASEAutomaticHeadTrackingFlagPosition	PHASEAutomaticHeadTrackingFlags			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	63785b59c3e4720d	2
+interface	c:objc(cs)PHASENumericPair	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	eba9b34a3e814ff8	-
+super	-	PHASENumericPair	NSObject		-	-	-	-	-	0be43e8d7a95dc2a	-
+method	c:objc(cs)PHASENumericPair(im)initWithFirstValue:secondValue:	-			instancetype	double first | double second	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aa1a1c2aa0175128	-
+property	c:objc(cs)PHASENumericPair(py)first	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9611a9767009e3b7	-
+property	c:objc(cs)PHASENumericPair(py)second	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e56e19f7df2ee658	-
+interface	c:objc(cs)PHASEEnvelopeSegment	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a2164ca0a42c48a2	-
+super	-	PHASEEnvelopeSegment	NSObject		-	-	-	-	-	d944b2865a5ce0b3	-
+method	c:objc(cs)PHASEEnvelopeSegment(im)initWithEndPoint:curveType:	-			instancetype	simd_double2 endPoint | PHASECurveType curveType	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	dd52361d6ff1136c	-
+property	c:objc(cs)PHASEEnvelopeSegment(py)endPoint	-			simd_double2	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d06b337446aaef74	-
+property	c:objc(cs)PHASEEnvelopeSegment(py)curveType	-			PHASECurveType	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	020a1e06edcf424e	-
+interface	c:objc(cs)PHASEEnvelope	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	25507101e4634f45	-
+super	-	PHASEEnvelope	NSObject		-	-	-	-	-	7ec9fbe4520ac75c	-
+method	c:objc(cs)PHASEEnvelope(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e816c85d9ccca0b5	-
+method	c:objc(cs)PHASEEnvelope(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	96e62be78d7587ca	-
+method	c:objc(cs)PHASEEnvelope(im)initWithStartPoint:segments:	-			instancetype	simd_double2 startPoint | NSArray<PHASEEnvelopeSegment *> * segments	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e5a2f9009f989f65	-
+method	c:objc(cs)PHASEEnvelope(im)evaluateForValue:	-			double	double x	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	829d3d6682ba6bf0	-
+property	c:objc(cs)PHASEEnvelope(py)startPoint	-			simd_double2	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	230f371e604fa0e0	-
+property	c:objc(cs)PHASEEnvelope(py)segments	-			NSArray<PHASEEnvelopeSegment *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c17633dd493af64d	-
+property	c:objc(cs)PHASEEnvelope(py)domain	-			PHASENumericPair *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c58cab08147a5806	-
+property	c:objc(cs)PHASEEnvelope(py)range	-			PHASENumericPair *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	68c5897f6438d147	-
+interface	c:objc(cs)PHASEDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e368333f225f2c37	-
+super	-	PHASEDefinition	NSObject		-	-	-	-	-	5e6b3e548fa52144	-
+method	c:objc(cs)PHASEDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	11197b63040b328a	-
+method	c:objc(cs)PHASEDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a6265343d67b6bc1	-
+property	c:objc(cs)PHASEDefinition(py)identifier	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8eb56b097de59972	-
+interface	c:objc(cs)PHASEMetaParameterDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0e349a07a4c9436f	-
+super	-	PHASEMetaParameterDefinition	PHASEDefinition		-	-	-	-	-	75ac9c626f846dab	-
+method	c:objc(cs)PHASEMetaParameterDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	40c37d7c8edcefce	-
+method	c:objc(cs)PHASEMetaParameterDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	924ce3f10c77a820	-
+property	c:objc(cs)PHASEMetaParameterDefinition(py)value	-			id	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	25463fdb3a382a2e	-
+interface	c:objc(cs)PHASENumberMetaParameterDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ef197474c1c985c5	-
+super	-	PHASENumberMetaParameterDefinition	PHASEMetaParameterDefinition		-	-	-	-	-	01ee15c93f5d9f96	-
+method	c:objc(cs)PHASENumberMetaParameterDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5e317ef95ce3f744	-
+method	c:objc(cs)PHASENumberMetaParameterDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5bde432dd81fc13a	-
+method	c:objc(cs)PHASENumberMetaParameterDefinition(im)initWithValue:identifier:	-			instancetype	double value | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4f2428b8c4d6c00e	-
+method	c:objc(cs)PHASENumberMetaParameterDefinition(im)initWithValue:	-			instancetype	double value	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a9d4dfd8d502cf51	-
+method	c:objc(cs)PHASENumberMetaParameterDefinition(im)initWithValue:minimum:maximum:identifier:	-			instancetype	double value | double minimum | double maximum | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5db391ef98739a29	-
+method	c:objc(cs)PHASENumberMetaParameterDefinition(im)initWithValue:minimum:maximum:	-			instancetype	double value | double minimum | double maximum	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a8f0912490497ef0	-
+property	c:objc(cs)PHASENumberMetaParameterDefinition(py)minimum	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0a7c68630f25ff59	-
+property	c:objc(cs)PHASENumberMetaParameterDefinition(py)maximum	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af1f7da12b3cc85e	-
+interface	c:objc(cs)PHASEStringMetaParameterDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2948b3a452fef69d	-
+super	-	PHASEStringMetaParameterDefinition	PHASEMetaParameterDefinition		-	-	-	-	-	a7f592cffc638265	-
+method	c:objc(cs)PHASEStringMetaParameterDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3ab0e8e072351367	-
+method	c:objc(cs)PHASEStringMetaParameterDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	744998c765a572dc	-
+method	c:objc(cs)PHASEStringMetaParameterDefinition(im)initWithValue:identifier:	-			instancetype	NSString * value | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bba2ba321c8745e2	-
+method	c:objc(cs)PHASEStringMetaParameterDefinition(im)initWithValue:	-			instancetype	NSString * value	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9d3d41ee50362be2	-
+interface	c:objc(cs)PHASEMappedMetaParameterDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f19351ae393ff786	-
+super	-	PHASEMappedMetaParameterDefinition	PHASENumberMetaParameterDefinition		-	-	-	-	-	9a7669d12d466e63	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ec285609a6a57c99	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1ef8a2068972697c	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)initWithValue:identifier:	-			instancetype	double value | NSString * identifier	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d429a88a8e004d16	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)initWithValue:	-			instancetype	double value	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f0d61184a25d4bd7	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)initWithValue:minimum:maximum:identifier:	-			instancetype	double value | double minimum | double maximum | NSString * identifier	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f9344153d5a653d6	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)initWithValue:minimum:maximum:	-			instancetype	double value | double minimum | double maximum	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6979b7f003880f14	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)initWithInputMetaParameterDefinition:envelope:identifier:	-			instancetype	PHASENumberMetaParameterDefinition * inputMetaParameterDefinition | PHASEEnvelope * envelope | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5e72847f6aac2f8c	-
+method	c:objc(cs)PHASEMappedMetaParameterDefinition(im)initWithInputMetaParameterDefinition:envelope:	-			instancetype	PHASENumberMetaParameterDefinition * inputMetaParameterDefinition | PHASEEnvelope * envelope	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1406c7eebfe86a8e	-
+property	c:objc(cs)PHASEMappedMetaParameterDefinition(py)envelope	-			PHASEEnvelope *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2290889e3c803f6e	-
+property	c:objc(cs)PHASEMappedMetaParameterDefinition(py)inputMetaParameterDefinition	-			PHASENumberMetaParameterDefinition *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d90180e2887d687f	-
+property	c:objc(cs)PHASEMappedMetaParameterDefinition(py)minimum	-			double	-	readonly,nonatomic	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0296193520319664	-
+property	c:objc(cs)PHASEMappedMetaParameterDefinition(py)maximum	-			double	-	readonly,nonatomic	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4720252f11db62b6	-
+interface	c:objc(cs)PHASEMetaParameter	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ec9ee3007f6691a8	-
+super	-	PHASEMetaParameter	NSObject		-	-	-	-	-	3d286437e362ea9a	-
+method	c:objc(cs)PHASEMetaParameter(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	05b07322e94f9eef	-
+method	c:objc(cs)PHASEMetaParameter(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9f73d191adb962ab	-
+property	c:objc(cs)PHASEMetaParameter(py)identifier	-			NSString *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	43d71431199a8808	-
+property	c:objc(cs)PHASEMetaParameter(py)value	-			id	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d342226246368825	-
+interface	c:objc(cs)PHASENumberMetaParameter	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b90d2fdc20fc128d	-
+super	-	PHASENumberMetaParameter	PHASEMetaParameter		-	-	-	-	-	e2ef85daba81575d	-
+method	c:objc(cs)PHASENumberMetaParameter(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8958c0a84f5cfa6b	-
+method	c:objc(cs)PHASENumberMetaParameter(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0f3a28ee8ee39313	-
+property	c:objc(cs)PHASENumberMetaParameter(py)minimum	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bbc4438f2a491bc1	-
+property	c:objc(cs)PHASENumberMetaParameter(py)maximum	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	12ff9255aaf5d131	-
+method	c:objc(cs)PHASENumberMetaParameter(im)fadeToValue:duration:	-			void	double value | NSTimeInterval duration	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	876d53b78e0c8446	-
+interface	c:objc(cs)PHASEStringMetaParameter	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e9d69876d9d92abf	-
+super	-	PHASEStringMetaParameter	PHASEMetaParameter		-	-	-	-	-	ee4069db83661680	-
+method	c:objc(cs)PHASEStringMetaParameter(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3d253f596e706cb6	-
+method	c:objc(cs)PHASEStringMetaParameter(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	646229a3c6d6b51e	-
+interface	c:objc(cs)PHASEMixerDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c0f9446d97b824d2	-
+super	-	PHASEMixerDefinition	PHASEDefinition		-	-	-	-	-	2116f8e03202ce0b	-
+method	c:objc(cs)PHASEMixerDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	223562f70f0a773b	-
+method	c:objc(cs)PHASEMixerDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	efe7434f60086f2a	-
+property	c:objc(cs)PHASEMixerDefinition(py)gain	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4eb8d59a11a10041	-
+property	c:objc(cs)PHASEMixerDefinition(py)gainMetaParameterDefinition	-			PHASENumberMetaParameterDefinition *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a7ddb64e5d5f623f	-
+interface	c:objc(cs)PHASESpatialMixerDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	867eef600d69dfa8	-
+super	-	PHASESpatialMixerDefinition	PHASEMixerDefinition		-	-	-	-	-	12bd6274822f3144	-
+method	c:objc(cs)PHASESpatialMixerDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3e8c54fad3a64542	-
+method	c:objc(cs)PHASESpatialMixerDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	80b31e299e40842b	-
+method	c:objc(cs)PHASESpatialMixerDefinition(im)initWithSpatialPipeline:	-			instancetype	PHASESpatialPipeline * spatialPipeline	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	148380ffa9cd3196	-
+method	c:objc(cs)PHASESpatialMixerDefinition(im)initWithSpatialPipeline:identifier:	-			instancetype	PHASESpatialPipeline * spatialPipeline | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e9d36f4eb8f0ede4	-
+property	c:objc(cs)PHASESpatialMixerDefinition(py)spatialPipeline	-			PHASESpatialPipeline *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	59a3848175f9cd1a	-
+property	c:objc(cs)PHASESpatialMixerDefinition(py)distanceModelParameters	-			PHASEDistanceModelParameters *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	96417c34727eacc6	-
+property	c:objc(cs)PHASESpatialMixerDefinition(py)listenerDirectivityModelParameters	-			PHASEDirectivityModelParameters *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c5d265b56973d233	-
+property	c:objc(cs)PHASESpatialMixerDefinition(py)sourceDirectivityModelParameters	-			PHASEDirectivityModelParameters *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	39cb1679964e4684	-
+interface	c:objc(cs)PHASEAmbientMixerDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	436fe0bc87092783	-
+super	-	PHASEAmbientMixerDefinition	PHASEMixerDefinition		-	-	-	-	-	5e5a0af8f6c81f90	-
+method	c:objc(cs)PHASEAmbientMixerDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	726c334598dfc839	-
+method	c:objc(cs)PHASEAmbientMixerDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	09be710a71c2c250	-
+method	c:objc(cs)PHASEAmbientMixerDefinition(im)initWithChannelLayout:orientation:identifier:	-			instancetype	AVAudioChannelLayout * layout | simd_quatf orientation | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	27becd0d934f056d	-
+method	c:objc(cs)PHASEAmbientMixerDefinition(im)initWithChannelLayout:orientation:	-			instancetype	AVAudioChannelLayout * layout | simd_quatf orientation	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3ee41b8fce5ec48d	-
+property	c:objc(cs)PHASEAmbientMixerDefinition(py)orientation	-			simd_quatf	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f41c309a2e374ef6	-
+property	c:objc(cs)PHASEAmbientMixerDefinition(py)inputChannelLayout	-			AVAudioChannelLayout *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	657f80fe10b0f0ca	-
+interface	c:objc(cs)PHASEChannelMixerDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	be2a9e7314862dc3	-
+super	-	PHASEChannelMixerDefinition	PHASEMixerDefinition		-	-	-	-	-	c754effc24f58574	-
+method	c:objc(cs)PHASEChannelMixerDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d8bf6b4b7e3b4fbf	-
+method	c:objc(cs)PHASEChannelMixerDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0b36726942afd043	-
+method	c:objc(cs)PHASEChannelMixerDefinition(im)initWithChannelLayout:identifier:	-			instancetype	AVAudioChannelLayout * layout | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ca727635a225ffb4	-
+method	c:objc(cs)PHASEChannelMixerDefinition(im)initWithChannelLayout:	-			instancetype	AVAudioChannelLayout * layout	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af3360bf2aca16a8	-
+property	c:objc(cs)PHASEChannelMixerDefinition(py)inputChannelLayout	-			AVAudioChannelLayout *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9f41bfd0a646b75a	-
+interface	c:objc(cs)PHASEMixer	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c12f1ed7bf70c6d4	-
+super	-	PHASEMixer	NSObject		-	-	-	-	-	61c5a4588272691e	-
+method	c:objc(cs)PHASEMixer(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6a225774f78c3c4e	-
+method	c:objc(cs)PHASEMixer(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	551b44bd9f767820	-
+property	c:objc(cs)PHASEMixer(py)identifier	-			NSString *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a54a04b99b1229a1	-
+property	c:objc(cs)PHASEMixer(py)gain	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fef4176ae031cc92	-
+property	c:objc(cs)PHASEMixer(py)gainMetaParameter	-			PHASEMetaParameter *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2f0eaf91481be84e	-
+interface	c:objc(cs)PHASEMixerParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	81cdcbdc0118fac8	-
+super	-	PHASEMixerParameters	NSObject		-	-	-	-	-	f3e665241ec72237	-
+method	c:objc(cs)PHASEMixerParameters(im)addSpatialMixerParametersWithIdentifier:source:listener:	-			void	NSString * identifier | PHASESource * source | PHASEListener * listener	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	02e0cdb78e00f0c3	-
+method	c:objc(cs)PHASEMixerParameters(im)addAmbientMixerParametersWithIdentifier:listener:	-			void	NSString * identifier | PHASEListener * listener	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2513ba48662c133f	-
+interface	c:objc(cs)PHASEGroup	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	641680f6813d347c	-
+super	-	PHASEGroup	NSObject		-	-	-	-	-	9310a5b3e4e33238	-
+method	c:objc(cs)PHASEGroup(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4a01178f4657c66e	-
+method	c:objc(cs)PHASEGroup(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7f297c7057c7df78	-
+method	c:objc(cs)PHASEGroup(im)initWithIdentifier:	-			instancetype	NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	391457d835b6c93b	-
+method	c:objc(cs)PHASEGroup(im)registerWithEngine:	-			void	PHASEEngine * engine	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	200ff12ed031a446	-
+method	c:objc(cs)PHASEGroup(im)unregisterFromEngine	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	827a4ae841e2e3bd	-
+method	c:objc(cs)PHASEGroup(im)fadeGain:duration:curveType:	-			void	double gain | double duration | PHASECurveType curveType	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e3f4ebcdcde1ff6e	-
+method	c:objc(cs)PHASEGroup(im)fadeRate:duration:curveType:	-			void	double rate | double duration | PHASECurveType curveType	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	30c242aa2cb66e79	-
+method	c:objc(cs)PHASEGroup(im)mute	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	de41512ad6835bbd	-
+method	c:objc(cs)PHASEGroup(im)unmute	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a8b75329b18ec12b	-
+method	c:objc(cs)PHASEGroup(im)solo	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a468d91f7c0cd351	-
+method	c:objc(cs)PHASEGroup(im)unsolo	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	656f5ed73ec91e28	-
+property	c:objc(cs)PHASEGroup(py)identifier	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1233c89dd9e401d2	-
+property	c:objc(cs)PHASEGroup(py)gain	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5189970ff6ef5207	-
+property	c:objc(cs)PHASEGroup(py)rate	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f0596e27adcc80a8	-
+property	c:objc(cs)PHASEGroup(py)muted	-			BOOL	-	readonly,getter=isMuted	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ddcbecc40f101d7f	-
+property	c:objc(cs)PHASEGroup(py)soloed	-			BOOL	-	readonly,getter=isSoloed	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	db6fbdd83627a976	-
+typedef	c:@T@PHASEPushStreamBufferOptions	-			enum PHASEPushStreamBufferOptions	-	-	-	-	771324f80f493dd7	-
+enum	c:@E@PHASEPushStreamBufferOptions	-			NSUInteger	-	-	-	-	1b1bba32da6f0c89	-
+enumconst	c:@E@PHASEPushStreamBufferOptions@PHASEPushStreamBufferDefault	PHASEPushStreamBufferOptions			-	-	-	-	-	bb91b81e05df74d0	1
+enumconst	c:@E@PHASEPushStreamBufferOptions@PHASEPushStreamBufferLoops	PHASEPushStreamBufferOptions			-	-	-	-	-	80b867d32f11df04	2
+enumconst	c:@E@PHASEPushStreamBufferOptions@PHASEPushStreamBufferInterrupts	PHASEPushStreamBufferOptions			-	-	-	-	-	f99f3e979acad74e	4
+enumconst	c:@E@PHASEPushStreamBufferOptions@PHASEPushStreamBufferInterruptsAtLoop	PHASEPushStreamBufferOptions			-	-	-	-	-	07f4c54e266d0aa9	8
+typedef	c:@T@PHASEPushStreamCompletionCallbackCondition	-			enum PHASEPushStreamCompletionCallbackCondition	-	-	-	-	14d02e3ade8c9789	-
+enum	c:@E@PHASEPushStreamCompletionCallbackCondition	-			NSInteger	-	-	-	-	037d277d9009885a	-
+enumconst	c:@E@PHASEPushStreamCompletionCallbackCondition@PHASEPushStreamCompletionDataRendered	PHASEPushStreamCompletionCallbackCondition			-	-	-	-	-	88ab59933afb7ea7	0
+interface	c:objc(cs)PHASESoundEventNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c94059ae275d64fa	-
+super	-	PHASESoundEventNodeDefinition	PHASEDefinition		-	-	-	-	-	eeae33ec25ec1d11	-
+method	c:objc(cs)PHASESoundEventNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c5dfe976a4581a0f	-
+method	c:objc(cs)PHASESoundEventNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b6b62d2340b08c1e	-
+property	c:objc(cs)PHASESoundEventNodeDefinition(py)children	-			NSArray<PHASESoundEventNodeDefinition *> *	-	readonly,copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	671147829822de73	-
+interface	c:objc(cs)PHASEGeneratorNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	05f1c40e03610bf0	-
+super	-	PHASEGeneratorNodeDefinition	PHASESoundEventNodeDefinition		-	-	-	-	-	0a37f752b7692be8	-
+method	c:objc(cs)PHASEGeneratorNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b38ae2fcf276d802	-
+method	c:objc(cs)PHASEGeneratorNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a529230b9fffd221	-
+method	c:objc(cs)PHASEGeneratorNodeDefinition(im)setCalibrationMode:level:	-			void	PHASECalibrationMode calibrationMode | double level	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7973da3120df7703	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)calibrationMode	-			PHASECalibrationMode	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cb98a93978539c26	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)level	-			double	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3a6971bc4cc113f4	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)rate	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4c4acfe1f006d57f	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)group	-			PHASEGroup *	-	weak,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	55c9c7854ec4c9df	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)gainMetaParameterDefinition	-			PHASENumberMetaParameterDefinition *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1422562e24f8f071	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)rateMetaParameterDefinition	-			PHASENumberMetaParameterDefinition *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a94154973d7e2d28	-
+property	c:objc(cs)PHASEGeneratorNodeDefinition(py)mixerDefinition	-			PHASEMixerDefinition *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2b0412de61dfe4ce	-
+interface	c:objc(cs)PHASESamplerNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	eaa58dc74b3db055	-
+super	-	PHASESamplerNodeDefinition	PHASEGeneratorNodeDefinition		-	-	-	-	-	4b9dd9b0c267c9f3	-
+method	c:objc(cs)PHASESamplerNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5e6f83626770fa0e	-
+method	c:objc(cs)PHASESamplerNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ed0e3fbbe956ea56	-
+method	c:objc(cs)PHASESamplerNodeDefinition(im)initWithSoundAssetIdentifier:mixerDefinition:identifier:	-			instancetype	NSString * soundAssetIdentifier | PHASEMixerDefinition * mixerDefinition | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5461c1d8fc0a6c46	-
+method	c:objc(cs)PHASESamplerNodeDefinition(im)initWithSoundAssetIdentifier:mixerDefinition:	-			instancetype	NSString * soundAssetIdentifier | PHASEMixerDefinition * mixerDefinition	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0629166c211522f0	-
+property	c:objc(cs)PHASESamplerNodeDefinition(py)assetIdentifier	-			NSString *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	860610ef760db4c6	-
+property	c:objc(cs)PHASESamplerNodeDefinition(py)cullOption	-			PHASECullOption	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c266ea0c94e78fc1	-
+property	c:objc(cs)PHASESamplerNodeDefinition(py)playbackMode	-			PHASEPlaybackMode	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	238c9cd457b6842c	-
+interface	c:objc(cs)PHASEContainerNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3383809af1453fc4	-
+super	-	PHASEContainerNodeDefinition	PHASESoundEventNodeDefinition		-	-	-	-	-	1a4f27f2f797049a	-
+method	c:objc(cs)PHASEContainerNodeDefinition(im)init	-			instancetype	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	96cfeb4ebac7ad74	-
+method	c:objc(cs)PHASEContainerNodeDefinition(cm)new	-			instancetype	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d2fe3be89db4797e	-
+method	c:objc(cs)PHASEContainerNodeDefinition(im)initWithIdentifier:	-			instancetype	NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ca06db80dd33cb6e	-
+method	c:objc(cs)PHASEContainerNodeDefinition(im)addSubtree:	-			void	PHASESoundEventNodeDefinition * subtree	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6f0a88034995850d	-
+interface	c:objc(cs)PHASEBlendNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	255191af51e01ab9	-
+super	-	PHASEBlendNodeDefinition	PHASESoundEventNodeDefinition		-	-	-	-	-	73bd95c4403cf10c	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	eedbfdad29b75d2b	-
+method	c:objc(cs)PHASEBlendNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a99094f7b39b2f08	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)initWithBlendMetaParameterDefinition:identifier:	-			instancetype	PHASENumberMetaParameterDefinition * blendMetaParameterDefinition | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1d40117930c307c4	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)initWithBlendMetaParameterDefinition:	-			instancetype	PHASENumberMetaParameterDefinition * blendMetaParameterDefinition	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	874d22865f0f20e7	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)initDistanceBlendWithSpatialMixerDefinition:identifier:	-			instancetype	PHASESpatialMixerDefinition * spatialMixerDefinition | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f2870cc47c44238d	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)initDistanceBlendWithSpatialMixerDefinition:	-			instancetype	PHASESpatialMixerDefinition * spatialMixerDefinition	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	48d9ed13f644b55b	-
+property	c:objc(cs)PHASEBlendNodeDefinition(py)blendParameterDefinition	-			PHASENumberMetaParameterDefinition *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b4931f4d3fe56d18	-
+property	c:objc(cs)PHASEBlendNodeDefinition(py)spatialMixerDefinitionForDistance	-			PHASESpatialMixerDefinition *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b81bf8edcef4a1d6	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)addRangeForInputValuesBelow:fullGainAtValue:fadeCurveType:subtree:	-			void	double value | double fullGainAtValue | PHASECurveType fadeCurveType | PHASESoundEventNodeDefinition * subtree	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f7de4d975da826f4	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)addRangeForInputValuesBetween:highValue:fullGainAtLowValue:fullGainAtHighValue:lowFadeCurveType:highFadeCurveType:subtree:	-			void	double lowValue | double highValue | double fullGainAtLowValue | double fullGainAtHighValue | PHASECurveType lowFadeCurveType | PHASECurveType highFadeCurveType | PHASESoundEventNodeDefinition * subtree	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	150c4e25ae48fb64	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)addRangeForInputValuesAbove:fullGainAtValue:fadeCurveType:subtree:	-			void	double value | double fullGainAtValue | PHASECurveType fadeCurveType | PHASESoundEventNodeDefinition * subtree	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	de82adeafd991e05	-
+method	c:objc(cs)PHASEBlendNodeDefinition(im)addRangeWithEnvelope:subtree:	-			void	PHASEEnvelope * envelope | PHASESoundEventNodeDefinition * subtree	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b32ce8896be8d13c	-
+interface	c:objc(cs)PHASESwitchNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	af8858589f320725	-
+super	-	PHASESwitchNodeDefinition	PHASESoundEventNodeDefinition		-	-	-	-	-	f70366964171e6cf	-
+method	c:objc(cs)PHASESwitchNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fa48b77a782fa26f	-
+method	c:objc(cs)PHASESwitchNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	38157a14f10f8e01	-
+method	c:objc(cs)PHASESwitchNodeDefinition(im)initWithSwitchMetaParameterDefinition:identifier:	-			instancetype	PHASEStringMetaParameterDefinition * switchMetaParameterDefinition | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	917905cf04a6c621	-
+method	c:objc(cs)PHASESwitchNodeDefinition(im)initWithSwitchMetaParameterDefinition:	-			instancetype	PHASEStringMetaParameterDefinition * switchMetaParameterDefinition	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	de1584484a0727b9	-
+method	c:objc(cs)PHASESwitchNodeDefinition(im)addSubtree:switchValue:	-			void	PHASESoundEventNodeDefinition * subtree | NSString * switchValue	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0d24b03f4a3f6f58	-
+property	c:objc(cs)PHASESwitchNodeDefinition(py)switchMetaParameterDefinition	-			PHASEStringMetaParameterDefinition *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f39a97ca81fa078d	-
+interface	c:objc(cs)PHASERandomNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d27bf4f12365db96	-
+super	-	PHASERandomNodeDefinition	PHASESoundEventNodeDefinition		-	-	-	-	-	b8a56a07d4ec1216	-
+method	c:objc(cs)PHASERandomNodeDefinition(im)init	-			instancetype	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9385080505016761	-
+method	c:objc(cs)PHASERandomNodeDefinition(im)initWithIdentifier:	-			instancetype	NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	72f50ae7ebe8aedc	-
+method	c:objc(cs)PHASERandomNodeDefinition(im)addSubtree:weight:	-			void	PHASESoundEventNodeDefinition * subtree | NSNumber * weight	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bde56df5bbbce62c	-
+property	c:objc(cs)PHASERandomNodeDefinition(py)uniqueSelectionQueueLength	-			NSInteger	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5b4c2b21d0be13b2	-
+interface	c:objc(cs)PHASEStreamNode	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	9526394cdcf2552d	-
+super	-	PHASEStreamNode	NSObject		-	-	-	-	-	3053950935897408	-
+method	c:objc(cs)PHASEStreamNode(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	5046fc5019d92654	-
+method	c:objc(cs)PHASEStreamNode(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	e0a22e427a641026	-
+property	c:objc(cs)PHASEStreamNode(py)gainMetaParameter	-			PHASENumberMetaParameter *	-	readonly,strong,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	fda54ed2dd331c6f	-
+property	c:objc(cs)PHASEStreamNode(py)rateMetaParameter	-			PHASENumberMetaParameter *	-	readonly,strong,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	f28a0676b5f67a92	-
+property	c:objc(cs)PHASEStreamNode(py)mixer	-			PHASEMixer *	-	readonly,strong,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	90cca42a88b0895c	-
+property	c:objc(cs)PHASEStreamNode(py)format	-			AVAudioFormat *	-	readonly,strong,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	81d461a537501788	-
+interface	c:objc(cs)PHASEPushStreamNodeDefinition	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	07b9e43c0c4df9f9	-
+super	-	PHASEPushStreamNodeDefinition	PHASEGeneratorNodeDefinition		-	-	-	-	-	71570d5be681b88c	-
+method	c:objc(cs)PHASEPushStreamNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d439a46b5e26c182	-
+method	c:objc(cs)PHASEPushStreamNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8b1bd515ed3e9a0e	-
+method	c:objc(cs)PHASEPushStreamNodeDefinition(im)initWithMixerDefinition:format:identifier:	-			instancetype	PHASEMixerDefinition * mixerDefinition | AVAudioFormat * format | NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	672ecdbb4459d519	-
+method	c:objc(cs)PHASEPushStreamNodeDefinition(im)initWithMixerDefinition:format:	-			instancetype	PHASEMixerDefinition * mixerDefinition | AVAudioFormat * format	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2e975a3f517b2c41	-
+property	c:objc(cs)PHASEPushStreamNodeDefinition(py)format	-			AVAudioFormat *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b34f951c10703378	-
+property	c:objc(cs)PHASEPushStreamNodeDefinition(py)normalize	-			BOOL	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	dbd4b503a93b5887	-
+interface	c:objc(cs)PHASEPushStreamNode	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c655e8ddab2b2976	-
+super	-	PHASEPushStreamNode	PHASEStreamNode		-	-	-	-	-	c4098dae4bd95872	-
+method	c:objc(cs)PHASEPushStreamNode(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ed13236afb05a3d5	-
+method	c:objc(cs)PHASEPushStreamNode(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6a469fd22f270907	-
+property	c:objc(cs)PHASEPushStreamNode(py)gainMetaParameter	-			PHASENumberMetaParameter *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9d6ff7c79ca07164	-
+property	c:objc(cs)PHASEPushStreamNode(py)rateMetaParameter	-			PHASENumberMetaParameter *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9a29be76f5c5af8b	-
+property	c:objc(cs)PHASEPushStreamNode(py)mixer	-			PHASEMixer *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8bb5eeb31e7ee29b	-
+property	c:objc(cs)PHASEPushStreamNode(py)format	-			AVAudioFormat *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d791f67948dd2933	-
+method	c:objc(cs)PHASEPushStreamNode(im)scheduleBuffer:	-			void	AVAudioPCMBuffer * buffer	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1893c01a8e2fabba	-
+method	c:objc(cs)PHASEPushStreamNode(im)scheduleBuffer:completionCallbackType:completionHandler:	-			void	AVAudioPCMBuffer * buffer | PHASEPushStreamCompletionCallbackCondition completionCallbackType | void (^)(PHASEPushStreamCompletionCallbackCondition) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3e6996e04c239d40	-
+method	c:objc(cs)PHASEPushStreamNode(im)scheduleBuffer:atTime:options:	-			void	AVAudioPCMBuffer * buffer | AVAudioTime * when | PHASEPushStreamBufferOptions options	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	83816b7f3e0ca61c	-
+method	c:objc(cs)PHASEPushStreamNode(im)scheduleBuffer:atTime:options:completionCallbackType:completionHandler:	-			void	AVAudioPCMBuffer * buffer | AVAudioTime * when | PHASEPushStreamBufferOptions options | PHASEPushStreamCompletionCallbackCondition completionCallbackType | void (^)(PHASEPushStreamCompletionCallbackCondition) completionHandler	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e773b9be8f6d38a7	-
+typedef	c:@T@PHASEPullStreamRenderBlock	-			OSStatus ((^))(BOOL *, const AudioTimeStamp *, AVAudioFrameCount, AudioBufferList *)	-	-	-	-	00e3573d9e078f45	-
+interface	c:objc(cs)PHASEPullStreamNodeDefinition	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	11dafb219f10397d	-
+super	-	PHASEPullStreamNodeDefinition	PHASEGeneratorNodeDefinition		-	-	-	-	-	9ca8b3e89cb1ca9b	-
+method	c:objc(cs)PHASEPullStreamNodeDefinition(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	4c36f6bae65d699e	-
+method	c:objc(cs)PHASEPullStreamNodeDefinition(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	ad9441aa346141c1	-
+method	c:objc(cs)PHASEPullStreamNodeDefinition(im)initWithMixerDefinition:format:identifier:	-			instancetype	PHASEMixerDefinition * mixerDefinition | AVAudioFormat * format | NSString * identifier	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	f5565f06354ce400	-
+method	c:objc(cs)PHASEPullStreamNodeDefinition(im)initWithMixerDefinition:format:	-			instancetype	PHASEMixerDefinition * mixerDefinition | AVAudioFormat * format	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	e7e081abaee57e68	-
+property	c:objc(cs)PHASEPullStreamNodeDefinition(py)format	-			AVAudioFormat *	-	readonly,strong,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	6cebeca30639b87d	-
+property	c:objc(cs)PHASEPullStreamNodeDefinition(py)normalize	-			BOOL	-	nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	5c7bc2e937a5d19e	-
+interface	c:objc(cs)PHASEPullStreamNode	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	03382f32f169bc7b	-
+super	-	PHASEPullStreamNode	PHASEStreamNode		-	-	-	-	-	dc1f90334543f86f	-
+method	c:objc(cs)PHASEPullStreamNode(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	fb11e861fc98a708	-
+method	c:objc(cs)PHASEPullStreamNode(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	5de2716a266fbf60	-
+property	c:objc(cs)PHASEPullStreamNode(py)renderBlock	-			PHASEPullStreamRenderBlock	-	strong,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	a1d312c11d3d60bf	-
+interface	c:objc(cs)PHASEAsset	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	78cdf6136464b1c1	-
+super	-	PHASEAsset	NSObject		-	-	-	-	-	678c637d811bdc15	-
+method	c:objc(cs)PHASEAsset(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	621923bfabaf184a	-
+method	c:objc(cs)PHASEAsset(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bb0d0c2220471200	-
+property	c:objc(cs)PHASEAsset(py)identifier	-			NSString *	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d5d24dbcdc4ce10b	-
+interface	c:objc(cs)PHASESoundAsset	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	326de565be8450ae	-
+super	-	PHASESoundAsset	PHASEAsset		-	-	-	-	-	04e5bf3187f4a980	-
+method	c:objc(cs)PHASESoundAsset(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a718a575ee54c907	-
+method	c:objc(cs)PHASESoundAsset(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3fcdb114835dce00	-
+property	c:objc(cs)PHASESoundAsset(py)url	-			NSURL *	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e95370846f90fe93	-
+property	c:objc(cs)PHASESoundAsset(py)data	-			NSData *	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0dccaa8ff92b897c	-
+property	c:objc(cs)PHASESoundAsset(py)type	-			PHASEAssetType	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0fcca9dfa3513c73	-
+interface	c:objc(cs)PHASESoundEventNodeAsset	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4e82a8b72eaca59b	-
+super	-	PHASESoundEventNodeAsset	PHASEAsset		-	-	-	-	-	1ef7f8f40b3bf19d	-
+method	c:objc(cs)PHASESoundEventNodeAsset(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fe97417b88ea1949	-
+method	c:objc(cs)PHASESoundEventNodeAsset(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	47f1613ef7f07bfa	-
+interface	c:objc(cs)PHASEGlobalMetaParameterAsset	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b5beb845a9a75812	-
+super	-	PHASEGlobalMetaParameterAsset	PHASEAsset		-	-	-	-	-	14e5da59167815f0	-
+method	c:objc(cs)PHASEGlobalMetaParameterAsset(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a1d325375b567788	-
+method	c:objc(cs)PHASEGlobalMetaParameterAsset(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5fc9ba219338a645	-
+interface	c:objc(cs)PHASEAssetRegistry	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3a9f225885355f8a	-
+super	-	PHASEAssetRegistry	NSObject		-	-	-	-	-	609ef3d4b8400bb7	-
+method	c:objc(cs)PHASEAssetRegistry(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3e94b6652d8afa79	-
+method	c:objc(cs)PHASEAssetRegistry(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2ea5e56686a8c81f	-
+method	c:objc(cs)PHASEAssetRegistry(im)registerGlobalMetaParameter:error:	-			PHASEGlobalMetaParameterAsset *	PHASEMetaParameterDefinition * metaParameterDefinition | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	426dc952ecc5a97a	-
+method	c:objc(cs)PHASEAssetRegistry(im)registerSoundEventAssetWithRootNode:identifier:error:	-			PHASESoundEventNodeAsset *	PHASESoundEventNodeDefinition * rootNode | NSString * identifier | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5a906edfea56d026	-
+method	c:objc(cs)PHASEAssetRegistry(im)registerSoundAssetAtURL:identifier:assetType:channelLayout:normalizationMode:error:	-			PHASESoundAsset *	NSURL * url | NSString * identifier | PHASEAssetType assetType | AVAudioChannelLayout * channelLayout | PHASENormalizationMode normalizationMode | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	70ca0056c9c334fb	-
+method	c:objc(cs)PHASEAssetRegistry(im)registerSoundAssetWithData:identifier:format:normalizationMode:error:	-			PHASESoundAsset *	NSData * data | NSString * identifier | AVAudioFormat * format | PHASENormalizationMode normalizationMode | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	da1d97734597691e	-
+method	c:objc(cs)PHASEAssetRegistry(im)unregisterAssetWithIdentifier:completion:	-			void	NSString * identifier | void (^)(_Bool) handler	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	83a1c495ea5e6277	-
+method	c:objc(cs)PHASEAssetRegistry(im)assetForIdentifier:	-			PHASEAsset *	NSString * identifier	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b789379e4e8d19a5	-
+property	c:objc(cs)PHASEAssetRegistry(py)globalMetaParameters	-			NSDictionary<NSString *,PHASEMetaParameter *> *	-	readonly,copy,atomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d9013a69704a98c7	-
+interface	c:objc(cs)PHASECardioidDirectivityModelSubbandParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	caf09117e0703007	-
+super	-	PHASECardioidDirectivityModelSubbandParameters	NSObject		-	-	-	-	-	788f5a382be6959c	-
+method	c:objc(cs)PHASECardioidDirectivityModelSubbandParameters(im)init	-			instancetype	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e904714416362391	-
+property	c:objc(cs)PHASECardioidDirectivityModelSubbandParameters(py)frequency	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fd3be1e78bef2aac	-
+property	c:objc(cs)PHASECardioidDirectivityModelSubbandParameters(py)pattern	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0f865f719e1e7450	-
+property	c:objc(cs)PHASECardioidDirectivityModelSubbandParameters(py)sharpness	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	25304335533a1cc8	-
+interface	c:objc(cs)PHASEConeDirectivityModelSubbandParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	817dd9489fb66b9f	-
+super	-	PHASEConeDirectivityModelSubbandParameters	NSObject		-	-	-	-	-	dd806d48df78d43e	-
+method	c:objc(cs)PHASEConeDirectivityModelSubbandParameters(im)init	-			instancetype	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f2cedc3f3b5008bd	-
+method	c:objc(cs)PHASEConeDirectivityModelSubbandParameters(im)setInnerAngle:outerAngle:	-			void	double innerAngle | double outerAngle	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b8534e31a91ce44c	-
+property	c:objc(cs)PHASEConeDirectivityModelSubbandParameters(py)frequency	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2930157d81280920	-
+property	c:objc(cs)PHASEConeDirectivityModelSubbandParameters(py)innerAngle	-			double	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	880e4bb576e51ef1	-
+property	c:objc(cs)PHASEConeDirectivityModelSubbandParameters(py)outerAngle	-			double	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f3dfd78ac614d1f3	-
+property	c:objc(cs)PHASEConeDirectivityModelSubbandParameters(py)outerGain	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a72e12bc09be436d	-
+interface	c:objc(cs)PHASEDirectivityModelParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	69be76037e376b4d	-
+super	-	PHASEDirectivityModelParameters	NSObject		-	-	-	-	-	1b2e9dc8c023281e	-
+method	c:objc(cs)PHASEDirectivityModelParameters(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	130d2e37751d558a	-
+method	c:objc(cs)PHASEDirectivityModelParameters(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	21e6ddb9a95c94c5	-
+interface	c:objc(cs)PHASECardioidDirectivityModelParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8bfd82a35910cd79	-
+super	-	PHASECardioidDirectivityModelParameters	PHASEDirectivityModelParameters		-	-	-	-	-	347010e1e7af5488	-
+method	c:objc(cs)PHASECardioidDirectivityModelParameters(im)initWithSubbandParameters:	-			instancetype	NSArray<PHASECardioidDirectivityModelSubbandParameters *> * subbandParameters	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	237d2e52e186d91b	-
+property	c:objc(cs)PHASECardioidDirectivityModelParameters(py)subbandParameters	-			NSArray<PHASECardioidDirectivityModelSubbandParameters *> *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bad65aa9db2ac7c8	-
+interface	c:objc(cs)PHASEConeDirectivityModelParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	218f8344270ea120	-
+super	-	PHASEConeDirectivityModelParameters	PHASEDirectivityModelParameters		-	-	-	-	-	f11a91ee167b80cc	-
+method	c:objc(cs)PHASEConeDirectivityModelParameters(im)initWithSubbandParameters:	-			instancetype	NSArray<PHASEConeDirectivityModelSubbandParameters *> * subbandParameters	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bc4de608f6ff3323	-
+property	c:objc(cs)PHASEConeDirectivityModelParameters(py)subbandParameters	-			NSArray<PHASEConeDirectivityModelSubbandParameters *> *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d646061692b26b3b	-
+interface	c:objc(cs)PHASEDistanceModelFadeOutParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4a26e2f47ad21488	-
+super	-	PHASEDistanceModelFadeOutParameters	NSObject		-	-	-	-	-	139f89ee81d331cb	-
+method	c:objc(cs)PHASEDistanceModelFadeOutParameters(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4664156071555b7c	-
+method	c:objc(cs)PHASEDistanceModelFadeOutParameters(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a0655e3f8b39d30e	-
+method	c:objc(cs)PHASEDistanceModelFadeOutParameters(im)initWithCullDistance:	-			instancetype	double cullDistance	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7241f9b24a44636a	-
+property	c:objc(cs)PHASEDistanceModelFadeOutParameters(py)cullDistance	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	06b20d3e494a1d14	-
+interface	c:objc(cs)PHASEDistanceModelParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	705cc2f254f4c6f4	-
+super	-	PHASEDistanceModelParameters	NSObject		-	-	-	-	-	59d7abbe4443e6b4	-
+method	c:objc(cs)PHASEDistanceModelParameters(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3d34d69b4d2dce43	-
+method	c:objc(cs)PHASEDistanceModelParameters(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4092ca0ed998f87f	-
+property	c:objc(cs)PHASEDistanceModelParameters(py)fadeOutParameters	-			PHASEDistanceModelFadeOutParameters *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	17d6c04b623114bb	-
+interface	c:objc(cs)PHASEGeometricSpreadingDistanceModelParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3a6dd272f995d8dd	-
+super	-	PHASEGeometricSpreadingDistanceModelParameters	PHASEDistanceModelParameters		-	-	-	-	-	77e261331c0a1c5f	-
+method	c:objc(cs)PHASEGeometricSpreadingDistanceModelParameters(im)init	-			instancetype	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3a139bfe5ced62b1	-
+property	c:objc(cs)PHASEGeometricSpreadingDistanceModelParameters(py)rolloffFactor	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2e7683f47193902c	-
+interface	c:objc(cs)PHASEEnvelopeDistanceModelParameters	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b96bcfb6151ac8e6	-
+super	-	PHASEEnvelopeDistanceModelParameters	PHASEDistanceModelParameters		-	-	-	-	-	2e48d6fcf5c3ab3e	-
+method	c:objc(cs)PHASEEnvelopeDistanceModelParameters(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	77a5f0207587c1d2	-
+method	c:objc(cs)PHASEEnvelopeDistanceModelParameters(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ef9a8e34636126a1	-
+method	c:objc(cs)PHASEEnvelopeDistanceModelParameters(im)initWithEnvelope:	-			instancetype	PHASEEnvelope * envelope	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b8fefdccd7508a9f	-
+property	c:objc(cs)PHASEEnvelopeDistanceModelParameters(py)envelope	-			PHASEEnvelope *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9e6f865d5aa96a1d	-
+interface	c:objc(cs)PHASEDucker	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ce0bb6818a375fc4	-
+super	-	PHASEDucker	NSObject		-	-	-	-	-	c6c28be03544b330	-
+method	c:objc(cs)PHASEDucker(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	81db036b6b2f10b2	-
+method	c:objc(cs)PHASEDucker(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	179d8fecc8349486	-
+method	c:objc(cs)PHASEDucker(im)initWithEngine:sourceGroups:targetGroups:gain:attackTime:releaseTime:attackCurve:releaseCurve:	-			instancetype	PHASEEngine * engine | NSSet<PHASEGroup *> * sourceGroups | NSSet<PHASEGroup *> * targetGroups | double gain | double attackTime | double releaseTime | PHASECurveType attackCurve | PHASECurveType releaseCurve	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3f823af254e6ea72	-
+method	c:objc(cs)PHASEDucker(im)activate	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2299331dcb1c3cd1	-
+method	c:objc(cs)PHASEDucker(im)deactivate	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e41adf6e34c88264	-
+property	c:objc(cs)PHASEDucker(py)sourceGroups	-			NSSet<PHASEGroup *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3c6b25f31425a5ae	-
+property	c:objc(cs)PHASEDucker(py)targetGroups	-			NSSet<PHASEGroup *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f8204d1421cb6c65	-
+property	c:objc(cs)PHASEDucker(py)active	-			BOOL	-	readonly,getter=isActive	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	69a64309e7a5e6c7	-
+property	c:objc(cs)PHASEDucker(py)gain	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	868b9f849df61d9d	-
+property	c:objc(cs)PHASEDucker(py)attackTime	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	82f1717f06cba7e2	-
+property	c:objc(cs)PHASEDucker(py)releaseTime	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cfca1da5e134d0df	-
+property	c:objc(cs)PHASEDucker(py)attackCurve	-			PHASECurveType	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d7944992a6ed1fc9	-
+property	c:objc(cs)PHASEDucker(py)releaseCurve	-			PHASECurveType	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	10df3fcacdabf29a	-
+property	c:objc(cs)PHASEDucker(py)identifier	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7caafd013deab460	-
+interface	c:objc(cs)PHASEGroupPresetSetting	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	404fdda6a10e97c9	-
+super	-	PHASEGroupPresetSetting	NSObject		-	-	-	-	-	d3a172a2f4f2c74a	-
+method	c:objc(cs)PHASEGroupPresetSetting(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e58d618c45c27990	-
+method	c:objc(cs)PHASEGroupPresetSetting(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	75d44cfc0d18ab17	-
+method	c:objc(cs)PHASEGroupPresetSetting(im)initWithGain:rate:gainCurveType:rateCurveType:	-			instancetype	double gain | double rate | PHASECurveType gainCurveType | PHASECurveType rateCurveType	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a7a1ed706d8b2b1d	-
+property	c:objc(cs)PHASEGroupPresetSetting(py)gain	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	010f3958e18495f9	-
+property	c:objc(cs)PHASEGroupPresetSetting(py)rate	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0ffef72c469f68b9	-
+property	c:objc(cs)PHASEGroupPresetSetting(py)gainCurveType	-			PHASECurveType	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	24b361dc937389d5	-
+property	c:objc(cs)PHASEGroupPresetSetting(py)rateCurveType	-			PHASECurveType	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	ec4eb317cda38e16	-
+interface	c:objc(cs)PHASEGroupPreset	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	48be691fe96b0753	-
+super	-	PHASEGroupPreset	NSObject		-	-	-	-	-	f83653cd35051958	-
+method	c:objc(cs)PHASEGroupPreset(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7b2ae3e2f18b8bda	-
+method	c:objc(cs)PHASEGroupPreset(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1fb94657491004c5	-
+method	c:objc(cs)PHASEGroupPreset(im)initWithEngine:settings:timeToTarget:timeToReset:	-			instancetype	PHASEEngine * engine | NSDictionary<NSString *,PHASEGroupPresetSetting *> * settings | double timeToTarget | double timeToReset	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3719824d72a98f51	-
+property	c:objc(cs)PHASEGroupPreset(py)settings	-			NSDictionary<NSString *,PHASEGroupPresetSetting *> *	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d47c9839fe85f6ab	-
+property	c:objc(cs)PHASEGroupPreset(py)timeToTarget	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	13a8141b5a584f2e	-
+property	c:objc(cs)PHASEGroupPreset(py)timeToReset	-			double	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	63aa040c9d250a6a	-
+method	c:objc(cs)PHASEGroupPreset(im)activate	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	49b4b40d8e1ccd89	-
+method	c:objc(cs)PHASEGroupPreset(im)activateWithTimeToTargetOverride:	-			void	double timeToTargetOverride	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c834022a2bfbf808	-
+method	c:objc(cs)PHASEGroupPreset(im)deactivate	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3136049f1fadd9d7	-
+method	c:objc(cs)PHASEGroupPreset(im)deactivateWithTimeToResetOverride:	-			void	double timeToResetOverride	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6c64e1c4a42f7a53	-
+typedef	c:@T@PHASEMediumPreset	-			enum PHASEMediumPreset	-	-	-	-	02cce6d9c0524769	-
+enum	c:@E@PHASEMediumPreset	-			NSInteger	-	-	-	-	877dd2ad34797939	-
+enumconst	c:@E@PHASEMediumPreset@PHASEMediumPresetAir	PHASEMediumPreset			-	-	-	-	-	a58b433fe1fdf206	1835286898
+interface	c:objc(cs)PHASEMedium	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	553df605cfe6623b	-
+super	-	PHASEMedium	NSObject		-	-	-	-	-	ed01f2326302c4a8	-
+method	c:objc(cs)PHASEMedium(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	864592d9060d69ae	-
+method	c:objc(cs)PHASEMedium(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	573d725f844c432d	-
+method	c:objc(cs)PHASEMedium(im)initWithEngine:preset:	-			instancetype	PHASEEngine * engine | PHASEMediumPreset preset	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1bf266bbbb570bc2	-
+interface	c:objc(cs)PHASEObject	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3ffddb133dc4acc7	-
+super	-	PHASEObject	NSObject		-	-	-	-	-	0df503facebf0a2c	-
+conforms	c:objc(cs)PHASEObject	PHASEObject	NSCopying		-	-	-	-	-	be580be22a80c6be	-
+method	c:objc(cs)PHASEObject(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6031671056b0d8f7	-
+method	c:objc(cs)PHASEObject(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7d0fcfaa5f6e7ce6	-
+method	c:objc(cs)PHASEObject(im)initWithEngine:	-			instancetype	PHASEEngine * engine	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3e31760837c39c47	-
+method	c:objc(cs)PHASEObject(im)addChild:error:	-			BOOL	PHASEObject * child | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6bb3ca7591a06fc4	-
+method	c:objc(cs)PHASEObject(im)removeChild:	-			void	PHASEObject * child	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b7cd07c8b0a44705	-
+method	c:objc(cs)PHASEObject(im)removeChildren	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5f37d96343ff9dd0	-
+property	c:objc(cs)PHASEObject(py)parent	-			PHASEObject *	-	readonly,weak,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	99841a8455b31c68	-
+property	c:objc(cs)PHASEObject(py)children	-			NSArray<PHASEObject *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	68ec52d3da96aa99	-
+property	c:objc(cs)PHASEObject(cpy)right	-			simd_float3	-	readonly,class	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	33c8053aadeca4f7	-
+property	c:objc(cs)PHASEObject(cpy)up	-			simd_float3	-	readonly,class	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6424ecae28539b66	-
+property	c:objc(cs)PHASEObject(cpy)forward	-			simd_float3	-	readonly,class	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	61b94c393f5dca11	-
+property	c:objc(cs)PHASEObject(py)transform	-			simd_float4x4	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	81efcb8bfa772fcc	-
+property	c:objc(cs)PHASEObject(py)worldTransform	-			simd_float4x4	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bb5ebd7860ff33ec	-
+interface	c:objc(cs)PHASESoundEvent	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	37c08b5c09b11f29	-
+super	-	PHASESoundEvent	NSObject		-	-	-	-	-	d92d43886883cefb	-
+method	c:objc(cs)PHASESoundEvent(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fd72a816e13920aa	-
+method	c:objc(cs)PHASESoundEvent(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fa4c29f12028302b	-
+method	c:objc(cs)PHASESoundEvent(im)initWithEngine:assetIdentifier:mixerParameters:error:	-			instancetype	PHASEEngine * engine | NSString * assetIdentifier | PHASEMixerParameters * mixerParameters | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	471a50bccc253394	-
+method	c:objc(cs)PHASESoundEvent(im)initWithEngine:assetIdentifier:error:	-			instancetype	PHASEEngine * engine | NSString * assetIdentifier | NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5595528b3555d1c6	-
+method	c:objc(cs)PHASESoundEvent(im)prepareWithCompletion:	-			void	void (^)(PHASESoundEventPrepareHandlerReason) handler	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	dc4b9999d5a347b3	-
+method	c:objc(cs)PHASESoundEvent(im)startWithCompletion:	-			void	void (^)(PHASESoundEventStartHandlerReason) handler	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c5b51e4c76394ed6	-
+method	c:objc(cs)PHASESoundEvent(im)startAtTime:completion:	-			void	AVAudioTime * when | void (^)(PHASESoundEventStartHandlerReason) handler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	d50db77cc476bf17	-
+method	c:objc(cs)PHASESoundEvent(im)seekToTime:completion:	-			void	double time | void (^)(PHASESoundEventSeekHandlerReason) handler	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	977a1df8c63b5c87	-
+method	c:objc(cs)PHASESoundEvent(im)seekToTime:resumeAtEngineTime:completion:	-			void	double time | AVAudioTime * engineTime | void (^)(PHASESoundEventSeekHandlerReason) handler	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	d066215ad21c1dfb	-
+method	c:objc(cs)PHASESoundEvent(im)pause	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	99fcdfcbf262c75a	-
+method	c:objc(cs)PHASESoundEvent(im)resume	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6d523fa606135698	-
+method	c:objc(cs)PHASESoundEvent(im)resumeAtTime:	-			void	AVAudioTime * time	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	252b38bb80dbd4c7	-
+method	c:objc(cs)PHASESoundEvent(im)stopAndInvalidate	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6d7f6b505fb65824	-
+property	c:objc(cs)PHASESoundEvent(py)renderingState	-			PHASERenderingState	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	d5d8aeb913ac6c1b	-
+property	c:objc(cs)PHASESoundEvent(py)prepareState	-			PHASESoundEventPrepareState	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c905bc954dd1ce07	-
+property	c:objc(cs)PHASESoundEvent(py)metaParameters	-			NSDictionary<NSString *,PHASEMetaParameter *> *	-	readonly,copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e89a16b05d167877	-
+property	c:objc(cs)PHASESoundEvent(py)mixers	-			NSDictionary<NSString *,PHASEMixer *> *	-	readonly,copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	fcdf69b2467fa1d5	-
+property	c:objc(cs)PHASESoundEvent(py)pushStreamNodes	-			NSDictionary<NSString *,PHASEPushStreamNode *> *	-	readonly,copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2c4ad6d2c73eafff	-
+property	c:objc(cs)PHASESoundEvent(py)pullStreamNodes	-			NSDictionary<NSString *,PHASEPullStreamNode *> *	-	readonly,copy	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=2.0/-/-/0	-	b32146b317450a13	-
+property	c:objc(cs)PHASESoundEvent(py)indefinite	-			BOOL	-	readonly,getter=isIndefinite	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a278c9c5914ee506	-
+interface	c:objc(cs)PHASEEngine	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9f024664fd348332	-
+super	-	PHASEEngine	NSObject		-	-	-	-	-	00712feca9b360f2	-
+method	c:objc(cs)PHASEEngine(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a48bd48f203bfc7b	-
+method	c:objc(cs)PHASEEngine(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	55ad6779bf06ee15	-
+method	c:objc(cs)PHASEEngine(im)initWithUpdateMode:	-			instancetype	PHASEUpdateMode updateMode	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3ac1ffe146c125ab	-
+method	c:objc(cs)PHASEEngine(im)initWithUpdateMode:renderingMode:	-			instancetype	PHASEUpdateMode updateMode | PHASERenderingMode renderingMode	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=26.0/-/-/0	-	a12b1c6ac6a2dc04	-
+method	c:objc(cs)PHASEEngine(im)startAndReturnError:	-			BOOL	NSError * _Nullable * error	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	74b66a6f7f24e0d4	-
+method	c:objc(cs)PHASEEngine(im)pause	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	26ac9928582708c7	-
+method	c:objc(cs)PHASEEngine(im)stop	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	7f9e14ca7689644c	-
+method	c:objc(cs)PHASEEngine(im)update	-			void	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4451a9fa5f2a62cc	-
+property	c:objc(cs)PHASEEngine(py)outputSpatializationMode	-			PHASESpatializationMode	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c5e72864a89d3a24	-
+property	c:objc(cs)PHASEEngine(py)renderingState	-			PHASERenderingState	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	323281ea4dcc4101	-
+property	c:objc(cs)PHASEEngine(py)rootObject	-			PHASEObject *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	39f8f40ea5be6d1b	-
+property	c:objc(cs)PHASEEngine(py)defaultMedium	-			PHASEMedium *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	cba50b41b8c8e545	-
+property	c:objc(cs)PHASEEngine(py)defaultReverbPreset	-			PHASEReverbPreset	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	31ba511707c84f05	-
+property	c:objc(cs)PHASEEngine(py)unitsPerSecond	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	71ce6035af4fe144	-
+property	c:objc(cs)PHASEEngine(py)unitsPerMeter	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	1846034bff4b6b5e	-
+property	c:objc(cs)PHASEEngine(py)assetRegistry	-			PHASEAssetRegistry *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	61ab915ecd5ef71d	-
+property	c:objc(cs)PHASEEngine(py)soundEvents	-			NSArray<PHASESoundEvent *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bc4a0a3b642bf94f	-
+property	c:objc(cs)PHASEEngine(py)groups	-			NSDictionary<NSString *,PHASEGroup *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	aad59f1e1bc86873	-
+property	c:objc(cs)PHASEEngine(py)duckers	-			NSArray<PHASEDucker *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	783b10931df5ee36	-
+property	c:objc(cs)PHASEEngine(py)activeGroupPreset	-			PHASEGroupPreset *	-	readonly,strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	735cabe58cf58c0d	-
+property	c:objc(cs)PHASEEngine(py)lastRenderTime	-			AVAudioTime *	-	readonly,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	da5cee6b883fb307	-
+interface	c:objc(cs)PHASEListener	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	6a914ff2954da06c	-
+super	-	PHASEListener	PHASEObject		-	-	-	-	-	959b2b6867bb9ed4	-
+method	c:objc(cs)PHASEListener(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	28d416e84e9fa392	-
+method	c:objc(cs)PHASEListener(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	62e51eb52149c7f1	-
+method	c:objc(cs)PHASEListener(im)initWithEngine:	-			instancetype	PHASEEngine * engine	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	922fa993270d28b3	-
+property	c:objc(cs)PHASEListener(py)gain	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3cc8fa36544ac193	-
+property	c:objc(cs)PHASEListener(py)automaticHeadTrackingFlags	-			PHASEAutomaticHeadTrackingFlags	-	assign,nonatomic	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1,xros=26.0/-/-/0	-	f4cdf1997850503a	-
+typedef	c:@T@PHASEMaterialPreset	-			enum PHASEMaterialPreset	-	-	-	-	d943b3245f94d544	-
+enum	c:@E@PHASEMaterialPreset	-			NSInteger	-	-	-	-	126b42bebdee3cbb	-
+enumconst	c:@E@PHASEMaterialPreset@PHASEMaterialPresetCardboard	PHASEMaterialPreset			-	-	-	-	-	fb11d060452c1165	1833136740
+enumconst	c:@E@PHASEMaterialPreset@PHASEMaterialPresetGlass	PHASEMaterialPreset			-	-	-	-	-	ec273182f9d98f7d	1833397363
+enumconst	c:@E@PHASEMaterialPreset@PHASEMaterialPresetBrick	PHASEMaterialPreset			-	-	-	-	-	8160bb3a4224f0b5	1833071211
+enumconst	c:@E@PHASEMaterialPreset@PHASEMaterialPresetConcrete	PHASEMaterialPreset			-	-	-	-	-	42e68fcab43d0864	1833132914
+enumconst	c:@E@PHASEMaterialPreset@PHASEMaterialPresetDrywall	PHASEMaterialPreset			-	-	-	-	-	5283c23cbfbaa81d	1833202295
+enumconst	c:@E@PHASEMaterialPreset@PHASEMaterialPresetWood	PHASEMaterialPreset			-	-	-	-	-	4fea0c2a3f2e66a7	1834448228
+interface	c:objc(cs)PHASEMaterial	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	9ee3e4193dae457f	-
+super	-	PHASEMaterial	NSObject		-	-	-	-	-	c85793bf9f4e013b	-
+method	c:objc(cs)PHASEMaterial(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4bbd6188e560b9d2	-
+method	c:objc(cs)PHASEMaterial(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e0f0ef8d8727f912	-
+method	c:objc(cs)PHASEMaterial(im)initWithEngine:preset:	-			instancetype	PHASEEngine * engine | PHASEMaterialPreset preset	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	afb34f5878cc9b3f	-
+interface	c:objc(cs)PHASEShapeElement	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	4cc0cc2d0d611f0f	-
+super	-	PHASEShapeElement	NSObject		-	-	-	-	-	257e1373d6dda9c0	-
+method	c:objc(cs)PHASEShapeElement(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0596915b143d13a8	-
+method	c:objc(cs)PHASEShapeElement(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	a3f4ef03678353fd	-
+property	c:objc(cs)PHASEShapeElement(py)material	-			PHASEMaterial *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	35f9be81d1850e86	-
+interface	c:objc(cs)PHASEShape	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2202df03be65d032	-
+super	-	PHASEShape	NSObject		-	-	-	-	-	efe905e4e938ad90	-
+conforms	c:objc(cs)PHASEShape	PHASEShape	NSCopying		-	-	-	-	-	30076533299f6666	-
+method	c:objc(cs)PHASEShape(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5d841a97b0d44234	-
+method	c:objc(cs)PHASEShape(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8f6b4f6fe8346e82	-
+method	c:objc(cs)PHASEShape(im)initWithEngine:mesh:	-			instancetype	PHASEEngine * engine | MDLMesh * mesh	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	790d513b0b536e5a	-
+method	c:objc(cs)PHASEShape(im)initWithEngine:mesh:materials:	-			instancetype	PHASEEngine * engine | MDLMesh * mesh | NSArray<PHASEMaterial *> * materials	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	81569ebc411c6c54	-
+property	c:objc(cs)PHASEShape(py)elements	-			NSArray<PHASEShapeElement *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	8cd66480d6975c9a	-
+interface	c:objc(cs)PHASEOccluder	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e944d0e8ea995739	-
+super	-	PHASEOccluder	PHASEObject		-	-	-	-	-	ea896537411fcda8	-
+method	c:objc(cs)PHASEOccluder(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bbc2fe100c849df5	-
+method	c:objc(cs)PHASEOccluder(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	62ee7944d1e32503	-
+method	c:objc(cs)PHASEOccluder(im)initWithEngine:	-			instancetype	PHASEEngine * engine	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	5d8f828d8e4812c0	-
+method	c:objc(cs)PHASEOccluder(im)initWithEngine:shapes:	-			instancetype	PHASEEngine * engine | NSArray<PHASEShape *> * shapes	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	40014ba36ab3563a	-
+property	c:objc(cs)PHASEOccluder(py)shapes	-			NSArray<PHASEShape *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	462c4bc1f1a449a4	-
+interface	c:objc(cs)PHASESource	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	309feeb8cc3c4fa9	-
+super	-	PHASESource	PHASEObject		-	-	-	-	-	d882a6d74fb6c04e	-
+method	c:objc(cs)PHASESource(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	3d164ff60186b16e	-
+method	c:objc(cs)PHASESource(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	2eb6c128a8acb06e	-
+method	c:objc(cs)PHASESource(im)initWithEngine:	-			instancetype	PHASEEngine * engine	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e99dd7ce281b1f0a	-
+method	c:objc(cs)PHASESource(im)initWithEngine:shapes:	-			instancetype	PHASEEngine * engine | NSArray<PHASEShape *> * shapes	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	c7722940b8d4f8a1	-
+property	c:objc(cs)PHASESource(py)gain	-			double	-	assign,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	e9e7f106d95045a7	-
+property	c:objc(cs)PHASESource(py)shapes	-			NSArray<PHASEShape *> *	-	readonly,copy,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0da0981d11d36e2e	-
+typedef	c:@T@PHASESpatialCategory	-			NSString *	-	-	-	-	cb629e57d40cdd06	-
+var	c:@PHASESpatialCategoryDirectPathTransmission	-			const PHASESpatialCategory	-	-	-	-	6054b3ca82b981c1	-
+var	c:@PHASESpatialCategoryEarlyReflections	-			const PHASESpatialCategory	-	-	-	-	6dbdd624cf5f06ad	-
+var	c:@PHASESpatialCategoryLateReverb	-			const PHASESpatialCategory	-	-	-	-	d69773b75298a78c	-
+typedef	c:@T@PHASESpatialPipelineFlags	-			enum PHASESpatialPipelineFlags	-	-	-	-	9c2a60d345ecadc1	-
+enum	c:@E@PHASESpatialPipelineFlags	-			NSUInteger	-	-	-	-	81d241cf9e25174c	-
+enumconst	c:@E@PHASESpatialPipelineFlags@PHASESpatialPipelineFlagDirectPathTransmission	PHASESpatialPipelineFlags			-	-	-	-	-	a545f00626b3ad78	1
+enumconst	c:@E@PHASESpatialPipelineFlags@PHASESpatialPipelineFlagEarlyReflections	PHASESpatialPipelineFlags			-	-	-	-	-	8e9dd38f42d93e17	2
+enumconst	c:@E@PHASESpatialPipelineFlags@PHASESpatialPipelineFlagLateReverb	PHASESpatialPipelineFlags			-	-	-	-	-	7109be4261a11c9e	4
+interface	c:objc(cs)PHASESpatialPipelineEntry	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	bc57d2c3d76d5f0b	-
+super	-	PHASESpatialPipelineEntry	NSObject		-	-	-	-	-	9dae70a5141ba6d0	-
+property	c:objc(cs)PHASESpatialPipelineEntry(py)sendLevel	-			double	-	nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	34ce5de419605f22	-
+property	c:objc(cs)PHASESpatialPipelineEntry(py)sendLevelMetaParameterDefinition	-			PHASENumberMetaParameterDefinition *	-	strong,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	53bf38fbf3e7faf9	-
+interface	c:objc(cs)PHASESpatialPipeline	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b2c7e570eea44d81	-
+super	-	PHASESpatialPipeline	NSObject		-	-	-	-	-	b8a5fba45fdc65de	-
+method	c:objc(cs)PHASESpatialPipeline(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	67d97df6e99b4f6a	-
+method	c:objc(cs)PHASESpatialPipeline(cm)new	-			instancetype	-	-	*unavailable ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	b1361adb129570a6	-
+method	c:objc(cs)PHASESpatialPipeline(im)initWithFlags:	-			instancetype	PHASESpatialPipelineFlags flags	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	0806dfeb452bb5a5	-
+property	c:objc(cs)PHASESpatialPipeline(py)flags	-			PHASESpatialPipelineFlags	-	readonly,nonatomic	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	f9fb399f106b0373	-
+property	c:objc(cs)PHASESpatialPipeline(py)entries	-			NSDictionary<PHASESpatialCategory,PHASESpatialPipelineEntry *> *	-	readonly,copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=17.0/-/-/0,watchos=-/-/-/1	-	20317f19eb1de179	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@simd_double2	-			double __attribute__((ext_vector_type(2)))	-	-	-	-	99822a9fba6409c0	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@simd_quatf	-			struct simd_quatf	-	-	-	-	6f7e5a385ce21003	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@OSStatus	-			SInt32	-	-	-	-	c9d4cae3c2778a27	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+typedef	c:@T@AudioTimeStamp	-			struct AudioTimeStamp	-	-	-	-	569ed97d1f95f524	-
+typedef	c:@T@AVAudioFrameCount	-			uint32_t	-	-	-	-	2bfc456a841f49a8	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@AudioBufferList	-			struct AudioBufferList	-	-	-	-	07faf9bcbab5aaf3	-
+typedef	c:@T@simd_float3	-			float __attribute__((ext_vector_type(3)))	-	-	-	-	0fce24b6ffb4ccd2	-
+typedef	c:@T@simd_float4x4	-			struct simd_float4x4	-	-	-	-	23bb586ffbc899fb	-

@@ -1,0 +1,2 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_RelevanceKit_MapKit	method	RelevantContext.location(category:)	26.0				container

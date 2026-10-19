@@ -1,0 +1,22 @@
+set_project("charonreleasemeasure")
+set_version("0.0.1")
+-- The release measurement of tests/backports/emulate/release-measure: an application that links only the 6.1.3 release's own
+-- frameworks (no apple-backports package), so its answers are the release's, not the port's. Every class it names is looked up
+-- at run time, so a class the release lacks answers nil instead of failing the load.
+local root = os.getenv("CHARPHOTOBRACKET_ROOT") or path.join(os.scriptdir(), "../../../../..")
+add_repositories("charon " .. root)
+add_addons("charon v0.8.17")
+set_config("apple_minimum", os.getenv("CHARPHOTOBRACKET_MINIMUM") or "6.1.3")
+includes("@addon/charon/apple-ios")
+includes("@addon/charon/emulate")
+set_defaultplat("iphoneos")
+set_defaultarchs("iphoneos|armv7")
+
+target("charonreleasemeasure")
+    add_rules("@addon/charon/app")
+    add_files(path.join(root, "tests/backports/emulate/release-measure/app/main.m"))
+    add_mflags("-fobjc-arc")
+    add_ldflags("-fobjc-arc", {force = true})
+    add_frameworks("Foundation", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreImage", "AVFoundation")
+    set_values("app.plist-file", "Info.plist")
+    set_values("charon.control", "control")

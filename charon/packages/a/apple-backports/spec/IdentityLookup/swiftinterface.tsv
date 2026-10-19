@@ -1,0 +1,36 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+IdentityLookup	protocol	LiveCallerIDLookupProtocol	18.0				own
+IdentityLookup	property	LiveCallerIDLookupProtocol.context	18.0				container
+IdentityLookup	enum	CallLookupExtensionStatus	18.0				own
+IdentityLookup	constant	CallLookupExtensionStatus.disabled	18.0				container
+IdentityLookup	constant	CallLookupExtensionStatus.enabled	18.0				container
+IdentityLookup	method	CallLookupExtensionStatus.==(a:b:)	18.0				container
+IdentityLookup	method	CallLookupExtensionStatus.hash(into:)	18.0				container
+IdentityLookup	property	CallLookupExtensionStatus.hashValue	18.0				container
+IdentityLookup	class	LiveCallerIDLookupManager	18.0				own
+IdentityLookup	property	LiveCallerIDLookupManager.shared	18.0				container
+IdentityLookup	method	LiveCallerIDLookupManager.status(forExtensionWithIdentifier:)	18.0				container
+IdentityLookup	method	LiveCallerIDLookupManager.openSettings()	18.0				container
+IdentityLookup	method	LiveCallerIDLookupManager.reset(forExtensionWithIdentifier:)	18.0				container
+IdentityLookup	method	LiveCallerIDLookupManager.refreshPIRParameters(forExtensionWithIdentifier:)	18.0				container
+IdentityLookup	method	LiveCallerIDLookupManager.refreshExtensionContext(forExtensionWithIdentifier:)	18.1				own
+IdentityLookup	typealias	LiveLookupDBExtensionCoreDataPropertiesSet					none
+IdentityLookup	struct	LiveCallerIDLookupExtensionContext	18.0				own
+IdentityLookup	property	LiveCallerIDLookupExtensionContext.serviceURL	18.0				container
+IdentityLookup	property	LiveCallerIDLookupExtensionContext.tokenIssuerURL	18.0				container
+IdentityLookup	property	LiveCallerIDLookupExtensionContext.userTierToken	18.0				container
+IdentityLookup	method	LiveCallerIDLookupExtensionContext.init(serviceURL:tokenIssuerURL:userTierToken:)	18.0				container
+IdentityLookup	method	LiveCallerIDLookupExtensionContext.==(a:b:)	18.0				container
+IdentityLookup	method	LiveCallerIDLookupExtensionContext.encode(to:)	18.0				container
+IdentityLookup	method	LiveCallerIDLookupExtensionContext.hash(into:)	18.0				container
+IdentityLookup	property	LiveCallerIDLookupExtensionContext.hashValue	18.0				container
+IdentityLookup	method	LiveCallerIDLookupExtensionContext.init(from:)	18.0				container
+IdentityLookup	property	ILMessageFilterCapabilitiesQueryResponse.transactionalSubActions	16.0				container
+IdentityLookup	property	ILMessageFilterCapabilitiesQueryResponse.promotionalSubActions	16.0				container
+IdentityLookup	constant	extensionPointName	18.0				own
+IdentityLookup	property	LiveCallerIDLookupProtocol.configuration	18.0				container
+IdentityLookup	protocol	LiveCallerIDLookupExtensionConfiguration	18.0				own
+IdentityLookup	typealias	BlockingInfoCoreDataPropertiesSet					none
+IdentityLookup	typealias	IdentityInfoCoreDataPropertiesSet					none
+IdentityLookup	typealias	LiveLookupStoreFoundationFrameworkSet					none
+IdentityLookup	typealias	LiveLookupStoreCoreDataFrameworkManagedObject					none

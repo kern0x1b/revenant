@@ -1,0 +1,52 @@
+#import <Foundation/Foundation.h>
+#import <AudioToolbox/AudioUnitParameters.h>
+#import <AudioToolbox/AudioUnit.h>
+
+// The release's distortion unit has sixteen parameters, ids 0-15 (AudioToolbox's AudioUnitParameters.h):
+// Delay, Decay, DelayMix, Decimation, Rounding, DecimationMix, LinearTerm, SquaredTerm, CubicTerm,
+// PolynomialMix, RingModFreq1, RingModFreq2, RingModBalance, RingModMix, SoftClipGain and FinalMix. The
+// SDK's preGain is SoftClipGain (14) and its wetDryMix is FinalMix (15): the host sets and reads
+// them at exactly those ids, which is how this file knows them (facts/AVFAudio/AVAudioUnitDistortion.md).
+//
+// A factory preset is the value of all sixteen. The table is the host's: row = the preset's value in
+// AVAudioUnitDistortionPreset order (0-21), column = parameter id. The host's loadFactoryPreset: is
+// those sixteen AudioUnitSetParameter calls, and a preset outside 0-21 changes nothing. Row 0 is also
+// what a fresh unit holds. The table was read back from the host unit after each preset, not
+// transcribed from documentation; tests/backports/host/avfaudio/distortion.m checks it again.
+#define CharonDistortionPresetCount 22
+#define CharonDistortionParameterCount 16
+static const float CharonDistortionPresets[CharonDistortionPresetCount][CharonDistortionParameterCount] = {
+    { 4.5999999f, 9.72999954f, 3.4000001f, 0.5f, 65.1999969f, 100.0f, 0.0f, 18.1100006f, 0.0f, 100.0f, 44.0f, 1147.0f, 50.0f, 0.0f, -0.899999976f, 44.5999985f },
+    { 15.5f, 35.7000008f, 75.6999969f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 15.0f, 82.4000015f, 324.5f, 303.899994f, 52.0f, 16.8999996f, -0.300000012f, 100.0f },
+    { 1.60000002f, 0.680000007f, 84.5f, 12.0f, 18.7000008f, 0.0f, 0.0f, 0.949999988f, 8.0f, 100.0f, 4000.0f, 5000.0f, 50.0f, 13.5f, 20.0f, 100.0f },
+    { 0.100000001f, 0.100000001f, 0.0f, 0.0f, 20.0f, 70.9000015f, 0.0f, 14.7299995f, 1.0f, 100.0f, 67.5199966f, 87.4100037f, 0.0f, 54.0999985f, 0.400000006f, 100.0f },
+    { 0.100000001f, 1.0f, 0.0f, 1.0f, 85.6999969f, 100.0f, 0.405000001f, 4.73000002f, 3.38000011f, 53.4000015f, 0.5f, 0.5f, 0.0f, 0.0f, 9.89999962f, 100.0f },
+    { 4.5999999f, 11.9099998f, 100.0f, 5.5999999f, 88.5999985f, 100.0f, 0.0f, 2.43000007f, 1.0f, 58.0999985f, 865.5f, 1897.0f, 52.7000008f, 98.5999985f, 4.5f, 100.0f },
+    { 15.5f, 35.7000008f, 0.0f, 61.4000015f, 0.0f, 12.1999998f, 0.0f, 15.0f, 1.0f, 51.4000015f, 0.5f, 0.5f, 0.0f, 0.0f, 6.5f, 100.0f },
+    { 15.5f, 35.7000008f, 0.0f, 4.0999999f, 82.8000031f, 43.2000008f, 0.0f, 4.73000002f, 1.0f, 40.5f, 0.5f, 0.5f, 0.0f, 0.0f, 13.1999998f, 100.0f },
+    { 4.80000019f, 50.0f, 0.0f, 12.0f, 16.0f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3400.0f, 300.0f, 74.3000031f, 0.0f, 20.0f, 100.0f },
+    { 0.100000001f, 1.0f, 0.0f, 0.5f, 0.0f, 100.0f, 0.0f, 13.5100002f, 1.0f, 100.0f, 106.699997f, 711.299988f, 50.0f, 93.9000015f, 7.19999981f, 62.2000008f },
+    { 0.100000001f, 0.100000001f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 20.0f, 100.0f, 0.5f, 0.5f, 0.0f, 0.0f, 7.19999981f, 100.0f },
+    { 0.100000001f, 0.100000001f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 20.0f, 0.0f, 100.0f, 0.5f, 0.5f, 0.0f, 0.0f, 7.19999981f, 100.0f },
+    { 356.700012f, 2.1500001f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f, 18.0f, 100.0f },
+    { 473.299988f, 6.73999977f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f, 3.79999995f, 100.0f },
+    { 22.0f, 10.0200005f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f, 5.80000019f, 100.0f },
+    { 54.9000015f, 6.5f, 100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f, 0.0f, 7.80000019f, 100.0f },
+    { 0.5f, 35.7000008f, 100.0f, 1.0f, 68.6999969f, 100.0f, 0.0f, 13.6499996f, 16.0809994f, 4.69999981f, 0.5f, 0.60799998f, 52.7000008f, 98.5999985f, 2.4000001f, 100.0f },
+    { 201.800003f, 7.23999977f, 10.1000004f, 1.5f, 76.4000015f, 16.2000008f, 0.0f, 12.1599998f, 17.9729996f, 17.6000004f, 1504.0f, 2159.0f, 40.5f, 98.5999985f, 15.3000002f, 100.0f },
+    { 0.100000001f, 1.0f, 2.70000005f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3400.0f, 300.0f, 93.9000015f, 100.0f, 14.6000004f, 100.0f },
+    { 15.5f, 12.2399998f, 22.2999992f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1618.0f, 3141.0f, 50.7000008f, 89.9000015f, 9.89999962f, 100.0f },
+    { 28.1000004f, 2.1500001f, 58.7999992f, 39.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 29.5599995f, 87.4100037f, 89.9000015f, 98.5999985f, 13.8999996f, 100.0f },
+    { 0.100000001f, 0.100000001f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 44.0f, 48.0f, 50.0f, 100.0f, 16.6000004f, 100.0f },
+};
+
+// Sets the sixteen parameters of one preset on the unit, in id order. A preset outside 0-21 sets nothing.
+static inline void CharonApplyDistortionPreset(AudioUnit unit, NSInteger preset)
+{
+    if (unit == NULL || preset < 0 || preset >= CharonDistortionPresetCount) {
+        return;
+    }
+    for (AudioUnitParameterID identifier = 0; identifier < CharonDistortionParameterCount; identifier++) {
+        AudioUnitSetParameter(unit, identifier, kAudioUnitScope_Global, 0, CharonDistortionPresets[preset][identifier], 0);
+    }
+}

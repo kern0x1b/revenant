@@ -1,0 +1,193 @@
+diff --git a/stdlib/public/Darwin/Dispatch/Source.swift b/stdlib/public/Darwin/Dispatch/Source.swift
+--- a/stdlib/public/Darwin/Dispatch/Source.swift
++++ b/stdlib/public/Darwin/Dispatch/Source.swift
+@@ -60,3 +60,132 @@
+ private var _replacedDataKey: UInt8 = 0
++
++/* The memory pressure source type arrived in iOS 8. Before it the kernel reports one event, NOTE_VM_PRESSURE of the
++   source type that came first, which is what iOS 8 calls a warning; the other two levels are read here from the
++   quantity the kernel itself decides them by, and by its rule (xnu, osfmk/vm/vm_pageout.c, VM_PRESSURE_NORMAL_TO_WARNING
++   and its three neighbours): the pages available are kern.memorystatus_level percent of all pages; below the pressure
++   threshold the level is warning, below the critical one it is critical, and it goes back down only past 115 % of the
++   threshold it left. The thresholds are kern.memorystatus_available_pages_pressure and _critical where the release has
++   them (iOS 7), else the percentages of bsd/sys/kern_memorystatus.h, 15 and 5 of all pages (iOS 6, where the sysctls are
++   not there).
++   The source the client holds is a source that ORs events, which is what the release's source does with its levels. A
++   source of the old type wakes the rule when the kernel reports a warning, and a timer runs it while the level is not
++   normal; both run on one queue of their own and merge the level into the client's source when the mask asks for it.
++   The events, the mask and the data of the client's source then answer as the newer release's. The client's source owns
++   this object through an association, so both sources end with it. */
++internal final class _MemoryPressure {
++	private static let normal: UInt = 1, warning: UInt = 2, critical: UInt = 4
++
++	let mask: UInt
++	private let queue = DispatchQueue(label: "org.charon.dispatch.memorypressure")
++	private let pressure: UInt
++	private let criticalLimit: UInt
++	private let total: UInt
++	private var level = _MemoryPressure.normal
++	private weak var client: DispatchSource?
++	private var vm: DispatchSource?
++	private var timer: DispatchSourceTimer?
++	private var timerIsSuspended = true
++
++	init(mask: UInt, client: DispatchSource) {
++		self.mask = mask
++		self.client = client
++		let pages = _MemoryPressure.number("hw.memsize") / _MemoryPressure.number("hw.pagesize")
++		total = pages
++		pressure = _MemoryPressure.optionalNumber("kern.memorystatus_available_pages_pressure") ?? pages * 15 / 100
++		criticalLimit = _MemoryPressure.optionalNumber("kern.memorystatus_available_pages_critical") ?? pages * 5 / 100
++		let vm = _swift_dispatch_source_create(_swift_dispatch_source_type_VM(), 0, _swift_dispatch_vm_pressure(), queue)
++		_swift_dispatch_source_set_event_handler(vm, { [weak self] in self?.warned() })
++		self.vm = vm
++		let timer = DispatchSource.makeTimerSource(queue: queue)
++		_swift_dispatch_source_set_event_handler(timer as! DispatchSource, { [weak self] in self?.sample() })
++		self.timer = timer
++		vm.resume()
++	}
++
++	deinit {
++		vm?.cancel()
++		if let timer = timer {
++			timer.cancel()
++			if timerIsSuspended { timer.resume() }
++		}
++	}
++
++	/// A number of the kernel, of the size the entry has: 4 bytes for a page count, 8 for hw.memsize. nil where there is none.
++	private static func optionalNumber(_ name: String) -> UInt? {
++		var size = 0
++		guard sysctlbyname(name, nil, &size, nil, 0) == 0 else { return nil }
++		if size == MemoryLayout<UInt32>.size {
++			var value: UInt32 = 0
++			return sysctlbyname(name, &value, &size, nil, 0) == 0 ? UInt(value) : nil
++		}
++		if size == MemoryLayout<UInt64>.size {
++			var value: UInt64 = 0
++			return sysctlbyname(name, &value, &size, nil, 0) == 0 ? UInt(truncatingIfNeeded: value) : nil
++		}
++		return nil
++	}
++
++	private static func number(_ name: String) -> UInt {
++		guard let value = optionalNumber(name) else { fatalError("\(name) cannot be read, and the pressure of memory is decided by it") }
++		return value
++	}
++
++	private func availablePages() -> UInt {
++		return _MemoryPressure.number("kern.memorystatus_level") * total / 100
++	}
++
++	private func hysteresis(_ threshold: UInt) -> UInt {
++		return threshold + (15 * threshold) / 100
++	}
++
++	/// The kernel reported a warning: the level is at least that, and the timer follows it from here.
++	private func warned() {
++		if level == _MemoryPressure.normal {
++			move(to: availablePages() < criticalLimit ? _MemoryPressure.critical : _MemoryPressure.warning)
++		}
++	}
++
++	/// The rule of VM_PRESSURE_NORMAL_TO_WARNING, _WARNING_TO_CRITICAL, _WARNING_TO_NORMAL and _CRITICAL_TO_WARNING.
++	private func sample() {
++		let available = availablePages()
++		switch level {
++		case _MemoryPressure.normal:
++			if available < criticalLimit { move(to: _MemoryPressure.critical) }
++			else if available < pressure { move(to: _MemoryPressure.warning) }
++		case _MemoryPressure.warning:
++			if available > hysteresis(pressure) { move(to: _MemoryPressure.normal) }
++			else if available < criticalLimit { move(to: _MemoryPressure.critical) }
++		default:
++			if available > hysteresis(pressure) { move(to: _MemoryPressure.normal) }
++			else if available > hysteresis(criticalLimit) { move(to: _MemoryPressure.warning) }
++		}
++	}
++
++	private func move(to new: UInt) {
++		level = new
++		if let timer = timer {
++			if new != _MemoryPressure.normal && timerIsSuspended {
++				// The kernel decides by events; the level is read, once a second while it is not normal, because that
++				// is the one reading these releases give (measured on 6.1.3: the level steps in fives of a percent, and the
++				// kernel posts no event for it). The interval is this overlay's, not the release's.
++				timer.schedule(deadline: .now() + .seconds(1), repeating: .seconds(1), leeway: .milliseconds(100))
++				timer.resume()
++				timerIsSuspended = false
++			} else if new == _MemoryPressure.normal && !timerIsSuspended {
++				timer.suspend()
++				timerIsSuspended = true
++			}
++		}
++		if mask & new != 0, let client = client {
++			__dispatch_source_merge_data(client, new)
++		}
++	}
++}
+ 
++private var _memoryPressureKey: UInt8 = 0
++
++private func _memoryPressure(of source: DispatchSource) -> _MemoryPressure? {
++	return objc_getAssociatedObject(source, &_memoryPressureKey) as? _MemoryPressure
++}
++
+ private func _replacedData(of source: DispatchSource) -> _ReplacedData? {
+@@ -234,4 +363,8 @@
+ 	public class func makeMemoryPressureSource(eventMask: MemoryPressureEvent, queue: DispatchQueue? = nil) -> DispatchSourceMemoryPressure {
+-		return _swift_dispatch_source_create(
+-			_swift_dispatch_source_type_MEMORYPRESSURE(), 0, eventMask.rawValue, queue) as DispatchSourceMemoryPressure
++		if let type = _swift_dispatch_source_type_MEMORYPRESSURE() {
++			return _swift_dispatch_source_create(type, 0, eventMask.rawValue, queue) as DispatchSourceMemoryPressure
++		}
++		let source = _swift_dispatch_source_create(_swift_dispatch_source_type_DATA_OR(), 0, 0, queue)
++		objc_setAssociatedObject(source, &_memoryPressureKey, _MemoryPressure(mask: eventMask.rawValue, client: source), .OBJC_ASSOCIATION_RETAIN)
++		return source as DispatchSourceMemoryPressure
+ 	}
+@@ -311,3 +444,4 @@
+ 	public var data: DispatchSource.MemoryPressureEvent {
+-		let data = __dispatch_source_get_data(self as! DispatchSource)
++		let source = self as! DispatchSource
++		let data = __dispatch_source_get_data(source)
+ 		return DispatchSource.MemoryPressureEvent(rawValue: data)
+@@ -316,3 +450,7 @@
+ 	public var mask: DispatchSource.MemoryPressureEvent {
+-		let mask = __dispatch_source_get_mask(self as! DispatchSource)
++		let source = self as! DispatchSource
++		if let pressure = _memoryPressure(of: source) {
++			return DispatchSource.MemoryPressureEvent(rawValue: pressure.mask)
++		}
++		let mask = __dispatch_source_get_mask(source)
+ 		return DispatchSource.MemoryPressureEvent(rawValue: mask)
+diff --git a/stdlib/public/SwiftShims/DispatchOverlayShims.h b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+--- a/stdlib/public/SwiftShims/DispatchOverlayShims.h
++++ b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+@@ -22,2 +22,5 @@
+ #include <dispatch/dispatch.h>
++#if __APPLE__
++#include <sys/event.h>
++#endif
+ 
+@@ -117,3 +120,20 @@
+ SWIFT_DISPATCH_SOURCE_TYPE(MACH_RECV)
+-SWIFT_DISPATCH_SOURCE_TYPE(MEMORYPRESSURE)
++
++/* The memory pressure source type, which iOS 8 brought. */
++SWIFT_DISPATCH_WEAK_SOURCE_TYPE(MEMORYPRESSURE, _dispatch_source_type_memorypressure)
++
++/* What reported memory pressure before it: libdispatch has exported this source type since iOS 4.3 and the SDK no longer
++   declares it, and the event is NOTE_VM_PRESSURE of <sys/event.h>. It is imported weakly and asked for only where the
++   type above is NULL. */
++extern const struct dispatch_source_type_s _dispatch_source_type_vm __attribute__((weak_import));
++
++static inline dispatch_source_type_t
++_swift_dispatch_source_type_VM(void) {
++  return &_dispatch_source_type_vm;
++}
++
++static inline unsigned long
++_swift_dispatch_vm_pressure(void) {
++  return NOTE_VM_PRESSURE;
++}
+ SWIFT_DISPATCH_SOURCE_TYPE(PROC)

@@ -1,0 +1,20 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+LinkPresentation	swift-struct	c:@E@LPErrorCode	-	LPError	-	-	-	ios=13.0	-	bad72474b48f355f
+LinkPresentation	swift-property	s:SC11LPErrorCodeLeV8_nsErrorSo7NSErrorCvp	LPError	_nsError	-	Foundation.NSError	-	-	-	934ce301f880f6e9
+LinkPresentation	swift-method	s:SC11LPErrorCodeLeV8_nsErrorABSo7NSErrorC_tcfc	LPError	init(_nsError:)	-	-	LinkPresentation.LPError | Foundation.NSError	-	-	4dd02d5ec8278898
+LinkPresentation	swift-property	s:SC11LPErrorCodeLeV11errorDomainSSvpZ	LPError	errorDomain	+	Swift.String	-	-	-	1e9e29e7147b0bac
+LinkPresentation	swift-enum	c:@E@LPErrorCode	LPError	Code	-	-	-	ios=13.0	-	d6581e8b551aed08
+LinkPresentation	swift-method	s:So11LPErrorCodeV8rawValueABSgSi_tcfc	LPError.Code	init(rawValue:)	-	-	LinkPresentation.LPError.Code? | Swift.Int	-	-	83abadeea23e07ad
+LinkPresentation	swift-property	s:So11LPErrorCodeV8rawValueSivp	LPError.Code	rawValue	-	Swift.Int	-	-	-	6a31a1da36832753
+LinkPresentation	swift-typealias	s:So11LPErrorCodeV8RawValuea	LPError.Code	RawValue	-	-	-	-	-	67b41972792f9442
+LinkPresentation	swift-typealias	c:@E@LPErrorCode	LPError.Code	_ErrorType	-	-	-	-	-	63e8706794a861e1
+LinkPresentation	swift-constant	c:@E@LPErrorCode@LPErrorUnknown	LPError.Code	unknown	-	-	-	-	-	320f3c369109076e
+LinkPresentation	swift-constant	c:@E@LPErrorCode@LPErrorMetadataFetchFailed	LPError.Code	metadataFetchFailed	-	-	-	-	-	2e062db8a3fa0a55
+LinkPresentation	swift-constant	c:@E@LPErrorCode@LPErrorMetadataFetchCancelled	LPError.Code	metadataFetchCancelled	-	-	-	-	-	8c3cf8586ee53e88
+LinkPresentation	swift-constant	c:@E@LPErrorCode@LPErrorMetadataFetchTimedOut	LPError.Code	metadataFetchTimedOut	-	-	-	-	-	3021a7dc6a492ec5
+LinkPresentation	swift-constant	c:@E@LPErrorCode@LPErrorMetadataFetchNotAllowed	LPError.Code	metadataFetchNotAllowed	-	-	-	ios=17.0	-	38a7511ffd7738b7
+LinkPresentation	swift-property	c:@E@LPErrorCode@LPErrorUnknown	LPError	unknown	+	LinkPresentation.LPError.Code	-	-	-	94abded84aae5352
+LinkPresentation	swift-property	c:@E@LPErrorCode@LPErrorMetadataFetchFailed	LPError	metadataFetchFailed	+	LinkPresentation.LPError.Code	-	-	-	b120ec31f5efaa98
+LinkPresentation	swift-property	c:@E@LPErrorCode@LPErrorMetadataFetchCancelled	LPError	metadataFetchCancelled	+	LinkPresentation.LPError.Code	-	-	-	b16b95076138ccf4
+LinkPresentation	swift-property	c:@E@LPErrorCode@LPErrorMetadataFetchTimedOut	LPError	metadataFetchTimedOut	+	LinkPresentation.LPError.Code	-	-	-	c43d260070671007
+LinkPresentation	swift-property	c:@E@LPErrorCode@LPErrorMetadataFetchNotAllowed	LPError	metadataFetchNotAllowed	+	LinkPresentation.LPError.Code	-	ios=17.0	-	21ef165634322f92

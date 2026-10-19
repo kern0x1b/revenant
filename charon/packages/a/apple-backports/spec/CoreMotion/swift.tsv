@@ -1,0 +1,4 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CoreMotion	swift-class	c:objc(cs)CMOdometerData	-	CMOdometerData	-	-	-	ios=8.0	-	dcf4f32647c064b5
+CoreMotion	swift-property	s:So14CMOdometerDataC10CoreMotionE5slopeSdSgvp	CMOdometerData	slope	-	Swift.Double?	-	ios=17.0,watchos=10.0	-	b96fe57628dfe67b
+CoreMotion	swift-property	s:So14CMOdometerDataC10CoreMotionE11maxAbsSlopeSdSgvp	CMOdometerData	maxAbsSlope	-	Swift.Double?	-	ios=17.0,watchos=10.0	-	63663b65f3fc8bf7

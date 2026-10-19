@@ -1,0 +1,27 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_16Fto16Q12()",
+      "kind": "function",
+      "introduced": "10.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "round(half * 4096) clamped to -32768..32767; measured 1.0 -> 4096, 0.5 -> 2048, an infinity -> 32767 and a negative one -> -32768; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_16Q12to16F()",
+      "kind": "function",
+      "introduced": "10.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "the IEEE half nearest value / 4096; measured 4096 -> 0x3C00, which is 1.0, 2048 -> 0x3800, which is 0.5, and 32767 -> 0x4800, which is 8.0; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    }
+  ]
+}

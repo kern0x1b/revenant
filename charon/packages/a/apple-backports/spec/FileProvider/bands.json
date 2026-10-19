@@ -1,0 +1,76 @@
+{
+  "class_prefix": "NSFileProvider",
+  "expect_classes": 25,
+  "framework": "FileProvider",
+  "frameworks": [
+    "FileProvider"
+  ],
+  "never_call_note": "never_call means CARRIED AND CALLABLE by an app, and never invoked BY THE DIFFERENTIAL: the port keeps the method so a strong reference does not crash, and the harness must not call it because calling +[NSFileProviderManager addDomain:completionHandler:] on the host would ask this machine to mount a provider domain. A name here is matched as an EXACT nm symbol, not a substring, so a name that is not carried is reported missing rather than quietly satisfied by a longer method.",
+  "package": "FileProvider",
+  "pieces": [
+    {
+      "band": "11.0",
+      "body": "// A carried domain is DATA. What an app does with one is read its identifier, its display name and where\n// it sits relative to the document storage, and hand it to the manager - and the manager is where this\n// release's own behaviour would have to come from, which it has none of.\n//\n// THE IVARS ARE ON THIS CLASS. The first version of this file put them on a separate\n// NSFileProviderDomainCharonStorage and had initWithIdentifier: return one of those, which is not an\n// NSFileProviderDomain at all. The compiler said so -\n//     incompatible pointer types returning 'NSFileProviderDomainCharonStorage *' from a function with\n//     result type 'NSFileProviderDomain *'\n// - and it was right: a caller holding that object back is holding the wrong class, and the port has to\n// answer as a real NSFileProviderDomain. So the state lives here and the init fills it in.\n\n// -initWithIdentifier:displayName: is declared by this class and answered by the 16.0 CATEGORY, because\n// release-split refuses one object whose symbols first appear in two releases. That is the same reason as\n// UIAction.m's pragma and the same reason it carries its reason on the line.\n#pragma clang diagnostic ignored \"-Wincomplete-implementation\"\n#pragma clang diagnostic ignored \"-Wobjc-protocol-method-implementation\"\n@implementation NSFileProviderDomain {\n  NSString *_charonIdentifier;\n  NSString *_charonDisplayName;\n  NSString *_charonRelative;\n  NSUUID *_charonVolumeUUID;\n  BOOL _charonUserEnabled;\n  BOOL _charonIsReplicated;\n  BOOL _charonHidden;\n  BOOL _charonSupportsSyncingTrash;\n}\n@synthesize identifier = _charonIdentifier;\n@synthesize displayName = _charonDisplayName;\n@synthesize pathRelativeToDocumentStorage = _charonRelative;\n\n@synthesize volumeUUID = _charonVolumeUUID;\n\n// The four flags the 16.0 header carries, stored here and filled through the one method the category can\n// reach, because a category has no ivar of its own on this target.\n- (void)charon_setUserEnabled:(BOOL)userEnabled replicated:(BOOL)replicated\n                     hidden:(BOOL)hidden supportsSyncingTrash:(BOOL)supportsSyncingTrash\n{\n  _charonUserEnabled = userEnabled;\n  _charonIsReplicated = replicated;\n  _charonHidden = hidden;\n  _charonSupportsSyncingTrash = supportsSyncingTrash;\n}\n- (BOOL)charon_userEnabled { return _charonUserEnabled; }\n- (BOOL)charon_replicated { return _charonIsReplicated; }\n- (BOOL)charon_hidden { return _charonHidden; }\n- (BOOL)charon_supportsSyncingTrash { return _charonSupportsSyncingTrash; }\n\n// NOT BUILT IN THIS OBJECT, AND SAID SO RATHER THAN CLAIMED. -initWithIdentifier:displayName: and the\n// members below are this class's own at 16.0 and later, or are API_UNAVAILABLE(ios) in the SDK's own header,\n// so this object does not define them. @dynamic leaves respondsToSelector: answering NO, which is the truth,\n// where a method that answered NO would be a name the port claims and does not carry.\n//\n// disconnected, testingModes and backingStoreIdentity are here for a second reason beyond 16.0:\n// what each promises is a system rather than a setting. A domain is \"disconnected from its\n// extension\" and there is no extension; a testing mode \"alters the behavior of the system\" and\n// there is no system to alter; a backing store identity names \"the backing store of the domain on\n// the system\" and there is none. Their registry rows answer absent, and the @dynamic is what\n// makes that true at run time.\n//\n// hidden, replicated and supportsSyncingTrash are listed here for the other reason: the 16.0\n// CATEGORY answers them, through the charon_ accessors above.\n@dynamic hidden;\n@dynamic disconnected;\n@dynamic replicated;\n@dynamic testingModes;\n@dynamic supportsSyncingTrash;\n@dynamic backingStoreIdentity;\n\n- (id)initWithIdentifier:(NSString *)identifier\n             displayName:(NSString *)displayName\npathRelativeToDocumentStorage:(NSString *)relative {\n  self = [super init];\n  if (self) {\n    _charonIdentifier = [identifier copy];\n    _charonDisplayName = [displayName copy];\n    _charonRelative = [relative copy];\n  }\n  return self;\n}\n@end",
+      "carries": [
+        "-[NSFileProviderDomain initWithIdentifier:displayName:pathRelativeToDocumentStorage:]",
+        "identifier",
+        "displayName",
+        "pathRelativeToDocumentStorage",
+        "volumeUUID"
+      ],
+      "header": "<FileProvider/FileProvider.h>",
+      "kind": "class",
+      "name": "NSFileProviderDomain",
+      "rank": "7",
+      "never_call": [
+        "+[NSFileProviderManager addDomain:completionHandler:]",
+        "+[NSFileProviderManager removeDomain:completionHandler:]",
+        "-[NSFileProviderManager signalEnumeratorForContainerItemIdentifier:completionHandler:]"
+      ],
+      "tag": "11"
+    },
+    {
+      "band": "16.0",
+      "body": "// The 16.0 two-argument init lives in ITS OWN object, not in the 11.0 one. It was in the 11.0 piece at\n// first and that is exactly what release-split refuses: an object whose symbols first appear in two\n// releases. The generator's one-band-per-file assertion did not catch it - the tag was single per band -\n// so the table has to be right as well as checked, and the check that would have caught it is release-split.\n\n@implementation NSFileProviderDomain (Charon16)\n- (id)initWithIdentifier:(NSString *)identifier displayName:(NSString *)displayName {\n  return [self initWithIdentifier:identifier displayName:displayName\n      pathRelativeToDocumentStorage:@\"\"];\n}\n\n// The members the 16.0 header carries and this release lacks, answered through the class that owns the\n// storage: this target gives a category no ivar of its own, so the state is the class's and these are the\n// accessors the class publishes.\n- (BOOL)userEnabled { return [self charon_userEnabled]; }\n- (void)setUserEnabled:(BOOL)userEnabled {\n  [self charon_setUserEnabled:userEnabled replicated:[self charon_replicated]\n                      hidden:[self charon_hidden] supportsSyncingTrash:[self charon_supportsSyncingTrash]];\n}\n- (BOOL)replicated { return [self charon_replicated]; }\n- (void)setReplicated:(BOOL)replicated {\n  [self charon_setUserEnabled:[self charon_userEnabled] replicated:replicated\n                      hidden:[self charon_hidden] supportsSyncingTrash:[self charon_supportsSyncingTrash]];\n}\n- (BOOL)hidden { return [self charon_hidden]; }\n- (void)setHidden:(BOOL)hidden {\n  [self charon_setUserEnabled:[self charon_userEnabled] replicated:[self charon_replicated]\n                      hidden:hidden supportsSyncingTrash:[self charon_supportsSyncingTrash]];\n}\n- (BOOL)supportsSyncingTrash { return [self charon_supportsSyncingTrash]; }\n- (void)setSupportsSyncingTrash:(BOOL)supportsSyncingTrash {\n  [self charon_setUserEnabled:[self charon_userEnabled] replicated:[self charon_replicated]\n                      hidden:[self charon_hidden] supportsSyncingTrash:supportsSyncingTrash];\n}\n@end",
+      "carries": [
+        "-[NSFileProviderDomain initWithIdentifier:displayName:]",
+        "userEnabled",
+        "replicated",
+        "hidden",
+        "supportsSyncingTrash"
+      ],
+      "header": "<FileProvider/FileProvider.h>",
+      "imports": [
+        "\"CharonFileProvider.h\""
+      ],
+      "kind": "category",
+      "name": "NSFileProviderDomain",
+      "rank": "7",
+      "never_call": [
+        "+[NSFileProviderManager addDomain:completionHandler:]",
+        "-[NSFileProviderManager signalEnumeratorForContainerItemIdentifier:completionHandler:]"
+      ],
+      "tag": "16"
+    },
+    {
+      "band": "11.0",
+      "body": "// NO CLASS IS EMITTED HERE, AND THAT IS THE POINT. NSFileProviderManager is defined by\n// FileProvider/NSFileProviderManager.m, which is main s work and is not mine to touch. A second\n// @implementation for one class is a duplicate class symbol at load - the nm sweep calls it \"class defined\n// twice\" and the process dies before main ever runs - so the generator REFUSES to emit a class any object\n// in the tree already defines, naming the file that has it, and this piece exists to hold the policy the\n// manager needs without owning the class.\n//\n// The names below are CARRIED by that file and are never invoked by a differential: addDomain and\n// removeDomain would ask this machine to mount a provider domain, and signalEnumerator would ask it to\n// watch one. They are in this spec so the check that reads them has one place to read them from.\n\n",
+      "carries": [
+        "+[NSFileProviderManager getDomainsWithCompletionHandler:]"
+      ],
+      "header": "<FileProvider/FileProvider.h>",
+      "kind": "policy",
+      "name": "NSFileProviderManager",
+      "rank": "8",
+      "never_call": [
+        "+[NSFileProviderManager addDomain:completionHandler:]",
+        "+[NSFileProviderManager removeDomain:completionHandler:]",
+        "-[NSFileProviderManager signalEnumeratorForContainerItemIdentifier:completionHandler:]"
+      ],
+      "policy_only": true,
+      "tag": "11"
+    }
+  ],
+  "prefix": "FileProvider",
+  "registry": "ios110.json"
+}

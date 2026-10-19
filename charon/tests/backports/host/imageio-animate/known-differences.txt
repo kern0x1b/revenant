@@ -1,0 +1,14 @@
+# Cases where the port's answer is not the host's, each with the rule the port follows and the measurement.
+#
+# The name of the case is the record's own first field in cases.m, before the #, because run.sh reads this
+# file with cut -d'#' -f1 and a name that wrapped onto a second line would be read as two cases. run.sh
+# requires that every difference this file declares really is a difference and that no difference is missing
+# from it, so a stale line cannot sit here. The full argument is in
+# packages/a/apple-backports/facts/ImageIO/Animation.md.
+#
+# There is no line here, and the reason is the shape of what the host does: the two cases where the port
+# answers something the host cannot are not differences to declare, because the host has no answer at all -
+# it dies. A NULL block is answered 0 and then SIGSEGVs when the run loop turns; a start index at or past the
+# frame count is answered 0 and then SIGTRAPs. Both are measured, both are recorded as PORTONLY records in
+# cases.m, and the port answers 0 and draws nothing in both. run.sh requires the host build to survive, so a
+# case that kills it cannot be compared at all.

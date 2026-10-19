@@ -1,0 +1,16 @@
+{
+  "framework": "CoreTelephony",
+  "entries": [
+    {
+      "api": "CTServiceRadioAccessTechnologyDidChangeNotification",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the notification name CTServiceRadioAccessTechnologyDidChangeNotification, carried and never posted: nothing of iOS 6 posts it",
+      "facts": "facts/CoreTelephony/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    }
+  ]
+}

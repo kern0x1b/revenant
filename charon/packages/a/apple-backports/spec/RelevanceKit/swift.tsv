@@ -1,0 +1,29 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+RelevanceKit	swift-struct	s:12RelevanceKit15RelevantContextV	-	RelevantContext	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0a298fc842af22e8
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV4dateyAC10Foundation4DateVFZ	RelevantContext	date(_:)	+	AppIntents.RelevantContext	Foundation.Date	-	-	aedd9b73e2e6f4d8
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV4date4from2toAC10Foundation4DateV_AItFZ	RelevantContext	date(from:to:)	+	AppIntents.RelevantContext	Foundation.Date | Foundation.Date	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	228e05739ab28fe6
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV8locationyACSo8CLRegionCFZ	RelevantContext	location(_:)	+	AppIntents.RelevantContext	CoreLocation.CLRegion	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	aee4145ec36409ad
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV8location8inferredA2C16InferredLocationV_tFZ	RelevantContext	location(inferred:)	+	AppIntents.RelevantContext	AppIntents.RelevantContext.InferredLocation	-	-	c97ac81fed0cfa79
+RelevanceKit	swift-struct	s:12RelevanceKit15RelevantContextV16InferredLocationV	RelevantContext	InferredLocation	-	-	-	-	-	9aab9057a49bbb89
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV16InferredLocationV4homeAEvpZ	RelevantContext.InferredLocation	home	+	AppIntents.RelevantContext.InferredLocation	-	-	-	b0b223bcaaebf4ae
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV16InferredLocationV4workAEvpZ	RelevantContext.InferredLocation	work	+	AppIntents.RelevantContext.InferredLocation	-	-	-	9fbedfb7f04a7d2d
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV16InferredLocationV6schoolAEvpZ	RelevantContext.InferredLocation	school	+	AppIntents.RelevantContext.InferredLocation	-	-	-	35096a766a1bccf9
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV16InferredLocationV7commuteAEvpZ	RelevantContext.InferredLocation	commute	+	AppIntents.RelevantContext.InferredLocation	-	-	-	a872765acf8bee4b
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV5sleepyA2C14SleepConditionVFZ	RelevantContext	sleep(_:)	+	AppIntents.RelevantContext	AppIntents.RelevantContext.SleepCondition	-	-	5a8d53ae162eddf4
+RelevanceKit	swift-struct	s:12RelevanceKit15RelevantContextV14SleepConditionV	RelevantContext	SleepCondition	-	-	-	-	-	909181c45e2329c1
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV14SleepConditionV6wakeupAEvpZ	RelevantContext.SleepCondition	wakeup	+	AppIntents.RelevantContext.SleepCondition	-	-	-	862da52ddfca79f9
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV14SleepConditionV7bedtimeAEvpZ	RelevantContext.SleepCondition	bedtime	+	AppIntents.RelevantContext.SleepCondition	-	-	-	a600b7674330070f
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV7fitnessyA2C16FitnessConditionVFZ	RelevantContext	fitness(_:)	+	AppIntents.RelevantContext	AppIntents.RelevantContext.FitnessCondition	-	-	b726006657c3e3d5
+RelevanceKit	swift-struct	s:12RelevanceKit15RelevantContextV16FitnessConditionV	RelevantContext	FitnessCondition	-	-	-	-	-	0f82d33bde37f72d
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV16FitnessConditionV13workoutActiveAEvpZ	RelevantContext.FitnessCondition	workoutActive	+	AppIntents.RelevantContext.FitnessCondition	-	-	-	627bf82111e20064
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV16FitnessConditionV23activityRingsIncompleteAEvpZ	RelevantContext.FitnessCondition	activityRingsIncomplete	+	AppIntents.RelevantContext.FitnessCondition	-	-	-	6a425098c7bad091
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV8hardware10headphonesA2C19HeadphonesConditionV_tFZ	RelevantContext	hardware(headphones:)	+	AppIntents.RelevantContext	AppIntents.RelevantContext.HeadphonesCondition	-	-	07b3ffdcc1521814
+RelevanceKit	swift-struct	s:12RelevanceKit15RelevantContextV19HeadphonesConditionV	RelevantContext	HeadphonesCondition	-	-	-	-	-	461147592fe2c47a
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV19HeadphonesConditionV9connectedAEvpZ	RelevantContext.HeadphonesCondition	connected	+	AppIntents.RelevantContext.HeadphonesCondition	-	-	-	ac2e7106d1620743
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV4date_4kindAC10Foundation4DateV_AC0H4KindVtFZ	RelevantContext	date(_:kind:)	+	AppIntents.RelevantContext	Foundation.Date | AppIntents.RelevantContext.DateKind	-	-	6c5cb1310cc4b045
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV4date8interval4kindAC10Foundation12DateIntervalV_AC0I4KindVtFZ	RelevantContext	date(interval:kind:)	+	AppIntents.RelevantContext	Foundation.DateInterval | AppIntents.RelevantContext.DateKind	-	-	5655d8456c249bcb
+RelevanceKit	swift-method	s:12RelevanceKit15RelevantContextV4date5range4kindACSNy10Foundation4DateVG_AC0I4KindVtFZ	RelevantContext	date(range:kind:)	+	AppIntents.RelevantContext	Swift.ClosedRange<Foundation.Date> | AppIntents.RelevantContext.DateKind	-	-	f09ccc066d304b0a
+RelevanceKit	swift-struct	s:12RelevanceKit15RelevantContextV8DateKindV	RelevantContext	DateKind	-	-	-	-	-	b59aedcebb6d79c1
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV8DateKindV13informationalAEvpZ	RelevantContext.DateKind	informational	+	AppIntents.RelevantContext.DateKind	-	-	-	a7c70076d211a982
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV8DateKindV7defaultAEvpZ	RelevantContext.DateKind	default	+	AppIntents.RelevantContext.DateKind	-	-	-	d7e1838faa5d3006
+RelevanceKit	swift-property	s:12RelevanceKit15RelevantContextV8DateKindV9scheduledAEvpZ	RelevantContext.DateKind	scheduled	+	AppIntents.RelevantContext.DateKind	-	-	-	f98740352dfc8e88

@@ -1,0 +1,394 @@
+# refusals.txt - what the system's own MPSGraph does with the questions of the gather family that
+# graph-cases.m cannot ask, one process each. It is the measurement behind the rows of the methods that take
+# their parameter fed and behind the rows of the ones the port refuses with NSInvalidArgumentException.
+#
+#   question  the exit status of the process (134 is SIGABRT, 139 is SIGSEGV)
+#   what      the text the framework's own diagnostic must carry, or - for a process that answers - the
+#             shape it answers
+#
+# run.sh asks each of these in a process of its own and fails a question whose exit status or whose
+# diagnostic is not the one written here, so a release that starts answering one of the five fed forms is as
+# much a failure as one that starts refusing another. facts/MetalPerformanceShadersGraph/Core.md carries what
+# each of them means and which row it is in.
+
+# The broadcast of an axis the shape makes WIDER than the operand's: the release answers its own eight
+# elements and then eight zeros, and the pattern the destination was filled with is not among them.
+broadcast-wider 0 4x4
+# An axis the shape ADDS at the front repeats the whole operand.
+broadcast-added 0 2x2x4
+# An aligned axis NARROWER than the operand's: the release keeps the operand's own extent and answers the
+# operand's bytes, which is what "the result takes the larger of the two extents" is measured on.
+broadcast-narrower 0 2x4
+# An extent of zero is a shape with no elements in it, and the release takes the process down building it.
+broadcast-zero-extent 134 device may not be nil
+
+# The five FED forms, and the reshape's own fed form below, on the CALLER-DESTINATION path: the caller builds
+# the destination and the release runs into it. Two things about the question, both of them this file's own
+# before and both measured here.
+#
+#   The destination is NOT sized off the result's own shape. Over a fed parameter the release cannot resolve that
+#   shape and carries a vector of -1 for it - each line below prints that vector first, before the compile - so
+#   a destination sized off it is a ONE-ELEMENT buffer, and the "NDArray dimension length > INT_MAX" this file
+#   used to record here was the release's NDArray refusing that buffer rather than the operation.
+#   The fed tensor is fed its OWN shape's worth of bytes. One number into a fed tensor of two is the same
+#   NDArray saying "buffer is not large enough", and a fed shape read out of a buffer that holds one number
+#   answers zeros - because a zero is a perfectly good extent.
+#
+# With both of those right, THE RELEASE COMPUTES THE GATHER: a fed flatten axis of 1 over a 2x4 answers the
+# operand's own eight values, a fed axes of [0] over a 1x2x4 answers the region's, and a fed axes of [0] of a 2x4
+# expanded answers the operand's own values once down the new axis. So the port's gather is the release's answer
+# and not a divergence. The reverse is the one form still refused, at the run and not over a buffer.
+fed-flatten-axis 0 result-shape -1x-1
+fed-broadcast-shape 0 result-shape -1
+fed-reverse-axes 134 non constant axes tensor
+fed-squeeze-axes 0 result-shape -1x-1
+fed-expand-axes 0 result-shape -1
+
+# THE OTHER RUN PATH of the same forms: -[MPSGraph runWithFeeds:targetTensors:targetOperations:], where the
+# RELEASE allocates the result and hands it back, so that nothing about the destination the caller chose can be
+# the reason for what comes back. What can be read is its SHAPE - the values of a result the release allocated
+# are not reachable through any public accessor on this host, measured: class_copyPropertyList on
+# MPSGraphTensorData gives `shape`, `dataType` and `device` and nothing that reaches the buffer, and MPSNDArray's
+# own headers are fifteen lines of imports in both the 16.4 and the 26.2 SDK. So each line is the shape the
+# release resolved for itself, which is what a caller would have to size its own buffer from.
+#
+# And it is the -1 vector with the extents RESOLVED, not the -1 vector: a flatten over a fed axis of 1 and a
+# squeeze over fed axes of [0] both allocate a 2x4, which is the written-down form's own answer, while an expand
+# over a fed axis of 0 allocates an 8 - one axis of eight elements where the written-down form answers a 1x2x4 -
+# a broadcast to a fed [2, 4] allocates the OPERAND's own 2x4 rather than the 2x2x4 the fed shape names, and a
+# reshape to a fed [4] allocates a 4, which is the fed shape's own single extent.
+fed-flatten-axis-own 0 own-shape 2x4
+fed-squeeze-axes-own 0 own-shape 2x4
+fed-expand-axes-own 0 own-shape 8
+fed-broadcast-shape-own 0 own-shape 2x4
+reshape-fed-shape-own 0 own-shape 4
+
+# The forms the port refuses, each with the release's own words.
+squeeze-not-unit 134 Failed to infer result type(s)
+flatten-axis-outside 134 Failed to infer result type(s)
+expand-axis-outside 134 Failed to infer result type(s)
+# A transpose naming an axis outside the rank is the one the release does NOT refuse: it builds a tensor whose
+# shape is nil and writes nothing at all, which the port cannot reproduce and raises instead.
+transpose-axis-outside 0 (null)
+reverse-axis-outside 134 invalid axis: 5, axis must be in range
+# A permutation that is not a permutation of the operand's axes.
+transpose-short-permutation 134 perm tensor length must equal input tensor rank
+
+# The forms with an empty array or no axes at all, each of which the port answers and each of which says what
+# "none" means in this family - unlike the reduction family, where a nil is every axis and an empty array none.
+reverse-axes-empty 0 2x4
+squeeze-axes-empty 0 1x2x4
+expand-axes-empty 0 2x4
+# A transpose naming the same axis twice is the identity.
+transpose-same-axis 0 2x3x4
+
+# The reshape's own three questions. The fed form is a fed parameter like the five above: the release prints
+# `-1` for it - one axis, the fed tensor's own extent - its own compiler refuses it with the sentence below,
+# and the refusal here is a DIAGNOSTIC rather than the abort it is over a written-down shape: the compile
+# hands back an executable, the run leaves the destination exactly as it was filled, and the process answers
+# 0. Asked in a graph that ALSO holds the written-down reshape of the same operand the same call aborts at
+# the compile with the same sentence (exit 134), which is what the band's own probe measured; this file's
+# question is the one run.sh re-runs, so it records this one.
+reshape-fed-shape 0 result-shape -1
+# A volume that does not match: the release builds the tensor the caller asked for - the shape line prints 1x7 -
+# and its own compiler refuses it, "the result shape is not compatible with the input shape"
+# (MPSGraphUtilities.mm:310), and the process is gone.
+reshape-volume-mismatch 134 not compatible with the input shape
+# Two dynamic extents is not the one the header allows, and the release does not resolve it either: the shape
+# line prints -1x-1 and the NDArray assertion takes the process down.
+reshape-two-dynamic 134 NDArray dimension length > INT_MAX
+# And the one the header allows where the result type can be inferred unambiguously: a 2x4 into a single -1
+# answers a shape of 8 - a rank of one, which prints without an x - and the operand's own bytes.
+reshape-dynamic-only 0 8
+
+# The slice's four. A length of zero is a result of no elements, and the release builds the shape (2x0) and
+# then cannot make an NDArray for it; the other three are its own compiler's refusals.
+slice-length-zero 134 device may not be nil
+slice-start-past-end 134 start value 9 does not fit dimension size
+slice-stride-zero 134 stride cannot be 0
+slice-length-past-end 134 does not fit within the dimension size
+
+# THE SLICE FAMILY'S OWN ELEVEN ROWS. What is measured here is the family in its three directions - the
+# masks, the gradient and the update - and what each of the eleven methods of 18.2's fed forms and of the
+# gradient's fed shape does to a release that cannot use a shape which arrives as data. Every question here
+# is asked in a process of its own and every one of them is a measurement in the row of its own method.
+#
+# A masked start is ZERO, so a start of 9 with an end of 0 asks for a result of no elements, which the
+# release builds and then cannot make an NDArray for.
+slice-mask-start-empty 134 device may not be nil
+
+# The three FED slice forms of 18.2, and the floating point one beside them. All four print the same thing
+# first: a result shape of -1x-1, which is the release's own way of saying it could not resolve the shape it
+# was given, and then the process goes. The exit status depends on the destination the caller hands it -
+# measured, SIGSEGV (139) into a 2x4 destination and "NDArray dimension length > INT_MAX" (134,
+# MPSNDArray.mm:759) into a destination of one element - so the status here is this harness's and the shape
+# line is what every destination agrees on.
+slice-fed-ends 139 result-shape -1x-1
+slice-fed-sizes 139 result-shape -1x-1
+slice-fed-float32 139 result-shape -1x-1
+
+# The gradient whose forward input's shape is FED rather than a constant: the release's own result tensor
+# carries no shape at all, before the run and after it, and the process writes the gradient's element 0 into
+# the destination's element 0 and nothing else, whatever the destination's shape is. This is why the four
+# gradient rows are carried with a constant shape in the cases and name this measurement in their text.
+slice-gradient-fed-shape 0 result-shape nil
+slice-gradient-fed 0 result-shape nil
+# Three gradients the release's own compiler will not build: a squeezeMask (alone and with the mask it pairs
+# with), and a stride above one.
+slice-gradient-squeeze 134 Optimize Original Module MLIR pass manager failed
+slice-gradient-stride2 134 Optimize Original Module MLIR pass manager failed
+# A gradient of one row where a startMask over axis 0 makes the region two rows: the release's own words are
+# "'mps.strided_slice_gradient' op `grad_input`[0] = 1 should match dimension size: 2 deduced from
+# `fwd_shape'", which is the check this port makes where the graph is built.
+slice-gradient-shape-mismatch 134 Optimize Original Module MLIR pass manager failed
+
+# The update's own questions. An endMask and a squeezeMask are refused on an update, and an update whose
+# shape is not the region's is refused: wider in the NDArray's own words, narrower in the compiler's. The
+# port refuses all three where the graph is built.
+slice-update-end-mask 134 Optimize Original Module MLIR pass manager failed
+slice-update-squeeze-mask 134 Optimize Original Module MLIR pass manager failed
+slice-update-shape-wide 134 initWithBufferImpl
+slice-update-shape-narrow 134 Optimize Original Module MLIR pass manager failed
+# And the one fed form of the family the release answers, which is the whole of what separates 18.0's fed
+# update from the seven fed parameters it cannot build a graph over: the starts, the ends and the strides
+# arrive as int32 of shape [2] and the answer is the written-down form's answer byte for byte.
+slice-update-fed-answer 0 0000c842000080bf000000c00000c8430000fa430000164400002f4400004844
+
+# THE PAD AND THE TILE'S OWN REFUSALS, each measured on this host's own MPSGraph and each a process of its
+# own. Every rank-2 pad and tile of the family answers; what is here is what the release does not.
+# The two periodic modes, refused by name and after the result tensor has been built.
+pad-periodic 134 Unsupported paddingMode
+pad-antiperiodic 134 Unsupported paddingMode
+# A MIRROR that reaches past the axis it mirrors: a left padding of three on an axis of extent two. The clamp,
+# the zero and the constant answer the same padding, so it is the mirror the release's own compiler refuses
+# ("Optimize Original Module MLIR pass manager failed"), and the port refuses it where the graph is built.
+pad-reflect-past-extent 134 Optimize Original Module MLIR pass manager failed
+# THE TWO MIRRORS' OWN LIMITS, which are different and neither is "the axis's own extent". Measured over
+# extents one, two and three, on the left and on the right, over every padding from one to five: a REFLECT
+# answers up to the axis LESS ONE and a SYMMETRIC up to the axis ITSELF, and the release's compiler says so
+# with its own words - "'mps.pad' op padding values too large at axis 0, max padding is N, got M"
+# (MPSGraphUtilities.mm:956), where the maximum it prints is 0 for a reflect on an axis of ONE and 1 for a
+# symmetric on the same axis. So over an axis of one element the reflect reaches nothing at all and the
+# symmetric reaches its own edge, and one element of padding past either is refused.
+pad-thin-reflect 134 max padding is 0, got 1
+pad-thin-symmetric 134 max padding is 1, got 2
+# A DESTINATION NARROWER THAN THE RESULT, which is what the two rank-3 pad entries used to be recorded as.
+# The destination this branch builds is the OPERAND's shape and the buffer is the OPERAND's bytes, while the
+# result is bigger: a 4x5x6 into a 2x3x4's 96 bytes at rank of three, and a 4x6 into a 2x4's 32 bytes at rank
+# of two. Which mode answers and which refuses is the measurement, and it is per mode and per rank - the two
+# mirrors at rank of three are refused by the release's own multiary kernel ("Invalid KernelDAG, equalShape
+# for destination failed") while the constant and the zero write what fits and exit 0, and at rank of two
+# every mode writes what fits. Neither is a refusal of the PAD: asked into a destination of the RESULT's own
+# shape the same pad of a rank of three answers in every mode, which is what graph-cases.m's pad-rank3-clamp
+# and pad-rank3-symmetric compare - so the pad of a rank of three is a case and not a refusal, and these
+# entries are named for the shape of the destination rather than for the rank.
+pad-destination-narrower-rank3-clamp 134 Invalid KernelDAG, equalShape for destination failed
+pad-destination-narrower-rank3-constant 0 0000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000c6420000004000004040000080400000c6420000c0400000e040
+pad-destination-narrower-rank2 0 0000c6420000c6420000c6420000c6420000c6420000c6420000803f00000040
+
+# THE TILE'S GRADIENT, and the one measurement of it that is reproducible. A window of m[j+1] terms along
+# axis j that runs off the end of that axis makes the release READ PAST THE END of the caller's gradient
+# buffer, so its answer there is whatever memory follows the operand. The two `tilegrad-1x2` entries below are
+# the same graph over the same values with the same shape and differ ONLY in the bytes planted immediately
+# after the operand - 1000 and up in one, zeros in the other - and the release's last row answers
+# 13, 15, 17, 19 in the first and 13, 14, 15, 16 in the second. That is the proof in one line: the answer is
+# a function of memory this repository does not own, which is why none of these is a case in graph-cases.m and
+# why the differential compares the tile's gradient only where no window leaves the axis.
+# tilegrad-1x1 is the identity and reads nothing it should not, so its bytes are the gradient's own.
+tilegrad-1x1 0 0000803f0000004000004040000080400000a0400000c0400000e040000000410000104100002041000030410000404100005041000060410000704100008041
+tilegrad-1x2 0 0000c0400000004100002041000040410000604100008041000090410000a0410000b0410000c0410000d0410000e04100005041000070410000884100009841
+tilegrad-1x2-zero 0 0000c0400000004100002041000040410000604100008041000090410000a0410000b0410000c0410000d0410000e04100005041000060410000704100008041
+tilegrad-1x3 0 00007041000090410000a8410000c0410000d8410000f04100000442000010420000b0410000c8410000e0410000f841000088410000a0410000b8410000d041
+tilegrad-1x5 0 0000e041000004420000184200002c420000f8410000104200002442000038420000084200001c420000304200004442000014420000284200003c4200005042
+tilegrad-1x3-short 0 0000c04000001041000040410000704100001041000040410000704100009041
+# The concat and stack family, whose result is SEVERAL operands. Both refusals are the release's own
+# compiler refusing to build the graph, and the message is its own: an axis outside the rank, and operands
+# whose shapes differ anywhere but the axis they are laid along. The header says the inputs must be
+# "broadcast compatible" and the release does not take it at all - which is why concat-thin-axis0 in
+# graph-cases.m is a case (an extent of one ON the axis laid along is one element of the result, not a
+# repeat) and this pair is a refusal (an extent of one anywhere else is not taken).
+# The two axis refusals carry different messages because the release builds a stack out of an expanded
+# dimension per operand and then a concatenation, and the expanded dimension is what names the axis first
+# (MPSGraphUtilities.mm:3237) where the concatenation names it for a concat (MPSGraphUtilities.mm:748).
+concat-axis-outside 134 invalid axis tensor: [2], axis must be in range -rank <= axis < rank, rank = 2
+concat-interleave-axis-outside 134 invalid axis tensor: [2], axis must be in range -rank <= axis < rank, rank = 2
+concat-shapes-differ 134 invalid input tensor shapes, all input shapes must match except at axis
+# The operands of DIFFERING LENGTH ON THE AXIS THEY ARE LAID ALONG: end to end that is a 2x5 and answers
+# (concat-unequal-axis1 in the differential), and interleaved it is REFUSED. That refusal is the whole of the
+# invariant the walk's division by the number of operands rests on, so it is recorded here and enforced in
+# the plan - see CharonMPSGraphConcatPlan.
+concat-interleave-unequal 134 all input shapes must match along axis dimension when interleaving
+# An operand of extent ZERO on the axis they are laid along: the regions' offsets collapse, so a walk that
+# lays them out by offset has two operands starting in the same place. The release builds the result tensor
+# of the OTHER operands' length and then fails inside its own array with its own assertion - no answer at
+# all - so the port refuses where the graph is built and says so in the row. The zero is the first operand,
+# which is the harder case; interleaved, the sentence above is the one the release names, and the plan asks
+# that question first for exactly that reason.
+concat-zero-extent 134 initWithDevice:descriptor:isTextureBacked:] Error: device may not be nil
+stack-axis-outside 134 invalid axis: 3, axis must be in range -|rank| <= axis < |rank|
+stack-shapes-differ 134 invalid input tensor shapes, all input shapes must match except at axis
+# MIXED DATA TYPES, the header's other sentence, measured rather than assumed: the result tensor carries the
+# FIRST operand's data type and the release's own COMPILER then refuses it, so the port agrees with the
+# release about the tensor and the refusal is a compiler's, not the graph's.
+# The EMPTY array is NOT here: it is not a refusal at all, and refusals.m's own branch for it is gone. It is
+# two cases of the differential instead (concat-empty and stack-empty in graph-cases.m), because the release
+# answers it - a result tensor of nil shape and float32 - and there was nothing to record as a refusal.
+concat-mixed-types 0 result-data-type 0x10000020
+# THE SPLIT AND THE COORDINATE ALONG AN AXIS, the two walks of 15.4 that are not gathers, and every question
+# of theirs that a case cannot ask - which is most of the refusals, because a split's result is SEVERAL
+# tensors and every one of them that the release will not answer takes the process down with it. What the
+# release DOES answer is in graph-cases.m's gather_split family: the regions cut in the order written, the
+# count's own measured rule, the rank of one and of three, and the coordinate's value at every axis asked of
+# it.
+#
+# The sizes must ADD UP to the extent of the axis they are cut from. The release builds the result tensors
+# first - the shape line prints two 2x1s and two 2x3s - and its own compiler refuses the graph afterwards.
+split-sizes-sum-short 134 sum of result dimension lengths along split axis must equal input dimension length along split axis
+split-sizes-sum-long 134 sum of result dimension lengths along split axis must equal input dimension length along split axis
+# A size of ZERO builds the result tensor of no elements (the shape line prints 2x0) and is refused as the
+# release assembles the results, from its own array. A NEGATIVE size takes the process down where the graph is
+# built with SIGSEGV and no word at all.
+split-sizes-zero 134 object cannot be nil
+split-sizes-negative 139 -
+# An axis outside the rank, positive or negative: the same sentence the concatenation's is, from the split's
+# own line of MPSGraphUtilities.mm.
+split-sizes-axis-outside 134 invalid axis tensor: [2], axis must be in range -rank <= axis < rank, rank = 2
+split-sizes-axis-negoutside 134 invalid axis tensor: [-3], axis must be in range -rank <= axis < rank, rank = 2
+# The sizes as a PLACEHOLDER, which is the form the header is written for: the release takes the process down
+# where the graph is BUILT, with SIGSEGV and nothing printed. The same value as a CONSTANT is answered - that
+# is three cases of gather_split - so what the release cannot do is read a value that is not in the graph.
+split-sizes-fed-placeholder 139 -
+# THE COUNT, whose rule is measured and is not dividing evenly: over an extent E and a count N the first N-1
+# sizes are ceil(E/N) and the last is what is left, so it is refused exactly when that last size would not be
+# positive. These three are the pairs where it is: 4 into 3, 6 into 4, and a count of zero at all.
+split-num-divisible 134 infer split sizes from total size=4 and num_splits=3 failed
+split-num-six-into-four 134 infer split sizes from total size=6 and num_splits=4 failed
+split-num0 134 infer split sizes from total size=4 and num_splits=0 failed
+# THE COORDINATE's axis outside the rank, positive or negative, and an axis of a rank of one. The sentence
+# carries the operation's own name, which is neither a split nor a gather.
+coord-axis-outside 134 'mps.get_coordinates' op invalid axis: 3.
+coord-axis-negoutside 134 'mps.get_coordinates' op invalid axis: -4.
+coord-rank-one-axis1 134 'mps.get_coordinates' op invalid axis: 1.
+# Its two FED parameters as PLACEHOLDERS, which is the only form the header spells, and the value is FED -
+# in the graph's feeds and in the run's inputs array, which is what a caller of the form does. An axis takes
+# the process down with SIGSEGV (the refusal writes nothing, so there is no text to match), and a shape builds
+# a result whose shape is -1x-1 and goes down with it. A FLOATING POINT axis is refused by the release's own
+# compiler, with the same sentence the fed gather parameters of this library raise. Each of the three is
+# answered as a CONSTANT instead - three cases of gather_split.
+#
+# One thing measured on the way, which is why the feed is paired with the caller's own PLACEHOLDER and not
+# with the operation's first input: the release holds the fed parameter as a constant of its own, and a value
+# paired with that one is refused at the run with "Input feed tensor not found in placeholders, tensor
+# corresponds to operation: mps_constant" (measured, exit 134).
+coord-fed-axis-placeholder 139 -
+coord-fed-shape-placeholder 134 -1x-1
+coord-fed-axis-float 134 operand #1 must be 0D tensor
+# A SHAPE WITH A ZERO EXTENT for a coordinate: the release BUILDS the result - a coordinate of a [0] is a [0]
+# and of a 2x0 is a 2x0, both MPSDataTypeInt32, which the shape line prints - and its own run then refuses
+# the destination with "object cannot be nil" from -[__NSArrayM insertObject:atIndex:], because a buffer of no
+# bytes does not exist (measured on this host: newBufferWithLength:0 and newBufferWithBytes:length:0 both
+# answer nil). So there is no run to answer and the port refuses the shape where the graph is built.
+coord-zero-extent 134 object cannot be nil
+# THE BLOCK-MOVING FAMILY of 15.0 and 16.1: the space-to-depth and depth-to-space of 15.0, the space-to-batch
+# and batch-to-space of 16.1. Four methods, FOUR operations to the release, and each operation refuses in its
+# own words and at its own MOMENT - which is why every line below records the exit status and not only the
+# text. An axis outside the rank is refused where the GRAPH is built, with the result's shape nil and the
+# release's own "Failed to infer result type(s)" behind it. A degenerate pair of axes and a block that does
+# not divide are refused where the graph is COMPILED, after the release has built a result of a shape of its
+# own - 3x16x3, 27x1x2, 1x6x9, 30x2x1 - and the shape line is in the measured output beside the sentence.
+#
+# The general form's three rules, over a [3, 4, 6] whose extents are all different.
+block-s2b-axis-outside 134 invalid axis: 3, axis must be in range - rank <= axis < rank, rank = 3
+block-s2b-axis-duplicate 134 'mps.space_to_batch' op axis must be unique
+block-s2b-batch-among-spatial 134 must be unique from `spatial_axes`
+# THE BATCH AXIS OUTSIDE THE RANK, which the general form had no question for at all and the fed 2D form's own
+# question covers only at the RUN (block-s2d-fed-axis-outside-at-run). Measured here over the 3x4x6 of 1 to 72
+# and the 8x2x2, both directions: the result tensor comes back with NO shape and the release's own COMPILER
+# prints its sentence - "'mps.space_to_batch' op invalid axis: 3, axis must be in range - rank <= axis < rank,
+# rank = 3" (MPSGraphUtilities.mm:1171) and "'mps.batch_to_space' op invalid axis: 3, ..." (MPSGraphUtilities.mm:
+# 1119) - and the process GOES DOWN with it, exit 134, in both directions. A negative axis outside the same
+# range is refused with the axis AS IT WAS GIVEN, -4 and not the -1 it counts to. The port refuses all four
+# where the graph is BUILT, which is this library's moment and the only one it has, with the release's own
+# sentence and its own range of -rank to rank-1.
+block-s2b-batch-outside 134 invalid axis: 3, axis must be in range
+block-b2s-batch-outside 134 invalid axis: 3, axis must be in range
+block-s2b-batch-negoutside 134 invalid axis: -4, axis must be in range
+block-b2s-batch-negoutside 134 invalid axis: -4, axis must be in range
+
+# THE 16.1 GENERAL FORM over its THREE FED LISTS, and the measurement that CORRECTS this file's own file-header
+# claim about them: a parameter that arrives as data is one the release answers, at the RUN, exactly as the 2D
+# form's fed pair is. Six questions - both directions, each of the three parameters fed in turn - over the
+# [3, 4, 6] of 1 to 72 with the spatial axes @[@1, @2], the batch axis @0 and the block @[@2, @2], the other two
+# held as constants. Each prints the result's shape (nil, the release's own), that the compile hands back an
+# executable, and the 72 values it writes, which are the written-down form's own answer byte for byte.
+#
+# Three things this question had to get right, all of them its own first attempt, all measured:
+#   - only the FED list goes into the feeds and the inputs. A constant is in the graph and not a feed, and one
+#     there is the release's "Input feed tensor not found in placeholders, tensor corresponds to operation:
+#     mps_constant" (MPSGraphExecutable.mm:1990).
+#   - the fed list's buffer is its ELEMENT COUNT and not its rank: a list of two axes is declared [2] and fed
+#     EIGHT bytes, and four is the release's "buffer is not large enough. Must be 8 bytes" (MPSNDArray.mm:893).
+#   - the feeds go in the graph's own PLACEHOLDER ORDER, so the operand's placeholder is made first: otherwise
+#     the release reads the float operand where it expects the int32 list, "Incompatible element type for
+#     parameter at index 0, mlir module expected element type si32 but received f32" (MPSGraphExecutable.mm:4490).
+block-s2b-fed-axes 0 run returned
+block-s2b-fed-batch 0 run returned
+block-s2b-fed-block 0 run returned
+block-b2s-fed-axes 0 run returned
+block-b2s-fed-batch 0 run returned
+block-b2s-fed-block 0 run returned
+block-s2b-block-list-short 134 must have same size as `block_dimensions`
+block-s2b-block-does-not-divide 134 Invalid `block_dimensions[1] = 5 for input size[2] = 6
+# And the batch-to-space's own two, over an [8, 2, 2] whose batch axis holds eight. The sentence names
+# 'mps.batch_to_space', which is the operation and not the other one.
+block-b2s-batch-among-spatial 134 'mps.batch_to_space' op `batch_axis` = 0 must be unique from `spatial_axes`
+block-b2s-block-list-short 134 must have same size as `block_dimensions`
+# The 2D forms of 15.0, which are two more operations and not the general form's words: an axis outside the
+# rank carries the axis's own NAME in the sentence, and a negative one lands there too with the value the
+# release was handed - 2147483647 is (NSUInteger)-1 - which is the header's own type making a caller write it.
+block-s2d-axis-outside 134 invalid width_axis (3) for shape of rank 3
+block-s2d-axis-negoutside 134 invalid width_axis (2147483647) for shape of rank 3
+# A DEGENERATE pair of axes - the depth axis among the two spatial ones - is refused at the COMPILE and not at
+# the build, and the result the release built for it is a 3x16x3: the height axis is read as a spatial axis
+# twice and its own extent is multiplied by the block a second time.
+block-s2d-degenerate-axes 134 Invalid degenerate axes: depth_axis (1) height_axis (1) for shape of rank 3
+# The block rule in each of the two directions' own words, which are not the general form's: moving the
+# blocks IN makes the block divide the height, moving them OUT makes the block SQUARED divide the depth.
+block-s2d-block-does-not-divide 134 block_size (3) must be multiple of height 4
+block-d2s-block-does-not-divide 134 block_size (3) squared (9) must be multiple of depth 12
+# THE FED PAIR of 15.0's own three questions, and they are the only ones of the family the release does NOT
+# refuse. A PLACEHOLDER for the three axes builds a graph whose result carries NO shape - so there is nothing
+# for a caller to read before the run - and its own run then answers the written-down form's values into the
+# destination the caller gave it, over the three axes of 2, 1 and 0 fed one each - and the DEPTH-TO-SPACE answers the same way, which the previous pass recorded as measured not
+# to return. An int64 axis fed is taken and answered exactly as an int32 one is. A fed float32 axis and a fed
+# placeholder of two numbers are refused where the graph is COMPILED, with the verifier's own rule about the
+# tensor. A fed axis whose value the release cannot use is refused by the release in the RUN - a width axis
+# outside the rank takes the process down with the written-down form's own sentence - or answered with a buffer
+# the verifier flags at the same time, which is the degenerate pair of axes and a block that does not divide.
+# A CONSTANT of NO RANK is
+# not constructible at all: the release's own +constantWithData:shape:dataType: takes the process down. A
+# constant of MORE THAN ONE NUMBER builds the graph and leaves the result with no shape, as a placeholder
+# does, and nothing is written into the destination.
+block-s2d-fed-axis-placeholder 0 result-shape nil
+block-s2d-fed-axis-unranked 134 a constant must be passed a ranked shape
+block-s2d-fed-axis-two-numbers 0 result-shape nil
+block-s2d-fed-axis-float32 134 operand #1 must be 0D tensor of mps index type values or static-shape defined tensor with shape equal to [1] or unranked tensor of mps index type values, but got 'tensor<1xf32>'
+block-s2d-fed-axis-two-fed-numbers 134 operand #1 must be 0D tensor of mps index type values or static-shape defined tensor with shape equal to [1] or unranked tensor of mps index type values, but got 'tensor<2xsi32>'
+block-d2s-fed-axis-placeholder 0 result-shape nil
+block-s2d-fed-axis-outside-at-run 134 invalid width_axis (3) for shape of rank 3
+block-s2d-fed-axis-int64-at-run 0 0000803f000040400000a0400000504100007041000088410000c8410000d8410000e84100001442
+block-s2d-fed-axis-degenerate-at-run 0 Invalid degenerate axes: depth_axis (1) height_axis (1) for shape of rank 3
+block-s2d-fed-axis-block3-at-run 0 block_size (3) must be multiple of height 4
+
+# The non-zero indices of 17.0, whose result is a list: the shape its own tensor carries is -1 by the
+# operand's rank whatever the operand's data type was, and a destination of NO ROWS is the one shape the
+# release cannot be given - the process goes down inside its own NDArray (MPSNDArray.mm:893) because the
+# answer cannot fit in it at all. A destination whose buffer is NO bytes at all is refused a line earlier
+# and with another of its own sentences ("Error: device may not be nil", MPSNDArray.mm:759), which is the
+# same refusal with nothing to write into.
+nonzero-result-shape 0 result-shape -1x3
+nonzero-destination-no-rows 134 buffer is not large enough. Must be 12 bytes
+# And the control: five rows is answered, and every one of them a written zero over a destination filled
+# with the byte 0xbd, because the [3, 4, 6] of 1 to 72 has no zero in it and so has no non-zero element to
+# answer.
+nonzero-destination-five-rows 0 00000000

@@ -1,0 +1,181 @@
+{
+  "framework": "Network",
+  "entries": [
+    {
+      "api": "nw_connection_group_create()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the factory of a group: an object that listens for, processes and answers the messages of a group of connections, over the protocols the parameters name",
+      "effect": "the group holds the descriptor and the parameters and copies both back; a descriptor of no kind, which is one no factory of this library made, is refused with NULL as the header's own failure for invalid parameters says (Network/nw16-connection-group.m:452)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:97-107, for the factory and its failure; the whole family measures at 16.0 and facts/Network/NWConnectionGroup.md carries the measurement"
+    },
+    {
+      "api": "nw_connection_group_copy_descriptor()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the group descriptor the group was created with: which members it has",
+      "effect": "the descriptor the group was created with, so a caller reads back the members it was given (Network/nw16-connection-group.m:474)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:109-123"
+    },
+    {
+      "api": "nw_connection_group_copy_parameters()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the parameters the group runs with: the protocols that delineate complete messages",
+      "effect": "the parameters the group was created with, which are the ones its datagram socket and any connection extracted from it run with (Network/nw16-connection-group.m:479)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:125-139"
+    },
+    {
+      "api": "nw_connection_group_set_queue()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the queue every handler of the group runs on, which the header says must be set before the group is started",
+      "effect": "the queue the socket is read on and every handler is called on, and the queue a connection extracted from a message runs with; a group started with no queue does nothing at all (Network/nw16-connection-group.m:484)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:141-155"
+    },
+    {
+      "api": "nw_connection_group_set_state_changed_handler()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the handler called when the group changes state",
+      "effect": "waiting while the group is brought up, ready once its socket is joined and bound, failed with the error that stopped it, and cancelled last; a state is not repeated and no handler runs after the cancel (Network/nw16-connection-group.m:490)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:181-197"
+    },
+    {
+      "api": "nw_connection_group_set_receive_handler()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the handler called for every inbound message, with the bounds the program will accept as a whole message",
+      "effect": "one call per datagram, with the bytes, the context that stands for the message and whether it is the whole of it; a datagram over the maximum arrives whole when the program asked for oversized messages to be delivered incomplete, and is answered by the group with an error when it asked for them to be refused (Network/nw16-connection-group.m:497)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:240-252"
+    },
+    {
+      "api": "nw_connection_group_start()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "what starts the group: it begins listening for and processing incoming messages",
+      "effect": "the datagram socket is opened, joined to every address the descriptor holds, bound to the descriptor's source and port, and read by a dispatch source on the group's own queue, so no handler runs before the call has returned to its caller; a group started twice is the same group and the second start says nothing (Network/nw16-connection-group.m:509)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:254-266"
+    },
+    {
+      "api": "nw_connection_group_cancel()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "what stops the group",
+      "effect": "the socket and its source are dropped, the path monitor is cancelled, every record of an inbound message is released, both handlers are dropped and the state handler is called once with cancelled; nothing is called after it (Network/nw16-connection-group.m:558)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:268-284"
+    },
+    {
+      "api": "nw_connection_group_copy_remote_endpoint_for_message()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "who sent an inbound message",
+      "effect": "the address the datagram came from, as an address endpoint, or nothing at all for a context that is not an inbound message of this group (Network/nw16-connection-group.m:597)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:286-303, for the result and for nothing when the context is not one of the group's messages"
+    },
+    {
+      "api": "nw_connection_group_copy_local_endpoint_for_message()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "where on the group an inbound message arrived",
+      "effect": "the address the datagram was sent to, read out of the kernel's own IP_PKTINFO for that datagram rather than guessed from the socket, and nothing at all for a context that is not an inbound message of this group (Network/nw16-connection-group.m:604)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:305-322"
+    },
+    {
+      "api": "nw_connection_group_copy_path_for_message()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "which path an inbound message arrived over",
+      "effect": "the path the group's own path monitor last reported, which is the only path a group has, and nothing at all until that monitor has reported one or for a context that is not an inbound message of this group (Network/nw16-connection-group.m:611)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:324-341"
+    },
+    {
+      "api": "nw_connection_group_extract_connection_for_message()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the connection of one peer of the group, so a caller can read the rest of what that peer says or answer it over a connection of its own",
+      "effect": "a real datagram nw_connection_t of this library over the address the sender used, with the group's parameters and its queue; the record of the message leaves the group with it, so later messages from that peer are the connection's to read, and nothing at all is returned for a context that is not an inbound message of this group (Network/nw16-connection-group.m:621)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:398-424"
+    },
+    {
+      "api": "nw_connection_group_reply()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the answer to an inbound message: the bytes, the outbound context that describes how to send them, and the context they answer",
+      "effect": "the bytes go to the address the message came from with the type of service the outbound context's IP metadata asks for, and a message may be answered exactly once; a context marked final stops the group holding what it knows about the message (Network/nw16-connection-group.m:638)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:426-453"
+    },
+    {
+      "api": "nw_connection_group_send_message()",
+      "kind": "function",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an outbound message of the group's own, to a named endpoint or to every member",
+      "effect": "the bytes go to the endpoint the program named, or to the group address and to every member of it when it named none, with the type of service the context's IP metadata asks for; the completion is called with no error once the bytes are on the socket and with ENOTCONN when the group has no socket, which is the documented failure for a cancelled group (Network/nw16-connection-group.m:660)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:497-522"
+    },
+    {
+      "api": "nw_connection_group_copy_protocol_metadata()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the metadata of one protocol of the group's own stack, once the group is up",
+      "effect": "IP metadata for the IP definition and UDP metadata for the UDP definition, which are the two protocols the group's stack has, and nothing for another definition or for a group that has not been brought up (Network/nw16-connection-group.m:694)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:563-580, for the result and for nothing when the group is not established or is cancelled"
+    },
+    {
+      "api": "nw_connection_group_copy_protocol_metadata_for_message()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the metadata of one protocol for one inbound message",
+      "effect": "the message's own IP or UDP metadata, and nothing for another definition or for a context that is not an inbound message of this group (Network/nw16-connection-group.m:707)",
+      "facts": "facts/Network/NWConnectionGroup.md",
+      "source": "SDK 26.2, connection_group.h:363-382"
+    }
+  ]
+}

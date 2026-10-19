@@ -1,0 +1,22 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+QuickLookThumbnailing	swift-struct	c:@E@QLThumbnailError	-	QLThumbnailError	-	-	-	ios=13.0	-	74248fbfbf5a52ff
+QuickLookThumbnailing	swift-property	s:SC16QLThumbnailErrorLeV03_nsB0So7NSErrorCvp	QLThumbnailError	_nsError	-	Foundation.NSError	-	-	-	f5bbb63881a1af5c
+QuickLookThumbnailing	swift-method	s:SC16QLThumbnailErrorLeV03_nsB0ABSo7NSErrorC_tcfc	QLThumbnailError	init(_nsError:)	-	-	QuickLookThumbnailing.QLThumbnailError | Foundation.NSError	-	-	0aa3f716cbc92a82
+QuickLookThumbnailing	swift-property	s:SC16QLThumbnailErrorLeV11errorDomainSSvpZ	QLThumbnailError	errorDomain	+	Swift.String	-	-	-	4d462ebb002eacdb
+QuickLookThumbnailing	swift-enum	c:@E@QLThumbnailError	QLThumbnailError	Code	-	-	-	ios=13.0	-	c6cf6258b3ae7081
+QuickLookThumbnailing	swift-method	s:So16QLThumbnailErrorV8rawValueABSgSi_tcfc	QLThumbnailError.Code	init(rawValue:)	-	-	QuickLookThumbnailing.QLThumbnailError.Code? | Swift.Int	-	-	838045fb7d01fe8c
+QuickLookThumbnailing	swift-property	s:So16QLThumbnailErrorV8rawValueSivp	QLThumbnailError.Code	rawValue	-	Swift.Int	-	-	-	26f2e4ba58740e0d
+QuickLookThumbnailing	swift-typealias	s:So16QLThumbnailErrorV8RawValuea	QLThumbnailError.Code	RawValue	-	-	-	-	-	4d2c2f1617f2dcfb
+QuickLookThumbnailing	swift-typealias	c:@E@QLThumbnailError	QLThumbnailError.Code	_ErrorType	-	-	-	-	-	3da2d8957fdb5f23
+QuickLookThumbnailing	swift-constant	c:@E@QLThumbnailError@QLThumbnailErrorGenerationFailed	QLThumbnailError.Code	generationFailed	-	-	-	-	-	6d0f2d863ca12b39
+QuickLookThumbnailing	swift-constant	c:@E@QLThumbnailError@QLThumbnailErrorSavingToURLFailed	QLThumbnailError.Code	savingToURLFailed	-	-	-	-	-	15b53949b3eef1ed
+QuickLookThumbnailing	swift-constant	c:@E@QLThumbnailError@QLThumbnailErrorNoCachedThumbnail	QLThumbnailError.Code	noCachedThumbnail	-	-	-	-	-	6b5178bfad1072a8
+QuickLookThumbnailing	swift-constant	c:@E@QLThumbnailError@QLThumbnailErrorNoCloudThumbnail	QLThumbnailError.Code	noCloudThumbnail	-	-	-	-	-	47d0fde3623d5f08
+QuickLookThumbnailing	swift-constant	c:@E@QLThumbnailError@QLThumbnailErrorRequestInvalid	QLThumbnailError.Code	requestInvalid	-	-	-	-	-	7f1d810f8edc8260
+QuickLookThumbnailing	swift-constant	c:@E@QLThumbnailError@QLThumbnailErrorRequestCancelled	QLThumbnailError.Code	requestCancelled	-	-	-	-	-	89cddb6a97edf261
+QuickLookThumbnailing	swift-property	c:@E@QLThumbnailError@QLThumbnailErrorGenerationFailed	QLThumbnailError	generationFailed	+	QuickLookThumbnailing.QLThumbnailError.Code	-	-	-	c1c69f49fa938050
+QuickLookThumbnailing	swift-property	c:@E@QLThumbnailError@QLThumbnailErrorSavingToURLFailed	QLThumbnailError	savingToURLFailed	+	QuickLookThumbnailing.QLThumbnailError.Code	-	-	-	ff4b4475777b4862
+QuickLookThumbnailing	swift-property	c:@E@QLThumbnailError@QLThumbnailErrorNoCachedThumbnail	QLThumbnailError	noCachedThumbnail	+	QuickLookThumbnailing.QLThumbnailError.Code	-	-	-	54dbb63ff9230db7
+QuickLookThumbnailing	swift-property	c:@E@QLThumbnailError@QLThumbnailErrorNoCloudThumbnail	QLThumbnailError	noCloudThumbnail	+	QuickLookThumbnailing.QLThumbnailError.Code	-	-	-	b804ecd7272fa60d
+QuickLookThumbnailing	swift-property	c:@E@QLThumbnailError@QLThumbnailErrorRequestInvalid	QLThumbnailError	requestInvalid	+	QuickLookThumbnailing.QLThumbnailError.Code	-	-	-	8a1cd2d4a66b62b8
+QuickLookThumbnailing	swift-property	c:@E@QLThumbnailError@QLThumbnailErrorRequestCancelled	QLThumbnailError	requestCancelled	+	QuickLookThumbnailing.QLThumbnailError.Code	-	-	-	698d8efad9ffb4ac

@@ -1,0 +1,205 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+   "api": "UIColor.systemRedColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic red colour, 255,56,60 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemRedColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemOrangeColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic orange colour, 255,141,40 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemOrangeColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemYellowColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic yellow colour, 255,204,0 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemYellowColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemGreenColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic green colour, 52,199,89 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemGreenColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemPinkColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic pink colour, 255,45,85 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemPinkColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemPurpleColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic purple colour, 203,48,224 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemPurpleColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemBlueColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic blue colour, 0,136,255 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemBlueColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "UIColor.systemGrayColor",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "effect": "the semantic gray colour, 142,142,147 in 8 bits per channel as the host's own holds it",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the case UIColor.systemGrayColor), and the tree's own UIColor+SystemColors.m, which builds it"
+  },
+  {
+   "api": "-[UIView isFocused]",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "NO, and it stays NO: the release has no focus engine, so nothing here takes the focus and saying so is better than reporting a focus the device does not have",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the UIView.focused case)"
+  },
+  {
+   "api": "-[UIView setFocused:]",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "remembers whether the view holds the focus, and nothing on this release takes it, so setting it true says the view is focused and the getter says so back; that is the port's own state, not the system's, and is what a focus engine built on this would read",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the UIView.focused case)"
+  },
+  {
+   "api": "+[UIView animateKeyframesWithDuration:delay:options:animations:completion:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the keyframes the block registers, each run with the release's own animation at the delay its own start says and for the length its own duration says, both relative to the whole, with the completion called when the whole has passed",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the header of SDK 26.2 for the relative times and for the block taking no time; the release's own +animateWithDuration:delay:options:animations:completion: is what each keyframe is run with"
+  },
+  {
+   "api": "+[UIView addKeyframeWithRelativeStartTime:relativeDuration:animations:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "one keyframe of the animation being built, kept with its start and duration relative to the whole, in the order it was added",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the header of SDK 26.2 for the relative times"
+  },
+  {
+   "api": "+[UIView performSystemAnimation:onViews:options:animations:completion:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the caller's own animations run on the views they named and the completion called; the named system effect itself is the system's and this release has no system animation set, which is the seam recorded in the facts",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the header of SDK 26.2 for the signature; the named effects are the system's and there is no public mechanism for one, which the facts say"
+  },
+  {
+   "api": "+[UIView inheritedAnimationDuration]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "0, which is what the host answers: there is no inherited duration on this release for an animation to inherit",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the UIView.inheritedAnimationDuration case)"
+  },
+  {
+   "api": "UIView.canBecomeFocused",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "NO: a focus engine drives focus on a device that has one, and this release has none, so a view here is not one focus can land on, which is what the host answers for a view made by hand",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions (the UIView.canBecomeFocused case)"
+  },
+  {
+   "api": "+[UIColor colorWithDisplayP3Red:green:blue:alpha:]",
+   "kind": "method",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "implemented, and the reason it was absent (the color is a private subclass holding its components in the Display P3 color space, which iOS 6 has not; a color made from sRGB values answers other components than the release does, so it would be a different color under the same name) named the system feature rather than anything this release cannot do, which the coordinator's ruling of 2026-09-27 overturned; what it does is in facts/UIKit/UIAccessibilityAdditions.md",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions"
+  },
+  {
+   "api": "-[UIColor initWithDisplayP3Red:green:blue:alpha:]",
+   "kind": "method",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "implemented, and the reason it was absent (the color is a private subclass holding its components in the Display P3 color space, which iOS 6 has not; a color made from sRGB values answers other components than the release does, so it would be a different color under the same name) named the system feature rather than anything this release cannot do, which the coordinator's ruling of 2026-09-27 overturned; what it does is in facts/UIKit/UIAccessibilityAdditions.md",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions"
+  },
+  {
+   "api": "-[UIView safeAreaInsetsDidChange]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "implemented, and the reason it was absent (the callback comes from the moment the insets change, and reaching that moment means replacing -layoutSubviews, -setFrame: or -didMoveToSuperview, which the port does not do) named the system feature rather than anything this release cannot do, which the coordinator's ruling of 2026-09-27 overturned; what it does is in facts/UIKit/UIAccessibilityAdditions.md",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions"
+  },
+  {
+   "api": "+[UIColor colorNamed:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "implemented, and the reason it was absent (a named colour lives in the compiled asset catalogue, which CoreUI reads; this release's CoreUI knows no such file) named the system feature rather than anything this release cannot do, which the coordinator's ruling of 2026-09-27 overturned; what it does is in facts/UIKit/UIAccessibilityAdditions.md",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions"
+  },
+  {
+   "api": "+[UIColor colorNamed:inBundle:compatibleWithTraitCollection:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "implemented, and the reason it was absent (the same asset catalogue as the plain +colorNamed:, read by a CoreUI that knows no such file) named the system feature rather than anything this release cannot do, which the coordinator's ruling of 2026-09-27 overturned; what it does is in facts/UIKit/UIAccessibilityAdditions.md",
+   "facts": "facts/UIKit/UIAccessibilityAdditions.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitadditions"
+  }
+ ]
+}

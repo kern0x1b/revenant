@@ -1,0 +1,13 @@
+{
+  "framework": "CoreMIDI",
+  "entries": [
+    {
+      "api": "kMIDIPropertyNameConfigurationDictionary",
+      "kind": "constant",
+      "introduced": "13.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/CoreMIDI.md",
+      "source": "the value macOS CoreMIDI gives the constant (nameConfigurationDictionary), read by tests/backports/host/coremidi/differential.m"
+    }
+  ]
+}

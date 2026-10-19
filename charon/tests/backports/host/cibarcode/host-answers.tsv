@@ -1,0 +1,22 @@
+sweep-qr	qr ranges answered	1280 of 1280
+sweep-qr	#exit	0
+sweep-aztec	aztec ranges answered	131072 of 131072
+sweep-aztec	#exit	0
+sweep-pdf417	pdf417 ranges answered	5280 of 5280
+sweep-pdf417	#exit	0
+sweep-matrix	matrix ranges answered	6400 of 6400
+sweep-matrix	#exit	0
+qr	qr version 0	nil
+qr	#exit	133
+aztec	aztec layers 0	nil
+aztec	#exit	133
+pdf417-rows	pdf417 rows 1	nil
+pdf417-rows	pdf417 rows 2	nil
+pdf417-rows	#exit	133
+pdf417-columns	pdf417 columns 0	nil
+pdf417-columns	#exit	133
+matrix	#exit	133
+payload	#exit	133
+payload-no-pdf417	#exit	133
+copy	#exit	133
+copy-no-pdf417	#exit	133

@@ -1,0 +1,7 @@
+Package: org.charon.arkitconfig
+Name: Charon ARKit configurations probe
+Architecture: iphoneos-arm
+Description: The stored settings, the support answers and the body refusal of the ARKit configurations, on the release
+Maintainer: charon
+Author: charon
+Section: Development

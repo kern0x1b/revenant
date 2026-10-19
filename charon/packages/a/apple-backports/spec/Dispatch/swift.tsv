@@ -1,0 +1,527 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+Dispatch	swift-constant	c:@Ea@DISPATCH_WALLTIME_NOW@DISPATCH_WALLTIME_NOW	-	DISPATCH_WALLTIME_NOW	-	Swift.UInt	-	ios=12.0	-	6c8abf24208f2d0f
+Dispatch	swift-class	c:objc(cs)OS_dispatch_queue_concurrent	-	DispatchConcurrentQueue	-	-	-	ios=12.0	-	41e977052f7a3d10
+Dispatch	swift-struct	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV	DispatchConcurrentQueue	Attributes	-	-	-	-	-	6ec75f9a0eaf7a49
+Dispatch	swift-property	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV8rawValues6UInt64Vvp	DispatchConcurrentQueue.Attributes	rawValue	-	Swift.UInt64	-	-	-	c699b6c3fdc212af
+Dispatch	swift-method	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV8rawValueAEs6UInt64V_tcfc	DispatchConcurrentQueue.Attributes	init(rawValue:)	-	-	Dispatch.DispatchConcurrentQueue.Attributes | Swift.UInt64	-	-	f8c4cadf7cfd2c25
+Dispatch	swift-property	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV17initiallyInactiveAEvpZ	DispatchConcurrentQueue.Attributes	initiallyInactive	+	Dispatch.DispatchConcurrentQueue.Attributes	-	-	-	f51cde43ccaadeb7
+Dispatch	swift-typealias	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV19ArrayLiteralElementa	DispatchConcurrentQueue.Attributes	ArrayLiteralElement	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e92c8748f078af52
+Dispatch	swift-typealias	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV7Elementa	DispatchConcurrentQueue.Attributes	Element	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d8ea2d3b3074b38d
+Dispatch	swift-typealias	s:So28OS_dispatch_queue_concurrentC8DispatchE10AttributesV8RawValuea	DispatchConcurrentQueue.Attributes	RawValue	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	102b09d87916af78
+Dispatch	swift-method	s:So28OS_dispatch_queue_concurrentC8DispatchE5label3qos10attributes20autoreleaseFrequency6targetABSS_AC0E3QoSVAbCE10AttributesVSo0a1_b1_C0CACE011AutoreleaseJ0OANSgtcfc	DispatchConcurrentQueue	init(label:qos:attributes:autoreleaseFrequency:target:)	-	-	Dispatch.DispatchConcurrentQueue | Swift.String | Dispatch.DispatchQoS | Dispatch.DispatchConcurrentQueue.Attributes | Dispatch.DispatchQueue.AutoreleaseFrequency | Dispatch.DispatchQueue?	-	-	a4f2e0bcb31c9d4c
+Dispatch	swift-class	c:objc(cs)OS_dispatch_group	-	DispatchGroup	-	-	-	-	-	11d7748ebc170aec
+Dispatch	swift-method	c:@F@dispatch_group_create	DispatchGroup	init()	-	-	Dispatch.DispatchGroup	ios=4.0	-	0ffe41f65453f740
+Dispatch	swift-method	c:@F@dispatch_group_enter	DispatchGroup	enter()	-	Swift.Void	-	ios=4.0	-	339d146fbe7a5901
+Dispatch	swift-method	c:@F@dispatch_group_leave	DispatchGroup	leave()	-	Swift.Void	-	ios=4.0	-	18c7bddaba0c0cfd
+Dispatch	swift-method	s:So17OS_dispatch_groupC8DispatchE6notify3qos5flags5queue7executeyAC0D3QoSV_AC0D13WorkItemFlagsVSo0a1_b1_H0CyyXLtF	DispatchGroup	notify(qos:flags:queue:execute:)	-	()	Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | Dispatch.DispatchQueue | () -> Swift.Void	-	-	52343e50cb1192a6
+Dispatch	swift-method	s:So17OS_dispatch_groupC8DispatchE6notify5queue4workySo0a1_b1_F0C_AC0D8WorkItemCtF	DispatchGroup	notify(queue:work:)	-	()	Dispatch.DispatchQueue | Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	d6bc3bb04819a0bf
+Dispatch	swift-method	s:So17OS_dispatch_groupC8DispatchE4waityyF	DispatchGroup	wait()	-	()	-	-	-	38921deeffd3e870
+Dispatch	swift-method	s:So17OS_dispatch_groupC8DispatchE4wait7timeoutAC0D13TimeoutResultOAC0D4TimeV_tF	DispatchGroup	wait(timeout:)	-	Dispatch.DispatchTimeoutResult	Dispatch.DispatchTime	-	-	4ce985cffa20a409
+Dispatch	swift-method	s:So17OS_dispatch_groupC8DispatchE4wait11wallTimeoutAC0dG6ResultOAC0D8WallTimeV_tF	DispatchGroup	wait(wallTimeout:)	-	Dispatch.DispatchTimeoutResult	Dispatch.DispatchWallTime	-	-	33d655cb33eb048b
+Dispatch	swift-class	c:objc(cs)OS_dispatch_io	-	DispatchIO	-	-	-	-	-	1b2defc9850c0d59
+Dispatch	swift-method	c:@F@dispatch_io_barrier	DispatchIO	barrier(execute:)	-	Swift.Void	() -> Swift.Void	ios=5.0	-	41b780176ffe3b1e
+Dispatch	swift-property	c:@F@dispatch_io_get_descriptor	DispatchIO	fileDescriptor	-	Swift.Int32	-	ios=5.0	-	770340faad6c252d
+Dispatch	swift-method	c:@F@dispatch_io_set_high_water	DispatchIO	setLimit(highWater:)	-	Swift.Void	Swift.Int	ios=5.0	-	ff542352433dbcf7
+Dispatch	swift-method	c:@F@dispatch_io_set_low_water	DispatchIO	setLimit(lowWater:)	-	Swift.Void	Swift.Int	ios=5.0	-	ba6e5c2ecb6150bf
+Dispatch	swift-enum	s:So14OS_dispatch_ioC8DispatchE10StreamTypeO	DispatchIO	StreamType	-	-	-	-	-	697d7d2787d2e588
+Dispatch	swift-constant	s:So14OS_dispatch_ioC8DispatchE10StreamTypeO6streamyA2EmF	DispatchIO.StreamType	stream	-	-	-	-	-	8f99d7ae265d5d35
+Dispatch	swift-constant	s:So14OS_dispatch_ioC8DispatchE10StreamTypeO6randomyA2EmF	DispatchIO.StreamType	random	-	-	-	-	-	154059dfe95a1e0c
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE10StreamTypeO8rawValueAESgSu_tcfc	DispatchIO.StreamType	init(rawValue:)	-	-	Dispatch.DispatchIO.StreamType? | Swift.UInt	-	-	3310f0c086c6dddb
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE10StreamTypeO8RawValuea	DispatchIO.StreamType	RawValue	-	-	-	-	-	1485076efeef105f
+Dispatch	swift-property	s:So14OS_dispatch_ioC8DispatchE10StreamTypeO8rawValueSuvp	DispatchIO.StreamType	rawValue	-	Swift.UInt	-	-	-	5724d4f44eab6685
+Dispatch	swift-struct	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV	DispatchIO	CloseFlags	-	-	-	-	-	343a30ca93a7610a
+Dispatch	swift-property	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV8rawValueSuvp	DispatchIO.CloseFlags	rawValue	-	Swift.UInt	-	-	-	57515f4a9e015482
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV8rawValueAESu_tcfc	DispatchIO.CloseFlags	init(rawValue:)	-	-	Dispatch.DispatchIO.CloseFlags | Swift.UInt	-	-	9b779d5a2983038f
+Dispatch	swift-property	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV4stopAEvpZ	DispatchIO.CloseFlags	stop	+	Dispatch.DispatchIO.CloseFlags	-	-	-	cf39d31c62f915fb
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV19ArrayLiteralElementa	DispatchIO.CloseFlags	ArrayLiteralElement	-	-	-	-	-	fa0d5599d2f3d481
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV7Elementa	DispatchIO.CloseFlags	Element	-	-	-	-	-	eae23cf7ab46c7aa
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE10CloseFlagsV8RawValuea	DispatchIO.CloseFlags	RawValue	-	-	-	-	-	e21f5753508b7419
+Dispatch	swift-struct	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV	DispatchIO	IntervalFlags	-	-	-	-	-	99071929eba22a5d
+Dispatch	swift-property	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV8rawValueSuvp	DispatchIO.IntervalFlags	rawValue	-	Swift.UInt	-	-	-	921574d21d8000aa
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV8rawValueAESu_tcfc	DispatchIO.IntervalFlags	init(rawValue:)	-	-	Dispatch.DispatchIO.IntervalFlags | Swift.UInt	-	-	75f4e3926750ad68
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV10nilLiteralAEyt_tcfc	DispatchIO.IntervalFlags	init(nilLiteral:)	-	-	Dispatch.DispatchIO.IntervalFlags | ()	-	-	51b4e7f6c36ef387
+Dispatch	swift-property	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV06strictE0AEvpZ	DispatchIO.IntervalFlags	strictInterval	+	Dispatch.DispatchIO.IntervalFlags	-	-	-	a182f9780cf86cbd
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV19ArrayLiteralElementa	DispatchIO.IntervalFlags	ArrayLiteralElement	-	-	-	-	-	62b36461ef7f381c
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV7Elementa	DispatchIO.IntervalFlags	Element	-	-	-	-	-	36d3cb4577649962
+Dispatch	swift-typealias	s:So14OS_dispatch_ioC8DispatchE13IntervalFlagsV8RawValuea	DispatchIO.IntervalFlags	RawValue	-	-	-	-	-	5394ae6551f340af
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE4read18fromFileDescriptor9maxLength16runningHandlerOn7handlerys5Int32V_SiSo0a1_B6_queueCyAC0D4DataV_AJtctFZ	DispatchIO	read(fromFileDescriptor:maxLength:runningHandlerOn:handler:)	+	()	Swift.Int32 | Swift.Int | Dispatch.DispatchQueue | (Dispatch.DispatchData, Swift.Int32) -> Swift.Void	-	-	d0f4b80f5bb187a8
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE5write16toFileDescriptor4data16runningHandlerOn7handlerys5Int32V_AC0D4DataVSo0a1_B6_queueCyALSg_AJtctFZ	DispatchIO	write(toFileDescriptor:data:runningHandlerOn:handler:)	+	()	Swift.Int32 | Dispatch.DispatchData | Dispatch.DispatchQueue | (Dispatch.DispatchData?, Swift.Int32) -> Swift.Void	-	-	9188be095ee8839d
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE4type14fileDescriptor5queue14cleanupHandlerA2bCE10StreamTypeO_s5Int32VSo0a1_b1_H0CyAKctcfc	DispatchIO	init(type:fileDescriptor:queue:cleanupHandler:)	-	-	Dispatch.DispatchIO | Dispatch.DispatchIO.StreamType | Swift.Int32 | Dispatch.DispatchQueue | (Swift.Int32) -> Swift.Void	-	-	d8c5347fc4a9aeb8
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE4type4path5oflag4mode5queue14cleanupHandlerABSgAbCE10StreamTypeO_SPys4Int8VGs5Int32Vs6UInt16VSo0a1_b1_I0CyAQctcfc	DispatchIO	init(type:path:oflag:mode:queue:cleanupHandler:)	-	-	Dispatch.DispatchIO? | Dispatch.DispatchIO.StreamType | Swift.UnsafePointer<Swift.Int8> | Swift.Int32 | _DarwinFoundation2.mode_t | Dispatch.DispatchQueue | (Swift.Int32) -> Swift.Void	swift=4	-	4919bcbc3a3a72eb
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE4type0C05queue14cleanupHandlerA2bCE10StreamTypeO_ABSo0a1_b1_F0Cys5Int32Vctcfc	DispatchIO	init(type:io:queue:cleanupHandler:)	-	-	Dispatch.DispatchIO | Dispatch.DispatchIO.StreamType | Dispatch.DispatchIO | Dispatch.DispatchQueue | (Swift.Int32) -> Swift.Void	-	-	bd8ef98fdfb15240
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE4read6offset6length5queue0C7Handlerys5Int64V_SiSo0a1_b1_H0CySb_AC0D4DataVSgs5Int32VtctF	DispatchIO	read(offset:length:queue:ioHandler:)	-	()	_DarwinFoundation2.off_t | Swift.Int | Dispatch.DispatchQueue | (Swift.Bool, Dispatch.DispatchData?, Swift.Int32) -> Swift.Void	-	-	156366770544b5a1
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE5write6offset4data5queue0C7Handlerys5Int64V_AC0D4DataVSo0a1_b1_H0CySb_ALSgs5Int32VtctF	DispatchIO	write(offset:data:queue:ioHandler:)	-	()	_DarwinFoundation2.off_t | Dispatch.DispatchData | Dispatch.DispatchQueue | (Swift.Bool, Dispatch.DispatchData?, Swift.Int32) -> Swift.Void	-	-	5631db13990c9a6c
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE11setInterval8interval5flagsyAC0d4TimeF0O_AbCE0F5FlagsVtF	DispatchIO	setInterval(interval:flags:)	-	()	Dispatch.DispatchTimeInterval | Dispatch.DispatchIO.IntervalFlags	-	-	f90076ead40acfad
+Dispatch	swift-method	s:So14OS_dispatch_ioC8DispatchE5close5flagsyAbCE10CloseFlagsV_tF	DispatchIO	close(flags:)	-	()	Dispatch.DispatchIO.CloseFlags	-	-	21591a0ea97c08c9
+Dispatch	swift-class	c:objc(cs)OS_dispatch_object	-	DispatchObject	-	-	-	-	-	c5da6dd76364a671
+Dispatch	swift-method	c:@F@dispatch_activate	DispatchObject	activate()	-	Swift.Void	-	ios=10.0	-	b6e32847bc9a29ff
+Dispatch	swift-method	c:@F@dispatch_suspend	DispatchObject	suspend()	-	Swift.Void	-	ios=4.0	-	1fe38e88088fa308
+Dispatch	swift-method	c:@F@dispatch_resume	DispatchObject	resume()	-	Swift.Void	-	ios=4.0	-	cb59227cf5876807
+Dispatch	swift-method	c:@F@dispatch_set_target_queue	DispatchObject	setTarget(queue:)	-	Swift.Void	Dispatch.dispatch_queue_t?	ios=4.0	-	a870afc3a257b909
+Dispatch	swift-class	c:objc(cs)OS_dispatch_queue	-	DispatchQueue	-	-	-	-	-	4af3f304ebdf0a48
+Dispatch	swift-struct	s:So17OS_dispatch_queueC8DispatchE10AttributesV	DispatchQueue	Attributes	-	-	-	-	-	8ee87b79dbb6b94c
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE10AttributesV8rawValues6UInt64Vvp	DispatchQueue.Attributes	rawValue	-	Swift.UInt64	-	-	-	8847e8fda967fcfa
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE10AttributesV8rawValueAEs6UInt64V_tcfc	DispatchQueue.Attributes	init(rawValue:)	-	-	Dispatch.DispatchQueue.Attributes | Swift.UInt64	-	-	62132a4da4e8e4fa
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE10AttributesV10concurrentAEvpZ	DispatchQueue.Attributes	concurrent	+	Dispatch.DispatchQueue.Attributes	-	-	-	e9f0005b3e3847e4
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE10AttributesV17initiallyInactiveAEvpZ	DispatchQueue.Attributes	initiallyInactive	+	Dispatch.DispatchQueue.Attributes	-	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	01a082ae92c61367
+Dispatch	swift-typealias	s:So17OS_dispatch_queueC8DispatchE10AttributesV19ArrayLiteralElementa	DispatchQueue.Attributes	ArrayLiteralElement	-	-	-	-	-	40300620ea1a3f63
+Dispatch	swift-typealias	s:So17OS_dispatch_queueC8DispatchE10AttributesV7Elementa	DispatchQueue.Attributes	Element	-	-	-	-	-	1467693ead269d61
+Dispatch	swift-typealias	s:So17OS_dispatch_queueC8DispatchE10AttributesV8RawValuea	DispatchQueue.Attributes	RawValue	-	-	-	-	-	f4df02729004317b
+Dispatch	swift-enum	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO	DispatchQueue	GlobalQueuePriority	-	-	-	-	-	d95bd437bf9e65f1
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO4highyA2EmF	DispatchQueue.GlobalQueuePriority	high	-	-	-	-	-	ad32987680a66a35
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO7defaultyA2EmF	DispatchQueue.GlobalQueuePriority	default	-	-	-	-	-	3d01ca2f6b06c1d6
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO3lowyA2EmF	DispatchQueue.GlobalQueuePriority	low	-	-	-	-	-	48e8e8c704b3743b
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO10backgroundyA2EmF	DispatchQueue.GlobalQueuePriority	background	-	-	-	-	-	96435295319112c0
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO2eeoiySbAE_AEtFZ	DispatchQueue.GlobalQueuePriority	==(_:_:)	+	Swift.Bool	Dispatch.DispatchQueue.GlobalQueuePriority | Dispatch.DispatchQueue.GlobalQueuePriority	-	-	b9e9d226ad72e25b
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO4hash4intoys6HasherVz_tF	DispatchQueue.GlobalQueuePriority	hash(into:)	-	()	Swift.Hasher	-	-	972b0e2794954bb5
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE19GlobalQueuePriorityO9hashValueSivp	DispatchQueue.GlobalQueuePriority	hashValue	-	Swift.Int	-	-	-	f49087e9bd4a2b87
+Dispatch	swift-enum	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO	DispatchQueue	AutoreleaseFrequency	-	-	-	-	-	c1f5108403fe62d5
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO7inherityA2EmF	DispatchQueue.AutoreleaseFrequency	inherit	-	-	-	-	-	95fa0836ef53926d
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO8workItemyA2EmF	DispatchQueue.AutoreleaseFrequency	workItem	-	-	-	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	9af5e1c09f4b9729
+Dispatch	swift-constant	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO5neveryA2EmF	DispatchQueue.AutoreleaseFrequency	never	-	-	-	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	f97f40b1fb1fec6b
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO2eeoiySbAE_AEtFZ	DispatchQueue.AutoreleaseFrequency	==(_:_:)	+	Swift.Bool	Dispatch.DispatchQueue.AutoreleaseFrequency | Dispatch.DispatchQueue.AutoreleaseFrequency	-	-	cc01a04bc9eb4366
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO4hash4intoys6HasherVz_tF	DispatchQueue.AutoreleaseFrequency	hash(into:)	-	()	Swift.Hasher	-	-	0830154e500848b9
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE20AutoreleaseFrequencyO9hashValueSivp	DispatchQueue.AutoreleaseFrequency	hashValue	-	Swift.Int	-	-	-	9d9aaf0abf70b96d
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17concurrentPerform10iterations7executeySi_ySiXEtFZ	DispatchQueue	concurrentPerform(iterations:execute:)	+	()	Swift.Int | (Swift.Int) -> Swift.Void	-	-	f1dfcab53a6d7884
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE4mainABvpZ	DispatchQueue	main	+	Dispatch.DispatchQueue	-	-	-	c56fc8f9b0d80484
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE6global8priorityA2bCE19GlobalQueuePriorityO_tFZ	DispatchQueue	global(priority:)	+	Dispatch.DispatchQueue	Dispatch.DispatchQueue.GlobalQueuePriority	-	-	35115737bf9b301a
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE6global3qosAbC0D3QoSV0G6SClassO_tFZ	DispatchQueue	global(qos:)	+	Dispatch.DispatchQueue	Dispatch.DispatchQoS.QoSClass	ios=8.0,macos=10.10	-	bc0ef55f2d0668e3
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE11getSpecific3keyxSgAC0dF3KeyCyxG_tlFZ	DispatchQueue	getSpecific(key:)	+	T?	Dispatch.DispatchSpecificKey<T>	-	-	2eafdf102e943c58
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE5label3qos10attributes20autoreleaseFrequency6targetABSS_AC0D3QoSVAbCE10AttributesVAbCE011AutoreleaseI0OABSgtcfc	DispatchQueue	init(label:qos:attributes:autoreleaseFrequency:target:)	-	-	Dispatch.DispatchQueue | Swift.String | Dispatch.DispatchQoS | Dispatch.DispatchQueue.Attributes | Dispatch.DispatchQueue.AutoreleaseFrequency | Dispatch.DispatchQueue?	-	-	e042bcaed1f5265c
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE5labelSSvp	DispatchQueue	label	-	Swift.String	-	-	-	9f683f3e93434334
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE4sync7executeyAC0D8WorkItemC_tF	DispatchQueue	sync(execute:)	-	()	Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	9acff12cc728c800
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE5async7executeyAC0D8WorkItemC_tF	DispatchQueue	async(execute:)	-	()	Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	74cb5b05fd7e8d65
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE12asyncAndWait7executeyAC0D8WorkItemC_tF	DispatchQueue	asyncAndWait(execute:)	-	()	Dispatch.DispatchWorkItem	ios=12.0,macos=10.14	-	93ca2d35690eddeb
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE5async5group7executeySo0a1_b1_F0C_AC0D8WorkItemCtF	DispatchQueue	async(group:execute:)	-	()	Dispatch.DispatchGroup | Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	a5d8b6ccfd81db21
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE11asyncUnsafe5group3qos5flags7executeySo0a1_b1_G0CSg_AC0D3QoSVAC0D13WorkItemFlagsVyyXLtF	DispatchQueue	asyncUnsafe(group:qos:flags:execute:)	-	()	Dispatch.DispatchGroup? | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4e15241f4bcbf7ed
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE5async5group3qos5flags7executeySo0a1_b1_F0CSg_AC0D3QoSVAC0D13WorkItemFlagsVyyXLtF	DispatchQueue	async(group:qos:flags:execute:)	-	()	Dispatch.DispatchGroup? | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	-	-	6a220268e03f20bf
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE12asyncAndWait7executexxyKXE_tKlF	DispatchQueue	asyncAndWait(execute:)	-	T	() throws -> T	ios=12.0,macos=10.14,tvos=12.0,watchos=5.0	-	330b3f095c70a8f7
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE12asyncAndWait5flags7executexAC0D13WorkItemFlagsV_xyKXEtKlF	DispatchQueue	asyncAndWait(flags:execute:)	-	T	Dispatch.DispatchWorkItemFlags | () throws -> T	ios=12.0,macos=10.14,tvos=12.0,watchos=5.0	-	0aeb0d5755d886f0
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE4sync7executexxyKXE_tKlF	DispatchQueue	sync(execute:)	-	T	() throws -> T	-	-	1961ed1684b1a8ce
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE4sync5flags7executexAC0D13WorkItemFlagsV_xyKXEtKlF	DispatchQueue	sync(flags:execute:)	-	T	Dispatch.DispatchWorkItemFlags | () throws -> T	-	-	f300f428d1988671
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE16asyncAfterUnsafe8deadline3qos5flags7executeyAC0D4TimeV_AC0D3QoSVAC0D13WorkItemFlagsVyyXLtF	DispatchQueue	asyncAfterUnsafe(deadline:qos:flags:execute:)	-	()	Dispatch.DispatchTime | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	eb1c7fc03122cb0b
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE10asyncAfter8deadline3qos5flags7executeyAC0D4TimeV_AC0D3QoSVAC0D13WorkItemFlagsVyyXLtF	DispatchQueue	asyncAfter(deadline:qos:flags:execute:)	-	()	Dispatch.DispatchTime | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	-	-	0ba949ed0a2a0c9e
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE16asyncAfterUnsafe12wallDeadline3qos5flags7executeyAC0D8WallTimeV_AC0D3QoSVAC0D13WorkItemFlagsVyyXLtF	DispatchQueue	asyncAfterUnsafe(wallDeadline:qos:flags:execute:)	-	()	Dispatch.DispatchWallTime | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	67c406295d4eda52
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE10asyncAfter12wallDeadline3qos5flags7executeyAC0D8WallTimeV_AC0D3QoSVAC0D13WorkItemFlagsVyyXLtF	DispatchQueue	asyncAfter(wallDeadline:qos:flags:execute:)	-	()	Dispatch.DispatchWallTime | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	-	-	ee70f6199a8b5699
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE10asyncAfter8deadline7executeyAC0D4TimeV_AC0D8WorkItemCtF	DispatchQueue	asyncAfter(deadline:execute:)	-	()	Dispatch.DispatchTime | Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	1305e5518659b407
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE10asyncAfter12wallDeadline7executeyAC0D8WallTimeV_AC0D8WorkItemCtF	DispatchQueue	asyncAfter(wallDeadline:execute:)	-	()	Dispatch.DispatchWallTime | Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	cdf1ae627e97a010
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE3qosAC0D3QoSVvp	DispatchQueue	qos	-	Dispatch.DispatchQoS	-	ios=8.0,macos=10.10	-	07e65c01736d1aac
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE11getSpecific3keyxSgAC0dF3KeyCyxG_tlF	DispatchQueue	getSpecific(key:)	-	T?	Dispatch.DispatchSpecificKey<T>	-	-	fb801da566164174
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE11setSpecific3key5valueyAC0dF3KeyCyxG_xSgtlF	DispatchQueue	setSpecific(key:value:)	-	()	Dispatch.DispatchSpecificKey<T> | T?	-	-	439fd4612919f17e
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE7enqueueyyScJF	DispatchQueue	enqueue(_:)	-	()	_Concurrency.UnownedJob	-	-	795d7565938b0698
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE21asUnownedTaskExecutor12_Concurrency0fgH0VyF	DispatchQueue	asUnownedTaskExecutor()	-	_Concurrency.UnownedTaskExecutor	-	-	-	8644f0381e0b4a1f
+Dispatch	swift-struct	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV	DispatchQueue	SchedulerTimeType	-	-	-	-	-	5e179e857f0cb1c3
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV0bF0AC0dF0Vvp	DispatchQueue.SchedulerTimeType	dispatchTime	-	Dispatch.DispatchTime	-	-	-	55063e56150df12e
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeVyAeC0dF0Vcfc	DispatchQueue.SchedulerTimeType	init(_:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType | Dispatch.DispatchTime	-	-	10b70c0af7ad45ed
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV4fromAEs7Decoder_p_tKcfc	DispatchQueue.SchedulerTimeType	init(from:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType | any Swift.Decoder	-	-	c6aa88add580f157
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6encode2toys7Encoder_p_tKF	DispatchQueue.SchedulerTimeType	encode(to:)	-	()	any Swift.Encoder	-	-	3b31d0006fe6163d
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV8distance2toAE6StrideVAE_tF	DispatchQueue.SchedulerTimeType	distance(to:)	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Dispatch.DispatchQueue.SchedulerTimeType	-	-	53fa171c5d86c979
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV8advanced2byA2E6StrideV_tF	DispatchQueue.SchedulerTimeType	advanced(by:)	-	Dispatch.DispatchQueue.SchedulerTimeType	Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	90b2899033ba99a4
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV4hash4intoys6HasherVz_tF	DispatchQueue.SchedulerTimeType	hash(into:)	-	()	Swift.Hasher	-	-	25abd7435c491e82
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV1loiySbAE_AEtFZ	DispatchQueue.SchedulerTimeType	<(_:_:)	+	Swift.Bool	Dispatch.DispatchQueue.SchedulerTimeType | Dispatch.DispatchQueue.SchedulerTimeType	-	-	2c8fd818381a9eaf
+Dispatch	swift-struct	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV	DispatchQueue.SchedulerTimeType	Stride	-	-	-	-	-	d763d90db1f831da
+Dispatch	swift-typealias	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV012FloatLiteralG0a	DispatchQueue.SchedulerTimeType.Stride	FloatLiteralType	-	-	-	-	-	e50a1adc7c3831ac
+Dispatch	swift-typealias	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV014IntegerLiteralG0a	DispatchQueue.SchedulerTimeType.Stride	IntegerLiteralType	-	-	-	-	-	4e93ce797d27f8c2
+Dispatch	swift-typealias	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV9Magnitudea	DispatchQueue.SchedulerTimeType.Stride	Magnitude	-	-	-	-	-	3f93747346e57d0f
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV9magnitudeSivp	DispatchQueue.SchedulerTimeType.Stride	magnitude	-	Swift.Int	-	-	-	b2b9f9eb48fed2f8
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV12timeIntervalAC0dfJ0Ovp	DispatchQueue.SchedulerTimeType.Stride	timeInterval	-	Dispatch.DispatchTimeInterval	-	-	-	572472d0f09a99b9
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideVyAgC0dF8IntervalOcfc	DispatchQueue.SchedulerTimeType.Stride	init(_:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchTimeInterval	-	-	4f421d95a3994a5c
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV12floatLiteralAGSd_tcfc	DispatchQueue.SchedulerTimeType.Stride	init(floatLiteral:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Swift.Double	-	-	0c46d031c36d0d75
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV14integerLiteralAGSi_tcfc	DispatchQueue.SchedulerTimeType.Stride	init(integerLiteral:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Swift.Int	-	-	63ff518c9d059499
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV7exactlyAGSgx_tcSzRzlufc	DispatchQueue.SchedulerTimeType.Stride	init(exactly:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride? | T	-	-	bf97f0e34d8b5a8d
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV1loiySbAG_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	<(_:_:)	+	Swift.Bool	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	c73e852778700637
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV1moiyA2G_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	*(_:_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	4bfcccbf8f968839
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV1poiyA2G_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	+(_:_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	e926e339437444c5
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV1soiyA2G_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	-(_:_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	753bcfe0b86ebf83
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV2seoiyyAGz_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	-=(_:_:)	+	()	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	72d39b6fc7ec989e
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV2meoiyyAGz_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	*=(_:_:)	+	()	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	ff399ff25f5e3454
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV2peoiyyAGz_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	+=(_:_:)	+	()	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	d7efb4dbf75bc0cc
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV7secondsyAGSdFZ	DispatchQueue.SchedulerTimeType.Stride	seconds(_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Swift.Double	-	-	37ece0b7b69ef95d
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV7secondsyAGSiFZ	DispatchQueue.SchedulerTimeType.Stride	seconds(_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Swift.Int	-	-	ff71c046e880ebbd
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV12millisecondsyAGSiFZ	DispatchQueue.SchedulerTimeType.Stride	milliseconds(_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Swift.Int	-	-	3628982715f3afeb
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV12microsecondsyAGSiFZ	DispatchQueue.SchedulerTimeType.Stride	microseconds(_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Swift.Int	-	-	d3ec0f05863a2c1e
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV11nanosecondsyAGSiFZ	DispatchQueue.SchedulerTimeType.Stride	nanoseconds(_:)	+	Dispatch.DispatchQueue.SchedulerTimeType.Stride	Swift.Int	-	-	55a3f99592057b9a
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV2eeoiySbAG_AGtFZ	DispatchQueue.SchedulerTimeType.Stride	==(_:_:)	+	Swift.Bool	Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	fcc81e74870eec78
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV6encode2toys7Encoder_p_tKF	DispatchQueue.SchedulerTimeType.Stride	encode(to:)	-	()	any Swift.Encoder	-	-	9fdd5e0f2254af4f
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV4hash4intoys6HasherVz_tF	DispatchQueue.SchedulerTimeType.Stride	hash(into:)	-	()	Swift.Hasher	-	-	57c1950466313e46
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV9hashValueSivp	DispatchQueue.SchedulerTimeType.Stride	hashValue	-	Swift.Int	-	-	-	9cf2c0e5ab63602d
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV6StrideV4fromAGs7Decoder_p_tKcfc	DispatchQueue.SchedulerTimeType.Stride	init(from:)	-	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride | any Swift.Decoder	-	-	e95bb9f23ac89d9f
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE17SchedulerTimeTypeV9hashValueSivp	DispatchQueue.SchedulerTimeType	hashValue	-	Swift.Int	-	-	-	a6b28c8b166170de
+Dispatch	swift-struct	s:So17OS_dispatch_queueC8DispatchE16SchedulerOptionsV	DispatchQueue	SchedulerOptions	-	-	-	-	-	fc636a2710e46b06
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE16SchedulerOptionsV3qosAC0D3QoSVvp	DispatchQueue.SchedulerOptions	qos	-	Dispatch.DispatchQoS	-	-	-	b147ca78a3537d14
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE16SchedulerOptionsV5flagsAC0D13WorkItemFlagsVvp	DispatchQueue.SchedulerOptions	flags	-	Dispatch.DispatchWorkItemFlags	-	-	-	3230facd523c5b01
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE16SchedulerOptionsV5groupSo0a1_b1_G0CSgvp	DispatchQueue.SchedulerOptions	group	-	Dispatch.DispatchGroup?	-	-	-	52bd0aa076537554
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE16SchedulerOptionsV3qos5flags5groupAeC0D3QoSV_AC0D13WorkItemFlagsVSo0a1_b1_I0CSgtcfc	DispatchQueue.SchedulerOptions	init(qos:flags:group:)	-	-	Dispatch.DispatchQueue.SchedulerOptions | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | Dispatch.DispatchGroup?	-	-	d0b14bf43d60909b
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE16minimumToleranceAbCE17SchedulerTimeTypeV6StrideVvp	DispatchQueue	minimumTolerance	-	Dispatch.DispatchQueue.SchedulerTimeType.Stride	-	-	-	f1197c8e03e6a7c7
+Dispatch	swift-property	s:So17OS_dispatch_queueC8DispatchE3nowAbCE17SchedulerTimeTypeVvp	DispatchQueue	now	-	Dispatch.DispatchQueue.SchedulerTimeType	-	-	-	f6d9cfb0781ad32b
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE8schedule7options_yAbCE16SchedulerOptionsVSg_yyctF	DispatchQueue	schedule(options:_:)	-	()	Dispatch.DispatchQueue.SchedulerOptions? | () -> Swift.Void	-	-	c86ccda757dd0152
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE8schedule5after9tolerance7options_yAbCE17SchedulerTimeTypeV_AI6StrideVAbCE0I7OptionsVSgyyctF	DispatchQueue	schedule(after:tolerance:options:_:)	-	()	Dispatch.DispatchQueue.SchedulerTimeType | Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerOptions? | () -> Swift.Void	-	-	89cdd0135f4b4eac
+Dispatch	swift-method	s:So17OS_dispatch_queueC8DispatchE8schedule5after8interval9tolerance7options_7Combine11Cancellable_pAbCE17SchedulerTimeTypeV_AL6StrideVAnbCE0L7OptionsVSgyyctF	DispatchQueue	schedule(after:interval:tolerance:options:_:)	-	any Combine.Cancellable	Dispatch.DispatchQueue.SchedulerTimeType | Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerTimeType.Stride | Dispatch.DispatchQueue.SchedulerOptions? | () -> Swift.Void	-	-	a718e4e3fb31064e
+Dispatch	swift-method	c:@F@dispatch_sync	DispatchQueue	sync(execute:)	-	Swift.Void	() -> Swift.Void	ios=4.0	-	9ea496cf7f490ed2
+Dispatch	swift-method	c:@F@dispatch_async_and_wait	DispatchQueue	asyncAndWait(execute:)	-	Swift.Void	() -> Swift.Void	ios=12.0	-	8bbb01a0f4ac4d36
+Dispatch	swift-class	c:objc(cs)OS_dispatch_semaphore	-	DispatchSemaphore	-	-	-	-	-	615d1b4af9a22a61
+Dispatch	swift-method	c:@F@dispatch_semaphore_create	DispatchSemaphore	init(value:)	-	-	Dispatch.DispatchSemaphore | Swift.Int	ios=4.0	-	aa61a3125ee5d26f
+Dispatch	swift-method	s:So21OS_dispatch_semaphoreC8DispatchE6signalSiyF	DispatchSemaphore	signal()	-	Swift.Int	-	-	-	08d80b7ce202f895
+Dispatch	swift-method	s:So21OS_dispatch_semaphoreC8DispatchE4waityyF	DispatchSemaphore	wait()	-	()	-	-	-	92bf42986908809d
+Dispatch	swift-method	s:So21OS_dispatch_semaphoreC8DispatchE4wait7timeoutAC0D13TimeoutResultOAC0D4TimeV_tF	DispatchSemaphore	wait(timeout:)	-	Dispatch.DispatchTimeoutResult	Dispatch.DispatchTime	-	-	c88e4fc90012179e
+Dispatch	swift-method	s:So21OS_dispatch_semaphoreC8DispatchE4wait11wallTimeoutAC0dG6ResultOAC0D8WallTimeV_tF	DispatchSemaphore	wait(wallTimeout:)	-	Dispatch.DispatchTimeoutResult	Dispatch.DispatchWallTime	-	-	a6e31b9f852bbb9d
+Dispatch	swift-class	c:objc(cs)OS_dispatch_queue_serial	-	DispatchSerialQueue	-	-	-	ios=12.0	-	d156941f5626527a
+Dispatch	swift-struct	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV	DispatchSerialQueue	Attributes	-	-	-	-	-	d3474445612af4ff
+Dispatch	swift-property	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV8rawValues6UInt64Vvp	DispatchSerialQueue.Attributes	rawValue	-	Swift.UInt64	-	-	-	99ce385c5c62e3dd
+Dispatch	swift-method	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV8rawValueAEs6UInt64V_tcfc	DispatchSerialQueue.Attributes	init(rawValue:)	-	-	Dispatch.DispatchSerialQueue.Attributes | Swift.UInt64	-	-	fe7411efcca53cc7
+Dispatch	swift-property	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV17initiallyInactiveAEvpZ	DispatchSerialQueue.Attributes	initiallyInactive	+	Dispatch.DispatchSerialQueue.Attributes	-	-	-	cf50f88d0c6cdc38
+Dispatch	swift-typealias	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV19ArrayLiteralElementa	DispatchSerialQueue.Attributes	ArrayLiteralElement	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a3c9f47afc1ff2e5
+Dispatch	swift-typealias	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV7Elementa	DispatchSerialQueue.Attributes	Element	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3ad09f1c6c2dae3a
+Dispatch	swift-typealias	s:So24OS_dispatch_queue_serialC8DispatchE10AttributesV8RawValuea	DispatchSerialQueue.Attributes	RawValue	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5767917161782d07
+Dispatch	swift-method	s:So24OS_dispatch_queue_serialC8DispatchE5label3qos10attributes20autoreleaseFrequency6targetABSS_AC0E3QoSVAbCE10AttributesVSo0a1_b1_C0CACE011AutoreleaseJ0OANSgtcfc	DispatchSerialQueue	init(label:qos:attributes:autoreleaseFrequency:target:)	-	-	Dispatch.DispatchSerialQueue | Swift.String | Dispatch.DispatchQoS | Dispatch.DispatchSerialQueue.Attributes | Dispatch.DispatchQueue.AutoreleaseFrequency | Dispatch.DispatchQueue?	-	-	658711ec966ad9b0
+Dispatch	swift-class	c:objc(cs)OS_dispatch_source	-	DispatchSource	-	-	-	-	-	b273aa8e9675f96b
+Dispatch	swift-struct	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV	DispatchSource	MachSendEvent	-	-	-	-	-	63f9057da55a80c0
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV8rawValueSuvp	DispatchSource.MachSendEvent	rawValue	-	Swift.UInt	-	-	-	302169225a76bc15
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV8rawValueAESu_tcfc	DispatchSource.MachSendEvent	init(rawValue:)	-	-	Dispatch.DispatchSource.MachSendEvent | Swift.UInt	-	-	fb3797387791d8da
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV4deadAEvpZ	DispatchSource.MachSendEvent	dead	+	Dispatch.DispatchSource.MachSendEvent	-	-	-	29a3397a6a5cda47
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV19ArrayLiteralElementa	DispatchSource.MachSendEvent	ArrayLiteralElement	-	-	-	-	-	5abd2e180cfcdfa8
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV7Elementa	DispatchSource.MachSendEvent	Element	-	-	-	-	-	fcf78fee979fadd8
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE13MachSendEventV8RawValuea	DispatchSource.MachSendEvent	RawValue	-	-	-	-	-	111b1315e36114f1
+Dispatch	swift-struct	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV	DispatchSource	MemoryPressureEvent	-	-	-	-	-	0d425caf14c4a255
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV8rawValueSuvp	DispatchSource.MemoryPressureEvent	rawValue	-	Swift.UInt	-	-	-	d873db7dcade2979
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV8rawValueAESu_tcfc	DispatchSource.MemoryPressureEvent	init(rawValue:)	-	-	Dispatch.DispatchSource.MemoryPressureEvent | Swift.UInt	-	-	b31e53f566411e93
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV6normalAEvpZ	DispatchSource.MemoryPressureEvent	normal	+	Dispatch.DispatchSource.MemoryPressureEvent	-	-	-	f22caaa4c7d55e30
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV7warningAEvpZ	DispatchSource.MemoryPressureEvent	warning	+	Dispatch.DispatchSource.MemoryPressureEvent	-	-	-	95babc3603682b36
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV8criticalAEvpZ	DispatchSource.MemoryPressureEvent	critical	+	Dispatch.DispatchSource.MemoryPressureEvent	-	-	-	325d4e8dac919a99
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV3allAEvpZ	DispatchSource.MemoryPressureEvent	all	+	Dispatch.DispatchSource.MemoryPressureEvent	-	-	-	72af098da2c61f27
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV19ArrayLiteralElementa	DispatchSource.MemoryPressureEvent	ArrayLiteralElement	-	-	-	-	-	01deab2e3674f87a
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV7Elementa	DispatchSource.MemoryPressureEvent	Element	-	-	-	-	-	4f2029b6aa9644a9
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV8RawValuea	DispatchSource.MemoryPressureEvent	RawValue	-	-	-	-	-	26ef9eef968a7476
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE19MemoryPressureEventV11descriptionSSvp	DispatchSource.MemoryPressureEvent	description	-	Swift.String	-	-	-	47f78f0f37c425d4
+Dispatch	swift-struct	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV	DispatchSource	ProcessEvent	-	-	-	-	-	378977ee61b10581
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV8rawValueSuvp	DispatchSource.ProcessEvent	rawValue	-	Swift.UInt	-	-	-	9e5b40d3cd54614f
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV8rawValueAESu_tcfc	DispatchSource.ProcessEvent	init(rawValue:)	-	-	Dispatch.DispatchSource.ProcessEvent | Swift.UInt	-	-	bcdc6c6f7c2666a9
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV4exitAEvpZ	DispatchSource.ProcessEvent	exit	+	Dispatch.DispatchSource.ProcessEvent	-	-	-	cf66ec5be8536968
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV4forkAEvpZ	DispatchSource.ProcessEvent	fork	+	Dispatch.DispatchSource.ProcessEvent	-	-	-	4f613823d755a349
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV4execAEvpZ	DispatchSource.ProcessEvent	exec	+	Dispatch.DispatchSource.ProcessEvent	-	-	-	d922837eb59e97f6
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV6signalAEvpZ	DispatchSource.ProcessEvent	signal	+	Dispatch.DispatchSource.ProcessEvent	-	-	-	cd675eff49051bed
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV3allAEvpZ	DispatchSource.ProcessEvent	all	+	Dispatch.DispatchSource.ProcessEvent	-	-	-	fb84b8bd89e55b8e
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV19ArrayLiteralElementa	DispatchSource.ProcessEvent	ArrayLiteralElement	-	-	-	-	-	a9773200bed888e2
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV7Elementa	DispatchSource.ProcessEvent	Element	-	-	-	-	-	578886825878c182
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE12ProcessEventV8RawValuea	DispatchSource.ProcessEvent	RawValue	-	-	-	-	-	d386b26b0794c6f1
+Dispatch	swift-struct	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV	DispatchSource	TimerFlags	-	-	-	-	-	5ee12db239a4d33a
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV8rawValueSuvp	DispatchSource.TimerFlags	rawValue	-	Swift.UInt	-	-	-	de40ce36484c88ad
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV8rawValueAESu_tcfc	DispatchSource.TimerFlags	init(rawValue:)	-	-	Dispatch.DispatchSource.TimerFlags | Swift.UInt	-	-	4b4e6a8e9247145c
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV6strictAEvpZ	DispatchSource.TimerFlags	strict	+	Dispatch.DispatchSource.TimerFlags	-	-	-	f87942d1f40383d0
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV19ArrayLiteralElementa	DispatchSource.TimerFlags	ArrayLiteralElement	-	-	-	-	-	05edf27240911a51
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV7Elementa	DispatchSource.TimerFlags	Element	-	-	-	-	-	0a9d747c937e9d2c
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE10TimerFlagsV8RawValuea	DispatchSource.TimerFlags	RawValue	-	-	-	-	-	96396e5f87a486dc
+Dispatch	swift-struct	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV	DispatchSource	FileSystemEvent	-	-	-	-	-	e5a2e26b0f25393c
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV8rawValueSuvp	DispatchSource.FileSystemEvent	rawValue	-	Swift.UInt	-	-	-	4245c8ca3db24768
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV8rawValueAESu_tcfc	DispatchSource.FileSystemEvent	init(rawValue:)	-	-	Dispatch.DispatchSource.FileSystemEvent | Swift.UInt	-	-	fe80685fddf46927
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV6deleteAEvpZ	DispatchSource.FileSystemEvent	delete	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	4b7bb3f167adafb3
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV5writeAEvpZ	DispatchSource.FileSystemEvent	write	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	61b56450cb394307
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV6extendAEvpZ	DispatchSource.FileSystemEvent	extend	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	3847cce2d15ec232
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV6attribAEvpZ	DispatchSource.FileSystemEvent	attrib	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	fdb9317b8240ee39
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV4linkAEvpZ	DispatchSource.FileSystemEvent	link	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	1282fbcfbe35fbf9
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV6renameAEvpZ	DispatchSource.FileSystemEvent	rename	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	8d7016f40d5be629
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV6revokeAEvpZ	DispatchSource.FileSystemEvent	revoke	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	2c2a8beea8b445a9
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV7funlockAEvpZ	DispatchSource.FileSystemEvent	funlock	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	b7a84f767ad3dcf8
+Dispatch	swift-property	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV3allAEvpZ	DispatchSource.FileSystemEvent	all	+	Dispatch.DispatchSource.FileSystemEvent	-	-	-	f812d2e4bde8688a
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV19ArrayLiteralElementa	DispatchSource.FileSystemEvent	ArrayLiteralElement	-	-	-	-	-	38aa263b2f4234db
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV7Elementa	DispatchSource.FileSystemEvent	Element	-	-	-	-	-	4258ef84e94eb6f1
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceC8DispatchE15FileSystemEventV8RawValuea	DispatchSource.FileSystemEvent	RawValue	-	-	-	-	-	f00a043a2edbd183
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE18makeMachSendSource4port9eventMask5queueSo0a1_b1_C10_mach_send_ps6UInt32V_AbCE0fG5EventVSo0a1_b1_L0CSgtFZ	DispatchSource	makeMachSendSource(port:eventMask:queue:)	+	any Dispatch.DispatchSourceMachSend	_DarwinFoundation2.mach_port_t | Dispatch.DispatchSource.MachSendEvent | Dispatch.DispatchQueue?	-	-	30d20a99724d1963
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE21makeMachReceiveSource4port5queueSo0a1_b1_C10_mach_recv_ps6UInt32V_So0a1_b1_J0CSgtFZ	DispatchSource	makeMachReceiveSource(port:queue:)	+	any Dispatch.DispatchSourceMachReceive	_DarwinFoundation2.mach_port_t | Dispatch.DispatchQueue?	-	-	ab0d0d025f6b43bf
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE24makeMemoryPressureSource9eventMask5queueSo0a1_b1_C15_memorypressure_pAbCE0fG5EventV_So0a1_b1_K0CSgtFZ	DispatchSource	makeMemoryPressureSource(eventMask:queue:)	+	any Dispatch.DispatchSourceMemoryPressure	Dispatch.DispatchSource.MemoryPressureEvent | Dispatch.DispatchQueue?	-	-	0ef566f00163cdf5
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE17makeProcessSource10identifier9eventMask5queueSo0a1_b1_C5_proc_ps5Int32V_AbCE0F5EventVSo0a1_b1_K0CSgtFZ	DispatchSource	makeProcessSource(identifier:eventMask:queue:)	+	any Dispatch.DispatchSourceProcess	_DarwinFoundation2.pid_t | Dispatch.DispatchSource.ProcessEvent | Dispatch.DispatchQueue?	-	-	9269de169b52e798
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE14makeReadSource14fileDescriptor5queueSo0a1_b1_C5_read_ps5Int32V_So0a1_b1_J0CSgtFZ	DispatchSource	makeReadSource(fileDescriptor:queue:)	+	any Dispatch.DispatchSourceRead	Swift.Int32 | Dispatch.DispatchQueue?	-	-	56fc02d020300573
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE16makeSignalSource6signal5queueSo0a1_b1_c1_H0_ps5Int32V_So0a1_b1_I0CSgtFZ	DispatchSource	makeSignalSource(signal:queue:)	+	any Dispatch.DispatchSourceSignal	Swift.Int32 | Dispatch.DispatchQueue?	-	-	38ad51c2523d82d0
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE15makeTimerSource5flags5queueSo0a1_b1_C6_timer_pAbCE0F5FlagsV_So0a1_b1_I0CSgtFZ	DispatchSource	makeTimerSource(flags:queue:)	+	any Dispatch.DispatchSourceTimer	Dispatch.DispatchSource.TimerFlags | Dispatch.DispatchQueue?	-	-	50570ad220776f07
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE21makeUserDataAddSource5queueSo0a1_b1_C9_data_add_pSo0a1_b1_J0CSg_tFZ	DispatchSource	makeUserDataAddSource(queue:)	+	any Dispatch.DispatchSourceUserDataAdd	Dispatch.DispatchQueue?	-	-	96eb88cb41085400
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE20makeUserDataOrSource5queueSo0a1_b1_C8_data_or_pSo0a1_b1_J0CSg_tFZ	DispatchSource	makeUserDataOrSource(queue:)	+	any Dispatch.DispatchSourceUserDataOr	Dispatch.DispatchQueue?	-	-	001d590e3d72b7cb
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE25makeUserDataReplaceSource5queueSo0a1_b1_C13_data_replace_pSo0a1_b1_J0CSg_tFZ	DispatchSource	makeUserDataReplaceSource(queue:)	+	any Dispatch.DispatchSourceUserDataReplace	Dispatch.DispatchQueue?	-	-	161bbb172d8cb246
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE26makeFileSystemObjectSource14fileDescriptor9eventMask5queueSo0a1_b1_C6_vnode_ps5Int32V_AbCE0fG5EventVSo0a1_b1_N0CSgtFZ	DispatchSource	makeFileSystemObjectSource(fileDescriptor:eventMask:queue:)	+	any Dispatch.DispatchSourceFileSystemObject	Swift.Int32 | Dispatch.DispatchSource.FileSystemEvent | Dispatch.DispatchQueue?	-	-	c919166273475e17
+Dispatch	swift-method	s:So18OS_dispatch_sourceC8DispatchE15makeWriteSource14fileDescriptor5queueSo0a1_b1_C6_write_ps5Int32V_So0a1_b1_J0CSgtFZ	DispatchSource	makeWriteSource(fileDescriptor:queue:)	+	any Dispatch.DispatchSourceWrite	Swift.Int32 | Dispatch.DispatchQueue?	-	-	855eff96b56d83ec
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_vnode	-	DispatchSourceFileSystemObject	-	-	-	-	-	c6dfecaeb533d8c6
+Dispatch	swift-property	s:So24OS_dispatch_source_vnodeP8DispatchE6handles5Int32Vvp	DispatchSourceFileSystemObject	handle	-	Swift.Int32	-	-	-	184f03b310a01df5
+Dispatch	swift-property	s:So24OS_dispatch_source_vnodeP8DispatchE4dataSo0a1_b1_C0CACE15FileSystemEventVvp	DispatchSourceFileSystemObject	data	-	Dispatch.DispatchSource.FileSystemEvent	-	-	-	df2a58db1f6a7032
+Dispatch	swift-property	s:So24OS_dispatch_source_vnodeP8DispatchE4maskSo0a1_b1_C0CACE15FileSystemEventVvp	DispatchSourceFileSystemObject	mask	-	Dispatch.DispatchSource.FileSystemEvent	-	-	-	f47cfbf1087eb588
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_mach_recv	-	DispatchSourceMachReceive	-	-	-	-	-	b608ffe1668c1a57
+Dispatch	swift-property	s:So28OS_dispatch_source_mach_recvP8DispatchE6handles6UInt32Vvp	DispatchSourceMachReceive	handle	-	_DarwinFoundation2.mach_port_t	-	-	-	671f7a761097a982
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_mach_send	-	DispatchSourceMachSend	-	-	-	-	-	545a28fdc9deba48
+Dispatch	swift-property	s:So28OS_dispatch_source_mach_sendP8DispatchE6handles6UInt32Vvp	DispatchSourceMachSend	handle	-	_DarwinFoundation2.mach_port_t	-	-	-	754703c6a4272a52
+Dispatch	swift-property	s:So28OS_dispatch_source_mach_sendP8DispatchE4dataSo0a1_b1_C0CACE13MachSendEventVvp	DispatchSourceMachSend	data	-	Dispatch.DispatchSource.MachSendEvent	-	-	-	d90d4d0b3ead0195
+Dispatch	swift-property	s:So28OS_dispatch_source_mach_sendP8DispatchE4maskSo0a1_b1_C0CACE13MachSendEventVvp	DispatchSourceMachSend	mask	-	Dispatch.DispatchSource.MachSendEvent	-	-	-	079da8d27e0b5c3d
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_memorypressure	-	DispatchSourceMemoryPressure	-	-	-	-	-	317d7193f6abe86a
+Dispatch	swift-property	s:So33OS_dispatch_source_memorypressureP8DispatchE4dataSo0a1_b1_C0CACE19MemoryPressureEventVvp	DispatchSourceMemoryPressure	data	-	Dispatch.DispatchSource.MemoryPressureEvent	-	-	-	b359a1a3f271f5c7
+Dispatch	swift-property	s:So33OS_dispatch_source_memorypressureP8DispatchE4maskSo0a1_b1_C0CACE19MemoryPressureEventVvp	DispatchSourceMemoryPressure	mask	-	Dispatch.DispatchSource.MemoryPressureEvent	-	-	-	628c5095088573a4
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_proc	-	DispatchSourceProcess	-	-	-	-	-	0a5930c6d835f42c
+Dispatch	swift-property	s:So23OS_dispatch_source_procP8DispatchE6handles5Int32Vvp	DispatchSourceProcess	handle	-	_DarwinFoundation2.pid_t	-	-	-	5470f3bcd3856a1e
+Dispatch	swift-property	s:So23OS_dispatch_source_procP8DispatchE4dataSo0a1_b1_C0CACE12ProcessEventVvp	DispatchSourceProcess	data	-	Dispatch.DispatchSource.ProcessEvent	-	-	-	f702898c4ecbfa8a
+Dispatch	swift-property	s:So23OS_dispatch_source_procP8DispatchE4maskSo0a1_b1_C0CACE12ProcessEventVvp	DispatchSourceProcess	mask	-	Dispatch.DispatchSource.ProcessEvent	-	-	-	d43357d4a6f2b4c5
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source	-	DispatchSourceProtocol	-	-	-	-	-	1ab2b825dfafd4af
+Dispatch	swift-typealias	s:So18OS_dispatch_sourceP8DispatchE0D13SourceHandlera	DispatchSourceProtocol	DispatchSourceHandler	-	-	-	-	-	dc3f4750e0db60ca
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE15setEventHandler3qos5flags7handleryAC0D3QoSV_AC0D13WorkItemFlagsVyyXLSgtF	DispatchSourceProtocol	setEventHandler(qos:flags:handler:)	-	()	Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | Self.DispatchSourceHandler?	-	-	31e83a1706ce1d4f
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE15setEventHandler7handleryAC0D8WorkItemC_tF	DispatchSourceProtocol	setEventHandler(handler:)	-	()	Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	5bbf4ce13bdde9c4
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE16setCancelHandler3qos5flags7handleryAC0D3QoSV_AC0D13WorkItemFlagsVyyXLSgtF	DispatchSourceProtocol	setCancelHandler(qos:flags:handler:)	-	()	Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | Self.DispatchSourceHandler?	-	-	a61218871fdd2454
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE16setCancelHandler7handleryAC0D8WorkItemC_tF	DispatchSourceProtocol	setCancelHandler(handler:)	-	()	Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	9c220c3a589e6ea7
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE22setRegistrationHandler3qos5flags7handleryAC0D3QoSV_AC0D13WorkItemFlagsVyyXLSgtF	DispatchSourceProtocol	setRegistrationHandler(qos:flags:handler:)	-	()	Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | Self.DispatchSourceHandler?	-	-	f70d243b5b20a119
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE22setRegistrationHandler7handleryAC0D8WorkItemC_tF	DispatchSourceProtocol	setRegistrationHandler(handler:)	-	()	Dispatch.DispatchWorkItem	ios=8.0,macos=10.10	-	c30385f39743333d
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE8activateyyF	DispatchSourceProtocol	activate()	-	()	-	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	2f110656553fb646
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE6cancelyyF	DispatchSourceProtocol	cancel()	-	()	-	-	-	8ec2bead5e4f985d
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE6resumeyyF	DispatchSourceProtocol	resume()	-	()	-	-	-	c213b164bc421394
+Dispatch	swift-method	s:So18OS_dispatch_sourceP8DispatchE7suspendyyF	DispatchSourceProtocol	suspend()	-	()	-	-	-	2c294516651c9375
+Dispatch	swift-property	s:So18OS_dispatch_sourceP8DispatchE6handleSuvp	DispatchSourceProtocol	handle	-	Swift.UInt	-	-	-	f6b175c275bd2b3d
+Dispatch	swift-property	s:So18OS_dispatch_sourceP8DispatchE4maskSuvp	DispatchSourceProtocol	mask	-	Swift.UInt	-	-	-	034a9bc813a23967
+Dispatch	swift-property	s:So18OS_dispatch_sourceP8DispatchE4dataSuvp	DispatchSourceProtocol	data	-	Swift.UInt	-	-	-	694b4722294b6dcf
+Dispatch	swift-property	s:So18OS_dispatch_sourceP8DispatchE11isCancelledSbvp	DispatchSourceProtocol	isCancelled	-	Swift.Bool	-	-	-	549b668686d0f269
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_read	-	DispatchSourceRead	-	-	-	-	-	29fb41a311188f9a
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_signal	-	DispatchSourceSignal	-	-	-	-	-	ffd3f54cf5ce8c13
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_timer	-	DispatchSourceTimer	-	-	-	-	-	e72c885447fb797b
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE15scheduleOneshot8deadline6leewayyAC0E4TimeV_AC0eJ8IntervalOtF	DispatchSourceTimer	scheduleOneshot(deadline:leeway:)	-	()	Dispatch.DispatchTime | Dispatch.DispatchTimeInterval	-	-	9f1f8ec92648fe1a
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE15scheduleOneshot12wallDeadline6leewayyAC0E8WallTimeV_AC0eL8IntervalOtF	DispatchSourceTimer	scheduleOneshot(wallDeadline:leeway:)	-	()	Dispatch.DispatchWallTime | Dispatch.DispatchTimeInterval	-	-	99ba5589e54bc0af
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE17scheduleRepeating8deadline8interval6leewayyAC0E4TimeV_AC0eK8IntervalOAKtF	DispatchSourceTimer	scheduleRepeating(deadline:interval:leeway:)	-	()	Dispatch.DispatchTime | Dispatch.DispatchTimeInterval | Dispatch.DispatchTimeInterval	-	-	d9ed9c271b9e8e81
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE17scheduleRepeating8deadline8interval6leewayyAC0E4TimeV_SdAC0eK8IntervalOtF	DispatchSourceTimer	scheduleRepeating(deadline:interval:leeway:)	-	()	Dispatch.DispatchTime | Swift.Double | Dispatch.DispatchTimeInterval	-	-	c9285881a2760579
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE17scheduleRepeating12wallDeadline8interval6leewayyAC0E8WallTimeV_AC0eM8IntervalOAKtF	DispatchSourceTimer	scheduleRepeating(wallDeadline:interval:leeway:)	-	()	Dispatch.DispatchWallTime | Dispatch.DispatchTimeInterval | Dispatch.DispatchTimeInterval	-	-	e2e72850e48adb44
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE17scheduleRepeating12wallDeadline8interval6leewayyAC0E8WallTimeV_SdAC0eM8IntervalOtF	DispatchSourceTimer	scheduleRepeating(wallDeadline:interval:leeway:)	-	()	Dispatch.DispatchWallTime | Swift.Double | Dispatch.DispatchTimeInterval	-	-	d6f3e4eebeaa3971
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE8schedule8deadline9repeating6leewayyAC0E4TimeV_AC0eJ8IntervalOAKtF	DispatchSourceTimer	schedule(deadline:repeating:leeway:)	-	()	Dispatch.DispatchTime | Dispatch.DispatchTimeInterval | Dispatch.DispatchTimeInterval	swift=4	-	587c26342a023406
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE8schedule8deadline9repeating6leewayyAC0E4TimeV_SdAC0eJ8IntervalOtF	DispatchSourceTimer	schedule(deadline:repeating:leeway:)	-	()	Dispatch.DispatchTime | Swift.Double | Dispatch.DispatchTimeInterval	swift=4	-	8e51e974a0b62523
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE8schedule12wallDeadline9repeating6leewayyAC0E8WallTimeV_AC0eL8IntervalOAKtF	DispatchSourceTimer	schedule(wallDeadline:repeating:leeway:)	-	()	Dispatch.DispatchWallTime | Dispatch.DispatchTimeInterval | Dispatch.DispatchTimeInterval	swift=4	-	b5b8a62f17ac012d
+Dispatch	swift-method	s:So24OS_dispatch_source_timerP8DispatchE8schedule12wallDeadline9repeating6leewayyAC0E8WallTimeV_SdAC0eL8IntervalOtF	DispatchSourceTimer	schedule(wallDeadline:repeating:leeway:)	-	()	Dispatch.DispatchWallTime | Swift.Double | Dispatch.DispatchTimeInterval	swift=4	-	0601bb64bbc2d194
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_data_add	-	DispatchSourceUserDataAdd	-	-	-	-	-	5a004387c602a9d0
+Dispatch	swift-method	s:So27OS_dispatch_source_data_addP8DispatchE0E00D0ySu_tF	DispatchSourceUserDataAdd	add(data:)	-	()	Swift.UInt	-	-	bbbb0bcc1ffa3c12
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_data_or	-	DispatchSourceUserDataOr	-	-	-	-	-	76d0f0fbdbb3a68c
+Dispatch	swift-method	s:So26OS_dispatch_source_data_orP8DispatchE0E00D0ySu_tF	DispatchSourceUserDataOr	or(data:)	-	()	Swift.UInt	-	-	ebcb1d46cdf6238e
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_data_replace	-	DispatchSourceUserDataReplace	-	-	-	-	-	06ae092ff359f9f3
+Dispatch	swift-method	s:So31OS_dispatch_source_data_replaceP8DispatchE0E00D0ySu_tF	DispatchSourceUserDataReplace	replace(data:)	-	()	Swift.UInt	-	-	c04e69942b0d687e
+Dispatch	swift-protocol	c:objc(pl)OS_dispatch_source_write	-	DispatchSourceWrite	-	-	-	-	-	78773e887a682f14
+Dispatch	swift-class	c:objc(cs)OS_dispatch_workloop	-	DispatchWorkloop	-	-	-	ios=12.0	-	59997d7f4840ee8d
+Dispatch	swift-struct	s:So20OS_dispatch_workloopC8DispatchE10AttributesV	DispatchWorkloop	Attributes	-	-	-	-	-	5a34a7fa4721749a
+Dispatch	swift-property	s:So20OS_dispatch_workloopC8DispatchE10AttributesV8rawValues6UInt64Vvp	DispatchWorkloop.Attributes	rawValue	-	Swift.UInt64	-	-	-	62eada44a47e7d63
+Dispatch	swift-method	s:So20OS_dispatch_workloopC8DispatchE10AttributesV8rawValueAEs6UInt64V_tcfc	DispatchWorkloop.Attributes	init(rawValue:)	-	-	Dispatch.DispatchWorkloop.Attributes | Swift.UInt64	-	-	1112511c5bca189a
+Dispatch	swift-typealias	s:So20OS_dispatch_workloopC8DispatchE10AttributesV19ArrayLiteralElementa	DispatchWorkloop.Attributes	ArrayLiteralElement	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	eeba23b13c69ec3f
+Dispatch	swift-typealias	s:So20OS_dispatch_workloopC8DispatchE10AttributesV7Elementa	DispatchWorkloop.Attributes	Element	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	43e2c2b11d0e227b
+Dispatch	swift-typealias	s:So20OS_dispatch_workloopC8DispatchE10AttributesV8RawValuea	DispatchWorkloop.Attributes	RawValue	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	891a9a5de33b1194
+Dispatch	swift-method	s:So20OS_dispatch_workloopC8DispatchE5label10attributes20autoreleaseFrequency11osWorkgroupABSS_AbCE10AttributesVSo0a1_B6_queueCACE011AutoreleaseH0OSo0a1_I10_workgroupCSgtcfc	DispatchWorkloop	init(label:attributes:autoreleaseFrequency:osWorkgroup:)	-	-	Dispatch.DispatchWorkloop | Swift.String | Dispatch.DispatchWorkloop.Attributes | Dispatch.DispatchQueue.AutoreleaseFrequency | os_workgroup.WorkGroup?	-	-	cba9da6b0f6dc6a8
+Dispatch	swift-class	c:objc(cs)OS_dispatch_queue_global	-	OS_dispatch_queue_global	-	-	-	-	-	95a55a8d7e42c816
+Dispatch	swift-class	c:objc(cs)OS_dispatch_queue_main	-	OS_dispatch_queue_main	-	-	-	-	-	7ce5d03c6b645bf0
+Dispatch	swift-class	c:objc(cs)OS_dispatch_queue_serial_executor	-	_DispatchSerialExecutorQueue	-	-	-	ios=17.0	-	636541bb0e946566
+Dispatch	swift-method	s:So33OS_dispatch_queue_serial_executorC8DispatchE7enqueueyy12_Concurrency11ExecutorJobVnF	_DispatchSerialExecutorQueue	enqueue(_:)	-	()	_Concurrency.ExecutorJob	-	-	252fe60bcbee23f1
+Dispatch	swift-method	s:So33OS_dispatch_queue_serial_executorC8DispatchE23asUnownedSerialExecutorSceyF	_DispatchSerialExecutorQueue	asUnownedSerialExecutor()	-	_Concurrency.UnownedSerialExecutor	-	-	-	0a5bd7d5387a978e
+Dispatch	swift-method	s:So33OS_dispatch_queue_serial_executorC8DispatchE13checkIsolatedyyF	_DispatchSerialExecutorQueue	checkIsolated()	-	()	-	-	-	d2755e8187bc9ec8
+Dispatch	swift-method	s:So33OS_dispatch_queue_serial_executorC8DispatchE25isIsolatingCurrentContextSbSgyF	_DispatchSerialExecutorQueue	isIsolatingCurrentContext()	-	Swift.Bool?	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	09e14592025de329
+Dispatch	swift-class	c:objc(cs)OS_dispatch_data	-	__DispatchData	-	-	-	-	-	0ee4458e172c9b70
+Dispatch	swift-function	c:@F@__builtin_assume	-	__builtin_assume(_:)	-	Swift.Void	Swift.Bool	-	-	7341c057383dd355
+Dispatch	swift-function	c:@F@__builtin_expect	-	__builtin_expect(_:_:)	-	Swift.Int	Swift.Int | Swift.Int	-	-	1aedae862c1f09aa
+Dispatch	swift-enum	c:@EA@dispatch_autorelease_frequency_t	-	__dispatch_autorelease_frequency_t	-	-	-	-	-	0d7e3e3268b37570
+Dispatch	swift-method	s:So32dispatch_autorelease_frequency_ta8rawValueABSgSu_tcfc	__dispatch_autorelease_frequency_t	init(rawValue:)	-	-	Dispatch.__dispatch_autorelease_frequency_t? | Swift.UInt	-	-	44d29de4db371b92
+Dispatch	swift-property	s:So32dispatch_autorelease_frequency_ta8rawValueSuvp	__dispatch_autorelease_frequency_t	rawValue	-	Swift.UInt	-	-	-	8a76df33c2341477
+Dispatch	swift-typealias	s:So32dispatch_autorelease_frequency_ta8RawValuea	__dispatch_autorelease_frequency_t	RawValue	-	-	-	-	-	05fc9f341ae20675
+Dispatch	swift-struct	c:@EA@dispatch_block_flags_t	-	__dispatch_block_flags_t	-	-	-	-	-	e90f317c4a4fe088
+Dispatch	swift-method	s:So22dispatch_block_flags_ta8rawValueABSu_tcfc	__dispatch_block_flags_t	init(rawValue:)	-	-	Dispatch.__dispatch_block_flags_t | Swift.UInt	-	-	6a9d2b7c22f90fda
+Dispatch	swift-property	s:So22dispatch_block_flags_ta8rawValueSuvp	__dispatch_block_flags_t	rawValue	-	Swift.UInt	-	-	-	2a376cb3ea0b009c
+Dispatch	swift-typealias	s:So22dispatch_block_flags_ta8RawValuea	__dispatch_block_flags_t	RawValue	-	-	-	-	-	e96acb1a96a17c09
+Dispatch	swift-typealias	s:So22dispatch_block_flags_ta7Elementa	__dispatch_block_flags_t	Element	-	-	-	-	-	463e68f18e6a97e2
+Dispatch	swift-typealias	s:So22dispatch_block_flags_ta19ArrayLiteralElementa	__dispatch_block_flags_t	ArrayLiteralElement	-	-	-	-	-	466e966283fd3a56
+Dispatch	swift-constant	c:@_dispatch_data_empty	-	_dispatch_data_empty	-	_	-	ios=5.0	-	9e2e5bf41afbb8cb
+Dispatch	swift-constant	c:@_dispatch_main_q	-	_dispatch_main_q	-	_	-	ios=4.0	-	83828cbac06aa7a3
+Dispatch	swift-constant	c:@_dispatch_queue_attr_concurrent	-	_dispatch_queue_attr_concurrent	-	_	-	ios=4.3	-	0dd17a4c68ced132
+Dispatch	swift-constant	c:@_dispatch_source_type_data_add	-	_dispatch_source_type_data_add	-	_	-	ios=4.0	-	11bf50f3df9827f3
+Dispatch	swift-constant	c:@_dispatch_source_type_data_or	-	_dispatch_source_type_data_or	-	_	-	ios=4.0	-	f3eeb66394fbc6b7
+Dispatch	swift-constant	c:@_dispatch_source_type_data_replace	-	_dispatch_source_type_data_replace	-	_	-	ios=11.0	-	b277a86a4abb3298
+Dispatch	swift-constant	c:@_dispatch_source_type_mach_recv	-	_dispatch_source_type_mach_recv	-	_	-	ios=4.0	-	bb09f18815092167
+Dispatch	swift-constant	c:@_dispatch_source_type_mach_send	-	_dispatch_source_type_mach_send	-	_	-	ios=4.0	-	e6accfd35460151d
+Dispatch	swift-constant	c:@_dispatch_source_type_memorypressure	-	_dispatch_source_type_memorypressure	-	_	-	ios=8.0	-	13e8e7926e7d0b16
+Dispatch	swift-constant	c:@_dispatch_source_type_proc	-	_dispatch_source_type_proc	-	_	-	ios=4.0	-	8687dd719f2354f7
+Dispatch	swift-constant	c:@_dispatch_source_type_read	-	_dispatch_source_type_read	-	_	-	ios=4.0	-	0f4f481546531089
+Dispatch	swift-constant	c:@_dispatch_source_type_signal	-	_dispatch_source_type_signal	-	_	-	ios=4.0	-	3c006eeee8e8ad31
+Dispatch	swift-constant	c:@_dispatch_source_type_timer	-	_dispatch_source_type_timer	-	_	-	ios=4.0	-	399ab2fe867c9a4e
+Dispatch	swift-constant	c:@_dispatch_source_type_vnode	-	_dispatch_source_type_vnode	-	_	-	ios=4.0	-	6624cf7cd80d1092
+Dispatch	swift-constant	c:@_dispatch_source_type_write	-	_dispatch_source_type_write	-	_	-	ios=4.0	-	d0b8780b39b204fb
+Dispatch	swift-function	c:@F@dispatch_main	-	dispatchMain()	-	Swift.Never	-	ios=4.0	-	ec54fdfff2534a80
+Dispatch	swift-function	c:@F@dispatch_allow_send_signals	-	dispatch_allow_send_signals(_:)	-	Swift.Int32	Swift.Int32	ios=17.4	-	987c73f8f2ca1018
+Dispatch	swift-typealias	c:@T@dispatch_data_t	-	dispatch_data_t	-	-	-	-	-	48152362646414aa
+Dispatch	swift-typealias	c:@T@dispatch_group_t	-	dispatch_group_t	-	-	-	-	-	c32d50a1485c2ba1
+Dispatch	swift-typealias	c:@T@dispatch_io_t	-	dispatch_io_t	-	-	-	-	-	67f0ef4877769e1f
+Dispatch	swift-typealias	c:@T@dispatch_object_t	-	dispatch_object_t	-	-	-	-	-	8909c48c166631a1
+Dispatch	swift-typealias	c:@T@dispatch_queue_attr_t	-	dispatch_queue_attr_t	-	-	-	-	-	555d1e64024ce23a
+Dispatch	swift-typealias	c:@T@dispatch_queue_concurrent_t	-	dispatch_queue_concurrent_t	-	-	-	-	-	ea8c8b90ee6d3eac
+Dispatch	swift-typealias	c:@T@dispatch_queue_global_t	-	dispatch_queue_global_t	-	-	-	-	-	3344a17b266c1fc9
+Dispatch	swift-typealias	c:@T@dispatch_queue_main_t	-	dispatch_queue_main_t	-	-	-	-	-	767c39758640b1ba
+Dispatch	swift-typealias	c:@T@dispatch_queue_serial_executor_t	-	dispatch_queue_serial_executor_t	-	-	-	-	-	470f63e14c1e6056
+Dispatch	swift-typealias	c:@T@dispatch_queue_serial_t	-	dispatch_queue_serial_t	-	-	-	-	-	08b95dd2507b97eb
+Dispatch	swift-typealias	c:@T@dispatch_queue_t	-	dispatch_queue_t	-	-	-	-	-	48711ec481ca7b54
+Dispatch	swift-typealias	c:@T@dispatch_semaphore_t	-	dispatch_semaphore_t	-	-	-	-	-	040f0f54c9b21b96
+Dispatch	swift-typealias	c:@T@dispatch_source_mach_recv_flags_t	-	dispatch_source_mach_recv_flags_t	-	-	-	-	-	37c41bb048f311d5
+Dispatch	swift-typealias	c:@T@dispatch_source_t	-	dispatch_source_t	-	-	-	-	-	13a289041bc32174
+Dispatch	swift-typealias	c:@T@dispatch_time_t	-	dispatch_time_t	-	-	-	-	-	8307d7f8dbbe4ab1
+Dispatch	swift-typealias	c:@T@dispatch_workloop_t	-	dispatch_workloop_t	-	-	-	-	-	5f36ede05663cfc5
+Dispatch	swift-struct	s:8Dispatch0A4DataV	-	DispatchData	-	-	-	-	-	891f8c96ba2643df
+Dispatch	swift-typealias	s:8Dispatch0A4DataV8Iteratora	DispatchData	Iterator	-	-	-	-	-	fad2e0495d7838bc
+Dispatch	swift-typealias	s:8Dispatch0A4DataV5Indexa	DispatchData	Index	-	-	-	-	-	1e76404afd64f3cb
+Dispatch	swift-typealias	s:8Dispatch0A4DataV7Indicesa	DispatchData	Indices	-	-	-	-	-	1ea1fe91dda62726
+Dispatch	swift-property	s:8Dispatch0A4DataV5emptyACvpZ	DispatchData	empty	+	Dispatch.DispatchData	-	-	-	fb6ac15006a9db2c
+Dispatch	swift-enum	s:8Dispatch0A4DataV11DeallocatorO	DispatchData	Deallocator	-	-	-	-	-	0ab092e9f7bf7d01
+Dispatch	swift-constant	s:8Dispatch0A4DataV11DeallocatorO4freeyA2EmF	DispatchData.Deallocator	free	-	-	-	-	-	f205afcb23ccba45
+Dispatch	swift-constant	s:8Dispatch0A4DataV11DeallocatorO5unmapyA2EmF	DispatchData.Deallocator	unmap	-	-	-	-	-	fb9a5735f4ec9cfc
+Dispatch	swift-constant	s:8Dispatch0A4DataV11DeallocatorO6customyAESo17OS_dispatch_queueCSg_yyXLtcAEmF	DispatchData.Deallocator	custom	-	-	-	-	-	8be2ee5d284c9f3d
+Dispatch	swift-method	s:8Dispatch0A4DataV5bytesACSRys5UInt8VG_tcfc	DispatchData	init(bytes:)	-	-	Dispatch.DispatchData | Swift.UnsafeBufferPointer<Swift.UInt8>	-	-	25ff125d58937a4e
+Dispatch	swift-method	s:8Dispatch0A4DataV5bytesACSW_tcfc	DispatchData	init(bytes:)	-	-	Dispatch.DispatchData | Swift.UnsafeRawBufferPointer	-	-	36c42d4c4325afc6
+Dispatch	swift-method	s:8Dispatch0A4DataV11bytesNoCopy11deallocatorACSRys5UInt8VG_AC11DeallocatorOtcfc	DispatchData	init(bytesNoCopy:deallocator:)	-	-	Dispatch.DispatchData | Swift.UnsafeBufferPointer<Swift.UInt8> | Dispatch.DispatchData.Deallocator	-	-	606bb1336a3caa07
+Dispatch	swift-method	s:8Dispatch0A4DataV11bytesNoCopy11deallocatorACSW_AC11DeallocatorOtcfc	DispatchData	init(bytesNoCopy:deallocator:)	-	-	Dispatch.DispatchData | Swift.UnsafeRawBufferPointer | Dispatch.DispatchData.Deallocator	-	-	226267bbc2886757
+Dispatch	swift-property	s:8Dispatch0A4DataV5countSivp	DispatchData	count	-	Swift.Int	-	-	-	7fe05a26f1531d24
+Dispatch	swift-method	s:8Dispatch0A4DataV15withUnsafeBytes4bodyxxSPyq_GKXE_tKr0_lF	DispatchData	withUnsafeBytes(body:)	-	Result	(Swift.UnsafePointer<ContentType>) throws -> Result	-	-	dd818bb681694363
+Dispatch	swift-method	s:8Dispatch0A4DataV14enumerateBytesyyySRys5UInt8VG_SiSbztXEF	DispatchData	enumerateBytes(_:)	-	()	(Swift.UnsafeBufferPointer<Swift.UInt8>, Swift.Int, inout Swift.Bool) -> Swift.Void	swift=4.2	-	89684e9254b93289
+Dispatch	swift-method	s:8Dispatch0A4DataV6append_5countySPys5UInt8VG_SitF	DispatchData	append(_:count:)	-	()	Swift.UnsafePointer<Swift.UInt8> | Swift.Int	-	-	b1d9ec90b3f91135
+Dispatch	swift-method	s:8Dispatch0A4DataV6appendyySWF	DispatchData	append(_:)	-	()	Swift.UnsafeRawBufferPointer	-	-	2e8efca3b24f37c5
+Dispatch	swift-method	s:8Dispatch0A4DataV6appendyyACF	DispatchData	append(_:)	-	()	Dispatch.DispatchData	-	-	4c783dd67d8e9781
+Dispatch	swift-method	s:8Dispatch0A4DataV6appendyySRyxGlF	DispatchData	append(_:)	-	()	Swift.UnsafeBufferPointer<SourceType>	-	-	e133c91d1544c5f4
+Dispatch	swift-method	s:8Dispatch0A4DataV9copyBytes2to5countySpys5UInt8VG_SitF	DispatchData	copyBytes(to:count:)	-	()	Swift.UnsafeMutablePointer<Swift.UInt8> | Swift.Int	-	-	0b5bdf2c2c7634f9
+Dispatch	swift-method	s:8Dispatch0A4DataV9copyBytes2to5countySw_SitF	DispatchData	copyBytes(to:count:)	-	()	Swift.UnsafeMutableRawBufferPointer | Swift.Int	-	-	bf71dba02b5c25c0
+Dispatch	swift-method	s:8Dispatch0A4DataV9copyBytes2to4fromySpys5UInt8VG_SnySiGtF	DispatchData	copyBytes(to:from:)	-	()	Swift.UnsafeMutablePointer<Swift.UInt8> | Swift.Range<Dispatch.DispatchData.Index>	-	-	a052e898503c5b81
+Dispatch	swift-method	s:8Dispatch0A4DataV9copyBytes2to4fromySw_SnySiGtF	DispatchData	copyBytes(to:from:)	-	()	Swift.UnsafeMutableRawBufferPointer | Swift.Range<Dispatch.DispatchData.Index>	-	-	dc1026f6b56863b4
+Dispatch	swift-method	s:8Dispatch0A4DataV9copyBytes2to4fromSiSryxG_SnySiGSgtlF	DispatchData	copyBytes(to:from:)	-	Swift.Int	Swift.UnsafeMutableBufferPointer<DestinationType> | Swift.Range<Dispatch.DispatchData.Index>?	-	-	90a68105d2435fff
+Dispatch	swift-method	s:8Dispatch0A4DataVys5UInt8VSicip	DispatchData	subscript(_:)	-	Swift.UInt8	Dispatch.DispatchData.Index	-	-	204ba97e290b11d3
+Dispatch	swift-method	s:8Dispatch0A4DataVys5SliceVyACGSnySiGcip	DispatchData	subscript(_:)	-	Swift.Slice<Dispatch.DispatchData>	Swift.Range<Swift.Int>	-	-	ddb25add8da6d9a5
+Dispatch	swift-method	s:8Dispatch0A4DataV7subdata2inACSnySiG_tF	DispatchData	subdata(in:)	-	Dispatch.DispatchData	Swift.Range<Dispatch.DispatchData.Index>	-	-	94f8a55b37d0e3bf
+Dispatch	swift-method	s:8Dispatch0A4DataV6region8locationAC4data_Si6offsettSi_tF	DispatchData	region(location:)	-	(data: Dispatch.DispatchData, offset: Swift.Int)	Swift.Int	-	-	ce45ab578b08d217
+Dispatch	swift-property	s:8Dispatch0A4DataV10startIndexSivp	DispatchData	startIndex	-	Dispatch.DispatchData.Index	-	-	-	b9ba88ef4ecb2b7c
+Dispatch	swift-property	s:8Dispatch0A4DataV8endIndexSivp	DispatchData	endIndex	-	Dispatch.DispatchData.Index	-	-	-	6579beb0d4459aa7
+Dispatch	swift-method	s:8Dispatch0A4DataV5index6beforeS2i_tF	DispatchData	index(before:)	-	Dispatch.DispatchData.Index	Dispatch.DispatchData.Index	-	-	eea171dfab4dbc54
+Dispatch	swift-method	s:8Dispatch0A4DataV5index5afterS2i_tF	DispatchData	index(after:)	-	Dispatch.DispatchData.Index	Dispatch.DispatchData.Index	-	-	bdb27c2b615c82db
+Dispatch	swift-method	s:8Dispatch0A4DataV12makeIteratorAA0abD0VyF	DispatchData	makeIterator()	-	Dispatch.DispatchData.Iterator	-	-	-	9cfff6fa2a436774
+Dispatch	swift-typealias	s:8Dispatch0A4DataV7Elementa	DispatchData	Element	-	-	-	-	-	e3acd14e76774ade
+Dispatch	swift-typealias	s:8Dispatch0A4DataV11SubSequencea	DispatchData	SubSequence	-	-	-	-	-	4f29937d86ca2447
+Dispatch	swift-struct	s:8Dispatch0A12DataIteratorV	-	DispatchDataIterator	-	-	-	-	-	69091cab8bfa1736
+Dispatch	swift-typealias	s:8Dispatch0A12DataIteratorV7Elementa	DispatchDataIterator	Element	-	-	-	-	-	a0aaa094659fa77a
+Dispatch	swift-method	s:8Dispatch0A12DataIteratorV4nexts5UInt8VSgyF	DispatchDataIterator	next()	-	Dispatch.DispatchData.Element?	-	-	-	de39da5e9d909d84
+Dispatch	swift-typealias	s:8Dispatch0A12DataIteratorV0C0a	DispatchDataIterator	Iterator	-	-	-	-	-	835c9b7d3bfe278f
+Dispatch	swift-class	s:8Dispatch0A11SpecificKeyC	-	DispatchSpecificKey	-	-	-	-	-	6bca901c5543cd00
+Dispatch	swift-method	s:8Dispatch0A11SpecificKeyCACyxGycfc	DispatchSpecificKey	init()	-	-	Dispatch.DispatchSpecificKey<T>	-	-	1e4d3fdc55a9bcb4
+Dispatch	swift-struct	s:8Dispatch0A4TimeV	-	DispatchTime	-	-	-	-	-	dce0a76f00b79428
+Dispatch	swift-property	s:8Dispatch0A4TimeV8rawValues6UInt64Vvp	DispatchTime	rawValue	-	Dispatch.dispatch_time_t	-	-	-	2b44c9bd8f6c27a3
+Dispatch	swift-method	s:8Dispatch0A4TimeV3nowACyFZ	DispatchTime	now()	+	Dispatch.DispatchTime	-	-	-	3edb16ee84e699b4
+Dispatch	swift-property	s:8Dispatch0A4TimeV13distantFutureACvpZ	DispatchTime	distantFuture	+	Dispatch.DispatchTime	-	-	-	12a354e022f424fd
+Dispatch	swift-method	s:8Dispatch0A4TimeV17uptimeNanosecondsACs6UInt64V_tcfc	DispatchTime	init(uptimeNanoseconds:)	-	-	Dispatch.DispatchTime | Swift.UInt64	-	-	5c52047e129a5c4b
+Dispatch	swift-property	s:8Dispatch0A4TimeV17uptimeNanosecondss6UInt64Vvp	DispatchTime	uptimeNanoseconds	-	Swift.UInt64	-	-	-	6c26b9605a687587
+Dispatch	swift-method	s:8Dispatch0A4TimeV1loiySbAC_ACtFZ	DispatchTime	<(_:_:)	+	Swift.Bool	Dispatch.DispatchTime | Dispatch.DispatchTime	-	-	fc59799ef768a3cd
+Dispatch	swift-method	s:8Dispatch0A4TimeV2eeoiySbAC_ACtFZ	DispatchTime	==(_:_:)	+	Swift.Bool	Dispatch.DispatchTime | Dispatch.DispatchTime	-	-	3426c475ea911fb6
+Dispatch	swift-method	s:8Dispatch0A4TimeV8distance2toAA0aB8IntervalOAC_tF	DispatchTime	distance(to:)	-	Dispatch.DispatchTimeInterval	Dispatch.DispatchTime	-	-	b9dbb81d9e0ac176
+Dispatch	swift-method	s:8Dispatch0A4TimeV8advanced2byAcA0aB8IntervalO_tF	DispatchTime	advanced(by:)	-	Dispatch.DispatchTime	Dispatch.DispatchTimeInterval	-	-	6daea2a794e207c2
+Dispatch	swift-struct	s:8Dispatch0A8WallTimeV	-	DispatchWallTime	-	-	-	-	-	79c246c895d02bba
+Dispatch	swift-property	s:8Dispatch0A8WallTimeV8rawValues6UInt64Vvp	DispatchWallTime	rawValue	-	Dispatch.dispatch_time_t	-	-	-	447234b3d4ec491b
+Dispatch	swift-method	s:8Dispatch0A8WallTimeV3nowACyFZ	DispatchWallTime	now()	+	Dispatch.DispatchWallTime	-	-	-	e1b5390916ecd1e0
+Dispatch	swift-property	s:8Dispatch0A8WallTimeV13distantFutureACvpZ	DispatchWallTime	distantFuture	+	Dispatch.DispatchWallTime	-	-	-	243ec9dd9cf848f5
+Dispatch	swift-method	s:8Dispatch0A8WallTimeV8timespecACSoADV_tcfc	DispatchWallTime	init(timespec:)	-	-	Dispatch.DispatchWallTime | _DarwinFoundation2.timespec	-	-	590f916146b0233d
+Dispatch	swift-method	s:8Dispatch0A8WallTimeV1loiySbAC_ACtFZ	DispatchWallTime	<(_:_:)	+	Swift.Bool	Dispatch.DispatchWallTime | Dispatch.DispatchWallTime	-	-	16d2d880fb078dd2
+Dispatch	swift-method	s:8Dispatch0A8WallTimeV2eeoiySbAC_ACtFZ	DispatchWallTime	==(_:_:)	+	Swift.Bool	Dispatch.DispatchWallTime | Dispatch.DispatchWallTime	-	-	e816f7517c4e1792
+Dispatch	swift-enum	s:8Dispatch0A12TimeIntervalO	-	DispatchTimeInterval	-	-	-	-	-	c76c204dca3b45b0
+Dispatch	swift-constant	s:8Dispatch0A12TimeIntervalO7secondsyACSicACmF	DispatchTimeInterval	seconds	-	-	-	-	-	7b4cd924aed1884b
+Dispatch	swift-constant	s:8Dispatch0A12TimeIntervalO12millisecondsyACSicACmF	DispatchTimeInterval	milliseconds	-	-	-	-	-	3ce8e1525d6f1ecd
+Dispatch	swift-constant	s:8Dispatch0A12TimeIntervalO12microsecondsyACSicACmF	DispatchTimeInterval	microseconds	-	-	-	-	-	d2e27097c59af2c0
+Dispatch	swift-constant	s:8Dispatch0A12TimeIntervalO11nanosecondsyACSicACmF	DispatchTimeInterval	nanoseconds	-	-	-	-	-	e242aa142403f8b3
+Dispatch	swift-constant	s:8Dispatch0A12TimeIntervalO5neveryA2CmF	DispatchTimeInterval	never	-	-	-	-	-	d928ee466c107cc9
+Dispatch	swift-method	s:8Dispatch0A12TimeIntervalO2eeoiySbAC_ACtFZ	DispatchTimeInterval	==(_:_:)	+	Swift.Bool	Dispatch.DispatchTimeInterval | Dispatch.DispatchTimeInterval	-	-	14acaf3afd263e20
+Dispatch	swift-function	s:8Dispatch1poiyAA0A4TimeVAD_AA0aB8IntervalOtF	-	+(_:_:)	-	Dispatch.DispatchTime	Dispatch.DispatchTime | Dispatch.DispatchTimeInterval	-	-	f2205d1b14035ff3
+Dispatch	swift-function	s:8Dispatch1soiyAA0A4TimeVAD_AA0aB8IntervalOtF	-	-(_:_:)	-	Dispatch.DispatchTime	Dispatch.DispatchTime | Dispatch.DispatchTimeInterval	-	-	833f583804331979
+Dispatch	swift-function	s:8Dispatch1poiyAA0A4TimeVAD_SdtF	-	+(_:_:)	-	Dispatch.DispatchTime	Dispatch.DispatchTime | Swift.Double	-	-	82ac9991da196e1b
+Dispatch	swift-function	s:8Dispatch1soiyAA0A4TimeVAD_SdtF	-	-(_:_:)	-	Dispatch.DispatchTime	Dispatch.DispatchTime | Swift.Double	-	-	0dce43a19d842cf5
+Dispatch	swift-function	s:8Dispatch1poiyAA0A8WallTimeVAD_AA0aC8IntervalOtF	-	+(_:_:)	-	Dispatch.DispatchWallTime	Dispatch.DispatchWallTime | Dispatch.DispatchTimeInterval	-	-	9c354ba786172213
+Dispatch	swift-function	s:8Dispatch1soiyAA0A8WallTimeVAD_AA0aC8IntervalOtF	-	-(_:_:)	-	Dispatch.DispatchWallTime	Dispatch.DispatchWallTime | Dispatch.DispatchTimeInterval	-	-	0d3daf4f373873fa
+Dispatch	swift-function	s:8Dispatch1poiyAA0A8WallTimeVAD_SdtF	-	+(_:_:)	-	Dispatch.DispatchWallTime	Dispatch.DispatchWallTime | Swift.Double	-	-	8d1a153fb33fbce5
+Dispatch	swift-function	s:8Dispatch1soiyAA0A8WallTimeVAD_SdtF	-	-(_:_:)	-	Dispatch.DispatchWallTime	Dispatch.DispatchWallTime | Swift.Double	-	-	756b50b14d7f80f7
+Dispatch	swift-struct	s:8Dispatch0A13WorkItemFlagsV	-	DispatchWorkItemFlags	-	-	-	-	-	66d39eb95d35b453
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV8rawValueSuvp	DispatchWorkItemFlags	rawValue	-	Swift.UInt	-	-	-	19e07ca8dd4e818f
+Dispatch	swift-method	s:8Dispatch0A13WorkItemFlagsV8rawValueACSu_tcfc	DispatchWorkItemFlags	init(rawValue:)	-	-	Dispatch.DispatchWorkItemFlags | Swift.UInt	-	-	9fd0e1a2ef9cd97e
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV7barrierACvpZ	DispatchWorkItemFlags	barrier	+	Dispatch.DispatchWorkItemFlags	-	-	-	12346da64d381579
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV8detachedACvpZ	DispatchWorkItemFlags	detached	+	Dispatch.DispatchWorkItemFlags	-	ios=8.0,macos=10.10	-	1c3e2ec3d1a144e1
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV20assignCurrentContextACvpZ	DispatchWorkItemFlags	assignCurrentContext	+	Dispatch.DispatchWorkItemFlags	-	ios=8.0,macos=10.10	-	cd46e22c4f00294b
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV5noQoSACvpZ	DispatchWorkItemFlags	noQoS	+	Dispatch.DispatchWorkItemFlags	-	ios=8.0,macos=10.10	-	db5868f32ffa6909
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV10inheritQoSACvpZ	DispatchWorkItemFlags	inheritQoS	+	Dispatch.DispatchWorkItemFlags	-	ios=8.0,macos=10.10	-	69a18b8ed13ab30b
+Dispatch	swift-property	s:8Dispatch0A13WorkItemFlagsV10enforceQoSACvpZ	DispatchWorkItemFlags	enforceQoS	+	Dispatch.DispatchWorkItemFlags	-	ios=8.0,macos=10.10	-	42b7021baf1bfc66
+Dispatch	swift-typealias	s:8Dispatch0A13WorkItemFlagsV19ArrayLiteralElementa	DispatchWorkItemFlags	ArrayLiteralElement	-	-	-	-	-	cb252b9476b85fa7
+Dispatch	swift-typealias	s:8Dispatch0A13WorkItemFlagsV7Elementa	DispatchWorkItemFlags	Element	-	-	-	-	-	a6332e80958eb038
+Dispatch	swift-typealias	s:8Dispatch0A13WorkItemFlagsV8RawValuea	DispatchWorkItemFlags	RawValue	-	-	-	-	-	2ba2c4f0cdfd4dd3
+Dispatch	swift-class	s:8Dispatch0A8WorkItemC	-	DispatchWorkItem	-	-	-	ios=8.0,macos=10.10	-	0ea9aab743dd86cd
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC3qos5flags5blockAcA0A3QoSV_AA0abC5FlagsVyyXLtcfc	DispatchWorkItem	init(qos:flags:block:)	-	-	Dispatch.DispatchWorkItem | Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	-	-	c153a78404964da6
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC5flags5blockAcA0abC5FlagsV_yyXLtcfc	DispatchWorkItem	init(flags:block:)	-	-	Dispatch.DispatchWorkItem | Dispatch.DispatchWorkItemFlags | () -> Swift.Void	ios=14.5,macos=11.3,tvos=14.5,watchos=7.4	-	d24b51ec026501a7
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC7performyyF	DispatchWorkItem	perform()	-	()	-	-	-	072da6b35b84ff72
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC4waityyF	DispatchWorkItem	wait()	-	()	-	-	-	735dd6cd4f0fe0c5
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC4wait7timeoutAA0A13TimeoutResultOAA0A4TimeV_tF	DispatchWorkItem	wait(timeout:)	-	Dispatch.DispatchTimeoutResult	Dispatch.DispatchTime	-	-	202ce19a47f3e304
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC4wait11wallTimeoutAA0aF6ResultOAA0A8WallTimeV_tF	DispatchWorkItem	wait(wallTimeout:)	-	Dispatch.DispatchTimeoutResult	Dispatch.DispatchWallTime	-	-	4009e71c16262f7d
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC6notify3qos5flags5queue7executeyAA0A3QoSV_AA0abC5FlagsVSo012OS_dispatch_G0CyyXLtF	DispatchWorkItem	notify(qos:flags:queue:execute:)	-	()	Dispatch.DispatchQoS | Dispatch.DispatchWorkItemFlags | Dispatch.DispatchQueue | () -> Swift.Void	-	-	f2e8f60c828c4142
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC6notify5queue7executeySo012OS_dispatch_E0C_ACtF	DispatchWorkItem	notify(queue:execute:)	-	()	Dispatch.DispatchQueue | Dispatch.DispatchWorkItem	-	-	e2bd045b03bd67b5
+Dispatch	swift-method	s:8Dispatch0A8WorkItemC6cancelyyF	DispatchWorkItem	cancel()	-	()	-	-	-	67d5f52dcae55aff
+Dispatch	swift-property	s:8Dispatch0A8WorkItemC11isCancelledSbvp	DispatchWorkItem	isCancelled	-	Swift.Bool	-	-	-	9ff7f66b4d1d2d09
+Dispatch	swift-enum	s:8Dispatch0A9PredicateO	-	DispatchPredicate	-	-	-	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	c10ec671aaa0ecb0
+Dispatch	swift-constant	s:8Dispatch0A9PredicateO7onQueueyACSo17OS_dispatch_queueCcACmF	DispatchPredicate	onQueue	-	-	-	-	-	2f00fc766001ff0d
+Dispatch	swift-constant	s:8Dispatch0A9PredicateO16onQueueAsBarrieryACSo17OS_dispatch_queueCcACmF	DispatchPredicate	onQueueAsBarrier	-	-	-	-	-	2d9529a1bf10b222
+Dispatch	swift-constant	s:8Dispatch0A9PredicateO10notOnQueueyACSo17OS_dispatch_queueCcACmF	DispatchPredicate	notOnQueue	-	-	-	-	-	544df462c7aaa329
+Dispatch	swift-function	s:8Dispatch20dispatchPrecondition9conditionyAA0A9PredicateOyXK_tF	-	dispatchPrecondition(condition:)	-	()	() -> Dispatch.DispatchPredicate	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	ca7957e7b09f29e2
+Dispatch	swift-struct	s:8Dispatch0A3QoSV	-	DispatchQoS	-	-	-	-	-	43f0414189c5baa9
+Dispatch	swift-property	s:8Dispatch0A3QoSV8qosClassAC0B6SClassOvp	DispatchQoS	qosClass	-	Dispatch.DispatchQoS.QoSClass	-	-	-	956ee81fae6358b1
+Dispatch	swift-property	s:8Dispatch0A3QoSV16relativePrioritySivp	DispatchQoS	relativePriority	-	Swift.Int	-	-	-	c67aa1a7f8e71c5a
+Dispatch	swift-property	s:8Dispatch0A3QoSV10backgroundACvpZ	DispatchQoS	background	+	Dispatch.DispatchQoS	-	ios=8.0,macos=10.10	-	4a8f31032d2d0560
+Dispatch	swift-property	s:8Dispatch0A3QoSV7utilityACvpZ	DispatchQoS	utility	+	Dispatch.DispatchQoS	-	ios=8.0,macos=10.10	-	c6b62c6bb8698604
+Dispatch	swift-property	s:8Dispatch0A3QoSV7defaultACvpZ	DispatchQoS	default	+	Dispatch.DispatchQoS	-	ios=8.0,macos=10.10	-	c2170d717e0951f4
+Dispatch	swift-property	s:8Dispatch0A3QoSV13userInitiatedACvpZ	DispatchQoS	userInitiated	+	Dispatch.DispatchQoS	-	ios=8.0,macos=10.10	-	62cddbb81106ff6b
+Dispatch	swift-property	s:8Dispatch0A3QoSV15userInteractiveACvpZ	DispatchQoS	userInteractive	+	Dispatch.DispatchQoS	-	ios=8.0,macos=10.10	-	fc706d976b71e2ee
+Dispatch	swift-property	s:8Dispatch0A3QoSV11unspecifiedACvpZ	DispatchQoS	unspecified	+	Dispatch.DispatchQoS	-	-	-	c7644555128768f6
+Dispatch	swift-enum	s:8Dispatch0A3QoSV0B6SClassO	DispatchQoS	QoSClass	-	-	-	-	-	4b443888ef31f777
+Dispatch	swift-constant	s:8Dispatch0A3QoSV0B6SClassO10backgroundyA2EmF	DispatchQoS.QoSClass	background	-	-	-	ios=8.0,macos=10.10	-	b76cf2fd31b3a6a5
+Dispatch	swift-constant	s:8Dispatch0A3QoSV0B6SClassO7utilityyA2EmF	DispatchQoS.QoSClass	utility	-	-	-	ios=8.0,macos=10.10	-	49ba0b148dee268f
+Dispatch	swift-constant	s:8Dispatch0A3QoSV0B6SClassO7defaultyA2EmF	DispatchQoS.QoSClass	default	-	-	-	ios=8.0,macos=10.10	-	dad7e9b4aefa80b8
+Dispatch	swift-constant	s:8Dispatch0A3QoSV0B6SClassO13userInitiatedyA2EmF	DispatchQoS.QoSClass	userInitiated	-	-	-	ios=8.0,macos=10.10	-	8f175566c44af1c2
+Dispatch	swift-constant	s:8Dispatch0A3QoSV0B6SClassO15userInteractiveyA2EmF	DispatchQoS.QoSClass	userInteractive	-	-	-	ios=8.0,macos=10.10	-	a8c2a97297c0f2a3
+Dispatch	swift-constant	s:8Dispatch0A3QoSV0B6SClassO11unspecifiedyA2EmF	DispatchQoS.QoSClass	unspecified	-	-	-	-	-	5a35f86d34f10dd5
+Dispatch	swift-method	s:8Dispatch0A3QoSV0B6SClassO8rawValueAESgSo11qos_class_ta_tcfc	DispatchQoS.QoSClass	init(rawValue:)	-	-	Dispatch.DispatchQoS.QoSClass? | _DarwinFoundation1.qos_class_t	ios=8.0,macos=10.10	-	d707f2c20972106b
+Dispatch	swift-property	s:8Dispatch0A3QoSV0B6SClassO8rawValueSo11qos_class_tavp	DispatchQoS.QoSClass	rawValue	-	_DarwinFoundation1.qos_class_t	-	ios=8.0,macos=10.10	-	7da74b03b26e6762
+Dispatch	swift-method	s:8Dispatch0A3QoSV0B6SClassO2eeoiySbAE_AEtFZ	DispatchQoS.QoSClass	==(_:_:)	+	Swift.Bool	Dispatch.DispatchQoS.QoSClass | Dispatch.DispatchQoS.QoSClass	-	-	c317a8406318b355
+Dispatch	swift-method	s:8Dispatch0A3QoSV0B6SClassO4hash4intoys6HasherVz_tF	DispatchQoS.QoSClass	hash(into:)	-	()	Swift.Hasher	-	-	74248cfd8baeec06
+Dispatch	swift-property	s:8Dispatch0A3QoSV0B6SClassO9hashValueSivp	DispatchQoS.QoSClass	hashValue	-	Swift.Int	-	-	-	68136f4d4ef4d1d5
+Dispatch	swift-method	s:8Dispatch0A3QoSV8qosClass16relativePriorityA2C0B6SClassO_Sitcfc	DispatchQoS	init(qosClass:relativePriority:)	-	-	Dispatch.DispatchQoS | Dispatch.DispatchQoS.QoSClass | Swift.Int	-	-	a73bdb786dce6e1b
+Dispatch	swift-method	s:8Dispatch0A3QoSV2eeoiySbAC_ACtFZ	DispatchQoS	==(_:_:)	+	Swift.Bool	Dispatch.DispatchQoS | Dispatch.DispatchQoS	-	-	89e202fa79e7eb7f
+Dispatch	swift-enum	s:8Dispatch0A13TimeoutResultO	-	DispatchTimeoutResult	-	-	-	-	-	81294c66c8d60bdc
+Dispatch	swift-constant	s:8Dispatch0A13TimeoutResultO7successyA2CmF	DispatchTimeoutResult	success	-	-	-	-	-	8e88cac456117c55
+Dispatch	swift-constant	s:8Dispatch0A13TimeoutResultO8timedOutyA2CmF	DispatchTimeoutResult	timedOut	-	-	-	-	-	48bcce486f117bcd
+Dispatch	swift-method	s:8Dispatch0A13TimeoutResultO2eeoiySbAC_ACtFZ	DispatchTimeoutResult	==(_:_:)	+	Swift.Bool	Dispatch.DispatchTimeoutResult | Dispatch.DispatchTimeoutResult	-	-	b027d0a80bad94fe
+Dispatch	swift-method	s:8Dispatch0A13TimeoutResultO4hash4intoys6HasherVz_tF	DispatchTimeoutResult	hash(into:)	-	()	Swift.Hasher	-	-	8a418c9e843db2b4
+Dispatch	swift-property	s:8Dispatch0A13TimeoutResultO9hashValueSivp	DispatchTimeoutResult	hashValue	-	Swift.Int	-	-	-	6e7d30b703f8a80d
+Dispatch	swift-constant	c:@macro@DISPATCH_API_VERSION	-	DISPATCH_API_VERSION	-	Swift.Int32	-	-	-	e4f937cbea8c7b20
+Dispatch	swift-constant	c:@macro@DISPATCH_APPLY_AUTO_AVAILABLE	-	DISPATCH_APPLY_AUTO_AVAILABLE	-	Swift.Int32	-	-	-	b32d6ea61dc4e342
+Dispatch	swift-constant	c:@macro@DISPATCH_IO_RANDOM	-	DISPATCH_IO_RANDOM	-	Swift.Int32	-	-	-	12f5b0528f7b90d7
+Dispatch	swift-constant	c:@macro@DISPATCH_IO_STOP	-	DISPATCH_IO_STOP	-	Swift.Int32	-	-	-	8fae843fa3b8f609
+Dispatch	swift-constant	c:@macro@DISPATCH_IO_STREAM	-	DISPATCH_IO_STREAM	-	Swift.Int32	-	-	-	1672b4a57e95878e
+Dispatch	swift-constant	c:@macro@DISPATCH_IO_STRICT_INTERVAL	-	DISPATCH_IO_STRICT_INTERVAL	-	Swift.Int32	-	-	-	ddf6d218fc8e9663
+Dispatch	swift-constant	c:@macro@DISPATCH_MACH_SEND_DEAD	-	DISPATCH_MACH_SEND_DEAD	-	Swift.Int32	-	-	-	b9cb27041b640228
+Dispatch	swift-constant	c:@macro@DISPATCH_MEMORYPRESSURE_CRITICAL	-	DISPATCH_MEMORYPRESSURE_CRITICAL	-	Swift.Int32	-	-	-	51fc0a8f1ac5af38
+Dispatch	swift-constant	c:@macro@DISPATCH_MEMORYPRESSURE_NORMAL	-	DISPATCH_MEMORYPRESSURE_NORMAL	-	Swift.Int32	-	-	-	34ca1bfe1ab54277
+Dispatch	swift-constant	c:@macro@DISPATCH_MEMORYPRESSURE_WARN	-	DISPATCH_MEMORYPRESSURE_WARN	-	Swift.Int32	-	-	-	70c642eaa6999a64
+Dispatch	swift-constant	c:@macro@DISPATCH_ONCE_INLINE_FASTPATH	-	DISPATCH_ONCE_INLINE_FASTPATH	-	Swift.Int32	-	-	-	a6b10114256cc694
+Dispatch	swift-constant	c:@macro@DISPATCH_PROC_EXEC	-	DISPATCH_PROC_EXEC	-	Swift.Int32	-	-	-	c15c9a7f1b5dad9c
+Dispatch	swift-constant	c:@macro@DISPATCH_PROC_EXIT	-	DISPATCH_PROC_EXIT	-	Swift.UInt32	-	-	-	663d8d194905bd6f
+Dispatch	swift-constant	c:@macro@DISPATCH_PROC_FORK	-	DISPATCH_PROC_FORK	-	Swift.Int32	-	-	-	6eea439b0b86f5e8
+Dispatch	swift-constant	c:@macro@DISPATCH_PROC_SIGNAL	-	DISPATCH_PROC_SIGNAL	-	Swift.Int32	-	-	-	8c99439036a01f96
+Dispatch	swift-constant	c:@macro@DISPATCH_QUEUE_PRIORITY_BACKGROUND	-	DISPATCH_QUEUE_PRIORITY_BACKGROUND	-	Swift.Int32	-	-	-	05823b90073ab2d9
+Dispatch	swift-constant	c:@macro@DISPATCH_QUEUE_PRIORITY_DEFAULT	-	DISPATCH_QUEUE_PRIORITY_DEFAULT	-	Swift.Int32	-	-	-	f73b37371f68517b
+Dispatch	swift-constant	c:@macro@DISPATCH_QUEUE_PRIORITY_HIGH	-	DISPATCH_QUEUE_PRIORITY_HIGH	-	Swift.Int32	-	-	-	ddd29e1de6e35397
+Dispatch	swift-constant	c:@macro@DISPATCH_QUEUE_PRIORITY_LOW	-	DISPATCH_QUEUE_PRIORITY_LOW	-	Swift.Int32	-	-	-	505293501e3934e8
+Dispatch	swift-constant	c:@macro@DISPATCH_SWIFT3_OVERLAY	-	DISPATCH_SWIFT3_OVERLAY	-	Swift.Int32	-	-	-	cb86e49d2c17aee1
+Dispatch	swift-constant	c:@macro@DISPATCH_TIMER_STRICT	-	DISPATCH_TIMER_STRICT	-	Swift.Int32	-	-	-	1cdcb85d306ec094
+Dispatch	swift-constant	c:@macro@DISPATCH_TIME_FOREVER	-	DISPATCH_TIME_FOREVER	-	Swift.UInt64	-	-	-	d09dee2f136e0614
+Dispatch	swift-constant	c:@macro@DISPATCH_TIME_NOW	-	DISPATCH_TIME_NOW	-	Swift.UInt64	-	-	-	4f4eee3e4a0bc747
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_ATTRIB	-	DISPATCH_VNODE_ATTRIB	-	Swift.Int32	-	-	-	764956e40d8bec75
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_DELETE	-	DISPATCH_VNODE_DELETE	-	Swift.Int32	-	-	-	d9a3706185a9a6e7
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_EXTEND	-	DISPATCH_VNODE_EXTEND	-	Swift.Int32	-	-	-	cca604c0993de071
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_FUNLOCK	-	DISPATCH_VNODE_FUNLOCK	-	Swift.Int32	-	-	-	ff2b0f81c24dc15f
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_LINK	-	DISPATCH_VNODE_LINK	-	Swift.Int32	-	-	-	22fc95874fa0d513
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_RENAME	-	DISPATCH_VNODE_RENAME	-	Swift.Int32	-	-	-	9bfca3e78e488fc6
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_REVOKE	-	DISPATCH_VNODE_REVOKE	-	Swift.Int32	-	-	-	f73278c6377554f0
+Dispatch	swift-constant	c:@macro@DISPATCH_VNODE_WRITE	-	DISPATCH_VNODE_WRITE	-	Swift.Int32	-	-	-	f729f8bb22b2fad1
+Dispatch	swift-constant	c:@macro@MSEC_PER_SEC	-	MSEC_PER_SEC	-	Swift.UInt64	-	-	-	961b3c800a8ad7c3
+Dispatch	swift-constant	c:@macro@NSEC_PER_MSEC	-	NSEC_PER_MSEC	-	Swift.UInt64	-	-	-	7c981681093202db
+Dispatch	swift-constant	c:@macro@NSEC_PER_SEC	-	NSEC_PER_SEC	-	Swift.UInt64	-	-	-	2f8b506892c9a067
+Dispatch	swift-constant	c:@macro@NSEC_PER_USEC	-	NSEC_PER_USEC	-	Swift.UInt64	-	-	-	2d94edbbe27dca11
+Dispatch	swift-constant	c:@macro@USEC_PER_SEC	-	USEC_PER_SEC	-	Swift.UInt64	-	-	-	348a42cfbc0337a2
+Dispatch	swift-method	s:8Dispatch0A4DataV19_bridgeToObjectiveCSo16OS_dispatch_dataCyF	DispatchData	_bridgeToObjectiveC()	-	Dispatch.__DispatchData	-	-	-	9c07fc615e259463
+Dispatch	swift-method	s:8Dispatch0A4DataV26_forceBridgeFromObjectiveC_6resultySo16OS_dispatch_dataC_ACSgztFZ	DispatchData	_forceBridgeFromObjectiveC(_:result:)	+	()	Dispatch.__DispatchData | Dispatch.DispatchData?	-	-	86e5625437885729
+Dispatch	swift-method	s:8Dispatch0A4DataV34_conditionallyBridgeFromObjectiveC_6resultSbSo16OS_dispatch_dataC_ACSgztFZ	DispatchData	_conditionallyBridgeFromObjectiveC(_:result:)	+	Swift.Bool	Dispatch.__DispatchData | Dispatch.DispatchData?	-	-	d1b341a88f88c2b1
+Dispatch	swift-method	s:8Dispatch0A4DataV36_unconditionallyBridgeFromObjectiveCyACSo16OS_dispatch_dataCSgFZ	DispatchData	_unconditionallyBridgeFromObjectiveC(_:)	+	Dispatch.DispatchData	Dispatch.__DispatchData?	-	-	50e598dd5470d65c
+Dispatch	swift-method	s:8Dispatch0A12DataIteratorV5_dataAcA0aB0V_tcfc	DispatchDataIterator	init(_data:)	-	-	Dispatch.DispatchDataIterator | Dispatch.DispatchData	-	-	1ee070546a9c1272
+Dispatch	swift-function	s:8Dispatch25_dispatchPreconditionTestySbAA0A9PredicateOF	-	_dispatchPreconditionTest(_:)	-	Swift.Bool	Dispatch.DispatchPredicate	ios=10.0,macos=10.12,tvos=10.0,watchos=3.0	-	fa9f527fb5f4f918

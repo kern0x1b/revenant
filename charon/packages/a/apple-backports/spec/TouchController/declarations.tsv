@@ -1,0 +1,327 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@TCControlLayoutAnchor	-			enum TCControlLayoutAnchor	-	-	-	-	a41220a2b0617fe1	-
+enum	c:@E@TCControlLayoutAnchor	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7f5f718d49558bc8	-
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorTopLeft	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c6a7be3a23e1f318	0
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorTopCenter	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d16f3505093d7148	1
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorTopRight	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b48f97c155610736	2
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorCenterLeft	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0e140cadeee9f5cb	3
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorCenter	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ea519aeb79460496	4
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorCenterRight	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	88a445e383f42713	5
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorBottomLeft	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	263cd0c378affe88	6
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorBottomCenter	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	56e9124fa822db04	7
+enumconst	c:@E@TCControlLayoutAnchor@TCControlLayoutAnchorBottomRight	TCControlLayoutAnchor			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c342668552d314da	8
+typedef	c:@T@TCControlLayoutAnchorCoordinateSystem	-			enum TCControlLayoutAnchorCoordinateSystem	-	-	-	-	f0a83a20a188f598	-
+enum	c:@E@TCControlLayoutAnchorCoordinateSystem	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5c4167ce4d2d19e1	-
+enumconst	c:@E@TCControlLayoutAnchorCoordinateSystem@TCControlLayoutAnchorCoordinateSystemRelative	TCControlLayoutAnchorCoordinateSystem			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3002d1fafd664ef6	0
+enumconst	c:@E@TCControlLayoutAnchorCoordinateSystem@TCControlLayoutAnchorCoordinateSystemAbsolute	TCControlLayoutAnchorCoordinateSystem			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	32523061920b81fe	1
+protocol	c:objc(pl)TCControlLayout	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1b03701d8abfc8db	-
+conforms	c:objc(pl)TCControlLayout	TCControlLayout	NSObject		-	-	-	-	-	283fd18233c7485c	-
+property	c:objc(pl)TCControlLayout(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6d43cb489eb587d6	-
+property	c:objc(pl)TCControlLayout(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	39c868aaf8df2ae8	-
+property	c:objc(pl)TCControlLayout(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	173f85c34561eb71	-
+property	c:objc(pl)TCControlLayout(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	40f4806584e5281c	-
+property	c:objc(pl)TCControlLayout(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c55b5b97a4008936	-
+property	c:objc(pl)TCControlLayout(py)position	-			CGPoint	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	51725ca0c25791ca	-
+typedef	c:@T@TCColliderShape	-			enum TCColliderShape	-	-	-	-	7d8857015e5a7164	-
+enum	c:@E@TCColliderShape	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c656f4b126153d84	-
+enumconst	c:@E@TCColliderShape@TCColliderShapeCircle	TCColliderShape			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	dbc0680efa1b48ee	0
+enumconst	c:@E@TCColliderShape@TCColliderShapeRect	TCColliderShape			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6d93db912b4f7d16	1
+enumconst	c:@E@TCColliderShape@TCColliderShapeLeftSide	TCColliderShape			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	18f0891d2cd36b32	2
+enumconst	c:@E@TCColliderShape@TCColliderShapeRightSide	TCColliderShape			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8e3624a6c37c2548	3
+typedef	c:@T@TCControlLabelRole	-			enum TCControlLabelRole	-	-	-	-	31229ea1b0fd723d	-
+enum	c:@E@TCControlLabelRole	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	99d14eae06f2143c	-
+enumconst	c:@E@TCControlLabelRole@TCControlLabelRoleButton	TCControlLabelRole			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d5028fa88fd05975	0
+enumconst	c:@E@TCControlLabelRole@TCControlLabelRoleDirectionPad	TCControlLabelRole			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8719c4ef58e69d86	1
+interface	c:objc(cs)TCControlLabel	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f1ecc27ee4d8b4cb	-
+super	-	TCControlLabel	NSObject		-	-	-	-	-	274e835a73f97a5f	-
+property	c:objc(cs)TCControlLabel(cpy)buttonA	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b1365a96de308dcc	-
+property	c:objc(cs)TCControlLabel(cpy)buttonB	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4cc28462e4e30a2b	-
+property	c:objc(cs)TCControlLabel(cpy)buttonX	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f79ad052a4981c6e	-
+property	c:objc(cs)TCControlLabel(cpy)buttonY	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8369c85726af9bc1	-
+property	c:objc(cs)TCControlLabel(cpy)buttonMenu	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8ee607a6d4cdd917	-
+property	c:objc(cs)TCControlLabel(cpy)buttonOptions	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d13e578f00228250	-
+property	c:objc(cs)TCControlLabel(cpy)buttonLeftShoulder	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3b0f8149db07516f	-
+property	c:objc(cs)TCControlLabel(cpy)buttonLeftTrigger	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f007662f1d6b916b	-
+property	c:objc(cs)TCControlLabel(cpy)buttonRightShoulder	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	da50ca3feead9f26	-
+property	c:objc(cs)TCControlLabel(cpy)buttonRightTrigger	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a54c2fb701dec76e	-
+property	c:objc(cs)TCControlLabel(cpy)leftThumbstick	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b5572ea25d422be2	-
+property	c:objc(cs)TCControlLabel(cpy)leftThumbstickButton	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f59da52d3aba755e	-
+property	c:objc(cs)TCControlLabel(cpy)rightThumbstick	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0dd9af453a4d741d	-
+property	c:objc(cs)TCControlLabel(cpy)rightThumbstickButton	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	24fa0dc742d0f7e6	-
+property	c:objc(cs)TCControlLabel(cpy)directionPad	-			TCControlLabel *	-	readonly,strong,nonatomic,class	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	62f929ddaed2ba9e	-
+method	c:objc(cs)TCControlLabel(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c2c8965c99a98c13	-
+method	c:objc(cs)TCControlLabel(im)initWithName:role:	-			instancetype	NSString * name | TCControlLabelRole role	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	54f7a47ce140217d	-
+property	c:objc(cs)TCControlLabel(py)name	-			NSString *	-	readonly,retain,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b05b5f6306458e74	-
+property	c:objc(cs)TCControlLabel(py)role	-			TCControlLabelRole	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0418315e17f525e5	-
+protocol	c:objc(pl)TCControl	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ca4555ff7f09edad	-
+conforms	c:objc(pl)TCControl	TCControl	NSObject		-	-	-	-	-	d8ea7e682a9e4464	-
+conforms	c:objc(pl)TCControl	TCControl	TCControlLayout		-	-	-	-	-	45d1a7ed26bbe6cb	-
+property	c:objc(pl)TCControl(py)label	-			TCControlLabel *	-	readonly,strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	052b382adce285f5	-
+property	c:objc(pl)TCControl(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	83d046526ad2687d	-
+property	c:objc(pl)TCControl(py)pressed	-			BOOL	-	readonly,assign,nonatomic,getter=isPressed	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4be4f5d25231b256	-
+property	c:objc(pl)TCControl(py)enabled	-			BOOL	-	assign,nonatomic,getter=isEnabled	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	2cf2891ba7cf78d3	-
+method	c:objc(pl)TCControl(im)handleTouchBeganAtPoint:	-			void	CGPoint point	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	2b3ade498fb26bdd	-
+method	c:objc(pl)TCControl(im)handleTouchMovedAtPoint:	-			void	CGPoint point	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	77af5fef61845d4e	-
+method	c:objc(pl)TCControl(im)handleTouchEndedAtPoint:	-			void	CGPoint point	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4dcc7610d8abf884	-
+property	c:objc(pl)TCControl(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c7847b74fc4ea990	-
+var	c:@TCGameControllerProductCategoryTouchController	-			NSString *const	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	08e59d8bac65f1bb	-
+interface	c:objc(cs)TCTouchController	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a0f7b9d3e0a181f8	-
+super	-	TCTouchController	NSObject		-	-	-	-	-	c2053da02c832a76	-
+property	c:objc(cs)TCTouchController(cpy)supported	-			BOOL	-	readonly,nonatomic,class,getter=isSupported	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b50ca8f5f0f189ae	-
+property	c:objc(cs)TCTouchController(py)device	-			id<MTLDevice>	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	fe5aa503de879ef8	-
+property	c:objc(cs)TCTouchController(py)controls	-			NSArray<id<TCControl>> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8f4a1087794fcee4	-
+property	c:objc(cs)TCTouchController(py)buttons	-			NSArray<TCButton *> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1c755641f33410d4	-
+property	c:objc(cs)TCTouchController(py)switches	-			NSArray<TCSwitch *> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	86364b1a978fffda	-
+property	c:objc(cs)TCTouchController(py)thumbsticks	-			NSArray<TCThumbstick *> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	76c02f6f48b42eda	-
+property	c:objc(cs)TCTouchController(py)directionPads	-			NSArray<TCDirectionPad *> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a93694bb9594acf3	-
+property	c:objc(cs)TCTouchController(py)throttles	-			NSArray<TCThrottle *> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	fe5563667f1b7553	-
+property	c:objc(cs)TCTouchController(py)touchpads	-			NSArray<TCTouchpad *> *	-	readonly,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6369c082e520dd95	-
+property	c:objc(cs)TCTouchController(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	65964b0c48d0be98	-
+property	c:objc(cs)TCTouchController(py)drawableSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e8fd662041fadce3	-
+method	c:objc(cs)TCTouchController(im)initWithDescriptor:	-			instancetype	TCTouchControllerDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	87b0135579b53d22	-
+method	c:objc(cs)TCTouchController(im)automaticallyLayoutControlsForLabels:	-			void	NSArray<TCControlLabel *> * labels	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9048360dd37d6ff4	-
+method	c:objc(cs)TCTouchController(im)addButtonWithDescriptor:	-			TCButton *	TCButtonDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	341585dcfd96935b	-
+method	c:objc(cs)TCTouchController(im)addSwitchWithDescriptor:	-			TCSwitch *	TCSwitchDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	065d0b150be26841	-
+method	c:objc(cs)TCTouchController(im)addThumbstickWithDescriptor:	-			TCThumbstick *	TCThumbstickDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0637e77182684f94	-
+method	c:objc(cs)TCTouchController(im)addDirectionPadWithDescriptor:	-			TCDirectionPad *	TCDirectionPadDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b14429bc10486ee2	-
+method	c:objc(cs)TCTouchController(im)addThrottleWithDescriptor:	-			TCThrottle *	TCThrottleDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6efb3d28b6d9ab8e	-
+method	c:objc(cs)TCTouchController(im)addTouchpadWithDescriptor:	-			TCTouchpad *	TCTouchpadDescriptor * descriptor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	38219c0a9c7ed24a	-
+method	c:objc(cs)TCTouchController(im)removeAllControls	-			void	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5edba2bbe3c0f623	-
+method	c:objc(cs)TCTouchController(im)removeControl:	-			void	id<TCControl> control	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9d3743e4ec4d3ce6	-
+method	c:objc(cs)TCTouchController(im)controlAtPoint:	-			id<TCControl>	CGPoint point	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	19b83c170ac9bc93	-
+method	c:objc(cs)TCTouchController(im)handleTouchBeganAtPoint:index:	-			BOOL	CGPoint point | NSInteger index	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	27ca6236549c2d33	-
+method	c:objc(cs)TCTouchController(im)handleTouchMovedAtPoint:index:	-			BOOL	CGPoint point | NSInteger index	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ed038753c6e1e1d4	-
+method	c:objc(cs)TCTouchController(im)handleTouchEndedAtPoint:index:	-			BOOL	CGPoint point | NSInteger index	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	2873f81d02911dc8	-
+method	c:objc(cs)TCTouchController(im)renderUsingRenderCommandEncoder:	-			void	id<MTLRenderCommandEncoder> encoder	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d5ea65854a6f1cb8	-
+property	c:objc(cs)TCTouchController(py)connected	-			BOOL	-	readonly,assign,nonatomic,getter=isConnected	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c3b04a16c25f2496	-
+method	c:objc(cs)TCTouchController(im)connect	-			void	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d3eab8cdab4c9dfa	-
+method	c:objc(cs)TCTouchController(im)disconnect	-			void	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7868cb4294007745	-
+property	c:objc(cs)TCTouchController(py)controller	-			GCController *	-	readonly,strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ce230fbbf276ff00	-
+typedef	c:@T@TCControlContentsButtonShape	-			enum TCControlContentsButtonShape	-	-	-	-	b87315a81bd34392	-
+enum	c:@E@TCControlContentsButtonShape	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	59ca543c788be3ba	-
+enumconst	c:@E@TCControlContentsButtonShape@TCControlContentsButtonShapeCircle	TCControlContentsButtonShape			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5a7418d8abd47ebd	0
+enumconst	c:@E@TCControlContentsButtonShape@TCControlContentsButtonShapeRect	TCControlContentsButtonShape			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5c595cf9e6278916	1
+typedef	c:@T@TCControlContentsDpadDirection	-			enum TCControlContentsDpadDirection	-	-	-	-	01a6fb6a530c6403	-
+enum	c:@E@TCControlContentsDpadDirection	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7431a9848ab6be92	-
+enumconst	c:@E@TCControlContentsDpadDirection@TCControlContentsDpadDirectionUp	TCControlContentsDpadDirection			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6023c3fb705c5bec	0
+enumconst	c:@E@TCControlContentsDpadDirection@TCControlContentsDpadDirectionDown	TCControlContentsDpadDirection			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f41685044233ebbd	1
+enumconst	c:@E@TCControlContentsDpadDirection@TCControlContentsDpadDirectionLeft	TCControlContentsDpadDirection			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	bef83137fcc02b8a	2
+enumconst	c:@E@TCControlContentsDpadDirection@TCControlContentsDpadDirectionRight	TCControlContentsDpadDirection			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8fb108bba0f012f2	3
+typedef	c:@T@TCControlContentsDpadElementStyle	-			enum TCControlContentsDpadElementStyle	-	-	-	-	8fe930a62e97c424	-
+enum	c:@E@TCControlContentsDpadElementStyle	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	30dbff24973116ec	-
+enumconst	c:@E@TCControlContentsDpadElementStyle@TCControlContentsDpadElementStyleCircle	TCControlContentsDpadElementStyle			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ebbb45c383317a15	0
+enumconst	c:@E@TCControlContentsDpadElementStyle@TCControlContentsDpadElementStylePentagon	TCControlContentsDpadElementStyle			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3646bb6465ae5d6f	1
+interface	c:objc(cs)TCControlContents	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	bd4b77529055dfaf	-
+super	-	TCControlContents	NSObject		-	-	-	-	-	b011d7d6e7a3b59c	-
+method	c:objc(cs)TCControlContents(cm)contentsWithImages:	-			instancetype	NSArray<TCControlImage *> * images	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	48424fa78ad0b4ac	-
+method	c:objc(cs)TCControlContents(cm)buttonContentsForSystemImageNamed:size:shape:controller:	-			TCControlContents *	NSString * imageName | CGSize size | TCControlContentsButtonShape shape | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	caad9daf4475bee3	-
+method	c:objc(cs)TCControlContents(cm)switchedOnContentsForSystemImageNamed:size:shape:controller:	-			TCControlContents *	NSString * imageName | CGSize size | TCControlContentsButtonShape shape | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a8a13a6343a9c0db	-
+method	c:objc(cs)TCControlContents(cm)thumbstickStickContentsOfSize:controller:	-			TCControlContents *	CGSize size | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	dbc16dc97cdd1628	-
+method	c:objc(cs)TCControlContents(cm)thumbstickBackgroundContentsOfSize:controller:	-			TCControlContents *	CGSize size | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	976965e2ccdefedf	-
+method	c:objc(cs)TCControlContents(cm)throttleIndicatorContentsOfSize:controller:	-			TCControlContents *	CGSize size | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0a21b66a910b5577	-
+method	c:objc(cs)TCControlContents(cm)throttleBackgroundContentsOfSize:controller:	-			TCControlContents *	CGSize size | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5e3822c9cc7baecb	-
+method	c:objc(cs)TCControlContents(cm)directionPadContentsForLabel:size:style:direction:controller:	-			TCControlContents *	TCControlLabel * label | CGSize size | TCControlContentsDpadElementStyle style | TCControlContentsDpadDirection direction | TCTouchController * controller	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	928e8977cd6c3b51	-
+method	c:objc(cs)TCControlContents(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	baa89ecbfe332f2b	-
+property	c:objc(cs)TCControlContents(py)images	-			NSArray<TCControlImage *> *	-	readonly,strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9de74e80366a12f8	-
+interface	c:objc(cs)TCControlImage	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5ef33dbc2f3ef572	-
+super	-	TCControlImage	NSObject		-	-	-	-	-	c15620ac30b3123a	-
+method	c:objc(cs)TCControlImage(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	92b77d3f99a7e2b8	-
+method	c:objc(cs)TCControlImage(im)initWithTexture:size:	-			instancetype	id<MTLTexture> texture | CGSize size	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b12ad34f0d18ee59	-
+method	c:objc(cs)TCControlImage(im)initWithTexture:size:highlightTexture:offset:tintColor:	-			instancetype	id<MTLTexture> texture | CGSize size | id<MTLTexture> highlightTexture | CGPoint offset | CGColorRef tintColor	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	223a085cb7247ee0	-
+method	c:objc(cs)TCControlImage(im)initWithCGImage:size:device:	-			instancetype	CGImageRef cgImage | CGSize size | id<MTLDevice> device	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	362207faad6ff071	-
+method	c:objc(cs)TCControlImage(im)initWithUIImage:size:device:	-			instancetype	UIImage * uiImage | CGSize size | id<MTLDevice> device	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8ecd71736826a9f9	-
+property	c:objc(cs)TCControlImage(py)texture	-			id<MTLTexture>	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	2092262e6f0554a4	-
+property	c:objc(cs)TCControlImage(py)highlightTexture	-			id<MTLTexture>	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6748149ff593242f	-
+property	c:objc(cs)TCControlImage(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d4ab06af50f9f940	-
+property	c:objc(cs)TCControlImage(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3577da5c65dfb9fa	-
+property	c:objc(cs)TCControlImage(py)tintColor	-			CGColorRef	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e36f55a4a1867508	-
+interface	c:objc(cs)TCButton	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	18fe14e674fc78df	-
+super	-	TCButton	NSObject		-	-	-	-	-	2707fbc514b92a4b	-
+conforms	c:objc(cs)TCButton	TCButton	TCControl		-	-	-	-	-	e1ed5895bd95ad33	-
+conforms	c:objc(cs)TCButton	TCButton	TCControlLayout		-	-	-	-	-	8baa2b9875d56585	-
+property	c:objc(cs)TCButton(py)contents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8dbbbd70ef83e17e	-
+property	c:objc(cs)TCButton(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6a57684d21404df2	-
+property	c:objc(cs)TCButton(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9d2a5cfdc8011bc1	-
+method	c:objc(cs)TCButton(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	061408f7a879aa76	-
+interface	c:objc(cs)TCButtonDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	dc6a7acc3668b677	-
+super	-	TCButtonDescriptor	NSObject		-	-	-	-	-	de2a58bf20dd50ba	-
+property	c:objc(cs)TCButtonDescriptor(py)label	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	becdf1753d66abc3	-
+property	c:objc(cs)TCButtonDescriptor(py)contents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ab1fade16136e55b	-
+property	c:objc(cs)TCButtonDescriptor(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6cf72663eb731201	-
+property	c:objc(cs)TCButtonDescriptor(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	24ee5c79e7b04129	-
+property	c:objc(cs)TCButtonDescriptor(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3eb45243b397486c	-
+property	c:objc(cs)TCButtonDescriptor(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	efeba00b93ba195c	-
+property	c:objc(cs)TCButtonDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	381d79a2db98402a	-
+property	c:objc(cs)TCButtonDescriptor(py)colliderShape	-			TCColliderShape	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f1f7ca67ae8bda86	-
+property	c:objc(cs)TCButtonDescriptor(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	129a07b42a42b07b	-
+method	c:objc(cs)TCButtonDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	30b2a160e6d61df8	-
+interface	c:objc(cs)TCSwitch	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	550483c27d672626	-
+super	-	TCSwitch	NSObject		-	-	-	-	-	943461fd069d3608	-
+conforms	c:objc(cs)TCSwitch	TCSwitch	TCControl		-	-	-	-	-	8d156dff6862f821	-
+conforms	c:objc(cs)TCSwitch	TCSwitch	TCControlLayout		-	-	-	-	-	bd70079a042f71c1	-
+property	c:objc(cs)TCSwitch(py)contents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0058922eae0e048a	-
+property	c:objc(cs)TCSwitch(py)switchedOnContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	504eccf1fe32d202	-
+property	c:objc(cs)TCSwitch(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f51ad79edf3e2cad	-
+property	c:objc(cs)TCSwitch(py)switchedOn	-			BOOL	-	readonly,assign,nonatomic,getter=isSwitchedOn	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a160206646107909	-
+property	c:objc(cs)TCSwitch(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	14a6fffa94e82683	-
+method	c:objc(cs)TCSwitch(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ebf9c6468d447fd0	-
+interface	c:objc(cs)TCSwitchDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f05d121962bc86df	-
+super	-	TCSwitchDescriptor	NSObject		-	-	-	-	-	adf878885982a58a	-
+property	c:objc(cs)TCSwitchDescriptor(py)label	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	84ff7da77dcf908c	-
+property	c:objc(cs)TCSwitchDescriptor(py)contents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ca6b1d10c7a5c510	-
+property	c:objc(cs)TCSwitchDescriptor(py)switchedOnContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	041e67167191a961	-
+property	c:objc(cs)TCSwitchDescriptor(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	cc24d452fd532be6	-
+property	c:objc(cs)TCSwitchDescriptor(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b7f975a179994afc	-
+property	c:objc(cs)TCSwitchDescriptor(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4da398735d4e9938	-
+property	c:objc(cs)TCSwitchDescriptor(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a248deac8daafb06	-
+property	c:objc(cs)TCSwitchDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b86efe76e8c00ac0	-
+property	c:objc(cs)TCSwitchDescriptor(py)colliderShape	-			TCColliderShape	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	713e7f6b47bee056	-
+property	c:objc(cs)TCSwitchDescriptor(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9a6b4df394aef2f6	-
+method	c:objc(cs)TCSwitchDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	97e6bbae1f607975	-
+interface	c:objc(cs)TCThumbstick	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	467186f1e161882b	-
+super	-	TCThumbstick	NSObject		-	-	-	-	-	f914e42f63929674	-
+conforms	c:objc(cs)TCThumbstick	TCThumbstick	TCControl		-	-	-	-	-	47420925bf181aed	-
+conforms	c:objc(cs)TCThumbstick	TCThumbstick	TCControlLayout		-	-	-	-	-	c39d784c9b416387	-
+property	c:objc(cs)TCThumbstick(py)backgroundContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	22c4fa0a76408730	-
+property	c:objc(cs)TCThumbstick(py)stickContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7a59ad97b794f33a	-
+property	c:objc(cs)TCThumbstick(py)hidesWhenNotPressed	-			BOOL	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6000435c75ba4b3f	-
+property	c:objc(cs)TCThumbstick(py)stickSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	61513dcefa94bb96	-
+property	c:objc(cs)TCThumbstick(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	178b94237d363595	-
+property	c:objc(cs)TCThumbstick(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	14b4f27a0dd02fd0	-
+method	c:objc(cs)TCThumbstick(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9d9a67f2895935d7	-
+interface	c:objc(cs)TCThumbstickDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	fd93dfb873c75c44	-
+super	-	TCThumbstickDescriptor	NSObject		-	-	-	-	-	4154816def7b2e4a	-
+property	c:objc(cs)TCThumbstickDescriptor(py)label	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5dfc1c7e50b2fd0d	-
+property	c:objc(cs)TCThumbstickDescriptor(py)backgroundContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d25fbb07a0933091	-
+property	c:objc(cs)TCThumbstickDescriptor(py)stickContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3e184cb48c8aa403	-
+property	c:objc(cs)TCThumbstickDescriptor(py)hidesWhenNotPressed	-			BOOL	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7c3e29396f4cb715	-
+property	c:objc(cs)TCThumbstickDescriptor(py)stickSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	935f1924437249df	-
+property	c:objc(cs)TCThumbstickDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	22ec2524f7b8ac32	-
+property	c:objc(cs)TCThumbstickDescriptor(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f9f0e859395845bf	-
+property	c:objc(cs)TCThumbstickDescriptor(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	16b92df3e0595b23	-
+property	c:objc(cs)TCThumbstickDescriptor(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7415e018d4a3e961	-
+property	c:objc(cs)TCThumbstickDescriptor(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9e74ea88cc676ce9	-
+property	c:objc(cs)TCThumbstickDescriptor(py)colliderShape	-			TCColliderShape	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4e320f350baf167b	-
+property	c:objc(cs)TCThumbstickDescriptor(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	340952557243a455	-
+method	c:objc(cs)TCThumbstickDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9167003734a473dc	-
+interface	c:objc(cs)TCDirectionPad	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	fc89cdee28116b09	-
+super	-	TCDirectionPad	NSObject		-	-	-	-	-	02499f0d89885f9d	-
+conforms	c:objc(cs)TCDirectionPad	TCDirectionPad	TCControl		-	-	-	-	-	3e890f672e01fd9a	-
+conforms	c:objc(cs)TCDirectionPad	TCDirectionPad	TCControlLayout		-	-	-	-	-	04235ae6e6cd7c8e	-
+property	c:objc(cs)TCDirectionPad(py)compositeLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	bdadeced18c4866c	-
+property	c:objc(cs)TCDirectionPad(py)upLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	942b17cf060afd32	-
+property	c:objc(cs)TCDirectionPad(py)downLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	2172b85b45b28f8b	-
+property	c:objc(cs)TCDirectionPad(py)leftLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ad9bdd63a52f5a46	-
+property	c:objc(cs)TCDirectionPad(py)rightLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	2f7ae6ccaab44517	-
+property	c:objc(cs)TCDirectionPad(py)upContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	cbf5b37a395623fa	-
+property	c:objc(cs)TCDirectionPad(py)downContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c925763f2dc414c4	-
+property	c:objc(cs)TCDirectionPad(py)leftContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3be78ccccfbc0f3c	-
+property	c:objc(cs)TCDirectionPad(py)rightContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a6e050d8dd379ab8	-
+property	c:objc(cs)TCDirectionPad(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7757bc89de38817f	-
+property	c:objc(cs)TCDirectionPad(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e5a30d658c27c939	-
+property	c:objc(cs)TCDirectionPad(py)radial	-			BOOL	-	assign,nonatomic,getter=isRadial	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	dd9d3f0ccf171cf7	-
+property	c:objc(cs)TCDirectionPad(py)digital	-			BOOL	-	assign,nonatomic,getter=isDigital	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1aaa801fad799938	-
+property	c:objc(cs)TCDirectionPad(py)mutuallyExclusiveInput	-			BOOL	-	assign,nonatomic,getter=inputIsMutuallyExclusive	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	31cb4ff6834f39a2	-
+method	c:objc(cs)TCDirectionPad(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	553767ace5be6dd5	-
+interface	c:objc(cs)TCDirectionPadDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	29f794e09030ae8a	-
+super	-	TCDirectionPadDescriptor	NSObject		-	-	-	-	-	4e946293c4af676e	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)compositeLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1d4d004a1f9915f4	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)upLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	426ef287245b3416	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)downLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a03fc4d8b5eeed85	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)leftLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	af7874cf71625aae	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)rightLabel	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	39b38cdd74dd2ef8	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)upContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f75de379fb04041e	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)downContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	83427394c4a6a272	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)leftContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9b1c461e64df4645	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)rightContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	08aeaca003887da5	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d14e6d8cfed70934	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	05d4c375792f638a	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	92d85b8b737094aa	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b79c644a4c536159	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1b47029901c60594	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)colliderShape	-			TCColliderShape	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	54dbe0f79e072022	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	81d6a378e97074a6	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)radial	-			BOOL	-	assign,nonatomic,getter=isRadial	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4b0e6caaa196f52b	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)digital	-			BOOL	-	assign,nonatomic,getter=isDigital	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e70e85686d94881c	-
+property	c:objc(cs)TCDirectionPadDescriptor(py)mutuallyExclusiveInput	-			BOOL	-	assign,nonatomic,getter=inputIsMutuallyExclusive	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	37cc8fe1ad737c92	-
+method	c:objc(cs)TCDirectionPadDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ab3eb8be0492c9a8	-
+interface	c:objc(cs)TCTouchpad	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	eb94f7d719e03f69	-
+super	-	TCTouchpad	NSObject		-	-	-	-	-	30707f6788aeb0ee	-
+conforms	c:objc(cs)TCTouchpad	TCTouchpad	TCControl		-	-	-	-	-	818073c1a20873e5	-
+conforms	c:objc(cs)TCTouchpad	TCTouchpad	TCControlLayout		-	-	-	-	-	09d38c4c49d86fbf	-
+property	c:objc(cs)TCTouchpad(py)contents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a953815c864b2a40	-
+property	c:objc(cs)TCTouchpad(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1bc551e98dffdabf	-
+property	c:objc(cs)TCTouchpad(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c2e413edf34c92e4	-
+property	c:objc(cs)TCTouchpad(py)reportsRelativeValues	-			BOOL	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	cf7e07ec1af3bfa2	-
+method	c:objc(cs)TCTouchpad(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f6e234458a88241a	-
+interface	c:objc(cs)TCTouchpadDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e337ea1e074e3a92	-
+super	-	TCTouchpadDescriptor	NSObject		-	-	-	-	-	5bd084ebdbee2738	-
+property	c:objc(cs)TCTouchpadDescriptor(py)label	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ebc1e6e7c0dedfe5	-
+property	c:objc(cs)TCTouchpadDescriptor(py)contents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c3624467f71adee6	-
+property	c:objc(cs)TCTouchpadDescriptor(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	771e324d2d6d6574	-
+property	c:objc(cs)TCTouchpadDescriptor(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	6438541f7a5be791	-
+property	c:objc(cs)TCTouchpadDescriptor(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	786e13e8de6d5816	-
+property	c:objc(cs)TCTouchpadDescriptor(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f8c9f84b68da464c	-
+property	c:objc(cs)TCTouchpadDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a4d325a865cadba5	-
+property	c:objc(cs)TCTouchpadDescriptor(py)colliderShape	-			TCColliderShape	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c00e5eb906ee418b	-
+property	c:objc(cs)TCTouchpadDescriptor(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e3f3091bc6f0a895	-
+property	c:objc(cs)TCTouchpadDescriptor(py)reportsRelativeValues	-			BOOL	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	11f1ff53f12f4513	-
+method	c:objc(cs)TCTouchpadDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	15215f4b9a0678fc	-
+typedef	c:@T@TCThrottleOrientation	-			enum TCThrottleOrientation	-	-	-	-	574748c5fdb6639c	-
+enum	c:@E@TCThrottleOrientation	-			NSInteger	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b64bd2a32424c817	-
+enumconst	c:@E@TCThrottleOrientation@TCThrottleOrientationVertical	TCThrottleOrientation			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	93700fc545c9fe3f	0
+enumconst	c:@E@TCThrottleOrientation@TCThrottleOrientationHorizontal	TCThrottleOrientation			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	4985cbcd75f3371a	1
+interface	c:objc(cs)TCThrottle	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	60c2d349c59e6c87	-
+super	-	TCThrottle	NSObject		-	-	-	-	-	b9dc4ef3684c2d11	-
+conforms	c:objc(cs)TCThrottle	TCThrottle	TCControl		-	-	-	-	-	25eae7c5a0816481	-
+conforms	c:objc(cs)TCThrottle	TCThrottle	TCControlLayout		-	-	-	-	-	5219e7fd2d0bc44c	-
+property	c:objc(cs)TCThrottle(py)backgroundContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	acb7c6748e21a7f9	-
+property	c:objc(cs)TCThrottle(py)indicatorContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	a76d1f67b5d97973	-
+property	c:objc(cs)TCThrottle(py)orientation	-			TCThrottleOrientation	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	bde3560f0c98c0e9	-
+property	c:objc(cs)TCThrottle(py)snapsToBaseValue	-			BOOL	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d1100a3dd89c0fd4	-
+property	c:objc(cs)TCThrottle(py)baseValue	-			CGFloat	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	626d6d8e705253d6	-
+property	c:objc(cs)TCThrottle(py)indicatorSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	d346b7de725e7dd9	-
+property	c:objc(cs)TCThrottle(py)throttleSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	5e09f4a8399deadf	-
+property	c:objc(cs)TCThrottle(py)colliderShape	-			TCColliderShape	-	readonly,assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	ab89b57cd433683d	-
+property	c:objc(cs)TCThrottle(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	1a410bf23f31c8fe	-
+method	c:objc(cs)TCThrottle(im)init	-			instancetype	-	-	*unavailable ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	3a2a5e6b39e2af1d	-
+interface	c:objc(cs)TCThrottleDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	13926dbc1fdef718	-
+super	-	TCThrottleDescriptor	NSObject		-	-	-	-	-	ad579a36aa57286b	-
+property	c:objc(cs)TCThrottleDescriptor(py)label	-			TCControlLabel *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	70636a289c10d2e9	-
+property	c:objc(cs)TCThrottleDescriptor(py)backgroundContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f23e85cfe334bf06	-
+property	c:objc(cs)TCThrottleDescriptor(py)indicatorContents	-			TCControlContents *	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	660eda8dba790e6e	-
+property	c:objc(cs)TCThrottleDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7038955a06200c90	-
+property	c:objc(cs)TCThrottleDescriptor(py)indicatorSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	7f4e498986ae8c04	-
+property	c:objc(cs)TCThrottleDescriptor(py)throttleSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	cd5905959a9f65e0	-
+property	c:objc(cs)TCThrottleDescriptor(py)orientation	-			TCThrottleOrientation	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	565bb3ddf277a866	-
+property	c:objc(cs)TCThrottleDescriptor(py)snapsToBaseValue	-			BOOL	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	67e7d921853ad6c8	-
+property	c:objc(cs)TCThrottleDescriptor(py)baseValue	-			CGFloat	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	8ba5d0d41149c59d	-
+property	c:objc(cs)TCThrottleDescriptor(py)anchor	-			TCControlLayoutAnchor	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	781cbd701a56b2fe	-
+property	c:objc(cs)TCThrottleDescriptor(py)anchorCoordinateSystem	-			TCControlLayoutAnchorCoordinateSystem	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	50bd55e16e520425	-
+property	c:objc(cs)TCThrottleDescriptor(py)offset	-			CGPoint	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b045d168606bb992	-
+property	c:objc(cs)TCThrottleDescriptor(py)zIndex	-			NSInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	01a570cb902258d6	-
+property	c:objc(cs)TCThrottleDescriptor(py)colliderShape	-			TCColliderShape	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	c10b9c531c4ae21c	-
+property	c:objc(cs)TCThrottleDescriptor(py)highlightDuration	-			NSTimeInterval	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	9115c9539d942c81	-
+method	c:objc(cs)TCThrottleDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b183c7a130f4916c	-
+interface	c:objc(cs)TCTouchControllerDescriptor	-			-	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	360f899b07b2fe7a	-
+super	-	TCTouchControllerDescriptor	NSObject		-	-	-	-	-	3283acafd5b473ad	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)device	-			id<MTLDevice>	-	strong,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	42662c585d86096d	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)size	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	290e67c88a670266	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)drawableSize	-			CGSize	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	740799c4d3ee3dfd	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)colorPixelFormat	-			MTLPixelFormat	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	f3c3c14748bf6bcb	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)depthAttachmentPixelFormat	-			MTLPixelFormat	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	62e53d765826eaaa	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)stencilAttachmentPixelFormat	-			MTLPixelFormat	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	71eeda285b37c26d	-
+property	c:objc(cs)TCTouchControllerDescriptor(py)sampleCount	-			NSUInteger	-	assign,nonatomic	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	0e173b4fd75e9bc5	-
+method	c:objc(cs)TCTouchControllerDescriptor(im)init	-			instancetype	-	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	e0c576213e8952dd	-
+method	c:objc(cs)TCTouchControllerDescriptor(im)initWithMTKView:	-			instancetype	MTKView * mtkView	-	ios=26.0/-/-/0,maccatalyst=-/-/-/1,xros=-/-/-/1	-	b523db86aad8dc50	-
+typedef	c:@T@CGPoint	-			struct CGPoint	-	-	-	-	5506c4b038700426	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@CGColorRef	-			struct CGColor *	-	-	-	-	6d1707fde3455599	-
+typedef	c:@T@CGImageRef	-			struct CGImage *	-	-	-	-	61e7c30be1f5f379	-
+typedef	c:@T@CGFloat	-			double	-	-	-	-	29e11a71cfda882e	-
+typedef	c:@T@MTLPixelFormat	-			enum MTLPixelFormat	-	-	-	-	40f56ebf564ac2ed	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-

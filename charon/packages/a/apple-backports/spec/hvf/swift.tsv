@@ -1,0 +1,167 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+hvf	swift-constant	s:3hvf0A14LibraryVersionSi5major_Si5minorSi5patchtvp	-	hvfLibraryVersion	-	(major: Swift.Int, minor: Swift.Int, patch: Swift.Int)	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	4c40ad96d8e816a4
+hvf	swift-enum	s:3hvf12AxisExtremumO	-	AxisExtremum	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	444cdd592f8d2b87
+hvf	swift-constant	s:3hvf12AxisExtremumO7minimumyA2CmF	AxisExtremum	minimum	-	-	-	-	-	b945ebd0921a6d6e
+hvf	swift-constant	s:3hvf12AxisExtremumO7maximumyA2CmF	AxisExtremum	maximum	-	-	-	-	-	8008e5857077b766
+hvf	swift-method	s:3hvf12AxisExtremumO8rawValueACSgSi_tcfc	AxisExtremum	init(rawValue:)	-	-	hvf.AxisExtremum? | Swift.Int	-	-	b675a520127d5383
+hvf	swift-typealias	s:3hvf12AxisExtremumO8RawValuea	AxisExtremum	RawValue	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	47562052152b57f9
+hvf	swift-property	s:3hvf12AxisExtremumO8rawValueSivp	AxisExtremum	rawValue	-	Swift.Int	-	-	-	16a918b4bc20d958
+hvf	swift-enum	s:3hvf16SegmentBlendTypeO	-	SegmentBlendType	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	15c1428e5851b7ac
+hvf	swift-constant	s:3hvf16SegmentBlendTypeO5curveyA2CmF	SegmentBlendType	curve	-	-	-	-	-	c2ec0dd4f99c202e
+hvf	swift-constant	s:3hvf16SegmentBlendTypeO6corneryA2CmF	SegmentBlendType	corner	-	-	-	-	-	9c3b33ffe5de6e9d
+hvf	swift-constant	s:3hvf16SegmentBlendTypeO7tangentyA2CmF	SegmentBlendType	tangent	-	-	-	-	-	0bd6e76a2a4ddc59
+hvf	swift-constant	s:3hvf16SegmentBlendTypeO15tangentTangent1yA2CmF	SegmentBlendType	tangentTangent1	-	-	-	-	-	d4aa7736b4d99389
+hvf	swift-constant	s:3hvf16SegmentBlendTypeO15tangentTangent2yA2CmF	SegmentBlendType	tangentTangent2	-	-	-	-	-	6d4b94c3c066ee1f
+hvf	swift-method	s:3hvf16SegmentBlendTypeO8rawValueACSgs5UInt8V_tcfc	SegmentBlendType	init(rawValue:)	-	-	hvf.SegmentBlendType? | Swift.UInt8	-	-	7a002e46d61ba38d
+hvf	swift-typealias	s:3hvf16SegmentBlendTypeO8RawValuea	SegmentBlendType	RawValue	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	13df73b6aae02701
+hvf	swift-property	s:3hvf16SegmentBlendTypeO8rawValues5UInt8Vvp	SegmentBlendType	rawValue	-	Swift.UInt8	-	-	-	a06616a3b195c2b3
+hvf	swift-protocol	s:3hvf11ShapeWriterP	-	ShapeWriter	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	6cda6d925ab0d8d7
+hvf	swift-property	s:3hvf11ShapeWriterP9axisCountSivp	ShapeWriter	axisCount	-	Swift.Int	-	-	-	3a69dc315c1932f1
+hvf	swift-property	s:3hvf11ShapeWriterP17totalSegmentCountSivp	ShapeWriter	totalSegmentCount	-	Swift.Int	-	-	-	ce83c83e36a46346
+hvf	swift-property	s:3hvf11ShapeWriterP9pathSizesSays6UInt16VGvp	ShapeWriter	pathSizes	-	[Swift.UInt16]	-	-	-	87765165957b0e38
+hvf	swift-property	s:3hvf11ShapeWriterP10blendTypesSayAA16SegmentBlendTypeOGvp	ShapeWriter	blendTypes	-	[hvf.SegmentBlendType]	-	-	-	a9a621e8ddef6afe
+hvf	swift-property	s:3hvf11ShapeWriterP12masterVectorSaySdGvp	ShapeWriter	masterVector	-	[Swift.Double]	-	-	-	f5f0ea0fc2058975
+hvf	swift-property	s:3hvf11ShapeWriterP16denseDeltaMatrixSaySdGvp	ShapeWriter	denseDeltaMatrix	-	[Swift.Double]	-	-	-	1a27af0fedb5b056
+hvf	swift-method	s:3hvf11ShapeWriterP8finalizeSbyF	ShapeWriter	finalize()	-	Swift.Bool	-	-	-	04efee86cbd6b260
+hvf	swift-method	s:3hvf11ShapeWriterPAAE12masterOffset7segment5point10coordinateS2i_AA12SegmentPointOAA0J10CoordinateOtF	ShapeWriter	masterOffset(segment:point:coordinate:)	-	Swift.Int	Swift.Int | hvf.SegmentPoint | hvf.PointCoordinate	-	-	14928b65a6725277
+hvf	swift-method	s:3hvf11ShapeWriterPAAE16denseDeltaOffset4axis8extremum7segment5point10coordinateS2i_AA12AxisExtremumOSiAA12SegmentPointOAA0O10CoordinateOtF	ShapeWriter	denseDeltaOffset(axis:extremum:segment:point:coordinate:)	-	Swift.Int	Swift.Int | hvf.AxisExtremum | Swift.Int | hvf.SegmentPoint | hvf.PointCoordinate	-	-	f0bdc941a9e4e1a5
+hvf	swift-enum	s:3hvf12SegmentPointO	-	SegmentPoint	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	2268129332deef91
+hvf	swift-constant	s:3hvf12SegmentPointO2onyA2CmF	SegmentPoint	on	-	-	-	-	-	a143b9e9e820937a
+hvf	swift-constant	s:3hvf12SegmentPointO3offyA2CmF	SegmentPoint	off	-	-	-	-	-	e8c6a7db6b72267c
+hvf	swift-method	s:3hvf12SegmentPointO8rawValueACSgSi_tcfc	SegmentPoint	init(rawValue:)	-	-	hvf.SegmentPoint? | Swift.Int	-	-	22aaba1eb810ed9b
+hvf	swift-typealias	s:3hvf12SegmentPointO8RawValuea	SegmentPoint	RawValue	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	33cba2417895b7c7
+hvf	swift-property	s:3hvf12SegmentPointO8rawValueSivp	SegmentPoint	rawValue	-	Swift.Int	-	-	-	969ade747a29ecf1
+hvf	swift-enum	s:3hvf15PointCoordinateO	-	PointCoordinate	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	ab67ee08f02d493f
+hvf	swift-constant	s:3hvf15PointCoordinateO11xOrParallelyA2CmF	PointCoordinate	xOrParallel	-	-	-	-	-	9dd61e43ffba59c8
+hvf	swift-constant	s:3hvf15PointCoordinateO7yOrZeroyA2CmF	PointCoordinate	yOrZero	-	-	-	-	-	ef9859c388564bb2
+hvf	swift-method	s:3hvf15PointCoordinateO8rawValueACSgSi_tcfc	PointCoordinate	init(rawValue:)	-	-	hvf.PointCoordinate? | Swift.Int	-	-	feb850d7c8451afd
+hvf	swift-typealias	s:3hvf15PointCoordinateO8RawValuea	PointCoordinate	RawValue	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	41b59c2fe5eeca25
+hvf	swift-property	s:3hvf15PointCoordinateO8rawValueSivp	PointCoordinate	rawValue	-	Swift.Int	-	-	-	ded7c6182de0d6c2
+hvf	swift-struct	s:3hvf16CompositeSubpartV	-	CompositeSubpart	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	191fe7fa6b2dbacc
+hvf	swift-property	s:3hvf16CompositeSubpartV9partIndexs6UInt32Vvp	CompositeSubpart	partIndex	-	Swift.UInt32	-	-	-	0bb4275cee9624ee
+hvf	swift-property	s:3hvf16CompositeSubpartV14treePartOffsets6UInt16Vvp	CompositeSubpart	treePartOffset	-	Swift.UInt16	-	-	-	5a7f98b7d4302664
+hvf	swift-property	s:3hvf16CompositeSubpartV14treeAxisOffsets6UInt16Vvp	CompositeSubpart	treeAxisOffset	-	Swift.UInt16	-	-	-	139bbe57e333b264
+hvf	swift-method	s:3hvf16CompositeSubpartV9partIndex14treePartOffset0f4AxisH0ACs6UInt32V_s6UInt16VAJtcfc	CompositeSubpart	init(partIndex:treePartOffset:treeAxisOffset:)	-	-	hvf.CompositeSubpart | Swift.UInt32 | Swift.UInt16 | Swift.UInt16	-	-	46bef2ffaac1e835
+hvf	swift-method	s:3hvf16CompositeSubpartV2eeoiySbAC_ACtFZ	CompositeSubpart	==(_:_:)	+	Swift.Bool	hvf.CompositeSubpart | hvf.CompositeSubpart	-	-	a098894123ee4c16
+hvf	swift-method	s:3hvf16CompositeSubpartV4hash4intoys6HasherVz_tF	CompositeSubpart	hash(into:)	-	()	Swift.Hasher	-	-	6b8fd45747cdffe5
+hvf	swift-property	s:3hvf16CompositeSubpartV9hashValueSivp	CompositeSubpart	hashValue	-	Swift.Int	-	-	-	332fad2f7bdfcf18
+hvf	swift-struct	s:3hvf27CompositeSubpartTranslationV	-	CompositeSubpartTranslation	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	c75ed0873b27f45a
+hvf	swift-property	s:3hvf27CompositeSubpartTranslationV2dxSfvp	CompositeSubpartTranslation	dx	-	Swift.Float	-	-	-	2fa4188e768e993d
+hvf	swift-property	s:3hvf27CompositeSubpartTranslationV2dySfvp	CompositeSubpartTranslation	dy	-	Swift.Float	-	-	-	b636b4316c1841e7
+hvf	swift-method	s:3hvf27CompositeSubpartTranslationV2dx2dyACSf_Sftcfc	CompositeSubpartTranslation	init(dx:dy:)	-	-	hvf.CompositeSubpartTranslation | Swift.Float | Swift.Float	-	-	aeeac37c7ec99fe7
+hvf	swift-method	s:3hvf27CompositeSubpartTranslationV2eeoiySbAC_ACtFZ	CompositeSubpartTranslation	==(_:_:)	+	Swift.Bool	hvf.CompositeSubpartTranslation | hvf.CompositeSubpartTranslation	-	-	f0b5d02f55127f1c
+hvf	swift-method	s:3hvf27CompositeSubpartTranslationV4hash4intoys6HasherVz_tF	CompositeSubpartTranslation	hash(into:)	-	()	Swift.Hasher	-	-	8cbeca640cec69c5
+hvf	swift-property	s:3hvf27CompositeSubpartTranslationV9hashValueSivp	CompositeSubpartTranslation	hashValue	-	Swift.Int	-	-	-	35c68570bbd9ee2d
+hvf	swift-struct	s:3hvf22CompositeExtremumIndexV	-	CompositeExtremumIndex	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	5e9e63e5857cbb21
+hvf	swift-property	s:3hvf22CompositeExtremumIndexV3rows6UInt16Vvp	CompositeExtremumIndex	row	-	Swift.UInt16	-	-	-	ca866f9a57bc90a1
+hvf	swift-property	s:3hvf22CompositeExtremumIndexV6columns6UInt16Vvp	CompositeExtremumIndex	column	-	Swift.UInt16	-	-	-	3ec7fb74f5de5c24
+hvf	swift-method	s:3hvf22CompositeExtremumIndexV3row6columnACs6UInt16V_AGtcfc	CompositeExtremumIndex	init(row:column:)	-	-	hvf.CompositeExtremumIndex | Swift.UInt16 | Swift.UInt16	-	-	ec48f3eb86e79794
+hvf	swift-method	s:3hvf22CompositeExtremumIndexV2eeoiySbAC_ACtFZ	CompositeExtremumIndex	==(_:_:)	+	Swift.Bool	hvf.CompositeExtremumIndex | hvf.CompositeExtremumIndex	-	-	5bfcc8e4afa9bbdb
+hvf	swift-method	s:3hvf22CompositeExtremumIndexV4hash4intoys6HasherVz_tF	CompositeExtremumIndex	hash(into:)	-	()	Swift.Hasher	-	-	6099a39950b89493
+hvf	swift-property	s:3hvf22CompositeExtremumIndexV9hashValueSivp	CompositeExtremumIndex	hashValue	-	Swift.Int	-	-	-	5f3eca6216371732
+hvf	swift-protocol	s:3hvf15CompositeWriterP	-	CompositeWriter	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	cef67a1ba9518959
+hvf	swift-property	s:3hvf15CompositeWriterP9axisCountSivp	CompositeWriter	axisCount	-	Swift.Int	-	-	-	0f4fae74cf3731f3
+hvf	swift-property	s:3hvf15CompositeWriterP12subpartCountSivp	CompositeWriter	subpartCount	-	Swift.Int	-	-	-	cf6932b290a3e0e7
+hvf	swift-property	s:3hvf15CompositeWriterP14totalPartCountSivp	CompositeWriter	totalPartCount	-	Swift.Int	-	-	-	dfb4372b7af1d63a
+hvf	swift-property	s:3hvf15CompositeWriterP14totalAxisCountSivp	CompositeWriter	totalAxisCount	-	Swift.Int	-	-	-	fdd1c6a531ef158c
+hvf	swift-property	s:3hvf15CompositeWriterP20maximumExtremumCountSivp	CompositeWriter	maximumExtremumCount	-	Swift.Int	-	-	-	912747b521168379
+hvf	swift-property	s:3hvf15CompositeWriterP8subpartsSayAA0B7SubpartVGvp	CompositeWriter	subparts	-	[hvf.CompositeSubpart]	-	-	-	b8269246d7da9e08
+hvf	swift-property	s:3hvf15CompositeWriterP23extremumCSCColumnStartsSays6UInt16VGvp	CompositeWriter	extremumCSCColumnStarts	-	[Swift.UInt16]	-	-	-	9608a9c2615cba54
+hvf	swift-property	s:3hvf15CompositeWriterP19masterCSCRowIndicesSays6UInt16VGvp	CompositeWriter	masterCSCRowIndices	-	[Swift.UInt16]	-	-	-	c279e90acdbdfe3e
+hvf	swift-property	s:3hvf15CompositeWriterP21extremumCSCRowIndicesSays6UInt16VGvp	CompositeWriter	extremumCSCRowIndices	-	[Swift.UInt16]	-	-	-	90ae72eef0084f8a
+hvf	swift-property	s:3hvf15CompositeWriterP19masterCSCAxisValuesSaySfGvp	CompositeWriter	masterCSCAxisValues	-	[Swift.Float]	-	-	-	012a5c5607786ab4
+hvf	swift-property	s:3hvf15CompositeWriterP21extremumCSCAxisValuesSaySfGvp	CompositeWriter	extremumCSCAxisValues	-	[Swift.Float]	-	-	-	ff6f7ff2669af896
+hvf	swift-property	s:3hvf15CompositeWriterP24masterTranslationIndicesSays6UInt16VGvp	CompositeWriter	masterTranslationIndices	-	[Swift.UInt16]	-	-	-	85e11241ce82ab2d
+hvf	swift-property	s:3hvf15CompositeWriterP18masterTranslationsSayAA0B18SubpartTranslationVGvp	CompositeWriter	masterTranslations	-	[hvf.CompositeSubpartTranslation]	-	-	-	221eb7a52a816491
+hvf	swift-property	s:3hvf15CompositeWriterP21masterRotationIndicesSays6UInt16VGvp	CompositeWriter	masterRotationIndices	-	[Swift.UInt16]	-	-	-	73b1926ad1c6f2d3
+hvf	swift-property	s:3hvf15CompositeWriterP15masterRotationsSaySfGvp	CompositeWriter	masterRotations	-	[Swift.Float]	-	-	-	4c298db7de61125a
+hvf	swift-property	s:3hvf15CompositeWriterP26extremumTranslationIndicesSayAA0B13ExtremumIndexVGvp	CompositeWriter	extremumTranslationIndices	-	[hvf.CompositeExtremumIndex]	-	-	-	a9237e577819dc5f
+hvf	swift-property	s:3hvf15CompositeWriterP20extremumTranslationsSayAA0B18SubpartTranslationVGvp	CompositeWriter	extremumTranslations	-	[hvf.CompositeSubpartTranslation]	-	-	-	031907c7c089333b
+hvf	swift-property	s:3hvf15CompositeWriterP23extremumRotationIndicesSayAA0B13ExtremumIndexVGvp	CompositeWriter	extremumRotationIndices	-	[hvf.CompositeExtremumIndex]	-	-	-	eb7adba15cd68f8b
+hvf	swift-property	s:3hvf15CompositeWriterP17extremumRotationsSaySfGvp	CompositeWriter	extremumRotations	-	[Swift.Float]	-	-	-	6fd5de89393ea669
+hvf	swift-method	s:3hvf15CompositeWriterP8finalizeSbyF	CompositeWriter	finalize()	-	Swift.Bool	-	-	-	9d4a04162a11c2a0
+hvf	swift-method	s:3hvf15CompositeWriterPAAE6column4axis8extremumS2i_AA12AxisExtremumOtF	CompositeWriter	column(axis:extremum:)	-	Swift.Int	Swift.Int | hvf.AxisExtremum	-	-	f60af7822aa201f5
+hvf	swift-protocol	s:3hvf13PartGeneratorP	-	PartGenerator	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	1e85d48cd0993c0a
+hvf	swift-method	s:3hvf13PartGeneratorP9makeShapeyAA0E6Writer_pSiF	PartGenerator	makeShape(_:)	-	any hvf.ShapeWriter	Swift.Int	-	-	48c9139f990aa4cc
+hvf	swift-method	s:3hvf13PartGeneratorP13makeCompositeyAA0E6Writer_pSiF	PartGenerator	makeComposite(_:)	-	any hvf.CompositeWriter	Swift.Int	-	-	7f19b7cc71b0cd7e
+hvf	swift-enum	s:3hvf10PartResultO	-	PartResult	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	5949399ff9d9056e
+hvf	swift-constant	s:3hvf10PartResultO5shapeyAcA11ShapeWriter_pcACmF	PartResult	shape	-	-	-	-	-	b70b5feda2c8db3b
+hvf	swift-constant	s:3hvf10PartResultO9compositeyAcA15CompositeWriter_pcACmF	PartResult	composite	-	-	-	-	-	c70c6023c866d861
+hvf	swift-constant	s:3hvf10PartResultO8notFoundyA2CmF	PartResult	notFound	-	-	-	-	-	49cc49ee2d49708b
+hvf	swift-typealias	s:3hvf16CustomPartLoadera	-	CustomPartLoader	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	d28be22628e61b28
+hvf	swift-class	s:3hvf14HVGLPartLoaderC	-	HVGLPartLoader	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	e753399fc1b34599
+hvf	swift-property	s:3hvf14HVGLPartLoaderC12tableVersionSi5major_Si5minortvp	HVGLPartLoader	tableVersion	-	(major: Swift.Int, minor: Swift.Int)	-	-	-	fcac99d1a2e749d2
+hvf	swift-property	s:3hvf14HVGLPartLoaderC10glyphCountSivp	HVGLPartLoader	glyphCount	-	Swift.Int	-	-	-	d94060b8e114d74b
+hvf	swift-property	s:3hvf14HVGLPartLoaderC9partCountSivp	HVGLPartLoader	partCount	-	Swift.Int	-	-	-	399c649e028b232d
+hvf	swift-method	s:3hvf14HVGLPartLoaderC9hvglTable04hvpmE0ACSgSW_SWSgtcfc	HVGLPartLoader	init(hvglTable:hvpmTable:)	-	-	hvf.HVGLPartLoader? | Swift.UnsafeRawBufferPointer | Swift.UnsafeRawBufferPointer?	-	-	b7fba170b4c41827
+hvf	swift-class	s:3hvf12PartRendererC	-	PartRenderer	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	53dfa0ccc032d571
+hvf	swift-struct	s:3hvf12PartRendererC11TranslationV	PartRenderer	Translation	-	-	-	-	-	b92e270372b1f8d0
+hvf	swift-property	s:3hvf12PartRendererC11TranslationV2dxSdvp	PartRenderer.Translation	dx	-	Swift.Double	-	-	-	2cbd663f081d4626
+hvf	swift-property	s:3hvf12PartRendererC11TranslationV2dySdvp	PartRenderer.Translation	dy	-	Swift.Double	-	-	-	dc6b719eed2837e4
+hvf	swift-method	s:3hvf12PartRendererC11TranslationV2dx2dyAESd_Sdtcfc	PartRenderer.Translation	init(dx:dy:)	-	-	hvf.PartRenderer.Translation | Swift.Double | Swift.Double	-	-	9d05522f1c42c0e9
+hvf	swift-method	s:3hvf12PartRendererC11TranslationV2eeoiySbAE_AEtFZ	PartRenderer.Translation	==(_:_:)	+	Swift.Bool	hvf.PartRenderer.Translation | hvf.PartRenderer.Translation	-	-	f0b5bf4052ea9cd2
+hvf	swift-method	s:3hvf12PartRendererC11TranslationV4hash4intoys6HasherVz_tF	PartRenderer.Translation	hash(into:)	-	()	Swift.Hasher	-	-	f27bb1e847faa502
+hvf	swift-property	s:3hvf12PartRendererC11TranslationV9hashValueSivp	PartRenderer.Translation	hashValue	-	Swift.Int	-	-	-	c79e097e1f10f966
+hvf	swift-enum	s:3hvf12PartRendererC11InstructionO	PartRenderer	Instruction	-	-	-	-	-	af07e59f237bf00a
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO05beginB0yAESi_SSSgtcAEmF	PartRenderer.Instruction	beginPart	-	-	-	-	-	0cf6befa4d85eeba
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO9beginPathyA2EmF	PartRenderer.Instruction	beginPath	-	-	-	-	-	33855ace74750dd4
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO8addPointyAeC0F0VcAEmF	PartRenderer.Instruction	addPoint	-	-	-	-	-	6c144dbf609c790b
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO7addLineyAeC5PointVcAEmF	PartRenderer.Instruction	addLine	-	-	-	-	-	83c8bfcfb5381578
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO7addQuadyAeC5PointV_AHtcAEmF	PartRenderer.Instruction	addQuad	-	-	-	-	-	2a9701cb731eb10b
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO8addCubicyAeC5PointV_A2HtcAEmF	PartRenderer.Instruction	addCubic	-	-	-	-	-	71dc953777147b2b
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO9closePathyA2EmF	PartRenderer.Instruction	closePath	-	-	-	-	-	d30fd5664a48056a
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO7endPathyA2EmF	PartRenderer.Instruction	endPath	-	-	-	-	-	c43dd825766f854c
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO03endB0yAESi_SSSgtcAEmF	PartRenderer.Instruction	endPart	-	-	-	-	-	6c6509516c0f392b
+hvf	swift-constant	s:3hvf12PartRendererC11InstructionO4stopyA2EmF	PartRenderer.Instruction	stop	-	-	-	-	-	2150ca3df3196479
+hvf	swift-enum	s:3hvf12PartRendererC6ActionO	PartRenderer	Action	-	-	-	-	-	143abe2a959e770a
+hvf	swift-constant	s:3hvf12PartRendererC6ActionO8continueyA2EmF	PartRenderer.Action	continue	-	-	-	-	-	08970589b1a062a8
+hvf	swift-constant	s:3hvf12PartRendererC6ActionO4skipyA2EmF	PartRenderer.Action	skip	-	-	-	-	-	e24a46d3be221869
+hvf	swift-constant	s:3hvf12PartRendererC6ActionO4stopyA2EmF	PartRenderer.Action	stop	-	-	-	-	-	b177f76b671ff941
+hvf	swift-method	s:3hvf12PartRendererC6ActionO2eeoiySbAE_AEtFZ	PartRenderer.Action	==(_:_:)	+	Swift.Bool	hvf.PartRenderer.Action | hvf.PartRenderer.Action	-	-	36e9c3939707a5bb
+hvf	swift-method	s:3hvf12PartRendererC6ActionO4hash4intoys6HasherVz_tF	PartRenderer.Action	hash(into:)	-	()	Swift.Hasher	-	-	cc3b04ad7b7a4435
+hvf	swift-property	s:3hvf12PartRendererC6ActionO9hashValueSivp	PartRenderer.Action	hashValue	-	Swift.Int	-	-	-	7233b0573fdc16ee
+hvf	swift-struct	s:3hvf12PartRendererC5PointV	PartRenderer	Point	-	-	-	-	-	8305ce52bd88d2a7
+hvf	swift-property	s:3hvf12PartRendererC5PointV1xSdvp	PartRenderer.Point	x	-	Swift.Double	-	-	-	9cf18f150c9eeb9a
+hvf	swift-property	s:3hvf12PartRendererC5PointV1ySdvp	PartRenderer.Point	y	-	Swift.Double	-	-	-	eb2d536afb5715b9
+hvf	swift-method	s:3hvf12PartRendererC5PointV1x1yAESd_Sdtcfc	PartRenderer.Point	init(x:y:)	-	-	hvf.PartRenderer.Point | Swift.Double | Swift.Double	-	-	aa1095a370c2e066
+hvf	swift-method	s:3hvf12PartRendererC5PointV2eeoiySbAE_AEtFZ	PartRenderer.Point	==(_:_:)	+	Swift.Bool	hvf.PartRenderer.Point | hvf.PartRenderer.Point	-	-	928a77dc307ab779
+hvf	swift-method	s:3hvf12PartRendererC5PointV4hash4intoys6HasherVz_tF	PartRenderer.Point	hash(into:)	-	()	Swift.Hasher	-	-	a8b4c52207bc5897
+hvf	swift-property	s:3hvf12PartRendererC5PointV9hashValueSivp	PartRenderer.Point	hashValue	-	Swift.Int	-	-	-	bb8074cff1ed3b78
+hvf	swift-class	s:3hvf12PartRendererC10AxisValuesC	PartRenderer	AxisValues	-	-	-	-	-	e9597e1b8e9d4207
+hvf	swift-typealias	s:3hvf12PartRendererC10AxisValuesC7Elementa	PartRenderer.AxisValues	Element	-	-	-	-	-	6cd5a5cdd75f932d
+hvf	swift-typealias	s:3hvf12PartRendererC10AxisValuesC5Indexa	PartRenderer.AxisValues	Index	-	-	-	-	-	f13b794e8ea759aa
+hvf	swift-property	s:3hvf12PartRendererC10AxisValuesC8isNestedSbvp	PartRenderer.AxisValues	isNested	-	Swift.Bool	-	-	-	3c338d41ec39b1d2
+hvf	swift-property	s:3hvf12PartRendererC10AxisValuesC10startIndexSivp	PartRenderer.AxisValues	startIndex	-	Swift.Int	-	-	-	23da4f2ae3364091
+hvf	swift-property	s:3hvf12PartRendererC10AxisValuesC8endIndexSivp	PartRenderer.AxisValues	endIndex	-	hvf.PartRenderer.AxisValues.Index	-	-	-	5165600740ced948
+hvf	swift-method	s:3hvf12PartRendererC10AxisValuesC5index5afterS2i_tF	PartRenderer.AxisValues	index(after:)	-	hvf.PartRenderer.AxisValues.Index	hvf.PartRenderer.AxisValues.Index	-	-	6c08f23c8dfffab9
+hvf	swift-method	s:3hvf12PartRendererC10AxisValuesCySdSicip	PartRenderer.AxisValues	subscript(_:)	-	Swift.Double	Swift.Int	-	-	9c96bc335f8c9034
+hvf	swift-method	s:3hvf12PartRendererC10AxisValuesC12blendedValue4axisSdSi_tF	PartRenderer.AxisValues	blendedValue(axis:)	-	Swift.Double	Swift.Int	-	-	b848f21b0acb2c00
+hvf	swift-typealias	s:3hvf12PartRendererC10AxisValuesC7Indicesa	PartRenderer.AxisValues	Indices	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	93c5114aee991ee8
+hvf	swift-typealias	s:3hvf12PartRendererC10AxisValuesC8Iteratora	PartRenderer.AxisValues	Iterator	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	a04a32de1cbd26ce
+hvf	swift-typealias	s:3hvf12PartRendererC10AxisValuesC11SubSequencea	PartRenderer.AxisValues	SubSequence	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	74f2ad793fdb4d31
+hvf	swift-class	s:3hvf12PartRendererC0B10ParametersC	PartRenderer	PartParameters	-	-	-	-	-	81190e174d302ad3
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC9partIndexSivp	PartRenderer.PartParameters	partIndex	-	Swift.Int	-	-	-	f2dd3a4a6882900c
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC10axisValuesAC04AxisF0Cvp	PartRenderer.PartParameters	axisValues	-	hvf.PartRenderer.AxisValues	-	-	-	ce5632047ba1434b
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC11translationAC11TranslationVvp	PartRenderer.PartParameters	translation	-	hvf.PartRenderer.Translation	-	-	-	4da89d555e2244d8
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC8rotationSdvp	PartRenderer.PartParameters	rotation	-	Swift.Double	-	-	-	78ef97713dc22af1
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC18blendedTranslationAC0F0Vvp	PartRenderer.PartParameters	blendedTranslation	-	hvf.PartRenderer.Translation	-	-	-	acd1fd5711088d40
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC15blendedRotationSdvp	PartRenderer.PartParameters	blendedRotation	-	Swift.Double	-	-	-	933e8473210d6390
+hvf	swift-property	s:3hvf12PartRendererC0B10ParametersC8subpartsAC8SubpartsVvp	PartRenderer.PartParameters	subparts	-	hvf.PartRenderer.Subparts	-	-	-	bd30fee3e5175633
+hvf	swift-struct	s:3hvf12PartRendererC8SubpartsV	PartRenderer	Subparts	-	-	-	-	-	3d5fac3dbe1b6d11
+hvf	swift-typealias	s:3hvf12PartRendererC8SubpartsV7Elementa	PartRenderer.Subparts	Element	-	-	-	-	-	0c4c1a7605a71389
+hvf	swift-typealias	s:3hvf12PartRendererC8SubpartsV5Indexa	PartRenderer.Subparts	Index	-	-	-	-	-	59a53862f928057c
+hvf	swift-property	s:3hvf12PartRendererC8SubpartsV10startIndexSivp	PartRenderer.Subparts	startIndex	-	Swift.Int	-	-	-	c43940795fa68713
+hvf	swift-property	s:3hvf12PartRendererC8SubpartsV8endIndexSivp	PartRenderer.Subparts	endIndex	-	hvf.PartRenderer.Subparts.Index	-	-	-	4cb4587b2155c734
+hvf	swift-method	s:3hvf12PartRendererC8SubpartsV5index5afterS2i_tF	PartRenderer.Subparts	index(after:)	-	hvf.PartRenderer.Subparts.Index	hvf.PartRenderer.Subparts.Index	-	-	2e06ccda9cf77aaa
+hvf	swift-method	s:3hvf12PartRendererC8SubpartsVyAC0B10ParametersCSicip	PartRenderer.Subparts	subscript(_:)	-	hvf.PartRenderer.PartParameters	Swift.Int	-	-	34fcfd49044793d2
+hvf	swift-typealias	s:3hvf12PartRendererC8SubpartsV7Indicesa	PartRenderer.Subparts	Indices	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	6a68f803b0f52d22
+hvf	swift-typealias	s:3hvf12PartRendererC8SubpartsV8Iteratora	PartRenderer.Subparts	Iterator	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	bcd35f3b2fe32d15
+hvf	swift-typealias	s:3hvf12PartRendererC8SubpartsV11SubSequencea	PartRenderer.Subparts	SubSequence	-	-	-	ios=18.4,macos=15.4,tvos=18.4,watchos=11.4	-	ba60a34a79ab2225
+hvf	swift-method	s:3hvf12PartRendererC10hvglLoader8reusableAcA08HVGLPartE0C_Sbtcfc	PartRenderer	init(hvglLoader:reusable:)	-	-	hvf.PartRenderer | hvf.HVGLPartLoader | Swift.Bool	-	-	62bf18e061f89ecc
+hvf	swift-method	s:3hvf12PartRendererC6custom8reusableAcA0B6ResultOSi_AA0B9Generator_ptc_Sbtcfc	PartRenderer	init(custom:reusable:)	-	-	hvf.PartRenderer | hvf.CustomPartLoader | Swift.Bool	-	-	081e7539abc8cca0
+hvf	swift-property	s:3hvf12PartRendererC9partIndexSivp	PartRenderer	partIndex	-	Swift.Int	-	-	-	6a6e4a6b75116487
+hvf	swift-property	s:3hvf12PartRendererC13partAxisCountSivp	PartRenderer	partAxisCount	-	Swift.Int	-	-	-	9f88fd5d937f6340
+hvf	swift-property	s:3hvf12PartRendererC10parametersAC0B10ParametersCvp	PartRenderer	parameters	-	hvf.PartRenderer.PartParameters	-	-	-	951ee8c16dc0e21d
+hvf	swift-property	s:3hvf12PartRendererC22blendedAxisValueBoundsSNySdGvp	PartRenderer	blendedAxisValueBounds	-	Swift.ClosedRange<Swift.Double>	-	-	-	77565677f464195e
+hvf	swift-method	s:3hvf12PartRendererC05clearB5CacheyyF	PartRenderer	clearPartCache()	-	()	-	-	-	67d6e7bd9d8aea95
+hvf	swift-method	s:3hvf12PartRendererC6render2toSbAC6ActionOAC11InstructionOc_tF	PartRenderer	render(to:)	-	Swift.Bool	(hvf.PartRenderer.Instruction) -> hvf.PartRenderer.Action	-	-	5c2f3ba585cb4a68

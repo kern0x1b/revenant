@@ -1,0 +1,3 @@
+        if (0) {
+            // A column with nothing under the diagonal has no factorization: the header's own status at
+            // :39, written instead of dividing by a zero pivot.

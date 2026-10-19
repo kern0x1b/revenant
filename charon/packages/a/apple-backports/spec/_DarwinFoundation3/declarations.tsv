@@ -1,0 +1,1324 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+enum	c:@EA@qos_class_t	-			unsigned int	-	-	-	-	f8107e65844ce494	-
+enumconst	c:@EA@qos_class_t@QOS_CLASS_USER_INTERACTIVE	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	9d06f5781c4ddeb2	33
+enumconst	c:@EA@qos_class_t@QOS_CLASS_USER_INITIATED	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	4ae9648d778837b4	25
+enumconst	c:@EA@qos_class_t@QOS_CLASS_DEFAULT	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	086f071bdc0c8403	21
+enumconst	c:@EA@qos_class_t@QOS_CLASS_UTILITY	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	5051a3de81493e2e	17
+enumconst	c:@EA@qos_class_t@QOS_CLASS_BACKGROUND	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	386f1e475b32187b	9
+enumconst	c:@EA@qos_class_t@QOS_CLASS_UNSPECIFIED	qos_class_t			-	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	ee2c00107f9a0d4b	0
+typedef	c:@T@qos_class_t	-			enum qos_class_t	-	-	-	-	2497899fa59592bb	-
+function	c:@F@qos_class_self	-			qos_class_t (void)	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	102afcf72e075b65	-
+function	c:@F@qos_class_main	-			qos_class_t (void)	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	180c2e784e691493	-
+struct	c:@S@_xlocale	-			-	-	-	-	-	42eddf56d2640d86	-
+typedef	c:@T@locale_t	-			struct _xlocale *	-	-	-	-	4d3b7099a57d493e	-
+typedef	c:@T@u_char	-			unsigned char	-	-	-	-	f4c7d2bf594e9071	-
+typedef	c:@T@u_short	-			unsigned short	-	-	-	-	acca982aae85a48e	-
+typedef	c:@T@u_int	-			unsigned int	-	-	-	-	50a69dc8154190c5	-
+typedef	c:@T@u_int8_t	-			unsigned char	-	-	-	-	ed6837ff6d0fcfa1	-
+typedef	c:@T@u_int16_t	-			unsigned short	-	-	-	-	f001648696c65924	-
+typedef	c:@T@u_int32_t	-			unsigned int	-	-	-	-	c124ba0ccea6e1e3	-
+typedef	c:@T@u_int64_t	-			unsigned long long	-	-	-	-	d21b4e932f7e4bcd	-
+typedef	c:@T@errno_t	-			int	-	-	-	-	0f1b7925690fec6f	-
+function	c:@F@__error	-			int * (void)	-	-	-	-	64f5c0746d599ab5	-
+typedef	c:@T@__int8_t	-			signed char	-	-	-	-	a45308d5797b7150	-
+typedef	c:@T@__uint8_t	-			unsigned char	-	-	-	-	21c4a3e51470361c	-
+typedef	c:@T@__int16_t	-			short	-	-	-	-	052cd88a0397785a	-
+typedef	c:@T@__uint16_t	-			unsigned short	-	-	-	-	a7bc1cb528a5deea	-
+typedef	c:@T@__int32_t	-			int	-	-	-	-	71b73741152fe871	-
+typedef	c:@T@__uint32_t	-			unsigned int	-	-	-	-	c165177149766f1f	-
+typedef	c:@T@__int64_t	-			long long	-	-	-	-	4db1dfd2e9c35e7a	-
+typedef	c:@T@__uint64_t	-			unsigned long long	-	-	-	-	f3f983597d64f162	-
+typedef	c:@T@__darwin_intptr_t	-			long	-	-	-	-	e10930324992848e	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-
+typedef	c:@T@__darwin_ct_rune_t	-			int	-	-	-	-	1c4d6583a64bee5b	-
+union	c:@UA@__mbstate_t	-			-	-	-	-	-	d7a7dc84b5130eb0	-
+field	c:@UA@__mbstate_t@FI@__mbstate8	__mbstate_t			char[128]	-	-	-	-	353f57f5398b4984	-
+field	c:@UA@__mbstate_t@FI@_mbstateL	__mbstate_t			long long	-	-	-	-	15df5596668f0937	-
+typedef	c:@T@__mbstate_t	-			union __mbstate_t	-	-	-	-	2e1efbd53cd7803d	-
+typedef	c:@T@__darwin_mbstate_t	-			__mbstate_t	-	-	-	-	26afc0071e5a067f	-
+typedef	c:@T@__darwin_ptrdiff_t	-			ptrdiff_t	-	-	-	-	314687d029cc1ae2	-
+typedef	c:@T@__darwin_size_t	-			size_t	-	-	-	-	f2048824ab89ea9a	-
+typedef	c:@T@__darwin_va_list	-			va_list	-	-	-	-	2da865c1653cfea9	-
+typedef	c:@T@__darwin_wchar_t	-			wchar_t	-	-	-	-	c9b90a75424edd57	-
+typedef	c:@T@__darwin_rune_t	-			__darwin_wchar_t	-	-	-	-	df24453f23d10209	-
+typedef	c:@T@__darwin_wint_t	-			int	-	-	-	-	dc1bc23bf4d90cac	-
+typedef	c:@T@__darwin_clock_t	-			unsigned long	-	-	-	-	b51b1bc9c87be519	-
+typedef	c:@T@__darwin_socklen_t	-			__uint32_t	-	-	-	-	489426511b4dc173	-
+typedef	c:@T@__darwin_ssize_t	-			long	-	-	-	-	871a2fb075a86142	-
+typedef	c:@T@__darwin_time_t	-			long	-	-	-	-	cc0e13085dd2bf24	-
+typedef	c:@T@int8_t	-			signed char	-	-	-	-	e405b6a7be656ab1	-
+typedef	c:@T@int16_t	-			short	-	-	-	-	a957af8a2c7c6b0a	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@register_t	-			int64_t	-	-	-	-	162cb547e35e63b6	-
+typedef	c:@T@intptr_t	-			__darwin_intptr_t	-	-	-	-	fdac1ab2f2a027a6	-
+typedef	c:@T@uintptr_t	-			unsigned long	-	-	-	-	d45bca13aaee37a2	-
+typedef	c:@T@user_addr_t	-			u_int64_t	-	-	-	-	7d9d9183debdfca9	-
+typedef	c:@T@user_size_t	-			u_int64_t	-	-	-	-	1e0a25689751f0c6	-
+typedef	c:@T@user_ssize_t	-			int64_t	-	-	-	-	07095c0894daf174	-
+typedef	c:@T@user_long_t	-			int64_t	-	-	-	-	99d21437425a0125	-
+typedef	c:@T@user_ulong_t	-			u_int64_t	-	-	-	-	69ee49d32e3b1455	-
+typedef	c:@T@user_time_t	-			int64_t	-	-	-	-	78e05ccbe1433f7f	-
+typedef	c:@T@user_off_t	-			int64_t	-	-	-	-	cdffd59f74bffe26	-
+typedef	c:@T@syscall_arg_t	-			u_int64_t	-	-	-	-	91971e76da9c03d7	-
+typedef	c:@T@__darwin_blkcnt_t	-			__int64_t	-	-	-	-	3a65346663316521	-
+typedef	c:@T@__darwin_blksize_t	-			__int32_t	-	-	-	-	9a9499d7d51cbc36	-
+typedef	c:@T@__darwin_dev_t	-			__int32_t	-	-	-	-	9d1541788438c8e0	-
+typedef	c:@T@__darwin_fsblkcnt_t	-			unsigned int	-	-	-	-	aa932592b4a71008	-
+typedef	c:@T@__darwin_fsfilcnt_t	-			unsigned int	-	-	-	-	948c95ee6c6b672d	-
+typedef	c:@T@__darwin_gid_t	-			__uint32_t	-	-	-	-	0bd5f511332b23bd	-
+typedef	c:@T@__darwin_id_t	-			__uint32_t	-	-	-	-	0a897dc3ea4b5d8b	-
+typedef	c:@T@__darwin_ino64_t	-			__uint64_t	-	-	-	-	54ff3e6e4a843fee	-
+typedef	c:@T@__darwin_ino_t	-			__darwin_ino64_t	-	-	-	-	3add59b9cde1a7cc	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mode_t	-			__uint16_t	-	-	-	-	27c48f037b9167b4	-
+typedef	c:@T@__darwin_off_t	-			__int64_t	-	-	-	-	2b9dfb96e9b9fb63	-
+typedef	c:@T@__darwin_pid_t	-			__int32_t	-	-	-	-	cb5c92904c281d82	-
+typedef	c:@T@__darwin_sigset_t	-			__uint32_t	-	-	-	-	2747cefc06b594a4	-
+typedef	c:@T@__darwin_suseconds_t	-			__int32_t	-	-	-	-	1f42ada411498c29	-
+typedef	c:@T@__darwin_uid_t	-			__uint32_t	-	-	-	-	073c04a7a5ce4f9c	-
+typedef	c:@T@__darwin_useconds_t	-			__uint32_t	-	-	-	-	bafa5571a062b160	-
+typedef	c:@T@__darwin_uuid_t	-			unsigned char[16]	-	-	-	-	8e41facc8ea29412	-
+typedef	c:@T@__darwin_uuid_string_t	-			char[37]	-	-	-	-	fb72aac47bcb84ba	-
+struct	c:@S@__darwin_pthread_handler_rec	-			-	-	-	-	-	f81688d1bda3b1d0	-
+field	c:@S@__darwin_pthread_handler_rec@FI@__routine	__darwin_pthread_handler_rec			void (*)(void *)	-	-	-	-	3ac3c73b55144118	-
+field	c:@S@__darwin_pthread_handler_rec@FI@__arg	__darwin_pthread_handler_rec			void *	-	-	-	-	6092b367e6688ae2	-
+field	c:@S@__darwin_pthread_handler_rec@FI@__next	__darwin_pthread_handler_rec			struct __darwin_pthread_handler_rec *	-	-	-	-	f9bc1c5a5467a11b	-
+struct	c:@S@_opaque_pthread_attr_t	-			-	-	-	-	-	b058fd69aefea424	-
+field	c:@S@_opaque_pthread_attr_t@FI@__sig	_opaque_pthread_attr_t			long	-	-	-	-	9b38ab3b651de2af	-
+field	c:@S@_opaque_pthread_attr_t@FI@__opaque	_opaque_pthread_attr_t			char[56]	-	-	-	-	db35b599d3bbb839	-
+struct	c:@S@_opaque_pthread_cond_t	-			-	-	-	-	-	15380f8a1dbf5e05	-
+field	c:@S@_opaque_pthread_cond_t@FI@__sig	_opaque_pthread_cond_t			long	-	-	-	-	948113f9f897986c	-
+field	c:@S@_opaque_pthread_cond_t@FI@__opaque	_opaque_pthread_cond_t			char[40]	-	-	-	-	41a2ca480e7e6416	-
+struct	c:@S@_opaque_pthread_condattr_t	-			-	-	-	-	-	83e2f6dbb636c833	-
+field	c:@S@_opaque_pthread_condattr_t@FI@__sig	_opaque_pthread_condattr_t			long	-	-	-	-	d30665bdd75ce273	-
+field	c:@S@_opaque_pthread_condattr_t@FI@__opaque	_opaque_pthread_condattr_t			char[8]	-	-	-	-	7136a19e668a315e	-
+struct	c:@S@_opaque_pthread_mutex_t	-			-	-	-	-	-	674b28c37bc45217	-
+field	c:@S@_opaque_pthread_mutex_t@FI@__sig	_opaque_pthread_mutex_t			long	-	-	-	-	7447127f9749a63d	-
+field	c:@S@_opaque_pthread_mutex_t@FI@__opaque	_opaque_pthread_mutex_t			char[56]	-	-	-	-	4ba17b389a488b39	-
+struct	c:@S@_opaque_pthread_mutexattr_t	-			-	-	-	-	-	81f6c62c676c7bd6	-
+field	c:@S@_opaque_pthread_mutexattr_t@FI@__sig	_opaque_pthread_mutexattr_t			long	-	-	-	-	dd308e1269c9e833	-
+field	c:@S@_opaque_pthread_mutexattr_t@FI@__opaque	_opaque_pthread_mutexattr_t			char[8]	-	-	-	-	fa5f4e4d1a01ea13	-
+struct	c:@S@_opaque_pthread_once_t	-			-	-	-	-	-	d13fc2fcbd593a05	-
+field	c:@S@_opaque_pthread_once_t@FI@__sig	_opaque_pthread_once_t			long	-	-	-	-	d10c89d4f01061ef	-
+field	c:@S@_opaque_pthread_once_t@FI@__opaque	_opaque_pthread_once_t			char[8]	-	-	-	-	fecce5da02afe4be	-
+struct	c:@S@_opaque_pthread_rwlock_t	-			-	-	-	-	-	3086724ce487c5d8	-
+field	c:@S@_opaque_pthread_rwlock_t@FI@__sig	_opaque_pthread_rwlock_t			long	-	-	-	-	7de73843f158886f	-
+field	c:@S@_opaque_pthread_rwlock_t@FI@__opaque	_opaque_pthread_rwlock_t			char[192]	-	-	-	-	769b4fc39b01d69b	-
+struct	c:@S@_opaque_pthread_rwlockattr_t	-			-	-	-	-	-	26e08305796a385f	-
+field	c:@S@_opaque_pthread_rwlockattr_t@FI@__sig	_opaque_pthread_rwlockattr_t			long	-	-	-	-	9e1ea368aab616d2	-
+field	c:@S@_opaque_pthread_rwlockattr_t@FI@__opaque	_opaque_pthread_rwlockattr_t			char[16]	-	-	-	-	c0efcd00fa4ef91e	-
+struct	c:@S@_opaque_pthread_t	-			-	-	-	-	-	54c4cbc86f13d8a4	-
+field	c:@S@_opaque_pthread_t@FI@__sig	_opaque_pthread_t			long	-	-	-	-	727d079e7eee4b99	-
+field	c:@S@_opaque_pthread_t@FI@__cleanup_stack	_opaque_pthread_t			struct __darwin_pthread_handler_rec *	-	-	-	-	0f500e0767a034b8	-
+field	c:@S@_opaque_pthread_t@FI@__opaque	_opaque_pthread_t			char[8176]	-	-	-	-	2acd79ab22703d8e	-
+typedef	c:@T@__darwin_pthread_attr_t	-			struct _opaque_pthread_attr_t	-	-	-	-	80b4ce202f70a158	-
+typedef	c:@T@__darwin_pthread_cond_t	-			struct _opaque_pthread_cond_t	-	-	-	-	321da9cc5080a806	-
+typedef	c:@T@__darwin_pthread_condattr_t	-			struct _opaque_pthread_condattr_t	-	-	-	-	ab437c49cb5bb8fc	-
+typedef	c:@T@__darwin_pthread_key_t	-			unsigned long	-	-	-	-	c7047a03f871fd32	-
+typedef	c:@T@__darwin_pthread_mutex_t	-			struct _opaque_pthread_mutex_t	-	-	-	-	97711a9f539298d3	-
+typedef	c:@T@__darwin_pthread_mutexattr_t	-			struct _opaque_pthread_mutexattr_t	-	-	-	-	c8884bd53dbfb936	-
+typedef	c:@T@__darwin_pthread_once_t	-			struct _opaque_pthread_once_t	-	-	-	-	962a12afa25ac4c5	-
+typedef	c:@T@__darwin_pthread_rwlock_t	-			struct _opaque_pthread_rwlock_t	-	-	-	-	bd58638f0437d09b	-
+typedef	c:@T@__darwin_pthread_rwlockattr_t	-			struct _opaque_pthread_rwlockattr_t	-	-	-	-	678f2d3f191b2727	-
+typedef	c:@T@__darwin_pthread_t	-			struct _opaque_pthread_t *	-	-	-	-	a2e14b3807fba1be	-
+typedef	c:@T@u_long	-			unsigned long	-	-	-	-	f1b6d4d018a17157	-
+typedef	c:@T@ushort	-			unsigned short	-	-	-	-	20e888688ab03ec4	-
+typedef	c:@T@uint	-			unsigned int	-	-	-	-	8dc38c5395a4ebfc	-
+typedef	c:@T@u_quad_t	-			u_int64_t	-	-	-	-	ad22fb866bf2c0c2	-
+typedef	c:@T@quad_t	-			int64_t	-	-	-	-	b96bc74dd5c312a6	-
+typedef	c:@T@qaddr_t	-			quad_t *	-	-	-	-	1bdfb68b488f99ea	-
+typedef	c:@T@caddr_t	-			char *	-	-	-	-	f39cc983612fe6ba	-
+typedef	c:@T@daddr_t	-			int32_t	-	-	-	-	c624982443fcab56	-
+typedef	c:@T@dev_t	-			__darwin_dev_t	-	-	-	-	14a84ca0e8bf867e	-
+typedef	c:@T@fixpt_t	-			u_int32_t	-	-	-	-	a064b038da5c6957	-
+typedef	c:@T@blkcnt_t	-			__darwin_blkcnt_t	-	-	-	-	dcd44a5c2a404bae	-
+typedef	c:@T@blksize_t	-			__darwin_blksize_t	-	-	-	-	efe416f98690b2d1	-
+typedef	c:@T@gid_t	-			__darwin_gid_t	-	-	-	-	a7ab6a243ada7837	-
+typedef	c:@T@in_addr_t	-			__uint32_t	-	-	-	-	02b20b3c5c7c10c3	-
+typedef	c:@T@in_port_t	-			__uint16_t	-	-	-	-	718f821fec2cf61d	-
+typedef	c:@T@ino_t	-			__darwin_ino_t	-	-	-	-	11490b242e06956b	-
+typedef	c:@T@ino64_t	-			__darwin_ino64_t	-	-	-	-	88f40d0e73e88def	-
+typedef	c:@T@key_t	-			__int32_t	-	-	-	-	da15947f9a2fcb53	-
+typedef	c:@T@mode_t	-			__darwin_mode_t	-	-	-	-	b9c9618428808f69	-
+typedef	c:@T@nlink_t	-			__uint16_t	-	-	-	-	46fa054ec1bd9a2c	-
+typedef	c:@T@id_t	-			__darwin_id_t	-	-	-	-	67f59bf7c1919040	-
+typedef	c:@T@pid_t	-			__darwin_pid_t	-	-	-	-	bf2c1907ad5396d7	-
+typedef	c:@T@off_t	-			__darwin_off_t	-	-	-	-	52c669a355a69d7e	-
+typedef	c:@T@segsz_t	-			int32_t	-	-	-	-	9f4a0e25dd4a8f80	-
+typedef	c:@T@swblk_t	-			int32_t	-	-	-	-	50a8522b827faf85	-
+typedef	c:@T@uid_t	-			__darwin_uid_t	-	-	-	-	6084ffa514638080	-
+typedef	c:@T@clock_t	-			__darwin_clock_t	-	-	-	-	4f1d1dcd32feb7fd	-
+typedef	c:@T@ssize_t	-			__darwin_ssize_t	-	-	-	-	e88d0f8d7f363eb2	-
+typedef	c:@T@time_t	-			__darwin_time_t	-	-	-	-	13e90b94f84e3aca	-
+typedef	c:@T@useconds_t	-			__darwin_useconds_t	-	-	-	-	27d03c105a71ec1e	-
+typedef	c:@T@suseconds_t	-			__darwin_suseconds_t	-	-	-	-	815a3c499d3794d2	-
+struct	c:@S@fd_set	-			-	-	-	-	-	43f2baa5effe2f5c	-
+field	c:@S@fd_set@FI@fds_bits	fd_set			__int32_t[32]	-	-	-	-	a6da3a7f6ea3e752	-
+typedef	c:@T@fd_set	-			struct fd_set	-	-	-	-	4bfff9e3729eda3c	-
+function	c:@F@__darwin_check_fd_set_overflow	-			int (int, const void *, int)	int  | const void *  | int 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	48f42f33051c324d	-
+function	c:@F@__darwin_check_fd_set	-			int (int, const void *)	int _a | const void * _b	-	-	-	011a842871140756	-
+function	c:@F@__darwin_fd_isset	-			int (int, const struct fd_set *)	int _fd | const struct fd_set * _p	-	-	-	e6ed4d4a9c7d17b6	-
+function	c:@F@__darwin_fd_set	-			void (int, struct fd_set *const)	int _fd | struct fd_set *const _p	-	-	-	1a4389262e9bb9e1	-
+function	c:@F@__darwin_fd_clr	-			void (int, struct fd_set *const)	int _fd | struct fd_set *const _p	-	-	-	f3d88e3e3ca6525e	-
+typedef	c:@T@fd_mask	-			__int32_t	-	-	-	-	0be9a0d1e061cd6d	-
+typedef	c:@T@pthread_attr_t	-			__darwin_pthread_attr_t	-	-	-	-	9204006e12f7b59a	-
+typedef	c:@T@pthread_cond_t	-			__darwin_pthread_cond_t	-	-	-	-	db6cdf877be51158	-
+typedef	c:@T@pthread_condattr_t	-			__darwin_pthread_condattr_t	-	-	-	-	02ed5ee67bf32012	-
+typedef	c:@T@pthread_mutex_t	-			__darwin_pthread_mutex_t	-	-	-	-	e22000a533f77eaf	-
+typedef	c:@T@pthread_mutexattr_t	-			__darwin_pthread_mutexattr_t	-	-	-	-	dedeb5295f9e1b3c	-
+typedef	c:@T@pthread_once_t	-			__darwin_pthread_once_t	-	-	-	-	30a0f912d153ec91	-
+typedef	c:@T@pthread_rwlock_t	-			__darwin_pthread_rwlock_t	-	-	-	-	58b585d6400fa952	-
+typedef	c:@T@pthread_rwlockattr_t	-			__darwin_pthread_rwlockattr_t	-	-	-	-	810cbed5fa699896	-
+typedef	c:@T@pthread_t	-			__darwin_pthread_t	-	-	-	-	15f5f993c0b71fd0	-
+typedef	c:@T@pthread_key_t	-			__darwin_pthread_key_t	-	-	-	-	55931e08cd7170cc	-
+typedef	c:@T@fsblkcnt_t	-			__darwin_fsblkcnt_t	-	-	-	-	8e09a8f0d62c5ed1	-
+typedef	c:@T@fsfilcnt_t	-			__darwin_fsfilcnt_t	-	-	-	-	d860fe3da8b1efb3	-
+typedef	c:@T@nl_item	-			__darwin_nl_item	-	-	-	-	9ec5a39477f00fb6	-
+typedef	c:@T@ct_rune_t	-			__darwin_ct_rune_t	-	-	-	-	054a75bdbbbcf890	-
+typedef	c:@T@rune_t	-			__darwin_rune_t	-	-	-	-	72689a702080321c	-
+typedef	c:@T@wint_t	-			__darwin_wint_t	-	-	-	-	b45a7d9ed98b0fa8	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+struct	c:@S@timeval	-			-	-	-	-	-	acb2d004b1642ae1	-
+field	c:@S@timeval@FI@tv_sec	timeval			__darwin_time_t	-	-	-	-	5fdb4229e3f1b5c0	-
+field	c:@S@timeval@FI@tv_usec	timeval			__darwin_suseconds_t	-	-	-	-	55591cf15bfd4ac7	-
+typedef	c:@T@uuid_t	-			__darwin_uuid_t	-	-	-	-	9f32779f176ee30f	-
+function	c:@F@___runetype_l	-			unsigned long (__darwin_ct_rune_t, locale_t)	__darwin_ct_rune_t  | locale_t 	-	-	-	7b78d0755a5001cb	-
+function	c:@F@___tolower_l	-			__darwin_ct_rune_t (__darwin_ct_rune_t, locale_t)	__darwin_ct_rune_t  | locale_t 	-	-	-	f852990bfeeb62b7	-
+function	c:@F@___toupper_l	-			__darwin_ct_rune_t (__darwin_ct_rune_t, locale_t)	__darwin_ct_rune_t  | locale_t 	-	-	-	78a58d988d9ef88b	-
+function	c:@F@__maskrune_l	-			int (__darwin_ct_rune_t, unsigned long, locale_t)	__darwin_ct_rune_t  | unsigned long  | locale_t 	-	-	-	e93eca696f7d330e	-
+function	c:@F@__istype_l	-			int (__darwin_ct_rune_t, unsigned long, locale_t)	__darwin_ct_rune_t _c | unsigned long _f | locale_t _l	-	-	-	d9fcc78ace347037	-
+function	c:@F@__toupper_l	-			__darwin_ct_rune_t (__darwin_ct_rune_t, locale_t)	__darwin_ct_rune_t _c | locale_t _l	-	-	-	715244f9545371a6	-
+function	c:@F@__tolower_l	-			__darwin_ct_rune_t (__darwin_ct_rune_t, locale_t)	__darwin_ct_rune_t _c | locale_t _l	-	-	-	2270a2cba9a11c2c	-
+function	c:@F@__wcwidth_l	-			int (__darwin_ct_rune_t, locale_t)	__darwin_ct_rune_t _c | locale_t _l	-	-	-	fed88e24a833219d	-
+function	c:@F@digittoint_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	9987be17b9d38f83	-
+function	c:@F@isalnum_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	cdb120fd6e2c4365	-
+function	c:@F@isalpha_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	257230d277f5aaf4	-
+function	c:@F@isblank_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	064c229725973a81	-
+function	c:@F@iscntrl_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	f8e63baf4324f11f	-
+function	c:@F@isdigit_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	1ad57dce5babb5fc	-
+function	c:@F@isgraph_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	e68709a70fa6ae12	-
+function	c:@F@ishexnumber_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	5d7aeb927000c580	-
+function	c:@F@isideogram_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	b3680afb119b0640	-
+function	c:@F@islower_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	23ed7594c7a00432	-
+function	c:@F@isnumber_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	7b89fbf8fff00750	-
+function	c:@F@isphonogram_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	a05bcf0daaec45f9	-
+function	c:@F@isprint_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	6774e67d24fed4a6	-
+function	c:@F@ispunct_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	ee3392bdc57fdecf	-
+function	c:@F@isrune_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	53fa16a8dbd02003	-
+function	c:@F@isspace_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	4ac55523450a75b8	-
+function	c:@F@isspecial_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	cf2121900dbeb9b9	-
+function	c:@F@isupper_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	340ccbeadd49c0a6	-
+function	c:@F@isxdigit_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	9b1932845621c603	-
+function	c:@F@tolower_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	3c53c9a75d97973e	-
+function	c:@F@toupper_l	-			int (int, locale_t)	int c | locale_t l	-	-	-	1188e3df61e33d84	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@intmax_t	-			long	-	-	-	-	8d84764b7b5284b7	-
+typedef	c:@T@uintmax_t	-			unsigned long	-	-	-	-	6f7ce4a028b7b6de	-
+function	c:@F@renameat	-			int (int, const char *, int, const char *)	int  | const char *  | int  | const char * 	-	ios=8.0/-/-/0	-	e53a184706a684e4	-
+function	c:@F@renamex_np	-			int (const char *, const char *, unsigned int)	const char *  | const char *  | unsigned int 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e0c732a26607c601	-
+function	c:@F@renameatx_np	-			int (int, const char *, int, const char *, unsigned int)	int  | const char *  | int  | const char *  | unsigned int 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	5760ec49d84f17cb	-
+function	c:@F@fprintf_l	-			int (FILE *restrict, restrict locale_t, const char *restrict, ...)	FILE *restrict  | restrict locale_t  | const char *restrict 	variadic	-	-	1a17a4ec5a78aa41	-
+function	c:@F@fscanf_l	-			int (FILE *restrict, restrict locale_t, const char *restrict, ...)	FILE *restrict  | restrict locale_t  | const char *restrict 	variadic	-	-	e50b6f6dc921867b	-
+function	c:@F@printf_l	-			int (restrict locale_t, const char *restrict, ...)	restrict locale_t  | const char *restrict 	variadic	-	-	78df4b38ab1a3b97	-
+function	c:@F@scanf_l	-			int (restrict locale_t, const char *restrict, ...)	restrict locale_t  | const char *restrict 	variadic	-	-	cb90f9079f3aa461	-
+function	c:@F@sprintf_l	-			int (char *restrict, restrict locale_t, const char *restrict, ...)	char *restrict  | restrict locale_t  | const char *restrict 	variadic	swift=-/-/-/1	-	a0520dca312b0524	-
+function	c:@F@sscanf_l	-			int (const char *restrict, restrict locale_t, const char *restrict, ...)	const char *restrict  | restrict locale_t  | const char *restrict 	variadic	-	-	1590ae1774859d62	-
+function	c:@F@vfprintf_l	-			int (FILE *restrict, restrict locale_t, const char *restrict, va_list)	FILE *restrict  | restrict locale_t  | const char *restrict  | va_list 	-	-	-	8d44e73982ea2c1e	-
+function	c:@F@vprintf_l	-			int (restrict locale_t, const char *restrict, va_list)	restrict locale_t  | const char *restrict  | va_list 	-	-	-	b3ed275a25e02e1d	-
+function	c:@F@vsprintf_l	-			int (char *restrict, restrict locale_t, const char *restrict, va_list)	char *restrict  | restrict locale_t  | const char *restrict  | va_list 	-	swift=-/-/-/1	-	096f44f7ce7dc5d8	-
+function	c:@F@snprintf_l	-			int (char *restrict, size_t, restrict locale_t, const char *restrict, ...)	char *restrict  | size_t __maxlen | restrict locale_t  | const char *restrict 	variadic	-	-	6d4ea4ce6fd020e3	-
+function	c:@F@vfscanf_l	-			int (FILE *restrict, restrict locale_t, const char *restrict, va_list)	FILE *restrict  | restrict locale_t  | const char *restrict  | va_list 	-	-	-	e39ddc5c592d3d69	-
+function	c:@F@vscanf_l	-			int (restrict locale_t, const char *restrict, va_list)	restrict locale_t  | const char *restrict  | va_list 	-	-	-	d4921026bf1798e7	-
+function	c:@F@vsnprintf_l	-			int (char *restrict, size_t, restrict locale_t, const char *restrict, va_list)	char *restrict  | size_t __maxlen | restrict locale_t  | const char *restrict  | va_list 	-	-	-	46d1708f1906b782	-
+function	c:@F@vsscanf_l	-			int (const char *restrict, restrict locale_t, const char *restrict, va_list)	const char *restrict  | restrict locale_t  | const char *restrict  | va_list 	-	-	-	82538ebf82a0a7ca	-
+function	c:@F@dprintf_l	-			int (int, restrict locale_t, const char *restrict, ...)	int  | restrict locale_t  | const char *restrict 	variadic	ios=4.3/-/-/0	-	d492a4cf236ba1b6	-
+function	c:@F@vdprintf_l	-			int (int, restrict locale_t, const char *restrict, va_list)	int  | restrict locale_t  | const char *restrict  | va_list 	-	ios=4.3/-/-/0	-	ccb8820450c20d17	-
+function	c:@F@asprintf_l	-			int (char **restrict, restrict locale_t, const char *restrict, ...)	char **restrict  | restrict locale_t  | const char *restrict 	variadic	-	-	32f6f1d6e3c9c848	-
+function	c:@F@vasprintf_l	-			int (char **restrict, restrict locale_t, const char *restrict, va_list)	char **restrict  | restrict locale_t  | const char *restrict  | va_list 	-	-	-	4a7478807be069e4	-
+function	c:@F@strcoll_l	-			int (const char *, const char *, locale_t)	const char *  | const char *  | locale_t 	-	-	-	5fc8dabd62a872b0	-
+function	c:@F@strxfrm_l	-			size_t (char *, const char *, size_t, locale_t)	char *  | const char *  | size_t __n | locale_t 	-	-	-	4fd89d4244cbeeff	-
+function	c:@F@strcasecmp_l	-			int (const char *, const char *, locale_t)	const char *  | const char *  | locale_t 	-	-	-	c99e6a9ab5f87bc5	-
+function	c:@F@strcasestr_l	-			char * (const char *, const char *, locale_t)	const char *  | const char *  | locale_t 	-	-	-	e042ecce5e1ce8b5	-
+function	c:@F@strncasecmp_l	-			int (const char *, const char *, size_t, locale_t)	const char *  | const char *  | size_t  | locale_t 	-	-	-	7e302905cb2245a3	-
+struct	c:@S@timespec	-			-	-	-	-	-	d96358d653cb00ed	-
+field	c:@S@timespec@FI@tv_sec	timespec			__darwin_time_t	-	-	-	-	8cc201dc84ec10f5	-
+field	c:@S@timespec@FI@tv_nsec	timespec			long	-	-	-	-	9e755ede9ae0913c	-
+function	c:@F@strftime_l	-			size_t (char *restrict, size_t, const char *restrict, const struct tm *restrict, locale_t)	char *restrict  | size_t __n | const char *restrict  | const struct tm *restrict  | locale_t 	-	-	-	22560f84fb783f52	-
+function	c:@F@strptime_l	-			char * (const char *restrict, const char *restrict, struct tm *restrict, locale_t)	const char *restrict  | const char *restrict  | struct tm *restrict  | locale_t 	-	-	-	f623b90934bf908a	-
+struct	c:@S@sched_param	-			-	-	-	-	-	ef2ceced987eb8cb	-
+field	c:@S@sched_param@FI@sched_priority	sched_param			int	-	-	-	-	31ae6081d75f31cb	-
+field	c:@S@sched_param@FI@__opaque	sched_param			char[4]	-	-	-	-	20b36b11605a73b4	-
+function	c:@F@sched_yield	-			int (void)	-	-	-	-	29161506b4a29174	-
+function	c:@F@sched_get_priority_min	-			int (int)	int 	-	-	-	01225b21b4b6a84f	-
+function	c:@F@sched_get_priority_max	-			int (int)	int 	-	-	-	73324a7bce7eb30c	-
+function	c:@F@pthread_attr_set_qos_class_np	-			int (pthread_attr_t *, qos_class_t, int)	pthread_attr_t * __attr | qos_class_t __qos_class | int __relative_priority	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	932e4110a4455f58	-
+function	c:@F@pthread_attr_get_qos_class_np	-			int (pthread_attr_t *restrict, qos_class_t *restrict, int *restrict)	pthread_attr_t *restrict __attr | qos_class_t *restrict __qos_class | int *restrict __relative_priority	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	dd3976158bbab0ab	-
+function	c:@F@pthread_set_qos_class_self_np	-			int (qos_class_t, int)	qos_class_t __qos_class | int __relative_priority	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	b9982a345f41bcc2	-
+function	c:@F@pthread_get_qos_class_np	-			int (pthread_t, qos_class_t *restrict, int *restrict)	pthread_t __pthread | qos_class_t *restrict __qos_class | int *restrict __relative_priority	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	32bb2fc79fc09208	-
+struct	c:@S@pthread_override_s	-			-	-	-	-	-	401b8648b3528d26	-
+typedef	c:@T@pthread_override_t	-			struct pthread_override_s *	-	-	-	-	b965bf6bc0c80c39	-
+function	c:@F@pthread_override_qos_class_start_np	-			pthread_override_t (pthread_t, qos_class_t, int)	pthread_t __pthread | qos_class_t __qos_class | int __relative_priority	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	f9a5246a37474260	-
+function	c:@F@pthread_override_qos_class_end_np	-			int (pthread_override_t)	pthread_override_t __override	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	0b06db2e30fe1c49	-
+typedef	c:@T@sigset_t	-			__darwin_sigset_t	-	-	-	-	f1046d2fbfd6f282	-
+function	c:@F@pthread_atfork	-			int (void (*)(void), void (*)(void), void (*)(void))	void (*)(void)  | void (*)(void)  | void (*)(void) 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	bb1c9516f07f9784	-
+function	c:@F@pthread_attr_destroy	-			int (pthread_attr_t *)	pthread_attr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	b234a6aba6248580	-
+function	c:@F@pthread_attr_getdetachstate	-			int (const pthread_attr_t *, int *)	const pthread_attr_t *  | int * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	6cd6c570ad57e83f	-
+function	c:@F@pthread_attr_getguardsize	-			int (const pthread_attr_t *restrict, size_t *restrict)	const pthread_attr_t *restrict  | size_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	6093ac85825de187	-
+function	c:@F@pthread_attr_getinheritsched	-			int (const pthread_attr_t *restrict, int *restrict)	const pthread_attr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	4f8bcf4485fd7715	-
+function	c:@F@pthread_attr_getschedparam	-			int (const pthread_attr_t *restrict, struct sched_param *restrict)	const pthread_attr_t *restrict  | struct sched_param *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	9ad31393dd558e32	-
+function	c:@F@pthread_attr_getschedpolicy	-			int (const pthread_attr_t *restrict, int *restrict)	const pthread_attr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	e7528ab69c54296f	-
+function	c:@F@pthread_attr_getscope	-			int (const pthread_attr_t *restrict, int *restrict)	const pthread_attr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	33dbe78f1f0a8ece	-
+function	c:@F@pthread_attr_getstack	-			int (const pthread_attr_t *restrict, void * _Nullable *restrict, size_t *restrict)	const pthread_attr_t *restrict  | void * _Nullable *restrict  | size_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	dba24cc314eb20a5	-
+function	c:@F@pthread_attr_getstackaddr	-			int (const pthread_attr_t *restrict, void * _Nullable *restrict)	const pthread_attr_t *restrict  | void * _Nullable *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	22f75d8535417760	-
+function	c:@F@pthread_attr_getstacksize	-			int (const pthread_attr_t *restrict, size_t *restrict)	const pthread_attr_t *restrict  | size_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	d7ba61a820ff2ad8	-
+function	c:@F@pthread_attr_init	-			int (pthread_attr_t *)	pthread_attr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	f417a15514e14695	-
+function	c:@F@pthread_attr_setdetachstate	-			int (pthread_attr_t *, int)	pthread_attr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	82c002608e9bdcfd	-
+function	c:@F@pthread_attr_setguardsize	-			int (pthread_attr_t *, size_t)	pthread_attr_t *  | size_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	791fdba643b6e1e3	-
+function	c:@F@pthread_attr_setinheritsched	-			int (pthread_attr_t *, int)	pthread_attr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	ce7115f4781ff483	-
+function	c:@F@pthread_attr_setschedparam	-			int (pthread_attr_t *restrict, const struct sched_param *restrict)	pthread_attr_t *restrict  | const struct sched_param *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	f133f7eb8d29cd3b	-
+function	c:@F@pthread_attr_setschedpolicy	-			int (pthread_attr_t *, int)	pthread_attr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	817cb9c9bd19ecbc	-
+function	c:@F@pthread_attr_setscope	-			int (pthread_attr_t *, int)	pthread_attr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	8f59cafb70e3a161	-
+function	c:@F@pthread_attr_setstack	-			int (pthread_attr_t *, void *, size_t)	pthread_attr_t *  | void *  | size_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	7d016b8eecb1bb02	-
+function	c:@F@pthread_attr_setstackaddr	-			int (pthread_attr_t *, void *)	pthread_attr_t *  | void * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	5a10721f7f97907f	-
+function	c:@F@pthread_attr_setstacksize	-			int (pthread_attr_t *, size_t)	pthread_attr_t *  | size_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	13693e10d01a28a6	-
+function	c:@F@pthread_cancel	-			int (pthread_t)	pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	97b22b39981f543f	-
+function	c:@F@pthread_cond_broadcast	-			int (pthread_cond_t *)	pthread_cond_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	6a5eb76979a0afd5	-
+function	c:@F@pthread_cond_destroy	-			int (pthread_cond_t *)	pthread_cond_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	8f08367ca62f844c	-
+function	c:@F@pthread_cond_init	-			int (pthread_cond_t *restrict, const pthread_condattr_t *restrict)	pthread_cond_t *restrict  | const pthread_condattr_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	eea1d66d5cd66a98	-
+function	c:@F@pthread_cond_signal	-			int (pthread_cond_t *)	pthread_cond_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	6acdac54c04c13b9	-
+function	c:@F@pthread_cond_timedwait	-			int (pthread_cond_t *restrict, pthread_mutex_t *restrict, const struct timespec *restrict)	pthread_cond_t *restrict  | pthread_mutex_t *restrict  | const struct timespec *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	c724e98d5f9352ce	-
+function	c:@F@pthread_cond_wait	-			int (pthread_cond_t *restrict, pthread_mutex_t *restrict)	pthread_cond_t *restrict  | pthread_mutex_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	0e4f0ec4c7127554	-
+function	c:@F@pthread_condattr_destroy	-			int (pthread_condattr_t *)	pthread_condattr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	2b63df9a0752ddde	-
+function	c:@F@pthread_condattr_init	-			int (pthread_condattr_t *)	pthread_condattr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	ec75334531277ed8	-
+function	c:@F@pthread_condattr_getpshared	-			int (const pthread_condattr_t *restrict, int *restrict)	const pthread_condattr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	3aefddfde6f49179	-
+function	c:@F@pthread_condattr_setpshared	-			int (pthread_condattr_t *, int)	pthread_condattr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	b5ac461fc1bf0c11	-
+function	c:@F@pthread_create	-			int (pthread_t  _Nullable *restrict, const pthread_attr_t *restrict, void * _Nullable (*)(void * _Nullable), void *restrict)	pthread_t  _Nullable *restrict  | const pthread_attr_t *restrict  | void * _Nullable (*)(void * _Nullable)  | void *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	a9076bed5e4a0262	-
+function	c:@F@pthread_detach	-			int (pthread_t)	pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	bd01bb16a8ab4a21	-
+function	c:@F@pthread_equal	-			int (pthread_t, pthread_t)	pthread_t  | pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	d9ec2aa64c5ea4cb	-
+function	c:@F@pthread_exit	-			void (void *)	void * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	5af00be189d90360	-
+function	c:@F@pthread_getconcurrency	-			int (void)	-	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	fc972564c1c331b0	-
+function	c:@F@pthread_getschedparam	-			int (pthread_t, int *restrict, struct sched_param *restrict)	pthread_t  | int *restrict  | struct sched_param *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	d3379dd4216e05d6	-
+function	c:@F@pthread_getspecific	-			void * (pthread_key_t)	pthread_key_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	f4f56e3c33c13705	-
+function	c:@F@pthread_join	-			int (pthread_t, void * _Nullable *)	pthread_t  | void * _Nullable * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	42c9b08a73a3a6ce	-
+function	c:@F@pthread_key_create	-			int (pthread_key_t *, void (*)(void * _Nonnull))	pthread_key_t *  | void (*)(void * _Nonnull) 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	7005317a3e41bd65	-
+function	c:@F@pthread_key_delete	-			int (pthread_key_t)	pthread_key_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	91c25be43f047c8a	-
+function	c:@F@pthread_mutex_destroy	-			int (pthread_mutex_t *)	pthread_mutex_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	1ddc5e95f1d7f96c	-
+function	c:@F@pthread_mutex_getprioceiling	-			int (const pthread_mutex_t *restrict, int *restrict)	const pthread_mutex_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	c20eef728f36a87f	-
+function	c:@F@pthread_mutex_init	-			int (pthread_mutex_t *restrict, const pthread_mutexattr_t *restrict)	pthread_mutex_t *restrict  | const pthread_mutexattr_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	1fbba208e90ac052	-
+function	c:@F@pthread_mutex_lock	-			int (pthread_mutex_t *)	pthread_mutex_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	9589a7e6cc560286	-
+function	c:@F@pthread_mutex_setprioceiling	-			int (pthread_mutex_t *restrict, int, int *restrict)	pthread_mutex_t *restrict  | int  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	caba854690f10372	-
+function	c:@F@pthread_mutex_trylock	-			int (pthread_mutex_t *)	pthread_mutex_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	51acbb8682437b40	-
+function	c:@F@pthread_mutex_unlock	-			int (pthread_mutex_t *)	pthread_mutex_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	0c73d35fd19e1686	-
+function	c:@F@pthread_mutexattr_destroy	-			int (pthread_mutexattr_t *)	pthread_mutexattr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	20f36ea6de37db61	-
+function	c:@F@pthread_mutexattr_getprioceiling	-			int (const pthread_mutexattr_t *restrict, int *restrict)	const pthread_mutexattr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	99921aacc8dcdff2	-
+function	c:@F@pthread_mutexattr_getprotocol	-			int (const pthread_mutexattr_t *restrict, int *restrict)	const pthread_mutexattr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	9b01c08b297bcefa	-
+function	c:@F@pthread_mutexattr_getpshared	-			int (const pthread_mutexattr_t *restrict, int *restrict)	const pthread_mutexattr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	8bcf30c2c24dd25a	-
+function	c:@F@pthread_mutexattr_gettype	-			int (const pthread_mutexattr_t *restrict, int *restrict)	const pthread_mutexattr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	2ed5aaf149b2d8d9	-
+function	c:@F@pthread_mutexattr_getpolicy_np	-			int (const pthread_mutexattr_t *restrict, int *restrict)	const pthread_mutexattr_t *restrict  | int *restrict 	-	ios=11.3/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0,watchos=4.3/-/-/0	-	4e6fe9f7a5971caa	-
+function	c:@F@pthread_mutexattr_init	-			int (pthread_mutexattr_t *)	pthread_mutexattr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	8d9799ab64a9106b	-
+function	c:@F@pthread_mutexattr_setprioceiling	-			int (pthread_mutexattr_t *, int)	pthread_mutexattr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	c129f435d8138396	-
+function	c:@F@pthread_mutexattr_setprotocol	-			int (pthread_mutexattr_t *, int)	pthread_mutexattr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	ffba4f4b93278979	-
+function	c:@F@pthread_mutexattr_setpshared	-			int (pthread_mutexattr_t *, int)	pthread_mutexattr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	036b6ea0f6b5fc1b	-
+function	c:@F@pthread_mutexattr_settype	-			int (pthread_mutexattr_t *, int)	pthread_mutexattr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	9322980133f3284c	-
+function	c:@F@pthread_mutexattr_setpolicy_np	-			int (pthread_mutexattr_t *, int)	pthread_mutexattr_t *  | int 	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	7e997487b4fdf698	-
+function	c:@F@pthread_once	-			int (pthread_once_t *, void (*)(void))	pthread_once_t *  | void (*)(void) 	-	ios=2.0/-/-/0,macos=10.4/-/-/0,swift=-/-/-/1	-	9d5157d364b6a7b9	-
+function	c:@F@pthread_rwlock_destroy	-			int (pthread_rwlock_t *)	pthread_rwlock_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	546befeee52586ca	-
+function	c:@F@pthread_rwlock_init	-			int (pthread_rwlock_t *restrict, const pthread_rwlockattr_t *restrict)	pthread_rwlock_t *restrict  | const pthread_rwlockattr_t *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	c16f65d0f1968185	-
+function	c:@F@pthread_rwlock_rdlock	-			int (pthread_rwlock_t *)	pthread_rwlock_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	ef2dc83a3b7e5774	-
+function	c:@F@pthread_rwlock_tryrdlock	-			int (pthread_rwlock_t *)	pthread_rwlock_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	e1148e16ee46edaf	-
+function	c:@F@pthread_rwlock_trywrlock	-			int (pthread_rwlock_t *)	pthread_rwlock_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	548306a0ee51c5d5	-
+function	c:@F@pthread_rwlock_wrlock	-			int (pthread_rwlock_t *)	pthread_rwlock_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	e8f7d75d43ec05df	-
+function	c:@F@pthread_rwlock_unlock	-			int (pthread_rwlock_t *)	pthread_rwlock_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	06dc4403675c101a	-
+function	c:@F@pthread_rwlockattr_destroy	-			int (pthread_rwlockattr_t *)	pthread_rwlockattr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	c9147c0a063d4af1	-
+function	c:@F@pthread_rwlockattr_getpshared	-			int (const pthread_rwlockattr_t *restrict, int *restrict)	const pthread_rwlockattr_t *restrict  | int *restrict 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	a7811ccdad3ee873	-
+function	c:@F@pthread_rwlockattr_init	-			int (pthread_rwlockattr_t *)	pthread_rwlockattr_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	103ba8914452b35a	-
+function	c:@F@pthread_rwlockattr_setpshared	-			int (pthread_rwlockattr_t *, int)	pthread_rwlockattr_t *  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	6d86fa2ee7f46154	-
+function	c:@F@pthread_self	-			pthread_t (void)	-	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	452742ea7709d9c1	-
+function	c:@F@pthread_setcancelstate	-			int (int, int *)	int  | int * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	037c8c2d4e837057	-
+function	c:@F@pthread_setcanceltype	-			int (int, int *)	int  | int * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	2c870344e83646a2	-
+function	c:@F@pthread_setconcurrency	-			int (int)	int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	9b92862d4e694c9b	-
+function	c:@F@pthread_setschedparam	-			int (pthread_t, int, const struct sched_param *)	pthread_t  | int  | const struct sched_param * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	8c8da56067474b9d	-
+function	c:@F@pthread_setspecific	-			int (pthread_key_t, const void *)	pthread_key_t  | const void * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	87d1c42ac6afbebc	-
+function	c:@F@pthread_testcancel	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	65a5e4b20abb9a9f	-
+function	c:@F@pthread_is_threaded_np	-			int (void)	-	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	6519fe37b4fd398e	-
+function	c:@F@pthread_threadid_np	-			int (pthread_t, __uint64_t *)	pthread_t  | __uint64_t * 	-	ios=3.2/-/-/0,macos=10.6/-/-/0	-	99d55e64852592fa	-
+function	c:@F@pthread_getname_np	-			int (pthread_t, char *, size_t)	pthread_t  | char *  | size_t 	-	ios=3.2/-/-/0,macos=10.6/-/-/0	-	7a6dfdb596562f71	-
+function	c:@F@pthread_setname_np	-			int (const char *)	const char * 	-	ios=3.2/-/-/0,macos=10.6/-/-/0	-	ae0e5f8ff222bae7	-
+function	c:@F@pthread_main_np	-			int (void)	-	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	d6e0a354943b72cb	-
+function	c:@F@pthread_mach_thread_np	-			mach_port_t (pthread_t)	pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	f846d6a203cd3b71	-
+function	c:@F@pthread_get_stacksize_np	-			size_t (pthread_t)	pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	5b531ce084d91f14	-
+function	c:@F@pthread_get_stackaddr_np	-			void * (pthread_t)	pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	68475b05535117f1	-
+function	c:@F@pthread_cond_signal_thread_np	-			int (pthread_cond_t *, pthread_t)	pthread_cond_t *  | pthread_t 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	1d4509854691d94f	-
+function	c:@F@pthread_cond_timedwait_relative_np	-			int (pthread_cond_t *, pthread_mutex_t *, const struct timespec *)	pthread_cond_t *  | pthread_mutex_t *  | const struct timespec * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	4e7a45c9d0b6a908	-
+function	c:@F@pthread_create_suspended_np	-			int (pthread_t  _Nullable *, const pthread_attr_t *, void * _Nullable (*)(void * _Nullable), void *)	pthread_t  _Nullable *  | const pthread_attr_t *  | void * _Nullable (*)(void * _Nullable)  | void * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	1b1562dd03263f32	-
+function	c:@F@pthread_kill	-			int (pthread_t, int)	pthread_t  | int 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	90e3a41e4ce97e4d	-
+function	c:@F@pthread_from_mach_thread_np	-			pthread_t (mach_port_t)	mach_port_t 	-	ios=2.0/-/-/0,macos=10.5/-/-/0	-	3e10207264040141	-
+function	c:@F@pthread_sigmask	-			int (int, const sigset_t *, sigset_t *)	int  | const sigset_t *  | sigset_t * 	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	1f947c4117a3c5b1	-
+function	c:@F@pthread_yield_np	-			void (void)	-	-	ios=2.0/-/-/0,macos=10.4/-/-/0	-	e9cea6573859cab3	-
+function	c:@F@pthread_jit_write_protect_np	-			void (int)	int enabled	-	driverkit=-/-/-/1,ios=-/-/-/1,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a00bd0c3a2cc6e29	-
+function	c:@F@pthread_jit_write_protect_supported_np	-			int (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d64946d4411fde5f	-
+typedef	c:@T@pthread_jit_write_callback_t	-			int (*)(void * _Nullable)	-	-	-	-	c8b9041e1cca6718	-
+function	c:@F@pthread_jit_write_with_callback_np	-			int (pthread_jit_write_callback_t, void *)	pthread_jit_write_callback_t callback | void * ctx	-	driverkit=-/-/-/1,ios=17.4/-/-/0,macos=11.4/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4908ec5c1badf274	-
+function	c:@F@pthread_jit_write_freeze_callbacks_np	-			void (void)	-	-	driverkit=-/-/-/1,ios=17.4/-/-/0,macos=12.1/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c37462cdb2b5aa03	-
+function	c:@F@pthread_cpu_number_np	-			int (size_t *)	size_t * cpu_number_out	-	ios=14.2/-/-/0,macos=11.0/-/-/0,tvos=14.2/-/-/0,watchos=7.1/-/-/0	-	fe715f588e45aa6b	-
+typedef	c:@T@rlim_t	-			__uint64_t	-	-	-	-	05d8ea63e2e49688	-
+struct	c:@S@rusage	-			-	-	-	-	-	9f0bf0a4c0ca87b7	-
+field	c:@S@rusage@FI@ru_utime	rusage			struct timeval	-	-	-	-	51328ef9b78f0a38	-
+field	c:@S@rusage@FI@ru_stime	rusage			struct timeval	-	-	-	-	c2abeddcf2bf24e0	-
+field	c:@S@rusage@FI@ru_maxrss	rusage			long	-	-	-	-	7a266776c8552cca	-
+field	c:@S@rusage@FI@ru_ixrss	rusage			long	-	-	-	-	ce65d9f25b49e0d1	-
+field	c:@S@rusage@FI@ru_idrss	rusage			long	-	-	-	-	61a3af191b99c8fe	-
+field	c:@S@rusage@FI@ru_isrss	rusage			long	-	-	-	-	3192fccf3037e394	-
+field	c:@S@rusage@FI@ru_minflt	rusage			long	-	-	-	-	c4e2a51e98936a0f	-
+field	c:@S@rusage@FI@ru_majflt	rusage			long	-	-	-	-	a1a5ad30a1abd70d	-
+field	c:@S@rusage@FI@ru_nswap	rusage			long	-	-	-	-	afa95914912f0428	-
+field	c:@S@rusage@FI@ru_inblock	rusage			long	-	-	-	-	4a6e7480669743d1	-
+field	c:@S@rusage@FI@ru_oublock	rusage			long	-	-	-	-	d53e1cab3e9cf591	-
+field	c:@S@rusage@FI@ru_msgsnd	rusage			long	-	-	-	-	de491c98b4afe46c	-
+field	c:@S@rusage@FI@ru_msgrcv	rusage			long	-	-	-	-	0cd8ca45a6c0c5a2	-
+field	c:@S@rusage@FI@ru_nsignals	rusage			long	-	-	-	-	cb648aa06e0b2430	-
+field	c:@S@rusage@FI@ru_nvcsw	rusage			long	-	-	-	-	43b033e4f230e8c3	-
+field	c:@S@rusage@FI@ru_nivcsw	rusage			long	-	-	-	-	f42f8ce371bd6d19	-
+typedef	c:@T@rusage_info_t	-			void *	-	-	-	-	3e754fb5716d447a	-
+struct	c:@S@rusage_info_v0	-			-	-	-	-	-	3f49410f33e1a359	-
+field	c:@S@rusage_info_v0@FI@ri_uuid	rusage_info_v0			uint8_t[16]	-	-	-	-	f6cae1e28cfdb442	-
+field	c:@S@rusage_info_v0@FI@ri_user_time	rusage_info_v0			uint64_t	-	-	-	-	18931e069c318425	-
+field	c:@S@rusage_info_v0@FI@ri_system_time	rusage_info_v0			uint64_t	-	-	-	-	4cc1b8558f2cace2	-
+field	c:@S@rusage_info_v0@FI@ri_pkg_idle_wkups	rusage_info_v0			uint64_t	-	-	-	-	55ca6f31c5d6c9fa	-
+field	c:@S@rusage_info_v0@FI@ri_interrupt_wkups	rusage_info_v0			uint64_t	-	-	-	-	683d6a6c139685c7	-
+field	c:@S@rusage_info_v0@FI@ri_pageins	rusage_info_v0			uint64_t	-	-	-	-	9555938afc22b6d3	-
+field	c:@S@rusage_info_v0@FI@ri_wired_size	rusage_info_v0			uint64_t	-	-	-	-	63242cdf4675e2f4	-
+field	c:@S@rusage_info_v0@FI@ri_resident_size	rusage_info_v0			uint64_t	-	-	-	-	3714a75d07410fbd	-
+field	c:@S@rusage_info_v0@FI@ri_phys_footprint	rusage_info_v0			uint64_t	-	-	-	-	69ec1a71b51157da	-
+field	c:@S@rusage_info_v0@FI@ri_proc_start_abstime	rusage_info_v0			uint64_t	-	-	-	-	296c79163a1b6b2a	-
+field	c:@S@rusage_info_v0@FI@ri_proc_exit_abstime	rusage_info_v0			uint64_t	-	-	-	-	23e671643bc2097c	-
+struct	c:@S@rusage_info_v1	-			-	-	-	-	-	bb5fcef36c43502e	-
+field	c:@S@rusage_info_v1@FI@ri_uuid	rusage_info_v1			uint8_t[16]	-	-	-	-	24b669c8eba69545	-
+field	c:@S@rusage_info_v1@FI@ri_user_time	rusage_info_v1			uint64_t	-	-	-	-	598ddad7e9f21c20	-
+field	c:@S@rusage_info_v1@FI@ri_system_time	rusage_info_v1			uint64_t	-	-	-	-	304d518cf8d7daf9	-
+field	c:@S@rusage_info_v1@FI@ri_pkg_idle_wkups	rusage_info_v1			uint64_t	-	-	-	-	c857ecfd77f92a05	-
+field	c:@S@rusage_info_v1@FI@ri_interrupt_wkups	rusage_info_v1			uint64_t	-	-	-	-	4663805ce443046c	-
+field	c:@S@rusage_info_v1@FI@ri_pageins	rusage_info_v1			uint64_t	-	-	-	-	cfa25f1d279e33f6	-
+field	c:@S@rusage_info_v1@FI@ri_wired_size	rusage_info_v1			uint64_t	-	-	-	-	81edb25be528be1b	-
+field	c:@S@rusage_info_v1@FI@ri_resident_size	rusage_info_v1			uint64_t	-	-	-	-	9940e1d6942f0a63	-
+field	c:@S@rusage_info_v1@FI@ri_phys_footprint	rusage_info_v1			uint64_t	-	-	-	-	e9f5fac13cfbf9c2	-
+field	c:@S@rusage_info_v1@FI@ri_proc_start_abstime	rusage_info_v1			uint64_t	-	-	-	-	565e5fed6b609577	-
+field	c:@S@rusage_info_v1@FI@ri_proc_exit_abstime	rusage_info_v1			uint64_t	-	-	-	-	c606aed4d6438341	-
+field	c:@S@rusage_info_v1@FI@ri_child_user_time	rusage_info_v1			uint64_t	-	-	-	-	152a95a60a52a65d	-
+field	c:@S@rusage_info_v1@FI@ri_child_system_time	rusage_info_v1			uint64_t	-	-	-	-	fb902aae25db03eb	-
+field	c:@S@rusage_info_v1@FI@ri_child_pkg_idle_wkups	rusage_info_v1			uint64_t	-	-	-	-	56d65a9a8b318416	-
+field	c:@S@rusage_info_v1@FI@ri_child_interrupt_wkups	rusage_info_v1			uint64_t	-	-	-	-	5ba3a2faccfb1760	-
+field	c:@S@rusage_info_v1@FI@ri_child_pageins	rusage_info_v1			uint64_t	-	-	-	-	14dacc2f0801919c	-
+field	c:@S@rusage_info_v1@FI@ri_child_elapsed_abstime	rusage_info_v1			uint64_t	-	-	-	-	e69d743a99a1125f	-
+struct	c:@S@rusage_info_v2	-			-	-	-	-	-	e1e823bbbb9a0084	-
+field	c:@S@rusage_info_v2@FI@ri_uuid	rusage_info_v2			uint8_t[16]	-	-	-	-	9376169211fedd4d	-
+field	c:@S@rusage_info_v2@FI@ri_user_time	rusage_info_v2			uint64_t	-	-	-	-	0576307679dbb6ce	-
+field	c:@S@rusage_info_v2@FI@ri_system_time	rusage_info_v2			uint64_t	-	-	-	-	096254b248d3857c	-
+field	c:@S@rusage_info_v2@FI@ri_pkg_idle_wkups	rusage_info_v2			uint64_t	-	-	-	-	52f3b3578f4c887c	-
+field	c:@S@rusage_info_v2@FI@ri_interrupt_wkups	rusage_info_v2			uint64_t	-	-	-	-	a4816c7fde465a96	-
+field	c:@S@rusage_info_v2@FI@ri_pageins	rusage_info_v2			uint64_t	-	-	-	-	7494e2924d895578	-
+field	c:@S@rusage_info_v2@FI@ri_wired_size	rusage_info_v2			uint64_t	-	-	-	-	0ee11824e898b4de	-
+field	c:@S@rusage_info_v2@FI@ri_resident_size	rusage_info_v2			uint64_t	-	-	-	-	46bb8f5fb0e3a60d	-
+field	c:@S@rusage_info_v2@FI@ri_phys_footprint	rusage_info_v2			uint64_t	-	-	-	-	481e1061ff4a6f91	-
+field	c:@S@rusage_info_v2@FI@ri_proc_start_abstime	rusage_info_v2			uint64_t	-	-	-	-	337671ddea4ef64a	-
+field	c:@S@rusage_info_v2@FI@ri_proc_exit_abstime	rusage_info_v2			uint64_t	-	-	-	-	0c993614147c2f78	-
+field	c:@S@rusage_info_v2@FI@ri_child_user_time	rusage_info_v2			uint64_t	-	-	-	-	1c00efdf70984b9b	-
+field	c:@S@rusage_info_v2@FI@ri_child_system_time	rusage_info_v2			uint64_t	-	-	-	-	0d36c2fbff0955b7	-
+field	c:@S@rusage_info_v2@FI@ri_child_pkg_idle_wkups	rusage_info_v2			uint64_t	-	-	-	-	a43bf0d3b5690f10	-
+field	c:@S@rusage_info_v2@FI@ri_child_interrupt_wkups	rusage_info_v2			uint64_t	-	-	-	-	1811b08b0c4fc236	-
+field	c:@S@rusage_info_v2@FI@ri_child_pageins	rusage_info_v2			uint64_t	-	-	-	-	b3122a491ee1de1d	-
+field	c:@S@rusage_info_v2@FI@ri_child_elapsed_abstime	rusage_info_v2			uint64_t	-	-	-	-	ffc22018b92e8361	-
+field	c:@S@rusage_info_v2@FI@ri_diskio_bytesread	rusage_info_v2			uint64_t	-	-	-	-	035e873cd01dc2d0	-
+field	c:@S@rusage_info_v2@FI@ri_diskio_byteswritten	rusage_info_v2			uint64_t	-	-	-	-	52f54c11482eb9c6	-
+struct	c:@S@rusage_info_v3	-			-	-	-	-	-	3de23e7a38b14eda	-
+field	c:@S@rusage_info_v3@FI@ri_uuid	rusage_info_v3			uint8_t[16]	-	-	-	-	f789b8766e88fcb5	-
+field	c:@S@rusage_info_v3@FI@ri_user_time	rusage_info_v3			uint64_t	-	-	-	-	1a517df111f8f08c	-
+field	c:@S@rusage_info_v3@FI@ri_system_time	rusage_info_v3			uint64_t	-	-	-	-	4df44b69e3638d2c	-
+field	c:@S@rusage_info_v3@FI@ri_pkg_idle_wkups	rusage_info_v3			uint64_t	-	-	-	-	494db831fe0bf874	-
+field	c:@S@rusage_info_v3@FI@ri_interrupt_wkups	rusage_info_v3			uint64_t	-	-	-	-	e6cd2ee7f09ba46b	-
+field	c:@S@rusage_info_v3@FI@ri_pageins	rusage_info_v3			uint64_t	-	-	-	-	ea1a3b4386bc889a	-
+field	c:@S@rusage_info_v3@FI@ri_wired_size	rusage_info_v3			uint64_t	-	-	-	-	c343cfc3e74fe73b	-
+field	c:@S@rusage_info_v3@FI@ri_resident_size	rusage_info_v3			uint64_t	-	-	-	-	64b70f34192e29e1	-
+field	c:@S@rusage_info_v3@FI@ri_phys_footprint	rusage_info_v3			uint64_t	-	-	-	-	beb5d5942b6d86dc	-
+field	c:@S@rusage_info_v3@FI@ri_proc_start_abstime	rusage_info_v3			uint64_t	-	-	-	-	b03869f640a2e00d	-
+field	c:@S@rusage_info_v3@FI@ri_proc_exit_abstime	rusage_info_v3			uint64_t	-	-	-	-	9cd251176dcde318	-
+field	c:@S@rusage_info_v3@FI@ri_child_user_time	rusage_info_v3			uint64_t	-	-	-	-	0613b784d5da2a9f	-
+field	c:@S@rusage_info_v3@FI@ri_child_system_time	rusage_info_v3			uint64_t	-	-	-	-	aabaa5f9185bd120	-
+field	c:@S@rusage_info_v3@FI@ri_child_pkg_idle_wkups	rusage_info_v3			uint64_t	-	-	-	-	7ca015827a8b5de4	-
+field	c:@S@rusage_info_v3@FI@ri_child_interrupt_wkups	rusage_info_v3			uint64_t	-	-	-	-	b2041cf49a9c39eb	-
+field	c:@S@rusage_info_v3@FI@ri_child_pageins	rusage_info_v3			uint64_t	-	-	-	-	7a59d0bdd651e465	-
+field	c:@S@rusage_info_v3@FI@ri_child_elapsed_abstime	rusage_info_v3			uint64_t	-	-	-	-	896795973468574b	-
+field	c:@S@rusage_info_v3@FI@ri_diskio_bytesread	rusage_info_v3			uint64_t	-	-	-	-	5163db0373e6a29b	-
+field	c:@S@rusage_info_v3@FI@ri_diskio_byteswritten	rusage_info_v3			uint64_t	-	-	-	-	fe2e895770ed7fde	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_default	rusage_info_v3			uint64_t	-	-	-	-	e9bcb577297ed5e7	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_maintenance	rusage_info_v3			uint64_t	-	-	-	-	3f1e1439439453b2	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_background	rusage_info_v3			uint64_t	-	-	-	-	0db431221e175fba	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_utility	rusage_info_v3			uint64_t	-	-	-	-	c76118d875b21eef	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_legacy	rusage_info_v3			uint64_t	-	-	-	-	dde2f60148cbac81	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_user_initiated	rusage_info_v3			uint64_t	-	-	-	-	8537678dcc2af4f4	-
+field	c:@S@rusage_info_v3@FI@ri_cpu_time_qos_user_interactive	rusage_info_v3			uint64_t	-	-	-	-	803319fac977f306	-
+field	c:@S@rusage_info_v3@FI@ri_billed_system_time	rusage_info_v3			uint64_t	-	-	-	-	fe84d9bf678a0837	-
+field	c:@S@rusage_info_v3@FI@ri_serviced_system_time	rusage_info_v3			uint64_t	-	-	-	-	c94cf2a2e8731b09	-
+struct	c:@S@rusage_info_v4	-			-	-	-	-	-	9b47fe7fd6b92564	-
+field	c:@S@rusage_info_v4@FI@ri_uuid	rusage_info_v4			uint8_t[16]	-	-	-	-	9924dde810965e3e	-
+field	c:@S@rusage_info_v4@FI@ri_user_time	rusage_info_v4			uint64_t	-	-	-	-	3aa9af4480a1c2d5	-
+field	c:@S@rusage_info_v4@FI@ri_system_time	rusage_info_v4			uint64_t	-	-	-	-	c86a326eaa577f7f	-
+field	c:@S@rusage_info_v4@FI@ri_pkg_idle_wkups	rusage_info_v4			uint64_t	-	-	-	-	35ec6380e2283d06	-
+field	c:@S@rusage_info_v4@FI@ri_interrupt_wkups	rusage_info_v4			uint64_t	-	-	-	-	a32c6b98a9fe72ba	-
+field	c:@S@rusage_info_v4@FI@ri_pageins	rusage_info_v4			uint64_t	-	-	-	-	c5483116e5dc8e5d	-
+field	c:@S@rusage_info_v4@FI@ri_wired_size	rusage_info_v4			uint64_t	-	-	-	-	dc60d97ea78426de	-
+field	c:@S@rusage_info_v4@FI@ri_resident_size	rusage_info_v4			uint64_t	-	-	-	-	cc1cd3f9843ec8de	-
+field	c:@S@rusage_info_v4@FI@ri_phys_footprint	rusage_info_v4			uint64_t	-	-	-	-	2d27ad8833693b48	-
+field	c:@S@rusage_info_v4@FI@ri_proc_start_abstime	rusage_info_v4			uint64_t	-	-	-	-	d622d1f060d7d6a4	-
+field	c:@S@rusage_info_v4@FI@ri_proc_exit_abstime	rusage_info_v4			uint64_t	-	-	-	-	8bf7fdd5738a76bc	-
+field	c:@S@rusage_info_v4@FI@ri_child_user_time	rusage_info_v4			uint64_t	-	-	-	-	e9e1f55a8b5581f3	-
+field	c:@S@rusage_info_v4@FI@ri_child_system_time	rusage_info_v4			uint64_t	-	-	-	-	720562a0af493a0f	-
+field	c:@S@rusage_info_v4@FI@ri_child_pkg_idle_wkups	rusage_info_v4			uint64_t	-	-	-	-	72d2c41a0d3473f7	-
+field	c:@S@rusage_info_v4@FI@ri_child_interrupt_wkups	rusage_info_v4			uint64_t	-	-	-	-	74df351146e113bc	-
+field	c:@S@rusage_info_v4@FI@ri_child_pageins	rusage_info_v4			uint64_t	-	-	-	-	f7385fc3706ebd4a	-
+field	c:@S@rusage_info_v4@FI@ri_child_elapsed_abstime	rusage_info_v4			uint64_t	-	-	-	-	937487889908fa11	-
+field	c:@S@rusage_info_v4@FI@ri_diskio_bytesread	rusage_info_v4			uint64_t	-	-	-	-	0fcdb555afdbfa6f	-
+field	c:@S@rusage_info_v4@FI@ri_diskio_byteswritten	rusage_info_v4			uint64_t	-	-	-	-	9d0361436fa22327	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_default	rusage_info_v4			uint64_t	-	-	-	-	21ac3a6351f77b0c	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_maintenance	rusage_info_v4			uint64_t	-	-	-	-	e6e36486fc873c16	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_background	rusage_info_v4			uint64_t	-	-	-	-	1a5bb29c500653b9	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_utility	rusage_info_v4			uint64_t	-	-	-	-	cc97f40d09fbf32f	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_legacy	rusage_info_v4			uint64_t	-	-	-	-	75f1a2eaf8b96ec2	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_user_initiated	rusage_info_v4			uint64_t	-	-	-	-	2ca9eb69a0e95c59	-
+field	c:@S@rusage_info_v4@FI@ri_cpu_time_qos_user_interactive	rusage_info_v4			uint64_t	-	-	-	-	7e344b5892c14eb7	-
+field	c:@S@rusage_info_v4@FI@ri_billed_system_time	rusage_info_v4			uint64_t	-	-	-	-	c90fb635e8639183	-
+field	c:@S@rusage_info_v4@FI@ri_serviced_system_time	rusage_info_v4			uint64_t	-	-	-	-	b98c63d86b435431	-
+field	c:@S@rusage_info_v4@FI@ri_logical_writes	rusage_info_v4			uint64_t	-	-	-	-	0e8b96f2a2db843a	-
+field	c:@S@rusage_info_v4@FI@ri_lifetime_max_phys_footprint	rusage_info_v4			uint64_t	-	-	-	-	033ee7d836085eba	-
+field	c:@S@rusage_info_v4@FI@ri_instructions	rusage_info_v4			uint64_t	-	-	-	-	88666a5d67c97fd0	-
+field	c:@S@rusage_info_v4@FI@ri_cycles	rusage_info_v4			uint64_t	-	-	-	-	a7895da973cb9774	-
+field	c:@S@rusage_info_v4@FI@ri_billed_energy	rusage_info_v4			uint64_t	-	-	-	-	095428d4b5bb6f52	-
+field	c:@S@rusage_info_v4@FI@ri_serviced_energy	rusage_info_v4			uint64_t	-	-	-	-	622e1b278c21e69f	-
+field	c:@S@rusage_info_v4@FI@ri_interval_max_phys_footprint	rusage_info_v4			uint64_t	-	-	-	-	0652e8a4d52d01d6	-
+field	c:@S@rusage_info_v4@FI@ri_runnable_time	rusage_info_v4			uint64_t	-	-	-	-	2df747d369c1ea1d	-
+struct	c:@S@rusage_info_v5	-			-	-	-	-	-	9b170ebab71ef453	-
+field	c:@S@rusage_info_v5@FI@ri_uuid	rusage_info_v5			uint8_t[16]	-	-	-	-	7604eef9dd7f9bcb	-
+field	c:@S@rusage_info_v5@FI@ri_user_time	rusage_info_v5			uint64_t	-	-	-	-	a804e75e36790368	-
+field	c:@S@rusage_info_v5@FI@ri_system_time	rusage_info_v5			uint64_t	-	-	-	-	bc1f64c90dbcd809	-
+field	c:@S@rusage_info_v5@FI@ri_pkg_idle_wkups	rusage_info_v5			uint64_t	-	-	-	-	9009dabb7c17ba8d	-
+field	c:@S@rusage_info_v5@FI@ri_interrupt_wkups	rusage_info_v5			uint64_t	-	-	-	-	a36a3ad2a809d37a	-
+field	c:@S@rusage_info_v5@FI@ri_pageins	rusage_info_v5			uint64_t	-	-	-	-	c48f0535f71b6096	-
+field	c:@S@rusage_info_v5@FI@ri_wired_size	rusage_info_v5			uint64_t	-	-	-	-	de02e2aa0f4a875b	-
+field	c:@S@rusage_info_v5@FI@ri_resident_size	rusage_info_v5			uint64_t	-	-	-	-	82b14f40f6e5ec82	-
+field	c:@S@rusage_info_v5@FI@ri_phys_footprint	rusage_info_v5			uint64_t	-	-	-	-	b119c78e21e4ff99	-
+field	c:@S@rusage_info_v5@FI@ri_proc_start_abstime	rusage_info_v5			uint64_t	-	-	-	-	f08e26ebbaf36591	-
+field	c:@S@rusage_info_v5@FI@ri_proc_exit_abstime	rusage_info_v5			uint64_t	-	-	-	-	45067932ffa7b9ee	-
+field	c:@S@rusage_info_v5@FI@ri_child_user_time	rusage_info_v5			uint64_t	-	-	-	-	fc2c0be554d3bbd8	-
+field	c:@S@rusage_info_v5@FI@ri_child_system_time	rusage_info_v5			uint64_t	-	-	-	-	1983aae3ccd0ce17	-
+field	c:@S@rusage_info_v5@FI@ri_child_pkg_idle_wkups	rusage_info_v5			uint64_t	-	-	-	-	7f84ce1129df3da4	-
+field	c:@S@rusage_info_v5@FI@ri_child_interrupt_wkups	rusage_info_v5			uint64_t	-	-	-	-	f96d7bae7a3da320	-
+field	c:@S@rusage_info_v5@FI@ri_child_pageins	rusage_info_v5			uint64_t	-	-	-	-	06238deb60cadfac	-
+field	c:@S@rusage_info_v5@FI@ri_child_elapsed_abstime	rusage_info_v5			uint64_t	-	-	-	-	3418dcf49e4437cf	-
+field	c:@S@rusage_info_v5@FI@ri_diskio_bytesread	rusage_info_v5			uint64_t	-	-	-	-	842a459c3eba6197	-
+field	c:@S@rusage_info_v5@FI@ri_diskio_byteswritten	rusage_info_v5			uint64_t	-	-	-	-	13dccc056ae7e290	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_default	rusage_info_v5			uint64_t	-	-	-	-	a884739770b37e0d	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_maintenance	rusage_info_v5			uint64_t	-	-	-	-	fdb73c25690ff958	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_background	rusage_info_v5			uint64_t	-	-	-	-	daafed1372785461	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_utility	rusage_info_v5			uint64_t	-	-	-	-	a161d235644c8d01	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_legacy	rusage_info_v5			uint64_t	-	-	-	-	1a61f22cffac331f	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_user_initiated	rusage_info_v5			uint64_t	-	-	-	-	fd20e365386f03ff	-
+field	c:@S@rusage_info_v5@FI@ri_cpu_time_qos_user_interactive	rusage_info_v5			uint64_t	-	-	-	-	a59c2410aba33488	-
+field	c:@S@rusage_info_v5@FI@ri_billed_system_time	rusage_info_v5			uint64_t	-	-	-	-	f8197e86192ddc6a	-
+field	c:@S@rusage_info_v5@FI@ri_serviced_system_time	rusage_info_v5			uint64_t	-	-	-	-	a5228503afc79fd0	-
+field	c:@S@rusage_info_v5@FI@ri_logical_writes	rusage_info_v5			uint64_t	-	-	-	-	8cd7404c185f0276	-
+field	c:@S@rusage_info_v5@FI@ri_lifetime_max_phys_footprint	rusage_info_v5			uint64_t	-	-	-	-	e33882292504ddf7	-
+field	c:@S@rusage_info_v5@FI@ri_instructions	rusage_info_v5			uint64_t	-	-	-	-	6913b613c401908c	-
+field	c:@S@rusage_info_v5@FI@ri_cycles	rusage_info_v5			uint64_t	-	-	-	-	3772905fe9c57f10	-
+field	c:@S@rusage_info_v5@FI@ri_billed_energy	rusage_info_v5			uint64_t	-	-	-	-	2774e40c11f787de	-
+field	c:@S@rusage_info_v5@FI@ri_serviced_energy	rusage_info_v5			uint64_t	-	-	-	-	e3523608a59b9918	-
+field	c:@S@rusage_info_v5@FI@ri_interval_max_phys_footprint	rusage_info_v5			uint64_t	-	-	-	-	9b76119eb96f23f8	-
+field	c:@S@rusage_info_v5@FI@ri_runnable_time	rusage_info_v5			uint64_t	-	-	-	-	03d0bbe7bf0fba72	-
+field	c:@S@rusage_info_v5@FI@ri_flags	rusage_info_v5			uint64_t	-	-	-	-	a2a1813be9db907c	-
+struct	c:@S@rusage_info_v6	-			-	-	-	-	-	5d801945468786ce	-
+field	c:@S@rusage_info_v6@FI@ri_uuid	rusage_info_v6			uint8_t[16]	-	-	-	-	a846b79a3064d1a6	-
+field	c:@S@rusage_info_v6@FI@ri_user_time	rusage_info_v6			uint64_t	-	-	-	-	8bd0b2d5da851fc5	-
+field	c:@S@rusage_info_v6@FI@ri_system_time	rusage_info_v6			uint64_t	-	-	-	-	1634bbf9a43b86df	-
+field	c:@S@rusage_info_v6@FI@ri_pkg_idle_wkups	rusage_info_v6			uint64_t	-	-	-	-	0b83e98bc7e44f28	-
+field	c:@S@rusage_info_v6@FI@ri_interrupt_wkups	rusage_info_v6			uint64_t	-	-	-	-	c14864930045c2b5	-
+field	c:@S@rusage_info_v6@FI@ri_pageins	rusage_info_v6			uint64_t	-	-	-	-	8a3743256d30701c	-
+field	c:@S@rusage_info_v6@FI@ri_wired_size	rusage_info_v6			uint64_t	-	-	-	-	9c57b474cf762e5b	-
+field	c:@S@rusage_info_v6@FI@ri_resident_size	rusage_info_v6			uint64_t	-	-	-	-	bc05284dd79c01bc	-
+field	c:@S@rusage_info_v6@FI@ri_phys_footprint	rusage_info_v6			uint64_t	-	-	-	-	a2824d96cafc7e4f	-
+field	c:@S@rusage_info_v6@FI@ri_proc_start_abstime	rusage_info_v6			uint64_t	-	-	-	-	97cff1f1235999da	-
+field	c:@S@rusage_info_v6@FI@ri_proc_exit_abstime	rusage_info_v6			uint64_t	-	-	-	-	562bd141ac2bc4b3	-
+field	c:@S@rusage_info_v6@FI@ri_child_user_time	rusage_info_v6			uint64_t	-	-	-	-	5358a73bea3b4edb	-
+field	c:@S@rusage_info_v6@FI@ri_child_system_time	rusage_info_v6			uint64_t	-	-	-	-	29c8c4664db21616	-
+field	c:@S@rusage_info_v6@FI@ri_child_pkg_idle_wkups	rusage_info_v6			uint64_t	-	-	-	-	1b2d466a0986c5ec	-
+field	c:@S@rusage_info_v6@FI@ri_child_interrupt_wkups	rusage_info_v6			uint64_t	-	-	-	-	a171fb05b1bd4d37	-
+field	c:@S@rusage_info_v6@FI@ri_child_pageins	rusage_info_v6			uint64_t	-	-	-	-	c7df23de1872181e	-
+field	c:@S@rusage_info_v6@FI@ri_child_elapsed_abstime	rusage_info_v6			uint64_t	-	-	-	-	9566718a558b86a6	-
+field	c:@S@rusage_info_v6@FI@ri_diskio_bytesread	rusage_info_v6			uint64_t	-	-	-	-	96352635a9af5941	-
+field	c:@S@rusage_info_v6@FI@ri_diskio_byteswritten	rusage_info_v6			uint64_t	-	-	-	-	e3e61ecb23bf0b3f	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_default	rusage_info_v6			uint64_t	-	-	-	-	3959b599973e2dba	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_maintenance	rusage_info_v6			uint64_t	-	-	-	-	473bdec208f3a217	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_background	rusage_info_v6			uint64_t	-	-	-	-	01d02a404698cdb1	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_utility	rusage_info_v6			uint64_t	-	-	-	-	6f073b6062452adf	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_legacy	rusage_info_v6			uint64_t	-	-	-	-	cd491ab0e390c4a9	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_user_initiated	rusage_info_v6			uint64_t	-	-	-	-	ae64595868f1e982	-
+field	c:@S@rusage_info_v6@FI@ri_cpu_time_qos_user_interactive	rusage_info_v6			uint64_t	-	-	-	-	927b5bcab76dc2be	-
+field	c:@S@rusage_info_v6@FI@ri_billed_system_time	rusage_info_v6			uint64_t	-	-	-	-	95807eeb28656c95	-
+field	c:@S@rusage_info_v6@FI@ri_serviced_system_time	rusage_info_v6			uint64_t	-	-	-	-	ff4fd31d9468a8e8	-
+field	c:@S@rusage_info_v6@FI@ri_logical_writes	rusage_info_v6			uint64_t	-	-	-	-	0725d855e805d02e	-
+field	c:@S@rusage_info_v6@FI@ri_lifetime_max_phys_footprint	rusage_info_v6			uint64_t	-	-	-	-	d953cf38cf75c263	-
+field	c:@S@rusage_info_v6@FI@ri_instructions	rusage_info_v6			uint64_t	-	-	-	-	2689fe4b0f561193	-
+field	c:@S@rusage_info_v6@FI@ri_cycles	rusage_info_v6			uint64_t	-	-	-	-	f11b1c538e506b41	-
+field	c:@S@rusage_info_v6@FI@ri_billed_energy	rusage_info_v6			uint64_t	-	-	-	-	1caea22bb3b50c85	-
+field	c:@S@rusage_info_v6@FI@ri_serviced_energy	rusage_info_v6			uint64_t	-	-	-	-	efaa7ac75ab120ef	-
+field	c:@S@rusage_info_v6@FI@ri_interval_max_phys_footprint	rusage_info_v6			uint64_t	-	-	-	-	7f1fcbd1c00bd931	-
+field	c:@S@rusage_info_v6@FI@ri_runnable_time	rusage_info_v6			uint64_t	-	-	-	-	a8ba582e20886845	-
+field	c:@S@rusage_info_v6@FI@ri_flags	rusage_info_v6			uint64_t	-	-	-	-	4a72bdeb4c3aa677	-
+field	c:@S@rusage_info_v6@FI@ri_user_ptime	rusage_info_v6			uint64_t	-	-	-	-	8536e7e51ac7e306	-
+field	c:@S@rusage_info_v6@FI@ri_system_ptime	rusage_info_v6			uint64_t	-	-	-	-	fd588fdea7c99941	-
+field	c:@S@rusage_info_v6@FI@ri_pinstructions	rusage_info_v6			uint64_t	-	-	-	-	8043b0d791100257	-
+field	c:@S@rusage_info_v6@FI@ri_pcycles	rusage_info_v6			uint64_t	-	-	-	-	7e268ac0326c28b1	-
+field	c:@S@rusage_info_v6@FI@ri_energy_nj	rusage_info_v6			uint64_t	-	-	-	-	16f7295d9c2d6b4d	-
+field	c:@S@rusage_info_v6@FI@ri_penergy_nj	rusage_info_v6			uint64_t	-	-	-	-	86148d0f580fcb8b	-
+field	c:@S@rusage_info_v6@FI@ri_secure_time_in_system	rusage_info_v6			uint64_t	-	-	-	-	14049db2c22b6197	-
+field	c:@S@rusage_info_v6@FI@ri_secure_ptime_in_system	rusage_info_v6			uint64_t	-	-	-	-	685a72a6dbb01fdd	-
+field	c:@S@rusage_info_v6@FI@ri_neural_footprint	rusage_info_v6			uint64_t	-	-	-	-	b69b90a8022d004e	-
+field	c:@S@rusage_info_v6@FI@ri_lifetime_max_neural_footprint	rusage_info_v6			uint64_t	-	-	-	-	dbf572d710f401ca	-
+field	c:@S@rusage_info_v6@FI@ri_interval_max_neural_footprint	rusage_info_v6			uint64_t	-	-	-	-	3a4504d915c61ceb	-
+field	c:@S@rusage_info_v6@FI@ri_reserved	rusage_info_v6			uint64_t[9]	-	-	-	-	3855d55a0a19d465	-
+typedef	c:@T@rusage_info_current	-			struct rusage_info_v6	-	-	-	-	ac4ca152679abae1	-
+struct	c:@S@rlimit	-			-	-	-	-	-	7b459f58c2e8c9a3	-
+field	c:@S@rlimit@FI@rlim_cur	rlimit			rlim_t	-	-	-	-	647e11a785c822aa	-
+field	c:@S@rlimit@FI@rlim_max	rlimit			rlim_t	-	-	-	-	b11d01da1671c32b	-
+struct	c:@S@proc_rlimit_control_wakeupmon	-			-	-	-	-	-	0dca57242c07f859	-
+field	c:@S@proc_rlimit_control_wakeupmon@FI@wm_flags	proc_rlimit_control_wakeupmon			uint32_t	-	-	-	-	70fd23aa2a3faf78	-
+field	c:@S@proc_rlimit_control_wakeupmon@FI@wm_rate	proc_rlimit_control_wakeupmon			int32_t	-	-	-	-	274e89c4c087105f	-
+function	c:@F@getpriority	-			int (int, id_t)	int  | id_t 	-	-	-	8718c9c0708ffa0a	-
+function	c:@F@getiopolicy_np	-			int (int, int)	int  | int 	-	ios=2.0/-/-/0	-	33598f7d28e9aef8	-
+function	c:@F@getrlimit	-			int (int, struct rlimit *)	int  | struct rlimit * 	-	-	-	0e5d9c3d4499801d	-
+function	c:@F@getrusage	-			int (int, struct rusage *)	int  | struct rusage * 	-	-	-	eea30b0eb8efde07	-
+function	c:@F@setpriority	-			int (int, id_t, int)	int  | id_t  | int 	-	-	-	a4cd3617e6731784	-
+function	c:@F@setiopolicy_np	-			int (int, int, int)	int  | int  | int 	-	ios=2.0/-/-/0	-	c7fffce085a000cd	-
+function	c:@F@setrlimit	-			int (int, const struct rlimit *)	int  | const struct rlimit * 	-	-	-	397a46d53c7aa2f2	-
+function	c:@F@pselect	-			int (int, fd_set *restrict, fd_set *restrict, fd_set *restrict, const struct timespec *restrict, const sigset_t *restrict)	int  | fd_set *restrict  | fd_set *restrict  | fd_set *restrict  | const struct timespec *restrict  | const sigset_t *restrict 	-	-	-	76e80aadcbe0f3e2	-
+function	c:@F@select	-			int (int, fd_set *restrict, fd_set *restrict, fd_set *restrict, struct timeval *restrict)	int  | fd_set *restrict  | fd_set *restrict  | fd_set *restrict  | struct timeval *restrict 	-	-	-	24e24456043429f0	-
+enum	c:@EA@idtype_t	-			unsigned int	-	-	-	-	b97c258f99c27604	-
+enumconst	c:@EA@idtype_t@P_ALL	idtype_t			-	-	-	-	-	f2a9e99630939501	0
+enumconst	c:@EA@idtype_t@P_PID	idtype_t			-	-	-	-	-	d7784e30c6a05e38	1
+enumconst	c:@EA@idtype_t@P_PGID	idtype_t			-	-	-	-	-	0c724cdf6eac0984	2
+typedef	c:@T@idtype_t	-			enum idtype_t	-	-	-	-	d17153896e3ba129	-
+typedef	c:@T@sig_atomic_t	-			int	-	-	-	-	2e066aa427666353	-
+struct	c:@S@__darwin_arm_exception_state	-			-	-	-	-	-	80766827ab309548	-
+field	c:@S@__darwin_arm_exception_state@FI@__exception	__darwin_arm_exception_state			__uint32_t	-	-	-	-	bba89e998eb7b8ec	-
+field	c:@S@__darwin_arm_exception_state@FI@__fsr	__darwin_arm_exception_state			__uint32_t	-	-	-	-	7e89a70e3ad56993	-
+field	c:@S@__darwin_arm_exception_state@FI@__far	__darwin_arm_exception_state			__uint32_t	-	-	-	-	edfddde68c595a81	-
+struct	c:@S@__darwin_arm_exception_state64	-			-	-	-	-	-	6888fa5b67398b15	-
+field	c:@S@__darwin_arm_exception_state64@FI@__far	__darwin_arm_exception_state64			__uint64_t	-	-	-	-	6ad36d3132b375c0	-
+field	c:@S@__darwin_arm_exception_state64@FI@__esr	__darwin_arm_exception_state64			__uint32_t	-	-	-	-	d7045d3d2894eca0	-
+field	c:@S@__darwin_arm_exception_state64@FI@__exception	__darwin_arm_exception_state64			__uint32_t	-	-	-	-	39b8e25e8897bdbb	-
+struct	c:@S@__darwin_arm_exception_state64_v2	-			-	-	-	-	-	10c292c94f9f317f	-
+field	c:@S@__darwin_arm_exception_state64_v2@FI@__far	__darwin_arm_exception_state64_v2			__uint64_t	-	-	-	-	32fa8616346769e3	-
+field	c:@S@__darwin_arm_exception_state64_v2@FI@__esr	__darwin_arm_exception_state64_v2			__uint64_t	-	-	-	-	f64c58b60573b167	-
+struct	c:@S@__darwin_arm_thread_state	-			-	-	-	-	-	07375b04a555b778	-
+field	c:@S@__darwin_arm_thread_state@FI@__r	__darwin_arm_thread_state			__uint32_t[13]	-	-	-	-	aea246e1fff00d8c	-
+field	c:@S@__darwin_arm_thread_state@FI@__sp	__darwin_arm_thread_state			__uint32_t	-	-	-	-	75ebb58b52d02bd5	-
+field	c:@S@__darwin_arm_thread_state@FI@__lr	__darwin_arm_thread_state			__uint32_t	-	-	-	-	54010e80aa1d69bb	-
+field	c:@S@__darwin_arm_thread_state@FI@__pc	__darwin_arm_thread_state			__uint32_t	-	-	-	-	2875de6d2c47a8e1	-
+field	c:@S@__darwin_arm_thread_state@FI@__cpsr	__darwin_arm_thread_state			__uint32_t	-	-	-	-	7a46bffe2173ca4d	-
+struct	c:@S@__darwin_arm_thread_state64	-			-	-	-	-	-	5162efe2b92387f1	-
+field	c:@S@__darwin_arm_thread_state64@FI@__x	__darwin_arm_thread_state64			__uint64_t[29]	-	-	-	-	50faed80657b9e79	-
+field	c:@S@__darwin_arm_thread_state64@FI@__fp	__darwin_arm_thread_state64			__uint64_t	-	-	-	-	b5f4d07fba921e11	-
+field	c:@S@__darwin_arm_thread_state64@FI@__lr	__darwin_arm_thread_state64			__uint64_t	-	-	-	-	1a0c8ea50f6277a1	-
+field	c:@S@__darwin_arm_thread_state64@FI@__sp	__darwin_arm_thread_state64			__uint64_t	-	-	-	-	6a4a8279cd11c671	-
+field	c:@S@__darwin_arm_thread_state64@FI@__pc	__darwin_arm_thread_state64			__uint64_t	-	-	-	-	c566fe4e315caec6	-
+field	c:@S@__darwin_arm_thread_state64@FI@__cpsr	__darwin_arm_thread_state64			__uint32_t	-	-	-	-	c41a647f06b82cec	-
+field	c:@S@__darwin_arm_thread_state64@FI@__pad	__darwin_arm_thread_state64			__uint32_t	-	-	-	-	d0cd8aaa9782a151	-
+struct	c:@S@__darwin_arm_vfp_state	-			-	-	-	-	-	eac1eed9ce60d2e7	-
+field	c:@S@__darwin_arm_vfp_state@FI@__r	__darwin_arm_vfp_state			__uint32_t[64]	-	-	-	-	5e49f41058c2200a	-
+field	c:@S@__darwin_arm_vfp_state@FI@__fpscr	__darwin_arm_vfp_state			__uint32_t	-	-	-	-	926199bcd5cfeb97	-
+struct	c:@S@__darwin_arm_neon_state64	-			-	-	-	-	-	427c70d3812aff32	-
+field	c:@S@__darwin_arm_neon_state64@FI@__v	__darwin_arm_neon_state64			__uint128_t[32]	-	-	-	-	794d044c7a370295	-
+field	c:@S@__darwin_arm_neon_state64@FI@__fpsr	__darwin_arm_neon_state64			__uint32_t	-	-	-	-	7071680681e86128	-
+field	c:@S@__darwin_arm_neon_state64@FI@__fpcr	__darwin_arm_neon_state64			__uint32_t	-	-	-	-	fcf513e14fad8aab	-
+struct	c:@S@__darwin_arm_neon_state	-			-	-	-	-	-	cd4ff9d98189dbaa	-
+field	c:@S@__darwin_arm_neon_state@FI@__v	__darwin_arm_neon_state			__uint128_t[16]	-	-	-	-	da96186dd2e7a115	-
+field	c:@S@__darwin_arm_neon_state@FI@__fpsr	__darwin_arm_neon_state			__uint32_t	-	-	-	-	d354621fd31e2bbe	-
+field	c:@S@__darwin_arm_neon_state@FI@__fpcr	__darwin_arm_neon_state			__uint32_t	-	-	-	-	54a4a40787fc529d	-
+struct	c:@S@__arm_pagein_state	-			-	-	-	-	-	10111c639d973a25	-
+field	c:@S@__arm_pagein_state@FI@__pagein_error	__arm_pagein_state			int	-	-	-	-	548ac69bd8c694f9	-
+struct	c:@S@__darwin_arm_sme_state	-			-	-	-	-	-	e9adb871c7ad1285	-
+field	c:@S@__darwin_arm_sme_state@FI@__svcr	__darwin_arm_sme_state			__uint64_t	-	-	-	-	2b4ec6faeeabcc6a	-
+field	c:@S@__darwin_arm_sme_state@FI@__tpidr2_el0	__darwin_arm_sme_state			__uint64_t	-	-	-	-	b65a721fea9734c8	-
+field	c:@S@__darwin_arm_sme_state@FI@__svl_b	__darwin_arm_sme_state			__uint16_t	-	-	-	-	2d27730f3b4b91f8	-
+struct	c:@S@__darwin_arm_sve_z_state	-			-	-	-	-	-	7976da955f09cbb7	-
+field	c:@S@__darwin_arm_sve_z_state@FI@__z	__darwin_arm_sve_z_state			char[16][256]	-	-	-	-	8d05a9761e15876c	-
+struct	c:@S@__darwin_arm_sve_p_state	-			-	-	-	-	-	152f47727936ec2e	-
+field	c:@S@__darwin_arm_sve_p_state@FI@__p	__darwin_arm_sve_p_state			char[16][32]	-	-	-	-	17bd76c38ef851b0	-
+struct	c:@S@__darwin_arm_sme_za_state	-			-	-	-	-	-	20756323174d5522	-
+field	c:@S@__darwin_arm_sme_za_state@FI@__za	__darwin_arm_sme_za_state			char[4096]	-	-	-	-	f69e0ef7a98b4a16	-
+struct	c:@S@__darwin_arm_sme2_state	-			-	-	-	-	-	700dc25d94ddc35b	-
+field	c:@S@__darwin_arm_sme2_state@FI@__zt0	__darwin_arm_sme2_state			char[64]	-	-	-	-	ec4757f4a834d885	-
+struct	c:@S@__arm_legacy_debug_state	-			-	-	-	-	-	e1c51e9de84e0055	-
+field	c:@S@__arm_legacy_debug_state@FI@__bvr	__arm_legacy_debug_state			__uint32_t[16]	-	-	-	-	5bd6c363f2d0fd7a	-
+field	c:@S@__arm_legacy_debug_state@FI@__bcr	__arm_legacy_debug_state			__uint32_t[16]	-	-	-	-	caba2f776fb3dfdb	-
+field	c:@S@__arm_legacy_debug_state@FI@__wvr	__arm_legacy_debug_state			__uint32_t[16]	-	-	-	-	52f87179f94ebfe8	-
+field	c:@S@__arm_legacy_debug_state@FI@__wcr	__arm_legacy_debug_state			__uint32_t[16]	-	-	-	-	9df6198cfd6062e0	-
+struct	c:@S@__darwin_arm_debug_state32	-			-	-	-	-	-	bb243f41cb0f5b84	-
+field	c:@S@__darwin_arm_debug_state32@FI@__bvr	__darwin_arm_debug_state32			__uint32_t[16]	-	-	-	-	48c91e2715082034	-
+field	c:@S@__darwin_arm_debug_state32@FI@__bcr	__darwin_arm_debug_state32			__uint32_t[16]	-	-	-	-	7a0504f96f43bd19	-
+field	c:@S@__darwin_arm_debug_state32@FI@__wvr	__darwin_arm_debug_state32			__uint32_t[16]	-	-	-	-	70f28f96d2a4272c	-
+field	c:@S@__darwin_arm_debug_state32@FI@__wcr	__darwin_arm_debug_state32			__uint32_t[16]	-	-	-	-	b7d7e8c3034f5660	-
+field	c:@S@__darwin_arm_debug_state32@FI@__mdscr_el1	__darwin_arm_debug_state32			__uint64_t	-	-	-	-	38a59ffa331ad6f0	-
+struct	c:@S@__darwin_arm_debug_state64	-			-	-	-	-	-	eeb0bb4d19d68c26	-
+field	c:@S@__darwin_arm_debug_state64@FI@__bvr	__darwin_arm_debug_state64			__uint64_t[16]	-	-	-	-	ec25f1c9e8d1b56d	-
+field	c:@S@__darwin_arm_debug_state64@FI@__bcr	__darwin_arm_debug_state64			__uint64_t[16]	-	-	-	-	ddf0f9cd611523e8	-
+field	c:@S@__darwin_arm_debug_state64@FI@__wvr	__darwin_arm_debug_state64			__uint64_t[16]	-	-	-	-	f3520866afc6cee6	-
+field	c:@S@__darwin_arm_debug_state64@FI@__wcr	__darwin_arm_debug_state64			__uint64_t[16]	-	-	-	-	da64c02a00bdb315	-
+field	c:@S@__darwin_arm_debug_state64@FI@__mdscr_el1	__darwin_arm_debug_state64			__uint64_t	-	-	-	-	988956c932e94fe8	-
+struct	c:@S@__darwin_arm_cpmu_state64	-			-	-	-	-	-	241c2202b0d7c4fb	-
+field	c:@S@__darwin_arm_cpmu_state64@FI@__ctrs	__darwin_arm_cpmu_state64			__uint64_t[16]	-	-	-	-	2a6ea5a3b54e59f7	-
+struct	c:@S@__darwin_mcontext32	-			-	-	-	-	-	01211f0cc49c3657	-
+field	c:@S@__darwin_mcontext32@FI@__es	__darwin_mcontext32			struct __darwin_arm_exception_state	-	-	-	-	aea43505f3f15403	-
+field	c:@S@__darwin_mcontext32@FI@__ss	__darwin_mcontext32			struct __darwin_arm_thread_state	-	-	-	-	d4fa2bc53660a91b	-
+field	c:@S@__darwin_mcontext32@FI@__fs	__darwin_mcontext32			struct __darwin_arm_vfp_state	-	-	-	-	218603f928b7dd8d	-
+struct	c:@S@__darwin_mcontext64	-			-	-	-	-	-	2612ddafce55f18c	-
+field	c:@S@__darwin_mcontext64@FI@__es	__darwin_mcontext64			struct __darwin_arm_exception_state64	-	-	-	-	a79354ce2123dde7	-
+field	c:@S@__darwin_mcontext64@FI@__ss	__darwin_mcontext64			struct __darwin_arm_thread_state64	-	-	-	-	6948b936f2c4924f	-
+field	c:@S@__darwin_mcontext64@FI@__ns	__darwin_mcontext64			struct __darwin_arm_neon_state64	-	-	-	-	b17f10fa96354f5d	-
+typedef	c:@T@mcontext_t	-			struct __darwin_mcontext64 *	-	-	-	-	93864545776cb9ad	-
+struct	c:@S@__darwin_sigaltstack	-			-	-	-	-	-	03b521a43ae8668b	-
+field	c:@S@__darwin_sigaltstack@FI@ss_sp	__darwin_sigaltstack			void *	-	-	-	-	223ecf9a93a3952d	-
+field	c:@S@__darwin_sigaltstack@FI@ss_size	__darwin_sigaltstack			__darwin_size_t	-	-	-	-	002618661f04046c	-
+field	c:@S@__darwin_sigaltstack@FI@ss_flags	__darwin_sigaltstack			int	-	-	-	-	c3d209a2e1bb2641	-
+typedef	c:@T@stack_t	-			struct __darwin_sigaltstack	-	-	-	-	8e907eddb3a00827	-
+struct	c:@S@__darwin_ucontext	-			-	-	-	-	-	8df0f69f9d99ec4e	-
+field	c:@S@__darwin_ucontext@FI@uc_onstack	__darwin_ucontext			int	-	-	-	-	cd9fc10fa50b34aa	-
+field	c:@S@__darwin_ucontext@FI@uc_sigmask	__darwin_ucontext			__darwin_sigset_t	-	-	-	-	a77a0e54c1d5deb6	-
+field	c:@S@__darwin_ucontext@FI@uc_stack	__darwin_ucontext			struct __darwin_sigaltstack	-	-	-	-	e02341a51ab9c098	-
+field	c:@S@__darwin_ucontext@FI@uc_link	__darwin_ucontext			struct __darwin_ucontext *	-	-	-	-	a53fff0b0314ca6c	-
+field	c:@S@__darwin_ucontext@FI@uc_mcsize	__darwin_ucontext			__darwin_size_t	-	-	-	-	ec46efcb7339891f	-
+field	c:@S@__darwin_ucontext@FI@uc_mcontext	__darwin_ucontext			struct __darwin_mcontext64 *	-	-	-	-	2300ee2f264a540d	-
+typedef	c:@T@ucontext_t	-			struct __darwin_ucontext	-	-	-	-	794d039c62034a71	-
+union	c:@U@sigval	-			-	-	-	-	-	fdb2910ea6c17cdc	-
+field	c:@U@sigval@FI@sival_int	sigval			int	-	-	-	-	1db0a3bfdf815ce2	-
+field	c:@U@sigval@FI@sival_ptr	sigval			void *	-	-	-	-	67bbfc67bba6b5a3	-
+struct	c:@S@sigevent	-			-	-	-	-	-	63d1ce8e6d229bf2	-
+field	c:@S@sigevent@FI@sigev_notify	sigevent			int	-	-	-	-	815c60d07ff72172	-
+field	c:@S@sigevent@FI@sigev_signo	sigevent			int	-	-	-	-	bf956f0c030c5218	-
+field	c:@S@sigevent@FI@sigev_value	sigevent			union sigval	-	-	-	-	7aca27ced58be0eb	-
+field	c:@S@sigevent@FI@sigev_notify_function	sigevent			void (*)(union sigval)	-	-	-	-	c92fbe4bb90ab656	-
+field	c:@S@sigevent@FI@sigev_notify_attributes	sigevent			pthread_attr_t *	-	-	-	-	8ddea8e31e41ae07	-
+struct	c:@S@__siginfo	-			-	-	-	-	-	ab03783d369eae99	-
+field	c:@S@__siginfo@FI@si_signo	__siginfo			int	-	-	-	-	767d17184b610ae8	-
+field	c:@S@__siginfo@FI@si_errno	__siginfo			int	-	-	-	-	d86a4c760a8c3a7b	-
+field	c:@S@__siginfo@FI@si_code	__siginfo			int	-	-	-	-	afa09128d8aaaa67	-
+field	c:@S@__siginfo@FI@si_pid	__siginfo			pid_t	-	-	-	-	98f7636b8ad8ff35	-
+field	c:@S@__siginfo@FI@si_uid	__siginfo			uid_t	-	-	-	-	e6bdb905a95186d6	-
+field	c:@S@__siginfo@FI@si_status	__siginfo			int	-	-	-	-	093d43a98617de1e	-
+field	c:@S@__siginfo@FI@si_addr	__siginfo			void *	-	-	-	-	9083b26aa75e1bf5	-
+field	c:@S@__siginfo@FI@si_value	__siginfo			union sigval	-	-	-	-	55344d4667791d0f	-
+field	c:@S@__siginfo@FI@si_band	__siginfo			long	-	-	-	-	30a2ed246a5c7124	-
+field	c:@S@__siginfo@FI@__pad	__siginfo			unsigned long[7]	-	-	-	-	ebecf4bfe1710a85	-
+typedef	c:@T@siginfo_t	-			struct __siginfo	-	-	-	-	c1eb322b4f9d4957	-
+union	c:@U@__sigaction_u	-			-	-	-	-	-	88113c2bd92b09ff	-
+field	c:@U@__sigaction_u@FI@__sa_handler	__sigaction_u			void (*)(int)	-	-	-	-	222f9f804746eaf4	-
+field	c:@U@__sigaction_u@FI@__sa_sigaction	__sigaction_u			void (*)(int, struct __siginfo *, void *)	-	-	-	-	1f241f324014780d	-
+struct	c:@S@__sigaction	-			-	-	-	-	-	17d55c6465dc0584	-
+field	c:@S@__sigaction@FI@__sigaction_u	__sigaction			union __sigaction_u	-	-	-	-	51abb9fe34276e84	-
+field	c:@S@__sigaction@FI@sa_tramp	__sigaction			void (*)(void *, int, int, siginfo_t *, void *)	-	-	-	-	a45c722ebd253a5d	-
+field	c:@S@__sigaction@FI@sa_mask	__sigaction			sigset_t	-	-	-	-	d2b160b42848918a	-
+field	c:@S@__sigaction@FI@sa_flags	__sigaction			int	-	-	-	-	85f915ad36652f3b	-
+struct	c:@S@sigaction	-			-	-	-	-	-	1ddb793b907ab411	-
+field	c:@S@sigaction@FI@__sigaction_u	sigaction			union __sigaction_u	-	-	-	-	8f963975144b40cb	-
+field	c:@S@sigaction@FI@sa_mask	sigaction			sigset_t	-	-	-	-	f40a1abad3037147	-
+field	c:@S@sigaction@FI@sa_flags	sigaction			int	-	-	-	-	17fbc1f89bd3e772	-
+typedef	c:@T@sig_t	-			void (*)(int)	-	-	-	-	889c2ea2e724e01a	-
+struct	c:@S@sigvec	-			-	-	-	-	-	ae6135cece52426d	-
+field	c:@S@sigvec@FI@sv_handler	sigvec			void (*)(int)	-	-	-	-	0a666f28d1955ccd	-
+field	c:@S@sigvec@FI@sv_mask	sigvec			int	-	-	-	-	f17da8680dc99654	-
+field	c:@S@sigvec@FI@sv_flags	sigvec			int	-	-	-	-	61d51662e182006e	-
+struct	c:@S@sigstack	-			-	-	-	-	-	543ce29e830550d3	-
+field	c:@S@sigstack@FI@ss_sp	sigstack			char *	-	-	-	-	c9765a26ba66eaeb	-
+field	c:@S@sigstack@FI@ss_onstack	sigstack			int	-	-	-	-	3522bdb006ee7a78	-
+function	c:@F@signal	-			void (*)(int) (int, void (*)(int))	int  | void (*)(int) 	-	-	-	4a7f67abc366f152	-
+union	c:@U@wait	-			-	-	-	-	-	170a86b28d05d836	-
+field	c:@U@wait@FI@w_status	wait			int	-	-	-	-	b1163dbfe1d5d985	-
+struct	c:@U@wait@S@wait.h@8155	-	-		-	-	-	-	-	6d9dc2c4a0326a83	-
+field	c:@U@wait@S@wait.h@8155@FI@w_Termsig	-			unsigned int	-	-	-	-	bab64a944adf35df	-
+field	c:@U@wait@S@wait.h@8155@FI@w_Coredump	-			unsigned int	-	-	-	-	5e2c939cd8137f1e	-
+field	c:@U@wait@S@wait.h@8155@FI@w_Retcode	-			unsigned int	-	-	-	-	7a2066123305b8ba	-
+field	c:@U@wait@S@wait.h@8155@FI@w_Filler	-			unsigned int	-	-	-	-	3d7ad2da69edd82f	-
+field	c:@U@wait@FI@w_T	wait			struct (unnamed)	-	-	-	-	5539bc7e7dec2a35	-
+struct	c:@U@wait@S@wait.h@8893	-	-		-	-	-	-	-	8c87453afb3ca9b4	-
+field	c:@U@wait@S@wait.h@8893@FI@w_Stopval	-			unsigned int	-	-	-	-	656f38bf16f6891f	-
+field	c:@U@wait@S@wait.h@8893@FI@w_Stopsig	-			unsigned int	-	-	-	-	3cec050ee66ca754	-
+field	c:@U@wait@S@wait.h@8893@FI@w_Filler	-			unsigned int	-	-	-	-	5282d8af6fd0257e	-
+field	c:@U@wait@FI@w_S	wait			struct (unnamed)	-	-	-	-	1270b965c325e411	-
+function	c:@F@wait	-			pid_t (int *)	int * 	-	-	-	c8c58933bd4470b7	-
+function	c:@F@waitpid	-			pid_t (pid_t, int *, int)	pid_t  | int *  | int 	-	-	-	73c7068d12ae5e7d	-
+function	c:@F@waitid	-			int (idtype_t, id_t, siginfo_t *, int)	idtype_t  | id_t  | siginfo_t *  | int 	-	-	-	56cd75a62d685777	-
+function	c:@F@wait3	-			pid_t (int *, int, struct rusage *)	int *  | int  | struct rusage * 	-	-	-	c507b6cccac37d87	-
+function	c:@F@wait4	-			pid_t (pid_t, int *, int, struct rusage *)	pid_t  | int *  | int  | struct rusage * 	-	-	-	b251d5d8a2ec52d9	-
+struct	c:@S@accessx_descriptor	-			-	-	-	-	-	7a4f166caa030733	-
+field	c:@S@accessx_descriptor@FI@ad_name_offset	accessx_descriptor			unsigned int	-	-	-	-	14fc9d3aa8f1d100	-
+field	c:@S@accessx_descriptor@FI@ad_flags	accessx_descriptor			int	-	-	-	-	414dfeccff96843d	-
+field	c:@S@accessx_descriptor@FI@ad_pad	accessx_descriptor			int[2]	-	-	-	-	2cb9fe3e8c71d306	-
+function	c:@F@getattrlistbulk	-			int (int, void *, void *, size_t, uint64_t)	int  | void *  | void *  | size_t  | uint64_t 	-	ios=8.0/-/-/0	-	e7b1e863f48ad819	-
+function	c:@F@getattrlistat	-			int (int, const char *, void *, void *, size_t, unsigned long)	int  | const char *  | void *  | void *  | size_t  | unsigned long 	-	ios=8.0/-/-/0	-	afc02aa87fd39576	-
+function	c:@F@setattrlistat	-			int (int, const char *, void *, void *, size_t, uint32_t)	int  | const char *  | void *  | void *  | size_t  | uint32_t 	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b73447074831a385	-
+function	c:@F@freadlink	-			ssize_t (int, char *restrict, size_t)	int  | char *restrict  | size_t 	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	8f3d2bff260be264	-
+function	c:@F@faccessat	-			int (int, const char *, int, int)	int  | const char *  | int  | int 	-	ios=8.0/-/-/0	-	29df10cd0d100e7e	-
+function	c:@F@fchownat	-			int (int, const char *, uid_t, gid_t, int)	int  | const char *  | uid_t  | gid_t  | int 	-	ios=8.0/-/-/0	-	b96c587cf855bedc	-
+function	c:@F@linkat	-			int (int, const char *, int, const char *, int)	int  | const char *  | int  | const char *  | int 	-	ios=8.0/-/-/0	-	7575492ba34b7d59	-
+function	c:@F@readlinkat	-			ssize_t (int, const char *, char *, size_t)	int  | const char *  | char *  | size_t 	-	ios=8.0/-/-/0	-	f9bd29a072d7ad67	-
+function	c:@F@symlinkat	-			int (const char *, int, const char *)	const char *  | int  | const char * 	-	ios=8.0/-/-/0	-	331c6b80d05d863c	-
+function	c:@F@unlinkat	-			int (int, const char *, int)	int  | const char *  | int 	-	ios=8.0/-/-/0	-	0b79e91025230021	-
+function	c:@F@_exit	-			void (int)	int 	-	-	-	81086011a4cdeeb9	-
+function	c:@F@access	-			int (const char *, int)	const char *  | int 	-	-	-	b01d157678c1160a	-
+function	c:@F@alarm	-			unsigned int (unsigned int)	unsigned int 	-	-	-	506dc4e11862eec6	-
+function	c:@F@chdir	-			int (const char *)	const char * 	-	-	-	2796426ef54e1e22	-
+function	c:@F@chown	-			int (const char *, uid_t, gid_t)	const char *  | uid_t  | gid_t 	-	-	-	796392fbd5cd417e	-
+function	c:@F@close	-			int (int)	int 	-	-	-	dd6c2dbf1523a314	-
+function	c:@F@dup	-			int (int)	int 	-	-	-	69ee9d02032f49a8	-
+function	c:@F@dup2	-			int (int, int)	int  | int 	-	-	-	049fe633be5972fe	-
+function	c:@F@execl	-			int (const char *, const char *, ...)	const char * __path | const char * __arg0	variadic	tvos=-/-/-/1,watchos=-/-/-/1	-	23101fccfd3d5eae	-
+function	c:@F@execle	-			int (const char *, const char *, ...)	const char * __path | const char * __arg0	variadic	tvos=-/-/-/1,watchos=-/-/-/1	-	29560a33087c30da	-
+function	c:@F@execlp	-			int (const char *, const char *, ...)	const char * __file | const char * __arg0	variadic	tvos=-/-/-/1,watchos=-/-/-/1	-	c254b989a0a82ee9	-
+function	c:@F@execv	-			int (const char *, char *const *)	const char * __path | char *const * __argv	-	tvos=-/-/-/1,watchos=-/-/-/1	-	11cde1b101e0a008	-
+function	c:@F@execve	-			int (const char *, char *const *, char *const *)	const char * __file | char *const * __argv | char *const * __envp	-	tvos=-/-/-/1,watchos=-/-/-/1	-	0225dfbf955938e1	-
+function	c:@F@execvp	-			int (const char *, char *const *)	const char * __file | char *const * __argv	-	tvos=-/-/-/1,watchos=-/-/-/1	-	797bd7c0a60f8787	-
+function	c:@F@fork	-			pid_t (void)	-	-	tvos=-/-/-/1,watchos=-/-/-/1	-	849b2873a61f2553	-
+function	c:@F@fpathconf	-			long (int, int)	int  | int 	-	-	-	78ec4f33b28563ec	-
+function	c:@F@getcwd	-			char * (char *, size_t)	char *  | size_t __size	-	-	-	3f66a52bf623df0f	-
+function	c:@F@getegid	-			gid_t (void)	-	-	-	-	29c7ad09221af61c	-
+function	c:@F@geteuid	-			uid_t (void)	-	-	-	-	158688d6718ca0a3	-
+function	c:@F@getgid	-			gid_t (void)	-	-	-	-	2313a5f7fadff6e0	-
+function	c:@F@getgroups	-			int (int, gid_t[])	int __gidsetsize | gid_t[] 	-	-	-	22b05b17a93455a7	-
+function	c:@F@getlogin	-			char * (void)	-	-	-	-	cb45f09bd59d592e	-
+function	c:@F@getpgrp	-			pid_t (void)	-	-	-	-	249f39fdff8e7167	-
+function	c:@F@getpid	-			pid_t (void)	-	-	-	-	5f738410fe32623b	-
+function	c:@F@getppid	-			pid_t (void)	-	-	-	-	d119fd49bbb8bc51	-
+function	c:@F@getuid	-			uid_t (void)	-	-	-	-	f4740f6131d016b9	-
+function	c:@F@isatty	-			int (int)	int 	-	-	-	302b8abfcd01c1e5	-
+function	c:@F@link	-			int (const char *, const char *)	const char *  | const char * 	-	-	-	7b69d505a9debdaa	-
+function	c:@F@lseek	-			off_t (int, off_t, int)	int  | off_t  | int 	-	-	-	ff83e058448d0a6e	-
+function	c:@F@pathconf	-			long (const char *, int)	const char *  | int 	-	-	-	fa7cab498c6a28ed	-
+function	c:@F@pause	-			int (void)	-	-	-	-	dec19faba2f544fe	-
+function	c:@F@pipe	-			int (int[2])	int[2] 	-	-	-	19b65399bde1aec1	-
+function	c:@F@read	-			ssize_t (int, void *, size_t)	int  | void *  | size_t __nbyte	-	-	-	d7b60ac3cbaae218	-
+function	c:@F@rmdir	-			int (const char *)	const char * 	-	-	-	afc33eaea5dbdd9c	-
+function	c:@F@setgid	-			int (gid_t)	gid_t 	-	-	-	e7c7554bef245362	-
+function	c:@F@setpgid	-			int (pid_t, pid_t)	pid_t  | pid_t 	-	-	-	da4810070c2047cd	-
+function	c:@F@setsid	-			pid_t (void)	-	-	-	-	6f7179048b310332	-
+function	c:@F@setuid	-			int (uid_t)	uid_t 	-	-	-	85b24a740d0c94a6	-
+function	c:@F@sleep	-			unsigned int (unsigned int)	unsigned int 	-	-	-	2cb891598c955388	-
+function	c:@F@sysconf	-			long (int)	int 	-	-	-	023a9474fd8a4248	-
+function	c:@F@tcgetpgrp	-			pid_t (int)	int 	-	-	-	da5cef05aa590ebf	-
+function	c:@F@tcsetpgrp	-			int (int, pid_t)	int  | pid_t 	-	-	-	73b62b9b37e5e802	-
+function	c:@F@ttyname	-			char * (int)	int 	-	-	-	a96c00b508054e97	-
+function	c:@F@ttyname_r	-			int (int, char *, size_t)	int  | char *  | size_t __len	-	-	-	3b3f3e0812c1f091	-
+function	c:@F@unlink	-			int (const char *)	const char * 	-	-	-	490fed1091d0dfe6	-
+function	c:@F@write	-			ssize_t (int, const void *, size_t)	int __fd | const void * __buf | size_t __nbyte	-	-	-	1eca2b636f9749b4	-
+function	c:@F@confstr	-			size_t (int, char *, size_t)	int  | char *  | size_t __len	-	-	-	0c8724edbabed091	-
+function	c:@F@getopt	-			int (int, const char *const[], const char *)	int __argc | const char *const[]  | const char * 	-	-	-	6b926e05b23f97b8	-
+var	c:@optarg	-			char *	-	-	-	-	4d85b51b25d40cf3	-
+var	c:@optind	-			int	-	-	-	-	cedf47bafd868b61	-
+var	c:@opterr	-			int	-	-	-	-	9f0775815f1a0f37	-
+var	c:@optopt	-			int	-	-	-	-	9791aff48536965e	-
+function	c:@F@brk	-			void * (const void *)	const void * 	-	*deprecated tvos=-/-/-/1,watchos=-/-/-/1	-	f6c7bf0df2a6b4b2	-
+function	c:@F@chroot	-			int (const char *)	const char * 	-	-	-	e49b376d88f9c857	-
+function	c:@F@crypt	-			char * (const char *, const char *)	const char *  | const char * 	-	-	-	f6ec8d14153e1e58	-
+function	c:@F@encrypt	-			void (char *, int)	char *  | int 	-	-	-	88eb0a5067ad58a6	-
+function	c:@F@fchdir	-			int (int)	int 	-	-	-	8617a7ceed41b47a	-
+function	c:@F@gethostid	-			long (void)	-	-	-	-	6bbf08bee8a856da	-
+function	c:@F@getpgid	-			pid_t (pid_t)	pid_t 	-	-	-	1d64474439ad9b57	-
+function	c:@F@getsid	-			pid_t (pid_t)	pid_t 	-	-	-	bc35b3bac73f9cee	-
+function	c:@F@getdtablesize	-			int (void)	-	-	-	-	90d9b7921b9c7935	-
+function	c:@F@getpagesize	-			int (void)	-	-	-	-	13eb769ad5a17701	-
+function	c:@F@getpass	-			char * (const char *)	const char * 	-	-	-	f6b1d039443de21a	-
+function	c:@F@getwd	-			char * (char *)	char * 	-	-	-	dc42f6239c9271e0	-
+function	c:@F@lchown	-			int (const char *, uid_t, gid_t)	const char *  | uid_t  | gid_t 	-	-	-	2fb1860e20ce4068	-
+function	c:@F@lockf	-			int (int, int, off_t)	int  | int  | off_t 	-	-	-	d2ae87d0f6dd6c18	-
+function	c:@F@nice	-			int (int)	int 	-	-	-	bb280de9cbf66b35	-
+function	c:@F@pread	-			ssize_t (int, void *, size_t, off_t)	int __fd | void * __buf | size_t __nbyte | off_t __offset	-	-	-	378eba1fd300f00e	-
+function	c:@F@pwrite	-			ssize_t (int, const void *, size_t, off_t)	int __fd | const void * __buf | size_t __nbyte | off_t __offset	-	-	-	de5ac01cf137dd6a	-
+function	c:@F@sbrk	-			void * (int)	int 	-	*deprecated tvos=-/-/-/1,watchos=-/-/-/1	-	ddb0d3f17cfc250d	-
+function	c:@F@setpgrp	-			pid_t (void)	-	-	-	-	b7e75df17ed992a3	-
+function	c:@F@setregid	-			int (gid_t, gid_t)	gid_t  | gid_t 	-	-	-	3e8bf7d141f01e64	-
+function	c:@F@setreuid	-			int (uid_t, uid_t)	uid_t  | uid_t 	-	-	-	d19a01f256397249	-
+function	c:@F@swab	-			void (const void *restrict, void *restrict, ssize_t)	const void *restrict  | void *restrict  | ssize_t __nbytes	-	-	-	8475d5d701e84c44	-
+function	c:@F@sync	-			void (void)	-	-	-	-	52c93b48800e042f	-
+function	c:@F@truncate	-			int (const char *, off_t)	const char *  | off_t 	-	-	-	b2af4ab742c47930	-
+function	c:@F@ualarm	-			useconds_t (useconds_t, useconds_t)	useconds_t  | useconds_t 	-	-	-	6275fe2d129b3c76	-
+function	c:@F@usleep	-			int (useconds_t)	useconds_t 	-	-	-	985509419aff0dd5	-
+function	c:@F@vfork	-			int (void)	-	-	*deprecated tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use posix_spawn or fork	d9c8b6e3ec7dffe1	-
+function	c:@F@fsync	-			int (int)	int 	-	-	-	3d1b43c1110c5132	-
+function	c:@F@ftruncate	-			int (int, off_t)	int  | off_t 	-	-	-	1aa4b8b1b442be64	-
+function	c:@F@getlogin_r	-			int (char *, size_t)	char *  | size_t __namelen	-	-	-	a2e5f869a31a6e4d	-
+function	c:@F@fchown	-			int (int, uid_t, gid_t)	int  | uid_t  | gid_t 	-	-	-	7c2b9a64d71f6f2b	-
+function	c:@F@gethostname	-			int (char *, size_t)	char *  | size_t __namelen	-	-	-	a4ef7919c6ba6be0	-
+function	c:@F@readlink	-			ssize_t (const char *restrict, char *restrict, size_t)	const char *restrict  | char *restrict  | size_t __bufsize	-	-	-	5cb3f4ed53e0f258	-
+function	c:@F@setegid	-			int (gid_t)	gid_t 	-	-	-	fb48ffa08c67da24	-
+function	c:@F@seteuid	-			int (uid_t)	uid_t 	-	-	-	626ce8fd527c6ee6	-
+function	c:@F@symlink	-			int (const char *, const char *)	const char *  | const char * 	-	-	-	c3c2cd48678cde33	-
+function	c:@F@_Exit	-			void (int)	int 	-	-	-	bcdb9f2f6d034384	-
+function	c:@F@accessx_np	-			int (const struct accessx_descriptor *, size_t, int *, uid_t)	const struct accessx_descriptor *  | size_t __sz | int *  | uid_t 	-	-	-	aeb084cc2793639b	-
+function	c:@F@acct	-			int (const char *)	const char * 	-	-	-	6ec6ace851cf87fc	-
+function	c:@F@add_profil	-			int (char *, size_t, unsigned long, unsigned int)	char *  | size_t __bufsiz | unsigned long  | unsigned int 	-	tvos=-/-/-/1,watchos=-/-/-/1	-	731b2fb3156a7e77	-
+function	c:@F@endusershell	-			void (void)	-	-	-	-	39dc4af1c1fd52d0	-
+function	c:@F@execvP	-			int (const char *, const char *, char *const *)	const char * __file | const char * __searchpath | char *const * __argv	-	tvos=-/-/-/1,watchos=-/-/-/1	-	d7e932ad81fb95cd	-
+function	c:@F@fflagstostr	-			char * (unsigned long)	unsigned long 	-	-	-	ed40f980d8625434	-
+function	c:@F@getdomainname	-			int (char *, int)	char *  | int __namelen	-	-	-	87f3d650b02039d2	-
+function	c:@F@getgrouplist	-			int (const char *, int, int *, int *)	const char *  | int  | int *  | int * __ngroups	-	-	-	d07a186708a45c38	-
+function	c:@F@gethostuuid	-			int (uuid_t, const struct timespec *)	uuid_t  | const struct timespec * 	-	ios=-/-/-/1,macos=10.5/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bf9407bf8742a70e	-
+function	c:@F@getmode	-			mode_t (const void *, mode_t)	const void *  | mode_t 	-	-	-	d5146efa0815f985	-
+function	c:@F@getpeereid	-			int (int, uid_t *, gid_t *)	int  | uid_t *  | gid_t * 	-	-	-	f8ea96695696ea9b	-
+function	c:@F@getsgroups_np	-			int (int *, uuid_t)	int *  | uuid_t 	-	-	-	7d116fed6bdc7945	-
+function	c:@F@getusershell	-			char * (void)	-	-	-	-	7b7bab2e67f46729	-
+function	c:@F@getwgroups_np	-			int (int *, uuid_t)	int *  | uuid_t 	-	-	-	4fdbe1b5a0f80379	-
+function	c:@F@initgroups	-			int (const char *, int)	const char *  | int 	-	-	-	bfd91a483c40942c	-
+function	c:@F@issetugid	-			int (void)	-	-	-	-	934307dbe64164d8	-
+function	c:@F@mkdtemp	-			char * (char *)	char * 	-	-	-	231756b4299cbd76	-
+function	c:@F@mknod	-			int (const char *, mode_t, dev_t)	const char *  | mode_t  | dev_t 	-	-	-	a9065d1bcd48fe13	-
+function	c:@F@mkpath_np	-			int (const char *, mode_t)	const char * path | mode_t omode	-	ios=5.0/-/-/0	-	e399b52097b639b7	-
+function	c:@F@mkpathat_np	-			int (int, const char *, mode_t)	int dfd | const char * path | mode_t omode	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	212de19006d7cd14	-
+function	c:@F@mkstemp	-			int (char *)	char * 	-	-	-	a37a573ea23567a7	-
+function	c:@F@mkstemps	-			int (char *, int)	char *  | int 	-	-	-	9acf8719f3a54618	-
+function	c:@F@mktemp	-			char * (char *)	char * 	-	*deprecated		0a5fb3cd29359300	-
+function	c:@F@mkostemp	-			int (char *, int)	char * path | int oflags	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	3a6f472e8953043c	-
+function	c:@F@mkostemps	-			int (char *, int, int)	char * path | int slen | int oflags	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c4b17bb843a2fb75	-
+function	c:@F@mkstemp_dprotected_np	-			int (char *, int, int)	char * path | int dpclass | int dpflags	-	ios=10.0/-/-/0,macos=-/-/-/1,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	57dd248baa4fd85c	-
+function	c:@F@mkdtempat_np	-			char * (int, char *)	int dfd | char * path	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	22a95905f46cbdce	-
+function	c:@F@mkstempsat_np	-			int (int, char *, int)	int dfd | char * path | int slen	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	93a04f3761a381df	-
+function	c:@F@mkostempsat_np	-			int (int, char *, int, int)	int dfd | char * path | int slen | int oflags	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1ddcb1cba5fc18d5	-
+function	c:@F@nfssvc	-			int (int, void *)	int  | void * 	-	-	-	9c6ffcb98b477700	-
+function	c:@F@profil	-			int (char *, size_t, unsigned long, unsigned int)	char *  | size_t __bufsiz | unsigned long  | unsigned int 	-	-	-	c5b5723a1591fbdd	-
+function	c:@F@pthread_setugid_np	-			int (uid_t, gid_t)	uid_t  | gid_t 	-	*deprecated	deprecated: Use of per-thread security contexts is error-prone and discouraged.	32a98c03bbfa71e3	-
+function	c:@F@pthread_getugid_np	-			int (uid_t *, gid_t *)	uid_t *  | gid_t * 	-	-	-	ac5bdbea259c5b56	-
+function	c:@F@reboot	-			int (int)	int 	-	-	-	ac5e715aed487412	-
+function	c:@F@revoke	-			int (const char *)	const char * 	-	-	-	90aed7c9de7211fd	-
+function	c:@F@rcmd	-			int (char **, int, const char *, const char *, const char *, int *)	char **  | int  | const char *  | const char *  | const char *  | int * 	-	*deprecated	-	6b3a8634315fb5ab	-
+function	c:@F@rcmd_af	-			int (char **, int, const char *, const char *, const char *, int *, int)	char **  | int  | const char *  | const char *  | const char *  | int *  | int 	-	*deprecated	-	031321c052cbeaac	-
+function	c:@F@rresvport	-			int (int *)	int * 	-	*deprecated	-	2e0efbd4195264a5	-
+function	c:@F@rresvport_af	-			int (int *, int)	int *  | int 	-	*deprecated	-	65d15c035e8de2af	-
+function	c:@F@iruserok	-			int (unsigned long, int, const char *, const char *)	unsigned long  | int  | const char *  | const char * 	-	*deprecated	-	f45e2315e8f01d63	-
+function	c:@F@iruserok_sa	-			int (const void *, int, int, const char *, const char *)	const void *  | int  | int  | const char *  | const char * 	-	*deprecated	-	ccdd4329245dacb5	-
+function	c:@F@ruserok	-			int (const char *, int, const char *, const char *)	const char *  | int  | const char *  | const char * 	-	*deprecated	-	b7f3b851b551767c	-
+function	c:@F@setdomainname	-			int (const char *, int)	const char *  | int __namelen	-	-	-	b656f7daba54951f	-
+function	c:@F@setgroups	-			int (int, const gid_t *)	int  | const gid_t * 	-	-	-	e085d003d04d4f8c	-
+function	c:@F@sethostid	-			void (long)	long 	-	-	-	a582a3567f7c14db	-
+function	c:@F@sethostname	-			int (const char *, int)	const char *  | int __namelen	-	-	-	bc21b80acea52c77	-
+function	c:@F@setkey	-			void (const char *)	const char * 	-	-	-	a918affb7748cc99	-
+function	c:@F@setlogin	-			int (const char *)	const char * 	-	-	-	c4f537557067805f	-
+function	c:@F@setmode	-			void * (const char *)	const char * 	-	-	-	64deecd6394f5172	-
+function	c:@F@setrgid	-			int (gid_t)	gid_t 	-	-	-	00282038401c586e	-
+function	c:@F@setruid	-			int (uid_t)	uid_t 	-	-	-	79814699edb08be5	-
+function	c:@F@setsgroups_np	-			int (int, const uuid_t)	int  | const uuid_t 	-	-	-	c794f4f09717c059	-
+function	c:@F@setusershell	-			void (void)	-	-	-	-	9aba72b69ff02ef1	-
+function	c:@F@setwgroups_np	-			int (int, const uuid_t)	int  | const uuid_t 	-	-	-	35d2e12bca6536b4	-
+function	c:@F@strtofflags	-			int (char **, unsigned long *, unsigned long *)	char **  | unsigned long *  | unsigned long * 	-	-	-	5828e2b931ebdefe	-
+function	c:@F@swapon	-			int (const char *)	const char * 	-	-	-	4097072a11eecf62	-
+function	c:@F@ttyslot	-			int (void)	-	-	-	-	c522081168cbcce4	-
+function	c:@F@undelete	-			int (const char *)	const char * 	-	-	-	ef895f5d4805694f	-
+function	c:@F@unwhiteout	-			int (const char *)	const char * 	-	-	-	58697c7f990b76d8	-
+function	c:@F@valloc	-			void * (size_t)	size_t __size	-	-	-	6cd05af621b2fc06	-
+function	c:@F@syscall	-			int (int, ...)	int 	variadic	ios=-/10.0/-/0,macos=-/10.12/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0e9a6c94b16c84ec	-
+var	c:@suboptarg	-			char *	-	-	-	-	4d65f2e4c0493d68	-
+function	c:@F@getsubopt	-			int (char **, char *const *, char **)	char **  | char *const *  | char ** 	-	-	-	6a7080f7ba560c93	-
+function	c:@F@fgetattrlist	-			int (int, void *, void *, size_t, unsigned int)	int  | void *  | void *  | size_t __attrBufSize | unsigned int 	-	ios=3.0/-/-/0	-	203e435eafb86ba8	-
+function	c:@F@fsetattrlist	-			int (int, void *, void *, size_t, unsigned int)	int  | void *  | void *  | size_t __attrBufSize | unsigned int 	-	ios=3.0/-/-/0	-	d640a7382663f910	-
+function	c:@F@getattrlist	-			int (const char *, void *, void *, size_t, unsigned int)	const char *  | void *  | void *  | size_t __attrBufSize | unsigned int 	-	-	-	0a25043e4538d590	-
+function	c:@F@setattrlist	-			int (const char *, void *, void *, size_t, unsigned int)	const char *  | void *  | void *  | size_t __attrBufSize | unsigned int 	-	-	-	18ff640599226b24	-
+function	c:@F@exchangedata	-			int (const char *, const char *, unsigned int)	const char *  | const char *  | unsigned int 	-	tvos=-/-/-/1,watchos=-/-/-/1	-	ac4f264e7cc3598d	-
+function	c:@F@getdirentriesattr	-			int (int, void *, void *, size_t, unsigned int *, unsigned int *, unsigned int *, unsigned int)	int  | void *  | void *  | size_t __attrBufSize | unsigned int *  | unsigned int *  | unsigned int *  | unsigned int 	-	tvos=-/-/-/1,watchos=-/-/-/1	-	72f34bd72639c935	-
+struct	c:@S@fssearchblock	-			-	-	-	-	-	57c95bf1b81699fe	-
+struct	c:@S@searchstate	-			-	-	-	-	-	99e5dd9ef13a1887	-
+function	c:@F@searchfs	-			int (const char *, struct fssearchblock *, unsigned long *, unsigned int, unsigned int, struct searchstate *)	const char *  | struct fssearchblock *  | unsigned long *  | unsigned int  | unsigned int  | struct searchstate * 	-	tvos=-/-/-/1,watchos=-/-/-/1	-	0dbf8442eb828bd5	-
+function	c:@F@fsctl	-			int (const char *, unsigned long, void *, unsigned int)	const char *  | unsigned long  | void *  | unsigned int 	-	-	-	f7bacdfeae0f1f77	-
+function	c:@F@ffsctl	-			int (int, unsigned long, void *, unsigned int)	int  | unsigned long  | void *  | unsigned int 	-	ios=3.0/-/-/0	-	a644187e67c9257e	-
+function	c:@F@fsync_volume_np	-			int (int, int)	int  | int 	-	ios=6.0/-/-/0	-	1454c629260a47b5	-
+function	c:@F@sync_volume_np	-			int (const char *, int)	const char *  | int 	-	ios=6.0/-/-/0	-	a3d7fa45ac6a757d	-
+var	c:@optreset	-			int	-	-	-	-	8c663e09d50da36a	-
+function	c:@F@imaxabs	-			intmax_t (intmax_t)	intmax_t j	-	ios=2.0/-/-/0	-	3c2da6d01a388c5b	-
+struct	c:@SA@imaxdiv_t	-			-	-	-	-	-	166f00489115a0d3	-
+field	c:@SA@imaxdiv_t@FI@quot	imaxdiv_t			intmax_t	-	-	-	-	6a1211fdfbcd9938	-
+field	c:@SA@imaxdiv_t@FI@rem	imaxdiv_t			intmax_t	-	-	-	-	c45a2e7580f95e14	-
+typedef	c:@T@imaxdiv_t	-			struct imaxdiv_t	-	-	-	-	cb13e203e214bde1	-
+function	c:@F@imaxdiv	-			imaxdiv_t (intmax_t, intmax_t)	intmax_t __numer | intmax_t __denom	-	ios=2.0/-/-/0	-	b662c5fde027422b	-
+function	c:@F@strtoimax	-			intmax_t (const char *restrict, char **restrict, int)	const char *restrict __nptr | char **restrict __endptr | int __base	-	ios=2.0/-/-/0	-	49e33ac860a8cc11	-
+function	c:@F@strtoumax	-			uintmax_t (const char *restrict, char **restrict, int)	const char *restrict __nptr | char **restrict __endptr | int __base	-	ios=2.0/-/-/0	-	bcdfeefb61ea402f	-
+function	c:@F@wcstoimax	-			intmax_t (const wchar_t *restrict, wchar_t **restrict, int)	const wchar_t *restrict __nptr | wchar_t **restrict __endptr | int __base	-	ios=2.0/-/-/0	-	e9537c7910a03d10	-
+function	c:@F@wcstoumax	-			uintmax_t (const wchar_t *restrict, wchar_t **restrict, int)	const wchar_t *restrict __nptr | wchar_t **restrict __endptr | int __base	-	ios=2.0/-/-/0	-	861110bc145e5b7e	-
+function	c:@F@strtoimax_l	-			intmax_t (const char *restrict, char **restrict, int, locale_t)	const char *restrict nptr | char **restrict endptr | int base | locale_t 	-	-	-	0bded71091fd82ef	-
+function	c:@F@strtoumax_l	-			uintmax_t (const char *restrict, char **restrict, int, locale_t)	const char *restrict nptr | char **restrict endptr | int base | locale_t 	-	-	-	a782a32219ac690e	-
+function	c:@F@wcstoimax_l	-			intmax_t (const wchar_t *restrict, wchar_t **restrict, int, locale_t)	const wchar_t *restrict nptr | wchar_t **restrict endptr | int base | locale_t 	-	-	-	b6daf45822a7ab90	-
+function	c:@F@wcstoumax_l	-			uintmax_t (const wchar_t *restrict, wchar_t **restrict, int, locale_t)	const wchar_t *restrict nptr | wchar_t **restrict endptr | int base | locale_t 	-	-	-	5579d768587b3bc5	-
+var	c:@sys_signame	-			const char *const[32]	-	-	-	-	83d50b6c7ac7d917	-
+var	c:@sys_siglist	-			const char *const[32]	-	-	-	-	2bd947a7e2bd0b1a	-
+function	c:@F@raise	-			int (int)	int 	-	-	-	a5ac04e19af64875	-
+function	c:@F@bsd_signal	-			void (*)(int) (int, void (*)(int))	int  | void (*)(int) 	-	-	-	f354bc6a4feed93b	-
+function	c:@F@kill	-			int (pid_t, int)	pid_t  | int 	-	-	-	2fe0a5f5657b1493	-
+function	c:@F@killpg	-			int (pid_t, int)	pid_t  | int 	-	-	-	73c4d9f8e2344ce7	-
+function	c:@F@sigaction	-			int (int, const struct sigaction *restrict, struct sigaction *restrict)	int  | const struct sigaction *restrict  | struct sigaction *restrict 	-	-	-	a23be0c10f0006fc	-
+function	c:@F@sigaddset	-			int (sigset_t *, int)	sigset_t *  | int 	-	-	-	e4aba46b5223f4c0	-
+function	c:@F@sigaltstack	-			int (const stack_t *restrict, stack_t *restrict)	const stack_t *restrict  | stack_t *restrict 	-	tvos=-/-/-/1,watchos=-/-/-/1	-	c7bf2e4b6a3185d2	-
+function	c:@F@sigdelset	-			int (sigset_t *, int)	sigset_t *  | int 	-	-	-	2acec8ffaa2e310b	-
+function	c:@F@sigemptyset	-			int (sigset_t *)	sigset_t * 	-	-	-	f248339a398eac39	-
+function	c:@F@sigfillset	-			int (sigset_t *)	sigset_t * 	-	-	-	942e36030f11ec41	-
+function	c:@F@sighold	-			int (int)	int 	-	-	-	6471890986a0c3cd	-
+function	c:@F@sigignore	-			int (int)	int 	-	-	-	6a33c4c45001dc14	-
+function	c:@F@siginterrupt	-			int (int, int)	int  | int 	-	-	-	5433c3055b2fd517	-
+function	c:@F@sigismember	-			int (const sigset_t *, int)	const sigset_t *  | int 	-	-	-	7b3777456f3b4b2b	-
+function	c:@F@sigpause	-			int (int)	int 	-	-	-	41e2b60c272973b5	-
+function	c:@F@sigpending	-			int (sigset_t *)	sigset_t * 	-	-	-	bec3cbb85e590447	-
+function	c:@F@sigprocmask	-			int (int, const sigset_t *restrict, sigset_t *restrict)	int  | const sigset_t *restrict  | sigset_t *restrict 	-	-	-	99b43041400e8fed	-
+function	c:@F@sigrelse	-			int (int)	int 	-	-	-	f59b70092c8568be	-
+function	c:@F@sigset	-			void (*)(int) (int, void (*)(int))	int  | void (*)(int) 	-	-	-	1ecbdda7bcfc4917	-
+function	c:@F@sigsuspend	-			int (const sigset_t *)	const sigset_t * 	-	-	-	892d9ebc79868729	-
+function	c:@F@sigwait	-			int (const sigset_t *restrict, int *restrict)	const sigset_t *restrict  | int *restrict 	-	-	-	552e98aff00c3290	-
+function	c:@F@psignal	-			void (int, const char *)	int  | const char * 	-	-	-	5767dbb72f42e4dd	-
+function	c:@F@sigblock	-			int (int)	int 	-	-	-	e77f389e67701c36	-
+function	c:@F@sigsetmask	-			int (int)	int 	-	-	-	dc30394b9c37b09c	-
+function	c:@F@sigvec	-			int (int, struct sigvec *, struct sigvec *)	int  | struct sigvec *  | struct sigvec * 	-	-	-	fe77e1b6bd88e5dc	-
+function	c:@F@__sigbits	-			int (int)	int __signo	-	-	-	6c4a5ac9a974c7cb	-
+struct	c:@SA@div_t	-			-	-	-	-	-	d16bb59ca8105e9a	-
+field	c:@SA@div_t@FI@quot	div_t			int	-	-	-	-	9800ce01366e34c7	-
+field	c:@SA@div_t@FI@rem	div_t			int	-	-	-	-	33d405c02353f826	-
+typedef	c:@T@div_t	-			struct div_t	-	-	-	-	944d7b74279f37b5	-
+struct	c:@SA@ldiv_t	-			-	-	-	-	-	1a41ffdb35c210fc	-
+field	c:@SA@ldiv_t@FI@quot	ldiv_t			long	-	-	-	-	589263cb5b3614ee	-
+field	c:@SA@ldiv_t@FI@rem	ldiv_t			long	-	-	-	-	b3e2bfce61708b33	-
+typedef	c:@T@ldiv_t	-			struct ldiv_t	-	-	-	-	e48829be39ecc89b	-
+struct	c:@SA@lldiv_t	-			-	-	-	-	-	432e865cc91cf809	-
+field	c:@SA@lldiv_t@FI@quot	lldiv_t			long long	-	-	-	-	483035e2d1f9d328	-
+field	c:@SA@lldiv_t@FI@rem	lldiv_t			long long	-	-	-	-	98d6d8bfbf66a315	-
+typedef	c:@T@lldiv_t	-			struct lldiv_t	-	-	-	-	d499ea47ebf6918e	-
+typedef	c:@T@malloc_type_id_t	-			unsigned long long	-	-	-	-	51a750cad32829b4	-
+function	c:@F@malloc_type_malloc	-			void * (size_t, malloc_type_id_t)	size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	edf6570f5704b607	-
+function	c:@F@malloc_type_calloc	-			void * (size_t, size_t, malloc_type_id_t)	size_t count | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	fe7588e6fb0115dd	-
+function	c:@F@malloc_type_free	-			void (void *, malloc_type_id_t)	void * ptr | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	5ea07a4b79724fc7	-
+function	c:@F@malloc_type_realloc	-			void * (void *, size_t, malloc_type_id_t)	void * ptr | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	8a5a4690cc76e0d8	-
+function	c:@F@malloc_type_valloc	-			void * (size_t, malloc_type_id_t)	size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	db7f17867100c4c8	-
+function	c:@F@malloc_type_aligned_alloc	-			void * (size_t, size_t, malloc_type_id_t)	size_t alignment | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	022e78d376b6bb17	-
+function	c:@F@malloc_type_posix_memalign	-			int (void **, size_t, size_t, malloc_type_id_t)	void ** memptr | size_t alignment | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	575a7dcb2605e6a6	-
+struct	c:@S@_malloc_zone_t	-			-	-	-	-	-	1d3760bae43bc8c3	-
+typedef	c:@T@malloc_zone_t	-			struct _malloc_zone_t	-	-	-	-	3e8c35ab13399e52	-
+function	c:@F@malloc_type_zone_malloc	-			void * (malloc_zone_t *, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	af8eb28ff8c02e8b	-
+function	c:@F@malloc_type_zone_calloc	-			void * (malloc_zone_t *, size_t, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t count | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	a081b773d8763f57	-
+function	c:@F@malloc_type_zone_free	-			void (malloc_zone_t *, void *, malloc_type_id_t)	malloc_zone_t * zone | void * ptr | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	71b6cb55b165ae9c	-
+function	c:@F@malloc_type_zone_realloc	-			void * (malloc_zone_t *, void *, size_t, malloc_type_id_t)	malloc_zone_t * zone | void * ptr | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	42ca9785891caa90	-
+function	c:@F@malloc_type_zone_valloc	-			void * (malloc_zone_t *, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	7d048d04f7f29b71	-
+function	c:@F@malloc_type_zone_memalign	-			void * (malloc_zone_t *, size_t, size_t, malloc_type_id_t)	malloc_zone_t * zone | size_t alignment | size_t size | malloc_type_id_t type_id	-	driverkit=23.0/-/-/0,ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	135c7f689a642bcc	-
+function	c:@F@malloc	-			void * (unsigned long)	size_t __size	-	-	-	494f3200949083a6	-
+function	c:@F@calloc	-			void * (unsigned long, unsigned long)	size_t __count | size_t __size	-	-	-	65d57b5bf9c3d020	-
+function	c:@F@free	-			void (void *)	void * 	-	-	-	44d4baf6d4e69cb7	-
+function	c:@F@realloc	-			void * (void *, unsigned long)	void * __ptr | size_t __size	-	-	-	5de542f8195cfea5	-
+function	c:@F@reallocf	-			void * (void *, size_t)	void * __ptr | size_t __size	-	-	-	604eb86b8ed8ca40	-
+function	c:@F@aligned_alloc	-			void * (unsigned long, unsigned long)	size_t __alignment | size_t __size	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	a8e3312df40e5e98	-
+function	c:@F@posix_memalign	-			int (void **, size_t, size_t)	void ** __memptr | size_t __alignment | size_t __size	-	ios=3.0/-/-/0	-	15ea740640269ffe	-
+function	c:@F@abort	-			void (void)	-	-	-	-	e6c290825ffc4777	-
+function	c:@F@abs	-			int (int)	int 	-	-	-	a979fd495ba76185	-
+function	c:@F@atexit	-			int (void (*)(void))	void (*)(void) 	-	-	-	48860c7fba341685	-
+function	c:@F@at_quick_exit	-			int (void (*)(void))	void (*)(void) 	-	-	-	235329cdf87cde8d	-
+function	c:@F@atof	-			double (const char *)	const char * 	-	-	-	397e9d42f922d011	-
+function	c:@F@atoi	-			int (const char *)	const char * 	-	-	-	d996ef0c55bd8b2f	-
+function	c:@F@atol	-			long (const char *)	const char * 	-	-	-	5cd234f2e8056d3c	-
+function	c:@F@atoll	-			long long (const char *)	const char * 	-	-	-	57869fed6c2c5d37	-
+function	c:@F@bsearch	-			void * (const void *, const void *, size_t, size_t, int (*)(const void *, const void *))	const void * __key | const void * __base | size_t __nel | size_t __width | int (*)(const void *, const void *) __compar	-	-	-	62c01e347e103908	-
+function	c:@F@div	-			div_t (int, int)	int  | int 	-	-	-	23668f7c1b174921	-
+function	c:@F@exit	-			void (int)	int 	-	-	-	1013e5f0d2ea0ff7	-
+function	c:@F@getenv	-			char * (const char *)	const char * 	-	-	-	c72a0ce89c350d28	-
+function	c:@F@labs	-			long (long)	long 	-	-	-	e97fa306fe0e7bc6	-
+function	c:@F@ldiv	-			ldiv_t (long, long)	long  | long 	-	-	-	3e42603c740c43dd	-
+function	c:@F@llabs	-			long long (long long)	long long 	-	-	-	19883dbaa0a15740	-
+function	c:@F@lldiv	-			lldiv_t (long long, long long)	long long  | long long 	-	-	-	e975b9887807836c	-
+function	c:@F@mblen	-			int (const char *, size_t)	const char * __s | size_t __n	-	-	-	50db004457156e2b	-
+function	c:@F@mbstowcs	-			size_t (wchar_t *restrict, const char *restrict, size_t)	wchar_t *restrict  | const char *restrict  | size_t __n	-	-	-	d505db1d4b4868ce	-
+function	c:@F@mbtowc	-			int (wchar_t *restrict, const char *restrict, size_t)	wchar_t *restrict  | const char *restrict  | size_t __n	-	-	-	ffe127919c22943c	-
+function	c:@F@qsort	-			void (void *, size_t, size_t, int (*)(const void *, const void *))	void * __base | size_t __nel | size_t __width | int (*)(const void *, const void *) __compar	-	-	-	488726589d2d6b6f	-
+function	c:@F@quick_exit	-			void (int)	int 	-	-	-	e801e65234dfae59	-
+function	c:@F@rand	-			int (void)	-	-	swift=-/-/-/1	-	adab520aa11a9de0	-
+function	c:@F@srand	-			void (unsigned int)	unsigned int 	-	swift=-/-/-/1	-	61045f3f76642940	-
+function	c:@F@strtod	-			double (const char *, char **)	const char *  | char ** 	-	-	-	50dfba09631ae5bc	-
+function	c:@F@strtof	-			float (const char *, char **)	const char *  | char ** 	-	-	-	c1cd6f2f7ed2f776	-
+function	c:@F@strtol	-			long (const char *, char **, int)	const char * __str | char ** __endptr | int __base	-	-	-	6fb11c8a0641c774	-
+function	c:@F@strtold	-			long double (const char *, char **)	const char *  | char ** 	-	-	-	3087bb9166ff33d7	-
+function	c:@F@strtoll	-			long long (const char *, char **, int)	const char * __str | char ** __endptr | int __base	-	-	-	6354431cdc82ed61	-
+function	c:@F@strtoul	-			unsigned long (const char *, char **, int)	const char * __str | char ** __endptr | int __base	-	-	-	b6a7c62d7be737d0	-
+function	c:@F@strtoull	-			unsigned long long (const char *, char **, int)	const char * __str | char ** __endptr | int __base	-	-	-	ad0f2907d2060c90	-
+function	c:@F@system	-			int (const char *)	const char * 	-	ios=-/-/-/1,macos=10.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	af492d0b254e1f31	-
+function	c:@F@wcstombs	-			size_t (char *restrict, const wchar_t *restrict, size_t)	char *restrict  | const wchar_t *restrict  | size_t __n	-	-	-	9bff2fe7a9a39559	-
+function	c:@F@wctomb	-			int (char *, wchar_t)	char *  | wchar_t 	-	-	-	c5c8512d22ef9e10	-
+function	c:@F@a64l	-			long (const char *)	const char * 	-	-	-	fb44f5f10c8b69dd	-
+function	c:@F@drand48	-			double (void)	-	-	-	-	4406a1de091cdf77	-
+function	c:@F@ecvt	-			char * (double, int, int *restrict, int *restrict)	double  | int  | int *restrict  | int *restrict 	-	-	-	c47e5fdf2f720f76	-
+function	c:@F@erand48	-			double (unsigned short[3])	unsigned short[3] 	-	-	-	410ad50d2004c1da	-
+function	c:@F@fcvt	-			char * (double, int, int *restrict, int *restrict)	double  | int  | int *restrict  | int *restrict 	-	-	-	952d670481aa7bd1	-
+function	c:@F@gcvt	-			char * (double, int, char *)	double  | int  | char * 	-	-	-	f9efa1cb0e4b1d43	-
+function	c:@F@grantpt	-			int (int)	int 	-	-	-	9f3a0678e81f66ba	-
+function	c:@F@initstate	-			char * (unsigned int, char *, size_t)	unsigned int  | char *  | size_t __size	-	-	-	95b0ff2af8ac3fc5	-
+function	c:@F@jrand48	-			long (unsigned short[3])	unsigned short[3] 	-	swift=-/-/-/1	-	3cf356c4e9a19401	-
+function	c:@F@l64a	-			char * (long)	long 	-	-	-	475ca082a5f14bf0	-
+function	c:@F@lcong48	-			void (unsigned short[7])	unsigned short[7] 	-	-	-	ea8e09096947559b	-
+function	c:@F@lrand48	-			long (void)	-	-	swift=-/-/-/1	-	114b256ed9a2b00a	-
+function	c:@F@mrand48	-			long (void)	-	-	swift=-/-/-/1	-	9b5cfa9e69b33609	-
+function	c:@F@nrand48	-			long (unsigned short[3])	unsigned short[3] 	-	swift=-/-/-/1	-	5795b9a61ca67e53	-
+function	c:@F@posix_openpt	-			int (int)	int 	-	-	-	16d1bfe7c5cfd7b4	-
+function	c:@F@ptsname	-			char * (int)	int 	-	-	-	176591f1082ef538	-
+function	c:@F@ptsname_r	-			int (int, char *, size_t)	int fildes | char * buffer | size_t buflen	-	ios=11.3/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0,watchos=4.3/-/-/0	-	b677e0919aa6cb3c	-
+function	c:@F@putenv	-			int (char *)	char * 	-	-	-	ec5e311972d13e13	-
+function	c:@F@random	-			long (void)	-	-	swift=-/-/-/1	-	e0419b2589c8e49b	-
+function	c:@F@rand_r	-			int (unsigned int *)	unsigned int * 	-	swift=-/-/-/1	-	f9300e4a8043797e	-
+function	c:@F@realpath	-			char * (const char *restrict, char *restrict)	const char *restrict  | char *restrict 	-	-	-	69bc173a3a14ea7a	-
+function	c:@F@seed48	-			unsigned short * (unsigned short[3])	unsigned short[3] 	-	-	-	87d860b02b137236	-
+function	c:@F@setenv	-			int (const char *, const char *, int)	const char * __name | const char * __value | int __overwrite	-	-	-	419e7a6a434ad05c	-
+function	c:@F@setstate	-			char * (const char *)	const char * 	-	-	-	ff00623abc68d113	-
+function	c:@F@srand48	-			void (long)	long 	-	-	-	ced782b6648d89b1	-
+function	c:@F@srandom	-			void (unsigned int)	unsigned int 	-	-	-	347b28d42a9f3580	-
+function	c:@F@unlockpt	-			int (int)	int 	-	-	-	358906fa8e59600b	-
+function	c:@F@unsetenv	-			int (const char *)	const char * 	-	-	-	b103037ef22dd4a7	-
+function	c:@F@arc4random	-			uint32_t (void)	-	-	-	-	15b1bcb052c44d4b	-
+function	c:@F@arc4random_addrandom	-			void (unsigned char *, int)	unsigned char *  | int __datlen	-	ios=2.0/10.0/-/0,macos=10.0/10.12/-/0,tvos=2.0/10.0/-/0,watchos=1.0/3.0/-/0	-	4ca8b3a63eed719b	-
+function	c:@F@arc4random_buf	-			void (void *, size_t)	void * __buf | size_t __nbytes	-	ios=4.3/-/-/0	-	f5394132c19d45d2	-
+function	c:@F@arc4random_stir	-			void (void)	-	-	-	-	e645dfdbf55f92a0	-
+function	c:@F@arc4random_uniform	-			uint32_t (uint32_t)	uint32_t __upper_bound	-	ios=4.3/-/-/0	-	eec875ecb71726f5	-
+function	c:@F@atexit_b	-			int (void (^)(void))	void (^)(void) 	-	ios=3.2/-/-/0	-	ee8874b7ebf6af51	-
+function	c:@F@bsearch_b	-			void * (const void *, const void *, size_t, size_t, __bsearch_noescape int (^)(const void *, const void *))	const void * __key | const void * __base | size_t __nel | size_t __width | __bsearch_noescape int (^)(const void *, const void *) __compar	-	ios=3.2/-/-/0	-	1a93888da06906f3	-
+function	c:@F@cgetcap	-			char * (char *, const char *, int)	char *  | const char *  | int 	-	-	-	5e25507d3a19d15d	-
+function	c:@F@cgetclose	-			int (void)	-	-	-	-	55cc74ef9d656699	-
+function	c:@F@cgetent	-			int (char **, char **, const char *)	char **  | char **  | const char * 	-	-	-	013ec4a10e53a9cf	-
+function	c:@F@cgetfirst	-			int (char **, char **)	char **  | char ** 	-	-	-	5521915d05f612d8	-
+function	c:@F@cgetmatch	-			int (const char *, const char *)	const char *  | const char * 	-	-	-	3643209631876b4b	-
+function	c:@F@cgetnext	-			int (char **, char **)	char **  | char ** 	-	-	-	91729de9539e3313	-
+function	c:@F@cgetnum	-			int (char *, const char *, long *)	char *  | const char *  | long * 	-	-	-	4332e21b081d2eae	-
+function	c:@F@cgetset	-			int (const char *)	const char * 	-	-	-	a3740789c4a4838b	-
+function	c:@F@cgetstr	-			int (char *, const char *, char **)	char *  | const char *  | char ** 	-	-	-	7a68eb6178ae9a6a	-
+function	c:@F@cgetustr	-			int (char *, const char *, char **)	char *  | const char *  | char ** 	-	-	-	2d67b5466f659f1d	-
+function	c:@F@daemon	-			int (int, int)	int  | int 	-	ios=2.0/2.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a4bd19d63ae421a7	-
+function	c:@F@devname	-			char * (dev_t, mode_t)	dev_t  | mode_t 	-	-	-	977da15c85750641	-
+function	c:@F@devname_r	-			char * (dev_t, mode_t, char *, int)	dev_t  | mode_t  | char * buf | int len	-	-	-	19c8c7912f7e245b	-
+function	c:@F@getbsize	-			char * (int *, long *)	int *  | long * 	-	-	-	9c5e561b2a8e058a	-
+function	c:@F@getloadavg	-			int (double[], int)	double[]  | int __nelem	-	-	-	2c11c0d0cab94542	-
+function	c:@F@getprogname	-			const char * (void)	-	-	-	-	6d71f6fa105108ac	-
+function	c:@F@setprogname	-			void (const char *)	const char * 	-	-	-	86f6179272cb0008	-
+function	c:@F@heapsort	-			int (void *, size_t, size_t, int (*)(const void *, const void *))	void * __base | size_t __nel | size_t __width | int (*)(const void *, const void *) __compar	-	-	-	8cd40fdc3871300d	-
+function	c:@F@heapsort_b	-			int (void *, size_t, size_t, __sort_noescape int (^)(const void *, const void *))	void * __base | size_t __nel | size_t __width | __sort_noescape int (^)(const void *, const void *) __compar	-	ios=3.2/-/-/0	-	d04e5419c206fc58	-
+function	c:@F@mergesort	-			int (void *, size_t, size_t, int (*)(const void *, const void *))	void * __base | size_t __nel | size_t __width | int (*)(const void *, const void *) __compar	-	-	-	eb5cc441fb8f42d3	-
+function	c:@F@mergesort_b	-			int (void *, size_t, size_t, __sort_noescape int (^)(const void *, const void *))	void * __base | size_t __nel | size_t __width | __sort_noescape int (^)(const void *, const void *) __compar	-	ios=3.2/-/-/0	-	6de0d353f6c32b7c	-
+function	c:@F@psort	-			void (void *, size_t, size_t, int (*)(const void *, const void *))	void * __base | size_t __nel | size_t __width | int (*)(const void *, const void *) __compar	-	ios=3.2/-/-/0	-	19ff714fe3c009dc	-
+function	c:@F@psort_b	-			void (void *, size_t, size_t, __sort_noescape int (^)(const void *, const void *))	void * __base | size_t __nel | size_t __width | __sort_noescape int (^)(const void *, const void *) __compar	-	ios=3.2/-/-/0	-	915c4dce6ee044b1	-
+function	c:@F@psort_r	-			void (void *, size_t, size_t, void *, int (*)(void *, const void *, const void *))	void * __base | size_t __nel | size_t __width | void *  | int (*)(void *, const void *, const void *) __compar	-	ios=3.2/-/-/0	-	0dde42bca002f757	-
+function	c:@F@qsort_b	-			void (void *, size_t, size_t, __sort_noescape int (^)(const void *, const void *))	void * __base | size_t __nel | size_t __width | __sort_noescape int (^)(const void *, const void *) __compar	-	ios=3.2/-/-/0	-	ec1b04c6dc2f39d2	-
+function	c:@F@qsort_r	-			void (void *, size_t, size_t, void *, int (*)(void *, const void *, const void *))	void * __base | size_t __nel | size_t __width | void *  | int (*)(void *, const void *, const void *) __compar	-	-	-	305f012ea3a05691	-
+function	c:@F@radixsort	-			int (const unsigned char **, int, const unsigned char *, unsigned int)	const unsigned char ** __base | int __nel | const unsigned char * __table | unsigned int __endbyte	-	-	-	f105685a1869b3ca	-
+function	c:@F@rpmatch	-			int (const char *)	const char * 	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	13a22ba930f22a52	-
+function	c:@F@sradixsort	-			int (const unsigned char **, int, const unsigned char *, unsigned int)	const unsigned char ** __base | int __nel | const unsigned char * __table | unsigned int __endbyte	-	-	-	233a5d0dee14808e	-
+function	c:@F@sranddev	-			void (void)	-	-	-	-	9458236043472349	-
+function	c:@F@srandomdev	-			void (void)	-	-	-	-	d04c136f04c3e083	-
+function	c:@F@strtonum	-			long long (const char *, long long, long long, const char **)	const char * __numstr | long long __minval | long long __maxval | const char ** __errstrp	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	3323f94f8dcca1fd	-
+function	c:@F@strtoq	-			long long (const char *, char **, int)	const char * __str | char ** __endptr | int __base	-	-	-	aba7414e8f37e773	-
+function	c:@F@strtouq	-			unsigned long long (const char *, char **, int)	const char * __str | char ** __endptr | int __base	-	-	-	612f581bbbea6b6c	-
+function	c:@F@atof_l	-			double (const char *, locale_t)	const char *  | locale_t 	-	-	-	601f89a646139811	-
+function	c:@F@atoi_l	-			int (const char *, locale_t)	const char *  | locale_t 	-	-	-	db8c9713371fa269	-
+function	c:@F@atol_l	-			long (const char *, locale_t)	const char *  | locale_t 	-	-	-	5bbe55be7cbd1cee	-
+function	c:@F@atoll_l	-			long long (const char *, locale_t)	const char *  | locale_t 	-	-	-	24d7714b69b69fb3	-
+function	c:@F@mblen_l	-			int (const char *, size_t, locale_t)	const char *  | size_t __n | locale_t 	-	-	-	d2bdac63174c17bd	-
+function	c:@F@mbstowcs_l	-			size_t (wchar_t *restrict, const char *restrict, size_t, locale_t)	wchar_t *restrict  | const char *restrict  | size_t __n | locale_t 	-	-	-	f306e4acf031737e	-
+function	c:@F@mbtowc_l	-			int (wchar_t *restrict, const char *restrict, size_t, locale_t)	wchar_t *restrict  | const char *restrict  | size_t __n | locale_t 	-	-	-	0e76d555a745c585	-
+function	c:@F@strtod_l	-			double (const char *, char **, locale_t)	const char *  | char **  | locale_t 	-	-	-	b1d4f48c7df5c49d	-
+function	c:@F@strtof_l	-			float (const char *, char **, locale_t)	const char *  | char **  | locale_t 	-	-	-	bc1ef92b3169cdd9	-
+function	c:@F@strtol_l	-			long (const char *, char **, int, locale_t)	const char *  | char **  | int  | locale_t 	-	-	-	b39ba475a149fe09	-
+function	c:@F@strtold_l	-			long double (const char *, char **, locale_t)	const char *  | char **  | locale_t 	-	-	-	7536577f874de936	-
+function	c:@F@strtoll_l	-			long long (const char *, char **, int, locale_t)	const char *  | char **  | int  | locale_t 	-	-	-	ba30e911304dd3ab	-
+function	c:@F@strtoq_l	-			long long (const char *, char **, int, locale_t)	const char *  | char **  | int  | locale_t 	-	-	-	d5294835d304fd9d	-
+function	c:@F@strtoul_l	-			unsigned long (const char *, char **, int, locale_t)	const char *  | char **  | int  | locale_t 	-	-	-	ef1637c03fd8fc1c	-
+function	c:@F@strtoull_l	-			unsigned long long (const char *, char **, int, locale_t)	const char *  | char **  | int  | locale_t 	-	-	-	b1fb77b4749b1000	-
+function	c:@F@strtouq_l	-			unsigned long long (const char *, char **, int, locale_t)	const char *  | char **  | int  | locale_t 	-	-	-	0d8821fa160ed072	-
+function	c:@F@wcstombs_l	-			size_t (char *, const wchar_t *restrict, size_t, locale_t)	char * __restric | const wchar_t *restrict  | size_t __n | locale_t 	-	-	-	6cec193f0ab8dee2	-
+function	c:@F@wctomb_l	-			int (char *, wchar_t, locale_t)	char *  | wchar_t  | locale_t 	-	-	-	2c0ccf2f123eb21f	-
+typedef	c:@T@mbstate_t	-			__darwin_mbstate_t	-	-	-	-	2b0d10304c0eade7	-
+typedef	c:@T@wctype_t	-			__darwin_wctype_t	-	-	-	-	77764a65e7e13d10	-
+function	c:@F@iswalnum	-			int (wint_t)	wint_t _wc	-	-	-	cc5942df72240cd4	-
+function	c:@F@iswalpha	-			int (wint_t)	wint_t _wc	-	-	-	1413c4e0b97070bb	-
+function	c:@F@iswcntrl	-			int (wint_t)	wint_t _wc	-	-	-	74cc2e23b45fa4a9	-
+function	c:@F@iswctype	-			int (wint_t, wctype_t)	wint_t _wc | wctype_t _charclass	-	-	-	ef680559a51a1a02	-
+function	c:@F@iswdigit	-			int (wint_t)	wint_t _wc	-	-	-	c333be72c66d78c9	-
+function	c:@F@iswgraph	-			int (wint_t)	wint_t _wc	-	-	-	00688dda2fed3541	-
+function	c:@F@iswlower	-			int (wint_t)	wint_t _wc	-	-	-	701db4bee2a88d83	-
+function	c:@F@iswprint	-			int (wint_t)	wint_t _wc	-	-	-	f24e2b9c13ed3e97	-
+function	c:@F@iswpunct	-			int (wint_t)	wint_t _wc	-	-	-	27973e693a1249fd	-
+function	c:@F@iswspace	-			int (wint_t)	wint_t _wc	-	-	-	3be4eb8346f42cf0	-
+function	c:@F@iswupper	-			int (wint_t)	wint_t _wc	-	-	-	ee08c3cebc0f3b2c	-
+function	c:@F@iswxdigit	-			int (wint_t)	wint_t _wc	-	-	-	52339d8f679d5f48	-
+function	c:@F@towlower	-			wint_t (wint_t)	wint_t _wc	-	-	-	1d0ee48bb2e4ccf9	-
+function	c:@F@towupper	-			wint_t (wint_t)	wint_t _wc	-	-	-	05a081dc85b86e37	-
+function	c:@F@wctype	-			wctype_t (const char *)	const char * 	-	-	-	5008b83599a03f46	-
+function	c:@F@btowc	-			wint_t (int)	int 	-	-	-	2cc3ef7c859a47eb	-
+function	c:@F@fgetwc	-			wint_t (FILE *)	FILE * 	-	-	-	d7a9b5ed2261fa2c	-
+function	c:@F@fgetws	-			wchar_t * (wchar_t *restrict, int, FILE *restrict)	wchar_t *restrict  | int __n | FILE *restrict 	-	-	-	7e56f35ff09212fa	-
+function	c:@F@fputwc	-			wint_t (wchar_t, FILE *)	wchar_t  | FILE * 	-	-	-	35e43248670974f2	-
+function	c:@F@fputws	-			int (const wchar_t *restrict, FILE *restrict)	const wchar_t *restrict  | FILE *restrict 	-	-	-	8c196dbb24603fd8	-
+function	c:@F@fwide	-			int (FILE *, int)	FILE *  | int 	-	-	-	f21c6d93d6fce85a	-
+function	c:@F@fwprintf	-			int (FILE *restrict, const wchar_t *restrict, ...)	FILE *restrict  | const wchar_t *restrict 	variadic	-	-	7bcc03ef1bb75540	-
+function	c:@F@fwscanf	-			int (FILE *restrict, const wchar_t *restrict, ...)	FILE *restrict  | const wchar_t *restrict 	variadic	-	-	781fc87ee8c9d2b3	-
+function	c:@F@getwc	-			wint_t (FILE *)	FILE * 	-	-	-	bce4d778d78d6b98	-
+function	c:@F@getwchar	-			wint_t (void)	-	-	-	-	3ee175b605baf126	-
+function	c:@F@mbrlen	-			size_t (const char *restrict, size_t, mbstate_t *restrict)	const char *restrict  | size_t __n | mbstate_t *restrict 	-	-	-	beb7d8d0f3b93513	-
+function	c:@F@mbrtowc	-			size_t (wchar_t *restrict, const char *restrict, size_t, mbstate_t *restrict)	wchar_t *restrict  | const char *restrict  | size_t __n | mbstate_t *restrict 	-	-	-	15865e032a272949	-
+function	c:@F@mbsinit	-			int (const mbstate_t *)	const mbstate_t * 	-	-	-	e1d3e0e07575d9b5	-
+function	c:@F@mbsrtowcs	-			size_t (wchar_t *restrict, const char **restrict, size_t, mbstate_t *restrict)	wchar_t *restrict  | const char **restrict  | size_t __len | mbstate_t *restrict 	-	-	-	5f96e48050866276	-
+function	c:@F@putwc	-			wint_t (wchar_t, FILE *)	wchar_t  | FILE * 	-	-	-	c9fe67eff4dba904	-
+function	c:@F@putwchar	-			wint_t (wchar_t)	wchar_t 	-	-	-	9626f8d5dc79557e	-
+function	c:@F@swprintf	-			int (wchar_t *restrict, size_t, const wchar_t *restrict, ...)	wchar_t *restrict  | size_t __maxlen | const wchar_t *restrict 	variadic	-	-	d14374390b18ffb1	-
+function	c:@F@swscanf	-			int (const wchar_t *restrict, const wchar_t *restrict, ...)	const wchar_t *restrict  | const wchar_t *restrict 	variadic	-	-	a552444a79ea044c	-
+function	c:@F@ungetwc	-			wint_t (wint_t, FILE *)	wint_t  | FILE * 	-	-	-	58882ed69e079742	-
+function	c:@F@vfwprintf	-			int (FILE *restrict, const wchar_t *restrict, __darwin_va_list)	FILE *restrict  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	395212f410969092	-
+function	c:@F@vswprintf	-			int (wchar_t *restrict, size_t, const wchar_t *restrict, __darwin_va_list)	wchar_t *restrict  | size_t __maxlen | const wchar_t *restrict  | __darwin_va_list 	-	-	-	720c0858b6111f9b	-
+function	c:@F@vwprintf	-			int (const wchar_t *restrict, __darwin_va_list)	const wchar_t *restrict  | __darwin_va_list 	-	-	-	dce47e129bae8ea6	-
+function	c:@F@wcrtomb	-			size_t (char *restrict, wchar_t, mbstate_t *restrict)	char *restrict  | wchar_t  | mbstate_t *restrict 	-	-	-	e176064b800755e4	-
+function	c:@F@wcscat	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict)	wchar_t *restrict  | const wchar_t *restrict 	-	-	-	1fddd57b794ed5ef	-
+function	c:@F@wcschr	-			int * (const int *, int)	const wchar_t *  | wchar_t 	-	-	-	87d6274534639ac9	-
+function	c:@F@wcscmp	-			int (const int *, const int *)	const wchar_t *  | const wchar_t * 	-	-	-	c580a8f36c20c93a	-
+function	c:@F@wcscoll	-			int (const wchar_t *, const wchar_t *)	const wchar_t *  | const wchar_t * 	-	-	-	1ce33b3eb0c2d9db	-
+function	c:@F@wcscpy	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict)	wchar_t *restrict  | const wchar_t *restrict 	-	-	-	e617c757e19c6f34	-
+function	c:@F@wcscspn	-			size_t (const wchar_t *, const wchar_t *)	const wchar_t *  | const wchar_t * 	-	-	-	76b692ebc469e5b9	-
+function	c:@F@wcsftime	-			size_t (wchar_t *restrict, size_t, const wchar_t *restrict, const struct tm *restrict)	wchar_t *restrict  | size_t __maxlen | const wchar_t *restrict  | const struct tm *restrict 	-	-	-	74ea9aeb78dcb777	-
+function	c:@F@wcslen	-			unsigned long (const int *)	const wchar_t * 	-	-	-	25ac58d3c9adfc8d	-
+function	c:@F@wcsncat	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict, size_t)	wchar_t *restrict  | const wchar_t *restrict  | size_t __n	-	-	-	c91f2ad90b4957bc	-
+function	c:@F@wcsncmp	-			int (const int *, const int *, unsigned long)	const wchar_t *  | const wchar_t *  | size_t 	-	-	-	56f17870688959d2	-
+function	c:@F@wcsncpy	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict, size_t)	wchar_t *restrict  | const wchar_t *restrict  | size_t __n	-	-	-	fdc8272f0e6c8f4b	-
+function	c:@F@wcspbrk	-			wchar_t * (const wchar_t *, const wchar_t *)	const wchar_t *  | const wchar_t * 	-	-	-	d0f6a7613d2af24e	-
+function	c:@F@wcsrchr	-			wchar_t * (const wchar_t *, wchar_t)	const wchar_t *  | wchar_t 	-	-	-	bb02a2f55a738838	-
+function	c:@F@wcsrtombs	-			size_t (char *restrict, const wchar_t **restrict, size_t, mbstate_t *restrict)	char *restrict  | const wchar_t **restrict  | size_t __len | mbstate_t *restrict 	-	-	-	3dd6d021038f7e80	-
+function	c:@F@wcsspn	-			size_t (const wchar_t *, const wchar_t *)	const wchar_t *  | const wchar_t * 	-	-	-	e3f82a0a25649c45	-
+function	c:@F@wcsstr	-			wchar_t * (const wchar_t *restrict, const wchar_t *restrict)	const wchar_t *restrict  | const wchar_t *restrict 	-	-	-	6fc17edca589435e	-
+function	c:@F@wcsxfrm	-			size_t (wchar_t *restrict, const wchar_t *restrict, size_t)	wchar_t *restrict  | const wchar_t *restrict  | size_t __n	-	-	-	004825bb2e9bf46c	-
+function	c:@F@wctob	-			int (wint_t)	wint_t 	-	-	-	5f4e6dc2e66a878a	-
+function	c:@F@wcstod	-			double (const wchar_t *restrict, wchar_t **restrict)	const wchar_t *restrict  | wchar_t **restrict 	-	-	-	e402be3d46360f11	-
+function	c:@F@wcstok	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict, wchar_t **restrict)	wchar_t *restrict  | const wchar_t *restrict  | wchar_t **restrict 	-	-	-	f79bcf6d39b89dd2	-
+function	c:@F@wcstol	-			long (const wchar_t *restrict, wchar_t **restrict, int)	const wchar_t *restrict  | wchar_t **restrict  | int 	-	-	-	a887997866b34681	-
+function	c:@F@wcstoul	-			unsigned long (const wchar_t *restrict, wchar_t **restrict, int)	const wchar_t *restrict  | wchar_t **restrict  | int 	-	-	-	8eedb485ad0cef0e	-
+function	c:@F@wmemchr	-			int * (const int *, int, unsigned long)	const wchar_t *  | wchar_t  | size_t __n	-	-	-	539aa215e0ab38fd	-
+function	c:@F@wmemcmp	-			int (const int *, const int *, unsigned long)	const wchar_t *  | const wchar_t *  | size_t __n	-	-	-	78e74f553b4b5244	-
+function	c:@F@wmemcpy	-			int * (int *, const int *, unsigned long)	wchar_t *restrict  | const wchar_t *restrict  | size_t __n	-	-	-	0f9747ea387da7bd	-
+function	c:@F@wmemmove	-			int * (int *, const int *, unsigned long)	wchar_t *  | const wchar_t *  | size_t __n	-	-	-	bd3471b5ed733be8	-
+function	c:@F@wmemset	-			wchar_t * (wchar_t *, wchar_t, size_t)	wchar_t *  | wchar_t  | size_t __n	-	-	-	7ba4827b2b616458	-
+function	c:@F@wprintf	-			int (const wchar_t *restrict, ...)	const wchar_t *restrict 	variadic	-	-	1a431e73365c5768	-
+function	c:@F@wscanf	-			int (const wchar_t *restrict, ...)	const wchar_t *restrict 	variadic	-	-	7155e730e854978d	-
+function	c:@F@wcswidth	-			int (const wchar_t *, size_t)	const wchar_t *  | size_t __n	-	-	-	c7239448f7919e42	-
+function	c:@F@wcwidth	-			int (wchar_t)	wchar_t 	-	-	-	b3507b70f5b782c7	-
+function	c:@F@vfwscanf	-			int (FILE *restrict, const wchar_t *restrict, __darwin_va_list)	FILE *restrict  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	99044613112a5fdc	-
+function	c:@F@vswscanf	-			int (const wchar_t *restrict, const wchar_t *restrict, __darwin_va_list)	const wchar_t *restrict  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	48811ada08ac2611	-
+function	c:@F@vwscanf	-			int (const wchar_t *restrict, __darwin_va_list)	const wchar_t *restrict  | __darwin_va_list 	-	-	-	c2d443ba7d52ffa4	-
+function	c:@F@wcstof	-			float (const wchar_t *restrict, wchar_t **restrict)	const wchar_t *restrict  | wchar_t **restrict 	-	-	-	493b01c44b2f05c6	-
+function	c:@F@wcstold	-			long double (const wchar_t *restrict, wchar_t **restrict)	const wchar_t *restrict  | wchar_t **restrict 	-	-	-	b569cf196366b2db	-
+function	c:@F@wcstoll	-			long long (const wchar_t *restrict, wchar_t **restrict, int)	const wchar_t *restrict  | wchar_t **restrict  | int 	-	-	-	dd66a7a42110b859	-
+function	c:@F@wcstoull	-			unsigned long long (const wchar_t *restrict, wchar_t **restrict, int)	const wchar_t *restrict  | wchar_t **restrict  | int 	-	-	-	d343d6e8c5797c24	-
+function	c:@F@mbsnrtowcs	-			size_t (wchar_t *restrict, const char **restrict, size_t, size_t, mbstate_t *restrict)	wchar_t *restrict  | const char **restrict  | size_t  | size_t __len | mbstate_t *restrict 	-	-	-	3c3aa5b6de307213	-
+function	c:@F@wcpcpy	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict)	wchar_t *restrict  | const wchar_t *restrict 	-	ios=4.3/-/-/0	-	e3da262b170c107f	-
+function	c:@F@wcpncpy	-			wchar_t * (wchar_t *restrict, const wchar_t *restrict, size_t)	wchar_t *restrict  | const wchar_t *restrict  | size_t __n	-	ios=4.3/-/-/0	-	26096a6c5369a032	-
+function	c:@F@wcsdup	-			wchar_t * (const wchar_t *)	const wchar_t * 	-	ios=4.3/-/-/0	-	22c2b97f0064cc32	-
+function	c:@F@wcscasecmp	-			int (const wchar_t *, const wchar_t *)	const wchar_t *  | const wchar_t * 	-	ios=4.3/-/-/0	-	3a72fdf2d5794385	-
+function	c:@F@wcsncasecmp	-			int (const wchar_t *, const wchar_t *, size_t)	const wchar_t *  | const wchar_t *  | size_t n	-	ios=4.3/-/-/0	-	d0049d1aa84c2a1b	-
+function	c:@F@wcsnlen	-			size_t (const wchar_t *, size_t)	const wchar_t *  | size_t __n	-	ios=4.3/-/-/0	-	d2974b700e8b25c3	-
+function	c:@F@wcsnrtombs	-			size_t (char *restrict, const wchar_t **restrict, size_t, size_t, mbstate_t *restrict)	char *restrict  | const wchar_t **restrict  | size_t  | size_t __len | mbstate_t *restrict 	-	-	-	1150db1756efe100	-
+function	c:@F@open_wmemstream	-			FILE * (wchar_t **, size_t *)	wchar_t ** __bufp | size_t * __sizep	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	86594f2de7ee8f4b	-
+function	c:@F@fgetwln	-			wchar_t * (FILE *restrict, size_t *)	FILE *restrict  | size_t * __len	-	ios=4.3/-/-/0	-	f129e3e548aad03e	-
+function	c:@F@wcslcat	-			size_t (wchar_t *, const wchar_t *, size_t)	wchar_t *  | const wchar_t *  | size_t __len	-	-	-	7bd92f618c7c912b	-
+function	c:@F@wcslcpy	-			size_t (wchar_t *, const wchar_t *, size_t)	wchar_t *  | const wchar_t *  | size_t __len	-	-	-	6fe7c9f23737c048	-
+function	c:@F@btowc_l	-			wint_t (int, locale_t)	int  | locale_t 	-	-	-	4811061e640e6a1c	-
+function	c:@F@fgetwc_l	-			wint_t (FILE *, locale_t)	FILE *  | locale_t 	-	-	-	7d30e564f0f0be5b	-
+function	c:@F@fgetws_l	-			wchar_t * (wchar_t *restrict, int, FILE *restrict, locale_t)	wchar_t *restrict  | int __n | FILE *restrict  | locale_t 	-	-	-	4ac44071aa630c24	-
+function	c:@F@fputwc_l	-			wint_t (wchar_t, FILE *, locale_t)	wchar_t  | FILE *  | locale_t 	-	-	-	6d72d0648079aaba	-
+function	c:@F@fputws_l	-			int (const wchar_t *restrict, FILE *restrict, locale_t)	const wchar_t *restrict  | FILE *restrict  | locale_t 	-	-	-	bef2d335ccfe1844	-
+function	c:@F@fwprintf_l	-			int (FILE *restrict, locale_t, const wchar_t *restrict, ...)	FILE *restrict  | locale_t  | const wchar_t *restrict 	variadic	-	-	96123e0b1ed43a59	-
+function	c:@F@fwscanf_l	-			int (FILE *restrict, locale_t, const wchar_t *restrict, ...)	FILE *restrict  | locale_t  | const wchar_t *restrict 	variadic	-	-	56e0ea52880e3574	-
+function	c:@F@getwc_l	-			wint_t (FILE *, locale_t)	FILE *  | locale_t 	-	-	-	e7ca77fd2c836f52	-
+function	c:@F@getwchar_l	-			wint_t (locale_t)	locale_t 	-	-	-	e3c3b4e3d8aa3f66	-
+function	c:@F@mbrlen_l	-			size_t (const char *restrict, size_t, mbstate_t *restrict, locale_t)	const char *restrict  | size_t __n | mbstate_t *restrict  | locale_t 	-	-	-	d44cc198e02ad80d	-
+function	c:@F@mbrtowc_l	-			size_t (wchar_t *restrict, const char *restrict, size_t, mbstate_t *restrict, locale_t)	wchar_t *restrict  | const char *restrict  | size_t __n | mbstate_t *restrict  | locale_t 	-	-	-	82f9136f66fef610	-
+function	c:@F@mbsinit_l	-			int (const mbstate_t *, locale_t)	const mbstate_t *  | locale_t 	-	-	-	e75886cda1455c00	-
+function	c:@F@mbsrtowcs_l	-			size_t (wchar_t *restrict, const char **restrict, size_t, mbstate_t *restrict, locale_t)	wchar_t *restrict  | const char **restrict  | size_t __len | mbstate_t *restrict  | locale_t 	-	-	-	efc3b3affe2f8380	-
+function	c:@F@putwc_l	-			wint_t (wchar_t, FILE *, locale_t)	wchar_t  | FILE *  | locale_t 	-	-	-	759f354907664db6	-
+function	c:@F@putwchar_l	-			wint_t (wchar_t, locale_t)	wchar_t  | locale_t 	-	-	-	bf0769df89406669	-
+function	c:@F@swprintf_l	-			int (wchar_t *restrict, size_t, locale_t, const wchar_t *restrict, ...)	wchar_t *restrict  | size_t n | locale_t  | const wchar_t *restrict 	variadic	-	-	a6c3c8e9bbb60d17	-
+function	c:@F@swscanf_l	-			int (const wchar_t *restrict, locale_t, const wchar_t *restrict, ...)	const wchar_t *restrict  | locale_t  | const wchar_t *restrict 	variadic	-	-	0ceec67a0dec4be1	-
+function	c:@F@ungetwc_l	-			wint_t (wint_t, FILE *, locale_t)	wint_t  | FILE *  | locale_t 	-	-	-	daf48dd45133051a	-
+function	c:@F@vfwprintf_l	-			int (FILE *restrict, locale_t, const wchar_t *restrict, __darwin_va_list)	FILE *restrict  | locale_t  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	765187ab7e538b21	-
+function	c:@F@vswprintf_l	-			int (wchar_t *restrict, size_t, locale_t, const wchar_t *restrict, __darwin_va_list)	wchar_t *restrict  | size_t n | locale_t  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	bface69ec8670324	-
+function	c:@F@vwprintf_l	-			int (locale_t, const wchar_t *restrict, __darwin_va_list)	locale_t  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	a04a3f9f9060a1ec	-
+function	c:@F@wcrtomb_l	-			size_t (char *restrict, wchar_t, mbstate_t *restrict, locale_t)	char *restrict  | wchar_t  | mbstate_t *restrict  | locale_t 	-	-	-	e987b89d68fdf6df	-
+function	c:@F@wcscoll_l	-			int (const wchar_t *, const wchar_t *, locale_t)	const wchar_t *  | const wchar_t *  | locale_t 	-	-	-	26b76111a5c022d6	-
+function	c:@F@wcsftime_l	-			size_t (wchar_t *restrict, size_t, const wchar_t *restrict, const struct tm *restrict, locale_t)	wchar_t *restrict  | size_t __n | const wchar_t *restrict  | const struct tm *restrict  | locale_t 	-	-	-	db6f32e1ede3d9d0	-
+function	c:@F@wcsrtombs_l	-			size_t (char *restrict, const wchar_t **restrict, size_t, mbstate_t *restrict, locale_t)	char *restrict  | const wchar_t **restrict  | size_t __len | mbstate_t *restrict  | locale_t 	-	-	-	501cd3384db077b8	-
+function	c:@F@wcstod_l	-			double (const wchar_t *restrict, wchar_t **restrict, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | locale_t 	-	-	-	66c8086d4138e5f0	-
+function	c:@F@wcstol_l	-			long (const wchar_t *restrict, wchar_t **restrict, int, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | int  | locale_t 	-	-	-	3d8537b23f7ec88e	-
+function	c:@F@wcstoul_l	-			unsigned long (const wchar_t *restrict, wchar_t **restrict, int, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | int  | locale_t 	-	-	-	f0353c388768c5ec	-
+function	c:@F@wcswidth_l	-			int (const wchar_t *, size_t, locale_t)	const wchar_t *  | size_t __n | locale_t 	-	-	-	2599a15d7ef177fb	-
+function	c:@F@wcsxfrm_l	-			size_t (wchar_t *restrict, const wchar_t *restrict, size_t, locale_t)	wchar_t *restrict  | const wchar_t *restrict  | size_t __n | locale_t 	-	-	-	e9659774eddaa8d6	-
+function	c:@F@wctob_l	-			int (wint_t, locale_t)	wint_t  | locale_t 	-	-	-	5399df6e3a72afce	-
+function	c:@F@wcwidth_l	-			int (wchar_t, locale_t)	wchar_t  | locale_t 	-	-	-	e2f741189e440b75	-
+function	c:@F@wprintf_l	-			int (locale_t, const wchar_t *restrict, ...)	locale_t  | const wchar_t *restrict 	variadic	-	-	f7ab6f72e71338c7	-
+function	c:@F@wscanf_l	-			int (locale_t, const wchar_t *restrict, ...)	locale_t  | const wchar_t *restrict 	variadic	-	-	4df9e0ada4ea0910	-
+function	c:@F@vfwscanf_l	-			int (FILE *restrict, locale_t, const wchar_t *restrict, __darwin_va_list)	FILE *restrict  | locale_t  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	011f0a5d314c5598	-
+function	c:@F@vswscanf_l	-			int (const wchar_t *restrict, locale_t, const wchar_t *restrict, __darwin_va_list)	const wchar_t *restrict  | locale_t  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	d6d83fbce78f09fc	-
+function	c:@F@vwscanf_l	-			int (locale_t, const wchar_t *restrict, __darwin_va_list)	locale_t  | const wchar_t *restrict  | __darwin_va_list 	-	-	-	c2f3775f56f4f55c	-
+function	c:@F@wcstof_l	-			float (const wchar_t *restrict, wchar_t **restrict, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | locale_t 	-	-	-	0303e8ac7205a054	-
+function	c:@F@wcstold_l	-			long double (const wchar_t *restrict, wchar_t **restrict, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | locale_t 	-	-	-	67e8fa1773d93834	-
+function	c:@F@wcstoll_l	-			long long (const wchar_t *restrict, wchar_t **restrict, int, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | int  | locale_t 	-	-	-	4fed7e3d8f93f4da	-
+function	c:@F@wcstoull_l	-			unsigned long long (const wchar_t *restrict, wchar_t **restrict, int, locale_t)	const wchar_t *restrict  | wchar_t **restrict  | int  | locale_t 	-	-	-	915db67ebf9b7e97	-
+function	c:@F@mbsnrtowcs_l	-			size_t (wchar_t *restrict, const char **restrict, size_t, size_t, mbstate_t *restrict, locale_t)	wchar_t *restrict  | const char **restrict  | size_t  | size_t __len | mbstate_t *restrict  | locale_t 	-	-	-	5dfb9485eb0d427a	-
+function	c:@F@wcscasecmp_l	-			int (const wchar_t *, const wchar_t *, locale_t)	const wchar_t *  | const wchar_t *  | locale_t 	-	ios=4.3/-/-/0	-	a7fdc947cf12b96b	-
+function	c:@F@wcsncasecmp_l	-			int (const wchar_t *, const wchar_t *, size_t, locale_t)	const wchar_t *  | const wchar_t *  | size_t n | locale_t 	-	ios=4.3/-/-/0	-	0dd85e98e99f9265	-
+function	c:@F@wcsnrtombs_l	-			size_t (char *restrict, const wchar_t **restrict, size_t, size_t, mbstate_t *restrict, locale_t)	char *restrict  | const wchar_t **restrict  | size_t  | size_t  | mbstate_t *restrict  | locale_t 	-	-	-	06ed4f69d76411ea	-
+function	c:@F@fgetwln_l	-			wchar_t * (FILE *restrict, size_t *, locale_t)	FILE *restrict  | size_t *  | locale_t 	-	ios=4.3/-/-/0	-	d4c7282f7539ce44	-
+typedef	c:@T@wctrans_t	-			__darwin_wctrans_t	-	-	-	-	12d104006fbbdb0a	-
+function	c:@F@iswblank	-			int (wint_t)	wint_t _wc	-	-	-	b50c3e809a51402b	-
+function	c:@F@iswascii	-			int (wint_t)	wint_t _wc	-	-	-	42a36897e92cc84c	-
+function	c:@F@iswhexnumber	-			int (wint_t)	wint_t _wc	-	-	-	a23847e986ce0957	-
+function	c:@F@iswideogram	-			int (wint_t)	wint_t _wc	-	-	-	fec198111262bdc8	-
+function	c:@F@iswnumber	-			int (wint_t)	wint_t _wc	-	-	-	d5080f10bc2a30e5	-
+function	c:@F@iswphonogram	-			int (wint_t)	wint_t _wc	-	-	-	2e3871628addd5c4	-
+function	c:@F@iswrune	-			int (wint_t)	wint_t _wc	-	-	-	29b78639a442abd7	-
+function	c:@F@iswspecial	-			int (wint_t)	wint_t _wc	-	-	-	6806399573c769a4	-
+function	c:@F@nextwctype	-			wint_t (wint_t, wctype_t)	wint_t  | wctype_t 	-	-	-	c7787bd53e2f18e7	-
+function	c:@F@towctrans	-			wint_t (wint_t, wctrans_t)	wint_t  | wctrans_t 	-	-	-	3ec2baee9781b37b	-
+function	c:@F@wctrans	-			wctrans_t (const char *)	const char * 	-	-	-	9448336261127191	-
+function	c:@F@iswblank_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	a30843e030e33fda	-
+function	c:@F@iswhexnumber_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	bc114de3ee40cb88	-
+function	c:@F@iswideogram_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	37cea979b5976269	-
+function	c:@F@iswnumber_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	d59c44c4338735bf	-
+function	c:@F@iswphonogram_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	b651b3298a59915d	-
+function	c:@F@iswrune_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	ebc429ee0ee14ca1	-
+function	c:@F@iswspecial_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	41af570fede20f07	-
+function	c:@F@nextwctype_l	-			wint_t (wint_t, wctype_t, locale_t)	wint_t  | wctype_t  | locale_t 	-	-	-	54a95fe1b080d9a0	-
+function	c:@F@towctrans_l	-			wint_t (wint_t, wctrans_t, locale_t)	wint_t  | wctrans_t  | locale_t 	-	-	-	a1d63fd2af23f324	-
+function	c:@F@wctrans_l	-			wctrans_t (const char *, locale_t)	const char *  | locale_t 	-	-	-	10c68ac1f120e043	-
+function	c:@F@iswalnum_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	c65bd4c4cf5497c4	-
+function	c:@F@iswalpha_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	5853d4ccc5523616	-
+function	c:@F@iswcntrl_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	8f2ad0c7537c74a8	-
+function	c:@F@iswctype_l	-			int (wint_t, wctype_t, locale_t)	wint_t _wc | wctype_t _charclass | locale_t _l	-	-	-	7d13d056394df72a	-
+function	c:@F@iswdigit_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	3a064492f6df0e2c	-
+function	c:@F@iswgraph_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	edcc807aaecb73b0	-
+function	c:@F@iswlower_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	9203d554ecde659b	-
+function	c:@F@iswprint_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	1ebb853a79282803	-
+function	c:@F@iswpunct_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	d2f767b2fdc771ce	-
+function	c:@F@iswspace_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	96eae7955e9c4578	-
+function	c:@F@iswupper_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	40cc68d7f572ae26	-
+function	c:@F@iswxdigit_l	-			int (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	107f025e54d72964	-
+function	c:@F@towlower_l	-			wint_t (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	ffe27a89fadc9601	-
+function	c:@F@towupper_l	-			wint_t (wint_t, locale_t)	wint_t _wc | locale_t _l	-	-	-	be730a52f242d6c7	-
+function	c:@F@wctype_l	-			wctype_t (const char *, locale_t)	const char *  | locale_t 	-	-	-	136bb595e10650f2	-
+typedef	c:@T@ptrdiff_t	-			long	-	-	-	-	cbb87dabc6faece5	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@va_list	-			__builtin_va_list	-	-	-	-	88519b6121af0d9d	-
+typedef	c:@T@__builtin_va_list	-			char *	-	-	-	-	954c872416ff897e	-
+typedef	c:@T@wchar_t	-			int	-	-	-	-	11d0245765e8e543	-
+typedef	c:@T@__darwin_nl_item	-			int	-	-	-	-	69f6811c4b01fc5e	-
+typedef	c:@T@FILE	-			struct __sFILE	-	-	-	-	997bcb6f4ecdba4d	-
+typedef	c:@T@__uint128_t	-			unsigned __int128	-	-	-	-	f5cb1e46309307f7	-
+typedef	c:@T@__darwin_wctype_t	-			__uint32_t	-	-	-	-	d60a04644630b732	-
+typedef	c:@T@__darwin_wctrans_t	-			int	-	-	-	-	7185cff397f03d24	-

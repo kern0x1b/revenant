@@ -1,0 +1,212 @@
+{
+  "framework": "CoreData",
+  "entries": [
+    {
+      "api": "NSPersistentHistoryChangeRequest",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a request to fetch the history after a date, a token or a transaction, or to delete it before one; a fetch asks for transactions and changes, a delete for the status only and keeps that whatever it is set to; request type 8; a copy keeps the result type; the request is a value only: no store of this release answers it",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSPersistentHistoryChangeRequest initWithDate:delete:], -initWithToken:delete:, -setResultType:, -requestType and -description, read case by case; the host's Core Data for what comes out"
+    },
+    {
+      "api": "NSPersistentHistoryToken",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no store of this release keeps a history, so no object of the concrete kind exists; an instance made with alloc and init is the abstract one, as it is in iOS 12",
+      "effect": "copies to itself and codes securely; encoding it or decoding it raises the exception iOS 12 raises for the abstract class",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSPersistentHistoryToken copyWithZone:], -encodeWithCoder: and -initWithCoder:, which ask for a concrete implementation"
+    },
+    {
+      "api": "NSPersistentHistoryTransaction",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no store of this release keeps a history, so no object of the concrete kind exists; an instance made with alloc and init is the abstract one, as it is in iOS 12",
+      "effect": "copies to itself; every property, and -objectIDNotification, raises the exception iOS 12 raises for the abstract class",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSPersistentHistoryTransaction copyWithZone:] and its accessors, which ask for a concrete implementation"
+    },
+    {
+      "api": "NSPersistentHistoryChange",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no store of this release keeps a history, so no object of the concrete kind exists; an instance made with alloc and init is the abstract one, as it is in iOS 12",
+      "effect": "copies to itself; every property raises the exception iOS 12 raises for the abstract class",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSPersistentHistoryChange copyWithZone:] and its accessors, which ask for a concrete implementation"
+    },
+    {
+      "api": "NSPersistentHistoryResult",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "holds the result and the result type it was made with, and is empty when made with init; nothing here makes one, since no history is answered",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSPersistentHistoryResult initWithResultType:andResult:] and its accessors"
+    },
+    {
+      "api": "NSPersistentHistoryTrackingKey",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string NSPersistentHistoryTrackingKey; a store given it as an option keeps no history, since the release ignores the options it does not know",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string the store reads the option by, at 0x183ce640e"
+    },
+    {
+      "api": "NSBinaryStoreSecureDecodingClasses",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string NSBinaryStoreSecureDecodingClasses; the binary store of this release decodes what it always did",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string, at 0x183ce650f"
+    },
+    {
+      "api": "NSBinaryStoreInsecureDecodingCompatibilityOption",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string _NSBinaryStoreInsecureDecodingCompatibilityOption; the binary store of this release decodes what it always did",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string, at 0x183ce64dd"
+    },
+    {
+      "api": "NSCoreDataCoreSpotlightExporter",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string NSCoreDataCoreSpotlightExporter; the release has no Core Spotlight for a store to export to",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string of the constant"
+    },
+    {
+      "api": "NSPersistentHistoryTokenKey",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string historyToken, the key of the token in the user info of a remote change notification; nothing here posts one",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string, which the release uses for the same key of the store's own results"
+    },
+    {
+      "api": "NSPersistentStoreRemoteChangeNotification",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string NSPersistentStoreRemoteChangeNotification; the notification is never posted, since no store here watches for changes made by another process",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string of the notification"
+    },
+    {
+      "api": "NSPersistentStoreURLKey",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string storeURL, the key of the store's URL in the user info of a remote change notification; nothing here posts one",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the string, at 0x183ce660b"
+    },
+    {
+      "api": "NSManagedObjectContext.transactionAuthor",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a string that the context keeps, copied, and nothing reads: no history is written to carry it",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the accessors of the property; the host's Core Data for the copy"
+    },
+    {
+      "api": "-[NSPersistentStoreCoordinator currentPersistentHistoryTokenFromStores:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "answers nil: the release's stores answer no change token, and the method builds the token from those",
+      "facts": "facts/CoreData/PersistentHistory.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSPersistentStoreCoordinator currentPersistentHistoryTokenFromStores:] asks each store for its current change token and joins the answers; the host's Core Data for a store that has none"
+    },
+    {
+      "api": "NSFetchIndexElementDescription",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the description of an index is carried and checked, and not applied: the store of this release builds no index from it, which the documentation allows a store that does not natively support indexing to do",
+      "effect": "an element of one property with a collation type and a direction; ascending to begin with; rtree collation is refused for anything but an attribute of type integer 16, integer 32 or float; refuses a missing, an unnamed and a fetched property; its collation cannot change when it is the only element of its index; copies, compares and describes, and codes with NSPropertyName, NSFetchIndexElementType, NSAscending and NSFetchIndexDescription",
+      "facts": "facts/CoreData/FetchIndex.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSFetchIndexElementDescription initWithProperty:collationType:], -_validateCollationType:forProperty:, -setCollationType:, -description and the coding methods, read case by case with the strings of the messages; the host's Core Data beside the port for the rest"
+    },
+    {
+      "api": "NSFetchIndexDescription",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the description of an index is carried and checked, and not applied: the store of this release builds no index from it, which the documentation allows a store that does not natively support indexing to do",
+      "effect": "an index with a name and elements, and a predicate for a partial one; refuses a nil name and elements of more than one collation type; holds its elements, sets the index they belong to when it is made, and keeps its name and predicate as they are given; copies its elements, compares by name, elements and predicate, and codes with NSIndexName, NSIndexElements, NSEntity and NSPartialIndexPredicate",
+      "facts": "facts/CoreData/FetchIndex.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSFetchIndexDescription initWithName:elements:], -_checkElements:, -setName:, -setElements:, -_validateCollationTypeChangeFrom:to:, -description and the coding methods, read case by case; the host's Core Data beside the port for the rest"
+    },
+    {
+      "api": "NSEntityDescription.indexes",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the description of an index is carried and checked, and not applied: the store of this release builds no index from it, which the documentation allows a store that does not natively support indexing to do",
+      "effect": "the indexes of the entity, an empty array to begin with; setting them refuses two of one name and an element whose attribute or relationship the entity does not have, tells each index its entity, and raises for a model in use; nothing builds an index",
+      "facts": "facts/CoreData/FetchIndex.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: -[NSEntityDescription setIndexes:] and -_validateIndex:, which look each element's property up by name and check the name against the entity's other indexes"
+    },
+    {
+      "api": "NSEntityDescription.coreSpotlightDisplayNameExpression",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the expression names what Core Spotlight shows for an object, and this release has no Core Spotlight, so it is kept and nothing reads it",
+      "effect": "a kept expression, nil to begin with; setting it raises for a model in use",
+      "facts": "facts/CoreData/FetchIndex.md",
+      "source": "CoreData of the arm64 shared cache of iOS 12.0: the accessors of the property"
+    },
+    {
+      "api": "NSCoreDataCoreSpotlightDelegate",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class NSCoreDataCoreSpotlightDelegate",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "the SDK 16.4 headers of CoreData"
+    },
+    {
+      "api": "NSPersistentStore.coreSpotlightExporter",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property NSPersistentStore.coreSpotlightExporter",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 16.4 headers of CoreData"
+    }
+  ]
+}

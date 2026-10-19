@@ -1,0 +1,5 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+OS_dispatch_queue_concurrent	12.0	refused	OS_dispatch_queue_concurrent: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-
+OS_dispatch_queue_serial	12.0	refused	OS_dispatch_queue_serial: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-
+OS_dispatch_queue_serial_executor	17.0	refused	OS_dispatch_queue_serial_executor: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-
+OS_dispatch_workloop	12.0	refused	OS_dispatch_workloop: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-

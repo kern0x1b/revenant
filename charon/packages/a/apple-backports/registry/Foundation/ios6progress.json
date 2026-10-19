@@ -1,0 +1,13 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSProgress",
+      "kind": "class",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProgress.md",
+      "source": "the armv7 caches of 4.3, 5.0 and 6.0 (NSProgress is absent below 6.0), the class measured under xmake emulate on iPhone2,1 4.3 and 5.0 against the release's own on iPhone3,1 6.0 (tests/backports/device/progress.m through below6/); swift-corelibs-foundation's Progress.swift read for the current-progress stack, followed only where it does not conflict with the release's own measured answers"
+    }
+  ]
+}

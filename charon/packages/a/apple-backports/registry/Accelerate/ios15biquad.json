@@ -1,0 +1,27 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_biquad_SetCoefficientsDouble()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the window is nsec sections of five values each at start_sec, and a section the setup does not have is left alone",
+      "effect": "the five coefficients of each section the window names become the given values, and nothing else changes: the caller's delay is the filter's state and the setup holds none, so a run over the same delay answers what a setup made from those coefficients answers over it",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad15, which builds a setup with each side's own vDSP_biquad_CreateSetup, calls each side's own setter on it and reads the change back through each side's own vDSP_biquad - the setup is never read on either side and never crosses, so nothing needs a layout both agree on; the header of iOS 16.4 for the declaration; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vDSP_biquad_SetCoefficientsSingle()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as above, and the array is read in the element type the declaration names",
+      "effect": "as vDSP_biquad_SetCoefficientsDouble, with the caller's five floats widened once on the way in; a setup made from the same five as doubles answers the same, measured",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad15, which builds a setup with each side's own vDSP_biquad_CreateSetup, calls each side's own setter on it and reads the change back through each side's own vDSP_biquad - the setup is never read on either side and never crosses, so nothing needs a layout both agree on; the header of iOS 16.4 for the declaration; the release's own armv7 caches, which say which release first exports the name"
+    }
+  ]
+}

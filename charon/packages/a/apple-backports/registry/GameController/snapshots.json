@@ -1,0 +1,125 @@
+{
+ "framework": "GameController",
+ "entries": [
+  {
+   "api": "GCGamepadSnapShotDataV100FromNSData()",
+   "kind": "function",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the structure filled from the data, and whether it took it at all: NO for a NULL structure, for nil data, for data too short to hold the four-byte header the empty data included, for fewer bytes than the structure holds, and for a header whose version is zero; YES for the rest, with as much of the structure filled as the data reaches and the rest zero. A header that declares a size of its own is not read: 36 bytes that declare 999 are taken whole",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27 with no controller connected, over a matrix of inputs held against the port line by line by the snapshot functions group of tests/backports/host/gamecontroller: 9188 checks, 0 different, and five mutants of the rule, each noticed"
+  },
+  {
+   "api": "NSDataFromGCGamepadSnapShotDataV100()",
+   "kind": "function",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the structure as the data of the header's own layout: 36 bytes whose first two are the version 0x0100 and the two after them the size, filled in when the structure carries neither and kept as they are when it does; nil for a NULL structure",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, byte for byte: a zeroed structure encodes as 00012400 followed by its fields, and one that declares version 0x0200 and size 999 keeps both"
+  },
+  {
+   "api": "GCExtendedGamepadSnapShotDataV100FromNSData()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the V100 structure filled from the data: NO for a NULL structure, for nil data, and for a header that declares a size larger than the 60 bytes the structure holds; YES for the rest, including data too short to hold a header at all, and including a header whose version is one this structure does not know",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, held against the port over the matrix: 59 bytes that declare 59 are read whole, 59 bytes whose declared size is 0x4141 are refused, 61 bytes are refused, and empty data is taken"
+  },
+  {
+   "api": "NSDataFromGCExtendedGamepadSnapShotDataV100()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the V100 structure as data: 60 bytes whose first four are the version 0x0100 and the size, filled in when the structure carries neither; nil for a NULL structure",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, byte for byte: a zeroed structure encodes as 00013c00"
+  },
+  {
+   "api": "GCExtendedGamepadSnapshotDataFromNSData()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the current structure filled from the data: NO for a NULL structure, for nil data, and for a header that declares a size larger than the 63 bytes the structure holds; YES for the rest, including data too short to hold a header, and a version this structure does not know is read rather than refused",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, held against the port over the matrix: 63 bytes that declare 999 are refused and 63 bytes that declare 63 are read, with the version and size read back as the data declares them"
+  },
+  {
+   "api": "NSDataFromGCExtendedGamepadSnapshotData()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the current structure as data: 63 bytes whose first four are the version 0x0101 and the size, filled in when the structure carries neither and kept as they are when it does, so a structure carrying the V100 header keeps it; nil for a NULL structure",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, byte for byte: a zeroed structure encodes as 01013f00, and one carrying version 0x0100 and size 60 encodes as 00013c00 in 63 bytes"
+  },
+  {
+   "api": "GCMicroGamepadSnapShotDataV100FromNSData()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the micro game's V100 structure filled from the data, under the same rule as the extended game's: NO for a NULL structure, for nil data, and for a header declaring a size larger than the structure's 20 bytes; YES for the rest",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, held against the port over the matrix: 20 bytes are read, 21 are refused"
+  },
+  {
+   "api": "NSDataFromGCMicroGamepadSnapShotDataV100()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the micro game's V100 structure as data: 20 bytes whose first four are the version 0x0100 and the size, filled in when the structure carries neither; nil for a NULL structure",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, byte for byte: a zeroed structure encodes as 00011400"
+  },
+  {
+   "api": "GCMicroGamepadSnapshotDataFromNSData()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the micro game's current structure filled from the data, under the same rule as the extended game's: NO for a NULL structure, for nil data, and for a header declaring a size larger than the structure's 20 bytes; YES for the rest",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, held against the port over the matrix: 19 bytes are read, 20 are read, 21 are refused"
+  },
+  {
+   "api": "NSDataFromGCMicroGamepadSnapshotData()",
+   "kind": "function",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the micro game's current structure as data: 20 bytes whose first four are the version 0x0100 and the size, filled in when the structure carries neither; nil for a NULL structure",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the host's own GameController under macOS 27, byte for byte: a zeroed structure encodes as 00011400"
+  },
+  {
+   "api": "GCCurrentExtendedGamepadSnapshotDataVersion",
+   "kind": "constant",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "0x0101, the version the extended game's current structure carries and the one its encoder writes when the structure declares none; the header's own GCExtendedGamepadSnapshotDataVersion2",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the header's own GCExtendedGamepadSnapshotDataVersion2, which is 0x0101, taken at compile time by GCSnapshots16.m from the very enumeration the header names. A run-time lookup is not how this value is produced and cannot be: the framework is cache-resident, so nothing reads it out at run time here"
+  },
+  {
+   "api": "GCCurrentMicroGamepadSnapshotDataVersion",
+   "kind": "constant",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "0x0100, the version the micro game's current structure carries and the one its encoder writes when the structure declares none; the header's own GCMicroGamepadSnapshotDataVersion1",
+   "facts": "facts/GameController/Snapshots.md",
+   "source": "the header's own GCMicroGamepadSnapshotDataVersion1, which is 0x0100, taken at compile time by GCSnapshots16.m from the very enumeration the header names. A run-time lookup is not how this value is produced and cannot be: the framework is cache-resident, so nothing reads it out at run time here"
+  }
+ ]
+}

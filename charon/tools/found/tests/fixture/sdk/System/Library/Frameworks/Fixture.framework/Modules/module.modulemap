@@ -1,0 +1,17 @@
+framework module Fixture [system] {
+  umbrella header "Fixture.h"
+  export *
+  module * { export * }
+  header "Sub.h"
+  header "Messages.h"
+  textual header "Textual.h"
+  private header "Private.h"
+  module X86Only {
+    requires x86
+    header "Gone.h"
+  }
+  framework module Inner {
+    umbrella header "Inner.h"
+    export *
+  }
+}

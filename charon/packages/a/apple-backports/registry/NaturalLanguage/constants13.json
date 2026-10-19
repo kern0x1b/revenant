@@ -1,0 +1,15 @@
+{
+ "framework": "NaturalLanguage",
+ "entries": [
+  {
+     "api": "NLTagSchemeSentimentScore",
+     "kind": "constant",
+     "introduced": "13.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the tag scheme Sentiment, which NLTagger takes as -tagScheme: and the scheme a tag read back belongs to; the framework compares schemes with ==, and this is the string it compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  }
+ ]
+}

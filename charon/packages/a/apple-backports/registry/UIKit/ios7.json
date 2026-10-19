@@ -1,0 +1,205 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIView.maskView",
+      "kind": "property",
+      "introduced": "8.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewMaskView.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "+[UIView performWithoutAnimation:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewMaskView.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIView.semanticContentAttribute",
+      "kind": "property",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSemanticContentAttribute.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIView.effectiveUserInterfaceLayoutDirection",
+      "kind": "property",
+      "introduced": "10.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSemanticContentAttribute.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "+[UIView userInterfaceLayoutDirectionForSemanticContentAttribute:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSemanticContentAttribute.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "+[UIView userInterfaceLayoutDirectionForSemanticContentAttribute:relativeToLayoutDirection:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSemanticContentAttribute.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.preferredStatusBarStyle",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.prefersStatusBarHidden",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.preferredStatusBarUpdateAnimation",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.childViewControllerForStatusBarStyle",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.childViewControllerForStatusBarHidden",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.modalPresentationCapturesStatusBarAppearance",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "-[UIViewController setNeedsStatusBarAppearanceUpdate]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerStatusBarAppearance.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.preferredContentSize",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewLoading.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "-[UIViewController loadViewIfNeeded]",
+      "kind": "method",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewLoading.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UIViewController.viewIfLoaded",
+      "kind": "property",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerViewLoading.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "-[UIView snapshotViewAfterScreenUpdates:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSnapshots.md",
+      "source": "the host's own UIKit under Mac Catalyst, in an application with a window, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "-[UIView resizableSnapshotViewFromRect:afterScreenUpdates:withCapInsets:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSnapshots.md",
+      "source": "the host's own UIKit under Mac Catalyst, in an application with a window, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "-[UIView drawViewHierarchyInRect:afterScreenUpdates:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewSnapshots.md",
+      "source": "the host's own UIKit under Mac Catalyst, in an application with a window, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "UITableViewRowAction",
+      "kind": "class",
+      "introduced": "8.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITableViewRowAction.md",
+      "source": "the host's own UIKit under Mac Catalyst, held against the backport by tests/backports/host/uikit2"
+    },
+    {
+      "api": "-[UITableViewDelegate tableView:editActionsForRowAtIndexPath:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's table asks its delegate for a delete confirmation and for nothing else; the port's swipe recognizer on the table sends the message",
+      "effect": "a horizontal drag on a row of a table whose delegate answers it slides the row to the left and shows the actions as buttons at the edge, the first at the edge; a tap on one runs its handler with the index path, and a drag across the row runs the first; a table whose delegate does not answer it is left to the release's own delete button",
+      "facts": "facts/UIKit/UITableViewRowAction.md",
+      "source": "the recognizer and buttons are the port's own, checked by tests/backports/device/swipeui.m on an iPhone 4S and an iPad 2; the values by the host's UIKit under Mac Catalyst"
+    },
+    {
+      "api": "UIFontDescriptor",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc (51 answers), UIFoundation and CoreText of iOS 6.0 armv7, and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "+[UIFont fontWithDescriptor:size:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a UIFontDescriptor is resolved through CoreText to the font it names; the release's own method still takes a CTFontDescriptorRef",
+      "facts": "facts/UIKit/UIFontDescriptor.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/fontdesc, and tests/backports/device/fontdesc.m on iOS 6"
+    },
+    {
+      "api": "UICollectionViewLayoutAttributes.transform",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a view of transform3D, which iOS 6 keeps and applies to the cell; the frame iOS 6 answers does not take the transform into account",
+      "facts": "facts/UIKit/UICollectionViewLayoutAttributesTransform.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/uikit2 (attributestransform)"
+    }
+  ]
+}

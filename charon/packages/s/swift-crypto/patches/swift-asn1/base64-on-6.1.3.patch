@@ -1,0 +1,20 @@
+--- a/Sources/SwiftASN1/Basic ASN1 Types/PEMDocument.swift	2026-10-15 08:39:20
++++ b/Sources/SwiftASN1/Basic ASN1 Types/PEMDocument.swift	2026-10-15 08:39:20
+@@ -160,7 +160,7 @@
+     /// -----END discriminator-----
+     /// ```
+     public var pemString: String {
+-        var encoded = Data(self.derBytes).base64EncodedString()[...]
++        var encoded = (Data(self.derBytes) as NSData).base64EncodedString()[...]
+         let pemLineCount = (encoded.utf8.count + Self.lineLength) / Self.lineLength
+         var pemLines = [Substring]()
+         pemLines.reserveCapacity(pemLineCount + 2)
+@@ -207,7 +207,7 @@
+             throw ASN1Error.invalidPEMDocument(reason: "discriminator is not valid UTF-8")
+         }
+ 
+-        guard let data = Data(base64Encoded: self.base64EncodedDERString) else {
++        guard let data = NSData(base64Encoded: self.base64EncodedDERString).map({ $0 as Data }) else {
+             throw ASN1Error.invalidPEMDocument(reason: "PEMDocument not correctly base64 encoded")
+         }
+         if data.isEmpty {

@@ -1,0 +1,91 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVMovie",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class arrived in iOS 13 and 6.1.3 has no movie class. An AVAsset subclass that answers, from one AVURLAsset made from the same URL and options, every AVAsset member the 16.4 header declares on AVAsset and this release carries; its tracks are AVMovieTrack objects built once from that asset's tracks, and trackWithTrackID: and the filters search them. The read side of AVMovie only: the writer pair and AVMutableMovie are other rows. Behaviour is the design in facts/AVFoundation/AVMovie.md, measured by the host differential tests/backports/host/avf-movie4 on two movies from AVAssetWriter and a third with a patched track header; the measured differences are in the facts file, and a movie opened from data is not read the way the host reads one",
+      "effect": "a movie opened from a URL answers from the release's own AVURLAsset; a movie opened from data is written to a file in the temporary directory and read from there, and that file is removed at dealloc; -init makes a movie with no URL, no inner asset and no tracks; -copyWithZone: returns the movie itself retained; isEqual: and hash are the release's own, as for any AVAsset",
+      "facts": "facts/AVFoundation/AVMovie.md",
+      "source": "SDK 16.4 AVFoundation/AVMovie.h:57; AVAsset and AVAssetTrack of the 6.1.3 armv7 cache, read with objc-inventory"
+    },
+    {
+      "api": "AVMovieTrack",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class arrived in iOS 13 and 6.1.3 has no movie track class. An AVAssetTrack subclass that wraps one AVAssetTrack of the movie's asset and answers every AVAssetTrack member the 16.4 header declares and this release carries from that track; -asset is the movie that made it, held weakly. Its own members mediaPresentationTimeRange, mediaDecodeTimeRange, alternateGroupID and mediaDataStorage have their own rows. Behaviour is the design in facts/AVFoundation/AVMovie.md, measured by the host differential tests/backports/host/avf-movie4",
+      "effect": "the track's values are the wrapped track's own; -asset answers the AVMovie that made the track, never the inner asset; the SDK marks -init unavailable (AVAssetTrack.h:40) and a track is made only by its movie, so a caller gets a track only from AVMovie's tracks",
+      "facts": "facts/AVFoundation/AVMovie.md",
+      "source": "SDK 16.4 AVFoundation/AVMovieTrack.h:33; AVAssetTrack of the 6.1.3 armv7 cache, read with objc-inventory"
+    },
+    {
+      "api": "-[AVMovie movieHeaderWithFileType:error:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[AVMovie movieHeaderWithFileType:error:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4 AVFoundation/AVMovie.h:206, AVMovie (AVMovieMovieHeaderSupport)"
+    },
+    {
+      "api": "-[AVMovie writeMovieHeaderToURL:fileType:options:error:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[AVMovie writeMovieHeaderToURL:fileType:options:error:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4 AVFoundation/AVMovie.h:221, AVMovie (AVMovieMovieHeaderSupport)"
+    },
+    {
+      "api": "AVMovieTrack.mediaPresentationTimeRange",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3's AVAssetTrack carries no such member. The port reads the movie file's own boxes (moov, trak, mdia, mdhd, stbl, stts, ctts) and answers the least sample time to the greatest sample end, in the media timescale. Measured by the host differential on three movies (tests/backports/host/avf-movie4): equal to the host on every track. The edit list is not applied, which the host also does not do on those files. The video tracks of those movies carry composition offsets (ctts), and the same rule matches the host on them",
+      "effect": "a track of a movie opened from a file answers its media's presentation range; a track whose file cannot be read answers an invalid range",
+      "facts": "facts/AVFoundation/AVMovie.md",
+      "source": "SDK 16.4 AVFoundation/AVMovieTrack.h:30, AVMovieTrack; QuickTime File Format specification (moov, trak, mdia, mdhd, stbl, stts, ctts)"
+    },
+    {
+      "api": "AVMovieTrack.mediaDecodeTimeRange",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3's AVAssetTrack carries no such member. The port reads the sum of the stts sample deltas from the movie file's stbl box, in the media timescale, from zero. Measured by the host differential on three movies (tests/backports/host/avf-movie4): equal to the host on every track",
+      "effect": "a track of a movie opened from a file answers [0, the decode duration) in its media timescale; a track whose file cannot be read answers an invalid range",
+      "facts": "facts/AVFoundation/AVMovie.md",
+      "source": "SDK 16.4 AVFoundation/AVMovieTrack.h:35, AVMovieTrack; QuickTime File Format specification (stts)"
+    },
+    {
+      "api": "AVMovieTrack.alternateGroupID",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3's AVAssetTrack carries no such member. The port reads the alternate_group field of the track's tkhd box. Measured by the host differential: 0 for the tracks of two movies written by AVAssetWriter, and 3 for the audio track of a third movie whose track header was patched to 3, which the host also reads as 3",
+      "effect": "a track of a movie opened from a file answers its track header's alternate group; 0 when the file cannot be read",
+      "facts": "facts/AVFoundation/AVMovie.md",
+      "source": "SDK 16.4 AVFoundation/AVMovieTrack.h:42, AVMovieTrack; QuickTime File Format specification (tkhd)"
+    },
+    {
+      "api": "AVMovieTrack.mediaDataStorage",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the storage a track writes media to is AVMediaDataStorage, a class this release does not have, so there is no storage to answer with. The answer is nil, which the host gives for every track of the three movies the differential makes (all read from files)",
+      "effect": "answers nil for every track",
+      "facts": "facts/AVFoundation/AVMovie.md",
+      "source": "SDK 16.4 AVFoundation/AVMovieTrack.h:51, AVMovieTrack (AVMovieTrackMediaDataStorage); host differential tests/backports/host/avf-movie4"
+    }
+  ]
+}

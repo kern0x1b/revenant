@@ -1,0 +1,2 @@
+#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@FixtureRootInt	-			int	-	-	-	-	c8c160a246527519	-

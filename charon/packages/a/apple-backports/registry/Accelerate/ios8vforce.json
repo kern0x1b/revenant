@@ -1,0 +1,27 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vvcbrt()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the cube root elementwise, which is libm's cbrt; vForce's header says of the family that it may treat some or all denormals as zero and that the exact value and the denormal treatment vary by microarchitecture and version, so the port answers the number the header's own pseudocode computes and the differential compares with a tolerance",
+      "effect": "y[i] = cbrt(x[i]) for the *n elements the caller names at the end of its own count, which is how vForce's whole family takes a length; and nothing at all for a NULL pointer, which the header does not describe",
+      "facts": "facts/Accelerate/vForce.md",
+      "source": "the host's own vForce, held against the port for every case by tests/backports/host/vforce, over the values that decide a cube root; the header of iOS 16.4 for the declarations and for the family's own words about denormals and the last place; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vvcbrtf()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the cube root elementwise, which is libm's cbrt; vForce's header says of the family that it may treat some or all denormals as zero and that the exact value and the denormal treatment vary by microarchitecture and version, so the port answers the number the header's own pseudocode computes and the differential compares with a tolerance",
+      "effect": "y[i] = cbrt(x[i]) narrowed to float, the same loop in the other scalar type",
+      "facts": "facts/Accelerate/vForce.md",
+      "source": "the host's own vForce, held against the port for every case by tests/backports/host/vforce, over the values that decide a cube root; the header of iOS 16.4 for the declarations and for the family's own words about denormals and the last place; the release's own armv7 caches, which say which release first exports each name"
+    }
+  ]
+}

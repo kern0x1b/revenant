@@ -1,0 +1,302 @@
+{
+  "framework": "GameController",
+  "entries": [
+    {
+      "api": "GCControllerElement",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an element of a profile is a value with a name, and needs no device; the names and symbols are those the host gives each element",
+      "effect": "the collection, whether it is analog, the aliases, the localized name and the SF Symbols name of each element and their unmapped ones as the host has them, the system gesture state that can be set; a localized name set to nil goes back to the default, and setting the unmapped SF Symbols name sets the SF Symbols name too, as the host does",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCControllerButtonInput",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a button holds a value that its owner sets, and a handler is called for each change",
+      "effect": "value between 0 and 1, pressed and touched from it (pressed above 1/512), and the value, pressed and touched handlers called in that order on the handler queue of the controller, main by default, with the handlers the button had when the value was set; a button of a direction pad follows the axis and quantizes the value it hands to a handler as the host does",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCControllerAxisInput",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an axis holds a value that its owner sets",
+      "effect": "value clamped to -1 and 1; the handler is given the value as it was set; the buttons of its direction, and the direction pad, are told first",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCControllerDirectionPad",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a direction pad is two axes and the four buttons that follow them",
+      "effect": "xAxis, yAxis, up, down, left and right, -setValueForXAxis:yAxis: sets the x axis and then the y axis, and the handler is given the two values after each",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCGamepad",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of a gamepad is a set of elements that need no device",
+      "effect": "the direction pad, A, B, X, Y, the menu button and the shoulders, with no names; nothing calls the value handler and saveSnapshot is absent",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCExtendedGamepad",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of an extended gamepad is a set of elements that need no device",
+      "effect": "the direction pad, thumbsticks, A, B, X, Y, menu, options, home, shoulders, triggers and thumbstick buttons of the host's profile, with the paddles and back buttons it lists as elements; -setStateFromExtendedGamepad: copies the direction pads and then the buttons, in the host's order; saveSnapshot is absent",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCMicroGamepad",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of a micro gamepad is a set of elements that need no device",
+      "effect": "the touch surface direction pad, A, X and the menu button of the host's profile; reportsAbsoluteDpadValues and allowsRotation are kept; -setStateFromMicroGamepad: copies them; saveSnapshot is absent",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCPhysicalInputProfile",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the base of the profiles holds their elements by name",
+      "effect": "elements, buttons, axes, dpads and touchpads by every alias, the sets of them, subscripting by name, -capture and -setStateFromPhysicalInput:; nothing changes lastEventTimestamp and no element is remapped",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCMotion",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a motion holds the vectors that its owner sets",
+      "effect": "gravity starts at (0, 0, -1) and the rest at 0; the setters keep the values and call nothing; -setStateFromMotion: copies them and calls the handler once, on the handler queue, whatever the state; the sensors are always active and setting them changes nothing; a micro gamepad's motion has an attitude and a rotation rate, and starts at the identity attitude",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "+[GCController controllerWithExtendedGamepad]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a controller of software has no device behind it, and needs nothing that iOS 6 lacks",
+      "effect": "a controller that is a snapshot and not attached, vendor ExtendedGamepad, product category MFi, player index GCControllerPlayerIndex1, with an extended gamepad and a motion; the gamepad and microGamepad properties answer that profile too, as they do on the host",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "+[GCController controllerWithMicroGamepad]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a controller of software has no device behind it, and needs nothing that iOS 6 lacks",
+      "effect": "a controller that is a snapshot and not attached, vendor MicroGamepad, product category Siri Remote, with a micro gamepad and a motion",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "-[GCController capture]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a copy of the state of a controller needs no device",
+      "effect": "a controller of the same kind with the state of the profile and of the motion copied",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.attachedToDevice",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no controller is attached to iOS 6",
+      "effect": "NO",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.vendorName",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a member GCDevice later folded in that GCController already carried on its own since 7.0; the protocol's own absence (facts/GameController/ControllerModel.md, registry/GameController/absent_GameController.json) does not reach the member",
+      "effect": "\"ExtendedGamepad\" for a controller made with +controllerWithExtendedGamepad, \"MicroGamepad\" for one made with +controllerWithMicroGamepad, kept across -capture",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.productCategory",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a member GCDevice later folded in that GCController already carried on its own since 7.0; the protocol's own absence (facts/GameController/ControllerModel.md, registry/GameController/absent_GameController.json) does not reach the member",
+      "effect": "\"MFi\" for a controller made with +controllerWithExtendedGamepad, \"Siri Remote\" for one made with +controllerWithMicroGamepad, kept across -capture",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.handlerQueue",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a member GCDevice later folded in that GCController already carried on its own since 7.0; the protocol's own absence (facts/GameController/ControllerModel.md, registry/GameController/absent_GameController.json) does not reach the member",
+      "effect": "the main queue until set, held and read back as set",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.controllerPausedHandler",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the handler is called when the menu button of a device is pressed, and no device is attached",
+      "effect": "the handler is kept and called by nothing",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.extendedGamepad",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of a controller made by software",
+      "effect": "the extended gamepad of a controller made with +controllerWithExtendedGamepad, and nil for a micro gamepad's",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.gamepad",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of a controller made by software",
+      "effect": "the extended gamepad of the controller, as the host answers, and nil for a micro gamepad's",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.microGamepad",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of a controller made by software",
+      "effect": "the profile of the controller, as the host answers, whichever kind it is",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.playerIndex",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the player of a controller is a value it keeps",
+      "effect": "GCControllerPlayerIndex1 to begin with, and what was set",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.motion",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the motion of a controller made by software",
+      "effect": "the GCMotion of the controller",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.snapshot",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a controller made by software is a snapshot",
+      "effect": "YES",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.battery",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no controller made by software reports a battery",
+      "effect": "nil, as the host answers for a controller made by software",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.haptics",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no controller made by software has haptics",
+      "effect": "nil, as the host answers for a controller made by software",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.light",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no controller made by software has a light",
+      "effect": "nil, as the host answers for a controller made by software",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    },
+    {
+      "api": "GCController.physicalInputProfile",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the profile of a controller made by software",
+      "effect": "the profile of the controller",
+      "facts": "facts/GameController/ControllerModel.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller: the elements, the profiles, the controller and the motion of a controller made with +controllerWithExtendedGamepad and +controllerWithMicroGamepad, over the events that a random sequence of values makes; the header of iOS 16.4 for the declarations"
+    }
+  ]
+}

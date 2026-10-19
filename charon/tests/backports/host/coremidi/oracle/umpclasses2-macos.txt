@@ -1,0 +1,22 @@
+fb groups 0+17: yes
+fb groups 15+2: yes
+fb groups total 0: yes
+fb direction 0: yes
+fb direction 7: yes
+fb streams 4: yes
+fb streams 5: yes
+fb disabled: enabled=0 first=2 groups=3 dir=1
+fb setEnabled YES: 0
+fb setName: 0 name=renamed
+fb reconfigure: 0 first=4 dir=2
+fb reconfigure 15+4: 0
+endpoint protocol 1.0 created: yes
+UMPEndpoints before enabling: 1
+ep setName: 1
+ep name=renamed enabled=0 protocol=1
+ep setEnabled YES: 1 enabled=1
+UMPEndpoints after enabling: 1
+ep registerFunctionBlocks (1): 1
+ep functionBlocks count (mutable): 1
+MIDICIDeviceInfo (3,2,2,4 bytes): nil family=0
+MIDICIDeviceInfo (manufacturer 2 bytes): nil

@@ -1,0 +1,165 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+   "api": "UITableView.separatorInset",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the inset the separators of this table are drawn at, {0, 16, 0, 0} in a table made by hand as the host answers and not the zero a guess gives; asking for anything else makes the port draw this table's separators in a view of its own, in the table's own colour and style, and putting every value back at its default gives the release its own separator back",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UITableViewCell.separatorInset",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the inset this cell's separator is drawn at, {0, 8, 0, 8} in a cell made by hand, and the table's inset where the cell has none of its own, as the header says the cell's wins over the table's",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UITableView.sectionIndexBackgroundColor",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the colour drawn behind the section index, nil in a table made by hand as the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UITableView.separatorEffect",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a view drawn behind this table's separators, nil in a table made by hand as the host answers; setting one makes the port draw the separators, and the effect goes behind the line rather than replacing it",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UITableView.cellLayoutMarginsFollowReadableWidth",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the cells' separators follow the readable width, NO in a table made by hand as the host answers; when it is on the separator is inset by the table's own layout margins, {8, 8, 8, 8} on the host, the same inset the cell's margins use",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UICollectionViewLayoutAttributes.bounds",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the element's box beside its frame: its origin is the frame's and its size is the element's, and setting the frame moves the bounds' size while the origin stays at zero, which is what the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UICollectionViewFlowLayout.sectionHeadersPinToVisibleBounds",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether a section header stays put at the edge of the visible area instead of scrolling with its section, NO in a layout made by hand as the host answers, and setting it lays the layout out again",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UICollectionViewFlowLayout.sectionFootersPinToVisibleBounds",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the same for a section footer, NO in a layout made by hand as the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UICollectionViewController.collectionViewLayout",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the layout the controller's collection view is using, which is the view's own layout, so a controller given one and a controller whose view made one answer the same",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UICollectionViewController.useLayoutToLayoutNavigationTransitions",
+   "kind": "property",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether a navigation transition is laid out by the layout rather than by the navigation controller, NO in a controller made by hand as the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "UICollectionViewController.installsStandardGestureForInteractiveMovement",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the controller installs the gesture that starts a reorder, YES in a controller made by hand as the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "-[UICollectionViewDelegate collectionView:willDisplayCell:forItemAtIndexPath:]",
+   "kind": "method",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "told about a cell once, from the layout pass that puts it on screen, and not told again for a cell it has already told about; the release never asks, so an application that implemented this to configure a cell as it arrives was never called",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "-[UICollectionViewDelegate collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:]",
+   "kind": "method",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "told about a supplementary view once, when it comes on screen, by the same pass and with the same once-only rule",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the table.*, cell.*, flow.*, attributes.* and collectionController.* cases, including the defaults)"
+  },
+  {
+   "api": "-[UITableViewDelegate tableView:estimatedHeightForRowAtIndexPath:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked for how tall a row is before it has been drawn, and the answer is used where the port needs that distance: deciding how many rows are about to come on screen, in UITableView+Prefetching10.m. The release's own scrolling does not consult it, which is the one thing about it the port cannot give",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the header of SDK 26.2 for the question; the port's own use is in UITableView+Prefetching10.m, and the absence of an estimation seam on the release is recorded in the facts"
+  },
+  {
+   "api": "-[UITableViewDelegate tableView:estimatedHeightForHeaderInSection:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked for how tall a section header is before it has been drawn, used the same way as the row estimate",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the header of SDK 26.2 for the question; the port's own use is in UITableView+Prefetching10.m"
+  },
+  {
+   "api": "-[UITableViewDelegate tableView:estimatedHeightForFooterInSection:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked for how tall a section footer is before it has been drawn, used the same way as the row estimate",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the header of SDK 26.2 for the question; the port's own use is in UITableView+Prefetching10.m"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+--- a/libtapi/src/clang/CMakeLists.txt
++++ b/libtapi/src/clang/CMakeLists.txt
+@@ -319,7 +319,7 @@
+ 
+ # Determine HOST_LINK_VERSION on Darwin.
+ set(HOST_LINK_VERSION)
+-if (APPLE AND NOT CMAKE_LINKER MATCHES ".*lld.*")
++if (APPLE AND NOT CMAKE_LINKER MATCHES ".*lld.*" AND COMMAND get_darwin_linker_version)
+   get_darwin_linker_version(HOST_LINK_VERSION)
+   message(STATUS "Host linker version: ${HOST_LINK_VERSION}")
+ endif()

@@ -1,0 +1,45 @@
+{
+  "framework": "CoreMIDI",
+  "entries": [
+    {
+      "api": "kMIDIPropertyUMPActiveGroupBitmap",
+      "kind": "constant",
+      "introduced": "17.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the key macOS CoreMIDI holds once a client exists (active group bitmap, after MIDIClientCreate), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "kMIDIPropertyUMPCanTransmitGroupless",
+      "kind": "constant",
+      "introduced": "17.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the key macOS CoreMIDI holds once a client exists (ump endpoint, after MIDIClientCreate), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIEventPacketSysexBytesForGroup()",
+      "kind": "function",
+      "introduced": "17.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Sysex.md",
+      "source": "the header of iOS 16.4 for the contract (26.2 MIDIServices.h); macOS CoreMIDI for the bytes and the errors (tests/backports/host/coremidi/oracle/sysexbytes.m)"
+    },
+    {
+      "api": "MIDISendUMPSysex()",
+      "kind": "function",
+      "introduced": "17.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Sysex.md",
+      "source": "the 26.2 header for the contract (MIDIServices.h); macOS CoreMIDI for the verbatim delivery (tests/backports/host/coremidi/oracle/umpsysend.m)"
+    },
+    {
+      "api": "MIDISendUMPSysex8()",
+      "kind": "function",
+      "introduced": "17.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Sysex.md",
+      "source": "the 26.2 header for the contract (MIDIServices.h); macOS CoreMIDI for the verbatim delivery (tests/backports/host/coremidi/oracle/umpsysend.m)"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_RGB565toRGB888()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the expansion of a 5/6/5 word to 8/8/8, which Conversion.h writes out",
+      "effect": "red and blue (5 * 255 + 15) / 31 and green (6 * 255 + 31) / 63, in that order; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_ARGB1555toRGB565()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "Conversion.h gives no formula for this one, only that a caller who wants the alpha handled should convert to eight bits first, so the port does exactly that: the 1/5/5/5 word up to 8/8/8/8 and the 5/6/5 word down from it, which is the header's own 'first at high bitdepth, then convert to lower bitdepth'",
+      "effect": "the 1/5/5/5 word expanded and narrowed, and not a bit shift: red and blue (5 * 255 + 15) / 31 then (8 * 31 + 127) / 255 and green (5 * 255 + 15) / 31 then (8 * 63 + 127) / 255, packed as (red << 11) | (green << 5) | blue; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_RGBA5551toRGB565()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as ARGB1555toRGB565, for the 5/5/5/1 word",
+      "effect": "the 5/5/5/1 word expanded and narrowed, red and blue (5 * 255 + 15) / 31 then (8 * 31 + 127) / 255 and green (5 * 255 + 15) / 31 then (8 * 63 + 127) / 255, packed as (red << 11) | (green << 5) | blue; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_RGB565toARGB1555()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as above and reversed, and the call takes the dither the header gives it, which the port records and does not use for a dither of zero",
+      "effect": "the 5/6/5 word expanded and narrowed, the alpha set to 1 and packed as (1 << 15) | (red << 10) | (green << 5) | blue, where the green went up through six bits and down through five",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_RGB565toRGBA5551()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as above and reversed, with the alpha at the low bit and the green the other way round",
+      "effect": "the 5/6/5 word expanded and narrowed with the alpha at 1, packed as (red << 11) | (green << 6) | (blue << 1) | 1, where the green went up through six bits and down through five",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    }
+  ]
+}

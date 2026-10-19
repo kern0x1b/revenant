@@ -1,0 +1,550 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:MPSCoreTypes.h@T@MPSKernelOptions	-			enum MPSKernelOptions	-	-	-	-	6be6be5039575904	-
+enum	c:@E@MPSKernelOptions	-			NSUInteger	-	-	-	-	6d750a47693dcb22	-
+enumconst	c:@E@MPSKernelOptions@MPSKernelOptionsNone	MPSKernelOptions			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	f1afee48aa232bb8	0
+enumconst	c:@E@MPSKernelOptions@MPSKernelOptionsSkipAPIValidation	MPSKernelOptions			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	16a835eab322b371	1
+enumconst	c:@E@MPSKernelOptions@MPSKernelOptionsAllowReducedPrecision	MPSKernelOptions			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	1a2ea34f92e8844c	2
+enumconst	c:@E@MPSKernelOptions@MPSKernelOptionsDisableInternalTiling	MPSKernelOptions			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	8e6fb1105c9f46d1	4
+enumconst	c:@E@MPSKernelOptions@MPSKernelOptionsInsertDebugGroups	MPSKernelOptions			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	8cfafb4a3927046c	8
+enumconst	c:@E@MPSKernelOptions@MPSKernelOptionsVerbose	MPSKernelOptions			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	15623de33a825e23	16
+typedef	c:MPSCoreTypes.h@T@MPSImageEdgeMode	-			enum MPSImageEdgeMode	-	-	-	-	f1d9d5c7250d7dd2	-
+enum	c:@E@MPSImageEdgeMode	-			NSUInteger	-	-	-	-	58464437a6eb2d65	-
+enumconst	c:@E@MPSImageEdgeMode@MPSImageEdgeModeZero	MPSImageEdgeMode			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	854249310663dcc0	0
+enumconst	c:@E@MPSImageEdgeMode@MPSImageEdgeModeClamp	MPSImageEdgeMode			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	aaae67f1e6a4c2e9	1
+enumconst	c:@E@MPSImageEdgeMode@MPSImageEdgeModeMirror	MPSImageEdgeMode			-	-	-	ios=12.1/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14.1/-/-/0,tvos=12.1/-/-/0	-	f1863e1153e3c21f	2
+enumconst	c:@E@MPSImageEdgeMode@MPSImageEdgeModeMirrorWithEdge	MPSImageEdgeMode			-	-	-	ios=12.1/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14.1/-/-/0,tvos=12.1/-/-/0	-	1d247fe7d320cca0	3
+enumconst	c:@E@MPSImageEdgeMode@MPSImageEdgeModeConstant	MPSImageEdgeMode			-	-	-	ios=12.1/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14.1/-/-/0,tvos=12.1/-/-/0	-	aa8d48d3f2f2b2d3	4
+typedef	c:MPSCoreTypes.h@T@MPSImageFeatureChannelFormat	-			enum MPSImageFeatureChannelFormat	-	-	-	-	ab3a1c7f9d014444	-
+enum	c:@E@MPSImageFeatureChannelFormat	-			NSUInteger	-	-	-	-	4d8ceca71affef15	-
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormatNone	MPSImageFeatureChannelFormat			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	48082a5e5d490857	0
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormatUnorm8	MPSImageFeatureChannelFormat			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	178e2dac6461f906	1
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormatUnorm16	MPSImageFeatureChannelFormat			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	02bffae14a2f02b2	2
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormatFloat16	MPSImageFeatureChannelFormat			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	782b8c2af30a1581	3
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormatFloat32	MPSImageFeatureChannelFormat			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	6e10a4aaa01920ee	4
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormat_reserved0	MPSImageFeatureChannelFormat			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	d0a6ce622af3fd9a	5
+enumconst	c:@E@MPSImageFeatureChannelFormat@MPSImageFeatureChannelFormatCount	MPSImageFeatureChannelFormat			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	98bc741862bc3cf2	6
+typedef	c:MPSCoreTypes.h@T@MPSFloatDataTypeBit	-			enum MPSFloatDataTypeBit	-	-	-	-	ce6c8dfdc0697130	-
+enum	c:@E@MPSFloatDataTypeBit	-			uint32_t	-	-	-	-	7465de7017c5abe0	-
+enumconst	c:@E@MPSFloatDataTypeBit@MPSFloatDataTypeSignBit	MPSFloatDataTypeBit			-	-	-	-	-	768ef187573bfea5	8388608
+enumconst	c:@E@MPSFloatDataTypeBit@MPSFloatDataTypeExponentBit	MPSFloatDataTypeBit			-	-	-	-	-	034d2b4ad092d7e0	8126464
+enumconst	c:@E@MPSFloatDataTypeBit@MPSFloatDataTypeMantissaBit	MPSFloatDataTypeBit			-	-	-	-	-	b51a59c9c018fb10	261120
+typedef	c:MPSCoreTypes.h@T@MPSFloatDataTypeShift	-			enum MPSFloatDataTypeShift	-	-	-	-	c7ba024d0b5f3e4b	-
+enum	c:@E@MPSFloatDataTypeShift	-			uint32_t	-	-	-	-	1aa05902d62bdb1c	-
+enumconst	c:@E@MPSFloatDataTypeShift@MPSFloatDataTypeSignShift	MPSFloatDataTypeShift			-	-	-	-	-	b253fe9a859393d5	23
+enumconst	c:@E@MPSFloatDataTypeShift@MPSFloatDataTypeExponentShift	MPSFloatDataTypeShift			-	-	-	-	-	5abef7a5c98d4e8d	18
+enumconst	c:@E@MPSFloatDataTypeShift@MPSFloatDataTypeMantissaShift	MPSFloatDataTypeShift			-	-	-	-	-	86ab4ec5c7176479	10
+typedef	c:MPSCoreTypes.h@T@MPSDataType	-			enum MPSDataType	-	-	-	-	99a17108960411fb	-
+enum	c:@E@MPSDataType	-			uint32_t	-	-	-	-	476c728eac3ca32f	-
+enumconst	c:@E@MPSDataType@MPSDataTypeInvalid	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	6c7bfba002d62ef9	0
+enumconst	c:@E@MPSDataType@MPSDataTypeFloatBit	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	76138256afe74891	268435456
+enumconst	c:@E@MPSDataType@MPSDataTypeFloat32	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	73062e829f37e45a	268435488
+enumconst	c:@E@MPSDataType@MPSDataTypeFloat16	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	ab75ea422bff5b13	268435472
+enumconst	c:@E@MPSDataType@MPSDataTypeComplexBit	MPSDataType			-	-	-	ios=16.2/-/-/0,maccatalyst=16.2/-/-/0,macos=13.1/-/-/0,tvos=16.2/-/-/0	-	68a00211a1778dcf	16777216
+enumconst	c:@E@MPSDataType@MPSDataTypeComplexFloat32	MPSDataType			-	-	-	ios=16.2/-/-/0,maccatalyst=16.2/-/-/0,macos=13.1/-/-/0,tvos=13.1/-/-/0	-	78a1c51831889fee	285212736
+enumconst	c:@E@MPSDataType@MPSDataTypeComplexFloat16	MPSDataType			-	-	-	ios=16.2/-/-/0,maccatalyst=16.2/-/-/0,macos=13.1/-/-/0,tvos=13.1/-/-/0	-	6520d44b48fd61ae	285212704
+enumconst	c:@E@MPSDataType@MPSDataTypeSignedBit	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	1c210c9196e497bb	536870912
+enumconst	c:@E@MPSDataType@MPSDataTypeIntBit	MPSDataType			-	-	-	*deprecated	-	f3df3f1837e35f18	536870912
+enumconst	c:@E@MPSDataType@MPSDataTypeInt2	MPSDataType			-	-	-	ios=18.4/-/-/0,maccatalyst=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,xros=2.4/-/-/0	-	8dfed25e50e30a94	536870914
+enumconst	c:@E@MPSDataType@MPSDataTypeInt4	MPSDataType			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	aabdaed1962cf733	536870916
+enumconst	c:@E@MPSDataType@MPSDataTypeInt8	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c7e6cc98ae5eacb4	536870920
+enumconst	c:@E@MPSDataType@MPSDataTypeInt16	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	217ef254d4a91c05	536870928
+enumconst	c:@E@MPSDataType@MPSDataTypeInt32	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	2b4d3da4345bad54	536870944
+enumconst	c:@E@MPSDataType@MPSDataTypeInt64	MPSDataType			-	-	-	ios=14.1/-/-/0,maccatalyst=14.1/-/-/0,macos=11.0/-/-/0,tvos=14.1/-/-/0	-	dc63ef3f9e5f698e	536870976
+enumconst	c:@E@MPSDataType@MPSDataTypeUInt2	MPSDataType			-	-	-	ios=18.4/-/-/0,maccatalyst=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,xros=2.4/-/-/0	-	c47b37b8b92ba5bc	2
+enumconst	c:@E@MPSDataType@MPSDataTypeUInt4	MPSDataType			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	c858229c8f1069da	4
+enumconst	c:@E@MPSDataType@MPSDataTypeUInt8	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	912b22bb3422e0a4	8
+enumconst	c:@E@MPSDataType@MPSDataTypeUInt16	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	0f9b4d3cbec4d789	16
+enumconst	c:@E@MPSDataType@MPSDataTypeUInt32	MPSDataType			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	4c01a7fde109e092	32
+enumconst	c:@E@MPSDataType@MPSDataTypeUInt64	MPSDataType			-	-	-	ios=14.1/-/-/0,maccatalyst=14.1/-/-/0,macos=11.0/-/-/0,tvos=14.1/-/-/0	-	dab6ee2f61e1f702	64
+enumconst	c:@E@MPSDataType@MPSDataTypeAlternateEncodingBit	MPSDataType			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0	-	5d1994ebffaefa9a	2147483648
+enumconst	c:@E@MPSDataType@MPSDataTypeBool	MPSDataType			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0	-	599b4a45bcc34590	2147483656
+enumconst	c:@E@MPSDataType@MPSDataTypeBFloat16	MPSDataType			-	-	-	ios=16.0/-/-/0,macos=14.0/-/-/0,tvos=16.0/-/-/0	-	f10f5dca3d02f898	2415919120
+enumconst	c:@E@MPSDataType@MPSDataTypeNormalizedBit	MPSDataType			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3408ce65625aa1c8	1073741824
+enumconst	c:@E@MPSDataType@MPSDataTypeUnorm1	MPSDataType			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fd93039f5b0c0d57	1073741825
+enumconst	c:@E@MPSDataType@MPSDataTypeUnorm8	MPSDataType			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0855c31b150c9bd2	1073741832
+typedef	c:MPSCoreTypes.h@T@MPSAliasingStrategy	-			enum MPSAliasingStrategy	-	-	-	-	768fd1c1c6690028	-
+enum	c:@E@MPSAliasingStrategy	-			NSUInteger	-	-	-	-	4cf41075a248188a	-
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyDefault	MPSAliasingStrategy			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	6e06fd1ac7c844ae	0
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyDontCare	MPSAliasingStrategy			-	-	-	-	-	2b4a676f47709e49	0
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyShallAlias	MPSAliasingStrategy			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4cdc507182d013b9	1
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyShallNotAlias	MPSAliasingStrategy			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	028ac4c2e83fbaf0	2
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyAliasingReserved	MPSAliasingStrategy			-	-	-	-	-	9ae27ae7d5279753	3
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyPreferTemporaryMemory	MPSAliasingStrategy			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	6f792d90056c67c2	4
+enumconst	c:@E@MPSAliasingStrategy@MPSAliasingStrategyPreferNonTemporaryMemory	MPSAliasingStrategy			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	0a8d422cd6a2ce8c	8
+struct	c:@SA@MPSOffset	-			-	-	-	-	-	c6b240709f78a5a8	-
+field	c:@SA@MPSOffset@FI@x	MPSOffset			NSInteger	-	-	-	-	0e18689bec8ce633	-
+field	c:@SA@MPSOffset@FI@y	MPSOffset			NSInteger	-	-	-	-	3abef1f31a41781d	-
+field	c:@SA@MPSOffset@FI@z	MPSOffset			NSInteger	-	-	-	-	1df76c564712b770	-
+typedef	c:@T@MPSOffset	-			struct MPSOffset	-	-	-	-	2397d7bfe3668be7	-
+struct	c:@S@MPSOrigin	-			-	-	-	-	-	ee2105f2e4a63834	-
+field	c:@S@MPSOrigin@FI@x	MPSOrigin			double	-	-	-	-	803a8813fc3c1c1b	-
+field	c:@S@MPSOrigin@FI@y	MPSOrigin			double	-	-	-	-	000cd73aaf7cc559	-
+field	c:@S@MPSOrigin@FI@z	MPSOrigin			double	-	-	-	-	a4037a60fb7f50ca	-
+typedef	c:MPSCoreTypes.h@T@MPSOrigin	-			struct MPSOrigin	-	-	-	-	a6e7fe77b5f4f6aa	-
+struct	c:@S@MPSSize	-			-	-	-	-	-	5ae65c6efc67bbd8	-
+field	c:@S@MPSSize@FI@width	MPSSize			double	-	-	-	-	f9ecb0d0318478ca	-
+field	c:@S@MPSSize@FI@height	MPSSize			double	-	-	-	-	b78cc55daa39f8e1	-
+field	c:@S@MPSSize@FI@depth	MPSSize			double	-	-	-	-	d34b4762c5c200ed	-
+typedef	c:MPSCoreTypes.h@T@MPSSize	-			struct MPSSize	-	-	-	-	8231f4e84bbe285f	-
+struct	c:@S@MPSDimensionSlice	-			-	-	-	-	-	6d9836d989d9cd2a	-
+field	c:@S@MPSDimensionSlice@FI@start	MPSDimensionSlice			NSUInteger	-	-	-	-	5a3bdd8365f7d50f	-
+field	c:@S@MPSDimensionSlice@FI@length	MPSDimensionSlice			NSUInteger	-	-	-	-	f99f1c0489cf0e19	-
+typedef	c:MPSCoreTypes.h@T@MPSDimensionSlice	-			struct MPSDimensionSlice	-	-	-	-	a88689de1e47e005	-
+struct	c:@S@MPSRegion	-			-	-	-	-	-	badae075d7e55203	-
+field	c:@S@MPSRegion@FI@origin	MPSRegion			MPSOrigin	-	-	-	-	e3dbb329ab3c1097	-
+field	c:@S@MPSRegion@FI@size	MPSRegion			MPSSize	-	-	-	-	41479a72a19f727e	-
+typedef	c:MPSCoreTypes.h@T@MPSRegion	-			struct MPSRegion	-	-	-	-	195d6580d6b85781	-
+struct	c:@S@MPSScaleTransform	-			-	-	-	-	-	1b88f35273f3df43	-
+field	c:@S@MPSScaleTransform@FI@scaleX	MPSScaleTransform			double	-	-	-	-	4f02e78b107c93ca	-
+field	c:@S@MPSScaleTransform@FI@scaleY	MPSScaleTransform			double	-	-	-	-	efb39c4104bad931	-
+field	c:@S@MPSScaleTransform@FI@translateX	MPSScaleTransform			double	-	-	-	-	38e6161412773a74	-
+field	c:@S@MPSScaleTransform@FI@translateY	MPSScaleTransform			double	-	-	-	-	bd5781f48047b4ee	-
+typedef	c:MPSCoreTypes.h@T@MPSScaleTransform	-			struct MPSScaleTransform	-	-	-	-	773b2ac57b633903	-
+struct	c:@S@MPSImageCoordinate	-			-	-	-	-	-	1d5b7d0275c03bc7	-
+field	c:@S@MPSImageCoordinate@FI@x	MPSImageCoordinate			NSUInteger	-	-	-	-	686f70bb854318b7	-
+field	c:@S@MPSImageCoordinate@FI@y	MPSImageCoordinate			NSUInteger	-	-	-	-	c4b17dde66bddccf	-
+field	c:@S@MPSImageCoordinate@FI@channel	MPSImageCoordinate			NSUInteger	-	-	-	-	33ef599e5bd0a9e8	-
+typedef	c:MPSCoreTypes.h@T@MPSImageCoordinate	-			struct MPSImageCoordinate	-	-	-	-	ddf93eaca1e18699	-
+struct	c:@S@MPSImageRegion	-			-	-	-	-	-	9235f61ca845ab7a	-
+field	c:@S@MPSImageRegion@FI@offset	MPSImageRegion			MPSImageCoordinate	-	-	-	-	291ad8aecf1a852e	-
+field	c:@S@MPSImageRegion@FI@size	MPSImageRegion			MPSImageCoordinate	-	-	-	-	76024a3b67f5b7d7	-
+typedef	c:MPSCoreTypes.h@T@MPSImageRegion	-			struct MPSImageRegion	-	-	-	-	0de14a04c34063f7	-
+var	c:@MPSRectNoClip	-			const MTLRegion	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d26a2fc27b616afd	-
+protocol	c:objc(pl)MPSDeviceProvider	-			-	-	-	-	-	d522521f39f4bbe5	-
+method	c:objc(pl)MPSDeviceProvider(im)mpsMTLDevice	-			id<MTLDevice>	-	-	-	-	bf794048318cb0de	-
+typedef	c:MPSCoreTypes.h@T@MPSShape	-			NSArray<NSNumber *>	-	-	-	-	1b1807870552e404	-
+function	c:MPSCoreTypes.h@F@MPSDataTypeBitsCount	-			size_t (MPSDataType)	MPSDataType t	-	-	-	e4fecc613dd1ce8c	-
+function	c:MPSCoreTypes.h@F@MPSSizeofMPSDataType	-			size_t (MPSDataType)	MPSDataType t	-	-	-	8b08784f45f624a6	-
+interface	c:objc(cs)MPSImageDescriptor	-			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	cdf387f23cb70388	-
+super	-	MPSImageDescriptor	NSObject		-	-	-	-	-	8fed333c055e9fe4	-
+conforms	c:objc(cs)MPSImageDescriptor	MPSImageDescriptor	NSCopying		-	-	-	-	-	a223de4c0215c54f	-
+property	c:objc(cs)MPSImageDescriptor(py)width	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	111f1076746bc2cb	-
+property	c:objc(cs)MPSImageDescriptor(py)height	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	b22c3e2b4b60d40e	-
+property	c:objc(cs)MPSImageDescriptor(py)featureChannels	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	ea25570ebaa6b90f	-
+property	c:objc(cs)MPSImageDescriptor(py)numberOfImages	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	01cb57c0a6370e21	-
+property	c:objc(cs)MPSImageDescriptor(py)pixelFormat	-			MTLPixelFormat	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	abd92b39d932545b	-
+property	c:objc(cs)MPSImageDescriptor(py)channelFormat	-			MPSImageFeatureChannelFormat	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c0edafc61107c0fe	-
+property	c:objc(cs)MPSImageDescriptor(py)cpuCacheMode	-			MTLCPUCacheMode	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	ed65043fc73bddd9	-
+property	c:objc(cs)MPSImageDescriptor(py)storageMode	-			MTLStorageMode	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	b23b8fd3a58e9e56	-
+property	c:objc(cs)MPSImageDescriptor(py)usage	-			MTLTextureUsage	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	f8afa6ea9d955954	-
+method	c:objc(cs)MPSImageDescriptor(cm)imageDescriptorWithChannelFormat:width:height:featureChannels:	-			instancetype	MPSImageFeatureChannelFormat channelFormat | NSUInteger width | NSUInteger height | NSUInteger featureChannels	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	fc0506a4d673cebf	-
+method	c:objc(cs)MPSImageDescriptor(cm)imageDescriptorWithChannelFormat:width:height:featureChannels:numberOfImages:usage:	-			instancetype	MPSImageFeatureChannelFormat channelFormat | NSUInteger width | NSUInteger height | NSUInteger featureChannels | NSUInteger numberOfImages | MTLTextureUsage usage	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	9c193528110fbfcb	-
+method	c:objc(cs)MPSImageDescriptor(im)copyWithZone:	-			instancetype	NSZone * zone	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	7ff856aae61238e0	-
+typedef	c:MPSImage.h@T@MPSImageBatch	-			NSArray<MPSImage *>	-	-	-	-	f6dc56e5940505a8	-
+function	c:@F@MPSImageBatchIncrementReadCount	-			NSUInteger (MPSImageBatch *, NSInteger)	MPSImageBatch * batch | NSInteger amount	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	8423dbede84c7e84	-
+function	c:@F@MPSImageBatchSynchronize	-			void (MPSImageBatch *, id<MTLCommandBuffer>)	MPSImageBatch * batch | id<MTLCommandBuffer> cmdBuf	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	dc87e56967073315	-
+function	c:@F@MPSImageBatchResourceSize	-			NSUInteger (MPSImageBatch *)	MPSImageBatch * batch	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	90388e2c432a4d83	-
+function	c:@F@MPSImageBatchIterate	-			NSInteger (MPSImageBatch *, NSInteger (^)(MPSImage * _Nonnull, NSUInteger))	MPSImageBatch * batch | NSInteger (^)(MPSImage * _Nonnull, NSUInteger) iteratorBlock	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	c55582c21cbbe266	-
+protocol	c:objc(pl)MPSImageAllocator	-			-	-	-	-	-	5c12d1b63ad2bbfc	-
+conforms	c:objc(pl)MPSImageAllocator	MPSImageAllocator	NSObject		-	-	-	-	-	42446c75b009d0dd	-
+conforms	c:objc(pl)MPSImageAllocator	MPSImageAllocator	NSSecureCoding		-	-	-	-	-	dcc57d3283e7311a	-
+method	c:objc(pl)MPSImageAllocator(im)imageForCommandBuffer:imageDescriptor:kernel:	-			MPSImage *	id<MTLCommandBuffer> cmdBuf | MPSImageDescriptor * descriptor | MPSKernel * kernel	-	-	-	224a91daced46739	-
+method	c:objc(pl)MPSImageAllocator(im)imageBatchForCommandBuffer:imageDescriptor:kernel:count:	-			MPSImageBatch *	id<MTLCommandBuffer> cmdBuf | MPSImageDescriptor * descriptor | MPSKernel * kernel | NSUInteger count	optional	-	-	986c94f076fc8ca0	-
+typedef	c:MPSImage.h@T@MPSPurgeableState	-			enum MPSPurgeableState	-	-	-	-	2057c1e292cdd8da	-
+enum	c:@E@MPSPurgeableState	-			NSUInteger	-	-	ios=8.0/-/-/0	-	d902e672f38528d7	-
+enumconst	c:@E@MPSPurgeableState@MPSPurgeableStateAllocationDeferred	MPSPurgeableState			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	642e916ed1846205	0
+enumconst	c:@E@MPSPurgeableState@MPSPurgeableStateKeepCurrent	MPSPurgeableState			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	cbe52195829d2954	1
+enumconst	c:@E@MPSPurgeableState@MPSPurgeableStateNonVolatile	MPSPurgeableState			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	555ef922605cb3d7	2
+enumconst	c:@E@MPSPurgeableState@MPSPurgeableStateVolatile	MPSPurgeableState			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	1fba7ceeffc919f6	3
+enumconst	c:@E@MPSPurgeableState@MPSPurgeableStateEmpty	MPSPurgeableState			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	1a39f50195b7f48c	4
+typedef	c:MPSImage.h@T@MPSDataLayout	-			enum MPSDataLayout	-	-	-	-	fda3d71b72aea067	-
+enum	c:@E@MPSDataLayout	-			NSUInteger	-	-	ios=11.0/-/-/0	-	1e40ec227db5a2ec	-
+enumconst	c:@E@MPSDataLayout@MPSDataLayoutHeightxWidthxFeatureChannels	MPSDataLayout			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e9ba7b8e3d373397	0
+enumconst	c:@E@MPSDataLayout@MPSDataLayoutFeatureChannelsxHeightxWidth	MPSDataLayout			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ac0791344faf413d	1
+struct	c:@SA@MPSImageReadWriteParams	-			-	-	-	-	-	8b8209e592e55fb4	-
+field	c:@SA@MPSImageReadWriteParams@FI@featureChannelOffset	MPSImageReadWriteParams			NSUInteger	-	-	-	-	5dd19bdb652cd440	-
+field	c:@SA@MPSImageReadWriteParams@FI@numberOfFeatureChannelsToReadWrite	MPSImageReadWriteParams			NSUInteger	-	-	-	-	ea1364f0631e7107	-
+typedef	c:@T@MPSImageReadWriteParams	-			struct MPSImageReadWriteParams	-	-	-	-	909985ca86266b91	-
+interface	c:objc(cs)MPSImage	-			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	3cc2e552ba63cce4	-
+super	-	MPSImage	NSObject		-	-	-	-	-	edd0597589a5b55e	-
+method	c:objc(cs)MPSImage(cm)defaultAllocator	-			id<MPSImageAllocator>	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	aee2fddf3cf5ec83	-
+property	c:objc(cs)MPSImage(py)device	-			id<MTLDevice>	-	readonly,retain,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	f1e3ea03bc5cf70d	-
+property	c:objc(cs)MPSImage(py)width	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	6f9c30054cd62d2b	-
+property	c:objc(cs)MPSImage(py)height	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	057564d0ddfaaf81	-
+property	c:objc(cs)MPSImage(py)featureChannels	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	df5597616cb64a29	-
+property	c:objc(cs)MPSImage(py)numberOfImages	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	15d9f0ac36a4a8a3	-
+property	c:objc(cs)MPSImage(py)textureType	-			MTLTextureType	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	83b5bd0f4e16a13c	-
+property	c:objc(cs)MPSImage(py)pixelFormat	-			MTLPixelFormat	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	44106df606561e9f	-
+property	c:objc(cs)MPSImage(py)precision	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	9763ce724e5bedc6	-
+property	c:objc(cs)MPSImage(py)usage	-			MTLTextureUsage	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	71d30abf971060d7	-
+property	c:objc(cs)MPSImage(py)featureChannelFormat	-			MPSImageFeatureChannelFormat	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	f906a7d05e347e38	-
+property	c:objc(cs)MPSImage(py)pixelSize	-			size_t	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	262bdcf0b45395ad	-
+property	c:objc(cs)MPSImage(py)texture	-			id<MTLTexture>	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	72d5b521a4725a60	-
+property	c:objc(cs)MPSImage(py)label	-			NSString *	-	copy,atomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	7b67a7994342c6eb	-
+property	c:objc(cs)MPSImage(py)parent	-			MPSImage *	-	readonly,retain,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	4b2e307379379d71	-
+method	c:objc(cs)MPSImage(im)initWithDevice:imageDescriptor:	-			instancetype	id<MTLDevice> device | const MPSImageDescriptor * imageDescriptor	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	7e9bf5f85da4e81e	-
+method	c:objc(cs)MPSImage(im)initWithParentImage:sliceRange:featureChannels:	-			instancetype	MPSImage * parent | NSRange sliceRange | NSUInteger featureChannels	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	33e9bd6f0e049a6b	-
+method	c:objc(cs)MPSImage(im)initWithTexture:featureChannels:	-			instancetype	id<MTLTexture> texture | NSUInteger featureChannels	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	d05a5b61621c1430	-
+method	c:objc(cs)MPSImage(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	d8cc37711652da35	-
+method	c:objc(cs)MPSImage(im)batchRepresentationWithSubRange:	-			MPSImageBatch *	NSRange subRange	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	0e178857daefda8d	-
+method	c:objc(cs)MPSImage(im)batchRepresentation	-			MPSImageBatch *	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	9b6a375ea4d4e51a	-
+method	c:objc(cs)MPSImage(im)subImageWithFeatureChannelRange:	-			MPSImage *	NSRange range	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	2838f25ff9e67d5d	-
+method	c:objc(cs)MPSImage(im)resourceSize	-			NSUInteger	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	af7df588de1ce12c	-
+method	c:objc(cs)MPSImage(im)setPurgeableState:	-			MPSPurgeableState	MPSPurgeableState state	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	dc0d79ce757090b3	-
+method	c:objc(cs)MPSImage(im)readBytes:dataLayout:bytesPerRow:region:featureChannelInfo:imageIndex:	-			void	void * dataBytes | MPSDataLayout dataLayout | NSUInteger bytesPerRow | MTLRegion region | MPSImageReadWriteParams featureChannelInfo | NSUInteger imageIndex	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	223449e1df55c769	-
+method	c:objc(cs)MPSImage(im)writeBytes:dataLayout:bytesPerRow:region:featureChannelInfo:imageIndex:	-			void	const void * dataBytes | MPSDataLayout dataLayout | NSUInteger bytesPerRow | MTLRegion region | MPSImageReadWriteParams featureChannelInfo | NSUInteger imageIndex	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	ea47055a08cceaf1	-
+method	c:objc(cs)MPSImage(im)writeBytes:dataLayout:bytesPerColumn:bytesPerRow:bytesPerImage:region:featureChannelInfo:imageIndex:	-			void	const void * dataBytes | MPSDataLayout dataLayout | NSUInteger bytesPerColumn | NSUInteger bytesPerRow | NSUInteger bytesPerImage | MTLRegion region | MPSImageReadWriteParams featureChannelInfo | NSUInteger imageIndex	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	9f6e7d0c504b13d8	-
+method	c:objc(cs)MPSImage(im)readBytes:dataLayout:bytesPerRow:bytesPerImage:region:featureChannelInfo:imageIndex:	-			void	void * dataBytes | MPSDataLayout dataLayout | NSUInteger bytesPerRow | NSUInteger bytesPerImage | MTLRegion region | MPSImageReadWriteParams featureChannelInfo | NSUInteger imageIndex	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5e672e7695422340	-
+method	c:objc(cs)MPSImage(im)writeBytes:dataLayout:bytesPerRow:bytesPerImage:region:featureChannelInfo:imageIndex:	-			void	const void * dataBytes | MPSDataLayout dataLayout | NSUInteger bytesPerRow | NSUInteger bytesPerImage | MTLRegion region | MPSImageReadWriteParams featureChannelInfo | NSUInteger imageIndex	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	49672a3de435ee53	-
+method	c:objc(cs)MPSImage(im)readBytes:dataLayout:imageIndex:	-			void	void * dataBytes | MPSDataLayout dataLayout | NSUInteger imageIndex	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	68f4330924138f4d	-
+method	c:objc(cs)MPSImage(im)writeBytes:dataLayout:imageIndex:	-			void	const void * dataBytes | MPSDataLayout dataLayout | NSUInteger imageIndex	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	33b7d7e33db4e6d5	-
+method	c:objc(cs)MPSImage(im)synchronizeOnCommandBuffer:	-			void	id<MTLCommandBuffer> commandBuffer	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	1c93d28856ce6f22	-
+interface	c:objc(cs)MPSTemporaryImage	-			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	7e780aa328e18207	-
+super	-	MPSTemporaryImage	MPSImage		-	-	-	-	-	e501709cae4b0aa4	-
+method	c:objc(cs)MPSTemporaryImage(cm)defaultAllocator	-			id<MPSImageAllocator>	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	d1f6cc49c98503d1	-
+method	c:objc(cs)MPSTemporaryImage(cm)temporaryImageWithCommandBuffer:imageDescriptor:	-			instancetype	id<MTLCommandBuffer> commandBuffer | const MPSImageDescriptor * imageDescriptor	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	a40e512bd9894861	-
+method	c:objc(cs)MPSTemporaryImage(cm)temporaryImageWithCommandBuffer:textureDescriptor:	-			instancetype	id<MTLCommandBuffer> commandBuffer | const MTLTextureDescriptor * textureDescriptor	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c1f1fbd906ea5f11	-
+method	c:objc(cs)MPSTemporaryImage(cm)temporaryImageWithCommandBuffer:textureDescriptor:featureChannels:	-			instancetype	id<MTLCommandBuffer> commandBuffer | const MTLTextureDescriptor * textureDescriptor | NSUInteger featureChannels	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	96b82ce591fc86b6	-
+method	c:objc(cs)MPSTemporaryImage(cm)prefetchStorageWithCommandBuffer:imageDescriptorList:	-			void	id<MTLCommandBuffer> commandBuffer | NSArray<MPSImageDescriptor *> * descriptorList	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	a73096d77e9de837	-
+method	c:objc(cs)MPSTemporaryImage(im)initWithTexture:featureChannels:	-			instancetype	id<MTLTexture> texture | NSUInteger featureChannels	-	*unavailable ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c7e3e65995ab8e30	-
+method	c:objc(cs)MPSTemporaryImage(im)initWithDevice:imageDescriptor:	-			instancetype	id<MTLDevice> device | const MPSImageDescriptor * imageDescriptor	-	*unavailable ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	0e4e6058d7e8de94	-
+property	c:objc(cs)MPSTemporaryImage(py)readCount	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	2f3ba30e00ff3068	-
+interface	c:objc(cs)MPSPredicate	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	3578a8f4cca6b9e5	-
+super	-	MPSPredicate	NSObject		-	-	-	-	-	d1eaa069447652c8	-
+property	c:objc(cs)MPSPredicate(py)predicateBuffer	-			id<MTLBuffer>	-	readonly,retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	d2dabb9df51fe0c9	-
+property	c:objc(cs)MPSPredicate(py)predicateOffset	-			NSUInteger	-	readonly,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	7888b8c09926cf52	-
+method	c:objc(cs)MPSPredicate(cm)predicateWithBuffer:offset:	-			instancetype	id<MTLBuffer> buffer | NSUInteger offset	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	f202dedf48d05e11	-
+method	c:objc(cs)MPSPredicate(im)initWithBuffer:offset:	-			instancetype	id<MTLBuffer> buffer | NSUInteger offset	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	0eef7ad80e6f715c	-
+method	c:objc(cs)MPSPredicate(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	3c3496ebb04c8217	-
+protocol	c:objc(pl)MPSHeapProvider	-			-	-	-	-	-	5880e9c31a49e368	-
+conforms	c:objc(pl)MPSHeapProvider	MPSHeapProvider	NSObject		-	-	-	-	-	fae305388668b683	-
+method	c:objc(pl)MPSHeapProvider(im)newHeapWithDescriptor:	-			id<MTLHeap>	MTLHeapDescriptor * descriptor	-	-	-	4c47dd7639d6ddb9	-
+method	c:objc(pl)MPSHeapProvider(im)retireHeap:cacheDelay:	-			void	id<MTLHeap> heap | double seconds	optional	-	-	26b4e21b47716d9b	-
+interface	c:objc(cs)MPSCommandBuffer	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1051641ac6b73547	-
+super	-	MPSCommandBuffer	NSObject		-	-	-	-	-	77ac16bd7f190f89	-
+conforms	c:objc(cs)MPSCommandBuffer	MPSCommandBuffer	MTLCommandBuffer		-	-	-	-	-	5e114df5096919c6	-
+property	c:objc(cs)MPSCommandBuffer(py)commandBuffer	-			id<MTLCommandBuffer>	-	readonly,retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	e47c92a24f6c5622	-
+property	c:objc(cs)MPSCommandBuffer(py)rootCommandBuffer	-			id<MTLCommandBuffer>	-	readonly,retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	3e8783a1123dbafb	-
+property	c:objc(cs)MPSCommandBuffer(py)predicate	-			MPSPredicate *	-	retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	521495f440d9be49	-
+property	c:objc(cs)MPSCommandBuffer(py)heapProvider	-			id<MPSHeapProvider>	-	retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	f384d3d989d3df12	-
+method	c:objc(cs)MPSCommandBuffer(cm)commandBufferWithCommandBuffer:	-			instancetype	id<MTLCommandBuffer> commandBuffer	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	878a9da1141b14e8	-
+method	c:objc(cs)MPSCommandBuffer(cm)commandBufferFromCommandQueue:	-			instancetype	id<MTLCommandQueue> commandQueue	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	098b9ca8039cbcfa	-
+method	c:objc(cs)MPSCommandBuffer(im)initWithCommandBuffer:	-			instancetype	id<MTLCommandBuffer> commandBuffer	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	0042d520550499b7	-
+method	c:objc(cs)MPSCommandBuffer(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	8f00d71994ca116c	-
+method	c:objc(cs)MPSCommandBuffer(im)commitAndContinue	-			void	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	2360bd82d47322f6	-
+method	c:objc(cs)MPSCommandBuffer(im)prefetchHeapForWorkloadSize:	-			void	size_t size	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ffe70374cfbded55	-
+interface	c:objc(cs)MPSKernel	-			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	ddb26493ba028409	-
+super	-	MPSKernel	NSObject		-	-	-	-	-	02250545001ba3fa	-
+conforms	c:objc(cs)MPSKernel	MPSKernel	NSCopying		-	-	-	-	-	2e0a8d1b48a39f5f	-
+conforms	c:objc(cs)MPSKernel	MPSKernel	NSSecureCoding		-	-	-	-	-	45568efb06ea637e	-
+property	c:objc(cs)MPSKernel(py)options	-			MPSKernelOptions	-	nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	0d192a1d1c05e2f1	-
+property	c:objc(cs)MPSKernel(py)device	-			id<MTLDevice>	-	readonly,retain,nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	e85581e4876529c9	-
+property	c:objc(cs)MPSKernel(py)label	-			NSString *	-	copy,atomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	5706b0b3d8ebc518	-
+method	c:objc(cs)MPSKernel(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	6b43e12132114268	-
+method	c:objc(cs)MPSKernel(im)copyWithZone:device:	-			instancetype	NSZone * zone | id<MTLDevice> device	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	e063b336609e4961	-
+method	c:objc(cs)MPSKernel(im)initWithCoder:	-			instancetype	NSCoder * aDecoder	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=9.0/-/-/0	-	79ebbd4532820baf	-
+method	c:objc(cs)MPSKernel(im)initWithCoder:device:	-			instancetype	NSCoder * aDecoder | id<MTLDevice> device	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cb3aa38903aeb58e	-
+interface	c:objc(cs)MPSMatrixDescriptor	-			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	0c38ee8b099d65ad	-
+super	-	MPSMatrixDescriptor	NSObject		-	-	-	-	-	03c1f8a068026943	-
+property	c:objc(cs)MPSMatrixDescriptor(py)rows	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	018c2fe789028ab9	-
+property	c:objc(cs)MPSMatrixDescriptor(py)columns	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	ed663e19f01043e1	-
+property	c:objc(cs)MPSMatrixDescriptor(py)matrices	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c25d0be76ba0bfde	-
+property	c:objc(cs)MPSMatrixDescriptor(py)dataType	-			MPSDataType	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	3d3c0545d3a5b3cc	-
+property	c:objc(cs)MPSMatrixDescriptor(py)rowBytes	-			NSUInteger	-	nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c73fc50456022488	-
+property	c:objc(cs)MPSMatrixDescriptor(py)matrixBytes	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	071ef79d7fd99217	-
+method	c:objc(cs)MPSMatrixDescriptor(cm)matrixDescriptorWithDimensions:columns:rowBytes:dataType:	-			instancetype	NSUInteger rows | NSUInteger columns | NSUInteger rowBytes | MPSDataType dataType	-	ios=10.0/11.0/-/0,maccatalyst=-/-/-/1,tvos=10.0/11.0/-/0	-	c0084a1bc78af8af	-
+method	c:objc(cs)MPSMatrixDescriptor(cm)matrixDescriptorWithRows:columns:rowBytes:dataType:	-			instancetype	NSUInteger rows | NSUInteger columns | NSUInteger rowBytes | MPSDataType dataType	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a781c61f60de631b	-
+method	c:objc(cs)MPSMatrixDescriptor(cm)matrixDescriptorWithRows:columns:matrices:rowBytes:matrixBytes:dataType:	-			instancetype	NSUInteger rows | NSUInteger columns | NSUInteger matrices | NSUInteger rowBytes | NSUInteger matrixBytes | MPSDataType dataType	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e3b60473895215af	-
+method	c:objc(cs)MPSMatrixDescriptor(cm)rowBytesFromColumns:dataType:	-			size_t	NSUInteger columns | MPSDataType dataType	-	ios=10.0/11.0/-/0,maccatalyst=-/-/-/1,tvos=10.0/11.0/-/0	-	8bbfcb17db2ea2aa	-
+method	c:objc(cs)MPSMatrixDescriptor(cm)rowBytesForColumns:dataType:	-			size_t	NSUInteger columns | MPSDataType dataType	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	d52d144ea0845c6d	-
+interface	c:objc(cs)MPSVectorDescriptor	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	295f86b33e3b1665	-
+super	-	MPSVectorDescriptor	NSObject		-	-	-	-	-	2005d99e9f6224b9	-
+property	c:objc(cs)MPSVectorDescriptor(py)length	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	42a39e2199bb7b88	-
+property	c:objc(cs)MPSVectorDescriptor(py)vectors	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	eff1c415ed125456	-
+property	c:objc(cs)MPSVectorDescriptor(py)dataType	-			MPSDataType	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8d08c668178373b0	-
+property	c:objc(cs)MPSVectorDescriptor(py)vectorBytes	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	887e7b6433a9f5fc	-
+method	c:objc(cs)MPSVectorDescriptor(cm)vectorDescriptorWithLength:dataType:	-			instancetype	NSUInteger length | MPSDataType dataType	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	9cbf4c6b1341dda2	-
+method	c:objc(cs)MPSVectorDescriptor(cm)vectorDescriptorWithLength:vectors:vectorBytes:dataType:	-			instancetype	NSUInteger length | NSUInteger vectors | NSUInteger vectorBytes | MPSDataType dataType	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8838ae9ef829b993	-
+method	c:objc(cs)MPSVectorDescriptor(cm)vectorBytesForLength:dataType:	-			size_t	NSUInteger length | MPSDataType dataType	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	1fc64e92d56a8cfb	-
+interface	c:objc(cs)MPSMatrix	-			-	-	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	88b86d4d29a0042d	-
+super	-	MPSMatrix	NSObject		-	-	-	-	-	8342c84046860026	-
+property	c:objc(cs)MPSMatrix(py)device	-			id<MTLDevice>	-	readonly,retain,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	e4b88e61b0d7fe8a	-
+property	c:objc(cs)MPSMatrix(py)rows	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	10ba2950c1b767c6	-
+property	c:objc(cs)MPSMatrix(py)columns	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	0f5197b91651d691	-
+property	c:objc(cs)MPSMatrix(py)matrices	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c7fce86f55254509	-
+property	c:objc(cs)MPSMatrix(py)dataType	-			MPSDataType	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	478e511b391df179	-
+property	c:objc(cs)MPSMatrix(py)rowBytes	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	c1e3ffa370179c1b	-
+property	c:objc(cs)MPSMatrix(py)matrixBytes	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c0216b3ba75e7fa0	-
+property	c:objc(cs)MPSMatrix(py)offset	-			NSUInteger	-	readonly,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4868f98eac15d34f	-
+property	c:objc(cs)MPSMatrix(py)data	-			id<MTLBuffer>	-	readonly,nonatomic	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	292cc95c5cf47aeb	-
+method	c:objc(cs)MPSMatrix(im)initWithBuffer:descriptor:	-			instancetype	id<MTLBuffer> buffer | MPSMatrixDescriptor * descriptor	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	a852cc3f9bfb55b1	-
+method	c:objc(cs)MPSMatrix(im)initWithBuffer:offset:descriptor:	-			instancetype	id<MTLBuffer> buffer | NSUInteger offset | MPSMatrixDescriptor * descriptor	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	8fd32b4b044d0fb9	-
+method	c:objc(cs)MPSMatrix(im)initWithDevice:descriptor:	-			instancetype	id<MTLDevice> device | MPSMatrixDescriptor * descriptor	-	ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	b36293b5b400e458	-
+method	c:objc(cs)MPSMatrix(im)init	-			instancetype	-	-	*unavailable ios=10.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=10.0/-/-/0	-	996eae0741cc5e60	-
+method	c:objc(cs)MPSMatrix(im)synchronizeOnCommandBuffer:	-			void	id<MTLCommandBuffer> commandBuffer	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	dd418c677889148d	-
+method	c:objc(cs)MPSMatrix(im)resourceSize	-			NSUInteger	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	22c9ff33aa7656d5	-
+interface	c:objc(cs)MPSVector	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	603ce4637d9367a2	-
+super	-	MPSVector	NSObject		-	-	-	-	-	4bbe2f71ffd9b48c	-
+property	c:objc(cs)MPSVector(py)device	-			id<MTLDevice>	-	readonly,retain,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	298c1a0290511963	-
+property	c:objc(cs)MPSVector(py)length	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	316acd10e8980b9f	-
+property	c:objc(cs)MPSVector(py)vectors	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b85c50bc1570557e	-
+property	c:objc(cs)MPSVector(py)dataType	-			MPSDataType	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	b6de4a1d3c417309	-
+property	c:objc(cs)MPSVector(py)vectorBytes	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a3f1558d064860ae	-
+property	c:objc(cs)MPSVector(py)offset	-			NSUInteger	-	readonly,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	df0f3704ef0b0309	-
+property	c:objc(cs)MPSVector(py)data	-			id<MTLBuffer>	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	6ac7cd890e890777	-
+method	c:objc(cs)MPSVector(im)initWithBuffer:descriptor:	-			instancetype	id<MTLBuffer> buffer | MPSVectorDescriptor * descriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	717c31075879ea49	-
+method	c:objc(cs)MPSVector(im)initWithBuffer:offset:descriptor:	-			instancetype	id<MTLBuffer> buffer | NSUInteger offset | MPSVectorDescriptor * descriptor	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	2ad63cbd26db5d16	-
+method	c:objc(cs)MPSVector(im)initWithDevice:descriptor:	-			instancetype	id<MTLDevice> device | MPSVectorDescriptor * descriptor	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	2b5fb8d3e550a67c	-
+method	c:objc(cs)MPSVector(im)init	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e618e3e6f1c42312	-
+method	c:objc(cs)MPSVector(im)synchronizeOnCommandBuffer:	-			void	id<MTLCommandBuffer> commandBuffer	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	4eb14cb49a20066c	-
+method	c:objc(cs)MPSVector(im)resourceSize	-			NSUInteger	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	443292fc9cdf6ed2	-
+interface	c:objc(cs)MPSTemporaryMatrix	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e6effc580c53e03f	-
+super	-	MPSTemporaryMatrix	MPSMatrix		-	-	-	-	-	8eea84cf25dff7f9	-
+method	c:objc(cs)MPSTemporaryMatrix(cm)temporaryMatrixWithCommandBuffer:matrixDescriptor:	-			instancetype	id<MTLCommandBuffer> commandBuffer | MPSMatrixDescriptor * matrixDescriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	e335196a8bdd1594	-
+method	c:objc(cs)MPSTemporaryMatrix(cm)prefetchStorageWithCommandBuffer:matrixDescriptorList:	-			void	id<MTLCommandBuffer> commandBuffer | NSArray<MPSMatrixDescriptor *> * descriptorList	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	4b09ab3096726ae4	-
+method	c:objc(cs)MPSTemporaryMatrix(im)initWithBuffer:descriptor:	-			instancetype	id<MTLBuffer> buffer | MPSMatrixDescriptor * descriptor	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	246439a43a477346	-
+property	c:objc(cs)MPSTemporaryMatrix(py)readCount	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	a4347b83d52ec6cb	-
+interface	c:objc(cs)MPSTemporaryVector	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	392995376c3c1322	-
+super	-	MPSTemporaryVector	MPSVector		-	-	-	-	-	58f2f058011082e4	-
+method	c:objc(cs)MPSTemporaryVector(cm)temporaryVectorWithCommandBuffer:descriptor:	-			instancetype	id<MTLCommandBuffer> commandBuffer | MPSVectorDescriptor * descriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	af42c228ecee15d4	-
+method	c:objc(cs)MPSTemporaryVector(cm)prefetchStorageWithCommandBuffer:descriptorList:	-			void	id<MTLCommandBuffer> commandBuffer | NSArray<MPSVectorDescriptor *> * descriptorList	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	781d46e467d6f16d	-
+method	c:objc(cs)MPSTemporaryVector(im)initWithBuffer:descriptor:	-			instancetype	id<MTLBuffer> buffer | MPSVectorDescriptor * descriptor	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	fc3d9b4810d882a5	-
+property	c:objc(cs)MPSTemporaryVector(py)readCount	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	65a23ebbfbebce5b	-
+interface	c:objc(cs)MPSStateResourceList	-			-	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	0a65c024cbce91f9	-
+super	-	MPSStateResourceList	NSObject		-	-	-	-	-	543b7efad166af48	-
+method	c:objc(cs)MPSStateResourceList(cm)resourceList	-			instancetype	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	f1f239eafd8731c0	-
+method	c:objc(cs)MPSStateResourceList(cm)resourceListWithTextureDescriptors:	-			instancetype	MTLTextureDescriptor * d	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	f6dc106bfaafc803	-
+method	c:objc(cs)MPSStateResourceList(cm)resourceListWithBufferSizes:	-			instancetype	NSUInteger firstSize	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	11e3e9c7ce8a7477	-
+method	c:objc(cs)MPSStateResourceList(im)init	-			instancetype	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	e302f027b43fc691	-
+method	c:objc(cs)MPSStateResourceList(im)appendTexture:	-			void	MTLTextureDescriptor * descriptor	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	4bca173313aca991	-
+method	c:objc(cs)MPSStateResourceList(im)appendBuffer:	-			void	NSUInteger size	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	fc6f25fe10e9215c	-
+struct	c:@S@MPSStateTextureInfo	-			-	-	-	-	-	629cfe83fe0d814e	-
+field	c:@S@MPSStateTextureInfo@FI@width	MPSStateTextureInfo			NSUInteger	-	-	-	-	b1c42bac8c88eaa9	-
+field	c:@S@MPSStateTextureInfo@FI@height	MPSStateTextureInfo			NSUInteger	-	-	-	-	a9473724ce532455	-
+field	c:@S@MPSStateTextureInfo@FI@depth	MPSStateTextureInfo			NSUInteger	-	-	-	-	c5757450ba105538	-
+field	c:@S@MPSStateTextureInfo@FI@arrayLength	MPSStateTextureInfo			NSUInteger	-	-	-	-	d269706ca37c9286	-
+field	c:@S@MPSStateTextureInfo@FI@pixelFormat	MPSStateTextureInfo			MTLPixelFormat	-	-	-	-	75410528acd57160	-
+field	c:@S@MPSStateTextureInfo@FI@textureType	MPSStateTextureInfo			MTLTextureType	-	-	-	-	b6cb7c70f7e3ca97	-
+field	c:@S@MPSStateTextureInfo@FI@usage	MPSStateTextureInfo			MTLTextureUsage	-	-	-	-	aa330b5dd496a556	-
+field	c:@S@MPSStateTextureInfo@FI@_reserved	MPSStateTextureInfo			NSUInteger[4]	-	-	-	-	1f78a8f6209084f1	-
+typedef	c:MPSState.h@T@MPSStateTextureInfo	-			struct MPSStateTextureInfo	-	-	-	-	0c2f1b30c401b298	-
+typedef	c:MPSState.h@T@MPSStateResourceType	-			enum MPSStateResourceType	-	-	-	-	dd6b90a639b053a2	-
+enum	c:@E@MPSStateResourceType	-			NSUInteger	-	-	-	-	157066810034c679	-
+enumconst	c:@E@MPSStateResourceType@MPSStateResourceTypeNone	MPSStateResourceType			-	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	9f18945c7a655fbd	0
+enumconst	c:@E@MPSStateResourceType@MPSStateResourceTypeBuffer	MPSStateResourceType			-	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	c114b94a8dfd44b4	1
+enumconst	c:@E@MPSStateResourceType@MPSStateResourceTypeTexture	MPSStateResourceType			-	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	4ff0d388faa8943f	2
+interface	c:objc(cs)MPSState	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c2036b61d979a681	-
+super	-	MPSState	NSObject		-	-	-	-	-	bdff4fae603ccebe	-
+method	c:objc(cs)MPSState(cm)temporaryStateWithCommandBuffer:bufferSize:	-			instancetype	id<MTLCommandBuffer> cmdBuf | size_t bufferSize	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	296182bce427d5db	-
+method	c:objc(cs)MPSState(cm)temporaryStateWithCommandBuffer:textureDescriptor:	-			instancetype	id<MTLCommandBuffer> cmdBuf | MTLTextureDescriptor * descriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	cc71a573058de6f4	-
+method	c:objc(cs)MPSState(cm)temporaryStateWithCommandBuffer:	-			instancetype	id<MTLCommandBuffer> cmdBuf	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	abe822919c1097a0	-
+method	c:objc(cs)MPSState(im)initWithDevice:bufferSize:	-			instancetype	id<MTLDevice> device | size_t bufferSize	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	524310746ffbeee7	-
+method	c:objc(cs)MPSState(im)initWithDevice:textureDescriptor:	-			instancetype	id<MTLDevice> device | MTLTextureDescriptor * descriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c1323866e8a9d2c5	-
+method	c:objc(cs)MPSState(im)initWithResource:	-			instancetype	id<MTLResource> resource	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	f7a70e988530c38f	-
+method	c:objc(cs)MPSState(im)init	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5c1ada619b12a4ac	-
+method	c:objc(cs)MPSState(im)initWithDevice:resourceList:	-			instancetype	id<MTLDevice> device | MPSStateResourceList * resourceList	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	3b2a4e10da13aa16	-
+method	c:objc(cs)MPSState(cm)temporaryStateWithCommandBuffer:resourceList:	-			instancetype	id<MTLCommandBuffer> commandBuffer | MPSStateResourceList * resourceList	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	037cc0fe686d5d25	-
+method	c:objc(cs)MPSState(im)initWithResources:	-			instancetype	NSArray<id<MTLResource>> * resources	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	7fc33a69608b68e0	-
+property	c:objc(cs)MPSState(py)resourceCount	-			NSUInteger	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8158abc8d201b14a	-
+method	c:objc(cs)MPSState(im)resourceAtIndex:allocateMemory:	-			id<MTLResource>	NSUInteger index | BOOL allocateMemory	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	0e19668fa2035def	-
+property	c:objc(cs)MPSState(py)readCount	-			NSUInteger	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	3790c36f4e638bcb	-
+property	c:objc(cs)MPSState(py)isTemporary	-			BOOL	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	5ad5615dee508b03	-
+property	c:objc(cs)MPSState(py)label	-			NSString *	-	copy,atomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8ef9d7c3f648b8ad	-
+method	c:objc(cs)MPSState(im)bufferSizeAtIndex:	-			NSUInteger	NSUInteger index	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	4cf95c712c2dbf9c	-
+method	c:objc(cs)MPSState(im)textureInfoAtIndex:	-			MPSStateTextureInfo	NSUInteger index	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	8c0d8e1d3246b61c	-
+method	c:objc(cs)MPSState(im)resourceTypeAtIndex:	-			MPSStateResourceType	NSUInteger index	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	c86c55996d17cdf3	-
+method	c:objc(cs)MPSState(im)synchronizeOnCommandBuffer:	-			void	id<MTLCommandBuffer> commandBuffer	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	704277a0eb280648	-
+method	c:objc(cs)MPSState(im)resourceSize	-			NSUInteger	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	f65a8309461212fc	-
+method	c:objc(cs)MPSState(im)destinationImageDescriptorForSourceImages:sourceStates:forKernel:suggestedDescriptor:	-			MPSImageDescriptor *	NSArray<MPSImage *> * sourceImages | NSArray<MPSState *> * sourceStates | MPSKernel * kernel | MPSImageDescriptor * inDescriptor	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0	-	2fa69a42d20e356a	-
+property	c:objc(cs)MPSState(py)resource	-			id<MTLResource>	-	readonly,retain,nonatomic	ios=11.0/12.0/-/0,maccatalyst=-/-/-/1,macos=10.13/10.13.4/-/0,tvos=11.0/12.0/-/0	-	94655adc00629de6	-
+typedef	c:MPSState.h@T@MPSStateBatch	-			NSArray<MPSState *>	-	-	-	-	da42432d50042f25	-
+function	c:@F@MPSStateBatchIncrementReadCount	-			NSUInteger (MPSStateBatch *, NSInteger)	MPSStateBatch * batch | NSInteger amount	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	6f0ed6a9db359bbc	-
+function	c:@F@MPSStateBatchSynchronize	-			void (MPSStateBatch *, id<MTLCommandBuffer>)	MPSStateBatch * batch | id<MTLCommandBuffer> cmdBuf	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	d8efbee13a7d47aa	-
+function	c:@F@MPSStateBatchResourceSize	-			NSUInteger (MPSStateBatch *)	MPSStateBatch * batch	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14.0/-/-/0,tvos=12.0/-/-/0	-	f6cdb9d52f912c26	-
+enum	c:@EA@MPSDeviceCapsValues	-			uint32_t	-	-	-	-	7faa5c48b3ea8634	-
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceCapsNull	MPSDeviceCapsValues			-	-	-	-	-	04a5377671080b74	0
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsReadableArrayOfTextures	MPSDeviceCapsValues			-	-	-	-	-	849850277cfb86ff	1
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsWritableArrayOfTextures	MPSDeviceCapsValues			-	-	-	-	-	51198381eca20f4a	2
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsReadWriteTextures	MPSDeviceCapsValues			-	-	-	-	-	2d7dbdd091f7f1a0	4
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsSimdgroupBarrier	MPSDeviceCapsValues			-	-	-	-	-	f49c450b59ac934e	8
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsQuadShuffle	MPSDeviceCapsValues			-	-	-	-	-	b4d2e37333d68169	16
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsSimdShuffle	MPSDeviceCapsValues			-	-	-	-	-	b9d73c0a3d98dafa	32
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsSimdReduction	MPSDeviceCapsValues			-	-	-	-	-	840d8b65f5314af9	64
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsFloat32Filtering	MPSDeviceCapsValues			-	-	-	-	-	f0f537ccbcbacd7f	128
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsNorm16BicubicFiltering	MPSDeviceCapsValues			-	-	-	-	-	df2fc950a1c0d3cd	256
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsFloat16BicubicFiltering	MPSDeviceCapsValues			-	-	-	-	-	dcb7d136b77a43bb	512
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceIsAppleDevice	MPSDeviceCapsValues			-	-	-	-	-	962ef5682a5d254b	1024
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsSimdShuffleAndFill	MPSDeviceCapsValues			-	-	-	-	-	668efdbbc0883152	2048
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceSupportsBFloat16Arithmetic	MPSDeviceCapsValues			-	-	-	-	-	a42a96a344bd57d5	4096
+enumconst	c:@EA@MPSDeviceCapsValues@MPSDeviceCapsLast	MPSDeviceCapsValues			-	-	-	-	-	a23598c8866bafa1	8192
+typedef	c:@T@MPSDeviceCapsValues	-			enum MPSDeviceCapsValues	-	-	-	-	c9f0d8de77c15c06	-
+typedef	c:MPSKernelTypes.h@T@MPSDeviceCaps	-			uint32_t	-	-	-	-	d0dfa10b4d0c583a	-
+enum	c:@EA@MPSCustomKernelIndex	-			unsigned int	-	-	-	-	b21a0dd5dec25cf3	-
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexDestIndex	MPSCustomKernelIndex			-	-	-	-	-	1d5a8514d4525cdb	0
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexSrc0Index	MPSCustomKernelIndex			-	-	-	-	-	f14dc1002dcdd39f	0
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexSrc1Index	MPSCustomKernelIndex			-	-	-	-	-	20c6f8c4796e78c6	1
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexSrc2Index	MPSCustomKernelIndex			-	-	-	-	-	a3d577db83ee99e9	2
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexSrc3Index	MPSCustomKernelIndex			-	-	-	-	-	3fed4506d529210a	3
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexSrc4Index	MPSCustomKernelIndex			-	-	-	-	-	14290757b2dc8318	4
+enumconst	c:@EA@MPSCustomKernelIndex@MPSCustomKernelIndexUserDataIndex	MPSCustomKernelIndex			-	-	-	-	-	65e0912e527e40a7	30
+typedef	c:@T@MPSCustomKernelIndex	-			enum MPSCustomKernelIndex	-	-	-	-	f7a149927afee2bb	-
+struct	c:@SA@MPSMatrixOffset	-			-	-	-	-	-	1a3458fa52b72172	-
+field	c:@SA@MPSMatrixOffset@FI@rowOffset	MPSMatrixOffset			uint32_t	-	-	-	-	0c7eea6ded9dadd0	-
+field	c:@SA@MPSMatrixOffset@FI@columnOffset	MPSMatrixOffset			uint32_t	-	-	-	-	f04f63b67ef94e61	-
+typedef	c:@T@MPSMatrixOffset	-			struct MPSMatrixOffset	-	-	-	-	fb7fcfa1ed1b5768	-
+struct	c:@SA@MPSIntegerDivisionParams	-			-	-	-	-	-	1fe5b77bcf5739b8	-
+field	c:@SA@MPSIntegerDivisionParams@FI@divisor	MPSIntegerDivisionParams			uint16_t	-	-	-	-	abc9885452a12370	-
+field	c:@SA@MPSIntegerDivisionParams@FI@recip	MPSIntegerDivisionParams			uint16_t	-	-	-	-	35e0e0bc07aa2c93	-
+field	c:@SA@MPSIntegerDivisionParams@FI@addend	MPSIntegerDivisionParams			uint16_t	-	-	-	-	b69fb17f24fd2f7a	-
+field	c:@SA@MPSIntegerDivisionParams@FI@shift	MPSIntegerDivisionParams			uint16_t	-	-	-	-	34687d74d6a27f9f	-
+typedef	c:@T@MPSIntegerDivisionParams	-			struct MPSIntegerDivisionParams	-	-	-	-	4683edfc96c2ff88	-
+struct	c:@SA@MPSCustomKernelSourceInfo	-			-	-	-	-	-	fdfa9ed611f36308	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@kernelOrigin	MPSCustomKernelSourceInfo			vector_short2	-	-	-	-	71daf1b0bbfd6899	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@kernelPhase	MPSCustomKernelSourceInfo			vector_ushort2	-	-	-	-	291ebd686bf31638	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@kernelSize	MPSCustomKernelSourceInfo			vector_ushort2	-	-	-	-	a26e98e5ad84bd0b	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@offset	MPSCustomKernelSourceInfo			vector_short2	-	-	-	-	dfad4430436c7e2e	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@stride	MPSCustomKernelSourceInfo			vector_ushort2	-	-	-	-	777feef0bcc33577	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@dilationRate	MPSCustomKernelSourceInfo			vector_ushort2	-	-	-	-	b6c8b8cd1f3a9b84	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@featureChannelOffset	MPSCustomKernelSourceInfo			uint16_t	-	-	-	-	926a371a880d2f02	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@featureChannels	MPSCustomKernelSourceInfo			uint16_t	-	-	-	-	edc050a28dd8a0e3	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@imageArrayOffset	MPSCustomKernelSourceInfo			uint16_t	-	-	-	-	c40903674b2a2d8e	-
+field	c:@SA@MPSCustomKernelSourceInfo@FI@imageArraySize	MPSCustomKernelSourceInfo			uint16_t	-	-	-	-	33d51459f5ac4894	-
+typedef	c:@T@MPSCustomKernelSourceInfo	-			struct MPSCustomKernelSourceInfo	-	-	-	-	9738ebef462fb7bc	-
+struct	c:@SA@MPSCustomKernelInfo	-			-	-	-	-	-	ddf0f31a599206ac	-
+field	c:@SA@MPSCustomKernelInfo@FI@clipOrigin	MPSCustomKernelInfo			vector_ushort4	-	-	-	-	9f47174c89c0a41c	-
+field	c:@SA@MPSCustomKernelInfo@FI@clipSize	MPSCustomKernelInfo			vector_ushort4	-	-	-	-	dedb5a022b6d5b8b	-
+field	c:@SA@MPSCustomKernelInfo@FI@destinationFeatureChannels	MPSCustomKernelInfo			uint16_t	-	-	-	-	46034319f2629c53	-
+field	c:@SA@MPSCustomKernelInfo@FI@destImageArraySize	MPSCustomKernelInfo			uint16_t	-	-	-	-	aeef6e636752c430	-
+field	c:@SA@MPSCustomKernelInfo@FI@sourceImageCount	MPSCustomKernelInfo			uint16_t	-	-	-	-	1544563cf91d3a52	-
+field	c:@SA@MPSCustomKernelInfo@FI@threadgroupSize	MPSCustomKernelInfo			uint16_t	-	-	-	-	b2b82064d6d6f74e	-
+field	c:@SA@MPSCustomKernelInfo@FI@subbatchIndex	MPSCustomKernelInfo			uint16_t	-	-	-	-	023136d41f3bf59f	-
+field	c:@SA@MPSCustomKernelInfo@FI@subbatchStride	MPSCustomKernelInfo			uint16_t	-	-	-	-	274522e412367c0f	-
+field	c:@SA@MPSCustomKernelInfo@FI@idiv	MPSCustomKernelInfo			MPSIntegerDivisionParams	-	-	-	-	aa45bffd16f6cfad	-
+typedef	c:@T@MPSCustomKernelInfo	-			struct MPSCustomKernelInfo	-	-	-	-	e4b93a4b9f80c5d1	-
+enum	c:@EA@MPSImageType	-			uint32_t	-	-	-	-	c41ea9afb516d65e	-
+enumconst	c:@EA@MPSImageType@MPSImageType2d	MPSImageType			-	-	-	-	-	a1a8c7cd6c3002ca	0
+enumconst	c:@EA@MPSImageType@MPSImageType2d_array	MPSImageType			-	-	-	-	-	67e7a0a9d62b0c8c	1
+enumconst	c:@EA@MPSImageType@MPSImageTypeArray2d	MPSImageType			-	-	-	-	-	1ef456707cc9a03d	2
+enumconst	c:@EA@MPSImageType@MPSImageTypeArray2d_array	MPSImageType			-	-	-	-	-	53cf92b9acba2cec	3
+enumconst	c:@EA@MPSImageType@MPSImageType_ArrayMask	MPSImageType			-	-	-	-	-	3345d378c4172afc	1
+enumconst	c:@EA@MPSImageType@MPSImageType_BatchMask	MPSImageType			-	-	-	-	-	f92570d19f05d224	2
+enumconst	c:@EA@MPSImageType@MPSImageType_typeMask	MPSImageType			-	-	-	-	-	7170d459e88d48ff	3
+enumconst	c:@EA@MPSImageType@MPSImageType_noAlpha	MPSImageType			-	-	-	-	-	250dbb4e69656b3e	4
+enumconst	c:@EA@MPSImageType@MPSImageType_texelFormatMask	MPSImageType			-	-	-	-	-	1afdb9c90a9a91c2	56
+enumconst	c:@EA@MPSImageType@MPSImageType_texelFormatShift	MPSImageType			-	-	-	-	-	284b680cfd0e3d09	3
+enumconst	c:@EA@MPSImageType@MPSImageType_texelFormatStandard	MPSImageType			-	-	-	-	-	0f25a3acd898b83a	0
+enumconst	c:@EA@MPSImageType@MPSImageType_texelFormatUnorm8	MPSImageType			-	-	-	-	-	89319099a8ed4c3c	8
+enumconst	c:@EA@MPSImageType@MPSImageType_texelFormatFloat16	MPSImageType			-	-	-	-	-	c70d43d337f01c76	16
+enumconst	c:@EA@MPSImageType@MPSImageType_texelFormatBFloat16	MPSImageType			-	-	-	-	-	75732631d9e63c3f	24
+enumconst	c:@EA@MPSImageType@MPSImageType_bitCount	MPSImageType			-	-	-	-	-	3e674f96ecbf10ad	6
+enumconst	c:@EA@MPSImageType@MPSImageType_mask	MPSImageType			-	-	-	-	-	1b79e9b38feb6bcf	63
+enumconst	c:@EA@MPSImageType@MPSImageType2d_noAlpha	MPSImageType			-	-	-	-	-	bfa8e7e79f7460d5	4
+enumconst	c:@EA@MPSImageType@MPSImageType2d_array_noAlpha	MPSImageType			-	-	-	-	-	b43dfe91f80de395	5
+enumconst	c:@EA@MPSImageType@MPSImageTypeArray2d_noAlpha	MPSImageType			-	-	-	-	-	be7ab07539801e87	6
+enumconst	c:@EA@MPSImageType@MPSImageTypeArray2d_array_noAlpha	MPSImageType			-	-	-	-	-	6c8e5cf6f84d6d9d	7
+typedef	c:@T@MPSImageType	-			enum MPSImageType	-	-	-	-	9ee3310e4d70c683	-
+function	c:@F@MPSGetImageType	-			MPSImageType (MPSImage *)	MPSImage * image	-	-	-	831fdd726ec20d6f	-
+typedef	c:MPSKernelTypes.h@T@MPSFunctionConstant	-			int64_t	-	-	-	-	d60ea6e20945c022	-
+typedef	c:MPSKernelTypes.h@T@MPSFunctionConstantInMetal	-			uint32_t	-	-	-	-	5ff4155fb921a48b	-
+function	c:MPSKernelTypes.h@F@MPSFindIntegerDivisionParams	-			MPSIntegerDivisionParams (uint16_t)	uint16_t divisor	-	-	-	1e9701b7ebc571c6	-
+struct	c:@S@MPSCustomKernelArgumentCount	-			-	-	-	-	-	8282d3166f0753ee	-
+field	c:@S@MPSCustomKernelArgumentCount@FI@destinationTextureCount	MPSCustomKernelArgumentCount			unsigned long	-	-	-	-	aba6a1a3560ba3bd	-
+field	c:@S@MPSCustomKernelArgumentCount@FI@sourceTextureCount	MPSCustomKernelArgumentCount			unsigned long	-	-	-	-	79b437487463ae4d	-
+field	c:@S@MPSCustomKernelArgumentCount@FI@broadcastTextureCount	MPSCustomKernelArgumentCount			unsigned long	-	-	-	-	9001da05619c6c6e	-
+typedef	c:MPSKernelTypes.h@T@MPSCustomKernelArgumentCount	-			struct MPSCustomKernelArgumentCount	-	-	-	-	5aa1185a62d3e1ce	-
+function	c:MPSKernelTypes.h@F@MPSGetCustomKernelMaxBatchSize	-			unsigned long (MPSCustomKernelArgumentCount, unsigned long)	MPSCustomKernelArgumentCount c | unsigned long MPSMaxTextures	-	-	-	f523c68d44e3bd15	-
+function	c:MPSKernelTypes.h@F@MPSGetCustomKernelBatchedDestinationIndex	-			unsigned long (MPSCustomKernelArgumentCount)	MPSCustomKernelArgumentCount c	-	-	-	82a6c0236d6b427b	-
+function	c:MPSKernelTypes.h@F@MPSGetCustomKernelBatchedSourceIndex	-			unsigned long (MPSCustomKernelArgumentCount, unsigned long, unsigned long)	MPSCustomKernelArgumentCount c | unsigned long sourceIndex | unsigned long MPSMaxTextures	-	-	-	4598de761c62fd76	-
+function	c:MPSKernelTypes.h@F@MPSGetCustomKernelBroadcastSourceIndex	-			unsigned long (MPSCustomKernelArgumentCount, unsigned long, unsigned long)	MPSCustomKernelArgumentCount c | unsigned long sourceIndex | unsigned long MPSMaxTextures	-	-	-	56292f08b53fb3ea	-
+interface	c:objc(cs)MPSKeyedUnarchiver	-			-	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	a15ed152c863df1f	-
+super	-	MPSKeyedUnarchiver	NSKeyedUnarchiver		-	-	-	-	-	a7c3d90cdc4c5824	-
+conforms	c:objc(cs)MPSKeyedUnarchiver	MPSKeyedUnarchiver	MPSDeviceProvider		-	-	-	-	-	833da5dd5e4a0140	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchivedObjectOfClasses:fromData:device:error:	-			id	NSSet<Class> * classes | NSData * data | id<MTLDevice> device | NSError * _Nullable * error	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	e3e593b0806b0897	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchivedObjectOfClass:fromData:device:error:	-			id	Class cls | NSData * data | id<MTLDevice> device | NSError * _Nullable * error	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	9859802c8e969294	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)initForReadingFromData:device:error:	-			instancetype	NSData * data | id<MTLDevice> device | NSError * _Nullable * error	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0	-	fa112a76eaf112aa	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)mpsMTLDevice	-			id<MTLDevice>	-	-	ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	3533d52e2c6dfeb6	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchivedObjectOfClasses:fromData:error:	-			id	NSSet<Class> * classes | NSData * data | NSError * _Nullable * error	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	4e53ff6f824fc353	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchivedObjectOfClass:fromData:error:	-			id	Class cls | NSData * data | NSError * _Nullable * error	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	875988952187f53d	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)init	-			instancetype	-	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	13c49198ef8b6311	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)initForReadingFromData:error:	-			instancetype	NSData * data | NSError * _Nullable * error	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	965e136abfbb5751	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchiveObjectWithData:	-			id	NSData * data	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	04bfaac113cd9952	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchiveObjectWithData:device:	-			id	NSData * data | id<MTLDevice> device	-	ios=11.3/12.0/-/0,maccatalyst=-/-/-/1,macos=10.13.4/10.14/-/0,tvos=11.3/12.0/-/0	-	b841c4dfe291f021	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchiveTopLevelObjectWithData:error:	-			id	NSData * data | NSError * _Nullable * error	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	c6e57a68c8162d45	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchiveTopLevelObjectWithData:device:error:	-			id	NSData * data | id<MTLDevice> device | NSError * _Nullable * error	-	ios=11.3/12.0/-/0,maccatalyst=-/-/-/1,macos=10.13.4/10.14/-/0,tvos=11.3/12.0/-/0	-	c77c97c67ca6c127	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchiveObjectWithFile:	-			id	NSString * path	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	10f975f009515b31	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)initForReadingWithData:	-			instancetype	NSData * data	-	*unavailable ios=11.3/-/-/0,maccatalyst=13.0/-/-/0,macos=10.13.4/-/-/0,tvos=11.3/-/-/0	-	3759adfcc8e0f976	-
+method	c:objc(cs)MPSKeyedUnarchiver(cm)unarchiveObjectWithFile:device:	-			id	NSString * path | id<MTLDevice> device	-	ios=11.3/12.0/-/0,maccatalyst=-/-/-/1,macos=10.13.4/10.14/-/0,tvos=11.3/12.0/-/0	-	5e7b9b19d95d3b46	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=11.3/12.0/-/0,maccatalyst=-/-/-/1,macos=10.13.4/10.14/-/0,tvos=11.3/12.0/-/0	-	c6ea8460ad4a3f5c	-
+method	c:objc(cs)MPSKeyedUnarchiver(im)initForReadingWithData:device:	-			instancetype	NSData * data | id<MTLDevice> device	-	ios=11.3/12.0/-/0,maccatalyst=-/-/-/1,macos=10.13.4/10.14/-/0,tvos=11.3/12.0/-/0	-	89e40d51285d4a00	-
+interface	c:objc(cs)MPSNDArrayDescriptor	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	6f8df0e8c685af5e	-
+super	-	MPSNDArrayDescriptor	NSObject		-	-	-	-	-	bfec4f586752e684	-
+property	c:objc(cs)MPSNDArrayDescriptor(py)dataType	-			MPSDataType	-	nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	2276ddd80e825fcc	-
+property	c:objc(cs)MPSNDArrayDescriptor(py)numberOfDimensions	-			NSUInteger	-	nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1a45de08d8011c30	-
+property	c:objc(cs)MPSNDArrayDescriptor(py)preferPackedRows	-			BOOL	-	nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	59d519df8b955704	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)lengthOfDimension:	-			NSUInteger	NSUInteger dimensionIndex	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	a155d100668492cc	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)sliceRangeForDimension:	-			MPSDimensionSlice	NSUInteger dimensionIndex	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	5831409281e47de8	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)sliceDimension:withSubrange:	-			void	NSUInteger dimensionIndex | MPSDimensionSlice subRange	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ac7ad2fb3dc90571	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)transposeDimension:withDimension:	-			void	NSUInteger dimensionIndex | NSUInteger dimensionIndex2	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	d55bd649de16f2d7	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)permuteWithDimensionOrder:	-			void	NSUInteger * dimensionOrder	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	cabef2e1f66cd99e	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)dimensionOrder	-			vector_uchar16	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	cd6891aac948b9e9	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)getShape	-			NSArray<NSNumber *> *	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	8829adb538a1a3e3	-
+method	c:objc(cs)MPSNDArrayDescriptor(cm)descriptorWithDataType:dimensionCount:dimensionSizes:	-			instancetype	MPSDataType dataType | NSUInteger numberOfDimensions | NSUInteger * dimensionSizes	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	88a0dad9b63cfa45	-
+method	c:objc(cs)MPSNDArrayDescriptor(cm)descriptorWithDataType:shape:	-			instancetype	MPSDataType dataType | NSArray<NSNumber *> * shape	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	136c8c404fb0e3e0	-
+method	c:objc(cs)MPSNDArrayDescriptor(cm)descriptorWithDataType:dimensionSizes:	-			instancetype	MPSDataType dataType | NSUInteger dimension0	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	e1eb73e0e70706aa	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)reshapeWithDimensionCount:dimensionSizes:	-			void	NSUInteger numberOfDimensions | NSUInteger * dimensionSizes	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	b4f241b730628678	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)reshapeWithShape:	-			void	NSArray<NSNumber *> * shape	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1ad2e9b67cd67cb5	-
+method	c:objc(cs)MPSNDArrayDescriptor(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	efd5d3c45519a6f0	-
+protocol	c:objc(pl)MPSNDArrayAllocator	-			-	-	-	-	-	de4b8034d74f268b	-
+conforms	c:objc(pl)MPSNDArrayAllocator	MPSNDArrayAllocator	NSObject		-	-	-	-	-	f84e9702a87c6c1c	-
+conforms	c:objc(pl)MPSNDArrayAllocator	MPSNDArrayAllocator	NSSecureCoding		-	-	-	-	-	5a9acd80c2ba04ba	-
+conforms	c:objc(pl)MPSNDArrayAllocator	MPSNDArrayAllocator	NSCopying		-	-	-	-	-	34358d0f4236c9e2	-
+method	c:objc(pl)MPSNDArrayAllocator(im)arrayForCommandBuffer:arrayDescriptor:kernel:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArrayDescriptor * descriptor | MPSKernel * kernel	-	-	-	6b682535122aa5ac	-
+interface	c:objc(cs)MPSNDArray	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	875b8840f67743ff	-
+super	-	MPSNDArray	NSObject		-	-	-	-	-	17c36446b3a18d07	-
+method	c:objc(cs)MPSNDArray(cm)defaultAllocator	-			id<MPSNDArrayAllocator>	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	b7961511b6c5709b	-
+property	c:objc(cs)MPSNDArray(py)label	-			NSString *	-	copy,atomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	8b1e6b217eed73dd	-
+property	c:objc(cs)MPSNDArray(py)dataType	-			MPSDataType	-	readonly,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	57453dbf01dd76d0	-
+property	c:objc(cs)MPSNDArray(py)dataTypeSize	-			size_t	-	readonly,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	f888e99adc39e942	-
+property	c:objc(cs)MPSNDArray(py)numberOfDimensions	-			NSUInteger	-	readonly,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	a07ea116afc067e2	-
+method	c:objc(cs)MPSNDArray(im)lengthOfDimension:	-			NSUInteger	NSUInteger dimensionIndex	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	21e4eb426782a4e4	-
+property	c:objc(cs)MPSNDArray(py)device	-			id<MTLDevice>	-	readonly,retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	cebf5942a213ffbd	-
+method	c:objc(cs)MPSNDArray(im)descriptor	-			MPSNDArrayDescriptor *	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	30f3b4132356bf55	-
+method	c:objc(cs)MPSNDArray(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	bd46b5b9e4c35390	-
+method	c:objc(cs)MPSNDArray(im)initWithDevice:descriptor:	-			instancetype	id<MTLDevice> device | MPSNDArrayDescriptor * descriptor	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	95e1cdc89b125fc6	-
+method	c:objc(cs)MPSNDArray(im)initWithDevice:scalar:	-			instancetype	id<MTLDevice> device | double value	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1ed090ce6af0b14a	-
+method	c:objc(cs)MPSNDArray(im)initWithBuffer:offset:descriptor:	-			instancetype	id<MTLBuffer> buffer | NSUInteger offset | MPSNDArrayDescriptor * descriptor	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	2b29ea19ac1a270f	-
+method	c:objc(cs)MPSNDArray(im)userBuffer	-			id<MTLBuffer>	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	5da231a08b1f0b21	-
+method	c:objc(cs)MPSNDArray(im)resourceSize	-			NSUInteger	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ac5a94860c8e1d43	-
+method	c:objc(cs)MPSNDArray(im)arrayViewWithCommandBuffer:descriptor:aliasing:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArrayDescriptor * descriptor | MPSAliasingStrategy aliasing	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1a9d02a448852cb2	-
+method	c:objc(cs)MPSNDArray(im)arrayViewWithDescriptor:	-			MPSNDArray *	MPSNDArrayDescriptor * descriptor	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	dabd959a6f63ce12	-
+method	c:objc(cs)MPSNDArray(im)arrayViewWithShape:strides:	-			MPSNDArray *	MPSShape * shape | MPSShape * strides	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	65cbacb3bce13771	-
+method	c:objc(cs)MPSNDArray(im)arrayViewWithDimensionCount:dimensionSizes:strides:	-			MPSNDArray *	NSUInteger numberOfDimensions | const NSUInteger * dimensionSizes | const NSUInteger * dimStrides	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	e1d32cb5687c65ca	-
+property	c:objc(cs)MPSNDArray(py)parent	-			MPSNDArray *	-	readonly,retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	afe8a8541363c27d	-
+method	c:objc(cs)MPSNDArray(im)exportDataWithCommandBuffer:toBuffer:destinationDataType:offset:rowStrides:	-			void	id<MTLCommandBuffer> cmdBuf | id<MTLBuffer> buffer | MPSDataType destinationDataType | NSUInteger offset | NSInteger * rowStrides	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ae6f8a7c910f04e7	-
+method	c:objc(cs)MPSNDArray(im)importDataWithCommandBuffer:fromBuffer:sourceDataType:offset:rowStrides:	-			void	id<MTLCommandBuffer> cmdBuf | id<MTLBuffer> buffer | MPSDataType sourceDataType | NSUInteger offset | NSInteger * rowStrides	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	d7add973a8fd3ddf	-
+method	c:objc(cs)MPSNDArray(im)exportDataWithCommandBuffer:toImages:offset:	-			void	id<MTLCommandBuffer> cmdBuf | MPSImageBatch * images | MPSImageCoordinate offset	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	14162ae45382bd6b	-
+method	c:objc(cs)MPSNDArray(im)importDataWithCommandBuffer:fromImages:offset:	-			void	id<MTLCommandBuffer> cmdBuf | MPSImageBatch * images | MPSImageCoordinate offset	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	b8a804084bab58c0	-
+method	c:objc(cs)MPSNDArray(im)readBytes:strideBytes:	-			void	void * buffer | NSInteger * strideBytesPerDimension	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	f80c6cf69a620ceb	-
+method	c:objc(cs)MPSNDArray(im)writeBytes:strideBytes:	-			void	void * buffer | NSInteger * strideBytesPerDimension	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	befd3a5efe9ad6c4	-
+method	c:objc(cs)MPSNDArray(im)synchronizeOnCommandBuffer:	-			void	id<MTLCommandBuffer> commandBuffer	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	908b7e63bece5283	-
+interface	c:objc(cs)MPSTemporaryNDArray	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1dc4787ce357c84f	-
+super	-	MPSTemporaryNDArray	MPSNDArray		-	-	-	-	-	0914a0a6bc2790cb	-
+method	c:objc(cs)MPSTemporaryNDArray(cm)defaultAllocator	-			id<MPSNDArrayAllocator>	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4c17f2cc22106070	-
+method	c:objc(cs)MPSTemporaryNDArray(cm)temporaryNDArrayWithCommandBuffer:descriptor:	-			instancetype	id<MTLCommandBuffer> commandBuffer | MPSNDArrayDescriptor * descriptor	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	fa55083bb746984b	-
+method	c:objc(cs)MPSTemporaryNDArray(im)initWithDevice:descriptor:	-			instancetype	id<MTLDevice> device | MPSNDArrayDescriptor * descriptor	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	b11c7f3dd29b5071	-
+property	c:objc(cs)MPSTemporaryNDArray(py)readCount	-			NSUInteger	-	nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	34ae41538a81391f	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@MTLRegion	-			struct MTLRegion	-	-	-	-	26e1bf56daefd9f6	-
+typedef	c:@T@size_t	-			__darwin_size_t	-	-	-	-	8ce79a13e58a1844	-
+typedef	c:@T@__darwin_size_t	-			unsigned long	-	-	-	-	0cd38a3df2217524	-
+typedef	c:@T@MTLPixelFormat	-			enum MTLPixelFormat	-	-	-	-	40f56ebf564ac2ed	-
+typedef	c:@T@MTLCPUCacheMode	-			enum MTLCPUCacheMode	-	-	-	-	706df9afe62ef7fb	-
+typedef	c:@T@MTLStorageMode	-			enum MTLStorageMode	-	-	-	-	c00b57d0e67328ac	-
+typedef	c:@T@MTLTextureUsage	-			enum MTLTextureUsage	-	-	-	-	736694021e0b9993	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSZone	-			struct _NSZone	-	-	-	-	a6dc1e3b1b8b2ac5	-
+typedef	c:@T@MTLTextureType	-			enum MTLTextureType	-	-	-	-	623237bab933c921	-
+typedef	c:@T@NSRange	-			struct _NSRange	-	-	-	-	d109726d1ae61321	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@vector_short2	-			simd_short2	-	-	-	-	92d19f8a04e857f9	-
+typedef	c:@T@simd_short2	-			short __attribute__((ext_vector_type(2)))	-	-	-	-	479e1fe3c0a1d925	-
+typedef	c:@T@vector_ushort2	-			simd_ushort2	-	-	-	-	f3708afe835f9b19	-
+typedef	c:@T@simd_ushort2	-			unsigned short __attribute__((ext_vector_type(2)))	-	-	-	-	8639aa927eb55b15	-
+typedef	c:@T@vector_ushort4	-			simd_ushort4	-	-	-	-	6b30db93d5424705	-
+typedef	c:@T@simd_ushort4	-			unsigned short __attribute__((ext_vector_type(4)))	-	-	-	-	a85f2c2affef39ec	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@vector_uchar16	-			simd_uchar16	-	-	-	-	5d2a88f61e3430d6	-
+typedef	c:@T@simd_uchar16	-			unsigned char __attribute__((ext_vector_type(16)))	-	-	-	-	30d8a8762535ec99	-

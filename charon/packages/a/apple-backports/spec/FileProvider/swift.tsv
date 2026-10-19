@@ -1,0 +1,55 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+FileProvider	swift-struct	c:@E@NSFileProviderErrorCode	-	NSFileProviderError	-	-	-	ios=11.0	-	a68f5c224a57e5ec
+FileProvider	swift-property	s:SC23NSFileProviderErrorCodeLeV03_nsC0So7NSErrorCvp	NSFileProviderError	_nsError	-	Foundation.NSError	-	-	-	5dd6573e03e7dbeb
+FileProvider	swift-method	s:SC23NSFileProviderErrorCodeLeV03_nsC0ABSo7NSErrorC_tcfc	NSFileProviderError	init(_nsError:)	-	-	FileProvider.NSFileProviderError | Foundation.NSError	-	-	5fbbf694b0396882
+FileProvider	swift-property	s:SC23NSFileProviderErrorCodeLeV11errorDomainSSvpZ	NSFileProviderError	errorDomain	+	Swift.String	-	-	-	34ede2423a0d17c3
+FileProvider	swift-enum	c:@E@NSFileProviderErrorCode	NSFileProviderError	Code	-	-	-	ios=11.0	-	1cf734415b9c9e7a
+FileProvider	swift-method	s:So23NSFileProviderErrorCodeV8rawValueABSgSi_tcfc	NSFileProviderError.Code	init(rawValue:)	-	-	FileProvider.NSFileProviderError.Code? | Swift.Int	-	-	c0ba624a4b642b0f
+FileProvider	swift-property	s:So23NSFileProviderErrorCodeV8rawValueSivp	NSFileProviderError.Code	rawValue	-	Swift.Int	-	-	-	87aa0229e4328278
+FileProvider	swift-typealias	s:So23NSFileProviderErrorCodeV8RawValuea	NSFileProviderError.Code	RawValue	-	-	-	-	-	18184ff5a6d23e05
+FileProvider	swift-typealias	c:@E@NSFileProviderErrorCode	NSFileProviderError.Code	_ErrorType	-	-	-	-	-	1fd2eb41c0287f30
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNotAuthenticated	NSFileProviderError.Code	notAuthenticated	-	-	-	-	-	c60559a73fa4a950
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorFilenameCollision	NSFileProviderError.Code	filenameCollision	-	-	-	-	-	8ff191d5839f0c2d
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorSyncAnchorExpired	NSFileProviderError.Code	syncAnchorExpired	-	-	-	-	-	82006b7bd82e7ee7
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorPageExpired	NSFileProviderError.Code	pageExpired	+	FileProvider.NSFileProviderError.Code	-	-	-	ea0211605f0d6b86
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorInsufficientQuota	NSFileProviderError.Code	insufficientQuota	-	-	-	-	-	f5f19e3dedd3dafc
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorServerUnreachable	NSFileProviderError.Code	serverUnreachable	-	-	-	-	-	9d798b107cc3647b
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNoSuchItem	NSFileProviderError.Code	noSuchItem	-	-	-	-	-	5f86c1825383cdb7
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorDeletionRejected	NSFileProviderError.Code	deletionRejected	-	-	-	ios=16.0	-	0efd1f28a1b06cf0
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorDirectoryNotEmpty	NSFileProviderError.Code	directoryNotEmpty	-	-	-	ios=16.0	-	4abe4d14efe2f982
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorProviderNotFound	NSFileProviderError.Code	providerNotFound	-	-	-	ios=16.0	-	12a6e550d3b71922
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorCannotSynchronize	NSFileProviderError.Code	cannotSynchronize	-	-	-	ios=16.0	-	13621e15df778c0c
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNonEvictableChildren	NSFileProviderError.Code	nonEvictableChildren	-	-	-	ios=16.0	-	e6139b98e3f67bae
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorUnsyncedEdits	NSFileProviderError.Code	unsyncedEdits	-	-	-	ios=16.0	-	11b9d7b3b8e58324
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNonEvictable	NSFileProviderError.Code	nonEvictable	-	-	-	ios=16.0	-	0d10be7cfdbb8a2b
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorExcludedFromSync	NSFileProviderError.Code	excludedFromSync	-	-	-	ios=16.0	-	bfccc95be283fa4d
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorDomainDisabled	NSFileProviderError.Code	domainDisabled	-	-	-	ios=16.0	-	afa000b1ca8264b5
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorProviderDomainTemporarilyUnavailable	NSFileProviderError.Code	providerDomainTemporarilyUnavailable	-	-	-	ios=17.1	-	580c1476dc9a6af7
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorProviderDomainNotFound	NSFileProviderError.Code	providerDomainNotFound	-	-	-	ios=17.1	-	ddb81cd3527c8b68
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorApplicationExtensionNotFound	NSFileProviderError.Code	applicationExtensionNotFound	-	-	-	ios=17.1	-	0b7014a97bd72fbf
+FileProvider	swift-constant	c:@E@NSFileProviderErrorCode@NSFileProviderErrorLocalVersionConflictingWithServer	NSFileProviderError.Code	localVersionConflictingWithServer	-	-	-	ios=26.0	-	05e0ab1d0087e73c
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNotAuthenticated	NSFileProviderError	notAuthenticated	+	FileProvider.NSFileProviderError.Code	-	-	-	9062b1aa8a67c9ae
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorFilenameCollision	NSFileProviderError	filenameCollision	+	FileProvider.NSFileProviderError.Code	-	-	-	12f1e11c1d931ead
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorSyncAnchorExpired	NSFileProviderError	syncAnchorExpired	+	FileProvider.NSFileProviderError.Code	-	-	-	bf547f6163110071
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorPageExpired	NSFileProviderError	pageExpired	+	FileProvider.NSFileProviderError.Code	-	-	-	388ad0ed2ad617e5
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorInsufficientQuota	NSFileProviderError	insufficientQuota	+	FileProvider.NSFileProviderError.Code	-	-	-	95a65c43e9aa29e1
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorServerUnreachable	NSFileProviderError	serverUnreachable	+	FileProvider.NSFileProviderError.Code	-	-	-	5143d58eca2c06ba
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNoSuchItem	NSFileProviderError	noSuchItem	+	FileProvider.NSFileProviderError.Code	-	-	-	7376c17bb505b2f0
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorDeletionRejected	NSFileProviderError	deletionRejected	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	517b197574851166
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorDirectoryNotEmpty	NSFileProviderError	directoryNotEmpty	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	13f9a64cc6d34947
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorProviderNotFound	NSFileProviderError	providerNotFound	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	90e3f84cea9150fd
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorCannotSynchronize	NSFileProviderError	cannotSynchronize	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	c68707a536292088
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNonEvictableChildren	NSFileProviderError	nonEvictableChildren	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	69786295d477e1e7
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorUnsyncedEdits	NSFileProviderError	unsyncedEdits	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	6558382386d6bd48
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorNonEvictable	NSFileProviderError	nonEvictable	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	3bb22ef172e89066
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorExcludedFromSync	NSFileProviderError	excludedFromSync	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	75be2d14e643f967
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorDomainDisabled	NSFileProviderError	domainDisabled	+	FileProvider.NSFileProviderError.Code	-	ios=16.0	-	71542517ccb2394d
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorProviderDomainTemporarilyUnavailable	NSFileProviderError	providerDomainTemporarilyUnavailable	+	FileProvider.NSFileProviderError.Code	-	ios=17.1	-	898201219352d25f
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorProviderDomainNotFound	NSFileProviderError	providerDomainNotFound	+	FileProvider.NSFileProviderError.Code	-	ios=17.1	-	aaadeab8184290bc
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorApplicationExtensionNotFound	NSFileProviderError	applicationExtensionNotFound	+	FileProvider.NSFileProviderError.Code	-	ios=17.1	-	94eb790f4056767d
+FileProvider	swift-property	c:@E@NSFileProviderErrorCode@NSFileProviderErrorLocalVersionConflictingWithServer	NSFileProviderError	localVersionConflictingWithServer	+	FileProvider.NSFileProviderError.Code	-	ios=26.0	-	dca651677b8e038b
+FileProvider	swift-class	c:objc(cs)NSFileProviderDomainVersion	-	NSFileProviderDomainVersion	-	-	-	ios=16.0	-	dc3aba03950e5304
+FileProvider	swift-method	s:So27NSFileProviderDomainVersionC04FileB0E1loiySbAB_ABtFZ	NSFileProviderDomainVersion	<(_:_:)	+	Swift.Bool	FileProvider.NSFileProviderDomainVersion | FileProvider.NSFileProviderDomainVersion	-	-	3ab5160dd009ab90
+FileProvider	swift-class	c:objc(cs)NSFileProviderManager	-	NSFileProviderManager	-	-	-	ios=11.0	-	c8dcff2e341c84b6
+FileProvider	swift-method	s:So21NSFileProviderManagerC04FileB0E22requestDownloadForItem14withIdentifier14requestedRange17completionHandlerySo0abhJ0a_So8_NSRangeVSgys5Error_pSgctF	NSFileProviderManager	requestDownloadForItem(withIdentifier:requestedRange:completionHandler:)	-	()	FileProvider.NSFileProviderItemIdentifier | Foundation.NSRange? | ((any Swift.Error)?) -> Swift.Void	-	-	7f3308bbedf5de82
+FileProvider	swift-method	s:So21NSFileProviderManagerC04FileB0E22requestDownloadForItem14withIdentifier14requestedRangeySo0abhJ0a_So8_NSRangeVSgtYaKF	NSFileProviderManager	requestDownloadForItem(withIdentifier:requestedRange:)	-	()	FileProvider.NSFileProviderItemIdentifier | Foundation.NSRange?	-	-	53d103e2a8916f66

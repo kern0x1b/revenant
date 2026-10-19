@@ -1,0 +1,313 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+Assignables	swift-constant	c:@AssignablesVersionNumber	-	AssignablesVersionNumber	-	Swift.Double	-	-	-	e6e31fe4deca7ca4
+Assignables	swift-constant	c:@AssignablesVersionString	-	AssignablesVersionString	-	_	-	-	-	805212319a4b86a0
+Assignables	swift-struct	s:11Assignables29MergeablePartsContainerPartIDV	-	MergeablePartsContainerPartID	-	-	-	ios=17.4	-	afb903976f25d15d
+Assignables	swift-property	s:11Assignables29MergeablePartsContainerPartIDV8rawValueSSvp	MergeablePartsContainerPartID	rawValue	-	Swift.String	-	ios=17.5	-	46eb24500890e8c7
+Assignables	swift-method	s:11Assignables29MergeablePartsContainerPartIDVyACSScfc	MergeablePartsContainerPartID	init(_:)	-	-	Assignables.MergeablePartsContainerPartID | Swift.String	ios=17.5	-	2bab12f27ae46ba6
+Assignables	swift-method	s:11Assignables29MergeablePartsContainerPartIDV2eeoiySbAC_ACtFZ	MergeablePartsContainerPartID	==(_:_:)	+	Swift.Bool	Assignables.MergeablePartsContainerPartID | Assignables.MergeablePartsContainerPartID	-	-	1ab1e79d00927df8
+Assignables	swift-method	s:11Assignables29MergeablePartsContainerPartIDV4hash4intoys6HasherVz_tF	MergeablePartsContainerPartID	hash(into:)	-	()	Swift.Hasher	-	-	bba3c5f9ebb0040f
+Assignables	swift-property	s:11Assignables29MergeablePartsContainerPartIDV9hashValueSivp	MergeablePartsContainerPartID	hashValue	-	Swift.Int	-	-	-	9318abb21f145be1
+Assignables	swift-enum	s:11Assignables17MergeablePartDataO	-	MergeablePartData	-	-	-	ios=17.5	-	19717d5ee47884fb
+Assignables	swift-constant	s:11Assignables17MergeablePartDataO4datayAC10Foundation0D0VcACmF	MergeablePartData	data	-	-	-	-	-	62086d41bfba7ab2
+Assignables	swift-constant	s:11Assignables17MergeablePartDataO7fileURLyAC10Foundation0F0VcACmF	MergeablePartData	fileURL	-	-	-	-	-	0c5f198cfa90a7f1
+Assignables	swift-protocol	s:11Assignables23MergeablePartsContainerP	-	MergeablePartsContainer	-	-	-	ios=17.4	-	d80c4eb9c8a3466c
+Assignables	swift-typealias	s:11Assignables23MergeablePartsContainerP6PartIDa	MergeablePartsContainer	PartID	-	-	-	-	-	fad7eee2f366a602
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP5merge5otherSbx_tKF	MergeablePartsContainer	merge(other:)	-	Swift.Bool	Self	-	-	88e0dc729c07e9c6
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP5merge6partID0F7DataURLSbAA0bcd4PartG0V_10Foundation0I0VtKF	MergeablePartsContainer	merge(partID:partDataURL:)	-	Swift.Bool	Self.PartID | Foundation.URL	-	-	0562de660bd9b9f8
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP6export7partIDsSDyAA0bcD6PartIDV10Foundation3URLVGSayAGG_tYaKF	MergeablePartsContainer	export(partIDs:)	-	[Self.PartID : Foundation.URL]	[Self.PartID]	-	-	11be8f5f8f494349
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP06exportC012identifiedBySDyAA0bcD6PartIDVAA0bH4DataOGSayAGG_tYaKF	MergeablePartsContainer	exportParts(identifiedBy:)	-	[Self.PartID : Assignables.MergeablePartData]	[Self.PartID]	ios=17.5	-	f77f58d494048a94
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP5mergeySbxYaKF	MergeablePartsContainer	merge(_:)	-	Swift.Bool	Self	ios=17.5	-	ba3667b82b0642d2
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP5merge8partData4intoSbAA0b4PartG0O_AA0bcdI2IDVtYaKF	MergeablePartsContainer	merge(partData:into:)	-	Swift.Bool	Assignables.MergeablePartData | Self.PartID	ios=17.5	-	e644f51499f87fc2
+Assignables	swift-method	s:11Assignables23MergeablePartsContainerP8makePart3forAA0bF4DataOSgAA0bcdF2IDV_tKF	MergeablePartsContainer	makePart(for:)	-	Assignables.MergeablePartData?	Self.PartID	ios=18	-	4ebd0c6e209ad689
+Assignables	swift-property	s:11Assignables23MergeablePartsContainerP9isPartialSbvp	MergeablePartsContainer	isPartial	-	Swift.Bool	-	-	-	f7cd08a88f5081a9
+Assignables	swift-property	s:11Assignables23MergeablePartsContainerP7partIDsSayAA0bcD6PartIDVGvp	MergeablePartsContainer	partIDs	-	[Self.PartID]	-	-	-	087375748136e7dc
+Assignables	swift-protocol	s:11Assignables27AssignedWorkDocumentElementP	-	AssignedWorkDocumentElement	-	-	-	ios=17.4	-	5d38b274aee9bac2
+Assignables	swift-struct	s:11Assignables20AssignedWorkDocumentV	-	AssignedWorkDocument	-	-	-	ios=17.4	-	b6ed666da8a0462c
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV2eeoiySbAC_ACtFZ	AssignedWorkDocument	==(_:_:)	+	Swift.Bool	Assignables.AssignedWorkDocument | Assignables.AssignedWorkDocument	-	-	66d936736f3e57ac
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4hash4intoys6HasherVz_tF	AssignedWorkDocument	hash(into:)	-	()	Swift.Hasher	-	-	6fe41f2d337ff61b
+Assignables	swift-enum	s:11Assignables20AssignedWorkDocumentV7PartIDsO	AssignedWorkDocument	PartIDs	-	-	-	-	-	5c7be0acf68e24cd
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO010assignableD4BaseAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	assignableDocumentBase	+	Assignables.MergeablePartsContainerPartID	-	-	-	ceabcb403b85f1c7
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO010assignableD17InstructionMarkupAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	assignableDocumentInstructionMarkup	+	Assignables.MergeablePartsContainerPartID	-	-	-	20a2b49f10335d85
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO010assignableD13QuestionBoxesAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	assignableDocumentQuestionBoxes	+	Assignables.MergeablePartsContainerPartID	-	-	-	b93970d64b24ea78
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO010assignableD7AuthorsAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	assignableDocumentAuthors	+	Assignables.MergeablePartsContainerPartID	-	-	-	7417d8f535af1b10
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO11takerMarkupAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	takerMarkup	+	Assignables.MergeablePartsContainerPartID	-	-	-	742b9aefc429af1d
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO12scorerMarkupAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	scorerMarkup	+	Assignables.MergeablePartsContainerPartID	-	-	-	5362377a3c09155b
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO16scoreAnnotationsAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	scoreAnnotations	+	Assignables.MergeablePartsContainerPartID	-	-	-	59047bb7cff7ec68
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO9assigneesAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	assignees	+	Assignables.MergeablePartsContainerPartID	-	-	-	bf0258f7f1c1b636
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO7scorersAA023MergeablePartsContainerE2IDVvpZ	AssignedWorkDocument.PartIDs	scorers	+	Assignables.MergeablePartsContainerPartID	-	-	-	6535e25716e497fb
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV7PartIDsO0D0a	AssignedWorkDocument.PartIDs	Document	-	-	-	-	-	ea3dfb0f4b6b6506
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7PartIDsO3allSayAA023MergeablePartsContainerE2IDVGvpZ	AssignedWorkDocument.PartIDs	all	+	[Assignables.MergeablePartsContainerPartID]	-	-	-	85c47e665301e27a
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV5merge5otherSbAC_tKF	AssignedWorkDocument	merge(other:)	-	Swift.Bool	Assignables.AssignedWorkDocument	-	-	97c953d595bdb400
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV5merge6partID0F7DataURLSbAA027MergeablePartsContainerPartG0V_10Foundation0I0VtKF	AssignedWorkDocument	merge(partID:partDataURL:)	-	Swift.Bool	Assignables.AssignedWorkDocument.PartID | Foundation.URL	-	-	760ae23e4fc6a79e
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV6export7partIDsSDyAA29MergeablePartsContainerPartIDV10Foundation3URLVGSayAGG_tYaKF	AssignedWorkDocument	export(partIDs:)	-	[Assignables.AssignedWorkDocument.PartID : Foundation.URL]	[Assignables.AssignedWorkDocument.PartID]	-	-	52f0f577bd0debf6
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV11exportParts12identifiedBySDyAA09MergeableF15ContainerPartIDVAA0iK4DataOGSayAGG_tYaKF	AssignedWorkDocument	exportParts(identifiedBy:)	-	[Assignables.AssignedWorkDocument.PartID : Assignables.MergeablePartData]	[Assignables.AssignedWorkDocument.PartID]	ios=17.5	-	2199b32b793c85b6
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV5mergeySbACYaKF	AssignedWorkDocument	merge(_:)	-	Swift.Bool	Assignables.AssignedWorkDocument	ios=17.5	-	fe9cc923eba3d53d
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV5merge8partData4intoSbAA013MergeablePartG0O_AA0i14PartsContainerJ2IDVtYaKF	AssignedWorkDocument	merge(partData:into:)	-	Swift.Bool	Assignables.MergeablePartData | Assignables.AssignedWorkDocument.PartID	ios=17.5	-	fab2413e1a48f364
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV9isPartialSbvp	AssignedWorkDocument	isPartial	-	Swift.Bool	-	-	-	7043df51d47096f6
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7partIDsSayAA29MergeablePartsContainerPartIDVGvp	AssignedWorkDocument	partIDs	-	[Assignables.MergeablePartsContainerPartID]	-	-	-	f19174583f14c03b
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV8makePart3forAA09MergeableF4DataOSgAA0h14PartsContainerF2IDV_tKF	AssignedWorkDocument	makePart(for:)	-	Assignables.MergeablePartData?	Assignables.AssignedWorkDocument.PartID	ios=18	-	2fd5edfbc403efe7
+Assignables	swift-enum	s:11Assignables20AssignedWorkDocumentV5ErrorO	AssignedWorkDocument	Error	-	-	-	-	-	74b17bf5489131a2
+Assignables	swift-constant	s:11Assignables20AssignedWorkDocumentV5ErrorO05otherD13IsNotAVariantyA2EmF	AssignedWorkDocument.Error	otherDocumentIsNotAVariant	-	-	-	-	-	0b1ce3a74d6f5217
+Assignables	swift-constant	s:11Assignables20AssignedWorkDocumentV5ErrorO12exportFailedyAESayAA29MergeablePartsContainerPartIDVG_tcAEmF	AssignedWorkDocument.Error	exportFailed	-	-	-	-	-	dbc238bdda91b810
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV2IDa	AssignedWorkDocument	ID	-	-	-	-	-	6d69adac1275ead2
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV2idSSvp	AssignedWorkDocument	id	-	Assignables.AssignedWorkDocument.ID	-	-	-	c376600b09943c38
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV010assignableD0AA010AssignableD0Vvp	AssignedWorkDocument	assignableDocument	-	Assignables.AssignableDocument	-	-	-	d241bbeb009f5e06
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV9assigneesSayAA15AnyUserIdentityVGvp	AssignedWorkDocument	assignees	-	[Assignables.AnyUserIdentity]	-	-	-	e5716cb3b10e4f69
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV7scorersSayAA15AnyUserIdentityVGvp	AssignedWorkDocument	scorers	-	[Assignables.AnyUserIdentity]	-	-	-	879f0e5b54201dae
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV2id010assignableD08partDataACSS_AA010AssignableD0VSDyAA29MergeablePartsContainerPartIDV10Foundation3URLVGtKcfc	AssignedWorkDocument	init(id:assignableDocument:partData:)	-	-	Assignables.AssignedWorkDocument | Assignables.AssignedWorkDocument.ID | Assignables.AssignableDocument | [Assignables.AssignedWorkDocument.PartID : Foundation.URL]	-	-	863bcb55bb7600b8
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV2id010assignableD08partDataACSS_AA010AssignableD0VSDyAA29MergeablePartsContainerPartIDVAA0jmH0OGtYaKcfc	AssignedWorkDocument	init(id:assignableDocument:partData:)	-	-	Assignables.AssignedWorkDocument | Assignables.AssignedWorkDocument.ID | Assignables.AssignableDocument | [Assignables.AssignedWorkDocument.PartID : Assignables.MergeablePartData]	ios=17.5	-	504df61cd7b485d4
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV9hashValueSivp	AssignedWorkDocument	hashValue	-	Swift.Int	-	-	-	740652f0236039f8
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV13Configurationa	AssignedWorkDocument	Configuration	-	-	-	-	-	56703001f15c0c58
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV13configurationAA0bcD13Configuration_pvp	AssignedWorkDocument	configuration	-	any Assignables.AssignedWorkDocumentConfiguration	-	-	-	2e72e531cc04714f
+Assignables	swift-struct	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV	AssignedWorkDocument	ScoreAnnotation	-	-	-	-	-	844189293169440c
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV2IDa	AssignedWorkDocument.ScoreAnnotation	ID	-	-	-	-	-	c27a6a410af35f1c
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV2idSSvp	AssignedWorkDocument.ScoreAnnotation	id	-	Assignables.AssignedWorkDocument.ScoreAnnotation.ID	-	-	-	38dcafbbfc84fe2b
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV0D0a	AssignedWorkDocument.ScoreAnnotation	Document	-	-	-	-	-	f599d443ed81d9e6
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV2id6pageID8location4kindAESS_AC4PageV0I0VSgSo7CGPointVAE4KindOtcfc	AssignedWorkDocument.ScoreAnnotation	init(id:pageID:location:kind:)	-	-	Assignables.AssignedWorkDocument.ScoreAnnotation | Assignables.AssignedWorkDocument.ScoreAnnotation.ID | Assignables.AssignedWorkDocument.Page.ID? | CoreFoundation.CGPoint | Assignables.AssignedWorkDocument.ScoreAnnotation.Kind	-	-	3790b89a63dffd6b
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV2eeoiySbAE_AEtFZ	AssignedWorkDocument.ScoreAnnotation	==(_:_:)	+	Swift.Bool	Assignables.AssignedWorkDocument.ScoreAnnotation | Assignables.AssignedWorkDocument.ScoreAnnotation	-	-	203897eb1f62c465
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4hash4intoys6HasherVz_tF	AssignedWorkDocument.ScoreAnnotation	hash(into:)	-	()	Swift.Hasher	-	-	5afcf3487c29bd59
+Assignables	swift-enum	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO	AssignedWorkDocument.ScoreAnnotation	Kind	-	-	-	-	-	68188f542db908f4
+Assignables	swift-constant	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO7unknownyA2GmF	AssignedWorkDocument.ScoreAnnotation.Kind	unknown	-	-	-	-	-	ad081d3480c9bbe0
+Assignables	swift-constant	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO9incorrectyA2GmF	AssignedWorkDocument.ScoreAnnotation.Kind	incorrect	-	-	-	-	-	23b61314cef41bec
+Assignables	swift-constant	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO7correctyA2GmF	AssignedWorkDocument.ScoreAnnotation.Kind	correct	-	-	-	-	-	67e4dce92657e0e2
+Assignables	swift-constant	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO5bonusyA2GmF	AssignedWorkDocument.ScoreAnnotation.Kind	bonus	-	-	-	-	-	4e013eafd363daab
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO16debugDescriptionSSvp	AssignedWorkDocument.ScoreAnnotation.Kind	debugDescription	-	Swift.String	-	-	-	c7ddb0168a2f552a
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO8rawValueAGSgSi_tcfc	AssignedWorkDocument.ScoreAnnotation.Kind	init(rawValue:)	-	-	Assignables.AssignedWorkDocument.ScoreAnnotation.Kind? | Swift.Int	-	-	2c96de739db9cfc9
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO8AllCasesa	AssignedWorkDocument.ScoreAnnotation.Kind	AllCases	-	-	-	ios=17.4	-	78eb73131585cff7
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO8RawValuea	AssignedWorkDocument.ScoreAnnotation.Kind	RawValue	-	-	-	ios=17.4	-	9085a5f16e645df2
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO8allCasesSayAGGvpZ	AssignedWorkDocument.ScoreAnnotation.Kind	allCases	+	[Assignables.AssignedWorkDocument.ScoreAnnotation.Kind]	-	-	-	95498e5a15f0826f
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4KindO8rawValueSivp	AssignedWorkDocument.ScoreAnnotation.Kind	rawValue	-	Swift.Int	-	-	-	980b40837b900a9a
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV6pageIDAC4PageV0H0VSgvp	AssignedWorkDocument.ScoreAnnotation	pageID	-	Assignables.AssignedWorkDocument.Page.ID?	-	-	-	2159367a0154233e
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV8locationSo7CGPointVvp	AssignedWorkDocument.ScoreAnnotation	location	-	CoreFoundation.CGPoint	-	-	-	dcc99f2ae6fc1ca6
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV4kindAE4KindOvp	AssignedWorkDocument.ScoreAnnotation	kind	-	Assignables.AssignedWorkDocument.ScoreAnnotation.Kind	-	-	-	d8d43b2925497c80
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV15ScoreAnnotationV9hashValueSivp	AssignedWorkDocument.ScoreAnnotation	hashValue	-	Swift.Int	-	-	-	13d370d922a32ca0
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV16scoreAnnotationsSayAC15ScoreAnnotationVGvp	AssignedWorkDocument	scoreAnnotations	-	[Assignables.AssignedWorkDocument.ScoreAnnotation]	-	-	-	cd0a4be37f54908b
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentVyAC4PageVSgAE2IDVcip	AssignedWorkDocument	subscript(_:)	-	Assignables.AssignedWorkDocument.Page?	Assignables.AssignedWorkDocument.Page.ID	-	-	928ec167e3ed926a
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentVyAC15ScoreAnnotationVSgSScip	AssignedWorkDocument	subscript(_:)	-	Assignables.AssignedWorkDocument.ScoreAnnotation?	Assignables.AssignedWorkDocument.ScoreAnnotation.ID	-	-	e9b7a433562f79ac
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV12computeScoreSdyF	AssignedWorkDocument	computeScore()	-	Swift.Double	-	-	-	818ecb8220773715
+Assignables	swift-struct	s:11Assignables20AssignedWorkDocumentV4PageV	AssignedWorkDocument	Page	-	-	-	-	-	08cadd3667c21d92
+Assignables	swift-struct	s:11Assignables20AssignedWorkDocumentV4PageV2IDV	AssignedWorkDocument.Page	ID	-	-	-	-	-	19fa1cbfae51a19d
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV4PageV2IDV7Elementa	AssignedWorkDocument.Page.ID	Element	-	-	-	-	-	88d71f5909ca088c
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV2IDV010assignabledeF0AA010AssignableD0VADVAFVvp	AssignedWorkDocument.Page.ID	assignableDocumentPageID	-	Assignables.AssignableDocument.Page.ID	-	-	-	ac400b528aecb092
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4PageV2IDV2eeoiySbAG_AGtFZ	AssignedWorkDocument.Page.ID	==(_:_:)	+	Swift.Bool	Assignables.AssignedWorkDocument.Page.ID | Assignables.AssignedWorkDocument.Page.ID	-	-	d501dbae1212a645
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4PageV2IDV6encode2toys7Encoder_p_tKF	AssignedWorkDocument.Page.ID	encode(to:)	-	()	any Swift.Encoder	-	-	62e1f5222913f415
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4PageV2IDV4hash4intoys6HasherVz_tF	AssignedWorkDocument.Page.ID	hash(into:)	-	()	Swift.Hasher	-	-	82f53c7705ef03f5
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV2IDV9hashValueSivp	AssignedWorkDocument.Page.ID	hashValue	-	Swift.Int	-	-	-	48082a55f18c5164
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4PageV2IDV4fromAGs7Decoder_p_tKcfc	AssignedWorkDocument.Page.ID	init(from:)	-	-	Assignables.AssignedWorkDocument.Page.ID | any Swift.Decoder	-	-	8817d95dad7912f2
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV2idAE2IDVvp	AssignedWorkDocument.Page	id	-	Assignables.AssignedWorkDocument.Page.ID	-	-	-	baf5c36ab02f3ca2
+Assignables	swift-typealias	s:11Assignables20AssignedWorkDocumentV4PageV0D0a	AssignedWorkDocument.Page	Document	-	-	-	-	-	535611d292fcf2e5
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4PageV2eeoiySbAE_AEtFZ	AssignedWorkDocument.Page	==(_:_:)	+	Swift.Bool	Assignables.AssignedWorkDocument.Page | Assignables.AssignedWorkDocument.Page	-	-	03d4047138e0bda5
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV4PageV4hash4intoys6HasherVz_tF	AssignedWorkDocument.Page	hash(into:)	-	()	Swift.Hasher	-	-	b6bbc9aaddf6882a
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV010assignabledE2IDAA010AssignableD0VADV0G0Vvp	AssignedWorkDocument.Page	assignableDocumentPageID	-	Assignables.AssignableDocument.Page.ID	-	-	-	c4b55d150b840ff4
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV8rotation10Foundation11MeasurementVySo11NSUnitAngleCGvp	AssignedWorkDocument.Page	rotation	-	Foundation.Measurement<Foundation.UnitAngle>	-	ios=18	-	77c845ec3a3b81db
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV16debugDescriptionSSvp	AssignedWorkDocument.Page	debugDescription	-	Swift.String	-	-	-	08f134fb9cd6a112
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV4PageV9hashValueSivp	AssignedWorkDocument.Page	hashValue	-	Swift.Int	-	-	-	e410025954a126e8
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV21pagesDebugDescriptionSSvp	AssignedWorkDocument	pagesDebugDescription	-	Swift.String	-	-	-	f7ce2f94115c8854
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV5pagesSayAC4PageVGvp	AssignedWorkDocument	pages	-	[Assignables.AssignedWorkDocument.Page]	-	-	-	f7e453025ed03050
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV11exportToPDF12visiblePartsSo11PDFDocumentCSayAA09MergeableI15ContainerPartIDVG_tYaF	AssignedWorkDocument	exportToPDF(visibleParts:)	-	PDFKit.PDFDocument	[Assignables.MergeablePartsContainerPartID]	-	-	6220c5936d67c49e
+Assignables	swift-property	s:11Assignables20AssignedWorkDocumentV011isMultiPageD0Sbvp	AssignedWorkDocument	isMultiPageDocument	-	Swift.Bool	-	-	-	c59f2bd3c0596336
+Assignables	swift-method	s:11Assignables20AssignedWorkDocumentV18questionThumbnails12visiblePartsSDyAA05BasicD9ElementIDVyAA010AssignableD0V8QuestionVGSayAK9ThumbnailVGGSayAA09Mergeableh13ContainerPartK0VG_tYaF	AssignedWorkDocument	questionThumbnails(visibleParts:)	-	[Assignables.AssignableDocument.Question.ID : [Assignables.AssignableDocument.Question.Thumbnail]]	[Assignables.AssignedWorkDocument.PartID]	-	-	169d4ea5d2555bae
+Assignables	swift-protocol	s:11Assignables33AssignedWorkDocumentConfigurationP	-	AssignedWorkDocumentConfiguration	-	-	-	ios=17.4	-	a7af29bc5128d3dc
+Assignables	swift-property	s:11Assignables33AssignedWorkDocumentConfigurationP11manualScoreSdSgvp	AssignedWorkDocumentConfiguration	manualScore	-	Swift.Double?	-	-	-	b282b6c71e9154e3
+Assignables	swift-protocol	s:11Assignables12UserIdentityP	-	UserIdentity	-	-	-	ios=17.4	-	4578641a3ddcddb3
+Assignables	swift-property	s:11Assignables12UserIdentityP6typeIDSSvp	UserIdentity	typeID	-	Swift.String	-	-	-	4aff408443b5d8fc
+Assignables	swift-property	s:11Assignables12UserIdentityP20stringRepresentationSSvp	UserIdentity	stringRepresentation	-	Swift.String	-	-	-	5a374665f4d6870e
+Assignables	swift-method	s:11Assignables12UserIdentityP010eraseToAnybC0AA0fbC0VyF	UserIdentity	eraseToAnyUserIdentity()	-	Assignables.AnyUserIdentity	-	-	-	bcda3f7760eb08d4
+Assignables	swift-typealias	s:11Assignables12UserIdentityPAAE2Asa	UserIdentity	As	-	-	-	-	-	c558acb1dc22dcd4
+Assignables	swift-method	s:11Assignables12UserIdentityPAAE010eraseToAnybC0AA0fbC0VyF	UserIdentity	eraseToAnyUserIdentity()	-	Assignables.AnyUserIdentity	-	-	-	b191c7e2817052c3
+Assignables	swift-method	s:11Assignables12UserIdentityPAAE5scopeyqd__qd__yKXEKlF	UserIdentity	scope(_:)	-	R	() throws -> R	-	-	ad097a407ce135ce
+Assignables	swift-method	s:11Assignables12UserIdentityPAAE5scopeyqd__qd__yYaKXEYaKlF	UserIdentity	scope(_:)	-	R	() async throws -> R	-	-	76f8fc1c71e4c23d
+Assignables	swift-enum	s:11Assignables19UserIdentityFactoryO	-	UserIdentityFactory	-	-	-	ios=17.4	-	6d425e1a8c6a5de2
+Assignables	swift-property	s:11Assignables19UserIdentityFactoryO9anonymousAA09AnonymousbC0VvpZ	UserIdentityFactory	anonymous	+	Assignables.AnonymousUserIdentity	-	-	-	c3dff41fcaf5ef7b
+Assignables	swift-method	s:11Assignables19UserIdentityFactoryO6stringyAA06StringbC0VSSFZ	UserIdentityFactory	string(_:)	+	Assignables.StringUserIdentity	Swift.String	-	-	b65423234409cd55
+Assignables	swift-struct	s:11Assignables21AnonymousUserIdentityV	-	AnonymousUserIdentity	-	-	-	ios=17.4	-	968bdb079b0f7905
+Assignables	swift-property	s:11Assignables21AnonymousUserIdentityV6typeIDSSvpZ	AnonymousUserIdentity	typeID	+	Swift.String	-	-	-	4b68ca651500ddd2
+Assignables	swift-property	s:11Assignables21AnonymousUserIdentityV6typeIDSSvp	AnonymousUserIdentity	typeID	-	Swift.String	-	-	-	09a007a05858d084
+Assignables	swift-property	s:11Assignables21AnonymousUserIdentityV20stringRepresentationSSvp	AnonymousUserIdentity	stringRepresentation	-	Swift.String	-	-	-	d4684cdd67c646c1
+Assignables	swift-method	s:11Assignables21AnonymousUserIdentityVACycfc	AnonymousUserIdentity	init()	-	-	Assignables.AnonymousUserIdentity	-	-	64fc3a5db5b123b4
+Assignables	swift-method	s:11Assignables21AnonymousUserIdentityV2eeoiySbAC_ACtFZ	AnonymousUserIdentity	==(_:_:)	+	Swift.Bool	Assignables.AnonymousUserIdentity | Assignables.AnonymousUserIdentity	-	-	e0ee66743ae937e7
+Assignables	swift-method	s:11Assignables21AnonymousUserIdentityV6encode2toys7Encoder_p_tKF	AnonymousUserIdentity	encode(to:)	-	()	any Swift.Encoder	-	-	fee0dde36e2bbf01
+Assignables	swift-method	s:11Assignables21AnonymousUserIdentityV4hash4intoys6HasherVz_tF	AnonymousUserIdentity	hash(into:)	-	()	Swift.Hasher	-	-	eea94b9ae7edfcb7
+Assignables	swift-property	s:11Assignables21AnonymousUserIdentityV9hashValueSivp	AnonymousUserIdentity	hashValue	-	Swift.Int	-	-	-	cc039cab21e6fcac
+Assignables	swift-method	s:11Assignables21AnonymousUserIdentityV4fromACs7Decoder_p_tKcfc	AnonymousUserIdentity	init(from:)	-	-	Assignables.AnonymousUserIdentity | any Swift.Decoder	-	-	94a0f30937653de3
+Assignables	swift-struct	s:11Assignables18StringUserIdentityV	-	StringUserIdentity	-	-	-	ios=17.4	-	6cb86ae9f15f9816
+Assignables	swift-property	s:11Assignables18StringUserIdentityV6typeIDSSvpZ	StringUserIdentity	typeID	+	Swift.String	-	-	-	16ec5d90d169b3b2
+Assignables	swift-property	s:11Assignables18StringUserIdentityV6typeIDSSvp	StringUserIdentity	typeID	-	Swift.String	-	-	-	d156734d90cc27fd
+Assignables	swift-property	s:11Assignables18StringUserIdentityV20stringRepresentationSSvp	StringUserIdentity	stringRepresentation	-	Swift.String	-	-	-	5870cf41aac27157
+Assignables	swift-property	s:11Assignables18StringUserIdentityV5valueSSvp	StringUserIdentity	value	-	Swift.String	-	-	-	461e02c0419137fb
+Assignables	swift-method	s:11Assignables18StringUserIdentityV5valueACSS_tcfc	StringUserIdentity	init(value:)	-	-	Assignables.StringUserIdentity | Swift.String	-	-	cfd873133c1ade58
+Assignables	swift-method	s:11Assignables18StringUserIdentityV2eeoiySbAC_ACtFZ	StringUserIdentity	==(_:_:)	+	Swift.Bool	Assignables.StringUserIdentity | Assignables.StringUserIdentity	-	-	1199a3aeb67c0066
+Assignables	swift-method	s:11Assignables18StringUserIdentityV6encode2toys7Encoder_p_tKF	StringUserIdentity	encode(to:)	-	()	any Swift.Encoder	-	-	5f19ef07e00c82b0
+Assignables	swift-method	s:11Assignables18StringUserIdentityV4hash4intoys6HasherVz_tF	StringUserIdentity	hash(into:)	-	()	Swift.Hasher	-	-	25e327c574e77434
+Assignables	swift-property	s:11Assignables18StringUserIdentityV9hashValueSivp	StringUserIdentity	hashValue	-	Swift.Int	-	-	-	466f7aca20ed6e6d
+Assignables	swift-method	s:11Assignables18StringUserIdentityV4fromACs7Decoder_p_tKcfc	StringUserIdentity	init(from:)	-	-	Assignables.StringUserIdentity | any Swift.Decoder	-	-	a8f9227d46fd2705
+Assignables	swift-struct	s:11Assignables15AnyUserIdentityV	-	AnyUserIdentity	-	-	-	ios=17.4	-	5c90f29a90c945a8
+Assignables	swift-property	s:11Assignables15AnyUserIdentityV6typeIDSSvp	AnyUserIdentity	typeID	-	Swift.String	-	-	-	dbd45da94a95fb82
+Assignables	swift-property	s:11Assignables15AnyUserIdentityV20stringRepresentationSSvp	AnyUserIdentity	stringRepresentation	-	Swift.String	-	-	-	0597ee42fb196175
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV2eeoiySbAC_ACtFZ	AnyUserIdentity	==(_:_:)	+	Swift.Bool	Assignables.AnyUserIdentity | Assignables.AnyUserIdentity	-	-	f6d0a86eb86db602
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV4hash4intoys6HasherVz_tF	AnyUserIdentity	hash(into:)	-	()	Swift.Hasher	-	-	994c9e9450ccda8a
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV6encode2toys7Encoder_p_tKF	AnyUserIdentity	encode(to:)	-	()	any Swift.Encoder	-	-	69535cc46365f1a3
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV4fromACs7Decoder_p_tKcfc	AnyUserIdentity	init(from:)	-	-	Assignables.AnyUserIdentity | any Swift.Decoder	-	-	1a7e622bae05a4f7
+Assignables	swift-method	s:11Assignables15AnyUserIdentityVyACxcAA0cD0Rzlufc	AnyUserIdentity	init(_:)	-	-	Assignables.AnyUserIdentity | T	-	-	2a69ba69e003bf6c
+Assignables	swift-enum	s:11Assignables15AnyUserIdentityV5ErrorO	AnyUserIdentity	Error	-	-	-	-	-	3d70ea02573fc32c
+Assignables	swift-constant	s:11Assignables15AnyUserIdentityV5ErrorO12cannotDecodeyA2EmF	AnyUserIdentity.Error	cannotDecode	-	-	-	-	-	b32c61fbf05f21df
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV5ErrorO2eeoiySbAE_AEtFZ	AnyUserIdentity.Error	==(_:_:)	+	Swift.Bool	Assignables.AnyUserIdentity.Error | Assignables.AnyUserIdentity.Error	-	-	de0c60a9308b8f60
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV5ErrorO4hash4intoys6HasherVz_tF	AnyUserIdentity.Error	hash(into:)	-	()	Swift.Hasher	-	-	cbaad2d1060ab8c1
+Assignables	swift-property	s:11Assignables15AnyUserIdentityV5ErrorO9hashValueSivp	AnyUserIdentity.Error	hashValue	-	Swift.Int	-	-	-	54747fb2e9b1527e
+Assignables	swift-property	s:11Assignables15AnyUserIdentityV9hashValueSivp	AnyUserIdentity	hashValue	-	Swift.Int	-	-	-	815e15c3eda0df73
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV5scopeyxxyKXEKlF	AnyUserIdentity	scope(_:)	-	R	() throws -> R	-	-	136fecdbbae8d059
+Assignables	swift-method	s:11Assignables15AnyUserIdentityV5scopeyxxyYaKXEYaKlF	AnyUserIdentity	scope(_:)	-	R	() async throws -> R	-	-	b3777c6188db176b
+Assignables	swift-class	s:11Assignables24UserIdentityTypeRegistryC	-	UserIdentityTypeRegistry	-	-	-	ios=17.4	-	c2ea85b3bb46bbb4
+Assignables	swift-method	s:11Assignables24UserIdentityTypeRegistryC08registerbcD06typeID0G0ySS_xmtAA0bC0RzlFZ	UserIdentityTypeRegistry	registerUserIdentityType(typeID:type:)	+	()	Swift.String | UI.Type	-	-	e8d27b7d585708cc
+Assignables	swift-protocol	s:11Assignables17DocumentElementIDP	-	DocumentElementID	-	-	-	ios=17.4	-	b03182090b8c8a4c
+Assignables	swift-protocol	s:11Assignables15DocumentElementP	-	DocumentElement	-	-	-	ios=17.4	-	dd4e9de950a4b892
+Assignables	swift-struct	s:11Assignables22AssignableDocumentViewV	-	AssignableDocumentView	-	-	-	ios=17.4	-	c3c4db59d3aeda62
+Assignables	swift-typealias	s:11Assignables22AssignableDocumentViewV0C0a	AssignableDocumentView	Document	-	-	-	-	-	82b1ef8ebebfa2b1
+Assignables	swift-method	s:11Assignables22AssignableDocumentViewV8document12activePartID06hiddenG3IDs012selectedPageH00k8QuestionH005showsL10Thumbnails25isStructureEditingEnabledAC7SwiftUI7BindingVyAA0bC0VG_AA023MergeablePartsContainergH0VSgSayARGAMyAO0L0V0H0VSgGSgAMyAA05Basicc7ElementH0VyAO0M0VGSgGSgS2btcfc	AssignableDocumentView	init(document:activePartID:hiddenPartIDs:selectedPageID:selectedQuestionID:showsPageThumbnails:isStructureEditingEnabled:)	-	-	Assignables.AssignableDocumentView | SwiftUI.Binding<Assignables.AssignableDocumentView.Document> | Assignables.MergeablePartsContainerPartID? | [Assignables.MergeablePartsContainerPartID] | SwiftUI.Binding<Assignables.AssignableDocumentView.Document.Page.ID?>? | SwiftUI.Binding<Assignables.AssignableDocumentView.Document.Question.ID?>? | Swift.Bool | Swift.Bool	-	-	a36625b6f2c11d92
+Assignables	swift-method	s:11Assignables22AssignableDocumentViewV8document12activePartID06hiddenG3IDs012selectedPageH00k8QuestionH005showsL10Thumbnails25isStructureEditingEnabled19allowsPencilDrawing18onMarkupActivationAC7SwiftUI7BindingVyAA0bC0VG_AA023MergeablePartsContainergH0VSgSayATGAOyAQ0L0V0H0VSgGSgAOyAA05Basicc7ElementH0VyAQ0M0VGSgGSgS3bySbctcfc	AssignableDocumentView	init(document:activePartID:hiddenPartIDs:selectedPageID:selectedQuestionID:showsPageThumbnails:isStructureEditingEnabled:allowsPencilDrawing:onMarkupActivation:)	-	-	Assignables.AssignableDocumentView | SwiftUI.Binding<Assignables.AssignableDocumentView.Document> | Assignables.MergeablePartsContainerPartID? | [Assignables.MergeablePartsContainerPartID] | SwiftUI.Binding<Assignables.AssignableDocumentView.Document.Page.ID?>? | SwiftUI.Binding<Assignables.AssignableDocumentView.Document.Question.ID?>? | Swift.Bool | Swift.Bool | Swift.Bool | (Swift.Bool) -> Swift.Void	ios=18.1	-	1736c8bf3d0cb2ee
+Assignables	swift-property	s:11Assignables22AssignableDocumentViewV4bodyQrvp	AssignableDocumentView	body	-	some SwiftUI.View	-	-	-	ea11fbc8bd836420
+Assignables	swift-typealias	s:11Assignables22AssignableDocumentViewV4Bodya	AssignableDocumentView	Body	-	-	-	ios=17.4	-	977d074be491baf3
+Assignables	swift-struct	s:11Assignables22BasicDocumentElementIDV	-	BasicDocumentElementID	-	-	-	ios=17.4	-	74caa8409536e0e4
+Assignables	swift-method	s:11Assignables22BasicDocumentElementIDV2eeoiySbACyxG_AEtFZ	BasicDocumentElementID	==(_:_:)	+	Swift.Bool	Assignables.BasicDocumentElementID<Element> | Assignables.BasicDocumentElementID<Element>	-	-	8ed2426fe24c391a
+Assignables	swift-method	s:11Assignables22BasicDocumentElementIDV6encode2toys7Encoder_p_tKF	BasicDocumentElementID	encode(to:)	-	()	any Swift.Encoder	-	-	812fefba818e13b8
+Assignables	swift-method	s:11Assignables22BasicDocumentElementIDV4hash4intoys6HasherVz_tF	BasicDocumentElementID	hash(into:)	-	()	Swift.Hasher	-	-	798acb55f7b3f29f
+Assignables	swift-property	s:11Assignables22BasicDocumentElementIDV9hashValueSivp	BasicDocumentElementID	hashValue	-	Swift.Int	-	-	-	702937e4beea62c8
+Assignables	swift-method	s:11Assignables22BasicDocumentElementIDV4fromACyxGs7Decoder_p_tKcfc	BasicDocumentElementID	init(from:)	-	-	Assignables.BasicDocumentElementID<Element> | any Swift.Decoder	-	-	a66d55b2396c8101
+Assignables	swift-typealias	s:11Assignables22BasicDocumentElementIDV0D0a	BasicDocumentElementID	Element	-	-	-	ios=17.4	-	174b4f6b3b104c93
+Assignables	swift-protocol	s:11Assignables25AssignableDocumentElementP	-	AssignableDocumentElement	-	-	-	ios=17.4	-	5ac530c371310ca8
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV	-	AssignableDocument	-	-	-	ios=17.4	-	fdf68502cc872494
+Assignables	swift-method	s:11Assignables18AssignableDocumentV2eeoiySbAC_ACtFZ	AssignableDocument	==(_:_:)	+	Swift.Bool	Assignables.AssignableDocument | Assignables.AssignableDocument	-	-	a718741a91fab9b1
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4hash4intoys6HasherVz_tF	AssignableDocument	hash(into:)	-	()	Swift.Hasher	-	-	f36bda5e741abb7c
+Assignables	swift-enum	s:11Assignables18AssignableDocumentV7PartIDsO	AssignableDocument	PartIDs	-	-	-	-	-	fcce5029fecf4ef1
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7PartIDsO4baseAA023MergeablePartsContainerD2IDVvpZ	AssignableDocument.PartIDs	base	+	Assignables.MergeablePartsContainerPartID	-	-	-	80ba63ee96dcfadb
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7PartIDsO17instructionMarkupAA023MergeablePartsContainerD2IDVvpZ	AssignableDocument.PartIDs	instructionMarkup	+	Assignables.MergeablePartsContainerPartID	-	-	-	961c2ddf9ff2d5d8
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7PartIDsO13questionBoxesAA023MergeablePartsContainerD2IDVvpZ	AssignableDocument.PartIDs	questionBoxes	+	Assignables.MergeablePartsContainerPartID	-	-	-	8e01a1541b97e8b7
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7PartIDsO7authorsAA023MergeablePartsContainerD2IDVvpZ	AssignableDocument.PartIDs	authors	+	Assignables.MergeablePartsContainerPartID	-	-	-	efe1bf2d5ed44dde
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV7PartIDsO0C0a	AssignableDocument.PartIDs	Document	-	-	-	-	-	a0999b13bc5b9002
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7PartIDsO3allSayAA023MergeablePartsContainerD2IDVGvpZ	AssignableDocument.PartIDs	all	+	[Assignables.MergeablePartsContainerPartID]	-	-	-	7d3a127b785221a5
+Assignables	swift-method	s:11Assignables18AssignableDocumentV5merge5otherSbAC_tKF	AssignableDocument	merge(other:)	-	Swift.Bool	Assignables.AssignableDocument	-	-	46d30ba0cf9bf204
+Assignables	swift-method	s:11Assignables18AssignableDocumentV5merge6partID0E7DataURLSbAA027MergeablePartsContainerPartF0V_10Foundation0H0VtKF	AssignableDocument	merge(partID:partDataURL:)	-	Swift.Bool	Assignables.AssignableDocument.PartID | Foundation.URL	-	-	29bc8ee35cffb391
+Assignables	swift-method	s:11Assignables18AssignableDocumentV6export7partIDsSDyAA29MergeablePartsContainerPartIDV10Foundation3URLVGSayAGG_tYaKF	AssignableDocument	export(partIDs:)	-	[Assignables.AssignableDocument.PartID : Foundation.URL]	[Assignables.AssignableDocument.PartID]	-	-	a62490f0104e7a39
+Assignables	swift-method	s:11Assignables18AssignableDocumentV11exportParts12identifiedBySDyAA09MergeableE15ContainerPartIDVAA0hJ4DataOGSayAGG_tYaKF	AssignableDocument	exportParts(identifiedBy:)	-	[Assignables.AssignableDocument.PartID : Assignables.MergeablePartData]	[Assignables.AssignableDocument.PartID]	ios=17.5	-	d55bccd23d7889bc
+Assignables	swift-method	s:11Assignables18AssignableDocumentV5mergeySbACYaKF	AssignableDocument	merge(_:)	-	Swift.Bool	Assignables.AssignableDocument	ios=17.5	-	294d875df19cac07
+Assignables	swift-method	s:11Assignables18AssignableDocumentV5merge8partData4intoSbAA013MergeablePartF0O_AA0h14PartsContainerI2IDVtYaKF	AssignableDocument	merge(partData:into:)	-	Swift.Bool	Assignables.MergeablePartData | Assignables.AssignableDocument.PartID	ios=17.5	-	7c5302f75b9d7f4d
+Assignables	swift-property	s:11Assignables18AssignableDocumentV9isPartialSbvp	AssignableDocument	isPartial	-	Swift.Bool	-	-	-	cd40a49a367c6da1
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7partIDsSayAA29MergeablePartsContainerPartIDVGvp	AssignableDocument	partIDs	-	[Assignables.AssignableDocument.PartID]	-	-	-	85f36fbf4f4b459e
+Assignables	swift-method	s:11Assignables18AssignableDocumentV8makePart3forAA09MergeableE4DataOSgAA0g14PartsContainerE2IDV_tKF	AssignableDocument	makePart(for:)	-	Assignables.MergeablePartData?	Assignables.AssignableDocument.PartID	ios=18	-	c3fd157f724c84b7
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV7Elementa	AssignableDocument	Element	-	-	-	-	-	e0a6805065d179a5
+Assignables	swift-enum	s:11Assignables18AssignableDocumentV5ErrorO	AssignableDocument	Error	-	-	-	-	-	813eed62e310b808
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV5ErrorO05otherC13IsNotAVariantyA2EmF	AssignableDocument.Error	otherDocumentIsNotAVariant	-	-	-	-	-	244c03e21205f6e4
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV5ErrorO10invalidURLyA2EmF	AssignableDocument.Error	invalidURL	-	-	-	-	-	4d88b5d468cfbb5e
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV5ErrorO12exportFailedyAESayAA29MergeablePartsContainerPartIDVG_tcAEmF	AssignableDocument.Error	exportFailed	-	-	-	-	-	419466c7b2ef1607
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV2IDa	AssignableDocument	ID	-	-	-	-	-	6aa6ee5497e0f913
+Assignables	swift-property	s:11Assignables18AssignableDocumentV2idSSvp	AssignableDocument	id	-	Assignables.AssignableDocument.ID	-	-	-	53566c48dd39d250
+Assignables	swift-enum	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO	AssignableDocument	CorrectMarkType	-	-	-	-	-	2a6da9957e154b12
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO9checkmarkyA2EmF	AssignableDocument.CorrectMarkType	checkmark	-	-	-	-	-	ba52c0c62af78795
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO4staryA2EmF	AssignableDocument.CorrectMarkType	star	-	-	-	-	-	6bb381530ff3f5ff
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO7numericyA2EmF	AssignableDocument.CorrectMarkType	numeric	-	-	-	-	-	cd3674169191ab3e
+Assignables	swift-constant	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO7unknownyA2EmF	AssignableDocument.CorrectMarkType	unknown	-	-	-	-	-	e75a1fdfe09992f6
+Assignables	swift-property	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO2idAEvp	AssignableDocument.CorrectMarkType	id	-	Assignables.AssignableDocument.CorrectMarkType	-	-	-	1bd9bc608d3e597a
+Assignables	swift-property	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO16debugDescriptionSSvp	AssignableDocument.CorrectMarkType	debugDescription	-	Swift.String	-	-	-	8dcf7f1d61406a29
+Assignables	swift-method	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO2eeoiySbAE_AEtFZ	AssignableDocument.CorrectMarkType	==(_:_:)	+	Swift.Bool	Assignables.AssignableDocument.CorrectMarkType | Assignables.AssignableDocument.CorrectMarkType	-	-	6d9476d9ec9ad9e9
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO8AllCasesa	AssignableDocument.CorrectMarkType	AllCases	-	-	-	ios=17.4	-	c26780e8eb1b7303
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO2IDa	AssignableDocument.CorrectMarkType	ID	-	-	-	ios=17.4	-	948186d2c5e6077d
+Assignables	swift-property	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO8allCasesSayAEGvpZ	AssignableDocument.CorrectMarkType	allCases	+	[Assignables.AssignableDocument.CorrectMarkType]	-	-	-	881e41ef2ee09dfa
+Assignables	swift-method	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO4hash4intoys6HasherVz_tF	AssignableDocument.CorrectMarkType	hash(into:)	-	()	Swift.Hasher	-	-	0fa9b97a1a2e505a
+Assignables	swift-property	s:11Assignables18AssignableDocumentV15CorrectMarkTypeO9hashValueSivp	AssignableDocument.CorrectMarkType	hashValue	-	Swift.Int	-	-	-	1215cd304060aad7
+Assignables	swift-property	s:11Assignables18AssignableDocumentV7authorsSayAA15AnyUserIdentityVGvp	AssignableDocument	authors	-	[Assignables.AnyUserIdentity]	-	-	-	f9cc8afd6babd8ef
+Assignables	swift-method	s:11Assignables18AssignableDocumentV6pdfURL7authors2idAC10Foundation0E0V_SayxGSSSgtKcAA12UserIdentityRzlufc	AssignableDocument	init(pdfURL:authors:id:)	-	-	Assignables.AssignableDocument | Foundation.URL | [some Assignables.UserIdentity] | Swift.String?	-	-	f60c88306e9f004d
+Assignables	swift-method	s:11Assignables18AssignableDocumentV6pdfURL2idAC10Foundation0E0V_SSSgtKcfc	AssignableDocument	init(pdfURL:id:)	-	-	Assignables.AssignableDocument | Foundation.URL | Swift.String?	-	-	63a25d4ad4269e2d
+Assignables	swift-method	s:11Assignables18AssignableDocumentV2id8partDataACSS_SDyAA29MergeablePartsContainerPartIDV10Foundation3URLVGtKcfc	AssignableDocument	init(id:partData:)	-	-	Assignables.AssignableDocument | Assignables.AssignableDocument.ID | [Assignables.AssignableDocument.PartID : Foundation.URL]	-	-	fe892f082b2c0799
+Assignables	swift-method	s:11Assignables18AssignableDocumentV2id8partDataACSS_SDyAA29MergeablePartsContainerPartIDVAA0gjF0OGtYaKcfc	AssignableDocument	init(id:partData:)	-	-	Assignables.AssignableDocument | Assignables.AssignableDocument.ID | [Assignables.AssignableDocument.PartID : Assignables.MergeablePartData]	ios=17.5	-	0e893557cc41162c
+Assignables	swift-method	s:11Assignables18AssignableDocumentV15exportBaseAsPDFSo11PDFDocumentCyYaF	AssignableDocument	exportBaseAsPDF()	-	PDFKit.PDFDocument	-	-	-	d0f71ab0ed149eaf
+Assignables	swift-property	s:11Assignables18AssignableDocumentV9hashValueSivp	AssignableDocument	hashValue	-	Swift.Int	-	-	-	d3b270d01360676e
+Assignables	swift-method	s:11Assignables18AssignableDocumentV6assign2toAA012AssignedWorkC0VAA15AnyUserIdentityV_tKF	AssignableDocument	assign(to:)	-	Assignables.AssignedWorkDocument	Assignables.AnyUserIdentity	-	-	cb92333158c14c85
+Assignables	swift-method	s:11Assignables18AssignableDocumentV016makeAssignedWorkC02idAA0efC0VSS_tKF	AssignableDocument	makeAssignedWorkDocument(id:)	-	Assignables.AssignedWorkDocument	Swift.String	ios=18	-	6ae58069074b646f
+Assignables	swift-method	s:11Assignables18AssignableDocumentV016makeAssignedWorkC0AA0efC0VyKF	AssignableDocument	makeAssignedWorkDocument()	-	Assignables.AssignedWorkDocument	-	ios=17.5	-	3571c66684851950
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV11QuestionBoxV	AssignableDocument	QuestionBox	-	-	-	-	-	4e2def300a8e4fca
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV11QuestionBoxV2IDa	AssignableDocument.QuestionBox	ID	-	-	-	-	-	f53769ebf028a9d9
+Assignables	swift-property	s:11Assignables18AssignableDocumentV11QuestionBoxV2idSSvp	AssignableDocument.QuestionBox	id	-	Assignables.AssignableDocument.QuestionBox.ID	-	-	-	9175375788c72b2e
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV11QuestionBoxV0C0a	AssignableDocument.QuestionBox	Document	-	-	-	-	-	3bb9a0181f30d83a
+Assignables	swift-method	s:11Assignables18AssignableDocumentV11QuestionBoxV2id6pageID6boundsAESS_AC4PageV0H0VSo6CGRectVtcfc	AssignableDocument.QuestionBox	init(id:pageID:bounds:)	-	-	Assignables.AssignableDocument.QuestionBox | Assignables.AssignableDocument.QuestionBox.ID | Assignables.AssignableDocument.Page.ID | CoreFoundation.CGRect	-	-	e2e9ef8fa4b14dae
+Assignables	swift-method	s:11Assignables18AssignableDocumentV11QuestionBoxV2eeoiySbAE_AEtFZ	AssignableDocument.QuestionBox	==(_:_:)	+	Swift.Bool	Assignables.AssignableDocument.QuestionBox | Assignables.AssignableDocument.QuestionBox	-	-	e513da091111a6d5
+Assignables	swift-method	s:11Assignables18AssignableDocumentV11QuestionBoxV4hash4intoys6HasherVz_tF	AssignableDocument.QuestionBox	hash(into:)	-	()	Swift.Hasher	-	-	ab61d1a9e98d48be
+Assignables	swift-property	s:11Assignables18AssignableDocumentV11QuestionBoxV6pageIDAC4PageV0G0VSgvp	AssignableDocument.QuestionBox	pageID	-	Assignables.AssignableDocument.Page.ID?	-	-	-	407704e72a3f21bf
+Assignables	swift-property	s:11Assignables18AssignableDocumentV11QuestionBoxV6boundsSo6CGRectVvp	AssignableDocument.QuestionBox	bounds	-	CoreFoundation.CGRect	-	-	-	7e0e747e3c63f2d2
+Assignables	swift-property	s:11Assignables18AssignableDocumentV11QuestionBoxV9hashValueSivp	AssignableDocument.QuestionBox	hashValue	-	Swift.Int	-	-	-	a052704ae0ff5416
+Assignables	swift-method	s:11Assignables18AssignableDocumentVyAC4PageVSgAE2IDVcip	AssignableDocument	subscript(_:)	-	Assignables.AssignableDocument.Page?	Assignables.AssignableDocument.Page.ID	-	-	58929c756d190178
+Assignables	swift-method	s:11Assignables18AssignableDocumentVyAC8QuestionVSgAA05BasicC9ElementIDVyAEGcip	AssignableDocument	subscript(_:)	-	Assignables.AssignableDocument.Question?	Assignables.AssignableDocument.Question.ID	-	-	34b957855e83da84
+Assignables	swift-method	s:11Assignables18AssignableDocumentVyAC11QuestionBoxVSgSScip	AssignableDocument	subscript(_:)	-	Assignables.AssignableDocument.QuestionBox?	Assignables.AssignableDocument.QuestionBox.ID	-	-	6e2b8636160250d2
+Assignables	swift-method	s:11Assignables18AssignableDocumentV11exportToPDF12visiblePartsSo11PDFDocumentCSayAA09MergeableH15ContainerPartIDVG_tYaF	AssignableDocument	exportToPDF(visibleParts:)	-	PDFKit.PDFDocument	[Assignables.MergeablePartsContainerPartID]	-	-	644c2e1df6f5cc24
+Assignables	swift-property	s:11Assignables18AssignableDocumentV011isMultiPageC0Sbvp	AssignableDocument	isMultiPageDocument	-	Swift.Bool	-	-	-	603c09c2d90087c6
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV4PageV	AssignableDocument	Page	-	-	-	-	-	2e7f1f9fe6a07ac4
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV4PageV2IDV	AssignableDocument.Page	ID	-	-	-	-	-	d394c3936db2ff5a
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV4PageV2IDV7Elementa	AssignableDocument.Page.ID	Element	-	-	-	-	-	4d29157830acde81
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV2IDV16debugDescriptionSSvp	AssignableDocument.Page.ID	debugDescription	-	Swift.String	-	-	-	3f766589b4ee7f72
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4PageV2IDV2eeoiySbAG_AGtFZ	AssignableDocument.Page.ID	==(_:_:)	+	Swift.Bool	Assignables.AssignableDocument.Page.ID | Assignables.AssignableDocument.Page.ID	-	-	26403bdc98d7daa5
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4PageV2IDV6encode2toys7Encoder_p_tKF	AssignableDocument.Page.ID	encode(to:)	-	()	any Swift.Encoder	-	-	7be5ca27e9a5cbb3
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4PageV2IDV4hash4intoys6HasherVz_tF	AssignableDocument.Page.ID	hash(into:)	-	()	Swift.Hasher	-	-	e3b229abeb80b763
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV2IDV9hashValueSivp	AssignableDocument.Page.ID	hashValue	-	Swift.Int	-	-	-	7d5a708ae6e74cbe
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4PageV2IDV4fromAGs7Decoder_p_tKcfc	AssignableDocument.Page.ID	init(from:)	-	-	Assignables.AssignableDocument.Page.ID | any Swift.Decoder	-	-	e4c4d5281fafee2f
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV2idAE2IDVvp	AssignableDocument.Page	id	-	Assignables.AssignableDocument.Page.ID	-	-	-	3fdf19464abd52ca
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV4PageV0C0a	AssignableDocument.Page	Document	-	-	-	-	-	1cb20695a84b72b3
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4PageV2eeoiySbAE_AEtFZ	AssignableDocument.Page	==(_:_:)	+	Swift.Bool	Assignables.AssignableDocument.Page | Assignables.AssignableDocument.Page	-	-	0fe4012b58d0229f
+Assignables	swift-method	s:11Assignables18AssignableDocumentV4PageV4hash4intoys6HasherVz_tF	AssignableDocument.Page	hash(into:)	-	()	Swift.Hasher	-	-	5da2b6d9119aadb7
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV4sizeSo6CGSizeVvp	AssignableDocument.Page	size	-	CoreFoundation.CGSize	-	-	-	89719fc5ec15257e
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV8rotation10Foundation11MeasurementVySo11NSUnitAngleCGvp	AssignableDocument.Page	rotation	-	Foundation.Measurement<Foundation.UnitAngle>	-	ios=18	-	da73e76b4da56ad7
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV16debugDescriptionSSvp	AssignableDocument.Page	debugDescription	-	Swift.String	-	-	-	32249b22fe71eee4
+Assignables	swift-property	s:11Assignables18AssignableDocumentV4PageV9hashValueSivp	AssignableDocument.Page	hashValue	-	Swift.Int	-	-	-	7669a22c291d7198
+Assignables	swift-property	s:11Assignables18AssignableDocumentV21pagesDebugDescriptionSSvp	AssignableDocument	pagesDebugDescription	-	Swift.String	-	-	-	5fb525c061cc8a41
+Assignables	swift-property	s:11Assignables18AssignableDocumentV5pagesSayAC4PageVGvp	AssignableDocument	pages	-	[Assignables.AssignableDocument.Page]	-	-	-	4a9a2b4e28c2a015
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV13Configurationa	AssignableDocument	Configuration	-	-	-	-	-	add14919f02a5076
+Assignables	swift-property	s:11Assignables18AssignableDocumentV13configurationQrvp	AssignableDocument	configuration	-	some Assignables.AssignableDocumentConfiguration	-	-	-	d7833d326985faf9
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV8QuestionV	AssignableDocument	Question	-	-	-	-	-	9a286a20ebbefab4
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV8QuestionV2IDa	AssignableDocument.Question	ID	-	-	-	-	-	6b17a96423d98594
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV2idAA05BasicC9ElementIDVyAEGvp	AssignableDocument.Question	id	-	Assignables.AssignableDocument.Question.ID	-	-	-	4c583a2a1cf0676c
+Assignables	swift-typealias	s:11Assignables18AssignableDocumentV8QuestionV0C0a	AssignableDocument.Question	Document	-	-	-	-	-	0cee77acf006c68f
+Assignables	swift-method	s:11Assignables18AssignableDocumentV8QuestionV6pageID5boxes8maxScoreAeC4PageV0F0V_SayAC0D3BoxVGSdSgtcfc	AssignableDocument.Question	init(pageID:boxes:maxScore:)	-	-	Assignables.AssignableDocument.Question | Assignables.AssignableDocument.Page.ID | [Assignables.AssignableDocument.QuestionBox] | Swift.Double?	-	-	b6d6597d99da1a6e
+Assignables	swift-method	s:11Assignables18AssignableDocumentV8QuestionV5boxes8maxScoreAESayAC0D3BoxVG_SdSgtcfc	AssignableDocument.Question	init(boxes:maxScore:)	-	-	Assignables.AssignableDocument.Question | [Assignables.AssignableDocument.QuestionBox] | Swift.Double?	ios=26.0	-	460d2dbcb0c6d647
+Assignables	swift-method	s:11Assignables18AssignableDocumentV8QuestionV2eeoiySbAE_AEtFZ	AssignableDocument.Question	==(_:_:)	+	Swift.Bool	Assignables.AssignableDocument.Question | Assignables.AssignableDocument.Question	-	-	f477035c21c48473
+Assignables	swift-method	s:11Assignables18AssignableDocumentV8QuestionV4hash4intoys6HasherVz_tF	AssignableDocument.Question	hash(into:)	-	()	Swift.Hasher	-	-	7a4928a35fe78955
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV	AssignableDocument.Question	Thumbnail	-	-	-	-	-	d3c9eef3ba54449e
+Assignables	swift-struct	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV4DataV	AssignableDocument.Question.Thumbnail	Data	-	-	-	-	-	cc60e7418ff651c4
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV4DataV6pageIDAC4PageV0H0Vvp	AssignableDocument.Question.Thumbnail.Data	pageID	-	Assignables.AssignableDocument.Page.ID	-	-	-	173816f4e30ea94c
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV4DataV3boxAC0D3BoxVvp	AssignableDocument.Question.Thumbnail.Data	box	-	Assignables.AssignableDocument.QuestionBox	-	-	-	f887bdbca9df2586
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV4DataV5imageSo7UIImageCvp	AssignableDocument.Question.Thumbnail.Data	image	-	UIKit.UIImage	-	-	-	639bd20d8a0f9e92
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV10questionIDAA05Basicc7ElementG0VyAEGvp	AssignableDocument.Question.Thumbnail	questionID	-	Assignables.AssignableDocument.Question.ID	-	-	-	9428491990df5aa4
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV9ThumbnailV4dataAG4DataVSgvp	AssignableDocument.Question.Thumbnail	data	-	Assignables.AssignableDocument.Question.Thumbnail.Data?	-	-	-	65a28eb8158adc3a
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV5boxesSayAC0D3BoxVGvp	AssignableDocument.Question	boxes	-	[Assignables.AssignableDocument.QuestionBox]	-	-	-	2920e315c1c4fdd2
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV8maxScoreSdSgvp	AssignableDocument.Question	maxScore	-	Swift.Double?	-	-	-	ca72c817bd33bcda
+Assignables	swift-property	s:11Assignables18AssignableDocumentV8QuestionV9hashValueSivp	AssignableDocument.Question	hashValue	-	Swift.Int	-	-	-	901c412f84bbb7de
+Assignables	swift-property	s:11Assignables18AssignableDocumentV9questionsSayAC8QuestionVGvp	AssignableDocument	questions	-	[Assignables.AssignableDocument.Question]	-	-	-	19114adcd9f1408d
+Assignables	swift-method	s:11Assignables18AssignableDocumentV14appendQuestion6pageID4rect8maxScoreAA05Basicc7ElementG0VyAC0E0VGAC4PageV0G0V_So6CGRectVSdSgtF	AssignableDocument	appendQuestion(pageID:rect:maxScore:)	-	Assignables.AssignableDocument.Question.ID	Assignables.AssignableDocument.Page.ID | CoreFoundation.CGRect | Swift.Double?	-	-	670b894a1fac6a4e
+Assignables	swift-method	s:11Assignables18AssignableDocumentV14removeQuestionyAC0E0VSgAA05BasicC9ElementIDVyAFGF	AssignableDocument	removeQuestion(_:)	-	Assignables.AssignableDocument.Question?	Assignables.AssignableDocument.Question.ID	-	-	afbcc0d981ec961b
+Assignables	swift-method	s:11Assignables18AssignableDocumentV9questions2onSayAC8QuestionVGAC4PageV2IDV_tF	AssignableDocument	questions(on:)	-	[Assignables.AssignableDocument.Question]	Assignables.AssignableDocument.Page.ID	-	-	a44e93347ffb2438
+Assignables	swift-method	s:11Assignables18AssignableDocumentV18questionThumbnails12visiblePartsSDyAA05BasicC9ElementIDVyAC8QuestionVGSayAI9ThumbnailVGGSayAA09Mergeableg13ContainerPartJ0VG_tYaF	AssignableDocument	questionThumbnails(visibleParts:)	-	[Assignables.AssignableDocument.Question.ID : [Assignables.AssignableDocument.Question.Thumbnail]]	[Assignables.AssignableDocument.PartID]	-	-	a1a3ae30cc2f24a3
+Assignables	swift-method	s:11Assignables18AssignableDocumentV15computeMaxScore015defaultQuestioneF0SdSgAF_tF	AssignableDocument	computeMaxScore(defaultQuestionMaxScore:)	-	Swift.Double?	Swift.Double?	-	-	e56ef023ad599a1b
+Assignables	swift-protocol	s:11Assignables10AssignableP	-	Assignable	-	-	-	ios=17.4	-	692a537e032cfdb5
+Assignables	swift-method	s:11Assignables10AssignableP6assign2toAA20AssignedWorkDocumentVqd___tKAA12UserIdentityRd__lF	Assignable	assign(to:)	-	Assignables.AssignedWorkDocument	some Assignables.UserIdentity	-	-	f3bb7c794c696115
+Assignables	swift-method	s:11Assignables10AssignableP6assign2toAA20AssignedWorkDocumentVAA15AnyUserIdentityV_tKF	Assignable	assign(to:)	-	Assignables.AssignedWorkDocument	Assignables.AnyUserIdentity	-	-	83fb8fc1c70d9826
+Assignables	swift-method	s:11Assignables10AssignableP24makeAssignedWorkDocument2idAA0deF0VSS_tKF	Assignable	makeAssignedWorkDocument(id:)	-	Assignables.AssignedWorkDocument	Swift.String	ios=18	-	626f8570dc0b071f
+Assignables	swift-method	s:11Assignables10AssignableP24makeAssignedWorkDocumentAA0deF0VyKF	Assignable	makeAssignedWorkDocument()	-	Assignables.AssignedWorkDocument	-	ios=18	-	98c6a654b70e7464
+Assignables	swift-method	s:11Assignables10AssignablePAAE6assign2toAA20AssignedWorkDocumentVqd___tKAA12UserIdentityRd__lF	Assignable	assign(to:)	-	Assignables.AssignedWorkDocument	some Assignables.UserIdentity	-	-	23447e97697687bb
+Assignables	swift-protocol	s:11Assignables31AssignableDocumentConfigurationP	-	AssignableDocumentConfiguration	-	-	-	ios=17.4	-	e876022692b49fc9
+Assignables	swift-property	s:11Assignables31AssignableDocumentConfigurationP8maxScoreSdSgvp	AssignableDocumentConfiguration	maxScore	-	Swift.Double?	-	-	-	8de0bf1cda55104e
+Assignables	swift-property	s:11Assignables31AssignableDocumentConfigurationP23pointsPerBonusScoreMarkSdvp	AssignableDocumentConfiguration	pointsPerBonusScoreMark	-	Swift.Double	-	-	-	5ee78c226acd7195
+Assignables	swift-property	s:11Assignables31AssignableDocumentConfigurationP20correctScoreMarkTypeAA0bC0V07CorrectgH0Ovp	AssignableDocumentConfiguration	correctScoreMarkType	-	Assignables.AssignableDocument.CorrectMarkType	-	-	-	5f7f82cfb1edcbe0
+Assignables	swift-property	s:11Assignables31AssignableDocumentConfigurationP25pointsPerCorrectScoreMarkSdvp	AssignableDocumentConfiguration	pointsPerCorrectScoreMark	-	Swift.Double	-	-	-	a618f19c0fccb223
+Assignables	swift-property	s:11Assignables31AssignableDocumentConfigurationP27pointsPerIncorrectScoreMarkSdvp	AssignableDocumentConfiguration	pointsPerIncorrectScoreMark	-	Swift.Double	-	-	-	7c2dde598fa0d50b
+Assignables	swift-struct	s:11Assignables24AssignedWorkDocumentViewV	-	AssignedWorkDocumentView	-	-	-	ios=17.4	-	478ef0f61137cb5a
+Assignables	swift-typealias	s:11Assignables24AssignedWorkDocumentViewV0D0a	AssignedWorkDocumentView	Document	-	-	-	-	-	4c6b9628975c33a0
+Assignables	swift-method	s:11Assignables24AssignedWorkDocumentViewV8document12activePartID06hiddenH3IDs012selectedPageI00l8QuestionI005showsM10Thumbnails25isStructureEditingEnabledAC7SwiftUI7BindingVyAA0bcD0VG_AA023MergeablePartsContainerhI0VSgSayARGAMyAO0M0V0I0VSgGSgAMyAA05Basicd7ElementI0VyAA010AssignableD0V0N0VGSgGSgS2btcfc	AssignedWorkDocumentView	init(document:activePartID:hiddenPartIDs:selectedPageID:selectedQuestionID:showsPageThumbnails:isStructureEditingEnabled:)	-	-	Assignables.AssignedWorkDocumentView | SwiftUI.Binding<Assignables.AssignedWorkDocumentView.Document> | Assignables.MergeablePartsContainerPartID? | [Assignables.MergeablePartsContainerPartID] | SwiftUI.Binding<Assignables.AssignedWorkDocumentView.Document.Page.ID?>? | SwiftUI.Binding<Assignables.AssignableDocument.Question.ID?>? | Swift.Bool | Swift.Bool	-	-	e2e4bd60a61f1a7d
+Assignables	swift-method	s:11Assignables24AssignedWorkDocumentViewV8document12activePartID06hiddenH3IDs012selectedPageI00l8QuestionI005showsM10Thumbnails25isStructureEditingEnabled18onMarkupActivationAC7SwiftUI7BindingVyAA0bcD0VG_AA023MergeablePartsContainerhI0VSgSayASGANyAP0M0V0I0VSgGSgANyAA05Basicd7ElementI0VyAA010AssignableD0V0N0VGSgGSgS2bySbctcfc	AssignedWorkDocumentView	init(document:activePartID:hiddenPartIDs:selectedPageID:selectedQuestionID:showsPageThumbnails:isStructureEditingEnabled:onMarkupActivation:)	-	-	Assignables.AssignedWorkDocumentView | SwiftUI.Binding<Assignables.AssignedWorkDocumentView.Document> | Assignables.MergeablePartsContainerPartID? | [Assignables.MergeablePartsContainerPartID] | SwiftUI.Binding<Assignables.AssignedWorkDocumentView.Document.Page.ID?>? | SwiftUI.Binding<Assignables.AssignableDocument.Question.ID?>? | Swift.Bool | Swift.Bool | (Swift.Bool) -> Swift.Void	ios=18.1	-	e9161bf3f080ff4f
+Assignables	swift-property	s:11Assignables24AssignedWorkDocumentViewV4bodyQrvp	AssignedWorkDocumentView	body	-	some SwiftUI.View	-	-	-	60f3c414a754e2c7
+Assignables	swift-typealias	s:11Assignables24AssignedWorkDocumentViewV4Bodya	AssignedWorkDocumentView	Body	-	-	-	ios=17.4	-	28aa7f7a914fc83c
+Assignables	swift-struct	s:11Assignables17DocumentThumbnailV	-	DocumentThumbnail	-	-	-	ios=17.4	-	c42b96b2be9d3e10
+Assignables	swift-property	s:11Assignables17DocumentThumbnailV6pageID4Page_0E0QZvp	DocumentThumbnail	pageID	-	Document.Page.ID	-	-	-	f059069964eaa80f
+Assignables	swift-protocol	s:11Assignables21MergeableDocumentPageP	-	MergeableDocumentPage	-	-	-	ios=17.4	-	e91cbaa9b750f7bc
+Assignables	swift-typealias	s:11Assignables21MergeableDocumentPageP9Thumbnaila	MergeableDocumentPage	Thumbnail	-	-	-	-	-	978fc244bdd4fd56
+Assignables	swift-protocol	s:11Assignables17MergeableDocumentP	-	MergeableDocument	-	-	-	ios=17.4	-	f6e0a0d10909a18a
+Assignables	swift-property	s:11Assignables17MergeableDocumentP5pagesSay4PageQzGvp	MergeableDocument	pages	-	[Self.Page]	-	-	-	db20e9a9dd35748e
+Assignables	swift-method	s:11Assignables17MergeableDocumentP14pageThumbnails12visiblePartsSDy4Page_2IDQZAA0C9ThumbnailVyAF_0C0QZGGSayAA0bg13ContainerPartI0VG_tYaF	MergeableDocument	pageThumbnails(visibleParts:)	-	[Self.Page.ID : Self.Page.Thumbnail]	[Self.PartID]	-	-	c7b0059256d7e5dd
+Assignables	swift-method	s:11Assignables17MergeableDocumentP11exportToPDF12visiblePartsSo11PDFDocumentCSayAA0bH15ContainerPartIDVG_tYaF	MergeableDocument	exportToPDF(visibleParts:)	-	PDFKit.PDFDocument	[Self.PartID]	-	-	72b0afeaddc078c1
+Assignables	swift-method	s:11Assignables17MergeableDocumentPAA4Page_0C0AD2IDQZAD_AFRTzrlE14pageThumbnails12visiblePartsSDyAhA0C9ThumbnailVyAD_AEQZGGSayAA0bi13ContainerPartE0VG_tYaF	MergeableDocument	pageThumbnails(visibleParts:)	-	[Self.Page.ID : Self.Page.Thumbnail]	[Assignables.MergeablePartsContainerPartID]	-	-	1dd63a92eab6c8be

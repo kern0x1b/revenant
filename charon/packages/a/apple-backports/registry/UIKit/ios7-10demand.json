@@ -1,0 +1,209 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+   "api": "UISearchController.obscuresBackgroundDuringPresentation",
+   "kind": "property",
+   "introduced": "9.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/UISearchController.md",
+   "source": "UIKit of iOS 10.0.1 armv7s, read for the dimming view the controller puts over what lies under it"
+  },
+  {
+   "api": "UITextInputAssistantItem.leadingBarButtonGroups",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the property UITextInputAssistantItem.leadingBarButtonGroups",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/ApplicationShortcuts.md",
+   "source": "the host's own UIKit, recorded for the values, the defaults and the copies"
+  },
+  {
+   "api": "UITextInputAssistantItem.trailingBarButtonGroups",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the property UITextInputAssistantItem.trailingBarButtonGroups",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/ApplicationShortcuts.md",
+   "source": "the host's own UIKit, recorded for the values, the defaults and the copies"
+  },
+  {
+   "api": "-[UIFeedbackGenerator prepare]",
+   "kind": "method",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/UIFeedbackGenerator.md",
+   "source": "UIKit of the armv7s cache of iOS 10.3.4, CoreMedia and AudioToolbox of the armv7 cache of iOS 6.0, and the vibrator of an iPhone4,1"
+  },
+  {
+   "api": "+[UIKeyCommand keyCommandWithInput:modifierFlags:action:discoverabilityTitle:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/KeyCommands.md",
+   "source": "the host's own UIKit, and UIKit of iOS 10.0.1 armv7s for the title a command carries"
+  },
+  {
+   "api": "-[UIAccessibilityCustomAction initWithName:target:selector:]",
+   "kind": "method",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "facts": "facts/UIKit/KeyboardAndAccessibility.md",
+   "source": "the host's own UIKit, recorded for what the action keeps and how it is performed",
+   "reason": "build -[UIAccessibilityCustomAction initWithName:target:selector:]",
+   "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+   "api": "+[UITraitCollection traitCollectionWithForceTouchCapability:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/UITraitEnvironment.md",
+   "source": "the host's own UIKit, and the release, which has no force touch, so the capability of a collection nobody set is unavailable"
+  },
+  {
+   "api": "+[UIVibrancyEffect effectForBlurEffect:]",
+   "kind": "method",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "facts": "facts/UIKit/UIVisualEffect.md",
+   "source": "UIKit of iOS 10.0.1 armv7s, read for the effect a vibrancy takes from a blur",
+   "reason": "build +[UIVibrancyEffect effectForBlurEffect:]",
+   "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+   "api": "-[UIViewController registerForPreviewingWithDelegate:sourceView:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build -[UIViewController registerForPreviewingWithDelegate:sourceView:]",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/UIViewControllerPreviewing.md",
+   "source": "the host's own UIKit under Mac Catalyst, which reports the same unavailable force touch capability, through tests/backports/host/previewing"
+  },
+  {
+   "api": "-[UIViewController unregisterForPreviewingWithContext:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build -[UIViewController unregisterForPreviewingWithContext:]",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/UIViewControllerPreviewing.md",
+   "source": "the host's own UIKit under Mac Catalyst, through tests/backports/host/previewing"
+  },
+  {
+   "api": "-[UIViewControllerPreviewingDelegate previewingContext:viewControllerForLocation:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build -[UIViewControllerPreviewingDelegate previewingContext:viewControllerForLocation:]",
+   "effect": "until built: respondsToSelector: answers NO",
+   "facts": "facts/UIKit/UIViewControllerPreviewing.md",
+   "source": "the host's own UIKit under Mac Catalyst, which asks it no more than the release does"
+  },
+  {
+   "api": "-[UIViewControllerPreviewingDelegate previewingContext:commitViewController:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build -[UIViewControllerPreviewingDelegate previewingContext:commitViewController:]",
+   "effect": "until built: respondsToSelector: answers NO",
+   "facts": "facts/UIKit/UIViewControllerPreviewing.md",
+   "source": "the host's own UIKit under Mac Catalyst, which asks it no more than the release does"
+  },
+  {
+   "api": "UIProgressView.observedProgress",
+   "kind": "property",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/UIProgressViewObservedProgress.md",
+   "source": "-[UIProgressView setObservedProgress:] in the armv7 cache of iOS 9.3.5 and the selectors UIKit of that release refers to; the host does not move its own bar for an observed progress and is no oracle for it"
+  },
+  {
+   "api": "UIFocusAnimationCoordinator",
+   "kind": "class",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/UIFocusAnimationCoordinator.md",
+   "source": "SDK 16.4, UIFocusAnimationCoordinator.h for the contract, and the release, which has no focus engine to hand one out"
+  },
+  {
+   "api": "-[UIFocusAnimationCoordinator addCoordinatedAnimations:completion:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/UIFocusAnimationCoordinator.md",
+   "source": "SDK 16.4, UIFocusAnimationCoordinator.h; the blocks are run rather than dropped, since dropping them would swallow the application's own animation"
+  },
+  {
+   "api": "UIContentSizeCategoryAdjusting",
+   "kind": "protocol",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the protocol UIContentSizeCategoryAdjusting",
+   "effect": "until built: NSProtocolFromString answers nil",
+   "facts": "facts/UIKit/UIContentSizeCategoryAdjusting.md",
+   "source": "the release, which posts no content size category change"
+  },
+  {
+   "api": "UILabel.adjustsFontForContentSizeCategory",
+   "kind": "property",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the property UILabel.adjustsFontForContentSizeCategory",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/UIContentSizeCategoryAdjusting.md",
+   "source": "the release, which posts no content size category change"
+  },
+  {
+   "api": "UITextField.adjustsFontForContentSizeCategory",
+   "kind": "property",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the property UITextField.adjustsFontForContentSizeCategory",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/UIContentSizeCategoryAdjusting.md",
+   "source": "the release, which posts no content size category change"
+  },
+  {
+   "api": "UITextView.adjustsFontForContentSizeCategory",
+   "kind": "property",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the property UITextView.adjustsFontForContentSizeCategory",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/UIKit/UIContentSizeCategoryAdjusting.md",
+   "source": "the release, which posts no content size category change"
+  },
+  {
+   "api": "NSTextContainer",
+   "kind": "class",
+   "introduced": "7.0",
+   "minimum": "7.0",
+   "status": "implemented",
+   "facts": "facts/UIKit/TextSystem7.md",
+   "source": "the release's own class: TextKit arrived in iOS 7, and the 4.3 gate named it among the weak imports the release it is checked against does not export, because the exclusion-path category references it and the registry named no class to place that object by"
+  }
+ ]
+}

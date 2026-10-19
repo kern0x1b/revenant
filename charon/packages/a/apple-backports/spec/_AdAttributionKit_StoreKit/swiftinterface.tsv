@@ -1,0 +1,5 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_AdAttributionKit_StoreKit	method	SKStoreProductViewController.loadProduct(parameters:impression:)	17.4				container
+_AdAttributionKit_StoreKit	method	SKStoreProductViewController.loadProduct(parameters:impression:reengagementURL:)	18.0				own
+_AdAttributionKit_StoreKit	property	SKOverlay.AppConfiguration.appImpression	17.4				container
+_AdAttributionKit_StoreKit	property	SKOverlay.AppConfiguration.adAttributionReengagementURL	18.0				own

@@ -1,0 +1,77 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "+[AVPlayerLooper playerLooperWithPlayer:templateItem:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "+[AVPlayerLooper playerLooperWithPlayer:templateItem:timeRange:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "-[AVPlayerLooper initWithPlayer:templateItem:timeRange:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "-[AVPlayerLooper disableLooping]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "AVPlayerLooper.status",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "AVPlayerLooper.error",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "AVPlayerLooper.loopCount",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    },
+    {
+      "api": "AVPlayerLooper.loopingPlayerItems",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/PlayerLooper10.md",
+      "source": "AVFoundation of the macOS host, measured by tests/backports/host/avf-player-looper"
+    }
+  ]
+}

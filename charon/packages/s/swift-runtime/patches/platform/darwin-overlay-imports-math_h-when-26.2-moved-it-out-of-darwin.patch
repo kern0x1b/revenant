@@ -1,0 +1,19 @@
+diff --git a/stdlib/public/Platform/Darwin.swift.gyb b/stdlib/public/Platform/Darwin.swift.gyb
+index f015322..cf23bfd 100644
+--- a/stdlib/public/Platform/Darwin.swift.gyb
++++ b/stdlib/public/Platform/Darwin.swift.gyb
+@@ -12,6 +12,14 @@
+ 
+ @_exported import Darwin // Clang module
+ 
++// 26.2 and later split the C standard library's headers out of Darwin's own Clang module (they moved to sibling
++// top-level modules the C++ standard library modules also read - math_h, stdio_h, ...), so a plain `import Darwin`
++// no longer brings math.h's declarations into scope the way it does through 16.5's `Darwin.C.math`; tgmath.swift
++// below calls them by name with no import of its own, same as every other libc call in this file.
++#if canImport(math_h)
++@_exported import math_h
++#endif
++
+ public let MAP_FAILED: UnsafeMutableRawPointer! = UnsafeMutableRawPointer(bitPattern: -1)
+ 
+ //  Constants defined by <math.h>

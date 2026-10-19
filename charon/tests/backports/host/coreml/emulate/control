@@ -1,0 +1,7 @@
+Package: org.charon.coreml
+Name: coreml
+Architecture: iphoneos-arm
+Description: The Core ML surface on iOS 6.1.3, every method the registry claims called over real models
+Maintainer: charon
+Author: charon
+Section: Development

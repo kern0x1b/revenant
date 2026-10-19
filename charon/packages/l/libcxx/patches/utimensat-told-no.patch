@@ -1,0 +1,11 @@
+--- a/llvm-project/libcxx/src/filesystem/time_utils.h
++++ b/llvm-project/libcxx/src/filesystem/time_utils.h
+@@ -33,7 +33,7 @@
+ #endif
+ 
+ // We can use the presence of UTIME_OMIT to detect platforms that provide utimensat.
+-#if defined(UTIME_OMIT)
++#if defined(UTIME_OMIT) && !defined(_LIBCPP_NO_UTIMENSAT)
+ #  define _LIBCPP_USE_UTIMENSAT
+ #endif
+ 

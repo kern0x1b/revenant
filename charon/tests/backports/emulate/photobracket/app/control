@@ -1,0 +1,7 @@
+Package: org.charon.photobracketprobe
+Name: Photo bracket probe
+Architecture: iphoneos-arm
+Description: The AVCapturePhotoBracketSettings and bracketed capture probe, a program on the 6.1.3 emulator: the settings, the refusals, the bracket's callbacks and the AVCapturePhoto object. Its last line is "checks: N failed: F".
+Maintainer: charon
+Author: charon
+Section: Development

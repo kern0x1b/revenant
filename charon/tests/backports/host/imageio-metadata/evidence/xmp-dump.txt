@@ -1,0 +1,8 @@
+=== flash: 311 bytes -> xmp-flash.bin
+=== array: 541 bytes -> xmp-array.bin
+=== empty: NULL
+=== parse: non-NULL
+=== parse: 3 tags
+  ns=http://ns.adobe.com/exif/1.0/ prefix=(null) name=(null) type=1 value=1
+  ns=http://purl.org/dc/elements/1.1/ prefix=(null) name=(null) type=2 value=(array)
+  ns=http://ns.apple.com/ImageIO/1.0/ prefix=(null) name=(null) type=1 value=True

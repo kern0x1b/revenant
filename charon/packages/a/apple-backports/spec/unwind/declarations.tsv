@@ -1,0 +1,52 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+enum	c:@EA@_Unwind_Reason_Code	-			unsigned int	-	-	-	-	4c9a566748ad7fd1	-
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_NO_REASON	_Unwind_Reason_Code			-	-	-	-	-	dcdf913b2d4ce837	0
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_OK	_Unwind_Reason_Code			-	-	-	-	-	68fc0e8ac94015ee	0
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_FOREIGN_EXCEPTION_CAUGHT	_Unwind_Reason_Code			-	-	-	-	-	71326062ed6f88e5	1
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_FATAL_PHASE2_ERROR	_Unwind_Reason_Code			-	-	-	-	-	c5ef102844dd114d	2
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_FATAL_PHASE1_ERROR	_Unwind_Reason_Code			-	-	-	-	-	420615da46e77b49	3
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_NORMAL_STOP	_Unwind_Reason_Code			-	-	-	-	-	94fad47154ee4a08	4
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_END_OF_STACK	_Unwind_Reason_Code			-	-	-	-	-	fc5ed23578b808cd	5
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_HANDLER_FOUND	_Unwind_Reason_Code			-	-	-	-	-	6fc6d99313d53808	6
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_INSTALL_CONTEXT	_Unwind_Reason_Code			-	-	-	-	-	a6bdce6b0da619b4	7
+enumconst	c:@EA@_Unwind_Reason_Code@_URC_CONTINUE_UNWIND	_Unwind_Reason_Code			-	-	-	-	-	d151d58600c3d763	8
+typedef	c:@T@_Unwind_Reason_Code	-			enum _Unwind_Reason_Code	-	-	-	-	69c2c8e387f52004	-
+enum	c:@EA@_Unwind_Action	-			unsigned int	-	-	-	-	63a0115c0b3f0910	-
+enumconst	c:@EA@_Unwind_Action@_UA_SEARCH_PHASE	_Unwind_Action			-	-	-	-	-	2f7458cfaa4d7b49	1
+enumconst	c:@EA@_Unwind_Action@_UA_CLEANUP_PHASE	_Unwind_Action			-	-	-	-	-	71bd5925485ddb58	2
+enumconst	c:@EA@_Unwind_Action@_UA_HANDLER_FRAME	_Unwind_Action			-	-	-	-	-	2a549408ecf96b71	4
+enumconst	c:@EA@_Unwind_Action@_UA_FORCE_UNWIND	_Unwind_Action			-	-	-	-	-	970901ceb7a23d99	8
+enumconst	c:@EA@_Unwind_Action@_UA_END_OF_STACK	_Unwind_Action			-	-	-	-	-	54974d379c5b7695	16
+typedef	c:@T@_Unwind_Action	-			enum _Unwind_Action	-	-	-	-	d2934722b110bc62	-
+struct	c:@S@_Unwind_Context	-			-	-	-	-	-	d940c1a41fd8bc48	-
+typedef	c:@T@_Unwind_Context	-			struct _Unwind_Context	-	-	-	-	3e725f3d428b800e	-
+typedef	c:@T@_Unwind_Stop_Fn	-			_Unwind_Reason_Code (*)(int, _Unwind_Action, _Unwind_Exception_Class, _Unwind_Exception *, struct _Unwind_Context *, void *)	-	-	-	-	18406dc52666d02f	-
+function	c:@F@_Unwind_GetRegionStart	-			uintptr_t (struct _Unwind_Context *)	struct _Unwind_Context * context	-	-	-	fed2975b6a277829	-
+function	c:@F@_Unwind_GetLanguageSpecificData	-			uintptr_t (struct _Unwind_Context *)	struct _Unwind_Context * context	-	-	-	397de5fbf4027970	-
+function	c:@F@_Unwind_ForcedUnwind	-			_Unwind_Reason_Code (_Unwind_Exception *, _Unwind_Stop_Fn, void *)	_Unwind_Exception * exception_object | _Unwind_Stop_Fn stop | void * stop_parameter	-	-	-	635bc27aaffc1181	-
+function	c:@F@_Unwind_Resume_or_Rethrow	-			_Unwind_Reason_Code (_Unwind_Exception *)	_Unwind_Exception * exception_object	-	-	-	47cb2c5310a6e116	-
+typedef	c:@T@_Unwind_Trace_Fn	-			_Unwind_Reason_Code (*)(struct _Unwind_Context *, void *)	-	-	-	-	f77cdc159e92d084	-
+function	c:@F@_Unwind_Backtrace	-			_Unwind_Reason_Code (_Unwind_Trace_Fn, void *)	_Unwind_Trace_Fn  | void * 	-	-	-	04968682204c7b44	-
+function	c:@F@_Unwind_GetCFA	-			uintptr_t (struct _Unwind_Context *)	struct _Unwind_Context * 	-	-	-	a3c582c541ec6612	-
+function	c:@F@_Unwind_GetIPInfo	-			uintptr_t (struct _Unwind_Context *, int *)	struct _Unwind_Context * context | int * ipBefore	-	-	-	042e7f13783cb8cc	-
+function	c:@F@__register_frame	-			void (const void *)	const void * fde	-	-	-	830b11b9fb6dc203	-
+function	c:@F@__deregister_frame	-			void (const void *)	const void * fde	-	-	-	534be85c05e0faf7	-
+struct	c:@S@dwarf_eh_bases	-			-	-	-	-	-	5e2519eb26e56af2	-
+field	c:@S@dwarf_eh_bases@FI@tbase	dwarf_eh_bases			uintptr_t	-	-	-	-	bd9aef5ac3ff719c	-
+field	c:@S@dwarf_eh_bases@FI@dbase	dwarf_eh_bases			uintptr_t	-	-	-	-	dccf7af088220f58	-
+field	c:@S@dwarf_eh_bases@FI@func	dwarf_eh_bases			uintptr_t	-	-	-	-	9c92dd8f56ef9ab3	-
+function	c:@F@_Unwind_Find_FDE	-			const void * (const void *, struct dwarf_eh_bases *)	const void * pc | struct dwarf_eh_bases * 	-	-	-	551c0dac7745eba9	-
+function	c:@F@_Unwind_FindEnclosingFunction	-			void * (void *)	void * pc	-	-	-	ad36dcf1d89cd085	-
+function	c:@F@_Unwind_GetDataRelBase	-			uintptr_t (struct _Unwind_Context *)	struct _Unwind_Context * context	-	*unavailable	-	e9b7d8b0fc3d5c90	-
+function	c:@F@_Unwind_GetTextRelBase	-			uintptr_t (struct _Unwind_Context *)	struct _Unwind_Context * context	-	*unavailable	-	3de20b3508ecd8d3	-
+function	c:@F@__register_frame_info_bases	-			void (const void *, void *, void *, void *)	const void * fde | void * ob | void * tb | void * db	-	*unavailable	-	39efbdc2d5e8c08d	-
+function	c:@F@__register_frame_info	-			void (const void *, void *)	const void * fde | void * ob	-	*unavailable	-	dae1ca48607bef96	-
+function	c:@F@__register_frame_info_table_bases	-			void (const void *, void *, void *, void *)	const void * fde | void * ob | void * tb | void * db	-	*unavailable	-	b967f126ea5e7a1d	-
+function	c:@F@__register_frame_info_table	-			void (const void *, void *)	const void * fde | void * ob	-	*unavailable	-	ea0fa7701ebce6a0	-
+function	c:@F@__register_frame_table	-			void (const void *)	const void * fde	-	*unavailable	-	f0ca0f0c11c38d24	-
+function	c:@F@__deregister_frame_info	-			void * (const void *)	const void * fde	-	*unavailable	-	287c36512f3bb770	-
+function	c:@F@__deregister_frame_info_bases	-			void * (const void *)	const void * fde	-	*unavailable	-	83f93b334c2dad93	-
+typedef	c:@T@_Unwind_Exception_Class	-			uint64_t	-	-	-	-	be7957d287a39f79	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@_Unwind_Exception	-			struct _Unwind_Exception	-	-	-	-	ab1e12638c450bf2	-
+typedef	c:@T@uintptr_t	-			unsigned long	-	-	-	-	d45bca13aaee37a2	-

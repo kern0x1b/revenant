@@ -1,0 +1,71 @@
+{
+  "framework": "Photos",
+  "entries": [
+    {
+      "api": "PHChangeRequest",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is the base of the change requests of iOS 13 and holds nothing",
+      "effect": "nothing is made of it; PHAssetChangeRequest is a class of NSObject here, as it was before iOS 13",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHPhotoLibrary.unavailabilityReason",
+      "kind": "property",
+      "introduced": "13.0",
+      "status": "implemented",
+      "reason": "iOS 13 asked the release's own photo library whether this process may read it, and the release answers: the authorization ALAssetsLibrary reports and the refusal its enumeration answers with",
+      "minimum": "6.0",
+      "effect": "nil while the release's library answers this process, and otherwise an NSError in PHPhotosErrorDomain with the header's own code: 3311 (PHPhotosErrorAccessUserDenied) for a denied process, 3310 (PHPhotosErrorAccessRestricted) for a restricted one. Measured for 3311; the nil and the 3310 cases are reasoned, and facts/Photos/Availability.md says which is which",
+      "facts": "facts/Photos/Availability.md",
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the name's presence in the device's own Photos; tests/backports/device/photosavailability13.m through tests/backports/device/photos/run.sh on an iPhone 4S running 6.1.3 for every answer below"
+    },
+    {
+      "api": "PHPhotoLibraryAvailabilityObserver",
+      "kind": "protocol",
+      "introduced": "13.0",
+      "status": "implemented",
+      "reason": "iOS 13 asked the release's own photo library whether this process may read it, and the release answers: the authorization ALAssetsLibrary reports and the refusal its enumeration answers with",
+      "minimum": "6.0",
+      "effect": "the protocol is there: NSProtocolFromString answers it and a class may declare it",
+      "facts": "facts/Photos/Availability.md",
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the name's presence in the device's own Photos; tests/backports/device/photosavailability13.m through tests/backports/device/photos/run.sh on an iPhone 4S running 6.1.3 for every answer below"
+    },
+    {
+      "api": "-[PHPhotoLibraryAvailabilityObserver photoLibraryDidBecomeUnavailable:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "status": "implemented",
+      "reason": "iOS 13 asked the release's own photo library whether this process may read it, and the release answers: the authorization ALAssetsLibrary reports and the refusal its enumeration answers with",
+      "minimum": "6.0",
+      "effect": "the port sends this to every availability observer registered at that moment, on a queue of its own, and sends it only for a change: the library going from available to unavailable",
+      "facts": "facts/Photos/Availability.md",
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the name's presence in the device's own Photos; tests/backports/device/photosavailability13.m through tests/backports/device/photos/run.sh on an iPhone 4S running 6.1.3 for every answer below"
+    },
+    {
+      "api": "-[PHPhotoLibrary registerAvailabilityObserver:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "status": "implemented",
+      "reason": "iOS 13 asked the release's own photo library whether this process may read it, and the release answers: the authorization ALAssetsLibrary reports and the refusal its enumeration answers with",
+      "minimum": "6.0",
+      "effect": "the observer is kept weakly and is told -photoLibraryDidBecomeUnavailable: off the main thread when the library goes from available to unavailable; an observer registered while it is already unavailable is told nothing",
+      "facts": "facts/Photos/Availability.md",
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the name's presence in the device's own Photos; tests/backports/device/photosavailability13.m through tests/backports/device/photos/run.sh on an iPhone 4S running 6.1.3 for every answer below"
+    },
+    {
+      "api": "-[PHPhotoLibrary unregisterAvailabilityObserver:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "status": "implemented",
+      "reason": "iOS 13 asked the release's own photo library whether this process may read it, and the release answers: the authorization ALAssetsLibrary reports and the refusal its enumeration answers with",
+      "minimum": "6.0",
+      "effect": "the observer is dropped at once, and dropping one twice is not a crash",
+      "facts": "facts/Photos/Availability.md",
+      "source": "the header of iOS 16.4 for the declaration; tools/corpus/cache-value.lua over the arm64e cache of 16.0 for the name's presence in the device's own Photos; tests/backports/device/photosavailability13.m through tests/backports/device/photos/run.sh on an iPhone 4S running 6.1.3 for every answer below"
+    }
+  ]
+}

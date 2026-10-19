@@ -1,0 +1,38 @@
+{
+  "framework": "HealthKit",
+  "entries": [
+    {
+      "api": "HKPredicateKeyPathDateComponents",
+      "kind": "constant",
+      "introduced": "8.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 8.2 is a point release between the two HealthKit images this workspace holds, and the one member and one constant it added are what iOS 9.0's own image exports, so the values and the behaviour are read out of that release",
+      "effect": "the value HealthKit gave it - \"dateComponents\" - read out of the armv7 shared cache of iOS 8.2. The SDK header this library is compiled against dates this constant 9.3, and the release's own image says 8.2: the armv7 shared cache of 8.2 exports it and the one of 8.0 does not, so it is carried here and the header's later date is recorded rather than followed. It is the key path the two activity-summary predicates of HKQuery are built over, and HKActivitySummary answers it",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the armv7 shared cache of iOS 9.0, HealthKit.framework, extracted with modules/apple/dyld.lua's extract()"
+    },
+    {
+      "api": "HKUserPreferencesDidChangeNotification",
+      "kind": "constant",
+      "introduced": "8.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 8.2 is a point release between the two HealthKit images this workspace holds, and the one member and one constant it added are what iOS 9.0's own image exports, so the values and the behaviour are read out of that release",
+      "effect": "the value HealthKit gave it, read out of the armv7 shared cache of iOS 9.0 rather than assumed; nothing here posts it, because the only thing that would is a user changing a preference in the Health application, which this release has none of",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the armv7 shared cache of iOS 9.0, HealthKit.framework, extracted with modules/apple/dyld.lua's extract()"
+    },
+    {
+      "api": "-[HKHealthStore preferredUnitsForQuantityTypes:completion:]",
+      "kind": "method",
+      "introduced": "8.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 8.2 is a point release between the two HealthKit images this workspace holds, and the one member and one constant it added are what iOS 9.0's own image exports, so the values and the behaviour are read out of that release",
+      "effect": "the unit each type asked about is the one the SDK's own table of the type's unit names, and a type that table counts in a string no unit can be made of is left out, which is the same refusal +canonicalUnitForQuantityType: makes in the next release and for the same reason",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the armv7 shared cache of iOS 9.0, HealthKit.framework, extracted with modules/apple/dyld.lua's extract()"
+    }
+  ]
+}

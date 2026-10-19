@@ -1,0 +1,2 @@
+    for (NSUInteger r = 0; r < order; r++) {
+        for (NSUInteger c = 0; c <= r; c++) {

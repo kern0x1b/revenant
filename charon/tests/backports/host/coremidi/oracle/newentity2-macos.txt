@@ -1,0 +1,3 @@
+MIDIDeviceNewEntity(0 device) -50 entity=0
+setup devices 4
+MIDIDeviceNewEntity(first setup device) 0

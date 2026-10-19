@@ -1,0 +1,315 @@
+{
+ "framework": "NaturalLanguage",
+ "entries": [
+  {
+     "api": "NLScriptArabic",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Arab, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptArmenian",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Armn, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptBengali",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Beng, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptCanadianAboriginalSyllabics",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Cans, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptCherokee",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Cher, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptCyrillic",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Cyrl, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptDevanagari",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Deva, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptEthiopic",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Ethi, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptGeorgian",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Geor, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptGreek",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Grek, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptGujarati",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Gujr, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptGurmukhi",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Guru, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptHebrew",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Hebr, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptJapanese",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Jpan, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptKannada",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Knda, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptKhmer",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Khmr, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptKorean",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Kore, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptLao",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Laoo, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptLatin",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Latn, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptMalayalam",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Mlym, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptMongolian",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Mong, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptMyanmar",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Mymr, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptOriya",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Orya, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptSimplifiedChinese",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Hans, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptSinhala",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Sinh, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptTamil",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Taml, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptTelugu",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Telu, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptThai",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Thai, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptTibetan",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Tibt, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptTraditionalChinese",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Hant, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  },
+  {
+     "api": "NLScriptUndetermined",
+     "kind": "constant",
+     "introduced": "17.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the script Zyyy, the ISO 15924 code NLTagger answers -[NLTag enumeratedTagForTag:...] and -script of a language with, and which -[NLLanguageRecognizer supportedScriptsForLanguage:] compares against",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  }
+ ]
+}

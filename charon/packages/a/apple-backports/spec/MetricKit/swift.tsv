@@ -1,0 +1,24 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+MetricKit	swift-struct	c:@E@MXErrorCode	-	MXError	-	-	-	ios=16.0	-	215b5929bfb154e5
+MetricKit	swift-property	s:SC11MXErrorCodeLeV8_nsErrorSo7NSErrorCvp	MXError	_nsError	-	Foundation.NSError	-	-	-	96e2abacdc6b221e
+MetricKit	swift-method	s:SC11MXErrorCodeLeV8_nsErrorABSo7NSErrorC_tcfc	MXError	init(_nsError:)	-	-	MetricKit.MXError | Foundation.NSError	-	-	da421413420f5ae5
+MetricKit	swift-property	s:SC11MXErrorCodeLeV11errorDomainSSvpZ	MXError	errorDomain	+	Swift.String	-	-	-	cb1b2789bf6bb1ba
+MetricKit	swift-enum	c:@E@MXErrorCode	MXError	Code	-	-	-	ios=16.0	-	3f442ee6152df903
+MetricKit	swift-method	s:So11MXErrorCodeV8rawValueABSgSi_tcfc	MXError.Code	init(rawValue:)	-	-	MetricKit.MXError.Code? | Swift.Int	-	-	32856e06e8cc04ed
+MetricKit	swift-property	s:So11MXErrorCodeV8rawValueSivp	MXError.Code	rawValue	-	Swift.Int	-	-	-	3e77c728ef87c2e5
+MetricKit	swift-typealias	s:So11MXErrorCodeV8RawValuea	MXError.Code	RawValue	-	-	-	-	-	3b91fd0e6790597b
+MetricKit	swift-typealias	c:@E@MXErrorCode	MXError.Code	_ErrorType	-	-	-	-	-	b7c9ee75ed7baa14
+MetricKit	swift-constant	c:@E@MXErrorCode@MXErrorLaunchTaskInvalidID	MXError.Code	launchTaskInvalidID	-	-	-	-	-	b307f05291d7c0df
+MetricKit	swift-constant	c:@E@MXErrorCode@MXErrorLaunchTaskMaxCount	MXError.Code	launchTaskMaxCount	-	-	-	-	-	63e9bb1c6b4d735e
+MetricKit	swift-constant	c:@E@MXErrorCode@MXErrorLaunchTaskPastDeadline	MXError.Code	launchTaskPastDeadline	-	-	-	-	-	4e058675a6d8ca02
+MetricKit	swift-constant	c:@E@MXErrorCode@MXErrorLaunchTaskDuplicated	MXError.Code	launchTaskDuplicated	-	-	-	-	-	d61d82a919945d97
+MetricKit	swift-constant	c:@E@MXErrorCode@MXErrorLaunchTaskUnknown	MXError.Code	launchTaskUnknown	-	-	-	-	-	07c6046e4fddf8c1
+MetricKit	swift-constant	c:@E@MXErrorCode@MXErrorLaunchTaskInternalFailure	MXError.Code	launchTaskInternalFailure	-	-	-	-	-	3d23b67c32b1162a
+MetricKit	swift-property	c:@E@MXErrorCode@MXErrorLaunchTaskInvalidID	MXError	launchTaskInvalidID	+	MetricKit.MXError.Code	-	-	-	2aebad73aa683d17
+MetricKit	swift-property	c:@E@MXErrorCode@MXErrorLaunchTaskMaxCount	MXError	launchTaskMaxCount	+	MetricKit.MXError.Code	-	-	-	4e436db5f34007f6
+MetricKit	swift-property	c:@E@MXErrorCode@MXErrorLaunchTaskPastDeadline	MXError	launchTaskPastDeadline	+	MetricKit.MXError.Code	-	-	-	596a4e3147c576ad
+MetricKit	swift-property	c:@E@MXErrorCode@MXErrorLaunchTaskDuplicated	MXError	launchTaskDuplicated	+	MetricKit.MXError.Code	-	-	-	a9903ca33fe7a585
+MetricKit	swift-property	c:@E@MXErrorCode@MXErrorLaunchTaskUnknown	MXError	launchTaskUnknown	+	MetricKit.MXError.Code	-	-	-	ea53907fa978db11
+MetricKit	swift-property	c:@E@MXErrorCode@MXErrorLaunchTaskInternalFailure	MXError	launchTaskInternalFailure	+	MetricKit.MXError.Code	-	-	-	f86fff95d5524054
+MetricKit	swift-function	s:9MetricKit10mxSignpost_3dso3log4name10signpostID__ySo03os_H7_type_ta_SVSo03OS_j1_F0Cs12StaticStringV0J0010OSSignpostI0VALSays7CVarArg_pGtF	-	mxSignpost(_:dso:log:name:signpostID:_:_:)	-	()	os.OSSignpostType | Swift.UnsafeRawPointer | os.OSLog | Swift.StaticString | os.OSSignpostID | Swift.StaticString | [any Swift.CVarArg]	ios=13.0,macos=10.15	-	0ef2e3b06caf890f
+MetricKit	swift-function	s:9MetricKit32mxSignpostAnimationIntervalBegin3dso3log4name10signpostID__ySV_So06OS_os_I0Cs12StaticStringV0N0010OSSignpostL0VAJSays7CVarArg_pGtF	-	mxSignpostAnimationIntervalBegin(dso:log:name:signpostID:_:_:)	-	()	Swift.UnsafeRawPointer | os.OSLog | Swift.StaticString | os.OSSignpostID | Swift.StaticString | [any Swift.CVarArg]	ios=15.0,macos=12.0	-	11cfc60178d51736

@@ -1,0 +1,5 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+SoundAnalysis	enum	SNTimeDurationConstraint	15.0				own
+SoundAnalysis	constant	SNTimeDurationConstraint.enumeratedDurations	15.0				container
+SoundAnalysis	constant	SNTimeDurationConstraint.durationRange	15.0				container
+SoundAnalysis	property	SNClassifySoundRequest.windowDurationConstraint	15.0				own

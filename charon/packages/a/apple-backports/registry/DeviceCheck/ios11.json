@@ -1,0 +1,25 @@
+{
+  "framework": "DeviceCheck",
+  "entries": [
+    {
+      "api": "DCDevice",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 12.0, whose -generateTokenWithCompletionHandler: asks the daemon com.apple.devicecheckd, which iOS 6 does not run",
+      "effect": "the handler hears DCErrorFeatureUnsupported from the DeviceCheck domain with no user info, on a background queue after the call has returned; the release itself, when it cannot reach its daemon, answers DCErrorUnknownSystemFailure",
+      "facts": "facts/DeviceCheck/DCDevice.md",
+      "source": "DeviceCheck of iOS 12.0 arm64: -[DCDevice isSupported] at 0x19e6794f8, +[DCDevice currentDevice] at 0x19e679170 and -[DCDevice generateTokenWithCompletionHandler:] at 0x19e6791f0; the host's DeviceCheck through Mac Catalyst"
+    },
+    {
+      "api": "DCErrorDomain",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/DeviceCheck/DCDevice.md",
+      "source": "DeviceCheck of iOS 12.0 arm64, the string com.apple.devicecheck.error; the host's DeviceCheck through Mac Catalyst"
+    }
+  ]
+}

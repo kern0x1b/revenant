@@ -1,0 +1,17 @@
+host colons and brackets kept outside brackets	NSString+URLUtilities.m	s/allowed\[':'\] = allowed\['\['\] = allowed\['\]'\] = NO;/(void)0;/
+a colon allowed before the first slash of a path	NSString+URLUtilities.m	s/if \(path\)\n(\s*)allowed\[':'\] = NO;/if (path)\n$1(void)0;/
+lowercase hex digits written	NSString+URLUtilities.m	s/"0123456789ABCDEF"/"0123456789abcdef"/
+a lone low surrogate encoded	NSString+URLUtilities.m	s/(else if \(character >= 0xDC00 && character <= 0xDFFF\) \{\n\s*)break;/$1;/
+an overlong UTF-8 sequence decoded	NSString+URLUtilities.m	s/if \(scalar < minimum \|\| /if (/
+lowercase hex refused when decoding	NSString+URLUtilities.m	s/\s*if \(character >= 'a' && character <= 'f'\)\n\s*return character - 'a' \+ 10;//
+an escape at the very end refused	NSString+URLUtilities.m	s/index \+ 2 < length/index + 3 < length/g
+the user set without a semicolon	NSCharacterSet+URLUtilities.m	s/charon_url_set\(\@"!\$&'\(\)\*\+,;="\)/charon_url_set(\@"!\$&'()*+,=")/
+the query set without a question mark	NSCharacterSet+URLUtilities.m	s/(URLQueryAllowedCharacterSet.*?)\@"!\$&'\(\)\*\+,;=:\@\/\?"/$1\@"!\$&'()*+,;=:\@\/"/s
+both line lengths asked for give no lines	NSData+Base64.m	s/if \(short64 == long76\)/if (!short64 || long76)/
+a line ending of a line feed alone by default	NSData+Base64.m	s/carriageReturn = lineFeed = YES;/lineFeed = YES;/
+a line one character too long	NSData+Base64.m	s/line == lineLength\)/line == lineLength + 1)/
+data after padding accepted	NSData+Base64.m	s/\} else if \(padding && !ignoreUnknown\) \{/} else if (NO) {/
+three padding characters accepted	NSData+Base64.m	s/if \(padding == 3\)/if (padding == 4)/
+an unfinished group accepted	NSData+Base64.m	s/    if \(count\) \{\n        free\(output\);/    if (NO) {\n        free(output);/
+a character outside ASCII read by its low byte	NSData+Base64.m	s/wide\[index\] < 0x80 \? \(unsigned char\)wide\[index\] : CharonBase64Unknown/(unsigned char)wide[index]/
+trailing characters after the padding accepted	NSData+Base64.m	s/index < length && !ignoreUnknown; index\+\+\)/index < length \&\& NO; index++)/

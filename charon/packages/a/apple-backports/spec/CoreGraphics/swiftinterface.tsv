@@ -1,0 +1,404 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+CoreGraphics	method	CGBitmapInfo.init(alpha:component:byteOrder:pixelFormat:)	12.0				own
+CoreGraphics	method	CGBitmapInfo.init(alpha:component:byteOrder:)	7.0				container
+CoreGraphics	property	CGBitmapInfo.alpha	7.0				container
+CoreGraphics	property	CGBitmapInfo.component	7.0				container
+CoreGraphics	property	CGBitmapInfo.byteOrder	7.0				container
+CoreGraphics	property	CGBitmapInfo.pixelFormat	12.0				own
+CoreGraphics	property	CGBitmapInfo.debugDescription	7.0				container
+CoreGraphics	property	CGBitmapInfo.customMirror	7.0				container
+CoreGraphics	property	CGBitmapInfo.children	7.0				container
+CoreGraphics	property	CGBitmapInfo.alphaInfoMask	7.0	10000.0			container
+CoreGraphics	property	CGBitmapInfo.floatInfoMask	7.0	10000.0			container
+CoreGraphics	property	CGBitmapInfo.byteOrderMask	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.init(arrayLiteral:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.init(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.union(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.intersection(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.symmetricDifference(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.contains(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.insert(_:)	7.0	10000.0			container
+CoreGraphics	property	CGBitmapInfo.oldMember	7.0				container
+CoreGraphics	property	CGBitmapInfo.shouldInsert	7.0				container
+CoreGraphics	property	CGBitmapInfo.result	7.0				container
+CoreGraphics	method	CGBitmapInfo.remove(_:)	7.0	10000.0			container
+CoreGraphics	property	CGBitmapInfo.intersectionElements	7.0				container
+CoreGraphics	method	CGBitmapInfo.update(with:)	7.0	10000.0			container
+CoreGraphics	property	CGBitmapInfo.r	7.0				container
+CoreGraphics	method	CGBitmapInfo.formUnion(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.formIntersection(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.formSymmetricDifference(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.subtracting(_:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.isSubset(of:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.isDisjoint(with:)	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.isSuperset(of:)	7.0	10000.0			container
+CoreGraphics	property	CGBitmapInfo.isEmpty	7.0	10000.0			container
+CoreGraphics	method	CGBitmapInfo.subtract(_:)	7.0	10000.0			container
+CoreGraphics	property	CGColorSpace.colorTable	7.0				container
+CoreGraphics	enum	CGContentToneMappingInfo	26.0				own
+CoreGraphics	enum	CGContentToneMappingInfo.LightLevel	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.LightLevel.relative	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.LightLevel.nits	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.LightLevel.==(a:b:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.LightLevel.hash(into:)	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.LightLevel.hashValue	26.0				container
+CoreGraphics	enum	CGContentToneMappingInfo.DynamicRange	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.DynamicRange.high	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.DynamicRange.constrained	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.DynamicRange.standard	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.DynamicRange.==(a:b:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.DynamicRange.hash(into:)	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.DynamicRange.hashValue	26.0				container
+CoreGraphics	struct	CGContentToneMappingInfo.DefaultOptions	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.DefaultOptions.contentAverageLightLevel	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.DefaultOptions.preferredDynamicRange	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.DefaultOptions.init()	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.DefaultOptions.init(contentAverageLightLevel:preferredDynamicRange:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.DefaultOptions.==(a:b:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.DefaultOptions.hash(into:)	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.DefaultOptions.hashValue	26.0				container
+CoreGraphics	struct	CGContentToneMappingInfo.ITURecommendedOptions	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.ITURecommendedOptions.skipBoostToHDR	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.ITURecommendedOptions.use100nitsHLGOOTF	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.ITURecommendedOptions.useBT1886ForCoreVideoGamma	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.ITURecommendedOptions.useLegacyHDREcosystem	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.ITURecommendedOptions.init()	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.ITURecommendedOptions.init(skipBoostToHDR:use100nitsHLGOOTF:useBT1886ForCoreVideoGamma:useLegacyHDREcosystem:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.ITURecommendedOptions.==(a:b:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.ITURecommendedOptions.hash(into:)	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.ITURecommendedOptions.hashValue	26.0				container
+CoreGraphics	struct	CGContentToneMappingInfo.EXRGammaOptions	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.EXRGammaOptions.defog	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.EXRGammaOptions.exposure	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.EXRGammaOptions.kneeHigh	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.EXRGammaOptions.kneeLow	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.EXRGammaOptions.init()	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.EXRGammaOptions.init(defog:exposure:kneeHigh:kneeLow:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.EXRGammaOptions.==(a:b:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.EXRGammaOptions.hash(into:)	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.EXRGammaOptions.hashValue	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.imageSpecificLumaScaling	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.referenceWhiteBased	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.ituRecommended	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.exrGamma	26.0				container
+CoreGraphics	constant	CGContentToneMappingInfo.none	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.==(a:b:)	26.0				container
+CoreGraphics	method	CGContentToneMappingInfo.hash(into:)	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.hashValue	26.0				container
+CoreGraphics	property	CGContentToneMappingInfo.id	26.0				container
+CoreGraphics	typealias	CGContentToneMappingInfo.ID	26.0				own
+CoreGraphics	property	CGImageComponentInfo.allCases	26.0				container
+CoreGraphics	typealias	CGImageComponentInfo.AllCases	26.0				own
+CoreGraphics	property	CGImageComponentInfo.debugDescription	7.0				container
+CoreGraphics	property	CGPoint.zero	7.0				container
+CoreGraphics	method	CGPoint.init(x:y:)	7.0				container
+CoreGraphics	method	CGPoint.init(x:y:)	7.0				container
+CoreGraphics	method	CGPoint.init?(dictionaryRepresentation:)	7.0				container
+CoreGraphics	property	CGPoint.customMirror	7.0				container
+CoreGraphics	property	CGPoint.customPlaygroundQuickLook	7.0	yes			container
+CoreGraphics	property	CGPoint.debugDescription	7.0				container
+CoreGraphics	method	CGPoint.==(lhs:rhs:)	7.0				container
+CoreGraphics	method	CGPoint.hash(into:)	7.0				container
+CoreGraphics	property	CGPoint.hashValue	7.0				container
+CoreGraphics	property	CGPoint.hasher	7.0				container
+CoreGraphics	method	CGPoint.init(from:)	7.0				container
+CoreGraphics	method	CGPoint.encode(to:)	7.0				container
+CoreGraphics	method	CGImage.copy(maskingColorComponents:)	7.0				container
+CoreGraphics	property	CGImageAlphaInfo.allCases	26.0				container
+CoreGraphics	typealias	CGImageAlphaInfo.AllCases	26.0				own
+CoreGraphics	property	CGImageAlphaInfo.debugDescription	7.0				container
+CoreGraphics	function	CGAffineTransformEqualToTransform(_:_:)				yes	none
+CoreGraphics	function	CGColorGetConstantColor(_:)				yes	none
+CoreGraphics	function	CGColorEqualToColor(_:_:)				yes	none
+CoreGraphics	function	CGColorGetComponents(_:)				yes	none
+CoreGraphics	function	CGColorSpaceGetColorTableCount(_:)				yes	none
+CoreGraphics	function	CGColorSpaceGetColorTable(_:_:)				yes	none
+CoreGraphics	function	CGContextSetLineDash(_:_:_:_:)				yes	none
+CoreGraphics	function	CGContextMoveToPoint(_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddLineToPoint(_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddCurveToPoint(_:_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddQuadCurveToPoint(_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddRects(_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddLines(_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddArc(_:_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGContextAddArcToPoint(_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGContextFillRects(_:_:_:)				yes	none
+CoreGraphics	function	CGContextStrokeLineSegments(_:_:_:)				yes	none
+CoreGraphics	function	CGContextClipToRects(_:_:_:)				yes	none
+CoreGraphics	function	CGContextDrawImage(_:_:_:)				yes	none
+CoreGraphics	function	CGContextDrawTiledImage(_:_:_:)				yes	none
+CoreGraphics	function	CGContextDrawImageApplyingToneMapping(_:_:_:applying:options:)				yes	none
+CoreGraphics	function	CGContextGetTextPosition(_:)				yes	none
+CoreGraphics	function	CGContextSetTextPosition(_:_:_:)				yes	none
+CoreGraphics	function	CGContextShowGlyphsAtPositions(_:_:_:_:)				yes	none
+CoreGraphics	function	CGContextFillPath(_:)				yes	none
+CoreGraphics	function	CGContextEOFillPath(_:)				yes	none
+CoreGraphics	function	CGContextClip(_:)				yes	none
+CoreGraphics	function	CGContextEOClip(_:)				yes	none
+CoreGraphics	function	CGGetLastMouseDelta(_:_:)				yes	none
+CoreGraphics	function	CGRectDivide(_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPointMakeWithDictionaryRepresentation(_:_:)				yes	none
+CoreGraphics	function	CGSizeMakeWithDictionaryRepresentation(_:_:)				yes	none
+CoreGraphics	function	CGRectMakeWithDictionaryRepresentation(_:_:)				yes	none
+CoreGraphics	function	CGImageCreateWithMaskingColors(_:_:)				yes	none
+CoreGraphics	function	CGContextDrawLayerInRect(_:_:_:)				yes	none
+CoreGraphics	function	CGContextDrawLayerAtPoint(_:_:_:)				yes	none
+CoreGraphics	function	CGPathCreateCopyByDashingPath(_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathCreateCopyByStrokingPath(_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathEqualToPath(_:_:)				yes	none
+CoreGraphics	function	CGPathMoveToPoint(_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddLineToPoint(_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddCurveToPoint(_:_:_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddQuadCurveToPoint(_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddRect(_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddRects(_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddLines(_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddEllipseInRect(_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddRelativeArc(_:_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddArc(_:_:_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddArcToPoint(_:_:_:_:_:_:_:)				yes	none
+CoreGraphics	function	CGPathAddPath(_:_:_:)				yes	none
+CoreGraphics	constant	kCGColorWhite				yes	none
+CoreGraphics	constant	kCGColorBlack				yes	none
+CoreGraphics	constant	kCGColorClear				yes	none
+CoreGraphics	property	CGColor.components	7.0				container
+CoreGraphics	protocol	_CGColorInitTrampoline	7.0				own
+CoreGraphics	method	_CGColorInitTrampoline.init?(colorSpace:components:)	7.0				container
+CoreGraphics	method	_CGColorInitTrampoline.init(_colorLiteralRed:green:blue:alpha:)	7.0				container
+CoreGraphics	method	CGAffineTransform.init(translationX:y:)					none
+CoreGraphics	method	CGAffineTransform.init(scaleX:y:)					none
+CoreGraphics	method	CGAffineTransform.init(rotationAngle:)					none
+CoreGraphics	method	CGAffineTransform.init(_:)	16.0				own
+CoreGraphics	property	CGAffineTransform.isIdentity					none
+CoreGraphics	method	CGAffineTransform.translatedBy(x:y:)					none
+CoreGraphics	method	CGAffineTransform.scaledBy(x:y:)					none
+CoreGraphics	method	CGAffineTransform.rotated(by:)					none
+CoreGraphics	method	CGAffineTransform.inverted()					none
+CoreGraphics	method	CGAffineTransform.decomposed()	16.0				own
+CoreGraphics	method	CGAffineTransform.concatenating(_:)					none
+CoreGraphics	method	CGAffineTransformComponents.init(scale:horizontalShear:rotation:translation:)	16.0				own
+CoreGraphics	method	CGPoint.applying(_:)					none
+CoreGraphics	method	CGSize.applying(_:)					none
+CoreGraphics	method	CGRect.applying(_:)					none
+CoreGraphics	method	CGAffineTransform.init(_:_:_:_:_:_:)					none
+CoreGraphics	method	CGPoint.equalTo(_:)					none
+CoreGraphics	property	CGPoint.dictionaryRepresentation					none
+CoreGraphics	method	CGSize.equalTo(_:)					none
+CoreGraphics	property	CGSize.dictionaryRepresentation					none
+CoreGraphics	method	CGRect.__divided(slice:remainder:atDistance:from:)	7.0				container
+CoreGraphics	property	CGRect.null	7.0				container
+CoreGraphics	property	CGRect.infinite	7.0				container
+CoreGraphics	property	CGRect.minX	7.0				container
+CoreGraphics	property	CGRect.midX	7.0				container
+CoreGraphics	property	CGRect.maxX	7.0				container
+CoreGraphics	property	CGRect.minY	7.0				container
+CoreGraphics	property	CGRect.midY	7.0				container
+CoreGraphics	property	CGRect.maxY	7.0				container
+CoreGraphics	property	CGRect.width	7.0				container
+CoreGraphics	property	CGRect.height	7.0				container
+CoreGraphics	method	CGRect.equalTo(_:)	7.0				container
+CoreGraphics	property	CGRect.standardized	7.0				container
+CoreGraphics	property	CGRect.isEmpty	7.0				container
+CoreGraphics	property	CGRect.isNull	7.0				container
+CoreGraphics	property	CGRect.isInfinite	7.0				container
+CoreGraphics	method	CGRect.insetBy(dx:dy:)	7.0				container
+CoreGraphics	property	CGRect.integral	7.0				container
+CoreGraphics	method	CGRect.union(_:)	7.0				container
+CoreGraphics	method	CGRect.intersection(_:)	7.0				container
+CoreGraphics	method	CGRect.offsetBy(dx:dy:)	7.0				container
+CoreGraphics	method	CGRect.contains(_:)	7.0				container
+CoreGraphics	method	CGRect.contains(_:)	7.0				container
+CoreGraphics	method	CGRect.intersects(_:)	7.0				container
+CoreGraphics	property	CGRect.dictionaryRepresentation	7.0				container
+CoreGraphics	function	__CGAffineTransformMake(_:_:_:_:_:_:)					none
+CoreGraphics	function	__CGPointApplyAffineTransform(_:_:)					none
+CoreGraphics	function	__CGSizeApplyAffineTransform(_:_:)					none
+CoreGraphics	property	CGImageByteOrderInfo.allCases	26.0				container
+CoreGraphics	typealias	CGImageByteOrderInfo.AllCases	26.0				own
+CoreGraphics	property	CGImageByteOrderInfo.debugDescription	7.0				container
+CoreGraphics	property	CGFloat.min				yes	none
+CoreGraphics	property	CGFloat.max				yes	none
+CoreGraphics	constant	CGFLOAT_MIN				yes	none
+CoreGraphics	constant	CGFLOAT_MAX				yes	none
+CoreGraphics	function	%(lhs:rhs:)				yes	none
+CoreGraphics	function	%=(lhs:rhs:)				yes	none
+CoreGraphics	function	acos(_:)	7.0				own
+CoreGraphics	function	asin(_:)	7.0				own
+CoreGraphics	function	atan(_:)	7.0				own
+CoreGraphics	function	cos(_:)	7.0				own
+CoreGraphics	function	sin(_:)	7.0				own
+CoreGraphics	function	tan(_:)	7.0				own
+CoreGraphics	function	acosh(_:)	7.0				own
+CoreGraphics	function	asinh(_:)	7.0				own
+CoreGraphics	function	atanh(_:)	7.0				own
+CoreGraphics	function	cosh(_:)	7.0				own
+CoreGraphics	function	sinh(_:)	7.0				own
+CoreGraphics	function	tanh(_:)	7.0				own
+CoreGraphics	function	exp(_:)	7.0				own
+CoreGraphics	function	exp2(_:)	7.0				own
+CoreGraphics	function	expm1(_:)	7.0				own
+CoreGraphics	function	log(_:)	7.0				own
+CoreGraphics	function	log10(_:)	7.0				own
+CoreGraphics	function	log1p(_:)	7.0				own
+CoreGraphics	function	log2(_:)	7.0				own
+CoreGraphics	function	logb(_:)	7.0				own
+CoreGraphics	function	cbrt(_:)	7.0				own
+CoreGraphics	function	erf(_:)	7.0				own
+CoreGraphics	function	erfc(_:)	7.0				own
+CoreGraphics	function	tgamma(_:)	7.0				own
+CoreGraphics	function	nearbyint(_:)	7.0				own
+CoreGraphics	function	rint(_:)	7.0				own
+CoreGraphics	function	atan2(_:_:)	7.0				own
+CoreGraphics	function	hypot(_:_:)	7.0				own
+CoreGraphics	function	pow(_:_:)	7.0				own
+CoreGraphics	function	copysign(_:_:)	7.0				own
+CoreGraphics	function	nextafter(_:_:)	7.0				own
+CoreGraphics	function	fdim(_:_:)	7.0				own
+CoreGraphics	function	fmax(_:_:)	7.0				own
+CoreGraphics	function	fmin(_:_:)	7.0				own
+CoreGraphics	function	fpclassify(_:)				yes	none
+CoreGraphics	function	isnormal(_:)				yes	none
+CoreGraphics	function	isfinite(_:)				yes	none
+CoreGraphics	function	isinf(_:)				yes	none
+CoreGraphics	function	isnan(_:)				yes	none
+CoreGraphics	function	signbit(_:)				yes	none
+CoreGraphics	function	ldexp(_:_:)	7.0				own
+CoreGraphics	function	ilogb(_:)	7.0				own
+CoreGraphics	function	lgamma(_:)	7.0				own
+CoreGraphics	function	remquo(_:_:)	7.0				own
+CoreGraphics	function	nan(_:)	7.0				own
+CoreGraphics	function	j0(_:)	7.0				own
+CoreGraphics	function	j1(_:)	7.0				own
+CoreGraphics	function	jn(_:_:)	7.0				own
+CoreGraphics	function	y0(_:)	7.0				own
+CoreGraphics	function	y1(_:)	7.0				own
+CoreGraphics	function	yn(_:_:)	7.0				own
+CoreGraphics	protocol	_CGRenderingBufferProviderInit	26.0				own
+CoreGraphics	method	_CGRenderingBufferProviderInit.init?(info:size:)	26.0				container
+CoreGraphics	method	_CGRenderingBufferProviderInit.init?(info:size:)	26.0				container
+CoreGraphics	protocol	CGRenderingBufferProvider.Info	26.0				container
+CoreGraphics	method	CGRenderingBufferProvider.Info.lock()	26.0				container
+CoreGraphics	method	CGRenderingBufferProvider.Info.unlock(_:)	26.0				container
+CoreGraphics	property	CGRect.zero	7.0				container
+CoreGraphics	method	CGRect.init(x:y:width:height:)	7.0				container
+CoreGraphics	method	CGRect.init(x:y:width:height:)	7.0				container
+CoreGraphics	method	CGRect.init(x:y:width:height:)	7.0				container
+CoreGraphics	method	CGRect.init?(dictionaryRepresentation:)	7.0				container
+CoreGraphics	method	CGRect.divided(atDistance:from:)	7.0				container
+CoreGraphics	property	CGRect.slice	7.0				container
+CoreGraphics	property	CGRect.remainder	7.0				container
+CoreGraphics	property	CGRect.x	7.0			yes	container
+CoreGraphics	property	CGRect.y	7.0			yes	container
+CoreGraphics	property	CGRect.customMirror	7.0				container
+CoreGraphics	property	CGRect.customPlaygroundQuickLook	7.0	yes			container
+CoreGraphics	property	CGRect.debugDescription	7.0				container
+CoreGraphics	method	CGRect.==(lhs:rhs:)	7.0				container
+CoreGraphics	method	CGRect.hash(into:)	7.0				container
+CoreGraphics	property	CGRect.standard	7.0				container
+CoreGraphics	property	CGRect.hashValue	7.0				container
+CoreGraphics	property	CGRect.hasher	7.0				container
+CoreGraphics	method	CGRect.init(from:)	7.0				container
+CoreGraphics	method	CGRect.encode(to:)	7.0				container
+CoreGraphics	enum	CGPathFillRule	7.0				own
+CoreGraphics	constant	CGPathFillRule.winding	7.0				container
+CoreGraphics	constant	CGPathFillRule.evenOdd	7.0				container
+CoreGraphics	method	CGPathFillRule.init?(rawValue:)	7.0				container
+CoreGraphics	typealias	CGPathFillRule.RawValue	7.0				own
+CoreGraphics	property	CGPathFillRule.rawValue	7.0				container
+CoreGraphics	property	CGImagePixelFormatInfo.allCases	26.0				container
+CoreGraphics	typealias	CGImagePixelFormatInfo.AllCases	26.0				own
+CoreGraphics	property	CGImagePixelFormatInfo.debugDescription	12.0				container
+CoreGraphics	property	CGVector.zero	7.0				container
+CoreGraphics	method	CGVector.init(dx:dy:)	7.0				container
+CoreGraphics	method	CGVector.init(dx:dy:)	7.0				container
+CoreGraphics	method	CGVector.==(lhs:rhs:)	7.0				container
+CoreGraphics	method	CGVector.hash(into:)	7.0				container
+CoreGraphics	property	CGVector.hashValue	7.0				container
+CoreGraphics	property	CGVector.hasher	7.0				container
+CoreGraphics	property	CGVector.debugDescription	7.0				container
+CoreGraphics	method	CGVector.init(from:)	7.0				container
+CoreGraphics	method	CGVector.encode(to:)	7.0				container
+CoreGraphics	property	CGSize.zero	7.0				container
+CoreGraphics	method	CGSize.init(width:height:)	7.0				container
+CoreGraphics	method	CGSize.init(width:height:)	7.0				container
+CoreGraphics	method	CGSize.init?(dictionaryRepresentation:)	7.0				container
+CoreGraphics	property	CGSize.customMirror	7.0				container
+CoreGraphics	property	CGSize.customPlaygroundQuickLook	7.0	yes			container
+CoreGraphics	property	CGSize.debugDescription	7.0				container
+CoreGraphics	method	CGSize.==(lhs:rhs:)	7.0				container
+CoreGraphics	method	CGSize.hash(into:)	7.0				container
+CoreGraphics	property	CGSize.hashValue	7.0				container
+CoreGraphics	property	CGSize.hasher	7.0				container
+CoreGraphics	method	CGSize.init(from:)	7.0				container
+CoreGraphics	method	CGSize.encode(to:)	7.0				container
+CoreGraphics	property	CGAffineTransform.identity	7.0				container
+CoreGraphics	method	CGAffineTransform.init(from:)	7.0				container
+CoreGraphics	method	CGAffineTransform.encode(to:)	7.0				container
+CoreGraphics	method	CGAffineTransform.==(lhs:rhs:)	7.0				container
+CoreGraphics	method	CGAffineTransform.hash(into:)	7.0				container
+CoreGraphics	property	CGAffineTransform.hashValue	7.0				container
+CoreGraphics	property	CGAffineTransform.hasher	7.0				container
+CoreGraphics	method	CGPath.copy(dashingWithPhase:lengths:transform:)	7.0				container
+CoreGraphics	method	CGPath.copy(strokingWithWidth:lineCap:lineJoin:miterLimit:transform:)	7.0				container
+CoreGraphics	method	CGPath.contains(_:using:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addRoundedRect(in:cornerWidth:cornerHeight:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.move(to:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addLine(to:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addQuadCurve(to:control:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addCurve(to:control1:control2:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addRect(_:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addRects(_:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addLines(between:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addEllipse(in:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addRelativeArc(center:radius:startAngle:delta:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addArc(center:radius:startAngle:endAngle:clockwise:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addArc(tangent1End:tangent2End:radius:transform:)	7.0				container
+CoreGraphics	method	CGMutablePath.addPath(_:transform:)	7.0				container
+CoreGraphics	method	CGPath.union(_:using:)	16.0				container
+CoreGraphics	method	CGPath.intersection(_:using:)	16.0				container
+CoreGraphics	method	CGPath.subtracting(_:using:)	16.0				container
+CoreGraphics	method	CGPath.symmetricDifference(_:using:)	16.0				container
+CoreGraphics	method	CGPath.lineSubtracting(_:using:)	16.0				container
+CoreGraphics	method	CGPath.lineIntersection(_:using:)	16.0				container
+CoreGraphics	method	CGPath.normalized(using:)	16.0				container
+CoreGraphics	method	CGPath.flattened(threshold:)	16.0				container
+CoreGraphics	method	CGPath.intersects(_:using:)	16.0				container
+CoreGraphics	method	CGPath.componentsSeparated(using:)	16.0				container
+CoreGraphics	method	CGContext.setLineDash(phase:lengths:)	7.0				container
+CoreGraphics	method	CGContext.move(to:)	7.0				container
+CoreGraphics	method	CGContext.addLine(to:)	7.0				container
+CoreGraphics	method	CGContext.addCurve(to:control1:control2:)	7.0				container
+CoreGraphics	method	CGContext.addQuadCurve(to:control:)	7.0				container
+CoreGraphics	method	CGContext.addRects(_:)	7.0				container
+CoreGraphics	method	CGContext.addLines(between:)	7.0				container
+CoreGraphics	method	CGContext.addArc(center:radius:startAngle:endAngle:clockwise:)	7.0				container
+CoreGraphics	method	CGContext.addArc(tangent1End:tangent2End:radius:)	7.0				container
+CoreGraphics	method	CGContext.fillPath(using:)	7.0				container
+CoreGraphics	method	CGContext.clip(using:)	7.0				container
+CoreGraphics	method	CGContext.fill(_:)	7.0				container
+CoreGraphics	method	CGContext.strokeLineSegments(between:)	7.0				container
+CoreGraphics	method	CGContext.clip(to:)	7.0				container
+CoreGraphics	method	CGContext.draw(_:in:byTiling:)	7.0				container
+CoreGraphics	method	CGContext.draw(_:in:by:options:)	18.0				own
+CoreGraphics	property	CGContext.textPosition	7.0				container
+CoreGraphics	method	CGContext.showGlyphs(_:at:)	7.0				container
+CoreGraphics	method	CGContext.draw(_:in:)	7.0				container
+CoreGraphics	method	CGContext.draw(_:at:)	7.0				container
+CoreGraphics	struct	CGBitmapParameters	26.0				own
+CoreGraphics	method	CGBitmapParameters.subscript(dynamicMember:)	26.0				container
+CoreGraphics	method	CGBitmapParameters.subscript(dynamicMember:)	26.0				container
+CoreGraphics	property	CGBitmapParameters.colorSpace	26.0				container
+CoreGraphics	property	CGBitmapParameters.retainedNewValue	26.0				container
+CoreGraphics	protocol	_CGContextInit	26.0				own
+CoreGraphics	method	_CGContextInit.init?(width:height:auxiliaryInfo:onResolve:onAllocate:onRelease:onError:)	26.0				container
+CoreGraphics	method	_CGContextInit.init?(width:height:auxiliaryInfo:onResolve:)	26.0				container
+CoreGraphics	method	_CGContextInit.init?(width:height:auxiliaryInfo:onResolve:onAllocate:onRelease:onError:)	26.0				container
+CoreGraphics	method	_CGContextInit.init?(width:height:auxiliaryInfo:onResolve:)	26.0				container
+CoreGraphics	struct	CGContext.AuxiliaryInfo	26.0				container
+CoreGraphics	property	CGContext.AuxiliaryInfo.maximumBitDepth	26.0				container
+CoreGraphics	method	CGContext.AuxiliaryInfo.init()	26.0				container
+CoreGraphics	method	CGContext.AuxiliaryInfo.init(maximumBitDepth:)	26.0				container
+CoreGraphics	method	CGContext.AuxiliaryInfo.==(a:b:)	26.0				container
+CoreGraphics	method	CGContext.AuxiliaryInfo.hash(into:)	26.0				container
+CoreGraphics	property	CGContext.AuxiliaryInfo.hashValue	26.0				container
+CoreGraphics	property	CGContext.contentToneMappingInfo	26.0				container

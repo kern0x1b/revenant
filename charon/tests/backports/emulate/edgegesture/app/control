@@ -1,0 +1,7 @@
+Package: org.charon.edge-probe
+Name: Charon edge gesture probe
+Architecture: iphoneos-arm
+Description: One white window, to measure which gestures from the screen edges the release answers, launched through SpringBoard
+Maintainer: charon
+Author: charon
+Section: Development

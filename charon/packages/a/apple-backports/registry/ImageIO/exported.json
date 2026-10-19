@@ -1,0 +1,126 @@
+{
+  "framework": "ImageIO",
+  "entries": [
+    {
+      "api": "CGImageSourceCopyMetadataAtIndex()",
+      "kind": "function",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceDublinCore",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceExif",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceExifAux",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceIPTCCore",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespacePhotoshop",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceTIFF",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceXMPBasic",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageMetadataNamespaceXMPRights",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImagePropertyPNGCompressionFilter",
+      "kind": "constant",
+      "introduced": "5.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    },
+    {
+      "api": "kCGImageSourceSubsampleFactor",
+      "kind": "constant",
+      "introduced": "4.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every name the headers of ImageIO and CoreVideo date after iOS 6",
+      "facts": "facts/ImageIO/ImageIOExports.md"
+    }
+  ]
+}

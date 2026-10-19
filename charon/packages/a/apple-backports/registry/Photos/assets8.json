@@ -1,0 +1,266 @@
+{
+  "framework": "Photos",
+  "entries": [
+    {
+      "api": "PHObject",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class holds the identifier of an object; iOS 6 has no Photos database, so its objects are made from what ALAssetsLibrary gives",
+      "effect": "localIdentifier is an opaque string, and two objects of a class are equal when their identifiers are",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHPhotosErrorDomain",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the domain of the errors of a change; the SDK header attaches it to the API_AVAILABLE block of iOS 13 that redeclares PHChangeRequest, but the symbol itself is exported by the 8.0, 9.0, 11.0 and 12.0 dyld shared caches alike (checked against the cache ladder, not the header) - it shipped with PHPhotoLibrary in iOS 8, not with PHChangeRequest",
+      "effect": "the string PHPhotosErrorDomain, as the host's Photos has it, for the errors of the changes",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the 8.0, 9.0, 11.0 and 12.0 dyld shared caches, each exporting _PHPhotosErrorDomain; the header of iOS 16.4 for the declaration; the host's Photos for the string"
+    },
+    {
+      "api": "PHObjectPlaceholder",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the identifier of an asset that a change is creating is not known before it is written, so the placeholder holds a token and gives the address of the asset once it is made",
+      "effect": "localIdentifier is the token before the change is done and the address of the created asset after it",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHFetchOptions",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the options of a fetch are plain values, applied to the objects the library gives",
+      "effect": "predicate, sort descriptors and fetchLimit are applied to the result; includeAssetSourceTypes chooses the user library, the synced library and the photo stream; includeHiddenAssets changes nothing, as nothing is hidden; wantsIncrementalChangeDetails starts on, as in iOS 8",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHFetchResult",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a fetch result is the list of the objects of a fetch, and needs nothing of a database",
+      "effect": "the objects at the moment of the fetch, with the calls of NSArray in the header, fast enumeration and countOfAssetsWithMediaType:; it does not follow the library",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHAsset",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an asset is made from an ALAsset of the release, which has the same photo or video with fewer properties",
+      "effect": "image or video, pixel size, date, location and duration as the asset has them; not favorite, not hidden, no burst, no media subtypes and no modification date, which iOS 6 does not keep; edit operations are not allowed",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHCollection",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a collection is made from an ALAssetsGroup of the release",
+      "effect": "the albums of the release, which can hold assets and not collections; edit operations are not allowed",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHAssetCollection",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an asset collection is made from an ALAssetsGroup of the release, or is one of the smart albums that can be told from the assets",
+      "effect": "albums, synced events and faces, the synced library, the photo stream and, as smart albums, the camera roll and the videos, and the favorites, hidden and bursts, which are empty; the other smart albums of iOS 8 and the moments are not made",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHCollectionList",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a collection list is a folder of albums, and iOS 6 has none",
+      "effect": "every fetch of collection lists is empty",
+      "facts": "facts/Photos/Assets.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageRequestOptions",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the options of an image request are plain values",
+      "effect": "synchronous, resize mode, crop rectangle and content mode are honoured; the version, the delivery mode, the network access and the progress handler change nothing, as there is one version of an asset, it is all on the device, and the image comes at once",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHVideoRequestOptions",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the options of a video request are plain values",
+      "effect": "the version, the delivery mode, the network access and the progress handler change nothing, as there is one version of a video and it is on the device",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageManager",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an image is drawn from the thumbnail, the full-screen image or the full-resolution image of the ALAssetRepresentation of the asset, and a video is the address of its representation",
+      "effect": "requestImageForAsset:, requestImageDataForAsset:, requestImageDataAndOrientationForAsset:, cancelImageRequest:, requestAVAssetForVideo:, requestPlayerItemForVideo: and requestExportSessionForVideo: answer once, not degraded, with the request identifier in the info; live photos are absent",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHCachingImageManager",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "caching is a hint that changes no result, and the manager it is built on is complete",
+      "effect": "allowsCachingHighQualityImages is kept and the calls that start and stop caching keep no cache; the images are those of PHImageManager",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHAssetChangeRequest",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the change that iOS 6 can make is the addition of an image or a video to the saved photos",
+      "effect": "the three creation requests write to the saved photos and have a placeholder; a creation date and a location are written as image metadata; deleting, editing an asset, a favorite and a hidden asset fail the change with PHPhotosErrorChangeNotSupported; content editing is absent",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHAssetCollectionChangeRequest",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the album change iOS 6 can make through ALAssetsLibrary is creating a regular album and appending assets to one; nothing in the release lets an application rename, reorder, delete from, or delete an album",
+      "effect": "creationRequestForAssetCollectionWithTitle: and changeRequestForAssetCollection: (only for a regular album) are made; addAssets: takes a PHAsset or a PHObjectPlaceholder from a creation request of the same change block, made before or after the album request, and queues it to append once every creation of the block is written; placeholderForCreatedAssetCollection resolves the same way PHAssetChangeRequest's placeholder does; setTitle: on an existing album, insertAssets:atIndexes:, removeAssets:, removeAssetsAtIndexes:, replaceAssetsAtIndexes:withAssets:, moveAssetsAtIndexes:toIndex:, and +deleteAssetCollections: all fail the change with a reason, since ALAssetsLibrary has no operation for any of them",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; verified against this port's own PHAssetChangeRequest (facts/Photos/Changes.md) and ALAssetsLibrary's addAssetsGroupAlbumWithName:resultBlock:failureBlock: and -[ALAssetsGroup addAsset:], which are the only album-mutating operations the release exports; an album request made before the asset request of the same block, and the album found again, run on an iPad 2 running 6.1.3 with tests/backports/device/photosdata9.m on 2026-09-24, 34 checks, 0 failures (one, the replacement of a file already there, since dropped)"
+    },
+    {
+      "api": "PHChange",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "made for each ALAssetsLibraryChangedNotification and given to the observers; changeDetailsForFetchResult: runs the fetch again and answers nil when nothing it holds changed, changeDetailsForObject: reads the object again",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHObjectChangeDetails",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the object before and after the change; objectWasDeleted when it cannot be read again; assetContentChanged when the release named the asset among the updated ones",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHFetchResultChangeDetails",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the fetch before and after; removed indexes of the fetch before, inserted and changed of the fetch after; a change that reorders what both fetches hold, or a fetch whose options do not want incremental details, is told as not incremental; hasMoves is always NO",
+      "facts": "facts/Photos/Changes.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageManagerMaximumSize",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the size that asks for the largest image is a constant of the framework",
+      "effect": "-1 by -1, as the host's Photos has it",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageResultIsInCloudKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key of the info of an image request",
+      "effect": "a string equal to its name, as the host's Photos has it",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageResultIsDegradedKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key of the info of an image request",
+      "effect": "a string equal to its name, as the host's Photos has it",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageResultRequestIDKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key of the info of an image request",
+      "effect": "a string equal to its name, as the host's Photos has it",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageCancelledKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key of the info of an image request",
+      "effect": "a string equal to its name, as the host's Photos has it",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    },
+    {
+      "api": "PHImageErrorKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key of the info of an image request",
+      "effect": "a string equal to its name, as the host's Photos has it",
+      "facts": "facts/Photos/ImageManager.md",
+      "source": "the header of iOS 16.4 for the declarations; the host's Photos for the defaults, constants and exception text; an iPad 2 running 6.1.3 and the iOS 6.0 emulator for what ALAssetsLibrary gives and the release does not export"
+    }
+  ]
+}

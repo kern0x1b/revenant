@@ -1,0 +1,9 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_Photos_AppIntents	swift-class	c:objc(cs)PHAsset	-	PHAsset	-	-	-	ios=8	-	7460a291dcbfda09
+_Photos_AppIntents	swift-property	s:So7PHAssetC18_Photos_AppIntentsE25typeDisplayRepresentation0cD004TypefG0VvpZ	PHAsset	typeDisplayRepresentation	+	AppIntents.TypeDisplayRepresentation	-	-	-	653a95a98d58a40c
+_Photos_AppIntents	swift-property	s:So7PHAssetC18_Photos_AppIntentsE21displayRepresentation0cD007DisplayF0Vvp	PHAsset	displayRepresentation	-	AppIntents.DisplayRepresentation	-	-	-	e1c6f93970fd0ac4
+_Photos_AppIntents	swift-property	s:So7PHAssetC18_Photos_AppIntentsE28defaultResolverSpecification0cD005EmptyfG0VyA2bE12_IntentValueACyHCg_GvpZ	PHAsset	defaultResolverSpecification	+	AppIntents.EmptyResolverSpecification<Photos.PHAsset>	-	-	-	0a455047ae15fce5
+_Photos_AppIntents	swift-property	s:So7PHAssetC18_Photos_AppIntentsE20persistentIdentifierSSvpZ	PHAsset	persistentIdentifier	+	Swift.String	-	-	-	a4f626d1cb255f5f
+_Photos_AppIntents	swift-typealias	s:So7PHAssetC18_Photos_AppIntentsE13Specificationa	PHAsset	Specification	-	-	-	ios=26.4,macos=26.4,tvos=26.4,watchos=26.4	-	c3c7922a3af78902
+_Photos_AppIntents	swift-typealias	s:So7PHAssetC18_Photos_AppIntentsE13UnwrappedTypea	PHAsset	UnwrappedType	-	-	-	ios=26.4,macos=26.4,tvos=26.4,watchos=26.4	-	7f8113ab576bf22b
+_Photos_AppIntents	swift-typealias	s:So7PHAssetC18_Photos_AppIntentsE9ValueTypea	PHAsset	ValueType	-	-	-	ios=26.4,macos=26.4,tvos=26.4,watchos=26.4	-	16d0c2eda83309e4

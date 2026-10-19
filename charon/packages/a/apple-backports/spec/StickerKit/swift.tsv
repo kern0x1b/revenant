@@ -1,0 +1,11 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+StickerKit	swift-protocol	s:10StickerKit34AvatarEditorViewControllerDelegateP	-	AvatarEditorViewControllerDelegate	-	-	-	-	-	03ab244b3a8bc65b
+StickerKit	swift-method	s:10StickerKit34AvatarEditorViewControllerDelegateP06avatard6RemoteeF13ShouldDismissyyF	AvatarEditorViewControllerDelegate	avatarEditorRemoteViewControllerShouldDismiss()	-	()	-	-	-	97ce347b2e2ec75e
+StickerKit	swift-class	c:@M@StickerKit@objc(cs)AvatarEditorViewController	-	AvatarEditorViewController	-	-	-	-	-	0d4964b2ee2ee918
+StickerKit	swift-property	s:10StickerKit26AvatarEditorViewControllerC8delegateAA0cdeF8Delegate_pSgvp	AvatarEditorViewController	delegate	-	(any StickerKit.AvatarEditorViewControllerDelegate)?	-	-	-	f45c83d57e8b9eb0
+StickerKit	swift-method	c:@M@StickerKit@objc(cs)AvatarEditorViewController(im)viewDidLoad	AvatarEditorViewController	viewDidLoad()	-	()	-	-	-	7d315d9649f15779
+StickerKit	swift-method	c:@M@StickerKit@objc(cs)AvatarEditorViewController(im)viewWillAppear:	AvatarEditorViewController	viewWillAppear(_:)	-	()	Swift.Bool	-	-	4570562ed52e5fd2
+StickerKit	swift-method	c:@M@StickerKit@objc(cs)AvatarEditorViewController(im)initWithNibName:bundle:	AvatarEditorViewController	init(nibName:bundle:)	-	-	StickerKit.AvatarEditorViewController | Swift.String? | Foundation.Bundle?	-	-	3a636a8829cdcd96
+StickerKit	swift-method	c:@M@StickerKit@objc(cs)AvatarEditorViewController(im)initWithCoder:	AvatarEditorViewController	init(coder:)	-	-	StickerKit.AvatarEditorViewController? | Foundation.NSCoder	-	-	bba5f4eef7138ff7
+StickerKit	swift-class	c:objc(cs)PHLivePhotoView	-	PHLivePhotoView	-	-	-	ios=9.1	-	a7b94d2382f7fcae
+StickerKit	swift-property	c:@CM@StickerKit@@objc(cs)PHLivePhotoView(py)intrinsicContentSize	PHLivePhotoView	intrinsicContentSize	-	CoreFoundation.CGSize	-	-	-	243daba856cb3388

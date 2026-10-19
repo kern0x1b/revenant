@@ -1,0 +1,5 @@
+#define CharonHostUIContentSizeCategoryCompareToCategory UIContentSizeCategoryCompareToCategory
+#define CharonHostUIContentSizeCategoryIsAccessibilityCategory UIContentSizeCategoryIsAccessibilityCategory
+#define CharonHostUIFontTextStyleLargeTitle UIFontTextStyleLargeTitle
+#define main charon_main_contentsize
+#import "contentsize/differential.m"

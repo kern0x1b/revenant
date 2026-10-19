@@ -1,0 +1,1 @@
+    NSUInteger extent = _transpose ? (_rows < _columns ? _rows : _columns) : _rows;

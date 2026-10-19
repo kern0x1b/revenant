@@ -1,0 +1,60 @@
+{
+  "framework": "Security",
+  "entries": [
+    {
+      "api": "SecPolicyCreateRevocation()",
+      "kind": "function",
+      "introduced": "3.1.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/Security/SecurityExports.md"
+    },
+    {
+      "api": "kSecPropertyTypeError",
+      "kind": "constant",
+      "introduced": "3.1.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/Security/SecurityExports.md"
+    },
+    {
+      "api": "kSecPropertyTypeTitle",
+      "kind": "constant",
+      "introduced": "3.1.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/Security/SecurityExports.md"
+    },
+    {
+      "api": "SecCertificateCopyPublicKey()",
+      "kind": "function",
+      "introduced": "3.1.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/Security/SecurityExports.md"
+    },
+    {
+      "api": "SecCertificateCopySerialNumber()",
+      "kind": "function",
+      "introduced": "3.1.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/Security/SecurityExports.md"
+    }
+  ]
+}

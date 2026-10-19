@@ -1,0 +1,3 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	MSMessagesErrorDomain	-	MSMessagesErrorDomain	10.0	NSString *const	NS_AVAILABLE_IOS(10_0)	54a423dc26562f30	found	com.apple.messages.messagesapp-error	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	MSStickersErrorDomain	-	MSStickersErrorDomain	10.0	NSString *const	NS_AVAILABLE_IOS(10_0)	1a9c61f372f483b6	found	com.apple.messages.stickers-error	-	ios-26.2-cache (no host value)	-	exported	ns	-

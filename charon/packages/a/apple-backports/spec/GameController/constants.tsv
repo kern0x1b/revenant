@@ -1,0 +1,10 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	GCInputGripButton	-	GCInputGripButton	26.0	const GCInputButtonName	API_AVAILABLE(macos(26.0), ios(26.0), tvos(26.0), visionos(26.0))	df6e044651569bde	found	Grip	Grip	ios-26.2-cache	-	exported	ns	-
+constant	GCInputLeftBumper	-	GCInputLeftBumper	17.4	const GCInputButtonName	API_AVAILABLE(macos(14.4), ios(17.4), tvos(17.4), visionos(1.1))	7ffea2002b17912d	found	Left Bumper	Left Bumper	ios-26.2-cache	-	exported	ns	-
+constant	GCInputRightBumper	-	GCInputRightBumper	17.4	const GCInputButtonName	API_AVAILABLE(macos(14.4), ios(17.4), tvos(17.4), visionos(1.1))	98bbcbaaa99a2e6e	found	Right Bumper	Right Bumper	ios-26.2-cache	-	exported	ns	-
+constant	GCInputThumbstick	-	GCInputThumbstick	26.0	const GCInputDirectionPadName	API_AVAILABLE(macos(26.0), ios(26.0), tvos(26.0), visionos(26.0))	20991a3f15cf2820	found	Thumbstick	Thumbstick	ios-26.2-cache	-	exported	ns	-
+constant	GCInputThumbstickButton	-	GCInputThumbstickButton	26.0	const GCInputButtonName	API_AVAILABLE(macos(26.0), ios(26.0), tvos(26.0), visionos(26.0))	8a25ce649d760c8e	found	Thumbstick Button	Thumbstick Button	ios-26.2-cache	-	exported	ns	-
+constant	GCInputTrigger	-	GCInputTrigger	26.0	const GCInputButtonName	API_AVAILABLE(macos(26.0), ios(26.0), tvos(26.0), visionos(26.0))	292678f3067cb770	found	Trigger	Trigger	ios-26.2-cache	-	exported	ns	-
+constant	GCPoint2Zero	-	GCPoint2Zero	17.4	const GCPoint2	API_AVAILABLE(macos(14.3), ios(17.4), tvos(17.4), visionos(1.1))	bc1e2b1a0104628c	numeric	-	-	host-macos	-	exported	ns	-
+constant	GCProductCategoryArcadeStick	-	GCProductCategoryArcadeStick	17.0	NSString *const	API_AVAILABLE(macos(14.0), ios(17.0), tvos(17.0))	6c8defd0a66a0d28	found	Arcade Stick	Arcade Stick	ios-26.2-cache	-	exported	ns	-
+constant	GCProductCategorySpatialController	-	GCProductCategorySpatialController	26.0	NSString *const	API_AVAILABLE(macos(26.0), ios(26.0), tvos(26.0), visionos(26.0))	bcc304c7809e7d66	found	Spatial Controller	Spatial Controller	ios-26.2-cache	-	exported	ns	-

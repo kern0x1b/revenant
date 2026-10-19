@@ -1,0 +1,84 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)QLPreviewController	-			-	-	-	ios=4.0/-/-/0	-	82052abdeafabea0	-
+super	-	QLPreviewController	UIViewController		-	-	-	-	-	d27399bd5f81bb00	-
+method	c:objc(cs)QLPreviewController(cm)canPreviewItem:	-			BOOL	id<QLPreviewItem> item	-	ios=4.0/-/-/0	-	8f3055d9fd6bb493	-
+property	c:objc(cs)QLPreviewController(py)dataSource	-			id<QLPreviewControllerDataSource>	-	weak,nonatomic	ios=4.0/-/-/0	-	ad678825bfc2afe4	-
+method	c:objc(cs)QLPreviewController(im)reloadData	-			void	-	-	ios=4.0/-/-/0	-	91360260fcb897c1	-
+method	c:objc(cs)QLPreviewController(im)refreshCurrentPreviewItem	-			void	-	-	ios=4.0/-/-/0	-	821542fdb5949d37	-
+property	c:objc(cs)QLPreviewController(py)currentPreviewItemIndex	-			NSInteger	-	-	ios=4.0/-/-/0	-	5193ee7aafe92233	-
+property	c:objc(cs)QLPreviewController(py)currentPreviewItem	-			id<QLPreviewItem>	-	readonly	ios=4.0/-/-/0	-	c3e4b0cd2cdab4f3	-
+property	c:objc(cs)QLPreviewController(py)delegate	-			id<QLPreviewControllerDelegate>	-	weak,nonatomic	ios=4.0/-/-/0	-	b53b4adb2bb40918	-
+protocol	c:objc(pl)QLPreviewControllerDataSource	-			-	-	-	-	-	c6559d3f7c47554e	-
+method	c:objc(pl)QLPreviewControllerDataSource(im)numberOfPreviewItemsInPreviewController:	-			NSInteger	QLPreviewController * controller	-	-	-	85ae9b2ea1c3b508	-
+method	c:objc(pl)QLPreviewControllerDataSource(im)previewController:previewItemAtIndex:	-			id<QLPreviewItem>	QLPreviewController * controller | NSInteger index	-	-	-	e8a951d2e39463ca	-
+typedef	c:@T@QLPreviewItemEditingMode	-			enum QLPreviewItemEditingMode	-	-	-	-	d2086b5206b735f8	-
+enum	c:@E@QLPreviewItemEditingMode	-			NSInteger	-	-	ios=13.0/-/-/0	-	939ae01b5f17d1de	-
+enumconst	c:@E@QLPreviewItemEditingMode@QLPreviewItemEditingModeDisabled	QLPreviewItemEditingMode			-	-	-	ios=13.0/-/-/0	-	9ff1fb49dc013904	0
+enumconst	c:@E@QLPreviewItemEditingMode@QLPreviewItemEditingModeUpdateContents	QLPreviewItemEditingMode			-	-	-	ios=13.0/-/-/0	-	5d5f936c4945b976	1
+enumconst	c:@E@QLPreviewItemEditingMode@QLPreviewItemEditingModeCreateCopy	QLPreviewItemEditingMode			-	-	-	ios=13.0/-/-/0	-	b2f4587ab2dd7380	2
+protocol	c:objc(pl)QLPreviewControllerDelegate	-			-	-	-	-	-	f012725c051ce78e	-
+conforms	c:objc(pl)QLPreviewControllerDelegate	QLPreviewControllerDelegate	NSObject		-	-	-	-	-	84f2d8f808fbf24d	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewControllerWillDismiss:	-			void	QLPreviewController * controller	optional	-	-	aefb72d8e6d3f72f	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewControllerDidDismiss:	-			void	QLPreviewController * controller	optional	-	-	611cc8175cb56c51	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:shouldOpenURL:forPreviewItem:	-			BOOL	QLPreviewController * controller | NSURL * url | id<QLPreviewItem> item	optional	-	-	2847c1540b729b21	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:frameForPreviewItem:inSourceView:	-			CGRect	QLPreviewController * controller | id<QLPreviewItem> item | UIView * _Nullable * view	optional	-	-	34990f518c02d75b	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:transitionImageForPreviewItem:contentRect:	-			UIImage *	QLPreviewController * controller | id<QLPreviewItem> item | CGRect * contentRect	optional	-	-	48b0426e090fd171	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:transitionViewForPreviewItem:	-			UIView *	QLPreviewController * controller | id<QLPreviewItem> item	optional	ios=10.0/-/-/0	-	a44ac31e317ab04c	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:editingModeForPreviewItem:	-			QLPreviewItemEditingMode	QLPreviewController * controller | id<QLPreviewItem> previewItem	optional	ios=13.0/-/-/0	-	8fcae0c9e59b69c3	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:didUpdateContentsOfPreviewItem:	-			void	QLPreviewController * controller | id<QLPreviewItem> previewItem	optional	ios=13.0/-/-/0	-	bfc4c5e62f8bba14	-
+method	c:objc(pl)QLPreviewControllerDelegate(im)previewController:didSaveEditedCopyOfPreviewItem:atURL:	-			void	QLPreviewController * controller | id<QLPreviewItem> previewItem | NSURL * modifiedContentsURL	optional	ios=13.0/-/-/0	-	34e57e32c1803d85	-
+protocol	c:objc(pl)QLPreviewItem	-			-	-	-	-	-	df03985b5d544314	-
+conforms	c:objc(pl)QLPreviewItem	QLPreviewItem	NSObject		-	-	-	-	-	2a40860eef52785b	-
+property	c:objc(pl)QLPreviewItem(py)previewItemURL	-			NSURL *	-	readonly,nonatomic	-	-	f7c3f8e6023d7e33	-
+property	c:objc(pl)QLPreviewItem(py)previewItemTitle	-			NSString *	-	readonly,nonatomic	-	-	b639fcc575831662	-
+category	c:objc(cy)NSURL@QLPreviewConvenienceAdditions	-			-	-	-	-	-	25b457bc1c9d3b57	-
+conforms	c:objc(cy)NSURL@QLPreviewConvenienceAdditions	NSURL	QLPreviewItem		-	-	-	-	-	e1a8a3816a5e4805	-
+interface	c:objc(cs)ARQuickLookPreviewItem	-			-	-	-	ios=13.0/-/-/0	-	4350cca6c19f52ad	-
+super	-	ARQuickLookPreviewItem	NSObject		-	-	-	-	-	202e2c9bc73e012e	-
+conforms	c:objc(cs)ARQuickLookPreviewItem	ARQuickLookPreviewItem	QLPreviewItem		-	-	-	-	-	66fcca6f09e19ed8	-
+method	c:objc(cs)ARQuickLookPreviewItem(im)initWithFileAtURL:	-			instancetype	NSURL * url	-	ios=13.0/-/-/0	-	bd2d9a153598b6c0	-
+property	c:objc(cs)ARQuickLookPreviewItem(py)canonicalWebPageURL	-			NSURL *	-	strong,nonatomic	ios=13.0/-/-/0	-	20a4bab19995ce5b	-
+property	c:objc(cs)ARQuickLookPreviewItem(py)allowsContentScaling	-			BOOL	-	assign,nonatomic	ios=13.0/-/-/0	-	4190747e5cc5ad2c	-
+method	c:objc(cs)ARQuickLookPreviewItem(im)init	-			instancetype	-	-	*unavailable ios=13.0/-/-/0	-	b01e373120674cea	-
+method	c:objc(cs)ARQuickLookPreviewItem(cm)new	-			instancetype	-	-	*unavailable ios=13.0/-/-/0	-	86479f61a210d218	-
+protocol	c:objc(pl)QLPreviewingController	-			-	-	-	-	-	f25651d25771bd62	-
+conforms	c:objc(pl)QLPreviewingController	QLPreviewingController	NSObject		-	-	-	-	-	645f0da4f9b5bf9a	-
+method	c:objc(pl)QLPreviewingController(im)preparePreviewOfSearchableItemWithIdentifier:queryString:completionHandler:	-			void	NSString * identifier | NSString * queryString | void (^)(NSError * _Nullable) handler	optional	-	-	e462cfa38b91fc0a	-
+method	c:objc(pl)QLPreviewingController(im)preparePreviewOfFileAtURL:completionHandler:	-			void	NSURL * url | void (^)(NSError * _Nullable) handler	optional	-	-	839f3ec89ff3c974	-
+method	c:objc(pl)QLPreviewingController(im)providePreviewForFileRequest:completionHandler:	-			void	QLFilePreviewRequest * request | void (^)(QLPreviewReply * _Nullable, NSError * _Nullable) handler	optional	-	-	5c117b47752476ae	-
+interface	c:objc(cs)QLPreviewProvider	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5b0ec8d477d82747	-
+super	-	QLPreviewProvider	NSObject		-	-	-	-	-	6b46c9952cfdc1a4	-
+conforms	c:objc(cs)QLPreviewProvider	QLPreviewProvider	NSExtensionRequestHandling		-	-	-	-	-	400090742067ed6b	-
+interface	c:objc(cs)QLPreviewReplyAttachment	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	986a8abf87fea541	-
+super	-	QLPreviewReplyAttachment	NSObject		-	-	-	-	-	4d482705b4b981c1	-
+property	c:objc(cs)QLPreviewReplyAttachment(py)data	-			NSData *	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3aebdb53cd64178e	-
+property	c:objc(cs)QLPreviewReplyAttachment(py)contentType	-			UTType *	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	cbd872168aeeb745	-
+method	c:objc(cs)QLPreviewReplyAttachment(im)initWithData:contentType:	-			instancetype	NSData * data | UTType * contentType	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b5de381502457cb7	-
+interface	c:objc(cs)QLPreviewReply	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9ba1a4ddac912de3	-
+super	-	QLPreviewReply	NSObject		-	-	-	-	-	21618e29ad9bac0d	-
+property	c:objc(cs)QLPreviewReply(py)stringEncoding	-			NSStringEncoding	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2793f12e65802054	-
+property	c:objc(cs)QLPreviewReply(py)attachments	-			NSDictionary<NSString *,QLPreviewReplyAttachment *> *	-	copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	11552be45293c2bd	-
+property	c:objc(cs)QLPreviewReply(py)title	-			NSString *	-	copy	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e7bd90c0197dda34	-
+method	c:objc(cs)QLPreviewReply(im)initWithContextSize:isBitmap:drawingBlock:	-			instancetype	CGSize contextSize | BOOL isBitmap | BOOL (^)(CGContextRef _Nonnull, QLPreviewReply * _Nonnull, NSError * _Nullable * _Nullable) drawingBlock	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2d60e8df87e7301b	-
+method	c:objc(cs)QLPreviewReply(im)initWithFileURL:	-			instancetype	NSURL * fileURL	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	13a889e057081633	-
+method	c:objc(cs)QLPreviewReply(im)initWithDataOfContentType:contentSize:dataCreationBlock:	-			instancetype	UTType * contentType | CGSize contentSize | NSData * _Nullable (^)(QLPreviewReply * _Nonnull, NSError * _Nullable * _Nullable) dataCreationBlock	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d658b8333f28ace5	-
+category	c:objc(cy)QLPreviewReply@UI	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d25dc504ede2204a	-
+method	c:objc(cs)QLPreviewReply(im)initForPDFWithPageSize:documentCreationBlock:	UI			instancetype	CGSize defaultPageSize | PDFDocument * _Nullable (^)(QLPreviewReply * _Nonnull, NSError * _Nullable * _Nullable) documentCreationBlock	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	17f8e266e59e103f	-
+interface	c:objc(cs)QLFilePreviewRequest	-			-	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d116818dfef04e13	-
+super	-	QLFilePreviewRequest	NSObject		-	-	-	-	-	d8c86a96139c83d2	-
+property	c:objc(cs)QLFilePreviewRequest(py)fileURL	-			NSURL *	-	readonly	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a4e1c0e41f9cbd47	-
+interface	c:objc(cs)QLPreviewSceneOptions	-			-	-	-	ios=15.0/-/-/0,xros=-/-/-/1	-	59d13f37720ff43e	-
+super	-	QLPreviewSceneOptions	NSObject		-	-	-	-	-	3b21a05981e59adb	-
+property	c:objc(cs)QLPreviewSceneOptions(py)initialPreviewIndex	-			NSInteger	-	assign	ios=15.0/-/-/0,xros=-/-/-/1	-	4a23bbe28c7706ec	-
+interface	c:objc(cs)QLPreviewSceneActivationConfiguration	-			-	-	-	ios=15.0/-/-/0,xros=-/-/-/1	-	e4e960ae901850ea	-
+super	-	QLPreviewSceneActivationConfiguration	UIWindowSceneActivationConfiguration		-	-	-	-	-	6dc0f0b322ab464e	-
+method	c:objc(cs)QLPreviewSceneActivationConfiguration(im)initWithItemsAtURLs:options:	-			instancetype	NSArray<NSURL *> * urls | QLPreviewSceneOptions * options	-	ios=15.0/-/-/0,xros=-/-/-/1	-	6bc58d205beef1fb	-
+method	c:objc(cs)QLPreviewSceneActivationConfiguration(im)initWithUserActivity:	-			instancetype	NSUserActivity * userActivity	-	*unavailable ios=15.0/-/-/0,xros=-/-/-/1	-	5724e13fcf472d9c	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@CGRect	-			struct CGRect	-	-	-	-	57cc4af4879304a9	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSStringEncoding	-			NSUInteger	-	-	-	-	7b301d41b44ff889	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@CGContextRef	-			struct CGContext *	-	-	-	-	38108536e4326699	-

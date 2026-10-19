@@ -1,0 +1,28 @@
+chain counts: 1 2 3
+group create 0 count 3
+
+create: status 0 out non-null
+  its CFTypeID 79; is a CMFormatDescription 1, is a CFDictionary 0, is a CFData 0
+  CMFormatDescriptionGetMediaSubType on it answers 1952606066
+
+matches: same group 1
+matches: two entries 0
+matches: same shape, different buffers 1
+matches: NULL group 0
+matches: same entry sizes, different tags 0
+create from a NULL group: status 0 out non-null
+  and it is a CFTypeID 79, a CMFormatDescription 1, subtype 1952606066
+  and it matches the real group 0, matches NULL 0
+  released without an ASan report
+
+withExtensions NULL dict: status 0 out non-null matches 1
+withExtensions one key: status 0 out non-null matches 1
+
+sample buffer: status 0 out non-null
+  GetTaggedBufferGroup non-null  same pointer 1  count 3  matchesDesc 1
+  numSamples 1 isDataReady 1 pts 1/2 dur 2/1
+  through the group, video (in all three) NULL
+  through the group, gone (only the third) non-null index 2 is-made[2] 1
+  the same lookup straight on the group is-made[2] 1
+
+plain image sample buffer: GetTaggedBufferGroup NULL

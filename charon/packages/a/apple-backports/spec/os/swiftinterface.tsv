@@ -1,0 +1,467 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+os	function	os_log(_:dso:log:_:_:)	12.0				own
+os	function	os_log(_:dso:log:type:_:)	10.0				own
+os	property	OSLogType.info	10.0				own
+os	property	OSLogType.debug	10.0				own
+os	property	OSLogType.error	10.0				own
+os	property	OSLogType.fault	10.0				own
+os	property	OSLog.disabled	10.0				own
+os	method	OSLog.init(subsystem:category:)	10.0				own
+os	constant	OS_LOG_TYPE_DEFAULT				yes	none
+os	constant	OS_LOG_TYPE_INFO				yes	none
+os	constant	OS_LOG_TYPE_DEBUG				yes	none
+os	constant	OS_LOG_TYPE_ERROR				yes	none
+os	constant	OS_LOG_TYPE_FAULT				yes	none
+os	constant	add					none
+os	constant	subtract					none
+os	constant	set					none
+os	constant	reset					none
+os	function	os_signpost(_:dso:log:name:signpostID:)	12.0				own
+os	function	os_signpost(_:dso:log:name:signpostID:_:_:)	12.0				own
+os	enum	AnimationFormatString	14.0				own
+os	property	AnimationFormatString.s	14.0				container
+os	struct	AnimationFormatString.OSLogMessage	14.0				container
+os	method	AnimationFormatString.OSLogMessage.init(stringLiteral:)	14.0				container
+os	property	AnimationFormatString.OSLogMessage.message	14.0				container
+os	property	AnimationFormatString.OSLogMessage.formatString	14.0				container
+os	typealias	AnimationFormatString.OSLogMessage.ExtendedGraphemeClusterLiteralType	14.0				own
+os	typealias	AnimationFormatString.OSLogMessage.StringLiteralType	14.0				own
+os	typealias	AnimationFormatString.OSLogMessage.UnicodeScalarLiteralType	14.0				own
+os	enum	OSSignpostAnimationBegin	14.0				own
+os	constant	OSSignpostAnimationBegin.animationBegin	14.0				container
+os	method	OSSignpostAnimationBegin.==(a:b:)	14.0				container
+os	method	OSSignpostAnimationBegin.hash(into:)	14.0				container
+os	property	OSSignpostAnimationBegin.hashValue	14.0				container
+os	function	os_signpost(_:dso:log:name:signpostID:_:_:)	14.0				own
+os	function	os_signpost(_:dso:log:name:signpostID:)	14.0				own
+os	constant	formatStringPointer					none
+os	property	OSSignpostType.event	12.0				container
+os	property	OSSignpostType.begin	12.0				container
+os	property	OSSignpostType.end	12.0				container
+os	struct	OSSignpostID	12.0				own
+os	property	OSSignpostID.rawValue	12.0				container
+os	property	OSSignpostID.exclusive	12.0				container
+os	property	OSSignpostID.invalid	12.0				container
+os	property	OSSignpostID.null	12.0				container
+os	method	OSSignpostID.init(log:)	12.0				container
+os	method	OSSignpostID.init(log:object:)	12.0				container
+os	method	OSSignpostID.init(_:)	12.0				container
+os	method	OSSignpostID.<(a:b:)	12.0				container
+os	method	OSSignpostID.==(a:b:)	12.0				container
+os	struct	OSLog.Category	12.0				container
+os	property	OSLog.Category.rawValue	12.0				container
+os	property	OSLog.Category.pointsOfInterest	12.0				container
+os	method	OSLog.init(subsystem:category:)	12.0				container
+os	property	OSLog.signpostsEnabled	12.0				container
+os	property	OSLog.Category.dynamicTracing	13.0				container
+os	property	OSLog.Category.dynamicStackTracing	13.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:privacy:attributes:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:privacy:attributes:)	14.0				container
+os	struct	OSLogFloatFormatting	14.0				own
+os	constant	OSLogFloatFormatting.hex	14.0				container
+os	constant	OSLogFloatFormatting.fixed	14.0				container
+os	constant	OSLogFloatFormatting.exponential	14.0				container
+os	constant	OSLogFloatFormatting.hybrid	14.0				container
+os	property	OSLogFloatFormatting.fixed	14.0				container
+os	method	OSLogFloatFormatting.fixed(precision:explicitPositiveSign:uppercase:)	14.0				container
+os	method	OSLogFloatFormatting.fixed(explicitPositiveSign:uppercase:)	14.0				container
+os	property	OSLogFloatFormatting.hex	14.0				container
+os	method	OSLogFloatFormatting.hex(explicitPositiveSign:uppercase:)	14.0				container
+os	property	OSLogFloatFormatting.exponential	14.0				container
+os	method	OSLogFloatFormatting.exponential(precision:explicitPositiveSign:uppercase:)	14.0				container
+os	method	OSLogFloatFormatting.exponential(explicitPositiveSign:uppercase:)	14.0				container
+os	property	OSLogFloatFormatting.hybrid	14.0				container
+os	method	OSLogFloatFormatting.hybrid(precision:explicitPositiveSign:uppercase:)	14.0				container
+os	method	OSLogFloatFormatting.hybrid(explicitPositiveSign:uppercase:)	14.0				container
+os	constant	OSLogFloatFormatting.is	14.0				container
+os	constant	OSLogFloatFormatting.is	14.0				container
+os	property	OSLogFloatFormatting.specification	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:attributes:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:attributes:)	14.0				container
+os	property	OSLogInterpolation.argumentHeader	14.0				container
+os	property	OSLogInterpolation.byteCount	14.0				container
+os	constant	byteCount					none
+os	constant	dest					none
+os	struct	OSLogIntegerFormatting	14.0				own
+os	method	OSLogIntegerFormatting.decimal(explicitPositiveSign:minDigits:)	14.0				container
+os	method	OSLogIntegerFormatting.decimal(explicitPositiveSign:)	14.0				container
+os	property	OSLogIntegerFormatting.decimal	14.0				container
+os	method	OSLogIntegerFormatting.hex(explicitPositiveSign:includePrefix:uppercase:minDigits:)	14.0				container
+os	method	OSLogIntegerFormatting.hex(explicitPositiveSign:includePrefix:uppercase:)	14.0				container
+os	property	OSLogIntegerFormatting.hex	14.0				container
+os	method	OSLogIntegerFormatting.octal(explicitPositiveSign:includePrefix:uppercase:minDigits:)	14.0				container
+os	method	OSLogIntegerFormatting.octal(explicitPositiveSign:includePrefix:uppercase:)	14.0				container
+os	property	OSLogIntegerFormatting.octal	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	constant	OSLogIntegerFormatting.is	14.0				container
+os	property	OSLogIntegerFormatting.specification	14.0				container
+os	property	OSLogIntegerFormatting.newSpecification	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:align:privacy:attributes:)	14.0				container
+os	property	OSLogInterpolation.argumentHeader	14.0				container
+os	property	OSLogInterpolation.maskValue	14.0				container
+os	constant	byteCount					none
+os	constant	dest					none
+os	constant	maxOSLogArgumentCount	14.0				own
+os	struct	OSLogInterpolation	14.0				own
+os	constant	OSLogInterpolation.scalar	14.0				container
+os	constant	OSLogInterpolation.count	14.0				container
+os	constant	OSLogInterpolation.string	14.0				container
+os	constant	OSLogInterpolation.pointer	14.0				container
+os	constant	OSLogInterpolation.object	14.0				container
+os	constant	OSLogInterpolation.mask	14.0				container
+os	method	OSLogInterpolation.init(literalCapacity:interpolationCount:)	14.0				container
+os	method	OSLogInterpolation.appendLiteral(_:)	14.0				container
+os	property	OSLogInterpolation.preamble	14.0				container
+os	typealias	OSLogInterpolation.StringLiteralType	14.0				own
+os	struct	OSLogMessage	14.0				own
+os	property	OSLogMessage.interpolation	14.0				container
+os	method	OSLogMessage.init(stringInterpolation:)	14.0				container
+os	method	OSLogMessage.init(stringLiteral:)	14.0				container
+os	property	OSLogMessage.s	14.0				container
+os	property	OSLogMessage.bufferSize	14.0				container
+os	typealias	OSLogMessage.ExtendedGraphemeClusterLiteralType	14.0				own
+os	typealias	OSLogMessage.StringInterpolation	14.0				own
+os	typealias	OSLogMessage.StringLiteralType	14.0				own
+os	typealias	OSLogMessage.UnicodeScalarLiteralType	14.0				own
+os	constant	hasPrivacy					none
+os	constant	hasAttr					none
+os	constant	hasBoth					none
+os	constant	tagString					none
+os	method	OSLogInterpolation.appendInterpolation(_:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:privacy:attributes:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:privacy:attributes:)	14.0				container
+os	property	OSLogInterpolation.header	14.0				container
+os	property	OSLogInterpolation.byteCount	14.0				container
+os	property	OSLogInterpolation.specifier	14.0				container
+os	constant	byteCount					none
+os	constant	dest					none
+os	constant	objectAddress					none
+os	enum	OSLogPointerFormat	14.0				own
+os	constant	OSLogPointerFormat.ipv6Address	14.0				container
+os	constant	OSLogPointerFormat.timeval	14.0				container
+os	constant	OSLogPointerFormat.timespec	14.0				container
+os	constant	OSLogPointerFormat.uuid	14.0				container
+os	constant	OSLogPointerFormat.sockaddr	14.0				container
+os	constant	OSLogPointerFormat.none	14.0				container
+os	method	OSLogPointerFormat.==(a:b:)	14.0				container
+os	method	OSLogPointerFormat.hash(into:)	14.0				container
+os	property	OSLogPointerFormat.hashValue	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:privacy:attributes:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:bytes:format:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:bytes:format:privacy:attributes:)	14.0				container
+os	property	OSLogInterpolation.header	14.0				container
+os	property	OSLogInterpolation.byteCount	14.0				container
+os	property	OSLogInterpolation.hasFormat	14.0				container
+os	property	OSLogInterpolation.privacyAndAttr	14.0				container
+os	property	OSLogInterpolation.hasPrivacyAndAttr	14.0				container
+os	property	OSLogInterpolation.hasTag	14.0				container
+os	property	OSLogInterpolation.hasBoth	14.0				container
+os	property	OSLogInterpolation.specifier	14.0				container
+os	constant	byteCount					none
+os	constant	dest					none
+os	struct	OSLogPrivacy	14.0				own
+os	constant	OSLogPrivacy.sensitive	14.0				container
+os	constant	OSLogPrivacy.auto	14.0				container
+os	enum	OSLogPrivacy.Mask	14.0				container
+os	constant	OSLogPrivacy.Mask.hash	14.0				container
+os	constant	OSLogPrivacy.Mask.none	14.0				container
+os	constant	OSLogPrivacy.Mask._mailName	15.0				own
+os	constant	OSLogPrivacy.Mask._mailAddress	15.0				own
+os	constant	OSLogPrivacy.Mask._mailSubject	15.0				own
+os	constant	OSLogPrivacy.Mask._mailSummary	15.0				own
+os	constant	OSLogPrivacy.Mask._mailAccount	15.0				own
+os	constant	OSLogPrivacy.Mask._mailbox	15.0				own
+os	constant	OSLogPrivacy.Mask._mailboxPath	15.0				own
+os	constant	OSLogPrivacy.Mask._mailAttachmentFileName	15.0				own
+os	method	OSLogPrivacy.Mask.==(a:b:)	14.0				container
+os	method	OSLogPrivacy.Mask.hash(into:)	14.0				container
+os	property	OSLogPrivacy.Mask.hashValue	14.0				container
+os	enum	OSLogPrivacy._MailMask	15.0				own
+os	constant	OSLogPrivacy._MailMask.name	15.0				container
+os	constant	OSLogPrivacy._MailMask.address	15.0				container
+os	constant	OSLogPrivacy._MailMask.subject	15.0				container
+os	constant	OSLogPrivacy._MailMask.summary	15.0				container
+os	constant	OSLogPrivacy._MailMask.account	15.0				container
+os	constant	OSLogPrivacy._MailMask.mailbox	15.0				container
+os	constant	OSLogPrivacy._MailMask.mailboxPath	15.0				container
+os	constant	OSLogPrivacy._MailMask.attachmentFileName	15.0				container
+os	method	OSLogPrivacy._MailMask.==(a:b:)	15.0				container
+os	method	OSLogPrivacy._MailMask.hash(into:)	15.0				container
+os	property	OSLogPrivacy._MailMask.hashValue	15.0				container
+os	method	OSLogPrivacy.`(mask:)	14.0				container
+os	property	OSLogPrivacy.sensitive	14.0				container
+os	method	OSLogPrivacy.sensitive(mask:)	14.0				container
+os	property	OSLogPrivacy.auto	14.0				container
+os	method	OSLogPrivacy.auto(mask:)	14.0				container
+os	property	OSLogPrivacy.hasMask	14.0				container
+os	property	OSLogPrivacy.isAuto	14.0				container
+os	property	OSLogPrivacy.specifier	14.0				container
+os	enum	OSLogBoolFormat	14.0				own
+os	constant	OSLogBoolFormat.truth	14.0				container
+os	constant	OSLogBoolFormat.answer	14.0				container
+os	method	OSLogBoolFormat.==(a:b:)	14.0				container
+os	method	OSLogBoolFormat.hash(into:)	14.0				container
+os	property	OSLogBoolFormat.hashValue	14.0				container
+os	enum	OSLogInt32ExtendedFormat	14.0				own
+os	constant	OSLogInt32ExtendedFormat.ipv4Address	14.0				container
+os	constant	OSLogInt32ExtendedFormat.secondsSince1970	14.0				container
+os	constant	OSLogInt32ExtendedFormat.darwinErrno	14.0				container
+os	constant	OSLogInt32ExtendedFormat.darwinMode	14.0				container
+os	constant	OSLogInt32ExtendedFormat.darwinSignal	14.0				container
+os	constant	OSLogInt32ExtendedFormat.machErrno	14.0				container
+os	constant	OSLogInt32ExtendedFormat.bitrate	14.0				container
+os	constant	OSLogInt32ExtendedFormat.bitrateIEC	14.0				container
+os	constant	OSLogInt32ExtendedFormat.byteCount	15.0				own
+os	constant	OSLogInt32ExtendedFormat.byteCountIEC	15.0				own
+os	constant	OSLogInt32ExtendedFormat.truth	14.0				container
+os	constant	OSLogInt32ExtendedFormat.answer	14.0				container
+os	method	OSLogInt32ExtendedFormat.==(a:b:)	14.0				container
+os	method	OSLogInt32ExtendedFormat.hash(into:)	14.0				container
+os	property	OSLogInt32ExtendedFormat.hashValue	14.0				container
+os	enum	OSLogIntExtendedFormat	15.0				own
+os	constant	OSLogIntExtendedFormat.bitrate	15.0				container
+os	constant	OSLogIntExtendedFormat.bitrateIEC	15.0				container
+os	constant	OSLogIntExtendedFormat.byteCount	15.0				container
+os	constant	OSLogIntExtendedFormat.byteCountIEC	15.0				container
+os	constant	OSLogIntExtendedFormat.secondsSince1970	26.0				own
+os	method	OSLogIntExtendedFormat.==(a:b:)	15.0				container
+os	method	OSLogIntExtendedFormat.hash(into:)	15.0				container
+os	property	OSLogIntExtendedFormat.hashValue	15.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:privacy:attributes:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:format:privacy:attributes:)	15.0				own
+os	property	OSLogInterpolation.tag	14.0				container
+os	property	OSLogInterpolation.attrWithFormat	14.0				container
+os	property	OSLogInterpolation.specifier	14.0				container
+os	constant	start					none
+os	constant	end					none
+os	struct	OSLogStringAlignment	14.0				own
+os	property	OSLogStringAlignment.none	14.0				container
+os	method	OSLogStringAlignment.right(columns:)	14.0				container
+os	method	OSLogStringAlignment.left(columns:)	14.0				container
+os	struct	Logger	14.0				own
+os	method	Logger.init(subsystem:category:)	14.0				container
+os	method	Logger.init()	14.0				container
+os	method	Logger.init(_:)	14.0				container
+os	method	Logger.log(_:)	14.0				container
+os	method	Logger.log(level:_:)	14.0				container
+os	method	Logger.trace(_:)	14.0				container
+os	method	Logger.debug(_:)	14.0				container
+os	method	Logger.info(_:)	14.0				container
+os	method	Logger.notice(_:)	14.0				container
+os	method	Logger.warning(_:)	14.0				container
+os	method	Logger.error(_:)	14.0				container
+os	method	Logger.critical(_:)	14.0				container
+os	method	Logger.fault(_:)	14.0				container
+os	function	os_log(_:)	14.0				own
+os	function	os_log(_:log:_:)	14.0				own
+os	constant	formatString					none
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	bufferSize					none
+os	constant	objectCount					none
+os	constant	stringCount					none
+os	constant	uint32bufferSize					none
+os	constant	argumentClosures					none
+os	constant	formatStringPointer					none
+os	constant	bufferMemory					none
+os	constant	objectArguments					none
+os	constant	stringArgumentOwners					none
+os	constant	currentBufferPosition					none
+os	constant	objectArgumentsPosition					none
+os	constant	stringArgumentOwnersPosition					none
+os	function	_checkFormatStringAndBuffer(_:with:)	14.0				own
+os	constant	formatString					none
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	bufferSize					none
+os	constant	objectCount					none
+os	constant	stringCount					none
+os	constant	argumentClosures					none
+os	constant	bufferMemory					none
+os	constant	objectArguments					none
+os	constant	stringArgumentOwners					none
+os	constant	currentBufferPosition					none
+os	constant	objectArgumentsPosition					none
+os	constant	stringArgumentOwnersPosition					none
+os	method	OSLogInterpolation.appendInterpolation(_:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:align:privacy:attributes:)	14.0				container
+os	property	OSLogInterpolation.header	14.0				container
+os	property	OSLogInterpolation.byteCount	14.0				container
+os	property	OSLogInterpolation.specifier	14.0				container
+os	constant	stringPointer					none
+os	constant	byteCount					none
+os	constant	dest					none
+os	method	OSLogInterpolation.appendInterpolation(_:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:align:privacy:attributes:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:align:privacy:)	14.0				container
+os	method	OSLogInterpolation.appendInterpolation(_:align:privacy:attributes:)	14.0				container
+os	typealias	SignpostMetadata	15.0				own
+os	struct	OSSignposter	15.0				own
+os	property	OSSignposter.isEnabled	15.0				container
+os	property	OSSignposter.disabled	15.0				container
+os	method	OSSignposter.init(subsystem:category:)	15.0				container
+os	method	OSSignposter.init(subsystem:category:)	15.0				container
+os	method	OSSignposter.init()	15.0				container
+os	method	OSSignposter.init(logHandle:)	15.0				container
+os	method	OSSignposter.init(logger:)	15.0				container
+os	method	OSSignposter.emitEvent(_:id:_:)	15.0				container
+os	method	OSSignposter.emitEvent(_:id:)	15.0				container
+os	method	OSSignposter.beginInterval(_:id:_:)	15.0				container
+os	method	OSSignposter.beginInterval(_:id:)	15.0				container
+os	method	OSSignposter.beginAnimationInterval(_:id:)	15.0				container
+os	method	OSSignposter.beginAnimationInterval(_:id:_:)	15.0				container
+os	method	OSSignposter.endInterval(_:_:_:)	15.0				container
+os	method	OSSignposter.endInterval(_:_:)	15.0				container
+os	method	OSSignposter.withIntervalSignpost(_:id:_:around:)	15.0				container
+os	property	OSSignposter.formatString	15.0				container
+os	property	OSSignposter.preamble	15.0				container
+os	property	OSSignposter.argumentCount	15.0				container
+os	property	OSSignposter.bufferSize	15.0				container
+os	property	OSSignposter.objectCount	15.0				container
+os	property	OSSignposter.stringCount	15.0				container
+os	property	OSSignposter.argumentClosures	15.0				container
+os	property	OSSignposter.nameStringPointer	15.0				container
+os	property	OSSignposter.formatStringPointer	15.0				container
+os	method	OSSignposter.withIntervalSignpost(_:id:around:)	15.0				container
+os	property	OSSignposter.nameStringPointer	15.0				container
+os	property	OSSignposter.formatStringPointer	15.0				container
+os	method	OSSignposter.makeSignpostID()	15.0				container
+os	method	OSSignposter.makeSignpostID(from:)	15.0				container
+os	constant	doubleEnd					none
+os	constant	none					none
+os	class	OSSignpostIntervalState	15.0				own
+os	method	OSSignpostIntervalState.beginState(id:)	15.0				container
+os	method	OSSignpostIntervalState.init(from:)	15.0				container
+os	method	OSSignpostIntervalState.encode(to:)	15.0				container
+os	method	OSSignpostIntervalState._hasValue(id:isOpen:)	15.0				container
+os	constant	formatString					none
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	bufferSize					none
+os	constant	objectCount					none
+os	constant	stringCount					none
+os	constant	argumentClosures					none
+os	constant	newPreamble					none
+os	constant	newArgumentCount					none
+os	constant	nameStringPointer					none
+os	constant	formatStringPointer					none
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	nameStringPointer					none
+os	constant	formatStringPointer					none
+os	constant	uint32bufferSize					none
+os	constant	bufferMemory					none
+os	constant	objectArguments					none
+os	constant	stringArgumentOwners					none
+os	constant	currentBufferPosition					none
+os	constant	objectArgumentsPosition					none
+os	constant	stringArgumentOwnersPosition					none
+os	constant	result					none
+os	constant	result					none
+os	constant	formatStringPointer					none
+os	constant	s					none
+os	function	_checkSignpostFormatStringAndBuffer(_:state:with:)	15.0				own
+os	constant	formatString					none
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	bufferSize					none
+os	constant	objectCount					none
+os	constant	stringCount					none
+os	constant	argumentClosures					none
+os	constant	newPreamble					none
+os	constant	newArgumentCount					none
+os	constant	formatStringPointer					none
+os	constant	errorString					none
+os	constant	newFormatString					none
+os	function	_checkSignpostBufferNoMessage(state:with:)	15.0				own
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	formatStringPointer					none
+os	constant	errorString					none
+os	constant	newFormatString					none
+os	function	_checkAnimationSignpostFormatStringAndBuffer(_:state:with:)	15.0				own
+os	constant	formatString					none
+os	constant	preamble					none
+os	constant	argumentCount					none
+os	constant	bufferSize					none
+os	constant	objectCount					none
+os	constant	stringCount					none
+os	constant	argumentClosures					none
+os	constant	newPreamble					none
+os	constant	newArgumentCount					none
+os	constant	formatStringPointer					none
+os	constant	errorString					none
+os	constant	newFormatString					none
+os	method	os_workgroup.WorkGroup.copyPort()	14.0				container
+os	method	os_workgroup.WorkGroup.init?(port:name:)	14.0				container
+os	method	os_workgroup.WorkGroup.copy(name:)	14.0				own
+os	struct	os_workgroup.WorkGroup.JoinToken	14.0				container
+os	method	os_workgroup.WorkGroup.join()	14.0				own
+os	method	os_workgroup.WorkGroup.leave(token:)	14.0				own
+os	method	os_workgroup.WorkGroup.cancel()	14.0				own
+os	property	os_workgroup.WorkGroup.isCancelled	14.0				own
+os	property	os_workgroup.WorkGroup.maxParallelThreads	14.0				own
+os	method	os_workgroup.WorkGroup.setWorkingArena(arena:max_workers:destruct:)	14.0				own
+os	typealias	os_workgroup.WorkGroup.Index	14.0				container
+os	property	os_workgroup.WorkGroup.workingArena	14.0				own
+os	method	os_workgroup.WorkGroup.start(at:deadline:)	14.0				own
+os	method	os_workgroup.WorkGroup.updateDeadline(deadline:)	14.0				own
+os	method	os_workgroup.WorkGroup.finish()	14.0				own
+os	method	os_workgroup.WorkGroupParallel.init?(name:)	14.0				own
+os	struct	OSAllocatedUnfairLockFlags	18.0				own
+os	property	OSAllocatedUnfairLockFlags.rawValue	18.0				container
+os	method	OSAllocatedUnfairLockFlags.init(rawValue:)	18.0				container
+os	property	OSAllocatedUnfairLockFlags.adaptiveSpin	18.0				container
+os	typealias	OSAllocatedUnfairLockFlags.ArrayLiteralElement	18.0				own
+os	typealias	OSAllocatedUnfairLockFlags.Element	18.0				own
+os	typealias	OSAllocatedUnfairLockFlags.RawValue	18.0				own
+os	struct	OSAllocatedUnfairLock	16.0				own
+os	method	OSAllocatedUnfairLock.init(uncheckedState:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLockUnchecked(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLockUnchecked(flags:_:)	18.0				own
+os	method	OSAllocatedUnfairLock.withLock(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLock(flags:_:)	18.0				own
+os	method	OSAllocatedUnfairLock.withLockIfAvailableUnchecked(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLockIfAvailable(_:)	16.0				container
+os	enum	OSAllocatedUnfairLock.Ownership	16.0				container
+os	constant	OSAllocatedUnfairLock.Ownership.owner	16.0				container
+os	constant	OSAllocatedUnfairLock.Ownership.notOwner	16.0				container
+os	method	OSAllocatedUnfairLock.Ownership.==(a:b:)	16.0				container
+os	method	OSAllocatedUnfairLock.Ownership.hash(into:)	16.0				container
+os	property	OSAllocatedUnfairLock.Ownership.hashValue	16.0				container
+os	method	OSAllocatedUnfairLock.precondition(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.init()	16.0				container
+os	method	OSAllocatedUnfairLock.withLockUnchecked(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLockUnchecked(flags:_:)	18.0				own
+os	method	OSAllocatedUnfairLock.withLock(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLock(flags:_:)	18.0				own
+os	method	OSAllocatedUnfairLock.withLockIfAvailableUnchecked(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.withLockIfAvailable(_:)	16.0				container
+os	method	OSAllocatedUnfairLock.lock()	16.0				container
+os	method	OSAllocatedUnfairLock.lock(flags:)	18.0				own
+os	method	OSAllocatedUnfairLock.unlock()	16.0				container
+os	method	OSAllocatedUnfairLock.lockIfAvailable()	16.0				container
+os	method	OSAllocatedUnfairLock.init(initialState:)	16.0				container

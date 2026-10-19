@@ -1,0 +1,41 @@
+{
+  "framework": "UserNotifications",
+  "entries": [
+    {
+      "api": "+[UNNotificationCategory categoryWithIdentifier:actions:intentIdentifiers:hiddenPreviewsBodyPlaceholder:options:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UserNotifications/UNNotificationCategoryHiddenPreviews.md",
+      "source": "UserNotifications of the arm64 shared cache of iOS 12.0 (the factories at 0x18b344700 and 0x18b3448f0, the older factory at 0x18b344548, -isEqual: at 0x18b344ebc) and the host's UserNotifications under Mac Catalyst, tests/backports/host/usernotifications"
+    },
+    {
+      "api": "+[UNNotificationCategory categoryWithIdentifier:actions:intentIdentifiers:hiddenPreviewsBodyPlaceholder:categorySummaryFormat:options:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UserNotifications/UNNotificationCategoryHiddenPreviews.md",
+      "source": "UserNotifications of the arm64 shared cache of iOS 12.0 (the factories at 0x18b344700 and 0x18b3448f0, the older factory at 0x18b344548, -isEqual: at 0x18b344ebc) and the host's UserNotifications under Mac Catalyst, tests/backports/host/usernotifications"
+    },
+    {
+      "api": "UNNotificationCategory.hiddenPreviewsBodyPlaceholder",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UserNotifications/UNNotificationCategoryHiddenPreviews.md",
+      "source": "UserNotifications of the arm64 shared cache of iOS 12.0 (the factories at 0x18b344700 and 0x18b3448f0, the older factory at 0x18b344548, -isEqual: at 0x18b344ebc) and the host's UserNotifications under Mac Catalyst, tests/backports/host/usernotifications"
+    },
+    {
+      "api": "UNNotificationCategory.categorySummaryFormat",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UserNotifications/UNNotificationCategoryHiddenPreviews.md",
+      "source": "UserNotifications of the arm64 shared cache of iOS 12.0 (the factories at 0x18b344700 and 0x18b3448f0, the older factory at 0x18b344548, -isEqual: at 0x18b344ebc) and the host's UserNotifications under Mac Catalyst, tests/backports/host/usernotifications"
+    }
+  ]
+}

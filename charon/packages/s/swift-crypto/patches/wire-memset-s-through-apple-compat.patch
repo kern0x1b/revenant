@@ -1,0 +1,76 @@
+--- a/Sources/Crypto/Util/Zeroization.swift	2026-10-14 16:29:31
++++ b/Sources/Crypto/Util/Zeroization.swift	2026-10-14 16:29:31
+@@ -17,8 +17,10 @@
+ #else
+ #if canImport(FoundationEssentials)
+ import FoundationEssentials
++import CharonCompat
+ #else
+ import Foundation
++import CharonCompat
+ #endif
+ 
+ protocol Zeroization {
+@@ -29,27 +31,27 @@
+     /// Zeroizes the pointee
+     func zeroize() {
+         let size = MemoryLayout.size(ofValue: Pointee.self)
+-        memset_s(self, size, 0, size)
++        charon_memset_s(self, size, 0, size)
+     }
+ }
+ 
+ extension UnsafeMutableRawBufferPointer: Zeroization {
+     func zeroize() {
+-        memset_s(self.baseAddress!, self.count, 0, self.count)
++        charon_memset_s(self.baseAddress!, self.count, 0, self.count)
+     }
+ }
+ 
+ extension Array: Zeroization where Element == UInt8 {
+     /// Zeroizes the array
+     mutating func zeroize() {
+-        memset_s(&self, self.count, 0, self.count)
++        charon_memset_s(&self, self.count, 0, self.count)
+     }
+ }
+ 
+ extension Data: Zeroization {
+     internal mutating func zeroize() {
+         _ = self.withUnsafeMutableBytes {
+-            memset_s($0.baseAddress!, $0.count, 0, $0.count)
++            charon_memset_s($0.baseAddress!, $0.count, 0, $0.count)
+         }
+     }
+ }
+--- a/Sources/Crypto/Util/SecureBytes.swift	2026-10-14 16:29:31
++++ b/Sources/Crypto/Util/SecureBytes.swift	2026-10-14 16:29:31
+@@ -17,8 +17,10 @@
+ #else
+ #if canImport(FoundationEssentials)
+ import FoundationEssentials
++import CharonCompat
+ #else
+ import Foundation
++import CharonCompat
+ #endif
+ 
+ nonisolated(unsafe) private let emptyStorage:SecureBytes.Backing = SecureBytes.Backing.createEmpty()
+@@ -360,7 +362,7 @@
+             let bytesToClear = self.header.capacity
+ 
+             _ = self.withUnsafeMutablePointerToElements { elementsPtr in
+-                memset_s(elementsPtr, bytesToClear, 0, bytesToClear)
++                charon_memset_s(elementsPtr, bytesToClear, 0, bytesToClear)
+             }
+         }
+ 
+@@ -520,7 +522,7 @@
+ 
+         deinit {
+             // We always clear the whole capacity, even if we don't think we used it all.
+-            memset_s(storage.baseAddress!, storage.count, 0, storage.count)
++            charon_memset_s(storage.baseAddress!, storage.count, 0, storage.count)
+             storage.deallocate()
+         }
+ 

@@ -1,0 +1,29 @@
+{
+  "framework": "CoreMIDI",
+  "entries": [
+    {
+      "api": "MIDIClientCreateWithBlock()",
+      "kind": "function",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/CoreMIDI.md",
+      "source": "the header of iOS 16.4 for the contract (MIDIServices.h); the host macOS CoreMIDI for the NULL-block answer (tests/backports/host/coremidi/oracle/nullargs.m)"
+    },
+    {
+      "api": "MIDIInputPortCreateWithBlock()",
+      "kind": "function",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/CoreMIDI.md",
+      "source": "the header of iOS 16.4 for the contract (MIDIServices.h); the host macOS CoreMIDI for the NULL-block answer (tests/backports/host/coremidi/oracle/nullargs.m)"
+    },
+    {
+      "api": "MIDIDestinationCreateWithBlock()",
+      "kind": "function",
+      "introduced": "9.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/CoreMIDI.md",
+      "source": "the header of iOS 16.4 for the contract (MIDIServices.h); the host macOS CoreMIDI for the NULL-block answer (tests/backports/host/coremidi/oracle/nullargs.m)"
+    }
+  ]
+}

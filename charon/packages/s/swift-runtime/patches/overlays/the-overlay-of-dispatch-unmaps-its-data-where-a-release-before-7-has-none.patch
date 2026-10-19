@@ -1,0 +1,80 @@
+diff --git a/stdlib/public/Darwin/Dispatch/Data.swift b/stdlib/public/Darwin/Dispatch/Data.swift
+--- a/stdlib/public/Darwin/Dispatch/Data.swift
++++ b/stdlib/public/Darwin/Dispatch/Data.swift
+@@ -11,6 +11,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ @_implementationOnly import _SwiftDispatchOverlayShims
++import Darwin
+ 
+ public struct DispatchData : RandomAccessCollection, _ObjectiveCBridgeable {
+ 	public typealias Iterator = DispatchDataIterator
+@@ -29,10 +30,15 @@
+ 		/// A custom deallocator
+ 		case custom(DispatchQueue?, @convention(block) () -> Void)
+ 
+-		fileprivate var _deallocator: (DispatchQueue?, @convention(block) () -> Void) {
++		/// The release's own munmap destructor arrived in iOS 7. Before it the data object is given a destructor block that
++		/// unmaps the range it was made over, which is what the release's would have done with the same two words.
++		fileprivate func _deallocator(of bytes: UnsafeRawPointer, count: Int) -> (DispatchQueue?, @convention(block) () -> Void) {
+ 			switch self {
+ 			case .free: return (nil, _swift_dispatch_data_destructor_free())
+-			case .unmap: return (nil, _swift_dispatch_data_destructor_munmap())
++			case .unmap:
++				if let destructor = _swift_dispatch_data_destructor_munmap() { return (nil, destructor) }
++				let range = UnsafeMutableRawPointer(mutating: bytes)
++				return (nil, { _ = munmap(range, count) })
+ 			case .custom(let q, let b): return (q, b)
+ 			}
+ 		}
+@@ -68,9 +74,8 @@
+ 	/// - parameter deallocator: Specifies the mechanism to free the indicated buffer.
+ 	@available(swift, deprecated: 4, message: "Use init(bytesNoCopy: UnsafeRawBufferPointer, deallocater: Deallocator) instead")
+ 	public init(bytesNoCopy bytes: UnsafeBufferPointer<UInt8>, deallocator: Deallocator = .free) {
+-		let (q, b) = deallocator._deallocator
+ 		__wrapped = bytes.baseAddress == nil ? _swift_dispatch_data_empty()
+-				: _swift_dispatch_data_create(bytes.baseAddress!, bytes.count, q, b) as! __DispatchData
++				: DispatchData._create(bytes.baseAddress!, bytes.count, deallocator)
+ 	}
+ 
+ 	/// Initialize a `Data` without copying the bytes.
+@@ -79,11 +84,15 @@
+ 	/// - parameter count: The size of the bytes.
+ 	/// - parameter deallocator: Specifies the mechanism to free the indicated buffer.
+ 	public init(bytesNoCopy bytes: UnsafeRawBufferPointer, deallocator: Deallocator = .free) {
+-		let (q, b) = deallocator._deallocator
+ 		__wrapped = bytes.baseAddress == nil ? _swift_dispatch_data_empty()
+-				: _swift_dispatch_data_create(bytes.baseAddress!, bytes.count, q, b) as! __DispatchData
++				: DispatchData._create(bytes.baseAddress!, bytes.count, deallocator)
+ 	}
+ 
++	private static func _create(_ bytes: UnsafeRawPointer, _ count: Int, _ deallocator: Deallocator) -> __DispatchData {
++		let (q, b) = deallocator._deallocator(of: bytes, count: count)
++		return _swift_dispatch_data_create(bytes, count, q, b) as! __DispatchData
++	}
++
+ 	internal init(data: __DispatchData) {
+ 		__wrapped = data
+ 	}
+diff --git a/stdlib/public/SwiftShims/DispatchOverlayShims.h b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+--- a/stdlib/public/SwiftShims/DispatchOverlayShims.h
++++ b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+@@ -82,10 +82,17 @@
+   return _dispatch_data_destructor_free;
+ }
+ 
+-static inline __swift_shims_dispatch_block_t
++/* NULL where the release has no munmap destructor (before iOS 7); the overlay then makes its own. */
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++static inline __swift_shims_dispatch_block_t _Nullable
+ _swift_dispatch_data_destructor_munmap(void) {
++  if (&_dispatch_data_destructor_munmap == NULL) {
++    return NULL;
++  }
+   return _dispatch_data_destructor_munmap;
+ }
++#pragma clang diagnostic pop
+ 
+ #define SWIFT_DISPATCH_SOURCE_TYPE(t)                                          \
+   static inline dispatch_source_type_t _swift_dispatch_source_type_##t(void) { \

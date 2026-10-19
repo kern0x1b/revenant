@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLBlitCommandEncoder copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:options:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    }
+  ]
+}

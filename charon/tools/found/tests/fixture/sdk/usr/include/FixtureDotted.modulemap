@@ -1,0 +1,4 @@
+module FixtureDotted [system] {
+  header "FixtureDotted.h"
+  export *
+}

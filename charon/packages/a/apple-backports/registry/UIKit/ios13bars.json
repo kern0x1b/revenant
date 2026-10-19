@@ -1,0 +1,250 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIBarAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarAppearanceValues.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationBarAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarAppearanceValues.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIToolbarAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarAppearanceValues.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBarAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarAppearanceValues.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIBarButtonItemAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarButtonItemAppearance.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIBarButtonItemStateAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarButtonItemAppearance.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBarItemAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITabBarItemAppearance.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBarItemStateAppearance",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITabBarItemAppearance.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationBar.standardAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationBar.compactAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIToolbar.standardAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIToolbar.compactAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBar.standardAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationBar.scrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationBar.compactScrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIToolbar.scrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UIToolbar.compactScrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBar.scrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationItem.standardAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationItem.compactAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationItem.scrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationItem.compactScrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBarItem.standardAppearance",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UITabBarItem.scrollEdgeAppearance",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/BarAppearanceApplication.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27"
+    },
+    {
+      "api": "UINavigationBarAppearance.prominentButtonAppearance",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarAppearanceValues.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27; the property is the done button appearance under its newer name"
+    },
+    {
+      "api": "UIToolbarAppearance.prominentButtonAppearance",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIBarAppearanceValues.md",
+      "source": "UIKit of the host under Mac Catalyst, held against the backport by tests/backports/host/uikit2, and the public SDK headers of iOS 13 to 27; the property is the done button appearance under its newer name"
+    },
+    {
+      "api": "UIBarAppearance.overrideUserInterfaceStyle",
+      "kind": "property",
+      "introduced": "27.0",
+      "status": "owed",
+      "reason": "owed: coordination/api-queue.md names this row, under 'UIKit 26.x - two rows owed because the surface predates them'. A 27.0 name cannot appear in the SDK 26.2 SURFACE by construction - the surface predates it - so there is no declaration in the tree to read the signature from, and carrying the property on a remembered signature would be a guess with a symbol on it. What closes it is a newer surface that declares the row, not a different implementation",
+      "effect": "NOT implemented while the row is owed: the accessor is not declared, so respondsToSelector: answers NO and an unchecked call raises - which is the same position an `absent` row is in, and the difference is why this one is owed rather than absent: the RELEASE carries the name and the PORT could carry it, so this is the port's own debt and not a gap in the release",
+      "source": "SDK 26.2 surface, UIKit (via=own); the band's object compiled for armv7-apple-ios6.1.3 and read with otool -v -s __TEXT __objc_classname and __objc_methname, which is the count the registry check makes",
+      "minimum": "6.0",
+      "facts": "facts/UIKit/UIContentUnavailable26.md"
+    }
+  ]
+}

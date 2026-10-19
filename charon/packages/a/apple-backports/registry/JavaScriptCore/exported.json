@@ -1,0 +1,148 @@
+{
+  "framework": "JavaScriptCore",
+  "entries": [
+    {
+      "api": "JSContextGetGlobalContext()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSContextGetGroup()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSContextGroupCreate()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSContextGroupRelease()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSContextGroupRetain()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSGlobalContextCreate()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSGlobalContextCreateInGroup()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSObjectMakeArray()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSObjectMakeDate()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSObjectMakeError()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSObjectMakeRegExp()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSValueCreateJSONString()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    },
+    {
+      "api": "JSValueMakeFromJSONString()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release exports it itself, so there is nothing to carry: it is the release's own and it is here to say so",
+      "effect": "the symbol is the release's own and does what it does there; it was not compared with a newer release",
+      "source": "an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym for every constant and function of the frameworks' headers that the SDK dates after iOS 6, after every framework of the release was loaded",
+      "facts": "facts/JavaScriptCore/JavaScriptCoreExports.md"
+    }
+  ]
+}

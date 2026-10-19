@@ -1,0 +1,4 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+SHSessionDelegate	15.0	sdk16 body		NSObject	-	-	-	-	-	-
+SHSessionDelegate	15.0	sdk16 body		NSObject	optional	method	yes	session:didFindMatch:	- (void)session:(SHSession * _Nonnull)session didFindMatch:(SHMatch * _Nonnull)match;	yes
+SHSessionDelegate	15.0	sdk16 body		NSObject	optional	method	yes	session:didNotFindMatchForSignature:error:	- (void)session:(SHSession * _Nonnull)session didNotFindMatchForSignature:(SHSignature * _Nonnull)signature error:(NSError * _Nullable)error;	yes

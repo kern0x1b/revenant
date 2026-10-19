@@ -1,0 +1,38 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UIInputView initWithFrame:inputViewStyle:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIInputView is a private class with no style and no self sizing",
+      "effect": "makes the view as -initWithFrame: does and keeps the style; the release draws nothing of a style, so a keyboard style looks as the default one does",
+      "facts": "facts/UIKit/UIInputView.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/inputview; the header of SDK 16.4"
+    },
+    {
+      "api": "UIInputView.inputViewStyle",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIInputView is a private class with no style and no self sizing",
+      "effect": "answers the style the view was made with, 0 for a view made any other way, and the value it was given whatever it is",
+      "facts": "facts/UIKit/UIInputView.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/inputview; the header of SDK 16.4"
+    },
+    {
+      "api": "UIInputView.allowsSelfSizing",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's UIInputView is a private class with no style and no self sizing",
+      "effect": "kept and read back; NO at first; nothing on the release sizes a view from its own constraints for the keyboard, so it changes nothing",
+      "facts": "facts/UIKit/UIInputView.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/inputview; the header of SDK 16.4"
+    }
+  ]
+}

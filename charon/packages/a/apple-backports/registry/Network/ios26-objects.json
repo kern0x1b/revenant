@@ -1,0 +1,55 @@
+{
+  "framework": "Network",
+  "entries": [
+    {
+      "api": "kNWErrorDomainWiFiAware",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the CoreFoundation error domain of a Wi-Fi Aware error, which is what an nw_error_t of that domain is over",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), a program printing what each exported symbol holds: NSPOSIXErrorDomain, kNWErrorDomainDNS, NSOSStatusErrorDomain, kNWErrorDomainWiFiAware and UINT32_MAX (4294967295) - measured, and written down in facts/Network/NWObjects.md"
+    },
+    {
+      "api": "nw_parameters_get_allow_ultra_constrained()",
+      "kind": "function",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether a connection of these parameters may go over an ultra-constrained network",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_parameters_set_allow_ultra_constrained()",
+      "kind": "function",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether a connection of these parameters may go over an ultra-constrained network",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework (macOS 27.0, build 26A428), asked the same question of the port's implementation compiled beside it with its names changed, and the two answers compared (tests/backports/host/network-objects, 188 checks)"
+    },
+    {
+      "api": "nw_path_get_link_quality()",
+      "kind": "function",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "how good the link under the path is, which this release cannot measure",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the port's own check in tests/backports/host/network-objects (189 checks): the release the port builds for has no way to ask its link a question, so every path answers 'no measurement available' and the host's own answer (20, moderate, for its wired link) is a different machine's link rather than a measurement to compare with (facts/Network/NWPath.md)"
+    },
+    {
+      "api": "nw_path_is_ultra_constrained()",
+      "kind": "function",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether the path is an ultra-constrained network, which this release does not have",
+      "facts": "facts/Network/NWObjects.md",
+      "source": "the host's own Network.framework asked the same question of a real path of the port's own monitor, both monitors started and both paths read (tests/backports/host/network-objects, 189 checks; the gateways' enumeration is the port's own shape because what each side can name is its own network - facts/Network/NWPath.md)"
+    }
+  ]
+}

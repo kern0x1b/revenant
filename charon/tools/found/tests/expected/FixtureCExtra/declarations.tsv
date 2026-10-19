@@ -1,0 +1,2 @@
+#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@fc_extra	-			void (void)	-	-	-	-	b9fbb5950ad72396	-

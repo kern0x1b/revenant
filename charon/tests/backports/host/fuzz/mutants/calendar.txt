@@ -1,0 +1,15 @@
+a later day ordered before	NSCalendar+Components.m	s/return two < from \? NSOrderedDescending : NSOrderedAscending;/return two < from ? NSOrderedAscending : NSOrderedDescending;/
+nanoseconds added as microseconds	NSCalendar+Components.m	s/return \[date dateByAddingTimeInterval:value \/ 1000000000\.0\];/return [date dateByAddingTimeInterval:value \/ 1000000.0];/
+the calendar and time zone components answered as undefined	NSCalendar+Components.m	s/if \(unit == NSCalendarUnitCalendar \|\| unit == NSCalendarUnitTimeZone\)\n(\s*)return 0;/if (unit == NSCalendarUnitCalendar || unit == NSCalendarUnitTimeZone)\n$1return NSDateComponentUndefined;/
+the nanoseconds of a date by era dropped	NSCalendar+Components.m	s/return nanosecondValue && date \? \[date dateByAddingTimeInterval:nanosecondValue \/ 1000000000\.0\] : date;/return date;/
+the nanoseconds of a date by week dropped	NSCalendar+Components.m	s/(components\.weekday = weekdayValue;.*?)return nanosecondValue && date \? \[date dateByAddingTimeInterval:nanosecondValue \/ 1000000000\.0\] : date;/$1return date;/s
+the start of the day taken as the start of the hour	NSCalendar+Components.m	s/return charon_start_of_unit\(self, NSCalendarUnitDay, date, &supported\);/return charon_start_of_unit(self, NSCalendarUnitHour, date, \&supported);/
+components in the calendar's own time zone	NSCalendar+Components.m	s/calendar\.timeZone = timezone;/(void)timezone;/
+an hour out of range set	NSCalendar+Components.m	s/if \(!NSLocationInRange\(h, \[self maximumRangeOfUnit:NSCalendarUnitHour\]\) \|\| /if (/
+a component that differs still matched	NSCalendar+Components.m	s/(candidates\[index\]\) != charon_calendar_value\(found, candidates\[index\]\)\)\n\s*)return NO;/$1continue;/
+components between dates counted backwards	NSCalendar+Components.m	s/fromDate:start toDate:finish options:options\]/fromDate:finish toDate:start options:options]/
+a component that differs still valid	NSDateComponents+Validation.m	s/(candidates\[index\]\) != charon_calendar_value\(found, candidates\[index\]\)\)\n\s*)return NO;/$1continue;/
+a date of no calendar valid	NSDateComponents+Validation.m	s/return self\.calendar && charon_components_valid/return !self.calendar || charon_components_valid/
+a backwards weekend search starting at the date	NSCalendar+Weekend.m	s/cursor = \[\(startOfDay \? startOfDay : date\) dateByAddingTimeInterval:-1\];/cursor = date;/
+a weekend under way taken as the next	NSCalendar+Weekend.m	s/if \(backwards \|\| \[start compare:date\] == NSOrderedDescending\)/if (YES)/
+a weekend one second longer	NSCalendar+Weekend.m	s/\*interval = \[finish timeIntervalSinceDate:start\];/*interval = [finish timeIntervalSinceDate:start] + 1;/

@@ -1,0 +1,104 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVAssetExportPresetHEVC7680x4320",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string AVAssetExportPresetHEVC7680x4320, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVAssetWriterInputMediaDataLocationSparselyInterleavedWithMainMediaData",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string AVAssetWriterInputMediaDataLocationSparselyInterleavedWithMainMediaData, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVMediaTypeAuxiliaryPicture",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string auxv, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVMetadataObjectTypeCatHead",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string catHead, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVMetadataObjectTypeDogHead",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string dogHead, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVOutputSettingsPresetHEVC7680x4320",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string AVOutputSettingsPresetHEVC7680x4320, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVSampleBufferVideoRendererDidFailToDecodeNotification",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string AVSampleBufferVideoRendererDidFailToDecodeNotification, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVSampleBufferVideoRendererDidFailToDecodeNotificationErrorKey",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string AVSampleBufferVideoRendererDidFailToDecodeNotificationErrorKey, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    },
+    {
+      "api": "AVSampleBufferVideoRendererRequiresFlushToResumeDecodingDidChangeNotification",
+      "kind": "constant",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port's minimum release does not export the name; it is carried with the text Apple's own framework gives it, so that an application that names it loads instead of failing on a missing symbol",
+      "effect": "the string AVSampleBufferVideoRendererRequiresFlushToResumeDecodingDidChangeNotification, carried with the text the newer release gives it; nothing of iOS 6.1.3 produces it, and where an application hands it to the release - a preset name, a metadata key or key space, a media type, a notification name - the release compares it against the strings it knows and answers as it answers for any string it has not heard of",
+      "facts": "facts/AVFoundation/Globals.md",
+      "source": "this machine's own AVFoundation, in one binary with the port's own definitions renamed: tests/backports/host/avf-globals/run.sh reads Apple's symbol under the bare name and the port's under a charon_host_ prefix and compares the two, with a planted value and a clean control around it (macOS 27.0 build 26A428); read a second time from the shared cache of the iOS release that exports the name, read with tools/corpus/cache-value.lua as the value its exported symbol holds, which agrees on this name; and coordination/corpus/ledger/constant-values-AVFoundation.tsv, which holds the same measurement for this name on the same build; the release this object is placed in is the one that first EXPORTS the name, measured with tools/symbol-first-release.lua over the held cache ladder: 16.0, not the header's API_AVAILABLE"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+RelevanceKit	method	RelevantContext.date(_:kind:)	26.0				container
+RelevanceKit	method	RelevantContext.date(interval:kind:)	26.0				container
+RelevanceKit	method	RelevantContext.date(range:kind:)	26.0				container
+RelevanceKit	struct	RelevantContext.DateKind	26.0				container
+RelevanceKit	property	RelevantContext.DateKind.informational	26.0				container
+RelevanceKit	property	RelevantContext.DateKind.scheduled	26.0				container
+RelevanceKit	struct	RelevantContext	17.0				own
+RelevanceKit	method	RelevantContext.date(_:)	17.0				container
+RelevanceKit	method	RelevantContext.date(from:to:)	17.0	26.0			own
+RelevanceKit	method	RelevantContext.location(_:)	17.0				own
+RelevanceKit	method	RelevantContext.location(inferred:)	17.0				container
+RelevanceKit	struct	RelevantContext.InferredLocation	17.0				container
+RelevanceKit	property	RelevantContext.InferredLocation.home	17.0				container
+RelevanceKit	property	RelevantContext.InferredLocation.work	17.0				container
+RelevanceKit	property	RelevantContext.InferredLocation.school	17.0				container
+RelevanceKit	property	RelevantContext.InferredLocation.commute	17.0				container
+RelevanceKit	method	RelevantContext.sleep(_:)	17.0				container
+RelevanceKit	struct	RelevantContext.SleepCondition	17.0				container
+RelevanceKit	property	RelevantContext.SleepCondition.wakeup	17.0				container
+RelevanceKit	property	RelevantContext.SleepCondition.bedtime	17.0				container
+RelevanceKit	method	RelevantContext.fitness(_:)	17.0				container
+RelevanceKit	struct	RelevantContext.FitnessCondition	17.0				container
+RelevanceKit	property	RelevantContext.FitnessCondition.workoutActive	17.0				container
+RelevanceKit	property	RelevantContext.FitnessCondition.activityRingsIncomplete	17.0				container
+RelevanceKit	method	RelevantContext.hardware(headphones:)	17.0				container
+RelevanceKit	struct	RelevantContext.HeadphonesCondition	17.0				container
+RelevanceKit	property	RelevantContext.HeadphonesCondition.connected	17.0				container

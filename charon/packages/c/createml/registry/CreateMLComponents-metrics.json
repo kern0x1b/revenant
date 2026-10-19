@@ -1,0 +1,115 @@
+{
+    "framework": "CreateMLComponents",
+    "entries": [
+        {
+            "api": "ClassificationMetrics",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "a classifier's quality, counted incrementally: a caller fills it row by row as a model predicts, so the counts are the state and every score is read from them. Per label it holds the true count, the predicted count and the true positives; the other three counts are derived from those, and trueNegativeCount is n - tp - fp - fn in that order",
+            "effect": "the example count, the labels, the accuracy, and the per-label counts and scores",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "the SDK 26.2 CreateMLComponents.swiftinterface; the true-negative order and the host's own numbers are in the facts"
+        },
+        {
+            "api": "ClassificationMetrics.trueNegativeCount",
+            "kind": "property",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "n - tp - fp - fn, and the order is the whole of it: a row that was predicted as the label and was not it is a FALSE POSITIVE, not a true negative, so it comes off before the false negatives. The first version read n - count(label:) - fn and then subtracted the false positives, which double-counts the false negatives; the host's numbers caught it",
+            "effect": "the rows that are none of the three other things for that label",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "measured against the host: 6, 3, 4, 7 for bird, cat, dog, fox on eight rows"
+        },
+        {
+            "api": "ClassificationMetrics.count",
+            "kind": "property",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "how many rows were PREDICTED as the label, and here the port DIVERGES from the host deliberately: the host answers 0 for every label on a table where three rows were predicted as cat and three as dog, while its precisionScore and recallScore are right and are not built on this counter. The port answers the real number, because a port that agreed with the host here would be wrong about a caller's model",
+            "effect": "the real predicted count",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "the divergence is measured and recorded in the facts; every other count agrees with the host exactly"
+        },
+        {
+            "api": "ClassificationMetrics.f1Score",
+            "kind": "property",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the HARMONIC mean of precision and recall, not the arithmetic one: a model with a precision of 1 and a recall of 0.01 has an arithmetic mean of 0.505 and a harmonic mean of 0.02, and the first is a lie about a model that finds almost nothing",
+            "effect": "the harmonic mean of the two scores, or 0 when both are 0",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "the definitions are in the facts and the test separates the signed mean from the mean absolute error on purpose"
+        },
+        {
+            "api": "MultiLabelClassificationMetrics",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "a classifier's quality when the classes are not exclusive: both sides of a row are SETS of labels, so every count is per label and per row and there is no single the answer. The score that means anything is the exact-match one - a model that finds two of three labels has found none of the row",
+            "effect": "the counts and scores per label, and the exact-match count and score",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "the SDK 26.2 CreateMLComponents.swiftinterface; the exact-match rule is in the facts"
+        },
+        {
+            "api": "MultiLabelClassificationMetrics.exactMatchScore",
+            "kind": "property",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the share of rows the model got ENTIRELY right: every label found AND none invented. A partial match is not a partial credit, it is a row the caller would throw away",
+            "effect": "the share of exactly-right rows",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "checked on a three-row table where one row is a partial match and is not counted"
+        },
+        {
+            "api": "RegressionMetrics",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the error measures a regression is read by, as free functions over two columns of the same length - which is how a caller has them, a table of predictions beside a table of targets. Every one of them PRECONDITIONS that the two are the same length: a zip of two columns of different lengths silently reports the metrics of the shorter one",
+            "effect": "the six measures, and nil-free NaN for an empty pair",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "the SDK 26.2 CreateMLComponents.swiftinterface; the length rule and the zero-target case are in the facts"
+        },
+        {
+            "api": "RegressionMetrics.meanAbsoluteError",
+            "kind": "property",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the mean of the ABSOLUTE errors. A mean of signed errors that over- and under-predicts equally is meanError and not this, and the first version of this one averaged signed errors and answered -0.25 where the answer is 2.25",
+            "effect": "the mean of the absolute errors",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "caught by the closed form in tests/backports/host/createml/metrics"
+        },
+        {
+            "api": "ClassificationMetrics.makeConfusionMatrix",
+            "kind": "method",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the matrix as the framework's own MLShapedArray<Float>: a row per label AS THE ANSWER, a column per label AS THE PREDICTION, and the cell the count of the rows that landed there. The labels are ordered by their printed names so two matrices are comparable, and the off-diagonal cells are derived from the remembered (predicted, answer) pairs rather than from the three count dictionaries: `predicted - hits` is how many rows were predicted as a label and were not it, which does not say WHICH answer they had, and a matrix with the right numbers in the wrong cells is worse than no matrix",
+            "effect": "MLShapedArray<Float>, a row per answer and a column per prediction",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "the SDK 26.2 CreateMLComponents.swiftinterface, whose signature returns MLShapedArray<Float>; the cells are compared against the host's own matrix in tests/backports/host/createml/metrics, 86 checks"
+        },
+        {
+            "api": "ClassificationMetrics.makeConfusionMatrixRows",
+            "kind": "method",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the same numbers in the same order as plain nested arrays, for a caller that has no CoreML to hand. It is NOT the framework's return type and the registry does not claim it is: the framework's method is makeConfusionMatrix() and it answers MLShapedArray<Float>. This exists so the metrics can be read without importing CoreML, and the test checks the two agree cell for cell so it cannot drift",
+            "effect": "[[Int]], the same cells as the shaped array",
+            "facts": "facts/CreateMLComponents/Metrics.md",
+            "source": "this port's; the agreement with the shaped array is checked by tests/backports/host/createml/metrics, 86 checks"
+        }
+    ]
+}

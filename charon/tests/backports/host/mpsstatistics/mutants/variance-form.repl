@@ -1,0 +1,2 @@
+            double deviation = CharonMPSImageLoad(buffer, &from, CharonMPSImageIndex(&from, pixel, channel));
+            squared += deviation * deviation;

@@ -1,0 +1,725 @@
+{
+  "framework": "NaturalLanguage",
+  "entries": [
+    {
+      "api": "NLTokenizer",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the words, sentences and paragraphs come from the release's own CFStringTokenizer, so a script the release segments with a smaller dictionary is cut at other places (the two-character Chinese word of the tests is two words on iOS 6), the release's sentence breaker breaks after abbreviations that the port lists by the ones the system's does not break at, and emoji sequences are cut by the port's own rule; a sign that stands alone (™ between spaces) is a word for the system in some contexts and not for the port, and a full stop followed by a symbol ends a sentence for the port and not for the system",
+      "effect": "a tokenizer of a unit (word, sentence, paragraph, document) of a string answers the ranges of the tokens, their attributes (numeric, symbolic, emoji) and the token that holds an index",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "-[NLTokenizer initWithUnit:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "NLTokenizer.unit",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "NLTokenizer.string",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "-[NLTokenizer setLanguage:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "-[NLTokenizer tokenRangeAtIndex:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "-[NLTokenizer tokensForRange:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "-[NLTokenizer enumerateTokensInRange:usingBlock:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLTokenizer.md",
+      "source": "the host's NaturalLanguage, compared with the port over 1445 checks by tests/backports/host/naturallanguage (natural text in nine scripts, emoji sequences, random text, every index and range), and an iPad 2 running 6.1.3 held to 99 recorded answers by tests/backports/device/naturallanguage.m"
+    },
+    {
+      "api": "NLLanguageRecognizer",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's tagger names one language for a sentence, so the port votes sentence by sentence, weighted by letters; the language of a clear text is the system's, the probabilities are shares of the letters and not the model's, a sentence too short to judge is judged as the tagger does, and languages the release's tagger does not know are never answered",
+      "effect": "a recognizer takes strings, then answers the language most of the text is in, or the shares of the languages it saw",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "+[NLLanguageRecognizer dominantLanguageForString:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "-[NLLanguageRecognizer processString:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "-[NLLanguageRecognizer reset]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "NLLanguageRecognizer.dominantLanguage",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "NLLanguageRecognizer.languageHints",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "NLLanguageRecognizer.languageConstraints",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "-[NLLanguageRecognizer languageHypothesesWithMaximum:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the values are the shares of the letters of the sentences by language, and add up to one; the system's are the probabilities of a model, of which it answers every language up to the maximum, zero ones included",
+      "effect": "the languages the text was in, with their shares; 0 asks for all of them",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage, held to the port for the dominant language of clear text in eight scripts, the shape of the answers, hints, constraints and reset (tests/backports/host/naturallanguage), and an iPad 2 running 6.1.3, where the release's tagger names the language of each sentence"
+    },
+    {
+      "api": "NLLanguageUndetermined",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value und, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageAmharic",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value am, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageArabic",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ar, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageArmenian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value hy, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageBengali",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value bn, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageBulgarian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value bg, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageBurmese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value my, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageCatalan",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ca, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageCherokee",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value chr, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageCroatian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value hr, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageCzech",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value cs, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageDanish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value da, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageDutch",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value nl, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageEnglish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value en, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageFinnish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value fi, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageFrench",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value fr, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageGeorgian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ka, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageGerman",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value de, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageGreek",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value el, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageGujarati",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value gu, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageHebrew",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value he, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageHindi",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value hi, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageHungarian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value hu, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageIcelandic",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value is, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageIndonesian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value id, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageItalian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value it, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageJapanese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ja, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageKannada",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value kn, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageKhmer",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value km, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageKorean",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ko, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageLao",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value lo, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageMalay",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ms, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageMalayalam",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ml, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageMarathi",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value mr, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageMongolian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value mn-Mong, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageNorwegian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value nb, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageOriya",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value or, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguagePersian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value fa, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguagePolish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value pl, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguagePortuguese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value pt, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguagePunjabi",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value pa-Guru, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageRomanian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ro, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageRussian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ru, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageSimplifiedChinese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value zh-Hans, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageSinhalese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value si, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageSlovak",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value sk, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageSpanish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value es, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageSwedish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value sv, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageTamil",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ta, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageTelugu",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value te, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageThai",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value th, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageTibetan",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value bo, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageTraditionalChinese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value zh-Hant, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageTurkish",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value tr, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageUkrainian",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value uk, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageUrdu",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ur, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    },
+    {
+      "api": "NLLanguageVietnamese",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value vi, the one iOS 12 gives it",
+      "facts": "facts/NaturalLanguage/NLLanguageRecognizer.md",
+      "source": "the host's NaturalLanguage: the value of each constant of iOS 12, held equal by tests/backports/host/naturallanguage; an iPad 2 running 6.1.3, where the framework is not there"
+    }
+  ]
+}

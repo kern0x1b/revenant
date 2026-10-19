@@ -1,0 +1,49 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIPreviewAction",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no peek and pop, so no preview is ever shown and no action is chosen",
+      "effect": "the class holds a title, a style and a handler as UIKit's does, copies to another object; nothing calls the handler",
+      "facts": "facts/UIKit/UIPreviewAction.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/previewaction; the header of SDK 16.4"
+    },
+    {
+      "api": "UIPreviewActionGroup",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no peek and pop, so no group is ever shown",
+      "effect": "the class holds a title, a style and a copy of its actions as UIKit's does; nothing shows it",
+      "facts": "facts/UIKit/UIPreviewAction.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/previewaction; the header of SDK 16.4"
+    },
+    {
+      "api": "UIPreviewActionItem",
+      "kind": "protocol",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no peek and pop, so no item is ever shown",
+      "effect": "both classes adopt it; an application's own class that adopts it compiles and links, and is never asked for its title",
+      "facts": "facts/UIKit/UIPreviewAction.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/previewaction; the header of SDK 16.4"
+    },
+    {
+      "api": "UIViewController.previewActionItems",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no preview is shown, so nobody asks a controller for its actions",
+      "effect": "the answer is an empty array as UIKit's is for a controller that does not override it; a controller that does answers what it says",
+      "facts": "facts/UIKit/UIPreviewAction.md",
+      "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/previewaction; the header of SDK 16.4"
+    }
+  ]
+}

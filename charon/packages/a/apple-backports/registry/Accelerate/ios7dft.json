@@ -1,0 +1,49 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_DFT_zop_CreateSetupD()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a setup for the complex-to-complex transform of a length that has an implementation, and NULL for one that has not, which the header says is what NULL means",
+      "effect": "a setup for the length, or NULL for a length that is not a power of two and not 3, 5 or 15 times a power of two of at least three. Measured over 1 to 200: 1, 2, 4, 8, 16, 24, 32, 40, 48, 64, 80, 96, 120, 128, 160 and 192",
+      "facts": "facts/Accelerate/vDSPDFT.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_DFT_zrop_CreateSetupD()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as the complex-to-complex one, for the real-to-complex transform, which needs at least two elements (measured: a length of 1 has a complex-to-complex setup and no real-to-complex one)",
+      "effect": "a setup for the length, or NULL on the same refusals and for a length of 1",
+      "facts": "facts/Accelerate/vDSPDFT.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_DFT_ExecuteD()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the sum the header prints, over the two layouts the header describes, and the answers the host gives differ from the header's formula in two places, both measured",
+      "effect": "complex to complex, unnormalised: H[k] in Or[k] and Oi[k]. Real to complex, forward: the input is the even and the odd samples in Ir and Ii, N/2 each, the output is H[0] in Or[0], H[N/2] in Oi[0] and H[k] as Or[k] + i * Oi[k] for 1 < k < N/2, and every packed value is *twice* the transform, which the header does not say. Inverse, both kinds: the layouts are the other way round and there is no normalisation, where a normalised inverse would answer 1/N of it. Measured as the linear map on the four basis inputs at N = 4 and N = 8",
+      "facts": "facts/Accelerate/vDSPDFT.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_DFT_DestroySetupD()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "frees what a setup routine made",
+      "effect": "frees the setup; NULL does nothing",
+      "facts": "facts/Accelerate/vDSPDFT.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    }
+  ]
+}

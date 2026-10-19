@@ -1,0 +1,104 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_vflt24()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the release carries the whole of vDSP from 4.3, so nothing is built beside it: this is one conversion of the release's own 24-bit type, and every release that has the function has the type it converts",
+      "effect": "C[n] = (float)A[n] over the 24-bit reader, with the strides given; a 24-bit value is three bytes least significant first, sign-extended from bit 23 for the signed reader and not for the unsigned one; measured, the signed reader of 8388607, -8388608 and -12345 answers those three and the unsigned reader the same three as 8388607, 8388608 and 16777215",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_vfltu24()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the release carries the whole of vDSP from 4.3, so nothing is built beside it: this is one conversion of the release's own 24-bit type, and every release that has the function has the type it converts",
+      "effect": "C[n] = (float)A[n] over the unsigned reader, with the strides given; a 24-bit value is three bytes least significant first, sign-extended from bit 23 for the signed reader and not for the unsigned one; measured, the signed reader of 8388607, -8388608 and -12345 answers those three and the unsigned reader the same three as 8388607, 8388608 and 16777215",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_vfltsm24()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the scale is a single float at B[0] and not a vector, which is what the absence of a stride for B in the header says and what the host's answer measures",
+      "effect": "C[n] = B[0] * (float)A[n] over the signed reader, with the strides given; the scale is applied as it stands, so a scale of 0 keeps the sign of the conversion (measured: 0 over -1 answers -0)",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_vfltsmu24()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the scale is a single float at B[0] and not a vector, which is what the absence of a stride for B in the header says and what the host's answer measures",
+      "effect": "C[n] = B[0] * (float)A[n] over the unsigned reader, with the strides given; measured over the six values 0, 1, 8388607, 8388608, 16777215 and 12345 with a scale of 2 it answers 0 2 16777214 16777216 33554430 24690, and with a scale of -1 it answers -0 -1 -8388607 -8388608 -16777215 -12345, so nothing is clamped",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_vsmfix24()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the truncation is toward zero and the clamp is into the range of the destination, both measured; the release's own 24-bit type is what the result is stored in",
+      "effect": "C[n] = trunc(A[n] * B[0]) clamped to [-8388608, 8388607], with the strides given; measured with a scale of 8388608 over 1, -1, 0.5, -0.5, 2/3 and 100 it answers 8388607 -8388608 4194304 -4194304 5592405 8388607, so a positive overflow stops at 8388607 and 2/3 truncates down",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_vsmfixu24()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the truncation is toward zero and the clamp is into the range of the destination, both measured; the release's own 24-bit type is what the result is stored in",
+      "effect": "C[n] = trunc(A[n] * B[0]) clamped to [0, 16777215], with the strides given; measured over the same six values and the same scale the signed reader answers 8388608 0 4194304 0 5592405 16777215, so a negative result becomes 0 rather than wrapping",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_vaddi()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the release's own vector add over ints, which has been in vDSP since 4.0 and is here for the int element type that era's vector add had no entry point for",
+      "effect": "C[n] = A[n] + B[n] over ints, with a stride for each of the three; measured over 1 -2 3 -4 5 -6 and 10 20 -30 40 -50 60 it answers 11 18 -27 36 -45 54, and with a stride of 2 on the first it answers 11 23 -25",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_zvma()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same arithmetic in one body as its counterpart in the other precision, in a file of its own, so the two precisions cannot drift apart; the release's own vDSP is not called because it does not have the function",
+      "effect": "D[n] = A[n] * B[n] + C[n] over split complex, with a stride for each of the four; the operands are in the order vDSP names them, with the accumulator last, which is what the host's answer measures: A = (1+5i), B = (2+0i) and C = (1+1i) answers 3 + 11i, which is A*B + C and neither A + B*C nor A + C*B",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    },
+    {
+      "api": "vDSP_zvmmaa()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same arithmetic in one body as its counterpart in the other precision, in a file of its own, so the two precisions cannot drift apart; the release's own vDSP is not called because it does not have the function",
+      "effect": "F[n] = A[n] * B[n] + C[n] * D[n] + E[n] over split complex, with a stride for each of the six; measured over the six vectors of the differential the answer is that sum and not A + B*C + D*E",
+      "facts": "facts/Accelerate/vDSP.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdsp, which runs the port's vDSPFixed7.m and vDSPElementwise8.m and the host's vDSP over the same inputs; the header of iOS 16.4 for the declarations; the release's own armv7 caches for 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2, 8.0 and 9.3.6, which say which release first exports each name and are the release the two files answer to"
+    }
+  ]
+}

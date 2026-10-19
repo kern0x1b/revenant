@@ -1,0 +1,31 @@
+CVPixelBufferRef	5	not-objc
+CMTime	12	not-objc
+NSInteger	1	not-objc
+BOOL	4	not-objc
+VTFrameRateConversionConfigurationQualityPrioritization	1	not-objc
+VTFrameRateConversionConfigurationRevision	1	not-objc
+VTFrameProcessorFrame *	-1	objc
+VTFrameProcessorOpticalFlow * _Nullable	-1	objc
+NSArray<NSNumber *> *	-1	objc
+VTFrameRateConversionParametersSubmissionMode	1	not-objc
+NSArray<VTFrameProcessorFrame *> *	-1	objc
+float	8	not-objc
+VTMotionBlurConfigurationQualityPrioritization	1	not-objc
+VTMotionBlurConfigurationRevision	1	not-objc
+VTFrameProcessorFrame * _Nullable	-1	objc
+VTMotionBlurParametersSubmissionMode	1	not-objc
+VTOpticalFlowConfigurationQualityPrioritization	1	not-objc
+VTOpticalFlowConfigurationRevision	1	not-objc
+VTOpticalFlowParametersSubmissionMode	1	not-objc
+VTFrameProcessorOpticalFlow *	-1	objc
+VTSuperResolutionScalerConfigurationInputType	1	not-objc
+VTSuperResolutionScalerConfigurationQualityPrioritization	1	not-objc
+VTSuperResolutionScalerConfigurationRevision	1	not-objc
+VTSuperResolutionScalerParametersSubmissionMode	1	not-objc
+OSType	1	not-objc
+Boolean	1	not-objc
+NSIndexSet *	-1	objc
+NSDictionary<NSString *, id> *	-1	objc
+CMVideoDimensions	12	not-objc
+VTSuperResolutionScalerConfigurationModelStatus	1	not-objc
+NSArray<NSNumber*> *	-1	objc

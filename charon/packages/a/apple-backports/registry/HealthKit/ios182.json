@@ -1,0 +1,16 @@
+{
+  "framework": "HealthKit",
+  "entries": [
+    {
+      "api": "HKMetadataKeyAppleFitnessPlusCatalogIdentifier",
+      "kind": "constant",
+      "introduced": "18.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 18.2 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(18.2)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. It is also where the held ladder's last rung is 18.0, so no image of that rung exports the symbol and the registry's own 18.2 places it: the object that defines it is HKConstants182.m",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKMetadataKeyAppleFitnessPlusCatalogIdentifier, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    }
+  ]
+}

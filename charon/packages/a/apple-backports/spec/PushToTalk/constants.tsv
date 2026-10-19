@@ -1,0 +1,3 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	PTChannelErrorDomain	-	PTChannelErrorDomain	16.0	NSErrorDomain const	API_AVAILABLE(ios(16.0)) API_UNAVAILABLE(macos, macCatalyst, tvos, watchos)	32cdbf5881f52ed6	found	com.apple.pushtotalk.channel	-	ios-26.2-cache (no host value)	-	exported	ns	-
+constant	PTInstantiationErrorDomain	-	PTInstantiationErrorDomain	16.0	NSErrorDomain const	API_AVAILABLE(ios(16.0)) API_UNAVAILABLE(macos, macCatalyst, tvos, watchos)	e9b8aa11f89d161d	found	com.apple.pushtotalk.instantiation	-	ios-26.2-cache (no host value)	-	exported	ns	-

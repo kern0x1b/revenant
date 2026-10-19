@@ -1,0 +1,26 @@
+[port]
+name = "$name"
+version = "0.1.0"
+description = "$Name, an application"
+
+[platform]
+use = "apple-ios"
+arch = "armv7"
+os-version = "6.0"
+distribution = "jailbreak"
+
+[application]
+name = "$Name"
+sources = ["src/*.m"]
+frameworks = ["UIKit", "Foundation", "CoreGraphics"]
+options = ["-Wall", "-Wextra", "-fobjc-arc"]
+
+[application.plist]
+CFBundleIdentifier = "$identifier"
+url-scheme = "$name"
+
+[package]
+control = "packaging/control"
+
+[pipeline]
+system = ["build:application", "sign:application", "check:imports"]

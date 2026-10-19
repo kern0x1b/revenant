@@ -1,0 +1,16 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPMediaPickerController.showsItemsWithProtectedAssets",
+   "kind": "property",
+   "introduced": "9.2",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPMediaPickerController.h, @property (nonatomic) BOOL showsItemsWithProtectedAssets MP_API(ios(9.2)); // default is YES",
+   "reason": "read with tools/mach32_methods.py from the armv7 cache of 6.1.3 (MediaPlayer image at 0x31fe3000), MPMediaPickerController has 19 own instance methods and 1 own class methods and neither showsItemsWithProtectedAssets nor setShowsItemsWithProtectedAssets: is among them; all 41 of the image's categories were read WITH THE CLASS EACH ONE EXTENDS, resolved through each category's own class pointer, and none extends MPMediaPickerController, so nothing here can clobber a release accessor and nothing in the release clobbers this one; -aSelectorNoFrameworkHas is absent as the control. The release's whole-cache selector list (selectors_armv7.txt, 113981 DISTINCT names, a list of names and not per-class counts) reads 0 for this selector, which is absence from the WHOLE release - no class anywhere in 6.1.3 declares it - so here the per-cache list is itself the right rung STORAGE: this is a CATEGORY on a class the release owns, so it cannot add an ivar and the value is an associated object - public API, and what this tree already does for the same problem (WebKit/WKWebpagePreferences13.m:39-42, SensorKit/SRSensorReader.m:120-135), one static address per stored property as WebKit does, so the value a caller sets is the value that reads back and is released with the object",
+   "effect": "YES when nothing has set it, because the header says // default is YES, and then whatever the caller set. FairPlay protected assets arrived with iTunes Match, which is iOS 7, so on 6.1.3 there is no protected asset for the flag to be about: the flag round-trips what the app set and no item is filtered, because there is none. That is Apple's own getter on this release, not a stub",
+   "facts": "facts/MediaPlayer/ReleaseOwnedMembers.md"
+  }
+ ]
+}

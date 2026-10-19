@@ -1,0 +1,3 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	SNClassifierIdentifierVersion1	-	SNClassifierIdentifierVersion1	15.0	SNClassifierIdentifier const	API_AVAILABLE(macos(12.0), ios(15.0), tvos(15.0), watchos(8.0), visionos(1.0))	fbd10942834d2f85	found	com.apple.SoundAnalysis.classifier.v1	com.apple.SoundAnalysis.classifier.v1	ios-26.2-cache	-	exported	ns	-
+constant	SNErrorDomain	-	SNErrorDomain	13.0	NSString * const	API_AVAILABLE(macos(10.15), ios(13.0), tvos(13.0), watchos(6.0), visionos(1.0))	ca26ced0f3584a2c	found	com.apple.SoundAnalysis	com.apple.SoundAnalysis	ios-26.2-cache	-	exported	ns	-

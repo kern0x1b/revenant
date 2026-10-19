@@ -1,0 +1,86 @@
+{
+  "framework": "WebKit",
+  "entries": [
+    {
+      "api": "WKContentWorld",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the class is there and names worlds as the release's does: +pageWorld and +defaultClientWorld are each one object for the process, +worldWithName: gives the same object back for the same name, and -name answers the name for a named world and nil for the two standard ones. What a world stands for - a separate JavaScript context - the release does not have: its UIWebView runs one context per frame, so scripts of every world share the page's globals",
+      "facts": "facts/WebKit/ContentWorldAndPreferences.md",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "WKContentWorld.pageWorld",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "one object for the process, with a nil name, as the release answers",
+      "facts": "facts/WebKit/ContentWorldAndPreferences.md",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "-[WKUserContentController removeScriptMessageHandlerForName:contentWorld:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "removes the handler of that name, as -removeScriptMessageHandlerForName: does; the world is not read, since the release has one script context and the handlers are kept in one table",
+      "facts": "facts/WebKit/ContentWorldAndPreferences.md",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "-[WKUserContentController addScriptMessageHandlerWithReply:contentWorld:name:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[WKUserContentController addScriptMessageHandlerWithReply:contentWorld:name:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "-[WKScriptMessageHandlerWithReply userContentController:didReceiveScriptMessage:replyHandler:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[WKScriptMessageHandlerWithReply userContentController:didReceiveScriptMessage:replyHandler:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "WKWebpagePreferences",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the object is there and keeps its preferred content mode, which starts as WKContentModeRecommended as in the release",
+      "facts": "facts/WebKit/ContentWorldAndPreferences.md",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "WKWebpagePreferences.preferredContentMode",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property WKWebpagePreferences.preferredContentMode",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/WebKit/ContentWorldAndPreferences.md",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    },
+    {
+      "api": "WKWebViewConfiguration.defaultWebpagePreferences",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a WKWebpagePreferences the configuration makes on first read and keeps, and which can be replaced; setting nil gives a fresh one, as the release does. It is held beside the configuration rather than in it, so a copy of the configuration does not carry it",
+      "facts": "facts/WebKit/ContentWorldAndPreferences.md",
+      "source": "the WebKit headers of SDK 16.4 for the declarations; the JavaScriptCore of the armv7 shared cache of 6.1.3 for what the release's script engine has, read by the strings of the cache against those of 9.3"
+    }
+  ]
+}

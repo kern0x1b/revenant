@@ -1,0 +1,11 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_CoreLocationUI_SwiftUI	struct	LocationButton	15.0				own
+_CoreLocationUI_SwiftUI	method	LocationButton.init(_:action:)	15.0				container
+_CoreLocationUI_SwiftUI	property	LocationButton.body	15.0				container
+_CoreLocationUI_SwiftUI	struct	LocationButton.Title	15.0				container
+_CoreLocationUI_SwiftUI	property	LocationButton.Title.currentLocation	15.0				container
+_CoreLocationUI_SwiftUI	property	LocationButton.Title.sendCurrentLocation	15.0				container
+_CoreLocationUI_SwiftUI	property	LocationButton.Title.sendMyCurrentLocation	15.0				container
+_CoreLocationUI_SwiftUI	property	LocationButton.Title.shareCurrentLocation	15.0				container
+_CoreLocationUI_SwiftUI	property	LocationButton.Title.shareMyCurrentLocation	15.0				container
+_CoreLocationUI_SwiftUI	typealias	LocationButton.Body	15.0				own

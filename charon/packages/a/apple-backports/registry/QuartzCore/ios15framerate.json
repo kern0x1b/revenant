@@ -1,0 +1,60 @@
+{
+  "framework": "QuartzCore",
+  "entries": [
+    {
+      "api": "CAFrameRateRangeMake()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a plain three-float struct constructor with no OS dependency: the caller only ever constructs and compares the value, and rank 121 of the crash-demand table is a LOAD-FAIL on this exact symbol for provenance - a hard, non-weak import that kills the application at launch if it is not carried",
+      "effect": "returns {minimum, maximum, preferred} exactly as given, the header's own definition",
+      "facts": "facts/QuartzCore/CAFrameRateRange.md",
+      "source": "SDK 16.4, QuartzCore/CAFrameRateRange.h"
+    },
+    {
+      "api": "CAFrameRateRangeIsEqualToRange()",
+      "kind": "function",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the struct's own field-by-field equality, carried alongside CAFrameRateRangeMake() rather than left as a second gap beside the one that crashes",
+      "effect": "true when minimum, maximum and preferred are each equal, false otherwise",
+      "facts": "facts/QuartzCore/CAFrameRateRange.md",
+      "source": "SDK 16.4, QuartzCore/CAFrameRateRange.h"
+    },
+    {
+      "api": "CAFrameRateRangeDefault",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the sentinel value the header documents for \"no preference\", carried as a real exported constant rather than a NULL weak reference",
+      "effect": "{-1, -1, -1}, the value Apple's own documentation gives for CAFrameRateRange.default",
+      "facts": "facts/QuartzCore/CAFrameRateRange.md",
+      "source": "SDK 16.4, QuartzCore/CAFrameRateRange.h; Apple's public documentation of CAFrameRateRange.default"
+    },
+    {
+      "api": "CAAnimation.preferredFrameRateRange",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "CAAnimation carries no display link of its own to throttle - kept and returned faithfully rather than declared absent, the same way this port already keeps a property it cannot act on elsewhere",
+      "effect": "stores and returns the exact range given, starting at CAFrameRateRangeDefault; never messaged further, since CoreAnimation on this release commits at the one rhythm the render server drives and a real device with no ProMotion display answers this property the same way",
+      "facts": "facts/QuartzCore/CAFrameRateRange.md",
+      "source": "SDK 16.4, QuartzCore/CAAnimation.h"
+    },
+    {
+      "api": "CADisplayLink.preferredFrameRateRange",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header deprecates preferredFramesPerSecond (already carried, ios10framerate.json) in favor of this property, so it drives the same frameInterval mechanism rather than being a second, disconnected store",
+      "effect": "stores the exact range given and drives preferredFramesPerSecond from preferred (or maximum, if preferred is unset), clamped to [minimum, maximum] when both are given; reads back the exact range last set, or CAFrameRateRangeDefault",
+      "facts": "facts/QuartzCore/CAFrameRateRange.md",
+      "source": "SDK 16.4, QuartzCore/CADisplayLink.h"
+    }
+  ]
+}

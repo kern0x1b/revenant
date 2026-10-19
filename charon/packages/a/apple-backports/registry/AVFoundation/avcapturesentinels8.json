@@ -1,0 +1,60 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptureExposureDurationCurrent",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus calls this a constant and it is a CMTime sentinel, not a string: the 8.0 rung is the first held rung that exports it and no earlier one does, so the port defines it with the SDK's own type and its own object. The corpus's `kind: constant` does not mean a string, and reading the five as NSString *const segfaults - that is how they were found",
+      "effect": "a CMTime {0, 0, 0}: the special duration a caller passes to say \"do not tell me the duration\", measured out of the host's own AVFoundation",
+      "facts": "facts/AVFoundation/AVFoundationDeviceTypeAndPresetKeys.md",
+      "source": "the value, read from the host with the type the SDK declares for it and printed by the differential in tests/backports/host/avf-notifications; and the rung: a direct dump of the exports of every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, searched for the name's own symbol, control _NSFileSize answering 4.3 on this set"
+    },
+    {
+      "api": "AVCaptureExposureTargetBiasCurrent",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus calls this a constant and it is a float sentinel, not a string: the 8.0 rung is the first held rung that exports it and no earlier one does, so the port defines it with the SDK's own type and its own object. The corpus's `kind: constant` does not mean a string, and reading the five as NSString *const segfaults - that is how they were found",
+      "effect": "FLT_MAX as a float: the special bias that means the caller does not want to be told the bias, measured out of the host's own AVFoundation",
+      "facts": "facts/AVFoundation/AVFoundationDeviceTypeAndPresetKeys.md",
+      "source": "the value, read from the host with the type the SDK declares for it and printed by the differential in tests/backports/host/avf-notifications; and the rung: a direct dump of the exports of every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, searched for the name's own symbol, control _NSFileSize answering 4.3 on this set"
+    },
+    {
+      "api": "AVCaptureISOCurrent",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus calls this a constant and it is a float sentinel, not a string: the 8.0 rung is the first held rung that exports it and no earlier one does, so the port defines it with the SDK's own type and its own object. The corpus's `kind: constant` does not mean a string, and reading the five as NSString *const segfaults - that is how they were found",
+      "effect": "FLT_MAX as a float: the special ISO that means the caller does not want to be told the ISO, measured out of the host's own AVFoundation",
+      "facts": "facts/AVFoundation/AVFoundationDeviceTypeAndPresetKeys.md",
+      "source": "the value, read from the host with the type the SDK declares for it and printed by the differential in tests/backports/host/avf-notifications; and the rung: a direct dump of the exports of every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, searched for the name's own symbol, control _NSFileSize answering 4.3 on this set"
+    },
+    {
+      "api": "AVCaptureLensPositionCurrent",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus calls this a constant and it is a float sentinel, not a string: the 8.0 rung is the first held rung that exports it and no earlier one does, so the port defines it with the SDK's own type and its own object. The corpus's `kind: constant` does not mean a string, and reading the five as NSString *const segfaults - that is how they were found",
+      "effect": "FLT_MAX as a float: the special lens position that means the caller does not want to be told it, measured out of the host's own AVFoundation",
+      "facts": "facts/AVFoundation/AVFoundationDeviceTypeAndPresetKeys.md",
+      "source": "the value, read from the host with the type the SDK declares for it and printed by the differential in tests/backports/host/avf-notifications; and the rung: a direct dump of the exports of every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, searched for the name's own symbol, control _NSFileSize answering 4.3 on this set"
+    },
+    {
+      "api": "AVCaptureWhiteBalanceGainsCurrent",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus calls this a constant and it is a AVCaptureWhiteBalanceGains sentinel, not a string: the 8.0 rung is the first held rung that exports it and no earlier one does, so the port defines it with the SDK's own type and its own object. The corpus's `kind: constant` does not mean a string, and reading the five as NSString *const segfaults - that is how they were found",
+      "effect": "{0, 0} as an AVCaptureWhiteBalanceGains: the special gains that mean the caller does not want to be told them, measured out of the host's own AVFoundation",
+      "facts": "facts/AVFoundation/AVFoundationDeviceTypeAndPresetKeys.md",
+      "source": "the value, read from the host with the type the SDK declares for it and printed by the differential in tests/backports/host/avf-notifications; and the rung: a direct dump of the exports of every held cache - 4.3, 6.1.3, 7.0, 7.1, 7.1.1, 7.1.2 and 8.0 armv7, 8.1.3, 8.2 and 8.4.1 armv7s, 9.3.6 armv7, 10.0.1, 11.0 and 12.0 arm64, 16.0 arm64e - with _NSFileSize planted as a control, searched for the name's own symbol, control _NSFileSize answering 4.3 on this set"
+    }
+  ]
+}

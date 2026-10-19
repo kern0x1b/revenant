@@ -1,0 +1,93 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_ARGB16UtoPlanar16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "the four channels of an interleaved 16-bit ARGB row written to four 16-bit rows, alpha first, in the machine's own byte order; the values are moved, not scaled; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_RGB16UtoPlanar16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "the three channels of an interleaved 16-bit RGB row to three rows, unmoved; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Planar16UtoARGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "four 16-bit rows gathered into an interleaved ARGB row, unmoved; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Planar16UtoRGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "three 16-bit rows gathered into an interleaved RGB row, unmoved; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_ARGB8888toPlanar16Q12()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "the four eight-bit channels to four 16Q12 rows with the measured scaling (value * 4096 + 127) / 255, which is the only rule that answers both 8 -> 129 and 254 -> 4080; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_RGB888toPlanar16Q12()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "the three eight-bit channels to three 16Q12 rows with the same scaling; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Planar16Q12toARGB8888()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "four 16Q12 rows to four eight-bit channels with round(value / 4096 * 255) clamped to 0..255; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Planar16Q12toRGB888()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an interleaved and a planar row of the same or of two named formats, where the whole of the work is where each channel lands; the header's argument order names the channels and the port follows it",
+      "effect": "three 16Q12 rows to three eight-bit channels with the same rule; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImagePlanar.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimageplanar; the format each name spells and the two scalings, which facts/Accelerate/vImageFixedPoint.md measures off the host; the release's own armv7 caches, which say which release first exports each name"
+    }
+  ]
+}

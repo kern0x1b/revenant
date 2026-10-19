@@ -1,0 +1,48 @@
+diff --git a/llvm-project/libcxxabi/CMakeLists.txt b/llvm-project/libcxxabi/CMakeLists.txt
+index 5cf3d6df..1982a15c 100644
+--- a/llvm-project/libcxxabi/CMakeLists.txt
++++ b/llvm-project/libcxxabi/CMakeLists.txt
+@@ -100,6 +100,13 @@ option(LIBCXXABI_ENABLE_ATOMIC_LIBCALLS
+    (iOS before 7.0). Every image in a process must bind to this one copy, so that
+    the locks guarding a memory location are the same whichever image touches it." OFF)
+ 
++set(LIBCXXABI_PROCESS_WIDE_SOURCES "" CACHE STRING
++  "C sources of calls an old Apple release lacks whose state every image in a process shares, such as os_unfair_lock
++   before iOS 10, built into the shared library with default visibility and re-exported by libc++, so that every image
++   binds to this one copy.")
++set(LIBCXXABI_PROCESS_WIDE_EXPORTS "" CACHE FILEPATH
++  "The exported symbol list naming what LIBCXXABI_PROCESS_WIDE_SOURCES define.")
++
+ option(LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS
+   "Build libc++abi with definitions for operator new/delete. These are normally
+    defined in libc++abi, but it is also possible to define them in libc++, in
+diff --git a/llvm-project/libcxxabi/src/CMakeLists.txt b/llvm-project/libcxxabi/src/CMakeLists.txt
+index 5a428e29..8562a229 100644
+--- a/llvm-project/libcxxabi/src/CMakeLists.txt
++++ b/llvm-project/libcxxabi/src/CMakeLists.txt
+@@ -59,6 +59,14 @@ if (APPLE AND LIBCXXABI_ENABLE_ATOMIC_LIBCALLS)
+   list(APPEND LIBCXXABI_SOURCES ${LIBCXXABI_ATOMIC_LIBCALLS_SOURCE})
+ endif()
+ 
++if (APPLE AND LIBCXXABI_PROCESS_WIDE_SOURCES)
++  if (NOT LIBCXXABI_PROCESS_WIDE_EXPORTS)
++    message(FATAL_ERROR "LIBCXXABI_PROCESS_WIDE_SOURCES needs LIBCXXABI_PROCESS_WIDE_EXPORTS to name what they define")
++  endif()
++  set_source_files_properties(${LIBCXXABI_PROCESS_WIDE_SOURCES} PROPERTIES COMPILE_OPTIONS -fvisibility=default)
++  list(APPEND LIBCXXABI_SOURCES ${LIBCXXABI_PROCESS_WIDE_SOURCES})
++endif()
++
+ set(LIBCXXABI_HEADERS
+   ../include/cxxabi.h
+ )
+@@ -276,6 +284,10 @@ if (LIBCXXABI_SUPPORTS_SHARED_LIBRARY)
+     reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/atomic-libcalls.exp")
+   endif()
+ 
++  if (APPLE AND LIBCXXABI_PROCESS_WIDE_SOURCES)
++    reexport_symbols("${LIBCXXABI_PROCESS_WIDE_EXPORTS}")
++  endif()
++
+   if (LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS)
+     reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/new-delete.exp")
+   endif()

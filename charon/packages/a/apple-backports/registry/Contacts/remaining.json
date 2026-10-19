@@ -1,0 +1,126 @@
+{
+  "framework": "Contacts",
+  "entries": [
+    {
+      "api": "+[CNContactFetchRequest new]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header declares it on CNContactFetchRequest and the corpus's property reader looks for the two instance spellings of the name, so it asks for an accessor that is NSObject's",
+      "effect": "it answers, being NSObject's: an allocated CNContactFetchRequest for +new, a CNContactFetchRequest for -init",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 for the declarations; Foundation/NSObject.m of this package, whose -init and +new every class inherits"
+    },
+    {
+      "api": "-[CNContactFetchRequest init]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header declares it on CNContactFetchRequest and the corpus's property reader looks for the two instance spellings of the name, so it asks for an accessor that is NSObject's",
+      "effect": "it answers, being NSObject's: an allocated CNContactFetchRequest for +new, a CNContactFetchRequest for -init",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 for the declarations; Foundation/NSObject.m of this package, whose -init and +new every class inherits"
+    },
+    {
+      "api": "+[CNFetchResult new]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header declares it on CNFetchResult and the corpus's property reader looks for the two instance spellings of the name, so it asks for an accessor that is NSObject's",
+      "effect": "it answers, being NSObject's: an allocated CNFetchResult for +new, a CNFetchResult for -init",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 for the declarations; Foundation/NSObject.m of this package, whose -init and +new every class inherits"
+    },
+    {
+      "api": "-[CNFetchResult init]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header declares it on CNFetchResult and the corpus's property reader looks for the two instance spellings of the name, so it asks for an accessor that is NSObject's",
+      "effect": "it answers, being NSObject's: an allocated CNFetchResult for +new, a CNFetchResult for -init",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 for the declarations; Foundation/NSObject.m of this package, whose -init and +new every class inherits"
+    },
+    {
+      "api": "+[CNPhoneNumber new]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header declares it on CNPhoneNumber and the corpus's property reader looks for the two instance spellings of the name, so it asks for an accessor that is NSObject's",
+      "effect": "it answers, being NSObject's: an allocated CNPhoneNumber for +new, a CNPhoneNumber for -init",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 for the declarations; Foundation/NSObject.m of this package, whose -init and +new every class inherits"
+    },
+    {
+      "api": "-[CNPhoneNumber init]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header declares it on CNPhoneNumber and the corpus's property reader looks for the two instance spellings of the name, so it asks for an accessor that is NSObject's",
+      "effect": "it answers, being NSObject's: an allocated CNPhoneNumber for +new, a CNPhoneNumber for -init",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 for the declarations; Foundation/NSObject.m of this package, whose -init and +new every class inherits"
+    },
+    {
+      "api": "CNChangeHistoryEventVisitor",
+      "kind": "protocol",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a caller's own visitor adopts the protocol, so the library has to carry the protocol object for the adoption to be found at run time",
+      "effect": "the protocol and its eleven visit methods are carried; -[CNChangeHistoryEvent acceptEventVisitor:] and the three concrete classes ask whether the visitor adopts it before handing the event over, so a visitor that does not is sent nothing",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the header of Contacts/CNChangeHistoryEvent.h in the SDK 16.4, which declares the protocol and its eleven methods; Contacts/CNChangeHistoryEvent13.m of this package, whose three acceptEventVisitor: bodies now ask conformsToProtocol: first - which is also what makes this library carry the protocol object, measured as the __OBJC_PROTOCOL_$_CNChangeHistoryEventVisitor its object defines"
+    },
+    {
+      "api": "+[CNGroup predicateForSubgroupsInGroupWithIdentifier:]",
+      "kind": "method",
+      "introduced": "10.11",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build +[CNGroup predicateForSubgroupsInGroupWithIdentifier:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 and in the SDK 26.2, CNGroup+Predicates.h and CNSaveRequest.h, read for the availability annotation"
+    },
+    {
+      "api": "-[CNSaveRequest addSubgroup:toGroup:]",
+      "kind": "method",
+      "introduced": "10.11",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[CNSaveRequest addSubgroup:toGroup:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 and in the SDK 26.2, CNGroup+Predicates.h and CNSaveRequest.h, read for the availability annotation"
+    },
+    {
+      "api": "-[CNSaveRequest removeSubgroup:fromGroup:]",
+      "kind": "method",
+      "introduced": "10.11",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[CNSaveRequest removeSubgroup:fromGroup:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the headers of Contacts in the SDK 16.4 and in the SDK 26.2, CNGroup+Predicates.h and CNSaveRequest.h, read for the availability annotation"
+    },
+    {
+      "api": "-[CNContactStore unifiedMeContactWithKeysToFetch:error:]",
+      "kind": "method",
+      "introduced": "10.11",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the me card is iOS 10.11: iOS 6.1.3 has no Contacts framework and no record of the person who owns the device in the address book it does have, so there is no card to hand back",
+      "effect": "nil, and the error out-parameter is an NSError in CNErrorDomain with code CNErrorCodeRecordDoesNotExist (200) and the description saying this release has no me card; a nil error pointer is allowed and nothing is written, and the keys are not read, since there is no contact to read them out of",
+      "facts": "facts/Contacts/Values.md",
+      "source": "the host's own Contacts under MacOSX.sdk, asked for a me card it has no access to: nil with CNErrorCodeAuthorizationDenied (100) and two userInfo keys, which is a refusal of access rather than the absence of a card and is a different case; the host's CNError.h, which gives CNErrorCodeRecordDoesNotExist as 200; the header of Contacts/CNContactStore.h in the SDK 16.4, which annotates the method NS_AVAILABLE(10_11, NA)"
+    }
+  ]
+}

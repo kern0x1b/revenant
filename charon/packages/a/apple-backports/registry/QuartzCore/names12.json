@@ -1,0 +1,60 @@
+{
+  "framework": "QuartzCore",
+  "entries": [
+    {
+      "api": "kCAContentsFormatGray8Uint",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string Gray8, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/QuartzCore/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCAContentsFormatRGBA16Float",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string RGBAh, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/QuartzCore/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCAContentsFormatRGBA8Uint",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string RGBA8, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/QuartzCore/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCAGradientLayerConic",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string conic, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/QuartzCore/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCARendererMetalCommandQueue",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string kCARendererMetalCommandQueue, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/QuartzCore/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    }
+  ]
+}

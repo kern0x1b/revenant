@@ -1,0 +1,388 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+WidgetKit	swift-struct	s:9WidgetKit22TimelineEntryRelevanceV	-	TimelineEntryRelevance	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	8ab4809bdf79806e
+WidgetKit	swift-property	s:9WidgetKit22TimelineEntryRelevanceV5scoreSfvp	TimelineEntryRelevance	score	-	Swift.Float	-	-	-	a402585801d26f9d
+WidgetKit	swift-property	s:9WidgetKit22TimelineEntryRelevanceV8durationSdvp	TimelineEntryRelevance	duration	-	Foundation.TimeInterval	-	-	-	e2fc2402c39d8216
+WidgetKit	swift-method	s:9WidgetKit22TimelineEntryRelevanceV5score8durationACSf_Sdtcfc	TimelineEntryRelevance	init(score:duration:)	-	-	WidgetKit.TimelineEntryRelevance | Swift.Float | Foundation.TimeInterval	-	-	4dc31576fa374dc4
+WidgetKit	swift-method	s:9WidgetKit22TimelineEntryRelevanceV2eeoiySbAC_ACtFZ	TimelineEntryRelevance	==(_:_:)	+	Swift.Bool	WidgetKit.TimelineEntryRelevance | WidgetKit.TimelineEntryRelevance	-	-	55c280935cb6dd5e
+WidgetKit	swift-method	s:9WidgetKit22TimelineEntryRelevanceV6encode2toys7Encoder_p_tKF	TimelineEntryRelevance	encode(to:)	-	()	any Swift.Encoder	-	-	01b54a8edf0dd05b
+WidgetKit	swift-method	s:9WidgetKit22TimelineEntryRelevanceV4hash4intoys6HasherVz_tF	TimelineEntryRelevance	hash(into:)	-	()	Swift.Hasher	-	-	cab25a9c09996832
+WidgetKit	swift-property	s:9WidgetKit22TimelineEntryRelevanceV9hashValueSivp	TimelineEntryRelevance	hashValue	-	Swift.Int	-	-	-	6936e4a71bdfeac6
+WidgetKit	swift-method	s:9WidgetKit22TimelineEntryRelevanceV4fromACs7Decoder_p_tKcfc	TimelineEntryRelevance	init(from:)	-	-	WidgetKit.TimelineEntryRelevance | any Swift.Decoder	-	-	0a23f8c7c29f4b48
+WidgetKit	swift-protocol	s:9WidgetKit13TimelineEntryP	-	TimelineEntry	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	a9a16b0338834ec4
+WidgetKit	swift-property	s:9WidgetKit13TimelineEntryP4date10Foundation4DateVvp	TimelineEntry	date	-	Foundation.Date	-	-	-	8b3d30621b7b4fe8
+WidgetKit	swift-property	s:9WidgetKit13TimelineEntryP9relevanceAA0cD9RelevanceVSgvp	TimelineEntry	relevance	-	WidgetKit.TimelineEntryRelevance?	-	-	-	b00828f30aea4a1a
+WidgetKit	swift-property	s:9WidgetKit13TimelineEntryPAAE9relevanceAA0cD9RelevanceVSgvp	TimelineEntry	relevance	-	WidgetKit.TimelineEntryRelevance?	-	-	-	e7b57d26ada458fb
+WidgetKit	swift-struct	s:9WidgetKit0A9RelevanceV	-	WidgetRelevance	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	0c7b8bad8f992aad
+WidgetKit	swift-method	s:9WidgetKit0A9RelevanceVyACyxGSayAA0aC9AttributeVyxGGcfc	WidgetRelevance	init(_:)	-	-	WidgetKit.WidgetRelevance<Configuration> | [WidgetKit.WidgetRelevanceAttribute<Configuration>]	-	-	0ea351a8f81e66e5
+WidgetKit	swift-struct	s:9WidgetKit22AppIntentConfigurationV	-	AppIntentConfiguration	-	-	-	ios=17.0,macos=14.0,watchos=10.0	-	b84156f57de89e92
+WidgetKit	swift-property	s:9WidgetKit22AppIntentConfigurationV4bodyQrvp	AppIntentConfiguration	body	-	some SwiftUI.WidgetConfiguration	-	-	-	b0253a7c0d70fa61
+WidgetKit	swift-typealias	s:9WidgetKit22AppIntentConfigurationV4Bodya	AppIntentConfiguration	Body	-	-	-	ios=17.0,macos=14.0,watchos=10.0	-	c5ba899386ce4212
+WidgetKit	swift-method	s:9WidgetKit22AppIntentConfigurationV4kind6intent8provider7contentACyxq_GSS_xmqd__q_5EntryQyd__ctc0D0Qyd__RszAA0cD16TimelineProviderRd__lufc	AppIntentConfiguration	init(kind:intent:provider:content:)	-	-	WidgetKit.AppIntentConfiguration<Intent, Content> | Swift.String | Intent.Type | Provider | (Provider.Entry) -> Content	-	-	8cc53ff2c66fdeba
+WidgetKit	swift-struct	s:9WidgetKit23AppIntentRecommendationV	-	AppIntentRecommendation	-	-	-	ios=17.0,macos=14.0,watchos=10.0	-	b9533031b87bb9e7
+WidgetKit	swift-method	s:9WidgetKit23AppIntentRecommendationV6intent11descriptionACyxGx_7SwiftUI4TextVtcfc	AppIntentRecommendation	init(intent:description:)	-	-	WidgetKit.AppIntentRecommendation<Intent> | Intent | SwiftUI.Text	-	-	0e4727f80e6cdb4a
+WidgetKit	swift-method	s:9WidgetKit23AppIntentRecommendationV6intent11descriptionACyxGx_7SwiftUI18LocalizedStringKeyVtcfc	AppIntentRecommendation	init(intent:description:)	-	-	WidgetKit.AppIntentRecommendation<Intent> | Intent | SwiftUI.LocalizedStringKey	-	-	adf7eb60e6269c39
+WidgetKit	swift-method	s:9WidgetKit23AppIntentRecommendationV6intent11descriptionACyxGx_10Foundation23LocalizedStringResourceVtcfc	AppIntentRecommendation	init(intent:description:)	-	-	WidgetKit.AppIntentRecommendation<Intent> | Intent | Foundation.LocalizedStringResource	-	-	80445ab060cdd54a
+WidgetKit	swift-method	s:9WidgetKit23AppIntentRecommendationV6intent11descriptionACyxGx_qd__tcSyRd__lufc	AppIntentRecommendation	init(intent:description:)	-	-	WidgetKit.AppIntentRecommendation<Intent> | Intent | some Swift.StringProtocol	-	-	326d522cb07d0928
+WidgetKit	swift-struct	s:9WidgetKit0A4InfoV	-	WidgetInfo	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	5307831328c4a472
+WidgetKit	swift-property	s:9WidgetKit0A4InfoV13configurationSo8INIntentCSgvp	WidgetInfo	configuration	-	Intents.INIntent?	-	-	-	c16617114ee80d4f
+WidgetKit	swift-method	s:9WidgetKit0A4InfoV25widgetConfigurationIntent2ofxSgxm_t10AppIntents0aeF0RzlF	WidgetInfo	widgetConfigurationIntent(of:)	-	Intent?	Intent.Type	ios=17.0,macos=14.0,watchos=10.0	-	850bf5052245c669
+WidgetKit	swift-property	s:9WidgetKit0A4InfoV6familyAA0A6FamilyOvp	WidgetInfo	family	-	WidgetKit.WidgetFamily	-	-	-	84b4b8055d4d50fd
+WidgetKit	swift-property	s:9WidgetKit0A4InfoV4kindSSvp	WidgetInfo	kind	-	Swift.String	-	-	-	9b042964fa5774b8
+WidgetKit	swift-property	s:9WidgetKit0A4InfoV2idACvp	WidgetInfo	id	-	WidgetKit.WidgetInfo	-	-	-	6c7a1e25fe5294da
+WidgetKit	swift-method	s:9WidgetKit0A4InfoV2eeoiySbAC_ACtFZ	WidgetInfo	==(_:_:)	+	Swift.Bool	WidgetKit.WidgetInfo | WidgetKit.WidgetInfo	-	-	65dcf56136e59b05
+WidgetKit	swift-method	s:9WidgetKit0A4InfoV4hash4intoys6HasherVz_tF	WidgetInfo	hash(into:)	-	()	Swift.Hasher	-	-	ac832b9f565078e9
+WidgetKit	swift-typealias	s:9WidgetKit0A4InfoV2IDa	WidgetInfo	ID	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	2cf8e8bc1e6dc4a3
+WidgetKit	swift-property	s:9WidgetKit0A4InfoV9hashValueSivp	WidgetInfo	hashValue	-	Swift.Int	-	-	-	43ee8969c434f6eb
+WidgetKit	swift-property	s:9WidgetKit0A4InfoV16debugDescriptionSSvp	WidgetInfo	debugDescription	-	Swift.String	-	-	-	93e3f6f898a0682c
+WidgetKit	swift-struct	s:9WidgetKit0A13MountingStyleV	-	WidgetMountingStyle	-	-	-	ios=26.0	-	ec0a9d842d2d6b56
+WidgetKit	swift-property	s:9WidgetKit0A13MountingStyleV8elevatedACvpZ	WidgetMountingStyle	elevated	+	WidgetKit.WidgetMountingStyle	-	-	-	6d7ca3867c6a4d0b
+WidgetKit	swift-property	s:9WidgetKit0A13MountingStyleV8recessedACvpZ	WidgetMountingStyle	recessed	+	WidgetKit.WidgetMountingStyle	-	-	-	3241cb7523aca059
+WidgetKit	swift-method	s:9WidgetKit0A13MountingStyleV2eeoiySbAC_ACtFZ	WidgetMountingStyle	==(_:_:)	+	Swift.Bool	WidgetKit.WidgetMountingStyle | WidgetKit.WidgetMountingStyle	-	-	2e54d01d933f3c63
+WidgetKit	swift-method	s:9WidgetKit0A13MountingStyleV4hash4intoys6HasherVz_tF	WidgetMountingStyle	hash(into:)	-	()	Swift.Hasher	-	-	3cd8e5039f4d961f
+WidgetKit	swift-property	s:9WidgetKit0A13MountingStyleV9hashValueSivp	WidgetMountingStyle	hashValue	-	Swift.Int	-	-	-	078eefaa778dcfa6
+WidgetKit	swift-struct	s:9WidgetKit19StaticConfigurationV	-	StaticConfiguration	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	7dfab2991683cf89
+WidgetKit	swift-property	s:9WidgetKit19StaticConfigurationV4bodyQrvp	StaticConfiguration	body	-	some SwiftUI.WidgetConfiguration	-	-	-	4fd83ca984c65c87
+WidgetKit	swift-typealias	s:9WidgetKit19StaticConfigurationV4Bodya	StaticConfiguration	Body	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	4729fc3344e9b9a2
+WidgetKit	swift-method	s:9WidgetKit19StaticConfigurationV4kind8provider7contentACyxGSS_qd__x5EntryQyd__ctcAA16TimelineProviderRd__lufc	StaticConfiguration	init(kind:provider:content:)	-	-	WidgetKit.StaticConfiguration<Content> | Swift.String | Provider | (Provider.Entry) -> Content	-	-	3c156f04894018a7
+WidgetKit	swift-struct	s:9WidgetKit0A14RelevanceGroupV	-	WidgetRelevanceGroup	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	abc122783a538635
+WidgetKit	swift-method	s:9WidgetKit0A14RelevanceGroupV5namedyACSSFZ	WidgetRelevanceGroup	named(_:)	+	WidgetKit.WidgetRelevanceGroup	Swift.String	-	-	8e5df8a000152c7f
+WidgetKit	swift-property	s:9WidgetKit0A14RelevanceGroupV9ungroupedACvpZ	WidgetRelevanceGroup	ungrouped	+	WidgetKit.WidgetRelevanceGroup	-	-	-	ba36f98c469fdced
+WidgetKit	swift-property	s:9WidgetKit0A14RelevanceGroupV9automaticACvpZ	WidgetRelevanceGroup	automatic	+	WidgetKit.WidgetRelevanceGroup	-	-	-	b55e930fc3553dc5
+WidgetKit	swift-struct	s:9WidgetKit0A21AccentedRenderingModeV	-	WidgetAccentedRenderingMode	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	184f0d108f95a02d
+WidgetKit	swift-property	s:9WidgetKit0A21AccentedRenderingModeV8accentedACvpZ	WidgetAccentedRenderingMode	accented	+	WidgetKit.WidgetAccentedRenderingMode	-	-	-	77149daff1b2a7c5
+WidgetKit	swift-property	s:9WidgetKit0A21AccentedRenderingModeV11desaturatedACvpZ	WidgetAccentedRenderingMode	desaturated	+	WidgetKit.WidgetAccentedRenderingMode	-	-	-	af612ee6def02609
+WidgetKit	swift-property	s:9WidgetKit0A21AccentedRenderingModeV19accentedDesaturatedACvpZ	WidgetAccentedRenderingMode	accentedDesaturated	+	WidgetKit.WidgetAccentedRenderingMode	-	-	-	6352de5004f6d8cd
+WidgetKit	swift-property	s:9WidgetKit0A21AccentedRenderingModeV9fullColorACvpZ	WidgetAccentedRenderingMode	fullColor	+	WidgetKit.WidgetAccentedRenderingMode	-	-	-	73aaf49d49747314
+WidgetKit	swift-method	s:9WidgetKit0A21AccentedRenderingModeV2eeoiySbAC_ACtFZ	WidgetAccentedRenderingMode	==(_:_:)	+	Swift.Bool	WidgetKit.WidgetAccentedRenderingMode | WidgetKit.WidgetAccentedRenderingMode	-	-	1e931a5bc104a6f3
+WidgetKit	swift-method	s:9WidgetKit0A21AccentedRenderingModeV4hash4intoys6HasherVz_tF	WidgetAccentedRenderingMode	hash(into:)	-	()	Swift.Hasher	-	-	cbb346f1c5b6948c
+WidgetKit	swift-property	s:9WidgetKit0A21AccentedRenderingModeV9hashValueSivp	WidgetAccentedRenderingMode	hashValue	-	Swift.Int	-	-	-	d7134187e0e047f8
+WidgetKit	swift-class	s:9WidgetKit13ControlCenterC	-	ControlCenter	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	08e7f14e29d59705
+WidgetKit	swift-property	s:9WidgetKit13ControlCenterC6sharedACvpZ	ControlCenter	shared	+	WidgetKit.ControlCenter	-	-	-	4913545a43d45227
+WidgetKit	swift-method	s:9WidgetKit13ControlCenterC15currentControlsSayAA0C4InfoVGyYaKF	ControlCenter	currentControls()	-	[WidgetKit.ControlInfo]	-	-	-	aa5477127c50895b
+WidgetKit	swift-method	s:9WidgetKit13ControlCenterC14reloadControls6ofKindySS_tF	ControlCenter	reloadControls(ofKind:)	-	()	Swift.String	-	-	d2fa755008406c0c
+WidgetKit	swift-method	s:9WidgetKit13ControlCenterC17reloadAllControlsyyF	ControlCenter	reloadAllControls()	-	()	-	-	-	196a120cfbffb7c2
+WidgetKit	swift-struct	s:9WidgetKit11ControlInfoV	-	ControlInfo	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	b68c8a0937799461
+WidgetKit	swift-method	s:9WidgetKit11ControlInfoV19configurationIntent2ofxSgxm_t10AppIntents0c13ConfigurationF0RzlF	ControlInfo	configurationIntent(of:)	-	Intent?	Intent.Type	-	-	64bb6a2e360481e8
+WidgetKit	swift-property	s:9WidgetKit11ControlInfoV4kindSSvp	ControlInfo	kind	-	Swift.String	-	-	-	3be94fddd3ca5c0c
+WidgetKit	swift-property	s:9WidgetKit11ControlInfoV04pushD0AA0c4PushD0VSgvp	ControlInfo	pushInfo	-	WidgetKit.ControlPushInfo?	-	-	-	c9bcb5ad251f5570
+WidgetKit	swift-property	s:9WidgetKit11ControlInfoV2idSSvp	ControlInfo	id	-	Swift.String	-	-	-	b005e33ec08ea162
+WidgetKit	swift-method	s:9WidgetKit11ControlInfoV2eeoiySbAC_ACtFZ	ControlInfo	==(_:_:)	+	Swift.Bool	WidgetKit.ControlInfo | WidgetKit.ControlInfo	-	-	0224bfe1a3cd7f5c
+WidgetKit	swift-method	s:9WidgetKit11ControlInfoV4hash4intoys6HasherVz_tF	ControlInfo	hash(into:)	-	()	Swift.Hasher	-	-	dfe3b698c5505d19
+WidgetKit	swift-typealias	s:9WidgetKit11ControlInfoV2IDa	ControlInfo	ID	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	7d84ba9562e78454
+WidgetKit	swift-property	s:9WidgetKit11ControlInfoV9hashValueSivp	ControlInfo	hashValue	-	Swift.Int	-	-	-	75804793f8245364
+WidgetKit	swift-struct	s:9WidgetKit13LevelOfDetailV	-	LevelOfDetail	-	-	-	ios=26.0	-	7727a6aceb587f1f
+WidgetKit	swift-property	s:9WidgetKit13LevelOfDetailV7defaultACvpZ	LevelOfDetail	default	+	WidgetKit.LevelOfDetail	-	-	-	ea4fc06a1aeb4134
+WidgetKit	swift-property	s:9WidgetKit13LevelOfDetailV10simplifiedACvpZ	LevelOfDetail	simplified	+	WidgetKit.LevelOfDetail	-	-	-	7caa7ef65d0255f3
+WidgetKit	swift-method	s:9WidgetKit13LevelOfDetailV2eeoiySbAC_ACtFZ	LevelOfDetail	==(_:_:)	+	Swift.Bool	WidgetKit.LevelOfDetail | WidgetKit.LevelOfDetail	-	-	b99ebf698379bc03
+WidgetKit	swift-struct	s:9WidgetKit19ActivityViewContextV	-	ActivityViewContext	-	-	-	ios=16.1	-	fc0fa39abab47cfe
+WidgetKit	swift-property	s:9WidgetKit19ActivityViewContextV10activityIDSSvp	ActivityViewContext	activityID	-	Swift.String	-	-	-	c846a5d9d739bb8c
+WidgetKit	swift-property	s:9WidgetKit19ActivityViewContextV10attributesxvp	ActivityViewContext	attributes	-	Attributes	-	-	-	22a3f6707b76f9c8
+WidgetKit	swift-property	s:9WidgetKit19ActivityViewContextV5state12ContentStateQzvp	ActivityViewContext	state	-	Attributes.ContentState	-	-	-	b8ea2b8e42aa30f4
+WidgetKit	swift-property	s:9WidgetKit19ActivityViewContextV7isStaleSbvp	ActivityViewContext	isStale	-	Swift.Bool	-	ios=16.2,macos=26.0	-	7cc041b3913da79e
+WidgetKit	swift-struct	s:9WidgetKit17DynamicIslandModeV	-	DynamicIslandMode	-	-	-	ios=16.1	-	bf60f8af3dde1e4a
+WidgetKit	swift-property	s:9WidgetKit17DynamicIslandModeV8expandedACvpZ	DynamicIslandMode	expanded	+	WidgetKit.DynamicIslandMode	-	-	-	066f78896e340c1c
+WidgetKit	swift-property	s:9WidgetKit17DynamicIslandModeV14compactLeadingACvpZ	DynamicIslandMode	compactLeading	+	WidgetKit.DynamicIslandMode	-	-	-	c39bf3c093196b2a
+WidgetKit	swift-property	s:9WidgetKit17DynamicIslandModeV15compactTrailingACvpZ	DynamicIslandMode	compactTrailing	+	WidgetKit.DynamicIslandMode	-	-	-	1104d4c89a6958ac
+WidgetKit	swift-property	s:9WidgetKit17DynamicIslandModeV7minimalACvpZ	DynamicIslandMode	minimal	+	WidgetKit.DynamicIslandMode	-	-	-	3cbaad7ad78cc4d9
+WidgetKit	swift-method	s:9WidgetKit17DynamicIslandModeV2eeoiySbAC_ACtFZ	DynamicIslandMode	==(_:_:)	+	Swift.Bool	WidgetKit.DynamicIslandMode | WidgetKit.DynamicIslandMode	-	-	282ef4500bec0ce3
+WidgetKit	swift-struct	s:9WidgetKit13DynamicIslandV	-	DynamicIsland	-	-	-	ios=16.1	-	634485b44a56f623
+WidgetKit	swift-method	s:9WidgetKit13DynamicIslandV8expanded14compactLeading0F8Trailing7minimalAcA0cD15ExpandedContentVyxGyc_q_ycq0_ycq1_yctc7SwiftUI4ViewRzAkLR_AkLR0_AkLR1_r2_lufc	DynamicIsland	init(expanded:compactLeading:compactTrailing:minimal:)	-	-	WidgetKit.DynamicIsland | () -> WidgetKit.DynamicIslandExpandedContent<Expanded> | () -> CompactLeading | () -> CompactTrailing | () -> Minimal	-	-	341fef7cc60be6a4
+WidgetKit	swift-method	s:9WidgetKit13DynamicIslandV9widgetURLyAC10Foundation0F0VSgF	DynamicIsland	widgetURL(_:)	-	WidgetKit.DynamicIsland	Foundation.URL?	-	-	684609b560bd20cf
+WidgetKit	swift-method	s:9WidgetKit13DynamicIslandV11keylineTintyAC7SwiftUI5ColorVSgF	DynamicIsland	keylineTint(_:)	-	WidgetKit.DynamicIsland	SwiftUI.Color?	-	-	ead03b249bb288e6
+WidgetKit	swift-method	s:9WidgetKit13DynamicIslandV14contentMargins__3forAC7SwiftUI4EdgeO3SetV_SdAA0cD4ModeVtF	DynamicIsland	contentMargins(_:_:for:)	-	WidgetKit.DynamicIsland	SwiftUI.Edge.Set | Swift.Double | WidgetKit.DynamicIslandMode	-	-	5076ab1bc0632d00
+WidgetKit	swift-struct	s:9WidgetKit0A18RelevanceAttributeV	-	WidgetRelevanceAttribute	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	9872e3ddcdfa0602
+WidgetKit	swift-method	s:9WidgetKit0A18RelevanceAttributeVAAytRszlE7contextACyytG0cB015RelevantContextV_tcfc	WidgetRelevanceAttribute	init(context:)	-	-	WidgetKit.WidgetRelevanceAttribute<Configuration> | AppIntents.RelevantContext	-	-	87fb8ae32290205a
+WidgetKit	swift-method	s:9WidgetKit0A18RelevanceAttributeVAAytRszlE5groupACyytGAA0aC5GroupV_tcfc	WidgetRelevanceAttribute	init(group:)	-	-	WidgetKit.WidgetRelevanceAttribute<Configuration> | WidgetKit.WidgetRelevanceGroup	-	-	23be76017090ec44
+WidgetKit	swift-method	s:9WidgetKit0A18RelevanceAttributeVAA10AppIntents0A19ConfigurationIntentRzlE13configuration7contextACyxGx_0cB015RelevantContextVtcfc	WidgetRelevanceAttribute	init(configuration:context:)	-	-	WidgetKit.WidgetRelevanceAttribute<Configuration> | Configuration | AppIntents.RelevantContext	-	-	f4a8f74c3ea42494
+WidgetKit	swift-method	s:9WidgetKit0A18RelevanceAttributeVAA10AppIntents0A19ConfigurationIntentRzlE13configuration5groupACyxGx_AA0aC5GroupVtcfc	WidgetRelevanceAttribute	init(configuration:group:)	-	-	WidgetKit.WidgetRelevanceAttribute<Configuration> | Configuration | WidgetKit.WidgetRelevanceGroup	-	-	7f12475542f570d4
+WidgetKit	swift-method	s:9WidgetKit0A18RelevanceAttributeVAASo8INIntentCRbzlE13configuration7contextACyxGx_0cB015RelevantContextVtcfc	WidgetRelevanceAttribute	init(configuration:context:)	-	-	WidgetKit.WidgetRelevanceAttribute<Configuration> | Configuration | AppIntents.RelevantContext	-	-	0ac442d6f714763c
+WidgetKit	swift-method	s:9WidgetKit0A18RelevanceAttributeVAASo8INIntentCRbzlE13configuration5groupACyxGx_AA0aC5GroupVtcfc	WidgetRelevanceAttribute	init(configuration:group:)	-	-	WidgetKit.WidgetRelevanceAttribute<Configuration> | Configuration | WidgetKit.WidgetRelevanceGroup	-	-	9c1735a84e1098fb
+WidgetKit	swift-struct	s:9WidgetKit21ActivityConfigurationV	-	ActivityConfiguration	-	-	-	ios=16.1	-	0ca8fe9598dea263
+WidgetKit	swift-method	s:9WidgetKit21ActivityConfigurationV3for7content13dynamicIslandACyxGxm_qd__AA0C11ViewContextVyxGcAA07DynamicH0VAJctc7SwiftUI0I0Rd__lufc	ActivityConfiguration	init(for:content:dynamicIsland:)	-	-	WidgetKit.ActivityConfiguration<Attributes> | Attributes.Type | (WidgetKit.ActivityViewContext<Attributes>) -> Content | (WidgetKit.ActivityViewContext<Attributes>) -> WidgetKit.DynamicIsland	-	-	412dd0e813fbfd3a
+WidgetKit	swift-property	s:9WidgetKit21ActivityConfigurationV4bodyQrvp	ActivityConfiguration	body	-	some SwiftUI.WidgetConfiguration	-	-	-	bb051545265e6b39
+WidgetKit	swift-typealias	s:9WidgetKit21ActivityConfigurationV4Bodya	ActivityConfiguration	Body	-	-	-	ios=16.1	-	e9d5f7ae86dd7df2
+WidgetKit	swift-struct	s:9WidgetKit28DynamicIslandExpandedContentV	-	DynamicIslandExpandedContent	-	-	-	ios=16.1	-	a438e58bdc0ffcf0
+WidgetKit	swift-struct	s:9WidgetKit35DynamicIslandExpandedContentBuilderV	-	DynamicIslandExpandedContentBuilder	-	-	-	ios=16.1	-	d62b0b4686efa767
+WidgetKit	swift-method	s:9WidgetKit35DynamicIslandExpandedContentBuilderV17buildPartialBlock5firstAA0cdeF0VyQrGAA0cdE6RegionVyxG_t7SwiftUI4ViewRzlFZ	DynamicIslandExpandedContentBuilder	buildPartialBlock(first:)	+	WidgetKit.DynamicIslandExpandedContent<some SwiftUI.View>	WidgetKit.DynamicIslandExpandedRegion<C>	-	-	1034752fb795e91b
+WidgetKit	swift-method	s:9WidgetKit35DynamicIslandExpandedContentBuilderV17buildPartialBlock5firstAA0cdeF0VyQrGAGyxG_t7SwiftUI4ViewRzlFZ	DynamicIslandExpandedContentBuilder	buildPartialBlock(first:)	+	WidgetKit.DynamicIslandExpandedContent<some SwiftUI.View>	WidgetKit.DynamicIslandExpandedContent<C>	-	-	1e520d8504179f9d
+WidgetKit	swift-method	s:9WidgetKit35DynamicIslandExpandedContentBuilderV17buildPartialBlock11accumulated4nextAA0cdeF0VyQrGAHyxG_AA0cdE6RegionVyq_Gt7SwiftUI4ViewRzAnOR_r0_lFZ	DynamicIslandExpandedContentBuilder	buildPartialBlock(accumulated:next:)	+	WidgetKit.DynamicIslandExpandedContent<some SwiftUI.View>	WidgetKit.DynamicIslandExpandedContent<C0> | WidgetKit.DynamicIslandExpandedRegion<C1>	-	-	cca7268ea4544627
+WidgetKit	swift-method	s:9WidgetKit35DynamicIslandExpandedContentBuilderV17buildPartialBlock11accumulated4nextAA0cdeF0VyQrGAHyxG_AHyq_Gt7SwiftUI4ViewRzAlMR_r0_lFZ	DynamicIslandExpandedContentBuilder	buildPartialBlock(accumulated:next:)	+	WidgetKit.DynamicIslandExpandedContent<some SwiftUI.View>	WidgetKit.DynamicIslandExpandedContent<C0> | WidgetKit.DynamicIslandExpandedContent<C1>	-	-	b340d211f5377773
+WidgetKit	swift-protocol	s:9WidgetKit29AppIntentControlValueProviderP	-	AppIntentControlValueProvider	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	f206c4ab6ee55978
+WidgetKit	swift-method	s:9WidgetKit29AppIntentControlValueProviderP07previewF013configuration0F0Qz13ConfigurationQz_tF	AppIntentControlValueProvider	previewValue(configuration:)	-	Self.Value	Self.Configuration	-	-	863d250a3d815dbe
+WidgetKit	swift-method	s:9WidgetKit29AppIntentControlValueProviderP07currentF013configuration0F0Qz13ConfigurationQz_tYaKF	AppIntentControlValueProvider	currentValue(configuration:)	-	Self.Value	Self.Configuration	-	-	f9419f770640d2c4
+WidgetKit	swift-struct	s:9WidgetKit29AppIntentControlConfigurationV	-	AppIntentControlConfiguration	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	8d37ea61d1659c90
+WidgetKit	swift-property	s:9WidgetKit29AppIntentControlConfigurationV4bodyQrvp	AppIntentControlConfiguration	body	-	some SwiftUI.ControlWidgetConfiguration	-	-	-	e383a35bd56bbc82
+WidgetKit	swift-typealias	s:9WidgetKit29AppIntentControlConfigurationV4Bodya	AppIntentControlConfiguration	Body	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	13ca36f58ad81c2e
+WidgetKit	swift-method	s:9WidgetKit29AppIntentControlConfigurationV4kind8provider7contentACyxq_GSS_qd__q_5ValueQyd__ctc0F0Qyd__RszAA0cdeJ8ProviderRd__lufc	AppIntentControlConfiguration	init(kind:provider:content:)	-	-	WidgetKit.AppIntentControlConfiguration<Configuration, Content> | Swift.String | Provider | (Provider.Value) -> Content	-	-	21f59eb5e28d9515
+WidgetKit	swift-method	s:9WidgetKit29AppIntentControlConfigurationV4kind6intent7contentACyxq_GSS_xmq_xctcfc	AppIntentControlConfiguration	init(kind:intent:content:)	-	-	WidgetKit.AppIntentControlConfiguration<Configuration, Content> | Swift.String | Configuration.Type | (Configuration) -> Content	-	-	94035f0aab5fb4ef
+WidgetKit	swift-struct	s:9WidgetKit0A14PreviewContextV	-	WidgetPreviewContext	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	68784e62f90a0f14
+WidgetKit	swift-method	s:9WidgetKit0A14PreviewContextVy5ValueQzxmc7SwiftUI0cD3KeyRzluip	WidgetPreviewContext	subscript(_:)	-	Key.Value	Key.Type	-	-	7b2c4b9704c969d2
+WidgetKit	swift-method	s:9WidgetKit0A14PreviewContextV6familyAcA0A6FamilyO_tcfc	WidgetPreviewContext	init(family:)	-	-	WidgetKit.WidgetPreviewContext | WidgetKit.WidgetFamily	-	-	4fb7b2205ad8ef82
+WidgetKit	swift-protocol	s:9WidgetKit18ControlPushHandlerP	-	ControlPushHandler	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	3bc80c6e0ec7c0e6
+WidgetKit	swift-method	s:9WidgetKit18ControlPushHandlerPxycfc	ControlPushHandler	init()	-	-	Self	-	-	ea635f3dc46b39cb
+WidgetKit	swift-method	s:9WidgetKit18ControlPushHandlerP19pushTokensDidChange8controlsySayAA0C4InfoVG_tF	ControlPushHandler	pushTokensDidChange(controls:)	-	()	[WidgetKit.ControlInfo]	-	-	7976c8c09d5cca69
+WidgetKit	swift-protocol	s:9WidgetKit16TimelineProviderP	-	TimelineProvider	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	96ae3d76dcf29723
+WidgetKit	swift-typealias	s:9WidgetKit16TimelineProviderP7Contexta	TimelineProvider	Context	-	-	-	-	-	23d1befd2a9c042e
+WidgetKit	swift-method	s:9WidgetKit16TimelineProviderP11placeholder2in5EntryQzAA0cD7ContextV_tF	TimelineProvider	placeholder(in:)	-	Self.Entry	Self.Context	-	-	8e968d8d5be06134
+WidgetKit	swift-method	s:9WidgetKit16TimelineProviderP11getSnapshot2in10completionyAA0cD7ContextV_y5EntryQzctF	TimelineProvider	getSnapshot(in:completion:)	-	()	Self.Context | (Self.Entry) -> Swift.Void	-	-	b64d1eb2072dee72
+WidgetKit	swift-method	s:9WidgetKit16TimelineProviderP03getC02in10completionyAA0cD7ContextV_yAA0C0Vy5EntryQzGctF	TimelineProvider	getTimeline(in:completion:)	-	()	Self.Context | (WidgetKit.Timeline<Self.Entry>) -> Swift.Void	-	-	d2afaa7a988c0d11
+WidgetKit	swift-method	s:9WidgetKit16TimelineProviderP9relevanceAA0A9RelevanceVyytGyYaF	TimelineProvider	relevance()	-	WidgetKit.WidgetRelevance<Swift.Void>	-	ios=18.0,macos=15.0,watchos=11.0	-	e2e6da96d63ca4ac
+WidgetKit	swift-method	s:9WidgetKit16TimelineProviderPAAE9relevanceAA0A9RelevanceVyytGyYaF	TimelineProvider	relevance()	-	WidgetKit.WidgetRelevance<Swift.Void>	-	ios=18.0,macos=15.0,watchos=11.0	-	27cdd582ae14b6fc
+WidgetKit	swift-class	s:9WidgetKit0A6CenterC	-	WidgetCenter	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	3e8fd378b99361e7
+WidgetKit	swift-property	s:9WidgetKit0A6CenterC6sharedACvpZ	WidgetCenter	shared	+	WidgetKit.WidgetCenter	-	-	-	a67adef44d95ae4b
+WidgetKit	swift-struct	s:9WidgetKit0A6CenterC11UserInfoKeyV	WidgetCenter	UserInfoKey	-	-	-	-	-	0c69377f0be1a51e
+WidgetKit	swift-property	s:9WidgetKit0A6CenterC11UserInfoKeyV4kindSSvpZ	WidgetCenter.UserInfoKey	kind	+	Swift.String	-	-	-	7a1e0c9d9c29f3a2
+WidgetKit	swift-property	s:9WidgetKit0A6CenterC11UserInfoKeyV6familySSvpZ	WidgetCenter.UserInfoKey	family	+	Swift.String	-	-	-	ea8a2bd0c5d95a64
+WidgetKit	swift-property	s:9WidgetKit0A6CenterC11UserInfoKeyV10activityIDSSvpZ	WidgetCenter.UserInfoKey	activityID	+	Swift.String	-	-	-	6e767a2992236280
+WidgetKit	swift-method	s:9WidgetKit0A6CenterC38invalidateConfigurationRecommendationsyyF	WidgetCenter	invalidateConfigurationRecommendations()	-	()	-	ios=16.0,macos=13.0,watchos=9.0	-	4349bceb2570af19
+WidgetKit	swift-method	s:9WidgetKit0A6CenterC24getCurrentConfigurationsyyys6ResultOySayAA0A4InfoVGs5Error_pGcF	WidgetCenter	getCurrentConfigurations(_:)	-	()	(Swift.Result<[WidgetKit.WidgetInfo], any Swift.Error>) -> Swift.Void	-	-	6208a77f7f75fd5f
+WidgetKit	swift-method	s:9WidgetKit0A6CenterC21currentConfigurationsSayAA0A4InfoVGyYaKF	WidgetCenter	currentConfigurations()	-	[WidgetKit.WidgetInfo]	-	ios=18.0,macos=15.0,watchos=11.0	-	fb8e2c73e92e0572
+WidgetKit	swift-method	s:9WidgetKit0A6CenterC15reloadTimelines6ofKindySS_tF	WidgetCenter	reloadTimelines(ofKind:)	-	()	Swift.String	-	-	373680157a66766e
+WidgetKit	swift-method	s:9WidgetKit0A6CenterC18reloadAllTimelinesyyF	WidgetCenter	reloadAllTimelines()	-	()	-	-	-	d57bdfccaeff386a
+WidgetKit	swift-method	s:9WidgetKit0A6CenterC19invalidateRelevance6ofKindySS_tF	WidgetCenter	invalidateRelevance(ofKind:)	-	()	Swift.String	-	-	9caf58b2fa76cd86
+WidgetKit	swift-property	s:9WidgetKit0A6CenterC15currentPushInfoAA0aeF0VSgvp	WidgetCenter	currentPushInfo	-	WidgetKit.WidgetPushInfo?	-	-	-	02a3fb0894887e31
+WidgetKit	swift-struct	s:9WidgetKit09AccessoryA10BackgroundV	-	AccessoryWidgetBackground	-	-	-	ios=16.0,macos=13.0,watchos=9.0	-	b7a59e3b87196b14
+WidgetKit	swift-method	s:9WidgetKit09AccessoryA10BackgroundVACycfc	AccessoryWidgetBackground	init()	-	-	WidgetKit.AccessoryWidgetBackground	-	-	98cf483e2d480ece
+WidgetKit	swift-property	s:9WidgetKit09AccessoryA10BackgroundV4bodyQrvp	AccessoryWidgetBackground	body	-	some SwiftUI.View	-	-	-	8fe744436eb8b8e9
+WidgetKit	swift-typealias	s:9WidgetKit09AccessoryA10BackgroundV4Bodya	AccessoryWidgetBackground	Body	-	-	-	ios=16.0,macos=13.0,watchos=9.0	-	4a48b915b323d041
+WidgetKit	swift-struct	s:9WidgetKit22PreviewTimelineBuilderV	-	PreviewTimelineBuilder	-	-	-	ios=17.0,macos=14.0,watchos=10.0	-	a89301935440161e
+WidgetKit	swift-method	s:9WidgetKit22PreviewTimelineBuilderV15buildExpressionySayAA0D5Entry_pGxAaERzlFZ	PreviewTimelineBuilder	buildExpression(_:)	+	[any WidgetKit.TimelineEntry]	some WidgetKit.TimelineEntry	-	-	27b605b9f790b180
+WidgetKit	swift-method	s:9WidgetKit22PreviewTimelineBuilderV17buildPartialBlock5firstSayAA0D5Entry_pGAG_tFZ	PreviewTimelineBuilder	buildPartialBlock(first:)	+	[any WidgetKit.TimelineEntry]	[any WidgetKit.TimelineEntry]	-	-	c84b4513d49a27a0
+WidgetKit	swift-method	s:9WidgetKit22PreviewTimelineBuilderV17buildPartialBlock11accumulated4nextSayAA0D5Entry_pGAH_AHtFZ	PreviewTimelineBuilder	buildPartialBlock(accumulated:next:)	+	[any WidgetKit.TimelineEntry]	[any WidgetKit.TimelineEntry] | [any WidgetKit.TimelineEntry]	-	-	29d9eef84682a89a
+WidgetKit	swift-method	s:9WidgetKit22PreviewTimelineBuilderV10buildArrayySayAA0D5Entry_pGSayAFGFZ	PreviewTimelineBuilder	buildArray(_:)	+	[any WidgetKit.TimelineEntry]	[[any WidgetKit.TimelineEntry]]	-	-	26900def25362a95
+WidgetKit	swift-enum	s:9WidgetKit14ActivityFamilyO	-	ActivityFamily	-	-	-	ios=18.0	-	ec04e2827743052a
+WidgetKit	swift-constant	s:9WidgetKit14ActivityFamilyO5smallyA2CmF	ActivityFamily	small	-	-	-	-	-	f472bdbf53c3efbd
+WidgetKit	swift-constant	s:9WidgetKit14ActivityFamilyO6mediumyA2CmF	ActivityFamily	medium	-	-	-	-	-	2557500bf16e2b73
+WidgetKit	swift-typealias	s:9WidgetKit14ActivityFamilyO8RawValuea	ActivityFamily	RawValue	-	-	-	-	-	c693f8b04c5c9405
+WidgetKit	swift-method	s:9WidgetKit14ActivityFamilyO8rawValueACSgSi_tcfc	ActivityFamily	init(rawValue:)	-	-	WidgetKit.ActivityFamily? | Swift.Int	-	-	334419d881ab8e4d
+WidgetKit	swift-property	s:9WidgetKit14ActivityFamilyO8rawValueSivp	ActivityFamily	rawValue	-	Swift.Int	-	-	-	7881266ad12a4fb5
+WidgetKit	swift-property	s:9WidgetKit14ActivityFamilyO11descriptionSSvp	ActivityFamily	description	-	Swift.String	-	-	-	745096ea8d446378
+WidgetKit	swift-struct	s:9WidgetKit39SupportedActivityFamiliesEnvironmentKeyV	-	SupportedActivityFamiliesEnvironmentKey	-	-	-	ios=18.0	-	81fd8cd9f7b1ef49
+WidgetKit	swift-property	s:9WidgetKit39SupportedActivityFamiliesEnvironmentKeyV12defaultValueShyAA0D6FamilyOGvpZ	SupportedActivityFamiliesEnvironmentKey	defaultValue	+	Swift.Set<WidgetKit.ActivityFamily>	-	-	-	a1ab3b9a05f8cef4
+WidgetKit	swift-typealias	s:9WidgetKit39SupportedActivityFamiliesEnvironmentKeyV5Valuea	SupportedActivityFamiliesEnvironmentKey	Value	-	-	-	ios=18.0	-	8728d335e892e574
+WidgetKit	swift-struct	s:9WidgetKit0A8PushInfoV	-	WidgetPushInfo	-	-	-	ios=26.0,macos=26.0,watchos=26.0	-	e24720314f7adacf
+WidgetKit	swift-property	s:9WidgetKit0A8PushInfoV5token10Foundation4DataVvp	WidgetPushInfo	token	-	Foundation.Data	-	-	-	7cd38f6ca24f3602
+WidgetKit	swift-protocol	s:9WidgetKit0A11PushHandlerP	-	WidgetPushHandler	-	-	-	ios=26.0,macos=26.0,watchos=26.0	-	95ae430a86e4983a
+WidgetKit	swift-method	s:9WidgetKit0A11PushHandlerPxycfc	WidgetPushHandler	init()	-	-	Self	-	-	777be16fd7985117
+WidgetKit	swift-method	s:9WidgetKit0A11PushHandlerP18pushTokenDidChange_7widgetsyAA0aC4InfoV_SayAA0aJ0VGtF	WidgetPushHandler	pushTokenDidChange(_:widgets:)	-	()	WidgetKit.WidgetPushInfo | [WidgetKit.WidgetInfo]	-	-	b68c764b968755a0
+WidgetKit	swift-struct	s:9WidgetKit44DynamicIslandExpandedRegionVerticalPlacementV	-	DynamicIslandExpandedRegionVerticalPlacement	-	-	-	ios=16.1	-	0cc7a5b4bfbaf3d6
+WidgetKit	swift-property	s:9WidgetKit44DynamicIslandExpandedRegionVerticalPlacementV7defaultACvpZ	DynamicIslandExpandedRegionVerticalPlacement	default	+	WidgetKit.DynamicIslandExpandedRegionVerticalPlacement	-	-	-	52c2ba132bd15839
+WidgetKit	swift-property	s:9WidgetKit44DynamicIslandExpandedRegionVerticalPlacementV14belowIfTooWideACvpZ	DynamicIslandExpandedRegionVerticalPlacement	belowIfTooWide	+	WidgetKit.DynamicIslandExpandedRegionVerticalPlacement	-	-	-	9fc6deabd0b534e1
+WidgetKit	swift-method	s:9WidgetKit44DynamicIslandExpandedRegionVerticalPlacementV2eeoiySbAC_ACtFZ	DynamicIslandExpandedRegionVerticalPlacement	==(_:_:)	+	Swift.Bool	WidgetKit.DynamicIslandExpandedRegionVerticalPlacement | WidgetKit.DynamicIslandExpandedRegionVerticalPlacement	-	-	eede17cb46ad3516
+WidgetKit	swift-struct	s:9WidgetKit35DynamicIslandExpandedRegionPositionV	-	DynamicIslandExpandedRegionPosition	-	-	-	ios=16.1	-	a519c3ed54f7a156
+WidgetKit	swift-property	s:9WidgetKit35DynamicIslandExpandedRegionPositionV7leadingACvpZ	DynamicIslandExpandedRegionPosition	leading	+	WidgetKit.DynamicIslandExpandedRegionPosition	-	ios=16.1	-	6da838d1ee71e957
+WidgetKit	swift-property	s:9WidgetKit35DynamicIslandExpandedRegionPositionV8trailingACvpZ	DynamicIslandExpandedRegionPosition	trailing	+	WidgetKit.DynamicIslandExpandedRegionPosition	-	ios=16.1	-	bfd3d5afdb08f251
+WidgetKit	swift-property	s:9WidgetKit35DynamicIslandExpandedRegionPositionV6centerACvpZ	DynamicIslandExpandedRegionPosition	center	+	WidgetKit.DynamicIslandExpandedRegionPosition	-	ios=16.1	-	2c34304794851e2e
+WidgetKit	swift-property	s:9WidgetKit35DynamicIslandExpandedRegionPositionV6bottomACvpZ	DynamicIslandExpandedRegionPosition	bottom	+	WidgetKit.DynamicIslandExpandedRegionPosition	-	ios=16.1	-	5c358fb33978eade
+WidgetKit	swift-struct	s:9WidgetKit27DynamicIslandExpandedRegionV	-	DynamicIslandExpandedRegion	-	-	-	ios=16.1	-	4080dd1c790d7a31
+WidgetKit	swift-method	s:9WidgetKit27DynamicIslandExpandedRegionV_8priority7contentACyxGAA0cdeF8PositionV_SdxyXEtcfc	DynamicIslandExpandedRegion	init(_:priority:content:)	-	-	WidgetKit.DynamicIslandExpandedRegion<Content> | WidgetKit.DynamicIslandExpandedRegionPosition | Swift.Double | () -> Content	-	-	23538e54d04b9917
+WidgetKit	swift-method	s:9WidgetKit27DynamicIslandExpandedRegionV14contentMarginsyACyxG7SwiftUI4EdgeO3SetV_SdtF	DynamicIslandExpandedRegion	contentMargins(_:_:)	-	WidgetKit.DynamicIslandExpandedRegion<Content>	SwiftUI.Edge.Set | Swift.Double	ios=16.1	-	5e641d459f3faaa3
+WidgetKit	swift-enum	s:9WidgetKit0A6FamilyO	-	WidgetFamily	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	b72fb0bb5b0dd5bc
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO11systemSmallyA2CmF	WidgetFamily	systemSmall	-	-	-	ios=14.0,macos=11.0	-	fb8d48f9c244b92b
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO12systemMediumyA2CmF	WidgetFamily	systemMedium	-	-	-	ios=14.0,macos=11.0	-	5a1ff60eb33c6daa
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO11systemLargeyA2CmF	WidgetFamily	systemLarge	-	-	-	ios=14.0,macos=11.0	-	53fc2b0d8b7e80a5
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO16systemExtraLargeyA2CmF	WidgetFamily	systemExtraLarge	-	-	-	ios=15.0,macos=14.0	-	2243d626011f8aac
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO17accessoryCircularyA2CmF	WidgetFamily	accessoryCircular	-	-	-	ios=16.0,watchos=9.0	-	58c7af2d1a4aa1f4
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO20accessoryRectangularyA2CmF	WidgetFamily	accessoryRectangular	-	-	-	ios=16.0,watchos=9.0	-	ac14fd5206edcf75
+WidgetKit	swift-constant	s:9WidgetKit0A6FamilyO15accessoryInlineyA2CmF	WidgetFamily	accessoryInline	-	-	-	ios=16.0,watchos=9.0	-	f311703862d76fc8
+WidgetKit	swift-property	s:9WidgetKit0A6FamilyO16debugDescriptionSSvp	WidgetFamily	debugDescription	-	Swift.String	-	-	-	587c8bff9a134776
+WidgetKit	swift-property	s:9WidgetKit0A6FamilyO11descriptionSSvp	WidgetFamily	description	-	Swift.String	-	-	-	0d3afffb82a41169
+WidgetKit	swift-method	s:9WidgetKit0A6FamilyO8rawValueACSgSi_tcfc	WidgetFamily	init(rawValue:)	-	-	WidgetKit.WidgetFamily? | Swift.Int	-	-	23cf1a03f21e54cd
+WidgetKit	swift-typealias	s:9WidgetKit0A6FamilyO8RawValuea	WidgetFamily	RawValue	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	13ab80ff2d659e79
+WidgetKit	swift-property	s:9WidgetKit0A6FamilyO8rawValueSivp	WidgetFamily	rawValue	-	Swift.Int	-	-	-	d7759906334f31ca
+WidgetKit	swift-struct	s:9WidgetKit0A13RenderingModeV	-	WidgetRenderingMode	-	-	-	ios=16.0,macos=13.0,watchos=9.0	-	72778989bb19f14b
+WidgetKit	swift-property	s:9WidgetKit0A13RenderingModeV9fullColorACvpZ	WidgetRenderingMode	fullColor	+	WidgetKit.WidgetRenderingMode	-	-	-	bdc00cfff3378c43
+WidgetKit	swift-property	s:9WidgetKit0A13RenderingModeV8accentedACvpZ	WidgetRenderingMode	accented	+	WidgetKit.WidgetRenderingMode	-	-	-	640fbc60671ebbde
+WidgetKit	swift-property	s:9WidgetKit0A13RenderingModeV7vibrantACvpZ	WidgetRenderingMode	vibrant	+	WidgetKit.WidgetRenderingMode	-	-	-	fb50f37e57d8b1f2
+WidgetKit	swift-property	s:9WidgetKit0A13RenderingModeV11descriptionSSvp	WidgetRenderingMode	description	-	Swift.String	-	-	-	f53e519f2494c398
+WidgetKit	swift-method	s:9WidgetKit0A13RenderingModeV2eeoiySbAC_ACtFZ	WidgetRenderingMode	==(_:_:)	+	Swift.Bool	WidgetKit.WidgetRenderingMode | WidgetKit.WidgetRenderingMode	-	-	8c43536e1ec2da10
+WidgetKit	swift-protocol	s:9WidgetKit22IntentTimelineProviderP	-	IntentTimelineProvider	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	4e927944ab835ec1
+WidgetKit	swift-typealias	s:9WidgetKit22IntentTimelineProviderP7Contexta	IntentTimelineProvider	Context	-	-	-	-	-	e06b6e839698c33b
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderP15recommendationsSayAA0C14RecommendationVy0C0QzGGyF	IntentTimelineProvider	recommendations()	-	[WidgetKit.IntentRecommendation<Self.Intent>]	-	ios=16.0,macos=13.0,watchos=9.0	-	e4054f5512f6bdc5
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderP11placeholder2in5EntryQzAA0dE7ContextV_tF	IntentTimelineProvider	placeholder(in:)	-	Self.Entry	Self.Context	-	-	f6296d457d604631
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderP11getSnapshot3for2in10completiony0C0Qz_AA0dE7ContextVy5EntryQzctF	IntentTimelineProvider	getSnapshot(for:in:completion:)	-	()	Self.Intent | Self.Context | (Self.Entry) -> Swift.Void	-	-	a2ae74a76a616efc
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderP03getD03for2in10completiony0C0Qz_AA0dE7ContextVyAA0D0Vy5EntryQzGctF	IntentTimelineProvider	getTimeline(for:in:completion:)	-	()	Self.Intent | Self.Context | (WidgetKit.Timeline<Self.Entry>) -> Swift.Void	-	-	a081b2096e89a875
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderP9relevanceAA0A9RelevanceVy0C0QzGyYaF	IntentTimelineProvider	relevance()	-	WidgetKit.WidgetRelevance<Self.Intent>	-	ios=18.0,macos=15.0,watchos=11.0	-	f7c0a328c1ff82c2
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderPAAE15recommendationsSayAA0C14RecommendationVy0C0QzGGyF	IntentTimelineProvider	recommendations()	-	[WidgetKit.IntentRecommendation<Self.Intent>]	-	-	-	432e7cd205ff3fcb
+WidgetKit	swift-method	s:9WidgetKit22IntentTimelineProviderPAAE9relevanceAA0A9RelevanceVy0C0QzGyYaF	IntentTimelineProvider	relevance()	-	WidgetKit.WidgetRelevance<Self.Intent>	-	ios=18.0,macos=15.0,watchos=11.0	-	910d0576d75b02a8
+WidgetKit	swift-protocol	s:9WidgetKit20ControlValueProviderP	-	ControlValueProvider	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	ac77fbd4b7020b44
+WidgetKit	swift-property	s:9WidgetKit20ControlValueProviderP07previewD00D0Qzvp	ControlValueProvider	previewValue	-	Self.Value	-	-	-	f0adc74b48abb43a
+WidgetKit	swift-method	s:9WidgetKit20ControlValueProviderP07currentD00D0QzyYaKF	ControlValueProvider	currentValue()	-	Self.Value	-	-	-	b1394a7db3d69df3
+WidgetKit	swift-struct	s:9WidgetKit26StaticControlConfigurationV	-	StaticControlConfiguration	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	eeb18784fa11c4f6
+WidgetKit	swift-property	s:9WidgetKit26StaticControlConfigurationV4bodyQrvp	StaticControlConfiguration	body	-	some SwiftUI.ControlWidgetConfiguration	-	-	-	b888baa172fe716b
+WidgetKit	swift-typealias	s:9WidgetKit26StaticControlConfigurationV4Bodya	StaticControlConfiguration	Body	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	e337ff85e9429c22
+WidgetKit	swift-method	s:9WidgetKit26StaticControlConfigurationV4kind7contentACyxGSS_xyctcfc	StaticControlConfiguration	init(kind:content:)	-	-	WidgetKit.StaticControlConfiguration<Content> | Swift.String | () -> Content	-	-	806a6d8f113d0771
+WidgetKit	swift-method	s:9WidgetKit26StaticControlConfigurationV4kind8provider7contentACyxGSS_qd__x5ValueQyd__ctcAA0dI8ProviderRd__lufc	StaticControlConfiguration	init(kind:provider:content:)	-	-	WidgetKit.StaticControlConfiguration<Content> | Swift.String | Provider | (Provider.Value) -> Content	-	-	0337f20adcfc601b
+WidgetKit	swift-enum	s:9WidgetKit23ActivityPreviewViewKindO	-	ActivityPreviewViewKind	-	-	-	ios=16.2	-	4d918e6593c8e7d1
+WidgetKit	swift-constant	s:9WidgetKit23ActivityPreviewViewKindO7contentyA2CmF	ActivityPreviewViewKind	content	-	-	-	-	-	313b023b978cc71a
+WidgetKit	swift-constant	s:9WidgetKit23ActivityPreviewViewKindO13dynamicIslandyA2C07DynamichdE5StateOcACmF	ActivityPreviewViewKind	dynamicIsland	-	-	-	-	-	0b728ad58e9a1a20
+WidgetKit	swift-enum	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO	ActivityPreviewViewKind	DynamicIslandPreviewViewState	-	-	-	-	-	104c5f135ee87a4d
+WidgetKit	swift-constant	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO7compactyA2EmF	ActivityPreviewViewKind.DynamicIslandPreviewViewState	compact	-	-	-	-	-	b60282629ce73a00
+WidgetKit	swift-constant	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO7minimalyA2EmF	ActivityPreviewViewKind.DynamicIslandPreviewViewState	minimal	-	-	-	-	-	495389739cc4ff6f
+WidgetKit	swift-constant	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO8expandedyA2EmF	ActivityPreviewViewKind.DynamicIslandPreviewViewState	expanded	-	-	-	-	-	b478f35582821000
+WidgetKit	swift-method	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO2eeoiySbAE_AEtFZ	ActivityPreviewViewKind.DynamicIslandPreviewViewState	==(_:_:)	+	Swift.Bool	WidgetKit.ActivityPreviewViewKind.DynamicIslandPreviewViewState | WidgetKit.ActivityPreviewViewKind.DynamicIslandPreviewViewState	-	-	720a83cbc0d58837
+WidgetKit	swift-method	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO4hash4intoys6HasherVz_tF	ActivityPreviewViewKind.DynamicIslandPreviewViewState	hash(into:)	-	()	Swift.Hasher	-	-	b5f73645d8f23585
+WidgetKit	swift-property	s:9WidgetKit23ActivityPreviewViewKindO013DynamicIslanddE5StateO9hashValueSivp	ActivityPreviewViewKind.DynamicIslandPreviewViewState	hashValue	-	Swift.Int	-	-	-	a140c74cb232e7c2
+WidgetKit	swift-struct	s:9WidgetKit15ControlPushInfoV	-	ControlPushInfo	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	b8497d3e09bcd2e9
+WidgetKit	swift-property	s:9WidgetKit15ControlPushInfoV5token10Foundation4DataVvp	ControlPushInfo	token	-	Foundation.Data	-	-	-	8ccba7e2b4267252
+WidgetKit	swift-struct	s:9WidgetKit07ControlA6ToggleV	-	ControlWidgetToggle	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	b884226c9b5ee085
+WidgetKit	swift-property	s:9WidgetKit07ControlA6ToggleV4bodyQrvp	ControlWidgetToggle	body	-	some SwiftUI.ControlWidgetTemplate	-	-	-	247d6409afde474a
+WidgetKit	swift-typealias	s:9WidgetKit07ControlA6ToggleV4Bodya	ControlWidgetToggle	Body	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	ca80a0e4ac19b73b
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ToggleV4isOn6action5label10valueLabelACyxq_q0_GSb_q0_xycq_Sbctc10AppIntents14SetValueIntentR0_Sb0N4TypeRt0_rlufc	ControlWidgetToggle	init(isOn:action:label:valueLabel:)	-	-	WidgetKit.ControlWidgetToggle<Label, ValueLabel, Action> | Swift.Bool | Action | () -> Label | (Swift.Bool) -> ValueLabel	-	-	a8f141e411ad89bb
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ToggleV4isOn6action5labelACyxAA0caD12DefaultLabelVq0_GSb_q0_xyctcAHRs_10AppIntents14SetValueIntentR0_Sb0N4TypeRt0_rlufc	ControlWidgetToggle	init(isOn:action:label:)	-	-	WidgetKit.ControlWidgetToggle<Label, ValueLabel, Action> | Swift.Bool | Action | () -> Label	-	-	5994cd94444ca3a3
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ToggleVAA7SwiftUI4TextVRszrlE_4isOn6action10valueLabelACyAFq_q0_GAD18LocalizedStringKeyV_Sbq0_q_Sbctc10AppIntents14SetValueIntentR0_Sb0S4TypeRt0_rlufc	ControlWidgetToggle	init(_:isOn:action:valueLabel:)	-	-	WidgetKit.ControlWidgetToggle<Label, ValueLabel, Action> | SwiftUI.LocalizedStringKey | Swift.Bool | Action | (Swift.Bool) -> ValueLabel	-	-	8d74afdf3c1addac
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ToggleVAA7SwiftUI4TextVRszrlE_4isOn6action10valueLabelACyAFq_q0_G10Foundation23LocalizedStringResourceV_Sbq0_q_Sbctc10AppIntents14SetValueIntentR0_Sb0T4TypeRt0_rlufc	ControlWidgetToggle	init(_:isOn:action:valueLabel:)	-	-	WidgetKit.ControlWidgetToggle<Label, ValueLabel, Action> | Foundation.LocalizedStringResource | Swift.Bool | Action | (Swift.Bool) -> ValueLabel	-	-	c1088af799bfce3e
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ToggleVAA7SwiftUI4TextVRszrlE_4isOn6action10valueLabelACyAFq_q0_Gqd___Sbq0_q_Sbctc10AppIntents14SetValueIntentR0_SyRd__Sb0P4TypeRt0_lufc	ControlWidgetToggle	init(_:isOn:action:valueLabel:)	-	-	WidgetKit.ControlWidgetToggle<Label, ValueLabel, Action> | some Swift.StringProtocol | Swift.Bool | Action | (Swift.Bool) -> ValueLabel	-	-	c0a33d43e8af2f88
+WidgetKit	swift-struct	s:9WidgetKit07ControlA18ToggleDefaultLabelV	-	ControlWidgetToggleDefaultLabel	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	50b920b10dabd7da
+WidgetKit	swift-property	s:9WidgetKit07ControlA18ToggleDefaultLabelV4bodyQrvp	ControlWidgetToggleDefaultLabel	body	-	some SwiftUI.View	-	-	-	e07219161dc43b6a
+WidgetKit	swift-typealias	s:9WidgetKit07ControlA18ToggleDefaultLabelV4Bodya	ControlWidgetToggleDefaultLabel	Body	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	e7ae3f8aa0b3ae04
+WidgetKit	swift-struct	s:9WidgetKit19IntentConfigurationV	-	IntentConfiguration	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	e452ead2ac6db809
+WidgetKit	swift-property	s:9WidgetKit19IntentConfigurationV4bodyQrvp	IntentConfiguration	body	-	some SwiftUI.WidgetConfiguration	-	-	-	b77bc3e6f98d02ed
+WidgetKit	swift-typealias	s:9WidgetKit19IntentConfigurationV4Bodya	IntentConfiguration	Body	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	ee0cad5851e228e5
+WidgetKit	swift-method	s:9WidgetKit19IntentConfigurationV4kind6intent8provider7contentACyxq_GSS_xmqd__q_5EntryQyd__ctc0C0Qyd__RszAA0C16TimelineProviderRd__lufc	IntentConfiguration	init(kind:intent:provider:content:)	-	-	WidgetKit.IntentConfiguration<Intent, Content> | Swift.String | Intent.Type | Provider | (Provider.Entry) -> Content	-	-	94892a5d6707193a
+WidgetKit	swift-struct	s:9WidgetKit20IntentRecommendationV	-	IntentRecommendation	-	-	-	ios=16.0,macos=13.0,watchos=9.0	-	377200425ca274a1
+WidgetKit	swift-method	s:9WidgetKit20IntentRecommendationV6intent11descriptionACyxGx_7SwiftUI4TextVtcfc	IntentRecommendation	init(intent:description:)	-	-	WidgetKit.IntentRecommendation<T> | T | SwiftUI.Text	-	-	249ef7b70c33c2f5
+WidgetKit	swift-method	s:9WidgetKit20IntentRecommendationV6intent11descriptionACyxGx_7SwiftUI18LocalizedStringKeyVtcfc	IntentRecommendation	init(intent:description:)	-	-	WidgetKit.IntentRecommendation<T> | T | SwiftUI.LocalizedStringKey	-	-	fb620bdb8c425a18
+WidgetKit	swift-method	s:9WidgetKit20IntentRecommendationV6intent11descriptionACyxGx_10Foundation23LocalizedStringResourceVtcfc	IntentRecommendation	init(intent:description:)	-	-	WidgetKit.IntentRecommendation<T> | T | Foundation.LocalizedStringResource	-	-	4e7c1037d61eb6ba
+WidgetKit	swift-method	s:9WidgetKit20IntentRecommendationV6intent11descriptionACyxGx_qd__tcSyRd__lufc	IntentRecommendation	init(intent:description:)	-	-	WidgetKit.IntentRecommendation<T> | T | S	-	-	fda7291d0453f3dc
+WidgetKit	swift-struct	s:9WidgetKit07ControlA6ButtonV	-	ControlWidgetButton	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	76c36cbe3528b19c
+WidgetKit	swift-property	s:9WidgetKit07ControlA6ButtonV4bodyQrvp	ControlWidgetButton	body	-	some SwiftUI.ControlWidgetTemplate	-	-	-	c60c7d1c85a619f4
+WidgetKit	swift-typealias	s:9WidgetKit07ControlA6ButtonV4Bodya	ControlWidgetButton	Body	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	ed613c4732546238
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ButtonV6action5label0E5LabelACyxq_q0_Gq0__xycq_Sbctc10AppIntents0H6IntentR0_rlufc	ControlWidgetButton	init(action:label:actionLabel:)	-	-	WidgetKit.ControlWidgetButton<Label, ActionLabel, Action> | Action | () -> Label | (Swift.Bool) -> ActionLabel	-	-	016f543aea135c66
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ButtonV6action5labelACyxAA0caD18DefaultActionLabelVq0_Gq0__xyctcAGRs_10AppIntents0J6IntentR0_rlufc	ControlWidgetButton	init(action:label:)	-	-	WidgetKit.ControlWidgetButton<Label, ActionLabel, Action> | Action | () -> Label	-	-	1abe45958a56c7f0
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ButtonV6action5labelACyxAA0caD18DefaultActionLabelVq0_Gq0__xyctcAGRs_10AppIntents10OpenIntentR0_rlufc	ControlWidgetButton	init(action:label:)	-	-	WidgetKit.ControlWidgetButton<Label, ActionLabel, Action> | Action | () -> Label	-	-	4a7ace3e40d8b131
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ButtonVAA7SwiftUI4TextVRszrlE_6action0H5LabelACyAFq_q0_GAD18LocalizedStringKeyV_q0_q_Sbctc10AppIntents0M6IntentR0_rlufc	ControlWidgetButton	init(_:action:actionLabel:)	-	-	WidgetKit.ControlWidgetButton<Label, ActionLabel, Action> | SwiftUI.LocalizedStringKey | Action | (Swift.Bool) -> ActionLabel	-	-	445f751d9cb5eb8e
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ButtonVAA7SwiftUI4TextVRszrlE_6action0H5LabelACyAFq_q0_G10Foundation23LocalizedStringResourceV_q0_q_Sbctc10AppIntents0N6IntentR0_rlufc	ControlWidgetButton	init(_:action:actionLabel:)	-	-	WidgetKit.ControlWidgetButton<Label, ActionLabel, Action> | Foundation.LocalizedStringResource | Action | (Swift.Bool) -> ActionLabel	-	-	7353a805d86ff78e
+WidgetKit	swift-method	s:9WidgetKit07ControlA6ButtonVAA7SwiftUI4TextVRszrlE_6action0H5LabelACyAFq_q0_Gqd___q0_q_Sbctc10AppIntents0J6IntentR0_SyRd__lufc	ControlWidgetButton	init(_:action:actionLabel:)	-	-	WidgetKit.ControlWidgetButton<Label, ActionLabel, Action> | some Swift.StringProtocol | Action | (Swift.Bool) -> ActionLabel	-	-	83123a6b8204950d
+WidgetKit	swift-struct	s:9WidgetKit07ControlA24ButtonDefaultActionLabelV	-	ControlWidgetButtonDefaultActionLabel	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	d8709d5afd6d9f8a
+WidgetKit	swift-property	s:9WidgetKit07ControlA24ButtonDefaultActionLabelV4bodyQrvp	ControlWidgetButtonDefaultActionLabel	body	-	some SwiftUI.View	-	-	-	c05e42874351aec3
+WidgetKit	swift-typealias	s:9WidgetKit07ControlA24ButtonDefaultActionLabelV4Bodya	ControlWidgetButtonDefaultActionLabel	Body	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	f83f0639b47b1f86
+WidgetKit	swift-struct	s:9WidgetKit8TimelineV	-	Timeline	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	954b64392944de88
+WidgetKit	swift-property	s:9WidgetKit8TimelineV7entriesSayxGvp	Timeline	entries	-	[EntryType]	-	-	-	6ad660c0ebb4a502
+WidgetKit	swift-property	s:9WidgetKit8TimelineV6policyAA0C12ReloadPolicyVvp	Timeline	policy	-	WidgetKit.TimelineReloadPolicy	-	-	-	f8fa380c1cfb4f1d
+WidgetKit	swift-method	s:9WidgetKit8TimelineV7entries6policyACyxGSayxG_AA0C12ReloadPolicyVtcfc	Timeline	init(entries:policy:)	-	-	WidgetKit.Timeline<EntryType> | [EntryType] | WidgetKit.TimelineReloadPolicy	-	-	05ade1f3a4392f85
+WidgetKit	swift-struct	s:9WidgetKit22PreviewActivityBuilderV	-	PreviewActivityBuilder	-	-	-	ios=17.0	-	63023e2870918058
+WidgetKit	swift-method	s:9WidgetKit22PreviewActivityBuilderV15buildExpressionySay12ContentStateQzGAFFZ	PreviewActivityBuilder	buildExpression(_:)	+	[A.ContentState]	A.ContentState	-	-	cad7aac4098e4fd5
+WidgetKit	swift-method	s:9WidgetKit22PreviewActivityBuilderV17buildPartialBlock5firstSay12ContentStateQzGAH_tFZ	PreviewActivityBuilder	buildPartialBlock(first:)	+	[A.ContentState]	[A.ContentState]	-	-	fe757ca6797cf00e
+WidgetKit	swift-method	s:9WidgetKit22PreviewActivityBuilderV17buildPartialBlock11accumulated4nextSay12ContentStateQzGAI_AItFZ	PreviewActivityBuilder	buildPartialBlock(accumulated:next:)	+	[A.ContentState]	[A.ContentState] | [A.ContentState]	-	-	f41802fa8a6d6f6e
+WidgetKit	swift-method	s:9WidgetKit22PreviewActivityBuilderV10buildArrayySay12ContentStateQzGSayAGGFZ	PreviewActivityBuilder	buildArray(_:)	+	[A.ContentState]	[[A.ContentState]]	-	-	8a8890bc84c956a5
+WidgetKit	swift-protocol	s:9WidgetKit25AppIntentTimelineProviderP	-	AppIntentTimelineProvider	-	-	-	ios=17.0,macos=14.0,watchos=10.0	-	fceee47238bb645f
+WidgetKit	swift-typealias	s:9WidgetKit25AppIntentTimelineProviderP7Contexta	AppIntentTimelineProvider	Context	-	-	-	-	-	ce1b375c1a1798f4
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderP15recommendationsSayAA0cD14RecommendationVy0D0QzGGyF	AppIntentTimelineProvider	recommendations()	-	[WidgetKit.AppIntentRecommendation<Self.Intent>]	-	-	-	6b1dc2a8bd9bf874
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderP11placeholder2in5EntryQzAA0eF7ContextV_tF	AppIntentTimelineProvider	placeholder(in:)	-	Self.Entry	Self.Context	-	-	9a68f0c3ddaed428
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderP8snapshot3for2in5EntryQz0D0Qz_AA0eF7ContextVtYaF	AppIntentTimelineProvider	snapshot(for:in:)	-	Self.Entry	Self.Intent | Self.Context	-	-	9e39b1b26dde060d
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderP8timeline3for2inAA0E0Vy5EntryQzG0D0Qz_AA0eF7ContextVtYaF	AppIntentTimelineProvider	timeline(for:in:)	-	WidgetKit.Timeline<Self.Entry>	Self.Intent | Self.Context	-	-	8394804293b7a27b
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderP9relevanceAA0A9RelevanceVy0D0QzGyYaF	AppIntentTimelineProvider	relevance()	-	WidgetKit.WidgetRelevance<Self.Intent>	-	ios=18.0,macos=15.0,watchos=11.0	-	607dc6af88bedc2b
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderPAAE9relevanceAA0A9RelevanceVy0D0QzGyYaF	AppIntentTimelineProvider	relevance()	-	WidgetKit.WidgetRelevance<Self.Intent>	-	ios=18.0,macos=15.0,watchos=11.0	-	20634fed51a38247
+WidgetKit	swift-method	s:9WidgetKit25AppIntentTimelineProviderPAAE15recommendationsSayAA0cD14RecommendationVy0D0QzGGyF	AppIntentTimelineProvider	recommendations()	-	[WidgetKit.AppIntentRecommendation<Self.Intent>]	-	ios=17.0,macos=14.0	-	9e48721ec384c97c
+WidgetKit	swift-struct	s:9WidgetKit0A8LocationV	-	WidgetLocation	-	-	-	ios=17.0,watchos=26.0	-	c50f4b369b2fc813
+WidgetKit	swift-method	s:9WidgetKit0A8LocationV2eeoiySbAC_ACtFZ	WidgetLocation	==(_:_:)	+	Swift.Bool	WidgetKit.WidgetLocation | WidgetKit.WidgetLocation	-	-	325866465648a571
+WidgetKit	swift-method	s:9WidgetKit0A8LocationV4hash4intoys6HasherVz_tF	WidgetLocation	hash(into:)	-	()	Swift.Hasher	-	-	c90e99754ccc447a
+WidgetKit	swift-property	s:9WidgetKit0A8LocationV9hashValueSivp	WidgetLocation	hashValue	-	Swift.Int	-	-	-	79e772d1e5a148f7
+WidgetKit	swift-property	s:9WidgetKit0A8LocationV10homeScreenACvpZ	WidgetLocation	homeScreen	+	WidgetKit.WidgetLocation	-	ios=17.0	-	1e77c616d84f8bc3
+WidgetKit	swift-property	s:9WidgetKit0A8LocationV10lockScreenACvpZ	WidgetLocation	lockScreen	+	WidgetKit.WidgetLocation	-	ios=17.0	-	1761c3a9a8c61833
+WidgetKit	swift-property	s:9WidgetKit0A8LocationV7standByACvpZ	WidgetLocation	standBy	+	WidgetKit.WidgetLocation	-	ios=17.0	-	2df09ddc3867d04d
+WidgetKit	swift-property	s:9WidgetKit0A8LocationV18iPhoneWidgetsOnMacACvpZ	WidgetLocation	iPhoneWidgetsOnMac	+	WidgetKit.WidgetLocation	-	ios=17.0	-	e2b29ce4cfdb7bd7
+WidgetKit	swift-property	s:9WidgetKit0A8LocationV7carPlayACvpZ	WidgetLocation	carPlay	+	WidgetKit.WidgetLocation	-	ios=26.0	-	db1698637b26de13
+WidgetKit	swift-struct	s:9WidgetKit20TimelineReloadPolicyV	-	TimelineReloadPolicy	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	3e6621bb6e074421
+WidgetKit	swift-property	s:9WidgetKit20TimelineReloadPolicyV5atEndACvpZ	TimelineReloadPolicy	atEnd	+	WidgetKit.TimelineReloadPolicy	-	-	-	02043323c193814b
+WidgetKit	swift-property	s:9WidgetKit20TimelineReloadPolicyV5neverACvpZ	TimelineReloadPolicy	never	+	WidgetKit.TimelineReloadPolicy	-	-	-	21620f5994b77c87
+WidgetKit	swift-method	s:9WidgetKit20TimelineReloadPolicyV5afteryAC10Foundation4DateVFZ	TimelineReloadPolicy	after(_:)	+	WidgetKit.TimelineReloadPolicy	Foundation.Date	-	-	9bdca8890efaa900
+WidgetKit	swift-method	s:9WidgetKit20TimelineReloadPolicyV2eeoiySbAC_ACtFZ	TimelineReloadPolicy	==(_:_:)	+	Swift.Bool	WidgetKit.TimelineReloadPolicy | WidgetKit.TimelineReloadPolicy	-	-	b014697c0a75a1bf
+WidgetKit	swift-struct	s:9WidgetKit23TimelineProviderContextV	-	TimelineProviderContext	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	810600774a188212
+WidgetKit	swift-struct	s:9WidgetKit23TimelineProviderContextV19EnvironmentVariantsV	TimelineProviderContext	EnvironmentVariants	-	-	-	-	-	a9a215772a7709d5
+WidgetKit	swift-method	s:9WidgetKit23TimelineProviderContextV19EnvironmentVariantsV13dynamicMemberSayxGSgs15WritableKeyPathCy7SwiftUI0F6ValuesVxG_tcluip	TimelineProviderContext.EnvironmentVariants	subscript(dynamicMember:)	-	[T]?	Swift.WritableKeyPath<SwiftUI.EnvironmentValues, T>	-	-	8f07f06729808f01
+WidgetKit	swift-method	s:9WidgetKit23TimelineProviderContextV19EnvironmentVariantsVySayxGSgs15WritableKeyPathCy7SwiftUI0F6ValuesVxGcluip	TimelineProviderContext.EnvironmentVariants	subscript(_:)	-	[T]?	Swift.WritableKeyPath<SwiftUI.EnvironmentValues, T>	-	-	441e606780c8c835
+WidgetKit	swift-property	s:9WidgetKit23TimelineProviderContextV19environmentVariantsAC011EnvironmentG0Vvp	TimelineProviderContext	environmentVariants	-	WidgetKit.TimelineProviderContext.EnvironmentVariants	-	-	-	3fbafc74d153481f
+WidgetKit	swift-property	s:9WidgetKit23TimelineProviderContextV6familyAA0A6FamilyOvp	TimelineProviderContext	family	-	WidgetKit.WidgetFamily	-	-	-	aeb1baf8720c8178
+WidgetKit	swift-property	s:9WidgetKit23TimelineProviderContextV9isPreviewSbvp	TimelineProviderContext	isPreview	-	Swift.Bool	-	-	-	93f61f8de6a73d27
+WidgetKit	swift-property	s:9WidgetKit23TimelineProviderContextV11displaySizeSo6CGSizeVvp	TimelineProviderContext	displaySize	-	CoreFoundation.CGSize	-	-	-	7823690c65fe1ec1
+WidgetKit	swift-struct	s:7SwiftUI17EnvironmentValuesV	-	EnvironmentValues	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	61d076f6895cbf5f
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE23isActivityUpdateReducedSbvp	EnvironmentValues	isActivityUpdateReduced	-	Swift.Bool	-	ios=18.0	-	4e5fe840a35d4a11
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE12widgetFamilyAD0eH0Ovp	EnvironmentValues	widgetFamily	-	WidgetKit.WidgetFamily	-	-	-	936863ad8a3cbd72
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE13levelOfDetailAD05LevelhI0Vvp	EnvironmentValues	levelOfDetail	-	WidgetKit.LevelOfDetail	-	-	-	349e774ce9c65547
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE20isActivityFullscreenSbvp	EnvironmentValues	isActivityFullscreen	-	Swift.Bool	-	ios=16.1	-	0443abead6084f8d
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE20widgetContentMarginsAA10EdgeInsetsVvp	EnvironmentValues	widgetContentMargins	-	SwiftUI.EdgeInsets	-	ios=17.0,macos=14.0,watchos=10.0	-	8ea2d16e2bbb98f9
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE14activityFamilyAD08ActivityH0Ovp	EnvironmentValues	activityFamily	-	WidgetKit.ActivityFamily	-	ios=18.0	-	52f396de00327b6a
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE25supportedActivityFamiliesShyAD0H6FamilyOGvp	EnvironmentValues	supportedActivityFamilies	-	Swift.Set<WidgetKit.ActivityFamily>	-	ios=18.0	-	0c0e9de37123d02c
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE05showsE19ContainerBackgroundSbvp	EnvironmentValues	showsWidgetContainerBackground	-	Swift.Bool	-	ios=15.0,macos=12.0,watchos=8.0	-	74c69f79f52b7e55
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE19widgetRenderingModeAD0ehI0Vvp	EnvironmentValues	widgetRenderingMode	-	WidgetKit.WidgetRenderingMode	-	-	-	ba82ac71de1f0c8f
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE05showsE5LabelSbvp	EnvironmentValues	showsWidgetLabel	-	Swift.Bool	-	-	-	bf11a46eb3f40f78
+WidgetKit	swift-struct	s:7SwiftUI5ImageV	-	Image	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	b43c92d154185c16
+WidgetKit	swift-method	s:7SwiftUI5ImageV9WidgetKitE27widgetAccentedRenderingModeyQrAD0dghI0VSgF	Image	widgetAccentedRenderingMode(_:)	-	some SwiftUI.View	WidgetKit.WidgetAccentedRenderingMode?	-	-	596de64984a1996d
+WidgetKit	swift-protocol	s:7SwiftUI21ControlWidgetTemplateP	-	ControlWidgetTemplate	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	bc6d7063002d916e
+WidgetKit	swift-method	s:7SwiftUI21ControlWidgetTemplateP0D3KitE4tintyQrAA5ColorVSgF	ControlWidgetTemplate	tint(_:)	-	some SwiftUI.ControlWidgetTemplate	SwiftUI.Color?	-	-	0e66338678e6dfb3
+WidgetKit	swift-method	s:7SwiftUI21ControlWidgetTemplateP0D3KitE16privacySensitiveyQrSbF	ControlWidgetTemplate	privacySensitive(_:)	-	some SwiftUI.ControlWidgetTemplate	Swift.Bool	-	-	53d3534f0184a049
+WidgetKit	swift-method	s:7SwiftUI21ControlWidgetTemplateP0D3KitE8disabledyQrSbF	ControlWidgetTemplate	disabled(_:)	-	some SwiftUI.ControlWidgetTemplate	Swift.Bool	ios=18.0,macos=26.0,watchos=26.0	-	1a0a418c95d8779e
+WidgetKit	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD6StatusyQrAA4TextVF	View	controlWidgetStatus(_:)	-	some SwiftUI.View	SwiftUI.Text	-	-	eca22d68b0355d2f
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD6StatusyQrAA18LocalizedStringKeyVF	View	controlWidgetStatus(_:)	-	some SwiftUI.View	SwiftUI.LocalizedStringKey	-	-	1b382c374c8fb6b0
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD6StatusyQr10Foundation23LocalizedStringResourceVF	View	controlWidgetStatus(_:)	-	some SwiftUI.View	Foundation.LocalizedStringResource	-	-	1b533f63e1e33a5c
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD6StatusyQrqd__SyRd__lF	View	controlWidgetStatus(_:)	-	some SwiftUI.View	S	-	-	acdb609d9185ec77
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD10ActionHintyQrAA4TextVF	View	controlWidgetActionHint(_:)	-	some SwiftUI.View	SwiftUI.Text	-	-	ba1527887bf1adb3
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD10ActionHintyQrAA18LocalizedStringKeyVF	View	controlWidgetActionHint(_:)	-	some SwiftUI.View	SwiftUI.LocalizedStringKey	-	-	313feaf36607e681
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD10ActionHintyQr10Foundation23LocalizedStringResourceVF	View	controlWidgetActionHint(_:)	-	some SwiftUI.View	Foundation.LocalizedStringResource	-	-	86d517a8f6cf1956
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE07controlD10ActionHintyQrqd__SyRd__lF	View	controlWidgetActionHint(_:)	-	some SwiftUI.View	S	-	-	fa4385edbfca825c
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE9widgetURLyQr10Foundation0G0VSgF	View	widgetURL(_:)	-	some SwiftUI.View	Foundation.URL?	-	-	53b5ccb3f7e34d9d
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE13dynamicIsland17verticalPlacementQrAD07Dynamicg22ExpandedRegionVerticalI0V_tF	View	dynamicIsland(verticalPlacement:)	-	some SwiftUI.View	WidgetKit.DynamicIslandExpandedRegionVerticalPlacement	ios=16.1	-	dcd7c3d368931074
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE19widgetCurvesContentyQrSbF	View	widgetCurvesContent(_:)	-	some SwiftUI.View	Swift.Bool	-	-	becb58e3dac45d99
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE16widgetAccentableyQrSbF	View	widgetAccentable(_:)	-	some SwiftUI.View	Swift.Bool	-	-	3c3f828cdba165fc
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE11widgetLabel5labelQrqd__yXE_tAaBRd__lF	View	widgetLabel(label:)	-	some SwiftUI.View	() -> Label	-	-	4e7dde872a66bc05
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE11widgetLabelyQrAA18LocalizedStringKeyVF	View	widgetLabel(_:)	-	some SwiftUI.View	SwiftUI.LocalizedStringKey	-	-	1a0c9fa1aa88c7a5
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE11widgetLabelyQr10Foundation23LocalizedStringResourceVF	View	widgetLabel(_:)	-	some SwiftUI.View	Foundation.LocalizedStringResource	-	-	01912723d95934da
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE11widgetLabelyQrqd__SyRd__lF	View	widgetLabel(_:)	-	some SwiftUI.View	S	-	-	691a87670d3ce6c1
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE22activityBackgroundTintyQrAA5ColorVSgF	View	activityBackgroundTint(_:)	-	some SwiftUI.View	SwiftUI.Color?	-	-	93460fa6a08c3259
+WidgetKit	swift-method	s:7SwiftUI4ViewP9WidgetKitE35activitySystemActionForegroundColoryQrAA0J0VSgF	View	activitySystemActionForegroundColor(_:)	-	some SwiftUI.View	SwiftUI.Color?	-	-	64260003ff7e3fe3
+WidgetKit	swift-protocol	s:7SwiftUI19WidgetConfigurationP	-	WidgetConfiguration	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	7a1aef668712e377
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE22contentMarginsDisabledQryF	WidgetConfiguration	contentMarginsDisabled()	-	some SwiftUI.WidgetConfiguration	-	-	-	7b2366ea6601a5a4
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE28supplementalActivityFamiliesyQrSayAD0G6FamilyOGF	WidgetConfiguration	supplementalActivityFamilies(_:)	-	some SwiftUI.WidgetConfiguration	[WidgetKit.ActivityFamily]	-	-	dc69fcfa6cf83842
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE28containerBackgroundRemovableyQrSbF	WidgetConfiguration	containerBackgroundRemovable(_:)	-	some SwiftUI.WidgetConfiguration	Swift.Bool	-	-	0543473291f8a338
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE24configurationDisplayNameyQrAA4TextVF	WidgetConfiguration	configurationDisplayName(_:)	-	some SwiftUI.WidgetConfiguration	SwiftUI.Text	-	-	dddb73a54911f8e9
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE24configurationDisplayNameyQrAA18LocalizedStringKeyVF	WidgetConfiguration	configurationDisplayName(_:)	-	some SwiftUI.WidgetConfiguration	SwiftUI.LocalizedStringKey	-	-	4cd2f384c07dd7cc
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE24configurationDisplayNameyQr10Foundation23LocalizedStringResourceVF	WidgetConfiguration	configurationDisplayName(_:)	-	some SwiftUI.WidgetConfiguration	Foundation.LocalizedStringResource	ios=16.0,macos=13.0,watchos=9.0	-	333754f55b8c05b3
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE24configurationDisplayNameyQrqd__SyRd__lF	WidgetConfiguration	configurationDisplayName(_:)	-	some SwiftUI.WidgetConfiguration	S	-	-	2efab9bdba72ab90
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE11descriptionyQrAA4TextVF	WidgetConfiguration	description(_:)	-	some SwiftUI.WidgetConfiguration	SwiftUI.Text	-	-	66b2cb45df7a03ce
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE11descriptionyQrAA18LocalizedStringKeyVF	WidgetConfiguration	description(_:)	-	some SwiftUI.WidgetConfiguration	SwiftUI.LocalizedStringKey	-	-	4de70cae9462e8ce
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE11descriptionyQr10Foundation23LocalizedStringResourceVF	WidgetConfiguration	description(_:)	-	some SwiftUI.WidgetConfiguration	Foundation.LocalizedStringResource	ios=16.0,macos=13.0,watchos=9.0	-	7dd9d2a344164ed5
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE11descriptionyQrqd__SyRd__lF	WidgetConfiguration	description(_:)	-	some SwiftUI.WidgetConfiguration	S	-	-	62d78747ce7201c0
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE17supportedFamiliesyQrSayAD0C6FamilyOGF	WidgetConfiguration	supportedFamilies(_:)	-	some SwiftUI.WidgetConfiguration	[WidgetKit.WidgetFamily]	-	-	24c17409b560942a
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE28onBackgroundURLSessionEvents8matching_QrSS_ySS_yyctctF	WidgetConfiguration	onBackgroundURLSessionEvents(matching:_:)	-	some SwiftUI.WidgetConfiguration	Swift.String | (Swift.String, @escaping () -> Swift.Void) -> Swift.Void	-	-	02b4354ae256f36a
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE28onBackgroundURLSessionEvents8matching_QrSbSScSg_ySS_yyctctF	WidgetConfiguration	onBackgroundURLSessionEvents(matching:_:)	-	some SwiftUI.WidgetConfiguration	((Swift.String) -> Swift.Bool)? | (Swift.String, @escaping () -> Swift.Void) -> Swift.Void	-	-	dbaa2bf5026c7f7d
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE014promptsForUserD0QryF	WidgetConfiguration	promptsForUserConfiguration()	-	some SwiftUI.WidgetConfiguration	-	ios=18.0,macos=15.0	-	8b594ad4b43d0214
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE19disfavoredLocations_3forQrSayAD0C8LocationVG_SayAD0C6FamilyOGtF	WidgetConfiguration	disfavoredLocations(_:for:)	-	some SwiftUI.WidgetConfiguration	[WidgetKit.WidgetLocation] | [WidgetKit.WidgetFamily]	-	-	26792d5a7e3b0bed
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE11pushHandleryQrAD0c4PushG0_pXpF	WidgetConfiguration	pushHandler(_:)	-	some SwiftUI.WidgetConfiguration	any WidgetKit.WidgetPushHandler.Type	-	-	884258ab277475a6
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE23supportedMountingStylesyQrSayAD0cG5StyleVGF	WidgetConfiguration	supportedMountingStyles(_:)	-	some SwiftUI.WidgetConfiguration	[WidgetKit.WidgetMountingStyle]	-	-	a2b1f25300f29d01
+WidgetKit	swift-struct	s:21DeveloperToolsSupport7PreviewV	-	Preview	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	8c96c279d09c72b6
+WidgetKit	swift-method	s:21DeveloperToolsSupport7PreviewV9WidgetKitE_2as6widget8timelineACSSSg_AD0E6FamilyOxycSayAD13TimelineEntry_pGyYaScMYcctc7SwiftUI0E0Rzlufc	Preview	init(_:as:widget:timeline:)	-	-	DeveloperToolsSupport.Preview | Swift.String? | WidgetKit.WidgetFamily | () -> some SwiftUI.Widget | () async -> [any WidgetKit.TimelineEntry]	-	-	382c9647c2083173
+WidgetKit	swift-method	s:21DeveloperToolsSupport7PreviewV9WidgetKitE_2as6widget16timelineProviderACSSSg_AD0E6FamilyOxycq_yctc7SwiftUI0E0RzAD08TimelineJ0R_r0_lufc	Preview	init(_:as:widget:timelineProvider:)	-	-	DeveloperToolsSupport.Preview | Swift.String? | WidgetKit.WidgetFamily | () -> some SwiftUI.Widget | () -> some WidgetKit.TimelineProvider	-	-	629fa0f3c69c2278
+WidgetKit	swift-method	s:21DeveloperToolsSupport7PreviewV9WidgetKitE_2as5using6widget16timelineProviderACSSSg_AD0E6FamilyO6IntentQzq_ycxyctcAD0m8TimelineK0Rz7SwiftUI0E0R_r0_lufc	Preview	init(_:as:using:widget:timelineProvider:)	-	-	DeveloperToolsSupport.Preview | Swift.String? | WidgetKit.WidgetFamily | Provider.Intent | () -> some SwiftUI.Widget | () -> Provider	ios=17.0,macos=14.0,tvos=18.0,watchos=10.0	-	5fd924c6b97b3cea
+WidgetKit	swift-method	s:21DeveloperToolsSupport7PreviewV9WidgetKitE_2as5using6widget16timelineProviderACSSSg_AD0E6FamilyO6IntentQzq_ycxyctcAD03Appm8TimelineK0Rz7SwiftUI0E0R_r0_lufc	Preview	init(_:as:using:widget:timelineProvider:)	-	-	DeveloperToolsSupport.Preview | Swift.String? | WidgetKit.WidgetFamily | Provider.Intent | () -> some SwiftUI.Widget | () -> Provider	-	-	dffa61e022f5455b
+WidgetKit	swift-method	s:21DeveloperToolsSupport7PreviewV9WidgetKitE_2as5using6widget13contentStatesACSSSg_AD08ActivityD8ViewKindOxq_ycSay12ContentStateQzGyYaScMYcctc0lF00L10AttributesRz7SwiftUI0E0R_r0_lufc	Preview	init(_:as:using:widget:contentStates:)	-	-	DeveloperToolsSupport.Preview | Swift.String? | WidgetKit.ActivityPreviewViewKind | Attributes | () -> some SwiftUI.Widget | () async -> [Attributes.ContentState]	-	-	807d7c124a4eb01a
+WidgetKit	swift-protocol	s:7SwiftUI6WidgetP	-	Widget	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	9dbfaccf46f33ced
+WidgetKit	swift-method	s:7SwiftUI6WidgetP0C3KitE4mainyyFZ	Widget	main()	+	()	-	-	-	c3d5d9c06f8f9e50
+WidgetKit	swift-protocol	s:7SwiftUI13ControlWidgetP	-	ControlWidget	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	f3d7067f283e48aa
+WidgetKit	swift-method	s:7SwiftUI13ControlWidgetP0D3KitE4mainyyFZ	ControlWidget	main()	+	()	-	-	-	98858f5bc3ce48e7
+WidgetKit	swift-protocol	s:7SwiftUI12WidgetBundleP	-	WidgetBundle	-	-	-	ios=14.0,macos=11.0,watchos=9.0	-	34d7307c5a6f705b
+WidgetKit	swift-method	s:7SwiftUI12WidgetBundleP0C3KitE4mainyyFZ	WidgetBundle	main()	+	()	-	-	-	ff1a323cf1a45e62
+WidgetKit	swift-struct	s:7SwiftUI28ContainerBackgroundPlacementV	-	ContainerBackgroundPlacement	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	70eebe94d29274c7
+WidgetKit	swift-property	s:7SwiftUI28ContainerBackgroundPlacementV9WidgetKitE6widgetACvpZ	ContainerBackgroundPlacement	widget	+	SwiftUI.ContainerBackgroundPlacement	-	ios=17.0,macos=14.0,watchos=10.0	-	fc279e08099b4101
+WidgetKit	swift-protocol	s:11ActivityKit0A10AttributesP	-	ActivityAttributes	-	-	-	ios=16.1	-	9b6f6f332acab813
+WidgetKit	swift-method	s:11ActivityKit0A10AttributesP06WidgetB0E14previewContext_7isStale8viewKindQr12ContentStateQz_SbAD0a11PreviewViewJ0OtF	ActivityAttributes	previewContext(_:isStale:viewKind:)	-	some SwiftUI.View	Self.ContentState | Swift.Bool | WidgetKit.ActivityPreviewViewKind	-	-	4050a4a6df3b6e42
+WidgetKit	swift-protocol	s:7SwiftUI26ControlWidgetConfigurationP	-	ControlWidgetConfiguration	-	-	-	ios=18.0,macos=26.0,watchos=26.0	-	90027c394c72b1e5
+WidgetKit	swift-method	s:7SwiftUI26ControlWidgetConfigurationP0D3KitE11displayNameyQr10Foundation23LocalizedStringResourceVF	ControlWidgetConfiguration	displayName(_:)	-	some SwiftUI.ControlWidgetConfiguration	Foundation.LocalizedStringResource	-	-	1f3e258edae8713f
+WidgetKit	swift-method	s:7SwiftUI26ControlWidgetConfigurationP0D3KitE11descriptionyQr10Foundation23LocalizedStringResourceVF	ControlWidgetConfiguration	description(_:)	-	some SwiftUI.ControlWidgetConfiguration	Foundation.LocalizedStringResource	-	-	695b0ab7479194a5
+WidgetKit	swift-method	s:7SwiftUI26ControlWidgetConfigurationP0D3KitE014promptsForUserE0QryF	ControlWidgetConfiguration	promptsForUserConfiguration()	-	some SwiftUI.ControlWidgetConfiguration	-	-	-	6abd4712cafd965a
+WidgetKit	swift-method	s:7SwiftUI26ControlWidgetConfigurationP0D3KitE11pushHandleryQrAD0c4PushH0_pXpF	ControlWidgetConfiguration	pushHandler(_:)	-	some SwiftUI.ControlWidgetConfiguration	any WidgetKit.ControlPushHandler.Type	-	-	038bdf53509312aa
+WidgetKit	swift-property	s:9WidgetKit28DynamicIslandExpandedContentV7contentxvp	DynamicIslandExpandedContent	content	-	\u03c4_0_0	-	-	-	2b3d4c06365193e1
+WidgetKit	swift-method	s:9WidgetKit28DynamicIslandExpandedContentV7contentACyxGxyXE_tcfc	DynamicIslandExpandedContent	init(content:)	-	-	WidgetKit.DynamicIslandExpandedContent<\u03c4_0_0> | () -> \u03c4_0_0	-	-	5df8d96eb2b22f86
+WidgetKit	swift-property	s:9WidgetKit27DynamicIslandExpandedRegionV19_viewRepresentationQrvp	DynamicIslandExpandedRegion	_viewRepresentation	-	some SwiftUI.View	-	-	-	ebb4140fa151a7c7
+WidgetKit	swift-property	s:9WidgetKit07ControlA6ToggleV12_controlTypeypXpvpZ	ControlWidgetToggle	_controlType	+	any Any.Type	-	-	-	ee35940ced631e95
+WidgetKit	swift-property	s:9WidgetKit07ControlA6ButtonV12_controlTypeypXpvpZ	ControlWidgetButton	_controlType	+	any Any.Type	-	-	-	0905d21a215a5cae
+WidgetKit	swift-struct	s:7SwiftUI17EnvironmentValuesV9WidgetKitE21ActivityFullScreenKeyV	EnvironmentValues	ActivityFullScreenKey	-	-	-	ios=17.0	-	c7917f3877a67f1c
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE21ActivityFullScreenKeyV12defaultValueSbvpZ	EnvironmentValues.ActivityFullScreenKey	defaultValue	+	Swift.Bool	-	-	-	918ac6cec207d274
+WidgetKit	swift-struct	s:7SwiftUI17EnvironmentValuesV9WidgetKitE0E17ContentMarginsKeyV	EnvironmentValues	WidgetContentMarginsKey	-	-	-	ios=17.0,macos=14.0,tvos=18.0,watchos=10.0	-	b9fb5fc4363445b5
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE0E17ContentMarginsKeyV12defaultValueAA10EdgeInsetsVvpZ	EnvironmentValues.WidgetContentMarginsKey	defaultValue	+	SwiftUI.EdgeInsets	-	-	-	ed1b19c0597102d3
+WidgetKit	swift-struct	s:7SwiftUI17EnvironmentValuesV9WidgetKitE05ShowsE13BackgroundKeyV	EnvironmentValues	ShowsWidgetBackgroundKey	-	-	-	-	-	9dcd6f9823e1343b
+WidgetKit	swift-property	s:7SwiftUI17EnvironmentValuesV9WidgetKitE05ShowsE13BackgroundKeyV12defaultValueSbvpZ	EnvironmentValues.ShowsWidgetBackgroundKey	defaultValue	+	Swift.Bool	-	-	-	f888fb5db815d89d
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE23_contentMarginsDisabledQryF	WidgetConfiguration	_contentMarginsDisabled()	-	some SwiftUI.WidgetConfiguration	-	ios=17.0,macos=14.0,watchos=10.0	-	fe8b92ee1ad4a601
+WidgetKit	swift-method	s:7SwiftUI19WidgetConfigurationP0C3KitE29_containerBackgroundRemovableyQrSbF	WidgetConfiguration	_containerBackgroundRemovable(_:)	-	some SwiftUI.WidgetConfiguration	Swift.Bool	-	-	7776fda3fe28f099

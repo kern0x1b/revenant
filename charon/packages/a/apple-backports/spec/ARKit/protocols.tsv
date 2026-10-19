@@ -1,0 +1,35 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+ARAnchorCopying	12.0	sdk16 body		NSCopying	-	-	-	-	-	-
+ARAnchorCopying	12.0	sdk16 body		NSCopying	required	method	yes	initWithAnchor:	- (instancetype _Nonnull)initWithAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARCoachingOverlayViewDelegate	13.0	sdk16 body		NSObject	-	-	-	-	-	-
+ARCoachingOverlayViewDelegate	13.0	sdk16 body		NSObject	optional	method	yes	coachingOverlayViewDidRequestSessionReset:	- (void)coachingOverlayViewDidRequestSessionReset:(ARCoachingOverlayView * _Nonnull)coachingOverlayView;	yes
+ARCoachingOverlayViewDelegate	13.0	sdk16 body		NSObject	optional	method	yes	coachingOverlayViewWillActivate:	- (void)coachingOverlayViewWillActivate:(ARCoachingOverlayView * _Nonnull)coachingOverlayView;	yes
+ARCoachingOverlayViewDelegate	13.0	sdk16 body		NSObject	optional	method	yes	coachingOverlayViewDidDeactivate:	- (void)coachingOverlayViewDidDeactivate:(ARCoachingOverlayView * _Nonnull)coachingOverlayView;	yes
+ARSCNViewDelegate	11.0	sdk16 body		SCNSceneRendererDelegate,ARSessionObserver	-	-	-	-	-	-
+ARSCNViewDelegate	11.0	sdk16 body		SCNSceneRendererDelegate,ARSessionObserver	optional	method	yes	renderer:nodeForAnchor:	- (SCNNode * _Nullable)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer nodeForAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSCNViewDelegate	11.0	sdk16 body		SCNSceneRendererDelegate,ARSessionObserver	optional	method	yes	renderer:didAddNode:forAnchor:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didAddNode:(SCNNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSCNViewDelegate	11.0	sdk16 body		SCNSceneRendererDelegate,ARSessionObserver	optional	method	yes	renderer:willUpdateNode:forAnchor:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer willUpdateNode:(SCNNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSCNViewDelegate	11.0	sdk16 body		SCNSceneRendererDelegate,ARSessionObserver	optional	method	yes	renderer:didUpdateNode:forAnchor:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didUpdateNode:(SCNNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSCNViewDelegate	11.0	sdk16 body		SCNSceneRendererDelegate,ARSessionObserver	optional	method	yes	renderer:didRemoveNode:forAnchor:	- (void)renderer:(id<SCNSceneRenderer>  _Nonnull)renderer didRemoveNode:(SCNNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSKViewDelegate	11.0	sdk16 body		SKViewDelegate,ARSessionObserver	-	-	-	-	-	-
+ARSKViewDelegate	11.0	sdk16 body		SKViewDelegate,ARSessionObserver	optional	method	yes	view:nodeForAnchor:	- (SKNode * _Nullable)view:(ARSKView * _Nonnull)view nodeForAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSKViewDelegate	11.0	sdk16 body		SKViewDelegate,ARSessionObserver	optional	method	yes	view:didAddNode:forAnchor:	- (void)view:(ARSKView * _Nonnull)view didAddNode:(SKNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSKViewDelegate	11.0	sdk16 body		SKViewDelegate,ARSessionObserver	optional	method	yes	view:willUpdateNode:forAnchor:	- (void)view:(ARSKView * _Nonnull)view willUpdateNode:(SKNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSKViewDelegate	11.0	sdk16 body		SKViewDelegate,ARSessionObserver	optional	method	yes	view:didUpdateNode:forAnchor:	- (void)view:(ARSKView * _Nonnull)view didUpdateNode:(SKNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSKViewDelegate	11.0	sdk16 body		SKViewDelegate,ARSessionObserver	optional	method	yes	view:didRemoveNode:forAnchor:	- (void)view:(ARSKView * _Nonnull)view didRemoveNode:(SKNode * _Nonnull)node forAnchor:(ARAnchor * _Nonnull)anchor;	yes
+ARSessionDelegate	11.0	sdk16 body		ARSessionObserver	-	-	-	-	-	-
+ARSessionDelegate	11.0	sdk16 body		ARSessionObserver	optional	method	yes	session:didUpdateFrame:	- (void)session:(ARSession * _Nonnull)session didUpdateFrame:(ARFrame * _Nonnull)frame;	yes
+ARSessionDelegate	11.0	sdk16 body		ARSessionObserver	optional	method	yes	session:didAddAnchors:	- (void)session:(ARSession * _Nonnull)session didAddAnchors:(NSArray<__kindof ARAnchor *> * _Nonnull)anchors;	yes
+ARSessionDelegate	11.0	sdk16 body		ARSessionObserver	optional	method	yes	session:didUpdateAnchors:	- (void)session:(ARSession * _Nonnull)session didUpdateAnchors:(NSArray<__kindof ARAnchor *> * _Nonnull)anchors;	yes
+ARSessionDelegate	11.0	sdk16 body		ARSessionObserver	optional	method	yes	session:didRemoveAnchors:	- (void)session:(ARSession * _Nonnull)session didRemoveAnchors:(NSArray<__kindof ARAnchor *> * _Nonnull)anchors;	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	session:didFailWithError:	- (void)session:(ARSession * _Nonnull)session didFailWithError:(NSError * _Nonnull)error;	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	session:cameraDidChangeTrackingState:	- (void)session:(ARSession * _Nonnull)session cameraDidChangeTrackingState:(ARCamera * _Nonnull)camera;	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	sessionWasInterrupted:	- (void)sessionWasInterrupted:(ARSession * _Nonnull)session;	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	sessionInterruptionEnded:	- (void)sessionInterruptionEnded:(ARSession * _Nonnull)session;	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	sessionShouldAttemptRelocalization:	- (BOOL)sessionShouldAttemptRelocalization:(ARSession * _Nonnull)session API_AVAILABLE(ios(11.3));	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	session:didOutputAudioSampleBuffer:	- (void)session:(ARSession * _Nonnull)session didOutputAudioSampleBuffer:(CMSampleBufferRef _Nonnull)audioSampleBuffer;	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	session:didOutputCollaborationData:	- (void)session:(ARSession * _Nonnull)session didOutputCollaborationData:(ARCollaborationData * _Nonnull)data API_AVAILABLE(ios(13.0));	yes
+ARSessionObserver	11.0	sdk16 body		NSObject	optional	method	yes	session:didChangeGeoTrackingStatus:	- (void)session:(ARSession * _Nonnull)session didChangeGeoTrackingStatus:(ARGeoTrackingStatus * _Nonnull)geoTrackingStatus API_AVAILABLE(ios(14.0));	yes
+ARTrackable	11.0	sdk16 body		NSObject	-	-	-	-	-	-
+ARTrackable	11.0	sdk16 body		NSObject	required	property	no	isTracked	@property (nonatomic, readonly) BOOL isTracked;	yes

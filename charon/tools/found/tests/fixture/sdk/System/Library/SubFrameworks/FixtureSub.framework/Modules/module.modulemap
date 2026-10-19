@@ -1,0 +1,4 @@
+framework module FixtureSub [system] {
+  umbrella header "FixtureSub.h"
+  export *
+}

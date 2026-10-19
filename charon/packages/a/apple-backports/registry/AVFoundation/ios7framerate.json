@@ -1,0 +1,27 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptureDevice.activeVideoMinFrameDuration",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the camera is real hardware the device has; iOS 6.1.3 already exposes the same frame-duration knob one level down, on AVCaptureConnection (videoMinFrameDuration, deprecated but present and functional since 5.0), and already carries AVCaptureDeviceFormat, activeFormat and videoSupportedFrameRateRanges (confirmed selectors on the release), so the property this port adds is a real front end onto real hardware control, not a stand-in",
+      "effect": "stored per device and applied to every video connection of every session the device's input is currently added to (found by hooking AVCaptureSession's addInput:, addOutput:, startRunning and commitConfiguration); reading it back without a stored value computes the shortest minFrameDuration across the active format's videoSupportedFrameRateRanges, the same default the real property documents",
+      "facts": "facts/AVFoundation/ActiveFrameDuration.md",
+      "source": "the header of iOS 16.4 for the contract; AVCaptureConnection.videoMinFrameDuration and the activeFormat/videoSupportedFrameRateRanges selectors of iOS 6.1.3's own AVFoundation"
+    },
+    {
+      "api": "AVCaptureDevice.activeVideoMaxFrameDuration",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the same real hardware knob as activeVideoMinFrameDuration, at the other end of the range",
+      "effect": "stored per device and applied to every video connection of every session the device's input is currently added to, the same way activeVideoMinFrameDuration is; reading it back without a stored value computes the longest maxFrameDuration across the active format's videoSupportedFrameRateRanges",
+      "facts": "facts/AVFoundation/ActiveFrameDuration.md",
+      "source": "the header of iOS 16.4 for the contract; AVCaptureConnection.videoMaxFrameDuration and the activeFormat/videoSupportedFrameRateRanges selectors of iOS 6.1.3's own AVFoundation"
+    }
+  ]
+}

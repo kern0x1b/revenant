@@ -1,0 +1,82 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_16Q12to16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "round(value / 4096 * 65535) clamped to 0..65535; measured 0 -> 0, 16 -> 256, 2048 -> 32768, 4095 -> 65519, 4096 and up -> 65535, and anything negative -> 0; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_16Q12to8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "round(value / 4096 * 255) clamped to 0..255; measured 16 -> 1, 1024 -> 64, 2048 -> 128; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_16Q12toF()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "value / 4096.0f exactly; measured 16 -> 0.00390625, 2048 -> 0.5, 32767 -> 7.99976 and -1 -> -0.000244141; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_16Uto16F()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "the IEEE half nearest value / 65535, subnormals and all; measured 65535 -> 0x3C00, which is 1.0, and 1 -> 0x0100, which is the subnormal 256 * 2**-24 - which is also what settles that 16F is an IEEE half; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_16Uto16Q12()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "(value + 8) >> 4; measured 15 -> 1, 127 -> 8, 255 -> 16 and 65535 -> 4096, where a plain shift would give 0, 7, 15 and 4095; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_8to16Q12()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "(value * 4096 + 127) / 255 in integer arithmetic, which is the only rule that gives both 8 -> 129 and 254 -> 4080 as the host answers them; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Fto16Q12()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a scalar conversion between two of vImage's pixel formats, whose arithmetic Conversion.h does not give and which was read off the host's own answers over a table bracketing both ends of each range",
+      "effect": "round(value * 4096) clamped to -32768..32767; measured 1.0 -> 4096, 0.5 -> 2048, 10.0 and 16777216.0 -> 32767, -2.0 -> -8192; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer",
+      "facts": "facts/Accelerate/vImageFixedPoint.md",
+      "source": "the host's own vImage, held against the port for every case by tests/backports/host/vimagefixed over the tables the mappings were read from, which .agent-work/runs/vimage/probe-fixedpoint.m produced; the format each name spells, from the headers and from the host's answers; the release's own armv7 caches, which say which release first exports each name"
+    }
+  ]
+}

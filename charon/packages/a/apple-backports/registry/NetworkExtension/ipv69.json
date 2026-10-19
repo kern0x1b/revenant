@@ -1,0 +1,113 @@
+{
+  "framework": "NetworkExtension",
+  "entries": [
+    {
+      "api": "NEIPv6Settings",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "the IPv6 settings object: the addresses and prefix lengths a configuration assigns to an interface, and the routes over them",
+      "effect": "it is created, filled, copied and archived, and the two binaries each answer from their own implementation; the two class methods the 26.2 header marks API_UNAVAILABLE on every platform are carried and answer an object whose read-only properties are empty arrays (NetworkExtension/NEIPv6Settings.m:47, :52)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh, with dladdr on each class's selector naming the answering image; the two names Apple's class does not carry are checked against this package's own header, which is the oracle the registry README names for a name no host carries"
+    },
+    {
+      "api": "NEIPv6Route",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "one route of an IPv6 settings object: a destination, how much of it the prefix covers, and the gateway to reach it through",
+      "effect": "it is created, filled, copied and archived, and +defaultRoute answers the route whose destination is the unspecified address with a prefix length of zero - which the host's own object also answers, and which the differential compares (NetworkExtension/NEIPv6Route9.m:31)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh, with dladdr naming the answering image (NEIPv6Route.dladdr)"
+    },
+    {
+      "api": "NEIPv6Settings.addresses",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a readonly value the caller built the object with and the system reads when a configuration is applied",
+      "effect": "a fresh object answers an **empty array**, not nil - the same answer the host gives and the same one NEIPv4Settings gives (NetworkExtension/NEIPv6Settings.m:57)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Settings.addresses)"
+    },
+    {
+      "api": "NEIPv6Settings.networkPrefixLengths",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a readonly value the caller built the object with: how much of each address the prefix covers",
+      "effect": "a fresh object answers an **empty array**, not nil, measured against the host (NetworkExtension/NEIPv6Settings.m:58)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Settings.networkPrefixLengths)"
+    },
+    {
+      "api": "NEIPv6Settings.includedRoutes",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "the routes a traffic of this configuration takes, as opposed to the ones it avoids",
+      "effect": "nil until a caller sets one, and a set is copied, so the object does not alias the caller's array; a set of routes survives the round trip through the keyed archive (NetworkExtension/NEIPv6Settings.m:60)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Settings.includedRoutes, v6RoundTrip.route.destination)"
+    },
+    {
+      "api": "NEIPv6Settings.excludedRoutes",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "the routes a traffic of this configuration does not take",
+      "effect": "nil until a caller sets one, and a set is copied (NetworkExtension/NEIPv6Settings.m:63)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Settings.excludedRoutes)"
+    },
+    {
+      "api": "NEIPv6Route.destinationAddress",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a readonly value the caller built the route with: the address the route is for",
+      "effect": "nil until the route is built with one, and +defaultRoute's is the unspecified address, which the host's own default route also answers (NetworkExtension/NEIPv6Route9.m:25)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Route.destinationAddress, NEIPv6Route.defaultRoute.destinationAddress)"
+    },
+    {
+      "api": "NEIPv6Route.destinationNetworkPrefixLength",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a readonly value the caller built the route with: how much of the destination address the route covers",
+      "effect": "nil until the route is built with one, and +defaultRoute's is zero, which the host's own default route also answers (NetworkExtension/NEIPv6Route9.m:26)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Route.destinationNetworkPrefixLength, NEIPv6Route.defaultRoute.prefixLength)"
+    },
+    {
+      "api": "NEIPv6Route.gatewayAddress",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "the address a route is reached through, which a caller sets and the system reads",
+      "effect": "nil until a caller sets one, on the default route as on every other (NetworkExtension/NEIPv6Route9.m:28)",
+      "source": "the host's own NetworkExtension, compared name by name in two binaries by tests/backports/host/netext-proxy/run.sh (NEIPv6Route.gatewayAddress, NEIPv6Route.defaultRoute.gatewayAddress)"
+    }
+  ]
+}

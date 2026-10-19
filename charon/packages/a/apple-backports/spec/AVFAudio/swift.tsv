@@ -1,0 +1,13 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+AVFAudio	swift-struct	c:@T@AVAudioSessionLocation	AVAudioSession	Location	-	-	-	-	-	484496a0a4600ebe
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE14orientationTopABvpZ	AVAudioSession.Location	orientationTop	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	ec90fe2882b389bb
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE17orientationBottomABvpZ	AVAudioSession.Location	orientationBottom	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	a4bda1a0ca23faef
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE16orientationFrontABvpZ	AVAudioSession.Location	orientationFront	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	d331926bc5850cca
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE15orientationBackABvpZ	AVAudioSession.Location	orientationBack	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	90aedf42bdb7a155
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE15orientationLeftABvpZ	AVAudioSession.Location	orientationLeft	+	AVFAudio.AVAudioSession.Location	-	ios=8.0,tvos=9.0,watchos=2.0	-	edbd8f2ca2aa4d21
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE16orientationRightABvpZ	AVAudioSession.Location	orientationRight	+	AVFAudio.AVAudioSession.Location	-	ios=8.0,tvos=9.0,watchos=2.0	-	1ab767a39c065056
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE20polarPatternCardioidABvpZ	AVAudioSession.Location	polarPatternCardioid	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	2d7c67d6e7bd7427
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE27polarPatternOmnidirectionalABvpZ	AVAudioSession.Location	polarPatternOmnidirectional	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	0c4686c859ff4ba8
+AVFAudio	swift-property	s:So22AVAudioSessionLocationa8AVFAudioE23polarPatternSubcardioidABvpZ	AVAudioSession.Location	polarPatternSubcardioid	+	AVFAudio.AVAudioSession.Location	-	ios=7.0,tvos=9.0,watchos=2.0	-	c2c00fc32fa9b98f
+AVFAudio	swift-class	c:objc(cs)AVAudioCompressedBuffer	-	AVAudioCompressedBuffer	-	-	-	ios=9.0	-	eaae735d2ae151e7
+AVFAudio	swift-property	s:So23AVAudioCompressedBufferC8AVFAudioE18packetDependenciesSaySo38AudioStreamPacketDependencyDescriptionVGSgvp	AVAudioCompressedBuffer	packetDependencies	-	[CoreAudioTypes.AudioStreamPacketDependencyDescription]?	-	-	-	42c7453f437d82e2

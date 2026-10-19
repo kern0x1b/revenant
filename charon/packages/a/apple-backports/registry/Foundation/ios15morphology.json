@@ -1,0 +1,298 @@
+{
+  "entries": [
+    {
+      "api": "+[NSInflectionRule canInflectLanguage:]",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); compared with the host's own, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "+[NSMorphologyCustomPronoun isSupportedForLanguage:]",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); compared with the host's own, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "+[NSMorphologyCustomPronoun requiredKeysForLanguage:]",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); the key set compared with the host's own, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "+[NSMorphologyPronoun new]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "reason": "build +[NSMorphologyPronoun new]",
+      "source": "the implementation is in the library; the row is held absent until the differential measures it",
+      "status": "owed"
+    },
+    {
+      "api": "-[NSInflectionRule init]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "reason": "build -[NSInflectionRule init]",
+      "source": "the host's own Foundation, measured by sh tests/backports/host/attributed15/run.sh in the case release.inflectionRule.init, where -[NSInflectionRule init] answers an instance of NSInflectionRule; the port's own class is facts/Foundation/NSMorphology.md",
+      "status": "owed"
+    },
+    {
+      "api": "-[NSInflectionRuleExplicit initWithMorphology:]",
+      "effect": "the initialiser builds a rule that keeps the morphology it was given, as the host's does",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case constructed.explicitRule.morphology",
+      "status": "implemented"
+    },
+    {
+      "api": "-[NSMorphology customPronounForLanguage:]",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); the subject form read back and compared, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "-[NSMorphology setCustomPronoun:forLanguage:error:]",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); set on a fresh image and read back, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "-[NSMorphologyPronoun initWithPronoun:morphology:dependentMorphology:]",
+      "effect": "the designated initialiser builds an object whose three properties read back what went in, as the host's does",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case constructed.pronoun",
+      "status": "implemented"
+    },
+    {
+      "api": "-[NSMorphologyPronoun init]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "method",
+      "minimum": "6.0",
+      "reason": "build -[NSMorphologyPronoun init]",
+      "source": "the implementation is in the library; the row is held absent until the differential measures it",
+      "status": "owed"
+    },
+    {
+      "api": "NSInflectionRule.automaticRule",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); compared with the host's own, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "NSInflectionRule.canInflectPreferredLocalization",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); compared with the host's own, for en, es and de",
+      "status": "implemented"
+    },
+    {
+      "api": "NSInflectionRuleExplicit.morphology",
+      "effect": "the rule keeps the morphology it was constructed with, as the host's does",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case constructed.explicitRule.morphology",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.definiteness",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.determination",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.grammaticalCase",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.grammaticalGender",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.grammaticalPerson",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.number",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.partOfSpeech",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.pronounType",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); read and written over every value of its own enumeration",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.unspecified",
+      "effect": "a fresh morphology answers YES and the three settings this release carries decide it: grammaticalGender, partOfSpeech or number at 1 or 2 answers NO and the five 17.0 settings are not read - the port's own class is beside the host's in one process and the two agree, and the golden file records the host's answer",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case fresh.unspecified and the eight settings' .unspecified cases, and on the port's own side by CharonMorphology.m's -isUnspecified",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphology.userMorphology",
+      "effect": "+userMorphology answers the host's own object, and both read the same setting from it",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the cases class.userMorphology and class.userMorphology.unspecified",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyCustomPronoun.objectForm",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); set and read back through the release's own accessor",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyCustomPronoun.possessiveAdjectiveForm",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); set and read back through the release's own accessor",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyCustomPronoun.possessiveForm",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); set and read back through the release's own accessor",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyCustomPronoun.reflexiveForm",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); set and read back through the release's own accessor",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyCustomPronoun.subjectForm",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "15.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the NSMorphology surface, measured against the host's own Foundation by tests/backports/host/morphology/run.sh (checks=466, failures=0, dladdr on both sides' IMPs so the two images answered separately); set and read back through the release's own accessor",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyPronoun.dependentMorphology",
+      "effect": "an object built without one keeps nil, as the host's does",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case constructed.dependentMorphology",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyPronoun.morphology",
+      "effect": "the object keeps the morphology it was constructed with, as the host's does",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case constructed.morphology",
+      "status": "implemented"
+    },
+    {
+      "api": "NSMorphologyPronoun.pronoun",
+      "effect": "the object keeps the string it was constructed with, as the host's does",
+      "facts": "facts/Foundation/NSMorphology.md",
+      "introduced": "17.0",
+      "kind": "property",
+      "minimum": "6.0",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case constructed.pronoun",
+      "status": "implemented"
+    }
+  ],
+  "framework": "Foundation"
+}

@@ -1,0 +1,523 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CoreNFC	swift-typealias	c:@T@EncryptionId	-	EncryptionId	-	-	-	ios=13.0	-	af7db5742b159fb0
+CoreNFC	swift-constant	c:@NFCErrorDomain	-	NFCErrorDomain	-	Swift.String	-	ios=11.0	-	6bfeec044d85dac4
+CoreNFC	swift-enum	c:@E@NFCFeliCaEncryptionId	-	NFCFeliCaEncryptionId	-	-	-	ios=13.0	-	fbbcff66e8acfbb1
+CoreNFC	swift-method	s:So21NFCFeliCaEncryptionIdV8rawValueABSgSi_tcfc	NFCFeliCaEncryptionId	init(rawValue:)	-	-	CoreNFC.NFCFeliCaEncryptionId? | Swift.Int	-	-	29dab991126434c6
+CoreNFC	swift-property	s:So21NFCFeliCaEncryptionIdV8rawValueSivp	NFCFeliCaEncryptionId	rawValue	-	Swift.Int	-	-	-	bffa96be6c4d7729
+CoreNFC	swift-typealias	s:So21NFCFeliCaEncryptionIdV8RawValuea	NFCFeliCaEncryptionId	RawValue	-	-	-	-	-	3b84bd970d9f9eb7
+CoreNFC	swift-constant	c:@E@NFCFeliCaEncryptionId@NFCFeliCaEncryptionIdAES	NFCFeliCaEncryptionId	AES	-	-	-	ios=13.0	-	95aaffe08a94aa40
+CoreNFC	swift-constant	c:@E@NFCFeliCaEncryptionId@NFCFeliCaEncryptionIdAES_DES	NFCFeliCaEncryptionId	AES_DES	-	-	-	ios=13.0	-	154d22d937af12a4
+CoreNFC	swift-property	c:@E@NFCFeliCaEncryptionId@EncryptionIdAES	NFCFeliCaEncryptionId	aes	+	CoreNFC.NFCFeliCaEncryptionId	-	ios=13.0	-	4194ef80a5aab153
+CoreNFC	swift-property	c:@E@NFCFeliCaEncryptionId@EncryptionIdAES_DES	NFCFeliCaEncryptionId	aes_des	+	CoreNFC.NFCFeliCaEncryptionId	-	ios=13.0	-	9de89aa0feb05553
+CoreNFC	swift-enum	c:@E@NFCFeliCaPollingRequestCode	-	NFCFeliCaPollingRequestCode	-	-	-	ios=13.0	-	d84709267f45f20c
+CoreNFC	swift-method	s:So27NFCFeliCaPollingRequestCodeV8rawValueABSgSi_tcfc	NFCFeliCaPollingRequestCode	init(rawValue:)	-	-	CoreNFC.NFCFeliCaPollingRequestCode? | Swift.Int	-	-	a6a7fd10d924f75b
+CoreNFC	swift-property	s:So27NFCFeliCaPollingRequestCodeV8rawValueSivp	NFCFeliCaPollingRequestCode	rawValue	-	Swift.Int	-	-	-	d9d27067a50082b3
+CoreNFC	swift-typealias	s:So27NFCFeliCaPollingRequestCodeV8RawValuea	NFCFeliCaPollingRequestCode	RawValue	-	-	-	-	-	f282a5792a56be98
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingRequestCode@NFCFeliCaPollingRequestCodeNoRequest	NFCFeliCaPollingRequestCode	noRequest	-	-	-	ios=13.0	-	3c6ef90db3fbc518
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingRequestCode@NFCFeliCaPollingRequestCodeSystemCode	NFCFeliCaPollingRequestCode	systemCode	-	-	-	ios=13.0	-	135489dd8f305fa6
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingRequestCode@NFCFeliCaPollingRequestCodeCommunicationPerformance	NFCFeliCaPollingRequestCode	communicationPerformance	-	-	-	ios=13.0	-	e56314782fad8787
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingRequestCode@PollingRequestCodeNoRequest	NFCFeliCaPollingRequestCode	PollingRequestCodeNoRequest	+	CoreNFC.NFCFeliCaPollingRequestCode	-	ios=13.0	-	a1a03c45f13a8e04
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingRequestCode@PollingRequestCodeSystemCode	NFCFeliCaPollingRequestCode	PollingRequestCodeSystemCode	+	CoreNFC.NFCFeliCaPollingRequestCode	-	ios=13.0	-	c2da8bf0fa3ee4fd
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingRequestCode@PollingRequestCodeCommunicationPerformance	NFCFeliCaPollingRequestCode	PollingRequestCodeCommunicationPerformance	+	CoreNFC.NFCFeliCaPollingRequestCode	-	ios=13.0	-	974753fa27f1ebaf
+CoreNFC	swift-enum	c:@E@NFCFeliCaPollingTimeSlot	-	NFCFeliCaPollingTimeSlot	-	-	-	ios=13.0	-	8a9ff0da90350816
+CoreNFC	swift-method	s:So24NFCFeliCaPollingTimeSlotV8rawValueABSgSi_tcfc	NFCFeliCaPollingTimeSlot	init(rawValue:)	-	-	CoreNFC.NFCFeliCaPollingTimeSlot? | Swift.Int	-	-	877d1ebe6de2eea6
+CoreNFC	swift-property	s:So24NFCFeliCaPollingTimeSlotV8rawValueSivp	NFCFeliCaPollingTimeSlot	rawValue	-	Swift.Int	-	-	-	d145da420d533847
+CoreNFC	swift-typealias	s:So24NFCFeliCaPollingTimeSlotV8RawValuea	NFCFeliCaPollingTimeSlot	RawValue	-	-	-	-	-	6c635c57344b9d13
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingTimeSlot@NFCFeliCaPollingTimeSlotMax1	NFCFeliCaPollingTimeSlot	max1	-	-	-	ios=13.0	-	6e4afea0f2a06575
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingTimeSlot@NFCFeliCaPollingTimeSlotMax2	NFCFeliCaPollingTimeSlot	max2	-	-	-	ios=13.0	-	832da61369432892
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingTimeSlot@NFCFeliCaPollingTimeSlotMax4	NFCFeliCaPollingTimeSlot	max4	-	-	-	ios=13.0	-	541153274843a098
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingTimeSlot@NFCFeliCaPollingTimeSlotMax8	NFCFeliCaPollingTimeSlot	max8	-	-	-	ios=13.0	-	55114ca0bbd11043
+CoreNFC	swift-constant	c:@E@NFCFeliCaPollingTimeSlot@NFCFeliCaPollingTimeSlotMax16	NFCFeliCaPollingTimeSlot	max16	-	-	-	ios=13.0	-	363e3468bf49702e
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingTimeSlot@PollingTimeSlotMax1	NFCFeliCaPollingTimeSlot	PollingTimeSlotMax1	+	CoreNFC.NFCFeliCaPollingTimeSlot	-	ios=13.0	-	fc88d3c4d1fd19f7
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingTimeSlot@PollingTimeSlotMax2	NFCFeliCaPollingTimeSlot	PollingTimeSlotMax2	+	CoreNFC.NFCFeliCaPollingTimeSlot	-	ios=13.0	-	c89ac5197484e3a1
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingTimeSlot@PollingTimeSlotMax4	NFCFeliCaPollingTimeSlot	PollingTimeSlotMax4	+	CoreNFC.NFCFeliCaPollingTimeSlot	-	ios=13.0	-	ed5e9146e4c46c97
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingTimeSlot@PollingTimeSlotMax8	NFCFeliCaPollingTimeSlot	PollingTimeSlotMax8	+	CoreNFC.NFCFeliCaPollingTimeSlot	-	ios=13.0	-	f5cd089ba515947a
+CoreNFC	swift-property	c:@E@NFCFeliCaPollingTimeSlot@PollingTimeSlotMax16	NFCFeliCaPollingTimeSlot	PollingTimeSlotMax16	+	CoreNFC.NFCFeliCaPollingTimeSlot	-	ios=13.0	-	e0a6815c01168e58
+CoreNFC	swift-protocol	c:objc(pl)NFCFeliCaTag	-	NFCFeliCaTag	-	-	-	ios=13.0	-	8624d1e995fada75
+CoreNFC	swift-property	c:objc(pl)NFCFeliCaTag(py)currentSystemCode	NFCFeliCaTag	currentSystemCode	-	Foundation.Data	-	ios=13.0	-	529bd517afa91514
+CoreNFC	swift-property	c:objc(pl)NFCFeliCaTag(py)currentIDm	NFCFeliCaTag	currentIDm	-	Foundation.Data	-	ios=13.0	-	50a9c298113df0e0
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)pollingWithSystemCode:requestCode:timeSlot:completionHandler:	NFCFeliCaTag	polling(systemCode:requestCode:timeSlot:completionHandler:)	-	Swift.Void	Foundation.Data | CoreNFC.NFCFeliCaPollingRequestCode | CoreNFC.NFCFeliCaPollingTimeSlot | (Foundation.Data, Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	314bf0d61631661a
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)pollingWithSystemCode:requestCode:timeSlot:completionHandler:	NFCFeliCaTag	polling(systemCode:requestCode:timeSlot:)	-	(Foundation.Data, Foundation.Data)	Foundation.Data | CoreNFC.NFCFeliCaPollingRequestCode | CoreNFC.NFCFeliCaPollingTimeSlot	ios=13.0	-	81ede6bb52378e42
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestServiceWithNodeCodeList:completionHandler:	NFCFeliCaTag	requestService(nodeCodeList:completionHandler:)	-	Swift.Void	[Foundation.Data] | ([Foundation.Data], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	9e436e6288161ad7
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestServiceWithNodeCodeList:completionHandler:	NFCFeliCaTag	requestService(nodeCodeList:)	-	[Foundation.Data]	[Foundation.Data]	ios=13.0	-	014de67c600ffda3
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestResponseWithCompletionHandler:	NFCFeliCaTag	requestResponse(completionHandler:)	-	Swift.Void	(Swift.Int, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	0d53895e86a58818
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestResponseWithCompletionHandler:	NFCFeliCaTag	requestResponse()	-	Swift.Int	-	ios=13.0	-	f302e7ea1b30ba81
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)readWithoutEncryptionWithServiceCodeList:blockList:completionHandler:	NFCFeliCaTag	readWithoutEncryption(serviceCodeList:blockList:completionHandler:)	-	Swift.Void	[Foundation.Data] | [Foundation.Data] | (Swift.Int, Swift.Int, [Foundation.Data], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	785637718899e750
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)readWithoutEncryptionWithServiceCodeList:blockList:completionHandler:	NFCFeliCaTag	readWithoutEncryption(serviceCodeList:blockList:)	-	(Swift.Int, Swift.Int, [Foundation.Data])	[Foundation.Data] | [Foundation.Data]	ios=13.0	-	aac2769db11a60fe
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)writeWithoutEncryptionWithServiceCodeList:blockList:blockData:completionHandler:	NFCFeliCaTag	writeWithoutEncryption(serviceCodeList:blockList:blockData:completionHandler:)	-	Swift.Void	[Foundation.Data] | [Foundation.Data] | [Foundation.Data] | (Swift.Int, Swift.Int, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	6fe62da771b436d8
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)writeWithoutEncryptionWithServiceCodeList:blockList:blockData:completionHandler:	NFCFeliCaTag	writeWithoutEncryption(serviceCodeList:blockList:blockData:)	-	(Swift.Int, Swift.Int)	[Foundation.Data] | [Foundation.Data] | [Foundation.Data]	ios=13.0	-	01a3f055306eae16
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestSystemCodeWithCompletionHandler:	NFCFeliCaTag	requestSystemCode(completionHandler:)	-	Swift.Void	([Foundation.Data], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	3b2d83d1cc4ffeb5
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestSystemCodeWithCompletionHandler:	NFCFeliCaTag	requestSystemCode()	-	[Foundation.Data]	-	ios=13.0	-	ae0d4a6df87f225e
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestServiceV2WithNodeCodeList:completionHandler:	NFCFeliCaTag	requestServiceV2(nodeCodeList:completionHandler:)	-	Swift.Void	[Foundation.Data] | (Swift.Int, Swift.Int, CoreNFC.NFCFeliCaEncryptionId, [Foundation.Data], [Foundation.Data], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	3314a30a605cc2fb
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestServiceV2WithNodeCodeList:completionHandler:	NFCFeliCaTag	requestServiceV2(nodeCodeList:)	-	(Swift.Int, Swift.Int, CoreNFC.NFCFeliCaEncryptionId, [Foundation.Data], [Foundation.Data])	[Foundation.Data]	ios=13.0	-	4b5526d898346e73
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestSpecificationVersionWithCompletionHandler:	NFCFeliCaTag	requestSpecificationVersion(completionHandler:)	-	Swift.Void	(Swift.Int, Swift.Int, Foundation.Data, Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	bbeda86716e2f94a
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)requestSpecificationVersionWithCompletionHandler:	NFCFeliCaTag	requestSpecificationVersion()	-	(Swift.Int, Swift.Int, Foundation.Data, Foundation.Data)	-	ios=13.0	-	b4cf1f49a632cfda
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)resetModeWithCompletionHandler:	NFCFeliCaTag	resetMode(completionHandler:)	-	Swift.Void	(Swift.Int, Swift.Int, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	26f877eec6f6b427
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)resetModeWithCompletionHandler:	NFCFeliCaTag	resetMode()	-	(Swift.Int, Swift.Int)	-	ios=13.0	-	d03c598246f788fb
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)sendFeliCaCommandPacket:completionHandler:	NFCFeliCaTag	sendFeliCaCommand(commandPacket:completionHandler:)	-	Swift.Void	Foundation.Data | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	5ed1e66fcdd58632
+CoreNFC	swift-method	c:objc(pl)NFCFeliCaTag(im)sendFeliCaCommandPacket:completionHandler:	NFCFeliCaTag	sendFeliCaCommand(commandPacket:)	-	Foundation.Data	Foundation.Data	ios=13.0	-	81230ff87c45f3b9
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE7polling10systemCode07requestH08timeSlot13resultHandlery10Foundation4DataV_So0ab14PollingRequestH0VSo0abp4TimeK0Vys6ResultOyAC0abP8ResponseVs5Error_pGctF	NFCFeliCaTag	polling(systemCode:requestCode:timeSlot:resultHandler:)	-	()	Foundation.Data | CoreNFC.NFCFeliCaPollingRequestCode | CoreNFC.NFCFeliCaPollingTimeSlot | (Swift.Result<CoreNFC.NFCFeliCaPollingResponse, any Swift.Error>) -> Swift.Void	ios=14.0	-	69707e3ea8cac988
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE14requestService12nodeCodeList13resultHandlerySay10Foundation4DataVG_ys6ResultOyAJs5Error_pGctF	NFCFeliCaTag	requestService(nodeCodeList:resultHandler:)	-	()	[Foundation.Data] | (Swift.Result<[Foundation.Data], any Swift.Error>) -> Swift.Void	ios=14.0	-	9be1335fa9b8752c
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE15requestResponse13resultHandleryys6ResultOySis5Error_pGc_tF	NFCFeliCaTag	requestResponse(resultHandler:)	-	()	(Swift.Result<Swift.Int, any Swift.Error>) -> Swift.Void	ios=14.0	-	a93513b941c1b9fb
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE21readWithoutEncryption15serviceCodeList05blockK013resultHandlerySay10Foundation4DataVG_AKys6ResultOyAC0aB10StatusFlagV_AKts5Error_pGctF	NFCFeliCaTag	readWithoutEncryption(serviceCodeList:blockList:resultHandler:)	-	()	[Foundation.Data] | [Foundation.Data] | (Swift.Result<(CoreNFC.NFCFeliCaStatusFlag, [Foundation.Data]), any Swift.Error>) -> Swift.Void	ios=14.0	-	b8d811e932105f8e
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE22writeWithoutEncryption15serviceCodeList05blockK00L4Data13resultHandlerySay10Foundation0M0VG_A2Lys6ResultOyAC0aB10StatusFlagVs5Error_pGctF	NFCFeliCaTag	writeWithoutEncryption(serviceCodeList:blockList:blockData:resultHandler:)	-	()	[Foundation.Data] | [Foundation.Data] | [Foundation.Data] | (Swift.Result<CoreNFC.NFCFeliCaStatusFlag, any Swift.Error>) -> Swift.Void	ios=14.0	-	110aa1e97e8b7b36
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE17requestSystemCode13resultHandleryys6ResultOySay10Foundation4DataVGs5Error_pGc_tF	NFCFeliCaTag	requestSystemCode(resultHandler:)	-	()	(Swift.Result<[Foundation.Data], any Swift.Error>) -> Swift.Void	ios=14.0	-	9e64ffce504d0ab8
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE16requestServiceV212nodeCodeList13resultHandlerySay10Foundation4DataVG_ys6ResultOyAC0ab7RequsetgH8ResponseVs5Error_pGctF	NFCFeliCaTag	requestServiceV2(nodeCodeList:resultHandler:)	-	()	[Foundation.Data] | (Swift.Result<CoreNFC.NFCFeliCaRequsetServiceV2Response, any Swift.Error>) -> Swift.Void	ios=14.0	-	ad9566a3e0769759
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE27requestSpecificationVersion13resultHandleryys6ResultOyAC0ab7RequestgH8ResponseVs5Error_pGc_tF	NFCFeliCaTag	requestSpecificationVersion(resultHandler:)	-	()	(Swift.Result<CoreNFC.NFCFeliCaRequestSpecificationVersionResponse, any Swift.Error>) -> Swift.Void	ios=14.0	-	5dda696853192a0a
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE9resetMode13resultHandleryys6ResultOyAC0aB10StatusFlagVs5Error_pGc_tF	NFCFeliCaTag	resetMode(resultHandler:)	-	()	(Swift.Result<CoreNFC.NFCFeliCaStatusFlag, any Swift.Error>) -> Swift.Void	ios=14.0	-	eef415bb72435cda
+CoreNFC	swift-method	s:So12NFCFeliCaTagP7CoreNFCE08sendFeliB7Command13commandPacket13resultHandlery10Foundation4DataV_ys6ResultOyAIs5Error_pGctF	NFCFeliCaTag	sendFeliCaCommand(commandPacket:resultHandler:)	-	()	Foundation.Data | (Swift.Result<Foundation.Data, any Swift.Error>) -> Swift.Void	ios=14.0	-	ffbc2fd4afb24d6f
+CoreNFC	swift-class	c:objc(cs)NFCISO15693CustomCommandConfiguration	-	NFCISO15693CustomCommandConfiguration	-	-	-	ios=11.0	-	87df2d6f02de4d56
+CoreNFC	swift-property	c:objc(cs)NFCISO15693CustomCommandConfiguration(py)manufacturerCode	NFCISO15693CustomCommandConfiguration	manufacturerCode	-	Swift.Int	-	ios=11.0	-	004a555dd9bf0a4f
+CoreNFC	swift-property	c:objc(cs)NFCISO15693CustomCommandConfiguration(py)customCommandCode	NFCISO15693CustomCommandConfiguration	customCommandCode	-	Swift.Int	-	ios=11.0	-	9a0ca478e6e7c35d
+CoreNFC	swift-property	c:objc(cs)NFCISO15693CustomCommandConfiguration(py)requestParameters	NFCISO15693CustomCommandConfiguration	requestParameters	-	Foundation.Data	-	ios=11.0	-	a553c2fffc6db734
+CoreNFC	swift-method	c:objc(cs)NFCISO15693CustomCommandConfiguration(im)initWithManufacturerCode:customCommandCode:requestParameters:	NFCISO15693CustomCommandConfiguration	init(manufacturerCode:customCommandCode:requestParameters:)	-	-	CoreNFC.NFCISO15693CustomCommandConfiguration | Swift.Int | Swift.Int | Foundation.Data?	ios=11.0	-	38d8d339236493ee
+CoreNFC	swift-method	c:objc(cs)NFCISO15693CustomCommandConfiguration(im)initWithManufacturerCode:customCommandCode:requestParameters:maximumRetries:retryInterval:	NFCISO15693CustomCommandConfiguration	init(manufacturerCode:customCommandCode:requestParameters:maximumRetries:retryInterval:)	-	-	CoreNFC.NFCISO15693CustomCommandConfiguration | Swift.Int | Swift.Int | Foundation.Data? | Swift.Int | Foundation.TimeInterval	ios=11.0	-	fa33df2eec077aca
+CoreNFC	swift-method	c:objc(cs)NSObject(im)init	NFCISO15693CustomCommandConfiguration	init()	-	-	CoreNFC.NFCISO15693CustomCommandConfiguration	-	-	9737d654107ca6c4
+CoreNFC	swift-class	c:objc(cs)NFCISO15693ReadMultipleBlocksConfiguration	-	NFCISO15693ReadMultipleBlocksConfiguration	-	-	-	ios=11.0	-	039d03be30b618d0
+CoreNFC	swift-property	c:objc(cs)NFCISO15693ReadMultipleBlocksConfiguration(py)range	NFCISO15693ReadMultipleBlocksConfiguration	range	-	Foundation.NSRange	-	ios=11.0	-	64464f4f45e5cb29
+CoreNFC	swift-property	c:objc(cs)NFCISO15693ReadMultipleBlocksConfiguration(py)chunkSize	NFCISO15693ReadMultipleBlocksConfiguration	chunkSize	-	Swift.Int	-	ios=11.0	-	3f6b2df5900def73
+CoreNFC	swift-method	c:objc(cs)NFCISO15693ReadMultipleBlocksConfiguration(im)initWithRange:chunkSize:	NFCISO15693ReadMultipleBlocksConfiguration	init(range:chunkSize:)	-	-	CoreNFC.NFCISO15693ReadMultipleBlocksConfiguration | Foundation.NSRange | Swift.Int	ios=11.0	-	bfa03f2cb3e2801f
+CoreNFC	swift-method	c:objc(cs)NFCISO15693ReadMultipleBlocksConfiguration(im)initWithRange:chunkSize:maximumRetries:retryInterval:	NFCISO15693ReadMultipleBlocksConfiguration	init(range:chunkSize:maximumRetries:retryInterval:)	-	-	CoreNFC.NFCISO15693ReadMultipleBlocksConfiguration | Foundation.NSRange | Swift.Int | Swift.Int | Foundation.TimeInterval	ios=11.0	-	6884a53a3dfec52a
+CoreNFC	swift-method	c:objc(cs)NSObject(im)init	NFCISO15693ReadMultipleBlocksConfiguration	init()	-	-	CoreNFC.NFCISO15693ReadMultipleBlocksConfiguration	-	-	330181c224029cf3
+CoreNFC	swift-struct	c:@E@NFCISO15693RequestFlag	-	NFCISO15693RequestFlag	-	-	-	ios=11.0	-	22a3df173bc645b7
+CoreNFC	swift-method	s:So22NFCISO15693RequestFlagV8rawValueABs5UInt8V_tcfc	NFCISO15693RequestFlag	init(rawValue:)	-	-	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8	-	-	48d62992a8048f34
+CoreNFC	swift-property	s:So22NFCISO15693RequestFlagV8rawValues5UInt8Vvp	NFCISO15693RequestFlag	rawValue	-	Swift.UInt8	-	-	-	438a8b542bac00a1
+CoreNFC	swift-typealias	s:So22NFCISO15693RequestFlagV8RawValuea	NFCISO15693RequestFlag	RawValue	-	-	-	-	-	f62d358e5348a22c
+CoreNFC	swift-typealias	s:So22NFCISO15693RequestFlagV7Elementa	NFCISO15693RequestFlag	Element	-	-	-	-	-	9c0a1cdd76276b3e
+CoreNFC	swift-typealias	s:So22NFCISO15693RequestFlagV19ArrayLiteralElementa	NFCISO15693RequestFlag	ArrayLiteralElement	-	-	-	-	-	e4120366ea456c48
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagDualSubCarriers	NFCISO15693RequestFlag	dualSubCarriers	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	46438ab1f5de96ba
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagHighDataRate	NFCISO15693RequestFlag	highDataRate	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	168a391b5ce3d8aa
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagProtocolExtension	NFCISO15693RequestFlag	protocolExtension	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	b3adeb6b3d83a96e
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagSelect	NFCISO15693RequestFlag	select	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	71d7d3d1ec60f7a7
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagAddress	NFCISO15693RequestFlag	address	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	9b9ddcbf68a4f5eb
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagOption	NFCISO15693RequestFlag	option	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	9451f8ce33feed1d
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@NFCISO15693RequestFlagCommandSpecificBit8	NFCISO15693RequestFlag	commandSpecificBit8	+	CoreNFC.NFCISO15693RequestFlag	-	ios=14.0	-	0996f23f06e0a05f
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@RequestFlagDualSubCarriers	NFCISO15693RequestFlag	RequestFlagDualSubCarriers	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	986f98034e27a624
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@RequestFlagHighDataRate	NFCISO15693RequestFlag	RequestFlagHighDataRate	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	d1ecad14f9637cd9
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@RequestFlagProtocolExtension	NFCISO15693RequestFlag	RequestFlagProtocolExtension	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	1aa5358d2fbc055c
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@RequestFlagSelect	NFCISO15693RequestFlag	RequestFlagSelect	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	56afb68b98006c25
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@RequestFlagAddress	NFCISO15693RequestFlag	RequestFlagAddress	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	02bf22904b529e31
+CoreNFC	swift-property	c:@E@NFCISO15693RequestFlag@RequestFlagOption	NFCISO15693RequestFlag	RequestFlagOption	+	CoreNFC.NFCISO15693RequestFlag	-	ios=11.0	-	371161d3f5c8aaaa
+CoreNFC	swift-struct	c:@E@NFCISO15693ResponseFlag	-	NFCISO15693ResponseFlag	-	-	-	ios=14.0	-	4bcbe69c2d0c46ba
+CoreNFC	swift-method	s:So23NFCISO15693ResponseFlagV8rawValueABs5UInt8V_tcfc	NFCISO15693ResponseFlag	init(rawValue:)	-	-	CoreNFC.NFCISO15693ResponseFlag | Swift.UInt8	-	-	a610ce06d63f5c5c
+CoreNFC	swift-property	s:So23NFCISO15693ResponseFlagV8rawValues5UInt8Vvp	NFCISO15693ResponseFlag	rawValue	-	Swift.UInt8	-	-	-	24da0e629cb85a56
+CoreNFC	swift-typealias	s:So23NFCISO15693ResponseFlagV8RawValuea	NFCISO15693ResponseFlag	RawValue	-	-	-	-	-	d80ee72f8f6d773f
+CoreNFC	swift-typealias	s:So23NFCISO15693ResponseFlagV7Elementa	NFCISO15693ResponseFlag	Element	-	-	-	-	-	90fe5fb3cf55fb92
+CoreNFC	swift-typealias	s:So23NFCISO15693ResponseFlagV19ArrayLiteralElementa	NFCISO15693ResponseFlag	ArrayLiteralElement	-	-	-	-	-	b53dc3cb5343cf0f
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagError	NFCISO15693ResponseFlag	error	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	fb0f1bab4959004a
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagResponseBufferValid	NFCISO15693ResponseFlag	responseBufferValid	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	e2217b0dfca5568d
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagFinalResponse	NFCISO15693ResponseFlag	finalResponse	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	89138a2e3745592f
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagProtocolExtension	NFCISO15693ResponseFlag	protocolExtension	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	778debaf9c8cbbc8
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagBlockSecurityStatusBit5	NFCISO15693ResponseFlag	blockSecurityStatusBit5	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	4cbdca4d73981007
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagBlockSecurityStatusBit6	NFCISO15693ResponseFlag	blockSecurityStatusBit6	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	340cbe87d72f4954
+CoreNFC	swift-property	c:@E@NFCISO15693ResponseFlag@NFCISO15693ResponseFlagWaitTimeExtension	NFCISO15693ResponseFlag	waitTimeExtension	+	CoreNFC.NFCISO15693ResponseFlag	-	ios=14.0	-	138dc181dcbc0d8f
+CoreNFC	swift-protocol	c:objc(pl)NFCISO15693Tag	-	NFCISO15693Tag	-	-	-	ios=11.0	-	b8e156c95efd97ba
+CoreNFC	swift-property	c:objc(pl)NFCISO15693Tag(py)identifier	NFCISO15693Tag	identifier	-	Foundation.Data	-	ios=11.0	-	f02c41f7d7503425
+CoreNFC	swift-property	c:objc(pl)NFCISO15693Tag(py)icManufacturerCode	NFCISO15693Tag	icManufacturerCode	-	Swift.Int	-	ios=11.0	-	cbf309515a459c02
+CoreNFC	swift-property	c:objc(pl)NFCISO15693Tag(py)icSerialNumber	NFCISO15693Tag	icSerialNumber	-	Foundation.Data	-	ios=11.0	-	5c6939b9e5892ef9
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)sendCustomCommandWithConfiguration:completionHandler:	NFCISO15693Tag	sendCustomCommand(commandConfiguration:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693CustomCommandConfiguration | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=11.0	-	a43d4077f5919a3e
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)readMultipleBlocksWithConfiguration:completionHandler:	NFCISO15693Tag	readMultipleBlock(readConfiguration:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693ReadMultipleBlocksConfiguration | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=11.0	-	c42d40ed5539445e
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)stayQuietWithCompletionHandler:	NFCISO15693Tag	stayQuiet(completionHandler:)	-	Swift.Void	((any Swift.Error)?) -> Swift.Void	ios=13.0	-	a1208e6a26aa1deb
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)stayQuietWithCompletionHandler:	NFCISO15693Tag	stayQuiet()	-	Swift.Void	-	ios=13.0	-	c4ecd89c1e9d4288
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)readSingleBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	readSingleBlock(requestFlags:blockNumber:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	8f6b39e792d1c425
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)readSingleBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	readSingleBlock(requestFlags:blockNumber:)	-	Foundation.Data	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8	ios=13.0	-	4a7227152170bf39
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeSingleBlockWithRequestFlags:blockNumber:dataBlock:completionHandler:	NFCISO15693Tag	writeSingleBlock(requestFlags:blockNumber:dataBlock:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | Foundation.Data | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	2bb0376bceaff5d7
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeSingleBlockWithRequestFlags:blockNumber:dataBlock:completionHandler:	NFCISO15693Tag	writeSingleBlock(requestFlags:blockNumber:dataBlock:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | Foundation.Data	ios=13.0	-	3b4c648523ffc616
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	lockBlock(requestFlags:blockNumber:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	759597f781eb040c
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	lockBlock(requestFlags:blockNumber:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8	ios=13.0	-	f2c28d6b2fd41c88
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)readMultipleBlocksWithRequestFlags:blockRange:completionHandler:	NFCISO15693Tag	readMultipleBlocks(requestFlags:blockRange:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | ([Foundation.Data], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	90914374bf805652
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)readMultipleBlocksWithRequestFlags:blockRange:completionHandler:	NFCISO15693Tag	readMultipleBlocks(requestFlags:blockRange:)	-	[Foundation.Data]	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange	ios=13.0	-	88e171155096e197
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeMultipleBlocksWithRequestFlags:blockRange:dataBlocks:completionHandler:	NFCISO15693Tag	writeMultipleBlocks(requestFlags:blockRange:dataBlocks:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | [Foundation.Data] | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	b49b1c4698c1f3c0
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeMultipleBlocksWithRequestFlags:blockRange:dataBlocks:completionHandler:	NFCISO15693Tag	writeMultipleBlocks(requestFlags:blockRange:dataBlocks:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | [Foundation.Data]	ios=13.0	-	7ca49fe0a011f74c
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)selectWithRequestFlags:completionHandler:	NFCISO15693Tag	select(requestFlags:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	caee4806742b0630
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)selectWithRequestFlags:completionHandler:	NFCISO15693Tag	select(requestFlags:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag	ios=13.0	-	6807e2f7008d3d33
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)resetToReadyWithRequestFlags:completionHandler:	NFCISO15693Tag	resetToReady(requestFlags:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	0560cea0447608ca
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)resetToReadyWithRequestFlags:completionHandler:	NFCISO15693Tag	resetToReady(requestFlags:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag	ios=13.0	-	6d52c3921e23f004
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeAFIWithRequestFlag:afi:completionHandler:	NFCISO15693Tag	writeAFI(requestFlags:afi:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	7e5a84347b520a73
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeAFIWithRequestFlag:afi:completionHandler:	NFCISO15693Tag	writeAFI(requestFlags:afi:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8	ios=13.0	-	7bd3c0e5bca9e69e
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockAFIWithRequestFlag:completionHandler:	NFCISO15693Tag	lockAFI(requestFlags:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	339ff2dfe80a2868
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockAFIWithRequestFlag:completionHandler:	NFCISO15693Tag	lockAFI(requestFlags:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag	ios=13.0	-	0e159f676261ffea
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeDSFIDWithRequestFlag:dsfid:completionHandler:	NFCISO15693Tag	writeDSFID(requestFlags:dsfid:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	a70eb492c64412bd
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)writeDSFIDWithRequestFlag:dsfid:completionHandler:	NFCISO15693Tag	writeDSFID(requestFlags:dsfid:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8	ios=13.0	-	92ab55432dd10028
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockDFSIDWithRequestFlag:completionHandler:	NFCISO15693Tag	lockDFSID(requestFlags:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	0f6619d68b9acdfc
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockDSFIDWithRequestFlag:completionHandler:	NFCISO15693Tag	lockDSFID(requestFlags:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | ((any Swift.Error)?) -> Swift.Void	ios=14.0	-	84ae106270f23af5
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)lockDSFIDWithRequestFlag:completionHandler:	NFCISO15693Tag	lockDSFID(requestFlags:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag	ios=14.0	-	93f03457d32fa5ad
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)getSystemInfoWithRequestFlag:completionHandler:	NFCISO15693Tag	getSystemInfo(requestFlags:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | (Swift.Int, Swift.Int, Swift.Int, Swift.Int, Swift.Int, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	9ddcd23930bbc5c3
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)getMultipleBlockSecurityStatusWithRequestFlag:blockRange:completionHandler:	NFCISO15693Tag	getMultipleBlockSecurityStatus(requestFlags:blockRange:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | ([Foundation.NSNumber], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	5f6f8750d72fa880
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)getMultipleBlockSecurityStatusWithRequestFlag:blockRange:completionHandler:	NFCISO15693Tag	getMultipleBlockSecurityStatus(requestFlags:blockRange:)	-	[Foundation.NSNumber]	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange	ios=13.0	-	99a7da4e383b3e18
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)customCommandWithRequestFlag:customCommandCode:customRequestParameters:completionHandler:	NFCISO15693Tag	customCommand(requestFlags:customCommandCode:customRequestParameters:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	bc0b97bcfa85ebee
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)customCommandWithRequestFlag:customCommandCode:customRequestParameters:completionHandler:	NFCISO15693Tag	customCommand(requestFlags:customCommandCode:customRequestParameters:)	-	Foundation.Data	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data	ios=13.0	-	42f9b2a1790e6dbc
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedReadSingleBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	extendedReadSingleBlock(requestFlags:blockNumber:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.Int | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	b4595c6c9c170df4
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedReadSingleBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	extendedReadSingleBlock(requestFlags:blockNumber:)	-	Foundation.Data	CoreNFC.NFCISO15693RequestFlag | Swift.Int	ios=13.0	-	a02fca0a04220f07
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedWriteSingleBlockWithRequestFlags:blockNumber:dataBlock:completionHandler:	NFCISO15693Tag	extendedWriteSingleBlock(requestFlags:blockNumber:dataBlock:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	04a170ea5395c54a
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedWriteSingleBlockWithRequestFlags:blockNumber:dataBlock:completionHandler:	NFCISO15693Tag	extendedWriteSingleBlock(requestFlags:blockNumber:dataBlock:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data	ios=13.0	-	d06f6dc8ab063295
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedLockBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	extendedLockBlock(requestFlags:blockNumber:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.Int | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	1f19960d9cbeb618
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedLockBlockWithRequestFlags:blockNumber:completionHandler:	NFCISO15693Tag	extendedLockBlock(requestFlags:blockNumber:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Swift.Int	ios=13.0	-	c4d7317972d1af86
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedReadMultipleBlocksWithRequestFlags:blockRange:completionHandler:	NFCISO15693Tag	extendedReadMultipleBlocks(requestFlags:blockRange:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | ([Foundation.Data], (any Swift.Error)?) -> Swift.Void	ios=13.0	-	f4ecb231dd245463
+CoreNFC	swift-method	c:objc(pl)NFCISO15693Tag(im)extendedReadMultipleBlocksWithRequestFlags:blockRange:completionHandler:	NFCISO15693Tag	extendedReadMultipleBlocks(requestFlags:blockRange:)	-	[Foundation.Data]	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange	ios=13.0	-	42f77330be3fc8f5
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE15readSingleBlock12requestFlags11blockNumber13resultHandlerySo0A11RequestFlagV_s5UInt8Vys6ResultOy10Foundation4DataVs5Error_pGctF	NFCISO15693Tag	readSingleBlock(requestFlags:blockNumber:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.UInt8 | (Swift.Result<Foundation.Data, any Swift.Error>) -> Swift.Void	ios=14.0	-	ee7772babdce1fb1
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE18readMultipleBlocks12requestFlags10blockRange13resultHandlerySo0A11RequestFlagV_So8_NSRangeVys6ResultOySay10Foundation4DataVGs5Error_pGctF	NFCISO15693Tag	readMultipleBlocks(requestFlags:blockRange:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | (Swift.Result<[Foundation.Data], any Swift.Error>) -> Swift.Void	ios=14.0	-	7ee73da0addab236
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE13getSystemInfo12requestFlags13resultHandlerySo0A11RequestFlagV_ys6ResultOyAC0afG0Vs5Error_pGctF	NFCISO15693Tag	getSystemInfo(requestFlags:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | (Swift.Result<CoreNFC.NFCISO15693SystemInfo, any Swift.Error>) -> Swift.Void	ios=14.0	-	6159b93f6c26c552
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE10systemInfo12requestFlagsAC0a6SystemF0VSo0A11RequestFlagV_tYaKF	NFCISO15693Tag	systemInfo(requestFlags:)	-	CoreNFC.NFCISO15693SystemInfo	CoreNFC.NFCISO15693RequestFlag	ios=14.0	-	2cf920464e1d8e07
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE22fastReadMultipleBlocks12requestFlags10blockRange13resultHandlerySo0A11RequestFlagV_So8_NSRangeVys6ResultOySay10Foundation4DataVGs5Error_pGctF	NFCISO15693Tag	fastReadMultipleBlocks(requestFlags:blockRange:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | (Swift.Result<[Foundation.Data], any Swift.Error>) -> Swift.Void	ios=14.0	-	cbe25877bc765d90
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE22fastReadMultipleBlocks12requestFlags10blockRangeSay10Foundation4DataVGSo0A11RequestFlagV_So8_NSRangeVtYaKF	NFCISO15693Tag	fastReadMultipleBlocks(requestFlags:blockRange:)	-	[Foundation.Data]	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange	ios=14.0	-	2f4ed2c8becee8a0
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE13customCommand12requestFlags0eF4Code0E17RequestParameters13resultHandlerySo0aJ4FlagV_Si10Foundation4DataVys6ResultOyAMs5Error_pGctF	NFCISO15693Tag	customCommand(requestFlags:customCommandCode:customRequestParameters:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data | (Swift.Result<Foundation.Data, any Swift.Error>) -> Swift.Void	ios=14.0	-	9cb769413f264829
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE23extendedReadSingleBlock12requestFlags11blockNumber13resultHandlerySo0A11RequestFlagV_Siys6ResultOy10Foundation4DataVs5Error_pGctF	NFCISO15693Tag	extendedReadSingleBlock(requestFlags:blockNumber:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.Int | (Swift.Result<Foundation.Data, any Swift.Error>) -> Swift.Void	ios=14.0	-	a16eb14444405951
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE27extendedWriteMultipleBlocks12requestFlags10blockRange04dataH017completionHandlerySo0A11RequestFlagV_So8_NSRangeVSay10Foundation4DataVGys5Error_pSgctF	NFCISO15693Tag	extendedWriteMultipleBlocks(requestFlags:blockRange:dataBlocks:completionHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | [Foundation.Data] | ((any Swift.Error)?) -> Swift.Void	ios=14.0	-	cf0947018f7c9af1
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE27extendedWriteMultipleBlocks12requestFlags10blockRange04dataH0ySo0A11RequestFlagV_So8_NSRangeVSay10Foundation4DataVGtYaKF	NFCISO15693Tag	extendedWriteMultipleBlocks(requestFlags:blockRange:dataBlocks:)	-	()	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | [Foundation.Data]	ios=14.0	-	4c5e111c6bc6bf7c
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE12authenticate12requestFlags21cryptoSuiteIdentifier7message13resultHandlerySo0A11RequestFlagV_Si10Foundation4DataVys6ResultOySo0a8ResponseO0V_AMts5Error_pGctF	NFCISO15693Tag	authenticate(requestFlags:cryptoSuiteIdentifier:message:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data | (Swift.Result<(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data), any Swift.Error>) -> Swift.Void	ios=14.0	-	316ac532354e6cd6
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE12authenticate12requestFlags21cryptoSuiteIdentifier7messageSo0A12ResponseFlagV_10Foundation4DataVtSo0a7RequestM0V_SiALtYaKF	NFCISO15693Tag	authenticate(requestFlags:cryptoSuiteIdentifier:message:)	-	(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data)	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data	ios=14.0	-	42f1ef4dd7ecf5b2
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE9keyUpdate12requestFlags0E10Identifier7message13resultHandlerySo0A11RequestFlagV_Si10Foundation4DataVys6ResultOySo0a8ResponseN0V_AMts5Error_pGctF	NFCISO15693Tag	keyUpdate(requestFlags:keyIdentifier:message:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data | (Swift.Result<(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data), any Swift.Error>) -> Swift.Void	ios=14.0	-	2272f0e4ca3a55e0
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE9keyUpdate12requestFlags0E10Identifier7messageSo0A12ResponseFlagV_10Foundation4DataVtSo0a7RequestL0V_SiALtYaKF	NFCISO15693Tag	keyUpdate(requestFlags:keyIdentifier:message:)	-	(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data)	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data	ios=14.0	-	b301a7c48791801c
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE9challenge12requestFlags21cryptoSuiteIdentifier7message17completionHandlerySo0A11RequestFlagV_Si10Foundation4DataVys5Error_pSgctF	NFCISO15693Tag	challenge(requestFlags:cryptoSuiteIdentifier:message:completionHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data | ((any Swift.Error)?) -> Swift.Void	ios=14.0	-	c0dbbac21db2c7b6
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE9challenge12requestFlags21cryptoSuiteIdentifier7messageySo0A11RequestFlagV_Si10Foundation4DataVtYaKF	NFCISO15693Tag	challenge(requestFlags:cryptoSuiteIdentifier:message:)	-	()	CoreNFC.NFCISO15693RequestFlag | Swift.Int | Foundation.Data	ios=14.0	-	62889bf191cc994c
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE10readBuffer12requestFlags13resultHandlerySo0A11RequestFlagV_ys6ResultOySo0a8ResponseL0V_10Foundation4DataVts5Error_pGctF	NFCISO15693Tag	readBuffer(requestFlags:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | (Swift.Result<(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data), any Swift.Error>) -> Swift.Void	ios=14.0	-	a490b8513226ccf0
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE10readBuffer12requestFlagsSo0A12ResponseFlagV_10Foundation4DataVtSo0a7RequestJ0V_tYaKF	NFCISO15693Tag	readBuffer(requestFlags:)	-	(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data)	CoreNFC.NFCISO15693RequestFlag	ios=14.0	-	cd53ea140c46c2bc
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE38extendedGetMultipleBlockSecurityStatus12requestFlags10blockRange13resultHandlerySo0A11RequestFlagV_So8_NSRangeVys6ResultOyAC0aghiJ0Vs5Error_pGctF	NFCISO15693Tag	extendedGetMultipleBlockSecurityStatus(requestFlags:blockRange:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | (Swift.Result<CoreNFC.NFCISO15693MultipleBlockSecurityStatus, any Swift.Error>) -> Swift.Void	ios=14.0	-	3b50f2a0fd852419
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE38extendedGetMultipleBlockSecurityStatus12requestFlags10blockRangeAC0aghiJ0VSo0A11RequestFlagV_So8_NSRangeVtYaKF	NFCISO15693Tag	extendedGetMultipleBlockSecurityStatus(requestFlags:blockRange:)	-	CoreNFC.NFCISO15693MultipleBlockSecurityStatus	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange	ios=14.0	-	4bb27c1c6bd9c2c3
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE30extendedFastReadMultipleBlocks12requestFlags10blockRange13resultHandlerySo0A11RequestFlagV_So8_NSRangeVys6ResultOySay10Foundation4DataVGs5Error_pGctF	NFCISO15693Tag	extendedFastReadMultipleBlocks(requestFlags:blockRange:resultHandler:)	-	()	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange | (Swift.Result<[Foundation.Data], any Swift.Error>) -> Swift.Void	ios=14.0	-	ac529bb4b7db11d3
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE30extendedFastReadMultipleBlocks12requestFlags10blockRangeSay10Foundation4DataVGSo0A11RequestFlagV_So8_NSRangeVtYaKF	NFCISO15693Tag	extendedFastReadMultipleBlocks(requestFlags:blockRange:)	-	[Foundation.Data]	CoreNFC.NFCISO15693RequestFlag | Foundation.NSRange	ios=14.0	-	211867c1aaea3162
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE11sendRequest12requestFlags11commandCode4data13resultHandlerySi_Si10Foundation4DataVSgys6ResultOySo0A12ResponseFlagV_ALts5Error_pGctF	NFCISO15693Tag	sendRequest(requestFlags:commandCode:data:resultHandler:)	-	()	Swift.Int | Swift.Int | Foundation.Data? | (Swift.Result<(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data?), any Swift.Error>) -> Swift.Void	ios=14.0	-	6ee8780b7a88ea29
+CoreNFC	swift-method	s:So14NFCISO15693TagP7CoreNFCE11sendRequest12requestFlags11commandCode4dataSo0A12ResponseFlagV_10Foundation4DataVSgtSi_SiAMtYaKF	NFCISO15693Tag	sendRequest(requestFlags:commandCode:data:)	-	(CoreNFC.NFCISO15693ResponseFlag, Foundation.Data?)	Swift.Int | Swift.Int | Foundation.Data?	ios=14.0	-	446c246e85cb2a77
+CoreNFC	swift-constant	c:@NFCISO15693TagResponseErrorKey	-	NFCISO15693TagResponseErrorKey	-	Swift.String	-	ios=11.0	-	d8c0fe4fb2da31a5
+CoreNFC	swift-class	c:objc(cs)NFCISO7816APDU	-	NFCISO7816APDU	-	-	-	ios=13.0	-	28b0ae738ee45403
+CoreNFC	swift-property	c:objc(cs)NFCISO7816APDU(py)instructionClass	NFCISO7816APDU	instructionClass	-	Swift.UInt8	-	ios=13.0	-	f50355c1c01d1277
+CoreNFC	swift-property	c:objc(cs)NFCISO7816APDU(py)instructionCode	NFCISO7816APDU	instructionCode	-	Swift.UInt8	-	ios=13.0	-	fa3d381cdeb932c9
+CoreNFC	swift-property	c:objc(cs)NFCISO7816APDU(py)p1Parameter	NFCISO7816APDU	p1Parameter	-	Swift.UInt8	-	ios=13.0	-	48aa5d5eb745bb12
+CoreNFC	swift-property	c:objc(cs)NFCISO7816APDU(py)p2Parameter	NFCISO7816APDU	p2Parameter	-	Swift.UInt8	-	ios=13.0	-	a53ba213d7a65389
+CoreNFC	swift-property	c:objc(cs)NFCISO7816APDU(py)data	NFCISO7816APDU	data	-	Foundation.Data?	-	ios=13.0	-	c1739276f3d58ee5
+CoreNFC	swift-property	c:objc(cs)NFCISO7816APDU(py)expectedResponseLength	NFCISO7816APDU	expectedResponseLength	-	Swift.Int	-	ios=13.0	-	81ad43ae0c0343ef
+CoreNFC	swift-method	c:objc(cs)NFCISO7816APDU(im)initWithInstructionClass:instructionCode:p1Parameter:p2Parameter:data:expectedResponseLength:	NFCISO7816APDU	init(instructionClass:instructionCode:p1Parameter:p2Parameter:data:expectedResponseLength:)	-	-	CoreNFC.NFCISO7816APDU | Swift.UInt8 | Swift.UInt8 | Swift.UInt8 | Swift.UInt8 | Foundation.Data | Swift.Int	ios=13.0	-	78bcc332376515bb
+CoreNFC	swift-method	c:objc(cs)NFCISO7816APDU(im)initWithData:	NFCISO7816APDU	init(data:)	-	-	CoreNFC.NFCISO7816APDU? | Foundation.Data	ios=13.0	-	e1a39fc8119ed10a
+CoreNFC	swift-protocol	c:objc(pl)NFCISO7816Tag	-	NFCISO7816Tag	-	-	-	ios=13.0	-	62e8b168fa6db1ff
+CoreNFC	swift-property	c:objc(pl)NFCISO7816Tag(py)initialSelectedAID	NFCISO7816Tag	initialSelectedAID	-	Swift.String	-	ios=13.0	-	05f651d2dc936336
+CoreNFC	swift-property	c:objc(pl)NFCISO7816Tag(py)identifier	NFCISO7816Tag	identifier	-	Foundation.Data	-	ios=13.0	-	fbd67ec62fa7086e
+CoreNFC	swift-property	c:objc(pl)NFCISO7816Tag(py)historicalBytes	NFCISO7816Tag	historicalBytes	-	Foundation.Data?	-	ios=13.0	-	ba67ab8da79ce6dd
+CoreNFC	swift-property	c:objc(pl)NFCISO7816Tag(py)applicationData	NFCISO7816Tag	applicationData	-	Foundation.Data?	-	ios=13.0	-	48e6d69c7b7e6b4b
+CoreNFC	swift-property	c:objc(pl)NFCISO7816Tag(py)proprietaryApplicationDataCoding	NFCISO7816Tag	proprietaryApplicationDataCoding	-	Swift.Bool	-	ios=13.0	-	fb75208951ed16b4
+CoreNFC	swift-method	c:objc(pl)NFCISO7816Tag(im)sendCommandAPDU:completionHandler:	NFCISO7816Tag	sendCommand(apdu:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO7816APDU | (Foundation.Data, Swift.UInt8, Swift.UInt8, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	f753e4ce690dc0ce
+CoreNFC	swift-method	c:objc(pl)NFCISO7816Tag(im)sendCommandAPDU:completionHandler:	NFCISO7816Tag	sendCommand(apdu:)	-	(Foundation.Data, Swift.UInt8, Swift.UInt8)	CoreNFC.NFCISO7816APDU	ios=13.0	-	63433c40f0aa1f0a
+CoreNFC	swift-method	s:So13NFCISO7816TagP7CoreNFCE11sendCommand4apdu13resultHandlerySo0A4APDUC_ys6ResultOyAC0a8ResponseJ0Vs5Error_pGctF	NFCISO7816Tag	sendCommand(apdu:resultHandler:)	-	()	CoreNFC.NFCISO7816APDU | (Swift.Result<CoreNFC.NFCISO7816ResponseAPDU, any Swift.Error>) -> Swift.Void	ios=14.0	-	3f294c65041ff264
+CoreNFC	swift-method	s:So13NFCISO7816TagP7CoreNFCE11sendCommand4apduAC0A12ResponseAPDUVSo0aI0C_tYaKF	NFCISO7816Tag	sendCommand(apdu:)	-	CoreNFC.NFCISO7816ResponseAPDU	CoreNFC.NFCISO7816APDU	ios=14.0	-	daf55386039fc386
+CoreNFC	swift-enum	c:@E@NFCMiFareFamily	-	NFCMiFareFamily	-	-	-	ios=13.0	-	979854685e76d078
+CoreNFC	swift-method	s:So15NFCMiFareFamilyV8rawValueABSgSu_tcfc	NFCMiFareFamily	init(rawValue:)	-	-	CoreNFC.NFCMiFareFamily? | Swift.UInt	-	-	db64f9e53ca35da5
+CoreNFC	swift-property	s:So15NFCMiFareFamilyV8rawValueSuvp	NFCMiFareFamily	rawValue	-	Swift.UInt	-	-	-	6279139f9113c1c1
+CoreNFC	swift-typealias	s:So15NFCMiFareFamilyV8RawValuea	NFCMiFareFamily	RawValue	-	-	-	-	-	3c9502b7fdd6dce2
+CoreNFC	swift-constant	c:@E@NFCMiFareFamily@NFCMiFareUnknown	NFCMiFareFamily	unknown	-	-	-	ios=13.0	-	7731ad18c8156ea9
+CoreNFC	swift-constant	c:@E@NFCMiFareFamily@NFCMiFareUltralight	NFCMiFareFamily	ultralight	-	-	-	ios=13.0	-	f59d8e7b4c1a76d6
+CoreNFC	swift-constant	c:@E@NFCMiFareFamily@NFCMiFarePlus	NFCMiFareFamily	plus	-	-	-	ios=13.0	-	f82a42178e4dd2a8
+CoreNFC	swift-constant	c:@E@NFCMiFareFamily@NFCMiFareDESFire	NFCMiFareFamily	desfire	-	-	-	ios=13.0	-	63d2b4424a63a45f
+CoreNFC	swift-protocol	c:objc(pl)NFCMiFareTag	-	NFCMiFareTag	-	-	-	ios=13.0	-	40f290816598346f
+CoreNFC	swift-property	c:objc(pl)NFCMiFareTag(py)mifareFamily	NFCMiFareTag	mifareFamily	-	CoreNFC.NFCMiFareFamily	-	ios=13.0	-	6ffae086bd3d4199
+CoreNFC	swift-property	c:objc(pl)NFCMiFareTag(py)identifier	NFCMiFareTag	identifier	-	Foundation.Data	-	ios=13.0	-	740d6a6a0a6708ea
+CoreNFC	swift-property	c:objc(pl)NFCMiFareTag(py)historicalBytes	NFCMiFareTag	historicalBytes	-	Foundation.Data?	-	ios=13.0	-	1863b7ed47606adc
+CoreNFC	swift-method	c:objc(pl)NFCMiFareTag(im)sendMiFareCommand:completionHandler:	NFCMiFareTag	sendMiFareCommand(commandPacket:completionHandler:)	-	Swift.Void	Foundation.Data | (Foundation.Data, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	713bf0a2ba4cc8d1
+CoreNFC	swift-method	c:objc(pl)NFCMiFareTag(im)sendMiFareCommand:completionHandler:	NFCMiFareTag	sendMiFareCommand(commandPacket:)	-	Foundation.Data	Foundation.Data	ios=13.0	-	1a30a7f1d639448d
+CoreNFC	swift-method	c:objc(pl)NFCMiFareTag(im)sendMiFareISO7816Command:completionHandler:	NFCMiFareTag	sendMiFareISO7816Command(_:completionHandler:)	-	Swift.Void	CoreNFC.NFCISO7816APDU | (Foundation.Data, Swift.UInt8, Swift.UInt8, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	49afffc63ef1e33a
+CoreNFC	swift-method	c:objc(pl)NFCMiFareTag(im)sendMiFareISO7816Command:completionHandler:	NFCMiFareTag	sendMiFareISO7816Command(_:)	-	(Foundation.Data, Swift.UInt8, Swift.UInt8)	CoreNFC.NFCISO7816APDU	ios=13.0	-	ab3c325327521f05
+CoreNFC	swift-method	s:So12NFCMiFareTagP7CoreNFCE06sendMiB7Command13commandPacket13resultHandlery10Foundation4DataV_ys6ResultOyAIs5Error_pGctF	NFCMiFareTag	sendMiFareCommand(commandPacket:resultHandler:)	-	()	Foundation.Data | (Swift.Result<Foundation.Data, any Swift.Error>) -> Swift.Void	ios=14.0	-	4a77d5ae5fd026c3
+CoreNFC	swift-method	s:So12NFCMiFareTagP7CoreNFCE06sendMiB14ISO7816Command_13resultHandlerySo14NFCISO7816APDUC_ys6ResultOyAC0l8ResponseM0Vs5Error_pGctF	NFCMiFareTag	sendMiFareISO7816Command(_:resultHandler:)	-	()	CoreNFC.NFCISO7816APDU | (Swift.Result<CoreNFC.NFCISO7816ResponseAPDU, any Swift.Error>) -> Swift.Void	ios=14.0	-	6a0a083f62abddf6
+CoreNFC	swift-method	s:So12NFCMiFareTagP7CoreNFCE06sendMiB14ISO7816CommandyAC22NFCISO7816ResponseAPDUVSo0jL0CYaKF	NFCMiFareTag	sendMiFareISO7816Command(_:)	-	CoreNFC.NFCISO7816ResponseAPDU	CoreNFC.NFCISO7816APDU	ios=14.0	-	bacc35fb308b2701
+CoreNFC	swift-class	c:objc(cs)NFCNDEFMessage	-	NFCNDEFMessage	-	-	-	ios=11.0	-	2b2b27f52eb9f848
+CoreNFC	swift-property	c:objc(cs)NFCNDEFMessage(py)records	NFCNDEFMessage	records	-	[CoreNFC.NFCNDEFPayload]	-	ios=11.0	-	83687a4d90d5122d
+CoreNFC	swift-property	c:objc(cs)NFCNDEFMessage(py)length	NFCNDEFMessage	length	-	Swift.Int	-	ios=13.0	-	31caeb9d66dcee6e
+CoreNFC	swift-method	c:objc(cs)NFCNDEFMessage(im)initWithNDEFRecords:	NFCNDEFMessage	init(records:)	-	-	CoreNFC.NFCNDEFMessage | [CoreNFC.NFCNDEFPayload]	ios=13.0	-	3df6fbe229196bde
+CoreNFC	swift-method	c:objc(cs)NFCNDEFMessage(cm)ndefMessageWithData:	NFCNDEFMessage	init(data:)	-	-	CoreNFC.NFCNDEFMessage? | Foundation.Data	ios=13.0	-	9009be186a396896
+CoreNFC	swift-class	c:objc(cs)NFCNDEFPayload	-	NFCNDEFPayload	-	-	-	ios=11.0	-	a61758eed3a775a3
+CoreNFC	swift-property	c:objc(cs)NFCNDEFPayload(py)typeNameFormat	NFCNDEFPayload	typeNameFormat	-	CoreNFC.NFCTypeNameFormat	-	ios=11.0	-	5f34ab58ee380d25
+CoreNFC	swift-property	c:objc(cs)NFCNDEFPayload(py)type	NFCNDEFPayload	type	-	Foundation.Data	-	ios=11.0	-	31a9b12e55d136f8
+CoreNFC	swift-property	c:objc(cs)NFCNDEFPayload(py)identifier	NFCNDEFPayload	identifier	-	Foundation.Data	-	ios=11.0	-	8a749fae48f20871
+CoreNFC	swift-property	c:objc(cs)NFCNDEFPayload(py)payload	NFCNDEFPayload	payload	-	Foundation.Data	-	ios=11.0	-	51dea4de18b1ffee
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(im)initWithFormat:type:identifier:payload:	NFCNDEFPayload	init(format:type:identifier:payload:)	-	-	CoreNFC.NFCNDEFPayload | CoreNFC.NFCTypeNameFormat | Foundation.Data | Foundation.Data | Foundation.Data	ios=13.0	-	ea5df61e1047204d
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(im)initWithFormat:type:identifier:payload:chunkSize:	NFCNDEFPayload	init(format:type:identifier:payload:chunkSize:)	-	-	CoreNFC.NFCNDEFPayload | CoreNFC.NFCTypeNameFormat | Foundation.Data | Foundation.Data | Foundation.Data | Swift.Int	ios=13.0	-	79135f77fd39f276
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(cm)wellKnownTypeURIPayloadWithString:	NFCNDEFPayload	wellKnownTypeURIPayload(string:)	+	Self?	Swift.String	ios=13.0	-	ccf78888837f083e
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(cm)wellKnownTypeURIPayloadWithURL:	NFCNDEFPayload	wellKnownTypeURIPayload(url:)	+	Self?	Foundation.URL	ios=13.0	-	f07e1bcc09b05173
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(cm)wellKnownTypeTextPayloadWithString:locale:	NFCNDEFPayload	wellKnownTypeTextPayload(string:locale:)	+	Self?	Swift.String | Foundation.Locale	ios=13.0	-	c6fb2847dd512439
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(cm)wellKnowTypeTextPayloadWithString:locale:	NFCNDEFPayload	wellKnowTypeTextPayload(string:locale:)	+	Self?	Swift.String | Foundation.Locale	ios=13.0	-	fad26ce77917f20f
+CoreNFC	swift-method	c:objc(cs)NFCNDEFPayload(im)wellKnownTypeURIPayload	NFCNDEFPayload	wellKnownTypeURIPayload()	-	Foundation.URL?	-	ios=13.0	-	3c5dea60d12d0509
+CoreNFC	swift-method	s:So14NFCNDEFPayloadC7CoreNFCE24wellKnownTypeTextPayloadSSSg_10Foundation6LocaleVSgtyF	NFCNDEFPayload	wellKnownTypeTextPayload()	-	(Swift.String?, Foundation.Locale?)	-	ios=13.0	-	46dc8de88c305cf4
+CoreNFC	swift-class	c:objc(cs)NFCNDEFReaderSession	-	NFCNDEFReaderSession	-	-	-	ios=11.0	-	dadf5a8b7b88de69
+CoreNFC	swift-method	c:objc(cs)NFCNDEFReaderSession(im)initWithDelegate:queue:invalidateAfterFirstRead:	NFCNDEFReaderSession	init(delegate:queue:invalidateAfterFirstRead:)	-	-	CoreNFC.NFCNDEFReaderSession | any CoreNFC.NFCNDEFReaderSessionDelegate | Dispatch.dispatch_queue_t? | Swift.Bool	ios=11.0	-	7d5573de71cd3091
+CoreNFC	swift-method	c:objc(cs)NFCNDEFReaderSession(im)restartPolling	NFCNDEFReaderSession	restartPolling()	-	Swift.Void	-	ios=13.0	-	b34c6a4a0359b5a7
+CoreNFC	swift-method	c:objc(cs)NFCNDEFReaderSession(im)connectToTag:completionHandler:	NFCNDEFReaderSession	connect(to:completionHandler:)	-	Swift.Void	any CoreNFC.NFCNDEFTag | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	ce0249a3a415a112
+CoreNFC	swift-method	c:objc(cs)NFCNDEFReaderSession(im)connectToTag:completionHandler:	NFCNDEFReaderSession	connect(to:)	-	Swift.Void	any CoreNFC.NFCNDEFTag	ios=13.0	-	cd783cffd0448941
+CoreNFC	swift-protocol	c:objc(pl)NFCNDEFReaderSessionDelegate	-	NFCNDEFReaderSessionDelegate	-	-	-	ios=11.0	-	368adb9df0be4d1e
+CoreNFC	swift-method	c:objc(pl)NFCNDEFReaderSessionDelegate(im)readerSession:didInvalidateWithError:	NFCNDEFReaderSessionDelegate	readerSession(_:didInvalidateWithError:)	-	Swift.Void	CoreNFC.NFCNDEFReaderSession | any Swift.Error	ios=11.0	-	00e50038fa01d725
+CoreNFC	swift-method	c:objc(pl)NFCNDEFReaderSessionDelegate(im)readerSession:didDetectNDEFs:	NFCNDEFReaderSessionDelegate	readerSession(_:didDetectNDEFs:)	-	Swift.Void	CoreNFC.NFCNDEFReaderSession | [CoreNFC.NFCNDEFMessage]	ios=11.0	-	a5ec73542e7c6de9
+CoreNFC	swift-method	c:objc(pl)NFCNDEFReaderSessionDelegate(im)readerSession:didDetectTags:	NFCNDEFReaderSessionDelegate	readerSession(_:didDetect:)	-	Swift.Void	CoreNFC.NFCNDEFReaderSession | [any CoreNFC.NFCNDEFTag]	ios=13.0	-	a67d7dcea660d288
+CoreNFC	swift-method	c:objc(pl)NFCNDEFReaderSessionDelegate(im)readerSessionDidBecomeActive:	NFCNDEFReaderSessionDelegate	readerSessionDidBecomeActive(_:)	-	Swift.Void	CoreNFC.NFCNDEFReaderSession	ios=13.0	-	637af81ce243833a
+CoreNFC	swift-enum	c:@E@NFCNDEFStatus	-	NFCNDEFStatus	-	-	-	ios=13.0	-	941c6a48d6303822
+CoreNFC	swift-method	s:So13NFCNDEFStatusV8rawValueABSgSu_tcfc	NFCNDEFStatus	init(rawValue:)	-	-	CoreNFC.NFCNDEFStatus? | Swift.UInt	-	-	48f81a3e8b73024c
+CoreNFC	swift-property	s:So13NFCNDEFStatusV8rawValueSuvp	NFCNDEFStatus	rawValue	-	Swift.UInt	-	-	-	cb0800987f565bbb
+CoreNFC	swift-typealias	s:So13NFCNDEFStatusV8RawValuea	NFCNDEFStatus	RawValue	-	-	-	-	-	9590ad10fc17e107
+CoreNFC	swift-constant	c:@E@NFCNDEFStatus@NFCNDEFStatusNotSupported	NFCNDEFStatus	notSupported	-	-	-	ios=13.0	-	86ddaf9e75fcbd9e
+CoreNFC	swift-constant	c:@E@NFCNDEFStatus@NFCNDEFStatusReadWrite	NFCNDEFStatus	readWrite	-	-	-	ios=13.0	-	d4d218d3eb2b5f4a
+CoreNFC	swift-constant	c:@E@NFCNDEFStatus@NFCNDEFStatusReadOnly	NFCNDEFStatus	readOnly	-	-	-	ios=13.0	-	c9a69c8040b61c6e
+CoreNFC	swift-protocol	c:objc(pl)NFCNDEFTag	-	NFCNDEFTag	-	-	-	ios=13.0	-	50d02ae474f3ac26
+CoreNFC	swift-property	c:objc(pl)NFCNDEFTag(py)available	NFCNDEFTag	isAvailable	-	Swift.Bool	-	ios=13.0	-	138d18e95f9d3e3c
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)queryNDEFStatusWithCompletionHandler:	NFCNDEFTag	queryNDEFStatus(completionHandler:)	-	Swift.Void	(CoreNFC.NFCNDEFStatus, Swift.Int, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	2782de9627fc86f4
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)queryNDEFStatusWithCompletionHandler:	NFCNDEFTag	queryNDEFStatus()	-	(CoreNFC.NFCNDEFStatus, Swift.Int)	-	ios=13.0	-	6bb914740adbe58a
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)readNDEFWithCompletionHandler:	NFCNDEFTag	readNDEF(completionHandler:)	-	Swift.Void	(CoreNFC.NFCNDEFMessage?, (any Swift.Error)?) -> Swift.Void	ios=13.0	-	fd95415585353832
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)readNDEFWithCompletionHandler:	NFCNDEFTag	readNDEF()	-	CoreNFC.NFCNDEFMessage	-	ios=13.0	-	43d9bd2413eafd19
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)writeNDEF:completionHandler:	NFCNDEFTag	writeNDEF(_:completionHandler:)	-	Swift.Void	CoreNFC.NFCNDEFMessage | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	7328989748588327
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)writeNDEF:completionHandler:	NFCNDEFTag	writeNDEF(_:)	-	Swift.Void	CoreNFC.NFCNDEFMessage	ios=13.0	-	3d83c8f9cb0a75f1
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)writeLockWithCompletionHandler:	NFCNDEFTag	writeLock(completionHandler:)	-	Swift.Void	((any Swift.Error)?) -> Swift.Void	ios=13.0	-	81a09ebbc9c4e33f
+CoreNFC	swift-method	c:objc(pl)NFCNDEFTag(im)writeLockWithCompletionHandler:	NFCNDEFTag	writeLock()	-	Swift.Void	-	ios=13.0	-	c6971e4512f9e7aa
+CoreNFC	swift-class	c:objc(cs)NFCPaymentTagReaderSession	-	NFCPaymentTagReaderSession	-	-	-	ios=26.0	-	b6c7793a0e9ed4c1
+CoreNFC	swift-method	s:So26NFCPaymentTagReaderSessionC7CoreNFCE8delegate5queueAbC06NFCTagcD8Delegate_p_So012OS_dispatch_H0CSgtcfc	NFCPaymentTagReaderSession	init(delegate:queue:)	-	-	CoreNFC.NFCPaymentTagReaderSession | any CoreNFC.NFCTagReaderSessionDelegate | Dispatch.DispatchQueue?	ios=26.0	-	8860e4eca8d59892
+CoreNFC	swift-struct	c:@E@NFCReaderError	-	NFCReaderError	-	-	-	ios=11.0	-	919508cf47d66a89
+CoreNFC	swift-property	s:SC14NFCReaderErrorLeV03_nsB0So7NSErrorCvp	NFCReaderError	_nsError	-	Foundation.NSError	-	-	-	21953148564ed1e4
+CoreNFC	swift-method	s:SC14NFCReaderErrorLeV03_nsB0ABSo7NSErrorC_tcfc	NFCReaderError	init(_nsError:)	-	-	CoreNFC.NFCReaderError | Foundation.NSError	-	-	95457f7372cef13e
+CoreNFC	swift-property	s:SC14NFCReaderErrorLeV11errorDomainSSvpZ	NFCReaderError	errorDomain	+	Swift.String	-	-	-	18edf8aff704b51a
+CoreNFC	swift-enum	c:@E@NFCReaderError	NFCReaderError	Code	-	-	-	ios=11.0	-	227b39a75b828e64
+CoreNFC	swift-method	s:So14NFCReaderErrorV8rawValueABSgSi_tcfc	NFCReaderError.Code	init(rawValue:)	-	-	CoreNFC.NFCReaderError.Code? | Swift.Int	-	-	15eafaf53b8de12c
+CoreNFC	swift-property	s:So14NFCReaderErrorV8rawValueSivp	NFCReaderError.Code	rawValue	-	Swift.Int	-	-	-	c4d44d97305a0a58
+CoreNFC	swift-typealias	s:So14NFCReaderErrorV8RawValuea	NFCReaderError.Code	RawValue	-	-	-	-	-	ad858fa41f47c519
+CoreNFC	swift-typealias	c:@E@NFCReaderError	NFCReaderError.Code	_ErrorType	-	-	-	-	-	c24df69b7e995c4b
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorUnsupportedFeature	NFCReaderError.Code	readerErrorUnsupportedFeature	-	-	-	ios=11.0	-	9f4264b7f8c17adb
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorSecurityViolation	NFCReaderError.Code	readerErrorSecurityViolation	-	-	-	ios=11.0	-	19bfa52d2f539a1e
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorInvalidParameter	NFCReaderError.Code	readerErrorInvalidParameter	-	-	-	ios=13.0	-	2b4e052351a25045
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorInvalidParameterLength	NFCReaderError.Code	readerErrorInvalidParameterLength	-	-	-	ios=13.0	-	a2412ba6eec3dae7
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorParameterOutOfBound	NFCReaderError.Code	readerErrorParameterOutOfBound	-	-	-	ios=13.0	-	df0b947b75daf9ae
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorRadioDisabled	NFCReaderError.Code	readerErrorRadioDisabled	-	-	-	ios=14.0	-	16be2e814b243c6f
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorIneligible	NFCReaderError.Code	readerErrorIneligible	-	-	-	ios=26.0	-	62ea42ca4d5c47d7
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderErrorAccessNotAccepted	NFCReaderError.Code	readerErrorAccessNotAccepted	-	-	-	ios=26.0	-	c29c8906961d8f1f
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderTransceiveErrorTagConnectionLost	NFCReaderError.Code	readerTransceiveErrorTagConnectionLost	-	-	-	ios=11.0	-	2445461a4b502c84
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderTransceiveErrorRetryExceeded	NFCReaderError.Code	readerTransceiveErrorRetryExceeded	-	-	-	ios=11.0	-	fd4f4ea0e0533c2b
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderTransceiveErrorTagResponseError	NFCReaderError.Code	readerTransceiveErrorTagResponseError	-	-	-	ios=11.0	-	6723678512c761a1
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderTransceiveErrorSessionInvalidated	NFCReaderError.Code	readerTransceiveErrorSessionInvalidated	-	-	-	ios=13.0	-	0585a7d714d80bde
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderTransceiveErrorTagNotConnected	NFCReaderError.Code	readerTransceiveErrorTagNotConnected	-	-	-	ios=13.0	-	7752dddf489e40a1
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderTransceiveErrorPacketTooLong	NFCReaderError.Code	readerTransceiveErrorPacketTooLong	-	-	-	ios=14.0	-	cbcfd1720bc7ee2b
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorUserCanceled	NFCReaderError.Code	readerSessionInvalidationErrorUserCanceled	-	-	-	ios=11.0	-	c06e6c3008ae1e6d
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorSessionTimeout	NFCReaderError.Code	readerSessionInvalidationErrorSessionTimeout	-	-	-	ios=11.0	-	50fa2d5db28ff4fc
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorSessionTerminatedUnexpectedly	NFCReaderError.Code	readerSessionInvalidationErrorSessionTerminatedUnexpectedly	-	-	-	ios=11.0	-	f8c4a2dd4dc771c3
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorSystemIsBusy	NFCReaderError.Code	readerSessionInvalidationErrorSystemIsBusy	-	-	-	ios=11.0	-	55c8e126b81ebf89
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorFirstNDEFTagRead	NFCReaderError.Code	readerSessionInvalidationErrorFirstNDEFTagRead	-	-	-	ios=11.0	-	82a82ef1030aab8c
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCTagCommandConfigurationErrorInvalidParameters	NFCReaderError.Code	tagCommandConfigurationErrorInvalidParameters	-	-	-	ios=11.0	-	c04fc0ca7348ba9c
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCNdefReaderSessionErrorTagNotWritable	NFCReaderError.Code	ndefReaderSessionErrorTagNotWritable	-	-	-	ios=13.0	-	c75833d427ea60fb
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCNdefReaderSessionErrorTagUpdateFailure	NFCReaderError.Code	ndefReaderSessionErrorTagUpdateFailure	-	-	-	ios=13.0	-	fc6c3f5379d006f9
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCNdefReaderSessionErrorTagSizeTooSmall	NFCReaderError.Code	ndefReaderSessionErrorTagSizeTooSmall	-	-	-	ios=13.0	-	db35fce15d611911
+CoreNFC	swift-constant	c:@E@NFCReaderError@NFCNdefReaderSessionErrorZeroLengthMessage	NFCReaderError.Code	ndefReaderSessionErrorZeroLengthMessage	-	-	-	ios=13.0	-	48d54e59a3db7837
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorUnsupportedFeature	NFCReaderError	readerErrorUnsupportedFeature	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	48a648cdcdacacbc
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorSecurityViolation	NFCReaderError	readerErrorSecurityViolation	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	30517aa3cc267068
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorInvalidParameter	NFCReaderError	readerErrorInvalidParameter	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	330d620373452d1f
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorInvalidParameterLength	NFCReaderError	readerErrorInvalidParameterLength	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	9c5f83e8bf5708bc
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorParameterOutOfBound	NFCReaderError	readerErrorParameterOutOfBound	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	c042d81b5d35bdd8
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorRadioDisabled	NFCReaderError	readerErrorRadioDisabled	+	CoreNFC.NFCReaderError.Code	-	ios=14.0	-	9b7805d21efc70d5
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorIneligible	NFCReaderError	readerErrorIneligible	+	CoreNFC.NFCReaderError.Code	-	ios=26.0	-	a8721264f8ad2bb9
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderErrorAccessNotAccepted	NFCReaderError	readerErrorAccessNotAccepted	+	CoreNFC.NFCReaderError.Code	-	ios=26.0	-	b6016a415b6d0581
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderTransceiveErrorTagConnectionLost	NFCReaderError	readerTransceiveErrorTagConnectionLost	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	9fadc407b81ddefa
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderTransceiveErrorRetryExceeded	NFCReaderError	readerTransceiveErrorRetryExceeded	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	8bbd06d33d9390ac
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderTransceiveErrorTagResponseError	NFCReaderError	readerTransceiveErrorTagResponseError	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	bc5f87863c6f84cc
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderTransceiveErrorSessionInvalidated	NFCReaderError	readerTransceiveErrorSessionInvalidated	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	0bccad99d40c8db8
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderTransceiveErrorTagNotConnected	NFCReaderError	readerTransceiveErrorTagNotConnected	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	6da276482df8e6c6
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderTransceiveErrorPacketTooLong	NFCReaderError	readerTransceiveErrorPacketTooLong	+	CoreNFC.NFCReaderError.Code	-	ios=14.0	-	f84dd94e9ffa7a7d
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorUserCanceled	NFCReaderError	readerSessionInvalidationErrorUserCanceled	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	b4d79e45e796565e
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorSessionTimeout	NFCReaderError	readerSessionInvalidationErrorSessionTimeout	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	517bf355aa2e5d26
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorSessionTerminatedUnexpectedly	NFCReaderError	readerSessionInvalidationErrorSessionTerminatedUnexpectedly	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	c9041260e4e59bca
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorSystemIsBusy	NFCReaderError	readerSessionInvalidationErrorSystemIsBusy	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	b8dfe20ff6191ed3
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCReaderSessionInvalidationErrorFirstNDEFTagRead	NFCReaderError	readerSessionInvalidationErrorFirstNDEFTagRead	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	b1506c17c46d0b28
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCTagCommandConfigurationErrorInvalidParameters	NFCReaderError	tagCommandConfigurationErrorInvalidParameters	+	CoreNFC.NFCReaderError.Code	-	ios=11.0	-	a17ebd9c49fc67ba
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCNdefReaderSessionErrorTagNotWritable	NFCReaderError	ndefReaderSessionErrorTagNotWritable	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	309ab47a8e9abd23
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCNdefReaderSessionErrorTagUpdateFailure	NFCReaderError	ndefReaderSessionErrorTagUpdateFailure	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	40d3deefe2bff9ae
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCNdefReaderSessionErrorTagSizeTooSmall	NFCReaderError	ndefReaderSessionErrorTagSizeTooSmall	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	44aef89905d1b49c
+CoreNFC	swift-property	c:@E@NFCReaderError@NFCNdefReaderSessionErrorZeroLengthMessage	NFCReaderError	ndefReaderSessionErrorZeroLengthMessage	+	CoreNFC.NFCReaderError.Code	-	ios=13.0	-	68cd5e49da2a6dd8
+CoreNFC	swift-class	c:objc(cs)NFCReaderSession	-	NFCReaderSession	-	-	-	ios=11.0	-	ce5f3b5b440ed279
+CoreNFC	swift-property	c:objc(cs)NFCReaderSession(py)delegate	NFCReaderSession	delegate	-	AnyObject?	-	ios=11.0	-	acde1a802c4ee57f
+CoreNFC	swift-property	c:objc(cs)NFCReaderSession(cpy)readingAvailable	NFCReaderSession	readingAvailable	+	Swift.Bool	-	ios=11.0	-	d98d09133ebd30cb
+CoreNFC	swift-property	c:objc(cs)NFCReaderSession(py)sessionQueue	NFCReaderSession	sessionQueue	-	Dispatch.dispatch_queue_t	-	ios=11.0	-	a43453f6d0fbd9c8
+CoreNFC	swift-protocol	c:objc(pl)NFCReaderSession	-	NFCReaderSessionProtocol	-	-	-	ios=11.0	-	dce8f16b42df9669
+CoreNFC	swift-property	c:objc(pl)NFCReaderSession(py)ready	NFCReaderSessionProtocol	isReady	-	Swift.Bool	-	ios=11.0	-	d551d1036197f312
+CoreNFC	swift-property	c:objc(pl)NFCReaderSession(py)alertMessage	NFCReaderSessionProtocol	alertMessage	-	Swift.String	-	ios=11.0	-	6413563d6a962f07
+CoreNFC	swift-method	c:objc(pl)NFCReaderSession(im)beginSession	NFCReaderSessionProtocol	begin()	-	Swift.Void	-	ios=11.0	-	b90e3f8b31473505
+CoreNFC	swift-method	c:objc(pl)NFCReaderSession(im)invalidateSession	NFCReaderSessionProtocol	invalidate()	-	Swift.Void	-	ios=11.0	-	7b63b850298cbe11
+CoreNFC	swift-method	c:objc(pl)NFCReaderSession(im)invalidateSessionWithErrorMessage:	NFCReaderSessionProtocol	invalidate(errorMessage:)	-	Swift.Void	Swift.String	ios=13.0	-	5383a4463c34752f
+CoreNFC	swift-class	c:objc(cs)NFCTagCommandConfiguration	-	NFCTagCommandConfiguration	-	-	-	ios=11.0	-	277b79cc7a1c806b
+CoreNFC	swift-property	c:objc(cs)NFCTagCommandConfiguration(py)maximumRetries	NFCTagCommandConfiguration	maximumRetries	-	Swift.Int	-	ios=11.0	-	fa374e9c6287178b
+CoreNFC	swift-property	c:objc(cs)NFCTagCommandConfiguration(py)retryInterval	NFCTagCommandConfiguration	retryInterval	-	Foundation.TimeInterval	-	ios=11.0	-	be0bbc0024c6bded
+CoreNFC	swift-method	c:objc(cs)NSObject(im)init	NFCTagCommandConfiguration	init()	-	-	CoreNFC.NFCTagCommandConfiguration	-	-	c40778d3ebdc394d
+CoreNFC	swift-class	c:objc(cs)NFCTagReaderSession	-	NFCTagReaderSession	-	-	-	ios=13.0	-	553f86659a5f33cf
+CoreNFC	swift-method	c:objc(cs)NFCTagReaderSession(im)restartPolling	NFCTagReaderSession	restartPolling()	-	Swift.Void	-	ios=13.0	-	2ffbfb35d05ce46b
+CoreNFC	swift-struct	c:@E@NFCPollingOption	NFCTagReaderSession	PollingOption	-	-	-	-	-	d2c69821f0c336ed
+CoreNFC	swift-method	s:So16NFCPollingOptionV8rawValueABSi_tcfc	NFCTagReaderSession.PollingOption	init(rawValue:)	-	-	CoreNFC.NFCTagReaderSession.PollingOption | Swift.Int	-	-	b1f7841db7724572
+CoreNFC	swift-property	s:So16NFCPollingOptionV8rawValueSivp	NFCTagReaderSession.PollingOption	rawValue	-	Swift.Int	-	-	-	366d1318dd255cfa
+CoreNFC	swift-typealias	s:So16NFCPollingOptionV8RawValuea	NFCTagReaderSession.PollingOption	RawValue	-	-	-	-	-	943731cb7a3673a9
+CoreNFC	swift-typealias	s:So16NFCPollingOptionV7Elementa	NFCTagReaderSession.PollingOption	Element	-	-	-	-	-	8ec13708f0db3cc8
+CoreNFC	swift-typealias	s:So16NFCPollingOptionV19ArrayLiteralElementa	NFCTagReaderSession.PollingOption	ArrayLiteralElement	-	-	-	-	-	216c2a4d19225cad
+CoreNFC	swift-property	c:@E@NFCPollingOption@NFCPollingISO14443	NFCTagReaderSession.PollingOption	iso14443	+	CoreNFC.NFCTagReaderSession.PollingOption	-	ios=13.0	-	c815ebfde326e59d
+CoreNFC	swift-property	c:@E@NFCPollingOption@NFCPollingISO15693	NFCTagReaderSession.PollingOption	iso15693	+	CoreNFC.NFCTagReaderSession.PollingOption	-	ios=13.0	-	6d108d47b107663c
+CoreNFC	swift-property	c:@E@NFCPollingOption@NFCPollingISO18092	NFCTagReaderSession.PollingOption	iso18092	+	CoreNFC.NFCTagReaderSession.PollingOption	-	ios=13.0	-	5b663af723765580
+CoreNFC	swift-property	c:@E@NFCPollingOption@NFCPollingPACE	NFCTagReaderSession.PollingOption	pace	+	CoreNFC.NFCTagReaderSession.PollingOption	-	ios=16.0	-	79961c11c99d5b31
+CoreNFC	swift-property	s:So19NFCTagReaderSessionC7CoreNFCE12connectedTagAC0A0OSgvp	NFCTagReaderSession	connectedTag	-	CoreNFC.NFCTag?	-	ios=13.0	-	c1c5158905b6b248
+CoreNFC	swift-method	s:So19NFCTagReaderSessionC7CoreNFCE13pollingOption8delegate5queueABSgSo010NFCPollingG0V_AC0abC8Delegate_pSo012OS_dispatch_I0CSgtcfc	NFCTagReaderSession	init(pollingOption:delegate:queue:)	-	-	CoreNFC.NFCTagReaderSession? | CoreNFC.NFCTagReaderSession.PollingOption | any CoreNFC.NFCTagReaderSessionDelegate | Dispatch.DispatchQueue?	ios=13.0	-	696e8e936d8a0183
+CoreNFC	swift-method	s:So19NFCTagReaderSessionC7CoreNFCE7connect2to17completionHandleryAC0A0O_ys5Error_pSgctF	NFCTagReaderSession	connect(to:completionHandler:)	-	()	CoreNFC.NFCTag | ((any Swift.Error)?) -> Swift.Void	ios=13.0	-	758883cda298c6ac
+CoreNFC	swift-method	s:So19NFCTagReaderSessionC7CoreNFCE7connect2toyAC0A0O_tYaKF	NFCTagReaderSession	connect(to:)	-	()	CoreNFC.NFCTag	ios=13.0	-	18250cb359089f3e
+CoreNFC	swift-constant	c:@NFCTagResponseUnexpectedLengthErrorKey	-	NFCTagResponseUnexpectedLengthErrorKey	-	Swift.String	-	ios=13.0	-	14f6413d0d90ae0a
+CoreNFC	swift-enum	c:@E@NFCTypeNameFormat	-	NFCTypeNameFormat	-	-	-	ios=11.0	-	33c4a4e4d69ab7de
+CoreNFC	swift-method	s:So17NFCTypeNameFormatV8rawValueABSgs5UInt8V_tcfc	NFCTypeNameFormat	init(rawValue:)	-	-	CoreNFC.NFCTypeNameFormat? | Swift.UInt8	-	-	6d2adeea6d50f161
+CoreNFC	swift-property	s:So17NFCTypeNameFormatV8rawValues5UInt8Vvp	NFCTypeNameFormat	rawValue	-	Swift.UInt8	-	-	-	097cf6f0fd06d373
+CoreNFC	swift-typealias	s:So17NFCTypeNameFormatV8RawValuea	NFCTypeNameFormat	RawValue	-	-	-	-	-	f6d1449c62659daa
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatEmpty	NFCTypeNameFormat	empty	-	-	-	ios=11.0	-	0938a166b80aa957
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatNFCWellKnown	NFCTypeNameFormat	nfcWellKnown	-	-	-	ios=11.0	-	a73f30bcbc4da226
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatMedia	NFCTypeNameFormat	media	-	-	-	ios=11.0	-	9388080701d15612
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatAbsoluteURI	NFCTypeNameFormat	absoluteURI	-	-	-	ios=11.0	-	fc7ebd579a4ad788
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatNFCExternal	NFCTypeNameFormat	nfcExternal	-	-	-	ios=11.0	-	5b7f86474e9c5af2
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatUnknown	NFCTypeNameFormat	unknown	-	-	-	ios=11.0	-	7138644d76910294
+CoreNFC	swift-constant	c:@E@NFCTypeNameFormat@NFCTypeNameFormatUnchanged	NFCTypeNameFormat	unchanged	-	-	-	ios=11.0	-	2738e55227b687e5
+CoreNFC	swift-class	c:objc(cs)NFCVASCommandConfiguration	-	NFCVASCommandConfiguration	-	-	-	ios=13.0	-	3c2328d929603a64
+CoreNFC	swift-property	c:objc(cs)NFCVASCommandConfiguration(py)mode	NFCVASCommandConfiguration	mode	-	CoreNFC.NFCVASCommandConfiguration.Mode	-	ios=13.0	-	9d4df23e6cf49b34
+CoreNFC	swift-property	c:objc(cs)NFCVASCommandConfiguration(py)passTypeIdentifier	NFCVASCommandConfiguration	passTypeIdentifier	-	Swift.String	-	ios=13.0	-	0eea58f24f40ad84
+CoreNFC	swift-property	c:objc(cs)NFCVASCommandConfiguration(py)url	NFCVASCommandConfiguration	url	-	Foundation.URL?	-	ios=13.0	-	2af94998602c0920
+CoreNFC	swift-method	c:objc(cs)NFCVASCommandConfiguration(im)initWithVASMode:passTypeIdentifier:url:	NFCVASCommandConfiguration	init(vasMode:passTypeIdentifier:url:)	-	-	CoreNFC.NFCVASCommandConfiguration | CoreNFC.NFCVASCommandConfiguration.Mode | Swift.String | Foundation.URL?	-	-	a6d8a5ee389437d6
+CoreNFC	swift-method	c:objc(cs)NSObject(im)init	NFCVASCommandConfiguration	init()	-	-	CoreNFC.NFCVASCommandConfiguration	-	-	ce6d7716fa5991ca
+CoreNFC	swift-enum	c:@E@NFCVASMode	NFCVASCommandConfiguration	Mode	-	-	-	ios=13.0	-	978dafb928910d66
+CoreNFC	swift-method	s:So10NFCVASModeV8rawValueABSgSi_tcfc	NFCVASCommandConfiguration.Mode	init(rawValue:)	-	-	CoreNFC.NFCVASCommandConfiguration.Mode? | Swift.Int	-	-	a09f37ea20d35874
+CoreNFC	swift-property	s:So10NFCVASModeV8rawValueSivp	NFCVASCommandConfiguration.Mode	rawValue	-	Swift.Int	-	-	-	d4e56d2d7d55a58b
+CoreNFC	swift-typealias	s:So10NFCVASModeV8RawValuea	NFCVASCommandConfiguration.Mode	RawValue	-	-	-	-	-	8e0fe1415ca68627
+CoreNFC	swift-constant	c:@E@NFCVASMode@NFCVASModeURLOnly	NFCVASCommandConfiguration.Mode	urlOnly	-	-	-	ios=13.0	-	7e4bc403472a77c5
+CoreNFC	swift-constant	c:@E@NFCVASMode@NFCVASModeNormal	NFCVASCommandConfiguration.Mode	normal	-	-	-	ios=13.0	-	d850dfe618a29f44
+CoreNFC	swift-property	c:@E@NFCVASMode@VASModeURLOnly	NFCVASCommandConfiguration.Mode	VASModeURLOnly	+	CoreNFC.NFCVASCommandConfiguration.Mode	-	ios=13.0	-	5b461c83a480009f
+CoreNFC	swift-property	c:@E@NFCVASMode@VASModeNormal	NFCVASCommandConfiguration.Mode	VASModeNormal	+	CoreNFC.NFCVASCommandConfiguration.Mode	-	ios=13.0	-	c52a81ddf51e3a60
+CoreNFC	swift-class	c:objc(cs)NFCVASReaderSession	-	NFCVASReaderSession	-	-	-	ios=13.0	-	88365babc6bbef1e
+CoreNFC	swift-method	c:objc(cs)NFCVASReaderSession(im)initWithVASCommandConfigurations:delegate:queue:	NFCVASReaderSession	init(vasCommandConfigurations:delegate:queue:)	-	-	CoreNFC.NFCVASReaderSession | [CoreNFC.NFCVASCommandConfiguration] | any CoreNFC.NFCVASReaderSessionDelegate | Dispatch.dispatch_queue_t?	ios=13.0	-	4aac31f47cef49ea
+CoreNFC	swift-protocol	c:objc(pl)NFCVASReaderSessionDelegate	-	NFCVASReaderSessionDelegate	-	-	-	ios=13.0	-	a44dad8bbc56022c
+CoreNFC	swift-method	c:objc(pl)NFCVASReaderSessionDelegate(im)readerSessionDidBecomeActive:	NFCVASReaderSessionDelegate	readerSessionDidBecomeActive(_:)	-	Swift.Void	CoreNFC.NFCVASReaderSession	ios=13.0	-	a8bd90cd0cc23df8
+CoreNFC	swift-method	c:objc(pl)NFCVASReaderSessionDelegate(im)readerSession:didInvalidateWithError:	NFCVASReaderSessionDelegate	readerSession(_:didInvalidateWithError:)	-	Swift.Void	CoreNFC.NFCVASReaderSession | any Swift.Error	ios=13.0	-	88e35af7c9e9481d
+CoreNFC	swift-method	c:objc(pl)NFCVASReaderSessionDelegate(im)readerSession:didReceiveVASResponses:	NFCVASReaderSessionDelegate	readerSession(_:didReceive:)	-	Swift.Void	CoreNFC.NFCVASReaderSession | [CoreNFC.NFCVASResponse]	ios=13.0	-	fc698c1e224441ee
+CoreNFC	swift-class	c:objc(cs)NFCVASResponse	-	NFCVASResponse	-	-	-	ios=13.0	-	c468746b29b2e700
+CoreNFC	swift-property	c:objc(cs)NFCVASResponse(py)status	NFCVASResponse	status	-	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	41ec619ff0dbe260
+CoreNFC	swift-property	c:objc(cs)NFCVASResponse(py)vasData	NFCVASResponse	vasData	-	Foundation.Data	-	ios=13.0	-	03528a60279df1fb
+CoreNFC	swift-property	c:objc(cs)NFCVASResponse(py)mobileToken	NFCVASResponse	mobileToken	-	Foundation.Data	-	ios=13.0	-	06b8344f97c24f82
+CoreNFC	swift-method	c:objc(cs)NSObject(im)init	NFCVASResponse	init()	-	-	CoreNFC.NFCVASResponse	-	-	7f9af6f9050ad490
+CoreNFC	swift-enum	c:@E@NFCVASErrorCode	NFCVASResponse	ErrorCode	-	-	-	ios=13.0	-	ab4b65d3623fb5ce
+CoreNFC	swift-method	s:So15NFCVASErrorCodeV8rawValueABSgSi_tcfc	NFCVASResponse.ErrorCode	init(rawValue:)	-	-	CoreNFC.NFCVASResponse.ErrorCode? | Swift.Int	-	-	4d277139c41faa43
+CoreNFC	swift-property	s:So15NFCVASErrorCodeV8rawValueSivp	NFCVASResponse.ErrorCode	rawValue	-	Swift.Int	-	-	-	812178c5f403112a
+CoreNFC	swift-typealias	s:So15NFCVASErrorCodeV8RawValuea	NFCVASResponse.ErrorCode	RawValue	-	-	-	-	-	b74e66f00587cb18
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeSuccess	NFCVASResponse.ErrorCode	success	-	-	-	ios=13.0	-	e7338ae308c26fd7
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeDataNotFound	NFCVASResponse.ErrorCode	dataNotFound	-	-	-	ios=13.0	-	cfeffd3d26f5521b
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeDataNotActivated	NFCVASResponse.ErrorCode	dataNotActivated	-	-	-	ios=13.0	-	eec62311cfe06281
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeWrongParameters	NFCVASResponse.ErrorCode	wrongParameters	-	-	-	ios=13.0	-	d4305d9fcf39ad9a
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeWrongLCField	NFCVASResponse.ErrorCode	wrongLCField	-	-	-	ios=13.0	-	d865844f2e3e2a7e
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeUserIntervention	NFCVASResponse.ErrorCode	userIntervention	-	-	-	ios=13.0	-	e08e99021ade5552
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeIncorrectData	NFCVASResponse.ErrorCode	incorrectData	-	-	-	ios=13.0	-	fab48dfb079b8b68
+CoreNFC	swift-constant	c:@E@NFCVASErrorCode@NFCVASErrorCodeUnsupportedApplicationVersion	NFCVASResponse.ErrorCode	unsupportedApplicationVersion	-	-	-	ios=13.0	-	b061c26e289f8809
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeSuccess	NFCVASResponse.ErrorCode	VASErrorCodeSuccess	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	8038e387ef69d9ca
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeDataNotFound	NFCVASResponse.ErrorCode	VASErrorCodeDataNotFound	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	a2362dde3cdafecd
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeDataNotActivated	NFCVASResponse.ErrorCode	VASErrorCodeDataNotActivated	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	3faac17f0091a108
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeWrongParameters	NFCVASResponse.ErrorCode	VASErrorCodeWrongParameters	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	00dc15dac5024fe5
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeWrongLCField	NFCVASResponse.ErrorCode	VASErrorCodeWrongLCField	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	75077fd2d29cd1c9
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeUserIntervention	NFCVASResponse.ErrorCode	VASErrorCodeUserIntervention	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	776503531c941120
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeIncorrectData	NFCVASResponse.ErrorCode	VASErrorCodeIncorrectData	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	fb2e587b91746fb7
+CoreNFC	swift-property	c:@E@NFCVASErrorCode@VASErrorCodeUnsupportedApplicationVersion	NFCVASResponse.ErrorCode	VASErrorCodeUnsupportedApplicationVersion	+	CoreNFC.NFCVASResponse.ErrorCode	-	ios=13.0	-	776a536d2d899f4a
+CoreNFC	swift-typealias	c:@T@PollingRequestCode	-	PollingRequestCode	-	-	-	ios=13.0	-	0c2eb48ba1f33a86
+CoreNFC	swift-typealias	c:@T@PollingTimeSlot	-	PollingTimeSlot	-	-	-	ios=13.0	-	df4da7f4eec3f4f8
+CoreNFC	swift-typealias	c:@T@RequestFlag	-	RequestFlag	-	-	-	ios=11.0	-	b289be2ced212cd4
+CoreNFC	swift-typealias	c:@T@VASErrorCode	-	VASErrorCode	-	-	-	ios=13.0	-	5d1a6678116c48a2
+CoreNFC	swift-typealias	c:@T@VASMode	-	VASMode	-	-	-	ios=13.0	-	6d93cdaad0db2323
+CoreNFC	swift-protocol	s:7CoreNFC27NFCTagReaderSessionDelegateP	-	NFCTagReaderSessionDelegate	-	-	-	ios=13.0	-	a280094aef1fe363
+CoreNFC	swift-method	s:7CoreNFC27NFCTagReaderSessionDelegateP03tagdE15DidBecomeActiveyySo0cdE0CF	NFCTagReaderSessionDelegate	tagReaderSessionDidBecomeActive(_:)	-	()	CoreNFC.NFCTagReaderSession	ios=13.0	-	e95303aaee1eaaa0
+CoreNFC	swift-method	s:7CoreNFC27NFCTagReaderSessionDelegateP03tagdE0_22didInvalidateWithErrorySo0cdE0C_s0K0_ptF	NFCTagReaderSessionDelegate	tagReaderSession(_:didInvalidateWithError:)	-	()	CoreNFC.NFCTagReaderSession | any Swift.Error	ios=13.0	-	879083771f893b37
+CoreNFC	swift-method	s:7CoreNFC27NFCTagReaderSessionDelegateP03tagdE0_9didDetectySo0cdE0C_SayAA0C0OGtF	NFCTagReaderSessionDelegate	tagReaderSession(_:didDetect:)	-	()	CoreNFC.NFCTagReaderSession | [CoreNFC.NFCTag]	ios=13.0	-	3a902ddbaeaab772
+CoreNFC	swift-struct	s:7CoreNFC22NFCISO7816ResponseAPDUV	-	NFCISO7816ResponseAPDU	-	-	-	ios=14.0	-	89a4d277b7dbaa96
+CoreNFC	swift-property	s:7CoreNFC22NFCISO7816ResponseAPDUV11statusWord1s5UInt8Vvp	NFCISO7816ResponseAPDU	statusWord1	-	Swift.UInt8	-	-	-	c40fba24a33dc2f3
+CoreNFC	swift-property	s:7CoreNFC22NFCISO7816ResponseAPDUV11statusWord2s5UInt8Vvp	NFCISO7816ResponseAPDU	statusWord2	-	Swift.UInt8	-	-	-	1f0acadfecbb6bde
+CoreNFC	swift-property	s:7CoreNFC22NFCISO7816ResponseAPDUV7payload10Foundation4DataVSgvp	NFCISO7816ResponseAPDU	payload	-	Foundation.Data?	-	-	-	0f3c81ceb2e9822a
+CoreNFC	swift-class	s:7CoreNFC29NFCPresentmentIntentAssertionC	-	NFCPresentmentIntentAssertion	-	-	-	ios=17.4	-	2f836a0ff4ed84d2
+CoreNFC	swift-enum	s:7CoreNFC29NFCPresentmentIntentAssertionC5ErrorO	NFCPresentmentIntentAssertion	Error	-	-	-	-	-	1e65db4ec6e30295
+CoreNFC	swift-constant	s:7CoreNFC29NFCPresentmentIntentAssertionC5ErrorO23systemEligibilityFailedyA2EmF	NFCPresentmentIntentAssertion.Error	systemEligibilityFailed	-	-	-	-	-	a79332080e949844
+CoreNFC	swift-constant	s:7CoreNFC29NFCPresentmentIntentAssertionC5ErrorO18systemNotAvailableyA2EmF	NFCPresentmentIntentAssertion.Error	systemNotAvailable	-	-	-	-	-	93d8770eebeadad7
+CoreNFC	swift-method	s:7CoreNFC29NFCPresentmentIntentAssertionC5ErrorO2eeoiySbAE_AEtFZ	NFCPresentmentIntentAssertion.Error	==(_:_:)	+	Swift.Bool	CoreNFC.NFCPresentmentIntentAssertion.Error | CoreNFC.NFCPresentmentIntentAssertion.Error	-	-	fff6bc3f72fac485
+CoreNFC	swift-method	s:7CoreNFC29NFCPresentmentIntentAssertionC5ErrorO4hash4intoys6HasherVz_tF	NFCPresentmentIntentAssertion.Error	hash(into:)	-	()	Swift.Hasher	-	-	9422c6fa99a3c18c
+CoreNFC	swift-property	s:7CoreNFC29NFCPresentmentIntentAssertionC5ErrorO9hashValueSivp	NFCPresentmentIntentAssertion.Error	hashValue	-	Swift.Int	-	-	-	b8404e16d720b6eb
+CoreNFC	swift-property	s:7CoreNFC29NFCPresentmentIntentAssertionC7isValidSbvp	NFCPresentmentIntentAssertion	isValid	-	Swift.Bool	-	-	-	40cbc5a9b680d61d
+CoreNFC	swift-method	s:7CoreNFC29NFCPresentmentIntentAssertionC7acquireACyYaKFZ	NFCPresentmentIntentAssertion	acquire()	+	CoreNFC.NFCPresentmentIntentAssertion	-	-	-	f0cebc746c6256d1
+CoreNFC	swift-class	s:7CoreNFC11CardSessionC	-	CardSession	-	-	-	ios=17.4	-	8b18d53932fe6671
+CoreNFC	swift-enum	s:7CoreNFC11CardSessionC5ErrorO	CardSession	Error	-	-	-	-	-	b57e5cd5a5388d7d
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO11invalidatedyA2EmF	CardSession.Error	invalidated	-	-	-	-	-	f265bbcda0db73b8
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO15userInvalidatedyA2EmF	CardSession.Error	userInvalidated	-	-	-	-	-	c3a8c394fd23bcaf
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO03maxD15DurationReachedyA2EmF	CardSession.Error	maxSessionDurationReached	-	-	-	-	-	9ce8d02f6d4619fa
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO012transmissionE0yA2EmF	CardSession.Error	transmissionError	-	-	-	-	-	12042505c95a549e
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO18systemNotAvailableyA2EmF	CardSession.Error	systemNotAvailable	-	-	-	-	-	f7f25dfd3cab0221
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO17accessNotAcceptedyA2EmF	CardSession.Error	accessNotAccepted	-	-	-	-	-	e672364fb92740ab
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO23systemEligibilityFailedyA2EmF	CardSession.Error	systemEligibilityFailed	-	-	-	-	-	bc572de52cd39b8d
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO16emulationStoppedyA2EmF	CardSession.Error	emulationStopped	-	-	-	-	-	a5ebb3e7f99b5d52
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5ErrorO13radioDisabledyA2EmF	CardSession.Error	radioDisabled	-	-	-	-	-	5d27c7e40ebf4768
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC5ErrorO2eeoiySbAE_AEtFZ	CardSession.Error	==(_:_:)	+	Swift.Bool	CoreNFC.CardSession.Error | CoreNFC.CardSession.Error	-	-	fe912b89ed288ed1
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC5ErrorO4hash4intoys6HasherVz_tF	CardSession.Error	hash(into:)	-	()	Swift.Hasher	-	-	9a5582a1a316095b
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC5ErrorO9hashValueSivp	CardSession.Error	hashValue	-	Swift.Int	-	-	-	6472ccd79278e0da
+CoreNFC	swift-enum	s:7CoreNFC11CardSessionC5EventO	CardSession	Event	-	-	-	-	-	64e938489d954104
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5EventO14sessionStartedyA2EmF	CardSession.Event	sessionStarted	-	-	-	-	-	1ec4e00051147347
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5EventO14readerDetectedyA2EmF	CardSession.Event	readerDetected	-	-	-	-	-	850cc459d68179e9
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5EventO8receivedyAeC4APDUCcAEmF	CardSession.Event	received	-	-	-	-	-	50bd733f9ac70ca8
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5EventO16readerDeselectedyA2EmF	CardSession.Event	readerDeselected	-	-	-	-	-	e5503f9aa043e27d
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC5EventO18sessionInvalidatedyAeC5ErrorO_tcAEmF	CardSession.Event	sessionInvalidated	-	-	-	-	-	ccb2d11f1892761c
+CoreNFC	swift-class	s:7CoreNFC11CardSessionC4APDUC	CardSession	APDU	-	-	-	-	-	5b6926c1305d60bb
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC4APDUC7payload10Foundation4DataVvp	CardSession.APDU	payload	-	Foundation.Data	-	-	-	ae5cdfd5333db5d4
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC4APDUC7respond8responsey10Foundation4DataV_tYaKF	CardSession.APDU	respond(response:)	-	()	Foundation.Data	-	-	bd425dbd5011fcb6
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC4APDUC2eeoiySbAE_AEtFZ	CardSession.APDU	==(_:_:)	+	Swift.Bool	CoreNFC.CardSession.APDU | CoreNFC.CardSession.APDU	-	-	b2f4e5f54f269369
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC4APDUC16debugDescriptionSSvp	CardSession.APDU	debugDescription	-	Swift.String	-	-	-	c10854676e62af4f
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC21isEmulationInProgressSbvp	CardSession	isEmulationInProgress	-	Swift.Bool	-	-	-	811f17cc2c55ec15
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC10isEligibleSbvpZ	CardSession	isEligible	+	Swift.Bool	-	-	-	9f710207fbd314e8
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC11isSupportedSbvpZ	CardSession	isSupported	+	Swift.Bool	-	-	-	ccca24069a3dac33
+CoreNFC	swift-method	s:7CoreNFC11CardSessionCACyYaKcfc	CardSession	init()	-	-	CoreNFC.CardSession	-	-	d0970268c9b82d5e
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC14startEmulationyyYaKF	CardSession	startEmulation()	-	()	-	-	-	825db41fd1311278
+CoreNFC	swift-enum	s:7CoreNFC11CardSessionC17EmulationUIStatusO	CardSession	EmulationUIStatus	-	-	-	-	-	78adad5405192c11
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC17EmulationUIStatusO7successyA2EmF	CardSession.EmulationUIStatus	success	-	-	-	-	-	3e2f7d81e98b5665
+CoreNFC	swift-constant	s:7CoreNFC11CardSessionC17EmulationUIStatusO7failureyA2EmF	CardSession.EmulationUIStatus	failure	-	-	-	-	-	68ee40e8d2f05109
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC17EmulationUIStatusO2eeoiySbAE_AEtFZ	CardSession.EmulationUIStatus	==(_:_:)	+	Swift.Bool	CoreNFC.CardSession.EmulationUIStatus | CoreNFC.CardSession.EmulationUIStatus	-	-	1bc64adaf09e69e9
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC17EmulationUIStatusO4hash4intoys6HasherVz_tF	CardSession.EmulationUIStatus	hash(into:)	-	()	Swift.Hasher	-	-	34e1f6448fbf9df3
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC17EmulationUIStatusO9hashValueSivp	CardSession.EmulationUIStatus	hashValue	-	Swift.Int	-	-	-	91cb3cda96d28bac
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC13stopEmulation6statusyAC0F8UIStatusO_tYaF	CardSession	stopEmulation(status:)	-	()	CoreNFC.CardSession.EmulationUIStatus	-	-	cfcbfdc8e9c0906a
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC10invalidateyyF	CardSession	invalidate()	-	()	-	-	-	d75915767ab25a2b
+CoreNFC	swift-class	s:7CoreNFC11CardSessionC11EventStreamC	CardSession	EventStream	-	-	-	-	-	9bc5e84fc44badf2
+CoreNFC	swift-typealias	s:7CoreNFC11CardSessionC11EventStreamC13AsyncIteratora	CardSession.EventStream	AsyncIterator	-	-	-	-	-	9b92f2ae318f1f2c
+CoreNFC	swift-typealias	s:7CoreNFC11CardSessionC11EventStreamC7Elementa	CardSession.EventStream	Element	-	-	-	-	-	aeb286fc9599f600
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC11EventStreamC17makeAsyncIteratorAE0I0CyF	CardSession.EventStream	makeAsyncIterator()	-	CoreNFC.CardSession.EventStream.Iterator	-	-	-	1882a5642362e316
+CoreNFC	swift-class	s:7CoreNFC11CardSessionC11EventStreamC8IteratorC	CardSession.EventStream	Iterator	-	-	-	-	-	d64dc6577ba81f01
+CoreNFC	swift-method	s:7CoreNFC11CardSessionC11EventStreamC8IteratorC4nextAC0E0OSgyYaKF	CardSession.EventStream.Iterator	next()	-	CoreNFC.CardSession.Event?	-	-	-	57f233b5cafd475c
+CoreNFC	swift-typealias	s:7CoreNFC11CardSessionC11EventStreamC8IteratorC7Elementa	CardSession.EventStream.Iterator	Element	-	-	-	-	-	4ded87117018f0e2
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC12alertMessageSSvp	CardSession	alertMessage	-	Swift.String	-	-	-	91f0bf3fb61157e3
+CoreNFC	swift-property	s:7CoreNFC11CardSessionC11eventStreamAC05EventF0Cvp	CardSession	eventStream	-	CoreNFC.CardSession.EventStream	-	-	-	b7d675dfa7c6f875
+CoreNFC	swift-struct	s:7CoreNFC24NFCFeliCaPollingResponseV	-	NFCFeliCaPollingResponse	-	-	-	ios=14.0	-	62577bd6efbea1b1
+CoreNFC	swift-property	s:7CoreNFC24NFCFeliCaPollingResponseV20manufactureParameter10Foundation4DataVvp	NFCFeliCaPollingResponse	manufactureParameter	-	Foundation.Data	-	-	-	cef6eacd24a4c591
+CoreNFC	swift-property	s:7CoreNFC24NFCFeliCaPollingResponseV11requestData10Foundation0H0VSgvp	NFCFeliCaPollingResponse	requestData	-	Foundation.Data?	-	-	-	74fb28cb94620732
+CoreNFC	swift-struct	s:7CoreNFC19NFCFeliCaStatusFlagV	-	NFCFeliCaStatusFlag	-	-	-	ios=14.0	-	12fa8ecbb2672894
+CoreNFC	swift-property	s:7CoreNFC19NFCFeliCaStatusFlagV11statusFlag1Sivp	NFCFeliCaStatusFlag	statusFlag1	-	Swift.Int	-	-	-	8c0ad42eaab53212
+CoreNFC	swift-property	s:7CoreNFC19NFCFeliCaStatusFlagV11statusFlag2Sivp	NFCFeliCaStatusFlag	statusFlag2	-	Swift.Int	-	-	-	205a184706699a58
+CoreNFC	swift-struct	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV	-	NFCFeliCaRequsetServiceV2Response	-	-	-	ios=14.0	-	fe898ee52fcedfa7
+CoreNFC	swift-property	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV11statusFlag1Sivp	NFCFeliCaRequsetServiceV2Response	statusFlag1	-	Swift.Int	-	-	-	a2c4731177c325f5
+CoreNFC	swift-property	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV11statusFlag2Sivp	NFCFeliCaRequsetServiceV2Response	statusFlag2	-	Swift.Int	-	-	-	37394b8acbb0fa71
+CoreNFC	swift-property	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV20encryptionIdentifierSo0cD12EncryptionIdVvp	NFCFeliCaRequsetServiceV2Response	encryptionIdentifier	-	CoreNFC.NFCFeliCaEncryptionId	-	-	-	88cc868040a85a6c
+CoreNFC	swift-property	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV21nodeKeyVersionListAESSay10Foundation4DataVGSgvp	NFCFeliCaRequsetServiceV2Response	nodeKeyVersionListAES	-	[Foundation.Data]?	-	-	-	4067bf40d35f054b
+CoreNFC	swift-property	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV21nodeKeyVersionListDESSay10Foundation4DataVGSgvp	NFCFeliCaRequsetServiceV2Response	nodeKeyVersionListDES	-	[Foundation.Data]?	-	-	-	7944600688b2bb30
+CoreNFC	swift-struct	s:7CoreNFC44NFCFeliCaRequestSpecificationVersionResponseV	-	NFCFeliCaRequestSpecificationVersionResponse	-	-	-	ios=14.0	-	6c9b03aa62b5c75f
+CoreNFC	swift-property	s:7CoreNFC44NFCFeliCaRequestSpecificationVersionResponseV11statusFlag1Sivp	NFCFeliCaRequestSpecificationVersionResponse	statusFlag1	-	Swift.Int	-	-	-	e10cda5f2c14cd65
+CoreNFC	swift-property	s:7CoreNFC44NFCFeliCaRequestSpecificationVersionResponseV11statusFlag2Sivp	NFCFeliCaRequestSpecificationVersionResponse	statusFlag2	-	Swift.Int	-	-	-	15a744d0b97738fd
+CoreNFC	swift-property	s:7CoreNFC44NFCFeliCaRequestSpecificationVersionResponseV05basicG010Foundation4DataVSgvp	NFCFeliCaRequestSpecificationVersionResponse	basicVersion	-	Foundation.Data?	-	-	-	e3c75cd034b75a46
+CoreNFC	swift-property	s:7CoreNFC44NFCFeliCaRequestSpecificationVersionResponseV06optionG010Foundation4DataVSgvp	NFCFeliCaRequestSpecificationVersionResponse	optionVersion	-	Foundation.Data?	-	-	-	0ab471cb5c34e59d
+CoreNFC	swift-enum	s:7CoreNFC6NFCTagO	-	NFCTag	-	-	-	ios=13.0	-	84a5bc59ad6d90f8
+CoreNFC	swift-constant	s:7CoreNFC6NFCTagO6feliCayACSo07NFCFeliE3Tag_pcACmF	NFCTag	feliCa	-	-	-	-	-	602e226bc0294d71
+CoreNFC	swift-constant	s:7CoreNFC6NFCTagO7iso7816yACSo13NFCISO7816Tag_pcACmF	NFCTag	iso7816	-	-	-	-	-	d6b1464c994b8f20
+CoreNFC	swift-constant	s:7CoreNFC6NFCTagO8iso15693yACSo14NFCISO15693Tag_pcACmF	NFCTag	iso15693	-	-	-	-	-	4058d49f8a96ae5c
+CoreNFC	swift-constant	s:7CoreNFC6NFCTagO6miFareyACSo05NFCMiE3Tag_pcACmF	NFCTag	miFare	-	-	-	-	-	d8c5acc027a835bd
+CoreNFC	swift-property	s:7CoreNFC6NFCTagO11isAvailableSbvp	NFCTag	isAvailable	-	Swift.Bool	-	-	-	4fe074248adf10c5
+CoreNFC	swift-struct	s:7CoreNFC21NFCISO15693SystemInfoV	-	NFCISO15693SystemInfo	-	-	-	ios=14.0	-	1664e254b957f039
+CoreNFC	swift-property	s:7CoreNFC21NFCISO15693SystemInfoV16uniqueIdentifier10Foundation4DataVvp	NFCISO15693SystemInfo	uniqueIdentifier	-	Foundation.Data	-	-	-	516fadd47f10ef15
+CoreNFC	swift-property	s:7CoreNFC21NFCISO15693SystemInfoV27dataStorageFormatIdentifierSivp	NFCISO15693SystemInfo	dataStorageFormatIdentifier	-	Swift.Int	-	-	-	caa472b99028f917
+CoreNFC	swift-property	s:7CoreNFC21NFCISO15693SystemInfoV27applicationFamilyIdentifierSivp	NFCISO15693SystemInfo	applicationFamilyIdentifier	-	Swift.Int	-	-	-	8fb395d45cfabdea
+CoreNFC	swift-property	s:7CoreNFC21NFCISO15693SystemInfoV9blockSizeSivp	NFCISO15693SystemInfo	blockSize	-	Swift.Int	-	-	-	20f64f05e6e1ec67
+CoreNFC	swift-property	s:7CoreNFC21NFCISO15693SystemInfoV11totalBlocksSivp	NFCISO15693SystemInfo	totalBlocks	-	Swift.Int	-	-	-	98bfda9118f1bebf
+CoreNFC	swift-property	s:7CoreNFC21NFCISO15693SystemInfoV11icReferenceSivp	NFCISO15693SystemInfo	icReference	-	Swift.Int	-	-	-	81b2f6b44107d24b
+CoreNFC	swift-struct	s:7CoreNFC38NFCISO15693MultipleBlockSecurityStatusV	-	NFCISO15693MultipleBlockSecurityStatus	-	-	-	ios=14.0	-	e9a6b818896a6cd5
+CoreNFC	swift-property	s:7CoreNFC38NFCISO15693MultipleBlockSecurityStatusV05blockfG0SaySiGvp	NFCISO15693MultipleBlockSecurityStatus	blockSecurityStatus	-	[Swift.Int]	-	-	-	d43b073b1bbf4d5c
+CoreNFC	swift-class	c:objc(cs)NSUserActivity	-	NSUserActivity	-	-	-	ios=8.0	-	d68a552240c7c0f0
+CoreNFC	swift-property	c:objc(cs)NSUserActivity(py)ndefMessagePayload	NSUserActivity	ndefMessagePayload	-	CoreNFC.NFCNDEFMessage	-	ios=12.0	-	c535a702d64d0cdd
+CoreNFC	swift-method	s:7CoreNFC22NFCISO7816ResponseAPDUV11statusWord10F5Word27payloadACs5UInt8V_AH10Foundation4DataVSgtcfc	NFCISO7816ResponseAPDU	init(statusWord1:statusWord2:payload:)	-	-	CoreNFC.NFCISO7816ResponseAPDU | Swift.UInt8 | Swift.UInt8 | Foundation.Data?	ios=14.0	-	1fdcb8a6defb614e
+CoreNFC	swift-method	s:7CoreNFC22NFCISO7816ResponseAPDUV11statusWord10F5Word27paylaodACs5UInt8V_AH10Foundation4DataVSgtcfc	NFCISO7816ResponseAPDU	init(statusWord1:statusWord2:paylaod:)	-	-	CoreNFC.NFCISO7816ResponseAPDU | Swift.UInt8 | Swift.UInt8 | Foundation.Data?	-	-	2ea4d9ba0168d7e0
+CoreNFC	swift-method	s:7CoreNFC24NFCFeliCaPollingResponseV20manufactureParameter11requestDataAC10Foundation0J0V_AHSgtcfc	NFCFeliCaPollingResponse	init(manufactureParameter:requestData:)	-	-	CoreNFC.NFCFeliCaPollingResponse | Foundation.Data | Foundation.Data?	-	-	1297b9543d433c75
+CoreNFC	swift-method	s:7CoreNFC19NFCFeliCaStatusFlagV11statusFlag10G5Flag2ACSi_Sitcfc	NFCFeliCaStatusFlag	init(statusFlag1:statusFlag2:)	-	-	CoreNFC.NFCFeliCaStatusFlag | Swift.Int | Swift.Int	-	-	f6206badf57bba55
+CoreNFC	swift-method	s:7CoreNFC33NFCFeliCaRequsetServiceV2ResponseV11statusFlag10I5Flag220encryptionIdentifier21nodeKeyVersionListAES0nopQ3DESACSi_SiSo0cD12EncryptionIdVSay10Foundation4DataVGSgAOtcfc	NFCFeliCaRequsetServiceV2Response	init(statusFlag1:statusFlag2:encryptionIdentifier:nodeKeyVersionListAES:nodeKeyVersionListDES:)	-	-	CoreNFC.NFCFeliCaRequsetServiceV2Response | Swift.Int | Swift.Int | CoreNFC.NFCFeliCaEncryptionId | [Foundation.Data]? | [Foundation.Data]?	-	-	0adaf32e63e4ede6
+CoreNFC	swift-method	s:7CoreNFC44NFCFeliCaRequestSpecificationVersionResponseV11statusFlag10I5Flag205basicG006optionG0ACSi_Si10Foundation4DataVSgAKtcfc	NFCFeliCaRequestSpecificationVersionResponse	init(statusFlag1:statusFlag2:basicVersion:optionVersion:)	-	-	CoreNFC.NFCFeliCaRequestSpecificationVersionResponse | Swift.Int | Swift.Int | Foundation.Data? | Foundation.Data?	-	-	6d8db22cee81cc0a
+CoreNFC	swift-method	s:7CoreNFC21NFCISO15693SystemInfoV16uniqueIdentifier017dataStorageFormatG0017applicationFamilyG09blockSize11totalBlocks11icReferenceAC10Foundation4DataV_S5itcfc	NFCISO15693SystemInfo	init(uniqueIdentifier:dataStorageFormatIdentifier:applicationFamilyIdentifier:blockSize:totalBlocks:icReference:)	-	-	CoreNFC.NFCISO15693SystemInfo | Foundation.Data | Swift.Int | Swift.Int | Swift.Int | Swift.Int | Swift.Int	-	-	d3838daad275d4d3
+CoreNFC	swift-method	s:7CoreNFC38NFCISO15693MultipleBlockSecurityStatusV05blockfG0ACSaySiG_tcfc	NFCISO15693MultipleBlockSecurityStatus	init(blockSecurityStatus:)	-	-	CoreNFC.NFCISO15693MultipleBlockSecurityStatus | [Swift.Int]	-	-	1e2573f28122ad44
+CoreNFC	swift-method	s:So19NFCTagReaderSessionC7CoreNFCE9upcastTagySo0A0_pAcEOF	NFCTagReaderSession	upcastTag(_:)	-	any CoreNFC.__NFCTag	CoreNFC.NFCTag	ios=15.0	-	8e1cc84f255964d4

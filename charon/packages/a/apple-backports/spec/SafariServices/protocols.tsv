@@ -1,0 +1,14 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+SFAddToHomeScreenActivityItem	17.4	transcribed		NSObject	-	-	-	-	-	-
+SFAddToHomeScreenActivityItem	17.4	transcribed		NSObject	required	property	no	URL	@property (nonatomic, readonly) NSURL * _Nonnull URL;	-
+SFAddToHomeScreenActivityItem	17.4	transcribed		NSObject	required	property	no	title	@property (nonatomic, readonly) NSString * _Nonnull title;	-
+SFAddToHomeScreenActivityItem	17.4	transcribed		NSObject	optional	property	no	iconItemProvider	@property (nonatomic, readonly) NSItemProvider * _Nullable iconItemProvider;	-
+SFAddToHomeScreenActivityItem	17.4	transcribed		NSObject	optional	method	yes	getWebAppManifestWithCompletionHandler:	- (void)getWebAppManifestWithCompletionHandler:(void (^ _Nonnull)(BEWebAppManifest * _Nullable))completionHandler API_AVAILABLE(ios(17.5));	-
+SFAddToHomeScreenActivityItem	17.4	transcribed		NSObject	optional	method	yes	getHomeScreenWebAppInfoWithCompletionHandler:	- (void)getHomeScreenWebAppInfoWithCompletionHandler:(void (^ _Nonnull)(SFAddToHomeScreenInfo * _Nullable))completionHandler API_AVAILABLE(ios(18.2));	-
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	-	-	-	-	-	-
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	safariViewController:activityItemsForURL:title:	- (NSArray<UIActivity *> * _Nonnull)safariViewController:(SFSafariViewController * _Nonnull)controller activityItemsForURL:(NSURL * _Nonnull)URL title:(NSString * _Nullable)title;	yes
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	safariViewController:excludedActivityTypesForURL:title:	- (NSArray<UIActivityType> * _Nonnull)safariViewController:(SFSafariViewController * _Nonnull)controller excludedActivityTypesForURL:(NSURL * _Nonnull)URL title:(NSString * _Nullable)title API_AVAILABLE(ios(11.0));	yes
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	safariViewControllerDidFinish:	- (void)safariViewControllerDidFinish:(SFSafariViewController * _Nonnull)controller;	yes
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	safariViewController:didCompleteInitialLoad:	- (void)safariViewController:(SFSafariViewController * _Nonnull)controller didCompleteInitialLoad:(BOOL)didLoadSuccessfully;	yes
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	safariViewController:initialLoadDidRedirectToURL:	- (void)safariViewController:(SFSafariViewController * _Nonnull)controller initialLoadDidRedirectToURL:(NSURL * _Nonnull)URL API_AVAILABLE(ios(11.0));	yes
+SFSafariViewControllerDelegate	9.0	sdk16 body		NSObject	optional	method	yes	safariViewControllerWillOpenInBrowser:	- (void)safariViewControllerWillOpenInBrowser:(SFSafariViewController * _Nonnull)controller API_AVAILABLE(ios(14.0));	yes

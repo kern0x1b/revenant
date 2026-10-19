@@ -1,0 +1,49 @@
+{
+  "framework": "ImageIO",
+  "entries": [
+    {
+      "api": "kCGImagePropertyASTCBlockSize",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the release's own caches first export these four symbols at iOS 10.0.1, and the 10.0.1 band has no object of its own yet, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImagePropertyASTCBlockSize, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImagePropertyASTCEncoder",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the release's own caches first export these four symbols at iOS 10.0.1, and the 10.0.1 band has no object of its own yet, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImagePropertyASTCEncoder, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImagePropertyEncoder",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the release's own caches first export these four symbols at iOS 10.0.1, and the 10.0.1 band has no object of its own yet, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImagePropertyEncoder, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    },
+    {
+      "api": "kCGImagePropertyPVREncoder",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; the release's own caches first export these four symbols at iOS 10.0.1, and the 10.0.1 band has no object of its own yet, and it is carried with the text the host's own ImageIO gives it, so that an application that names it loads",
+      "effect": "the string kCGImagePropertyPVREncoder, which is the text Apple's own ImageIO gives this name and not always the name itself; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/ImageIO/Names.md",
+      "source": "the host's own ImageIO with dlsym, one process per symbol, by tests/backports/host/imageio-names, which compiles these objects and links them into a pure C reader so the value compared against Apple's is the port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants run, 438 RED', the last line being the harness proving it can fail on every one of them"
+    }
+  ]
+}

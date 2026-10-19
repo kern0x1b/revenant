@@ -1,0 +1,82 @@
+{
+  "framework": "GameController",
+  "entries": [
+    {
+      "api": "GCMouse.mouseInput",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an external mouse is peripheral the owner may attach over Bluetooth, not hardware absent from the phone (COORDINATION.md verdict, 2026-09-22); §2's capability-honest device-template treatment applies: the class exists, the profile is real, only the fact of a physical mouse being connected is not detected",
+      "effect": "a real GCMouseInput, built through the same spec-driven element pipeline (GCPhysicalInputProfile14.m/CharonGCTables.m) GCController's own profiles use; every GCMouse instance carries one",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract; this port's own GCController.m for the pattern (mouseInput mirrors GCController's profile properties)"
+    },
+    {
+      "api": "GCMouseInput.leftButton",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a real, non-optional element of the mouse profile",
+      "effect": "a real GCControllerButtonInput, pressed/value/touched all real and settable the way every other button element in this port already is",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "GCMouseInput.rightButton",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried alongside leftButton",
+      "effect": "a real GCControllerButtonInput, never nil, though the header marks it nullable for a real two-button mouse",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "GCMouseInput.middleButton",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus's own crash-demand row for this cluster",
+      "effect": "a real GCControllerButtonInput, never nil, though the header marks it nullable for a real two- or three-button mouse",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "GCMouseInput.auxiliaryButtons",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried alongside the other buttons, honestly answering none rather than guessing a count",
+      "effect": "answers nil: this port has no real mouse to measure how many auxiliary buttons it has, and the header already allows nil for a mouse with none",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "GCMouseInput.scroll",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus's own crash-demand row for this cluster",
+      "effect": "a real GCDeviceCursor (a GCControllerDirectionPad subclass) with real X/Y axes and up/down/left/right buttons, built the same way a dpad is; the header's own note that a cursor's range differs from [-1,1] is not modelled, a real, stated gap",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "GCMouseInput.mouseMovedHandler",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus's own crash-demand row for this cluster",
+      "effect": "a real, settable, copied block property; this port never calls it, since it has no live pointer-delta source to call it with - a real, stated gap, distinct from the block itself being real and safe to set",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the contract"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+MetalKit	method	MTKMesh.newMeshes(asset:device:)	9.0				container
+MetalKit	function	MTKModelIOVertexDescriptorFromMetalWithError(_:)	10.0				own
+MetalKit	function	MTKMetalVertexDescriptorFromModelIOWithError(_:)	10.0				own

@@ -1,0 +1,177 @@
+# Every constant row the VideoToolbox registry holds, and the held-cache release that first EXPORTS
+# each one - or '-', meaning NO held cache exports it, which is a MEASUREMENT and not a silence.
+#
+# WHY EVERY REGISTRY ROW AND NOT ONLY THE 135 THE PORT DEFINES: this table used to be built from the
+# port's own objects, so it held those 135 and nothing else, and 'the table says nothing' could be
+# read as 'no held cache exports it'. Those are different claims, and 13 rows - the kVTProfileLevel
+# levels, which the release exports itself - were unaccountable for. A registry constant row absent
+# from this table is now a FAILURE of check-registered.py, so the two can no longer be confused.
+#
+# MEASURED with tools/vt-ladder-names.lua, which calls the same module tools/release-split.lua calls:
+# dyld.held_ladder({"armv7", "armv7s"}) and dyld.first_releases(ladder, sdkdir, symbols).
+# There is no exports reader here: a second one is the two-implementations failure this family has
+# produced four times, and the export tries are why a byte search cannot answer this -
+# modules/apple/dyld.lua:trie_exports() walks them.
+#
+# The SDK directory is the one a gate's build records in build/objects/sdkdir, passed as an
+# argument, because first_releases keys its kept measurement on it:
+#
+#     SDKD=$(cat <a gate dir>/build/objects/sdkdir)
+#     xmake l tools/vt-ladder-names.lua <names file> "$SDKD"
+#
+# TWO CONTROLS, printed on every run and required for any row to be believed:
+#   kVTProfileLevel_H264_Baseline_4_0   must come back with a rung - it is 7.0
+#   a nonsense name                     must come back '-'
+#
+# HELD CACHE RELEASES MEASURED AGAINST, oldest first:
+#   10.0.1, 11.0, 12.0, 16.0, 18.0, 7.0, 8.0
+#
+# constant<TAB>release  - TAB separated; '-' alone means no held cache exports it
+kVTAlphaChannelMode_PremultipliedAlpha	16.0
+kVTAlphaChannelMode_StraightAlpha	16.0
+kVTCameraCalibrationExtrinsicOriginSource_StereoCameraSystemBaseline	
+kVTCameraCalibrationLensAlgorithmKind_ParametricLens	
+kVTCameraCalibrationLensDomain_Color	
+kVTCameraCalibrationLensRole_Left	
+kVTCameraCalibrationLensRole_Mono	
+kVTCameraCalibrationLensRole_Right	
+kVTCompressionPreset_Balanced	
+kVTCompressionPreset_HighQuality	
+kVTCompressionPreset_HighSpeed	
+kVTCompressionPreset_VideoConferencing	
+kVTCompressionPropertyCameraCalibrationKey_ExtrinsicOrientationQuaternion	
+kVTCompressionPropertyCameraCalibrationKey_ExtrinsicOriginSource	
+kVTCompressionPropertyCameraCalibrationKey_IntrinsicMatrix	
+kVTCompressionPropertyCameraCalibrationKey_IntrinsicMatrixProjectionOffset	
+kVTCompressionPropertyCameraCalibrationKey_IntrinsicMatrixReferenceDimensions	
+kVTCompressionPropertyCameraCalibrationKey_LensAlgorithmKind	
+kVTCompressionPropertyCameraCalibrationKey_LensDistortions	
+kVTCompressionPropertyCameraCalibrationKey_LensDomain	
+kVTCompressionPropertyCameraCalibrationKey_LensFrameAdjustmentsPolynomialX	
+kVTCompressionPropertyCameraCalibrationKey_LensFrameAdjustmentsPolynomialY	
+kVTCompressionPropertyCameraCalibrationKey_LensIdentifier	
+kVTCompressionPropertyCameraCalibrationKey_LensRole	
+kVTCompressionPropertyCameraCalibrationKey_RadialAngleLimit	
+kVTCompressionPropertyKey_AllowOpenGOP	12.0
+kVTCompressionPropertyKey_AlphaChannelMode	16.0
+kVTCompressionPropertyKey_BaseLayerBitRateFraction	16.0
+kVTCompressionPropertyKey_BaseLayerFrameRate	11.0
+kVTCompressionPropertyKey_BaseLayerFrameRateFraction	16.0
+kVTCompressionPropertyKey_CalculateMeanSquaredError	18.0
+kVTCompressionPropertyKey_CameraCalibrationDataLensCollection	
+kVTCompressionPropertyKey_ConstantBitRate	16.0
+kVTCompressionPropertyKey_ContentLightLevelInfo	11.0
+kVTCompressionPropertyKey_EnableLTR	16.0
+kVTCompressionPropertyKey_EncoderID	11.0
+kVTCompressionPropertyKey_EstimatedAverageBytesPerFrame	16.0
+kVTCompressionPropertyKey_GammaLevel	7.0
+kVTCompressionPropertyKey_HDRMetadataInsertionMode	16.0
+kVTCompressionPropertyKey_HasLeftStereoEyeView	18.0
+kVTCompressionPropertyKey_HasRightStereoEyeView	18.0
+kVTCompressionPropertyKey_HeroEye	18.0
+kVTCompressionPropertyKey_HorizontalDisparityAdjustment	18.0
+kVTCompressionPropertyKey_HorizontalFieldOfView	16.0
+kVTCompressionPropertyKey_MVHEVCLeftAndRightViewIDs	18.0
+kVTCompressionPropertyKey_MVHEVCVideoLayerIDs	18.0
+kVTCompressionPropertyKey_MVHEVCViewIDs	18.0
+kVTCompressionPropertyKey_MasteringDisplayColorVolume	11.0
+kVTCompressionPropertyKey_MaxAllowedFrameQP	16.0
+kVTCompressionPropertyKey_MaximizePowerEfficiency	12.0
+kVTCompressionPropertyKey_MaximumRealTimeFrameRate	18.0
+kVTCompressionPropertyKey_MinAllowedFrameQP	16.0
+kVTCompressionPropertyKey_MultiPassStorage	7.0
+kVTCompressionPropertyKey_OutputBitDepth	16.0
+kVTCompressionPropertyKey_PreserveAlphaChannel	16.0
+kVTCompressionPropertyKey_PreserveDynamicHDRMetadata	16.0
+kVTCompressionPropertyKey_PrioritizeEncodingSpeedOverQuality	16.0
+kVTCompressionPropertyKey_ProjectionKind	18.0
+kVTCompressionPropertyKey_RecommendedParallelizedSubdivisionMinimumDuration	18.0
+kVTCompressionPropertyKey_RecommendedParallelizedSubdivisionMinimumFrameCount	18.0
+kVTCompressionPropertyKey_ReferenceBufferCount	16.0
+kVTCompressionPropertyKey_StereoCameraBaseline	18.0
+kVTCompressionPropertyKey_SupportedPresetDictionaries	
+kVTCompressionPropertyKey_SupportsBaseFrameQP	16.0
+kVTCompressionPropertyKey_TargetQualityForAlpha	16.0
+kVTCompressionPropertyKey_UsingGPURegistryID	16.0
+kVTCompressionPropertyKey_VBVBufferDuration	
+kVTCompressionPropertyKey_VBVInitialDelayPercentage	
+kVTCompressionPropertyKey_VBVMaxBitRate	
+kVTCompressionPropertyKey_VariableBitRate	
+kVTCompressionPropertyKey_ViewPackingKind	18.0
+kVTDecodeFrameOptionKey_ContentAnalyzerCropRectangle	
+kVTDecodeFrameOptionKey_ContentAnalyzerRotation	
+kVTDecompressionPropertyKey_AllowBitstreamToChangeFrameDimensions	18.0
+kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata	18.0
+kVTDecompressionPropertyKey_MaximizePowerEfficiency	12.0
+kVTDecompressionPropertyKey_OutputPoolRequestedMinimumBufferCount	7.0
+kVTDecompressionPropertyKey_PropagatePerFrameHDRDisplayMetadata	16.0
+kVTDecompressionPropertyKey_RealTime	8.0
+kVTDecompressionPropertyKey_RequestedMVHEVCVideoLayerIDs	18.0
+kVTDecompressionPropertyKey_UsingGPURegistryID	16.0
+kVTDecompressionProperty_TemporalLevelLimit	11.0
+kVTEncodeFrameOptionKey_AcknowledgedLTRTokens	16.0
+kVTEncodeFrameOptionKey_BaseFrameQP	16.0
+kVTEncodeFrameOptionKey_ForceLTRRefresh	16.0
+kVTHDRMetadataInsertionMode_Auto	16.0
+kVTHDRMetadataInsertionMode_None	16.0
+kVTHDRMetadataInsertionMode_RequestSDRRangePreservation	
+kVTHDRPerFrameMetadataGenerationOptionsKey_HDRFormats	18.0
+kVTHeroEye_Left	
+kVTHeroEye_Right	
+kVTMotionEstimationSessionCreationOption_Label	18.0
+kVTMotionEstimationSessionCreationOption_MotionVectorSize	18.0
+kVTMotionEstimationSessionCreationOption_UseMultiPassSearch	
+kVTMultiPassStorageCreationOption_DoNotDelete	7.0
+kVTPixelRotationPropertyKey_FlipHorizontalOrientation	16.0
+kVTPixelRotationPropertyKey_FlipVerticalOrientation	16.0
+kVTPixelRotationPropertyKey_Rotation	16.0
+kVTPixelTransferPropertyKey_DestinationColorPrimaries	10.0.1
+kVTPixelTransferPropertyKey_DestinationICCProfile	10.0.1
+kVTPixelTransferPropertyKey_DestinationTransferFunction	10.0.1
+kVTPixelTransferPropertyKey_DestinationYCbCrMatrix	8.0
+kVTPixelTransferPropertyKey_RealTime	7.0
+kVTProfileLevel_H264_Baseline_4_0	7.0
+kVTProfileLevel_H264_Baseline_4_2	7.0
+kVTProfileLevel_H264_Baseline_5_0	7.0
+kVTProfileLevel_H264_Baseline_5_1	7.0
+kVTProfileLevel_H264_Baseline_5_2	7.0
+kVTProfileLevel_H264_ConstrainedBaseline_AutoLevel	16.0
+kVTProfileLevel_H264_ConstrainedHigh_AutoLevel	16.0
+kVTProfileLevel_H264_High_3_2	7.0
+kVTProfileLevel_H264_High_4_2	7.0
+kVTProfileLevel_H264_High_5_1	7.0
+kVTProfileLevel_H264_High_5_2	7.0
+kVTProfileLevel_H264_Main_4_2	7.0
+kVTProfileLevel_H264_Main_5_1	7.0
+kVTProfileLevel_H264_Main_5_2	7.0
+kVTProfileLevel_HEVC_Main10_AutoLevel	11.0
+kVTProfileLevel_HEVC_Main42210_AutoLevel	16.0
+kVTProfileLevel_HEVC_Main_AutoLevel	11.0
+kVTProfileLevel_HEVC_Monochrome10_AutoLevel	16.0
+kVTProfileLevel_HEVC_Monochrome_AutoLevel	11.0
+kVTProjectionKind_Equirectangular	
+kVTProjectionKind_HalfEquirectangular	
+kVTProjectionKind_ParametricImmersive	
+kVTProjectionKind_Rectilinear	
+kVTRotation_0	16.0
+kVTRotation_180	16.0
+kVTRotation_CCW90	16.0
+kVTRotation_CW90	16.0
+kVTSampleAttachmentKey_RequireLTRAcknowledgementToken	16.0
+kVTSampleAttachmentQualityMetricsKey_ChromaBlueMeanSquaredError	18.0
+kVTSampleAttachmentQualityMetricsKey_ChromaRedMeanSquaredError	18.0
+kVTSampleAttachmentQualityMetricsKey_LumaMeanSquaredError	18.0
+kVTVideoDecoderSpecification_PreferredDecoderGPURegistryID	12.0
+kVTVideoDecoderSpecification_RequiredDecoderGPURegistryID	12.0
+kVTVideoEncoderListOption_IncludeStandardDefinitionDVEncoders	16.0
+kVTVideoEncoderList_GPURegistryID	16.0
+kVTVideoEncoderList_InstanceLimit	16.0
+kVTVideoEncoderList_PerformanceRating	16.0
+kVTVideoEncoderList_QualityRating	16.0
+kVTVideoEncoderList_SupportedSelectionProperties	16.0
+kVTVideoEncoderList_SupportsFrameReordering	16.0
+kVTVideoEncoderSpecification_EnableLowLatencyRateControl	16.0
+kVTVideoEncoderSpecification_PreferredEncoderGPURegistryID	16.0
+kVTVideoEncoderSpecification_RequiredEncoderGPURegistryID	16.0
+kVTViewPackingKind_OverUnder	
+kVTViewPackingKind_SideBySide	

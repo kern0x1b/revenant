@@ -1,0 +1,541 @@
+//===--- SpatialGeometry.swift.gyb ------------*- swift -*-===//
+//
+// The value types of Spatial, once for each of the framework's two scalars. The Float half is
+// this file with the scalar changed and the names suffixed, which is how the SDK declares them
+// too: every type below has a twin whose name is this one's with `Float` after it, down to the
+// nested typealiases, so writing the half twice would be writing the same code twice.
+//
+// What each declaration means, and what it gives for a given input, is the SDK's own C header of
+// the same name (usr/include/Spatial), and the values were read off the framework itself on the
+// host; the differences a reader should know about are at each declaration.
+//
+//===----------------------------------------------------------------------===//
+
+import Foundation
+import simd
+
+
+// MARK: - Euler angles
+
+/// The order the three angles of `EulerAngles` are applied in, as the `SPEulerAngleOrder` enumeration.
+@frozen
+public struct SPEulerAngleOrder: RawRepresentable, Hashable, Codable, Sendable {
+    public let rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+        self.rawValue = rawValue
+    }
+
+    public init(_ rawValue: UInt32) {
+        self.rawValue = rawValue
+    }
+
+    /// Pitch, yaw, roll: about the world's `x`, then `y`, then `z`.
+    public static let xyz = SPEulerAngleOrder(0x0001)
+    /// Roll, pitch, yaw: about the world's `z`, then `x`, then `y`.
+    public static let zxy = SPEulerAngleOrder(0x0002)
+}
+
+
+//
+// The C library's name of a math function is the scalar's own: `acos` for Double and `acosf` for
+// Float, which is what `usr/include/Spatial` calls. The spelling `Foundation.acos` reaches this
+// runtime's Foundation, which is swift-corelibs-foundation and declares no math at all, so it
+// arrives at the C library's `double acos(double)` and a Float argument does not convert: 29 call
+// sites, measured with swiftc -typecheck -target armv7-apple-ios6.1.3 (the commit message has the
+// output). It does convert on the host, because Apple's Foundation re-exports the shims that
+// declare the Float half as `Float(acosf(CFloat(x)))` - macOS SDK,
+// _DarwinFoundation1.swiftinterface:237 - which is the call this makes.
+//
+
+// The scalar's own pi and not the Double's unqualified one: the Float half's degrees are then
+// converted from a Double that has already lost the Float's own rounding, and the host's
+// Angle2DFloat.degrees(30).radians prints (radians: 0.5235988) where the Double route's
+// prints (radians: 0.52359873).
+% for scalar, vector, packed, matrix, matrix3, quat, suffix, tolerance in [("Double", "simd_double3", "simd_packed_double4", "simd_double4x4", "simd_double3x3", "simd_quatd", "", "defaultTolerance"), ("Float", "simd_float3", "simd_packed_float4", "simd_float4x4", "simd_float3x3", "simd_quatf", "Float", "defaultToleranceFloat")]:
+% cmath = lambda f: "Darwin." + f + ("f" if scalar == "Float" else "")
+
+// MARK: - Angle2D${suffix}
+
+@frozen
+public struct Angle2D${suffix}: ${"AdditiveArithmetic, Comparable, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "AdditiveArithmetic, Comparable, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+
+    public var radians: ${scalar}
+
+    public init() { self.radians = 0 }
+    public init(radians: ${scalar}) { self.radians = radians }
+    public init<T: BinaryFloatingPoint>(radians: T) { self.radians = ${scalar}(radians) }
+    public init(degrees: ${scalar}) { self.radians = degrees * ${scalar}.pi / 180 }
+    public init<T: BinaryFloatingPoint>(degrees: T) { self.radians = ${scalar}(degrees) * ${scalar}.pi / 180 }
+
+    public static let zero = Angle2D${suffix}(radians: 0)
+    public static func radians(_ radians: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: radians) }
+    public static func degrees(_ degrees: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(degrees: degrees) }
+
+    public var degrees: ${scalar} { radians * 180 / ${scalar}.pi }
+
+    public var normalized: Angle2D${suffix} {
+        var value = radians.truncatingRemainder(dividingBy: 2 * ${scalar}.pi)
+        if value > ${scalar}.pi {
+            value -= 2 * ${scalar}.pi
+        } else if value <= -${scalar}.pi {
+            value += 2 * ${scalar}.pi
+        }
+        return Angle2D${suffix}(radians: value)
+    }
+
+    public static func + (lhs: Angle2D${suffix}, rhs: Angle2D${suffix}) -> Angle2D${suffix} { Angle2D${suffix}(radians: lhs.radians + rhs.radians) }
+    public static prefix func + (x: Self) -> Self { Angle2D${suffix}(radians: x.radians) }
+    public static func - (lhs: Angle2D${suffix}, rhs: Angle2D${suffix}) -> Angle2D${suffix} { Angle2D${suffix}(radians: lhs.radians - rhs.radians) }
+    public static prefix func - (angle: Angle2D${suffix}) -> Angle2D${suffix} { Angle2D${suffix}(radians: -angle.radians) }
+    public static func += (lhs: inout Angle2D${suffix}, rhs: Angle2D${suffix}) { lhs = lhs + rhs }
+    public static func -= (lhs: inout Angle2D${suffix}, rhs: Angle2D${suffix}) { lhs = lhs - rhs }
+    public static func < (lhs: Angle2D${suffix}, rhs: Angle2D${suffix}) -> Bool { lhs.radians < rhs.radians }
+    public static func == (lhs: Angle2D${suffix}, rhs: Angle2D${suffix}) -> Bool { lhs.radians == rhs.radians }
+
+    public static func acos(_ x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("acos")}(x)) }
+    public static func acosh(_ x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("acosh")}(x)) }
+    public static func asin(_ x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("asin")}(x)) }
+    public static func asinh(_ x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("asinh")}(x)) }
+    public static func atan(_ x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("atan")}(x)) }
+    public static func atanh(_ x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("atanh")}(x)) }
+    public static func atan2(y: ${scalar}, x: ${scalar}) -> Angle2D${suffix} { Angle2D${suffix}(radians: ${cmath("atan2")}(y, x)) }
+
+    public func hash(into hasher: inout Hasher) { hasher.combine(radians) }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(radians)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        self.radians = try decoder.singleValueContainer().decode(${scalar}.self)
+    }
+
+    public var description: String { "(radians: \(radians))" }
+    public var customMirror: Mirror { Mirror(self, children: ["radians": radians]) }
+}
+
+@inlinable
+public func cos(_ angle: Angle2D${suffix}) -> ${scalar} { ${cmath("cos")}(angle.radians) }
+
+@inlinable
+public func sin(_ angle: Angle2D${suffix}) -> ${scalar} { ${cmath("sin")}(angle.radians) }
+
+@inlinable
+public func tan(_ angle: Angle2D${suffix}) -> ${scalar} { ${cmath("tan")}(angle.radians) }
+
+@inlinable
+public func cosh(_ angle: Angle2D${suffix}) -> ${scalar} { ${cmath("cosh")}(angle.radians) }
+
+@inlinable
+public func sinh(_ angle: Angle2D${suffix}) -> ${scalar} { ${cmath("sinh")}(angle.radians) }
+
+@inlinable
+public func tanh(_ angle: Angle2D${suffix}) -> ${scalar} { ${cmath("tanh")}(angle.radians) }
+
+// MARK: - Vector3D${suffix}
+
+@frozen
+public struct Vector3D${suffix}: ${"Primitive3D, Rotatable3D, Primitive3DProtocol, AdditiveArithmetic, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Primitive3DProtocolFloat, AdditiveArithmetic, Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias AffineTransform = AffineTransform3D${suffix}
+    public typealias ProjectiveTransform = ProjectiveTransform3D${suffix}
+    public typealias Pose = Pose3D${suffix}
+    public typealias Rect = Rect3D${suffix}
+    public typealias Vector = Vector3D${suffix}
+    public typealias Point = Point3D${suffix}
+    public typealias Size = Size3D${suffix}
+    public typealias Rotation = Rotation3D${suffix}
+    public typealias Quaternion = ${quat}
+    public typealias AxisEnumeration = AxisWithFactors${suffix}
+
+    public var x: ${scalar}
+    public var y: ${scalar}
+    public var z: ${scalar}
+
+    public init(x: ${scalar} = 0, y: ${scalar} = 0, z: ${scalar} = 0) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    public init(_ vector: ${vector}) {
+        self.x = vector.x
+        self.y = vector.y
+        self.z = vector.z
+    }
+
+    public init(_ source: ${packed}) { self.init(x: source.x, y: source.y, z: source.z) }
+    public init(_ size: Size3D${suffix}) { self.init(size.vector) }
+    public init(_ point: Point3D${suffix}) { self.init(x: point.x, y: point.y, z: point.z) }
+    public init(_ axis: RotationAxis3D${suffix}) { self.init(axis.vector) }
+    public init(_ coords: SphericalCoordinates3D${suffix}) { self.init(SphericalCoordinates3D${suffix}.cartesian(in: coords)) }
+    public init(_ pose: Pose3D${suffix}) { self.init(pose.position.vector) }
+    public init(_ scale: ScaledPose3D${suffix}) { self.init(x: scale.scale, y: scale.scale, z: scale.scale) }
+
+    /// The storage, which the C structure is a union of. The framework's public spelling is `x`,
+    /// `y` and `z`, which is what a caller writes, so this stays inside the module.
+    var vector: ${vector} {
+        get { ${vector}(x, y, z) }
+        set { x = newValue.x; y = newValue.y; z = newValue.z }
+    }
+
+    public static let zero = Vector3D${suffix}()
+    public static let infinity = Vector3D${suffix}(x: .infinity, y: .infinity, z: .infinity)
+    public static let right = Vector3D${suffix}(x: 1, y: 0, z: 0)
+    public static let up = Vector3D${suffix}(x: 0, y: 1, z: 0)
+    public static let forward = Vector3D${suffix}(x: 0, y: 0, z: 1)
+
+    public var isZero: Bool { x == 0 && y == 0 && z == 0 }
+    public var isFinite: Bool { x.isFinite && y.isFinite && z.isFinite }
+    public var isNaN: Bool { x.isNaN || y.isNaN || z.isNaN }
+
+    public var lengthSquared: ${scalar} { simd_length_squared(vector) }
+    public var length: ${scalar} { simd_length(vector) }
+    public var normalized: Vector3D${suffix} { Vector3D${suffix}(simd_normalize(vector)) }
+
+    public mutating func normalize() { self = normalized }
+
+    public func dot(_ other: Vector3D${suffix}) -> ${scalar} { simd_dot(vector, other.vector) }
+    public func cross(_ other: Vector3D${suffix}) -> Vector3D${suffix} { Vector3D${suffix}(simd_cross(vector, other.vector)) }
+
+    public func projected(_ other: Vector3D${suffix}) -> Vector3D${suffix} {
+        Vector3D${suffix}(simd_project(vector, other.vector))
+    }
+    public func reflected(_ normal: Vector3D${suffix}) -> Vector3D${suffix} { self - normal * (2 * self.dot(normal)) }
+
+    public func scaledBy(x: ${scalar} = 1, y: ${scalar} = 1, z: ${scalar} = 1) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: self.x * x, y: self.y * y, z: self.z * z)
+    }
+
+    public func scaled(by size: Size3D${suffix}) -> Vector3D${suffix} { scaledBy(x: size.width, y: size.height, z: size.depth) }
+    public func uniformlyScaled(by scale: ${scalar}) -> Vector3D${suffix} { scaledBy(x: scale, y: scale, z: scale) }
+
+    public func sheared(_ shear: AxisWithFactors${suffix}) -> Vector3D${suffix} {
+        switch shear {
+        case .xAxis(let yFactor, let zFactor): return Vector3D${suffix}(x: x, y: y + x * yFactor, z: z + x * zFactor)
+        case .yAxis(let xFactor, let zFactor): return Vector3D${suffix}(x: x + y * xFactor, y: y, z: z + y * zFactor)
+        case .zAxis(let xFactor, let yFactor): return Vector3D${suffix}(x: x + z * xFactor, y: y + z * yFactor, z: z)
+        }
+    }
+
+    public mutating func shear(_ shear: AxisWithFactors${suffix}) { self = sheared(shear) }
+
+    /// A direction has no position, so translating it moves nothing.
+    public func translated(by vector: Vector3D${suffix}) -> Vector3D${suffix} { self }
+
+    public func rotated(by rotation: Rotation3D${suffix}) -> Vector3D${suffix} { applying(rotation.affineTransform) }
+    public func rotated(by quaternion: ${quat}) -> Vector3D${suffix} { applying(Rotation3D${suffix}(quaternion).affineTransform) }
+    public func rotation(to other: Vector3D${suffix}) -> Rotation3D${suffix} { Rotation3D${suffix}(from: self, to: other) }
+
+    public func applying(_ transform: AffineTransform3D${suffix}) -> Vector3D${suffix} { applying(matrix: transform.matrix4x4) }
+    public func applying(_ transform: ProjectiveTransform3D${suffix}) -> Vector3D${suffix} { applying(matrix: transform.matrix4x4) }
+    public func applying(_ pose: Pose3D${suffix}) -> Vector3D${suffix} { applying(matrix: pose.matrix) }
+    public func applying(_ scaledPose: ScaledPose3D${suffix}) -> Vector3D${suffix} { applying(matrix: scaledPose.matrix) }
+
+    public func unapplying(_ transform: AffineTransform3D${suffix}) -> Vector3D${suffix} { unapplying(matrix: transform.matrix4x4) }
+    public func unapplying(_ transform: ProjectiveTransform3D${suffix}) -> Vector3D${suffix} { unapplying(matrix: transform.matrix4x4) }
+    public func unapplying(_ pose: Pose3D${suffix}) -> Vector3D${suffix} { unapplying(matrix: pose.matrix) }
+    public func unapplying(_ scaledPose: ScaledPose3D${suffix}) -> Vector3D${suffix} { unapplying(matrix: scaledPose.matrix) }
+
+    public mutating func apply(_ transform: AffineTransform3D${suffix}) { self = applying(transform) }
+    public mutating func apply(_ transform: ProjectiveTransform3D${suffix}) { self = applying(transform) }
+    public mutating func apply(_ pose: Pose3D${suffix}) { self = applying(pose) }
+    public mutating func unapply(_ transform: AffineTransform3D${suffix}) { self = unapplying(transform) }
+    public mutating func unapply(_ transform: ProjectiveTransform3D${suffix}) { self = unapplying(transform) }
+    public mutating func unapply(_ pose: Pose3D${suffix}) { self = unapplying(pose) }
+
+    /// `SPVector3DApplyAffineTransform`: a direction is a column vector of `w = 0`, so the
+    /// translation of the matrix does not reach it.
+    func applying(matrix: ${matrix}) -> Vector3D${suffix} {
+        Vector3D${suffix}(first3(simd_mul(matrix, SIMD4<${scalar}>(vector, 0))))
+    }
+
+    func unapplying(matrix: ${matrix}) -> Vector3D${suffix} {
+        guard let inverse = invertedMatrix(matrix) else { return self }
+        return applying(matrix: inverse)
+    }
+
+    public static func + (lhs: Vector3D${suffix}, rhs: Vector3D${suffix}) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: lhs.x + rhs.x, y: lhs.y + rhs.y, z: lhs.z + rhs.z)
+    }
+
+    public static func - (lhs: Vector3D${suffix}, rhs: Vector3D${suffix}) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: lhs.x - rhs.x, y: lhs.y - rhs.y, z: lhs.z - rhs.z)
+    }
+
+    public static func * (lhs: Vector3D${suffix}, rhs: ${scalar}) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: lhs.x * rhs, y: lhs.y * rhs, z: lhs.z * rhs)
+    }
+
+    public static func * (lhs: ${scalar}, rhs: Vector3D${suffix}) -> Vector3D${suffix} { rhs * lhs }
+    public static func * (lhs: Vector3D${suffix}, rhs: Point3D${suffix}) -> Point3D${suffix} {
+        Point3D${suffix}(x: lhs.x * rhs.x, y: lhs.y * rhs.y, z: lhs.z * rhs.z)
+    }
+    public static func * (lhs: Point3D${suffix}, rhs: Vector3D${suffix}) -> Point3D${suffix} {
+        Point3D${suffix}(x: lhs.x * rhs.x, y: lhs.y * rhs.y, z: lhs.z * rhs.z)
+    }
+    public static func * (lhs: Vector3D${suffix}, rhs: Size3D${suffix}) -> Size3D${suffix} {
+        Size3D${suffix}(width: lhs.x * rhs.width, height: lhs.y * rhs.height, depth: lhs.z * rhs.depth)
+    }
+    public static func * (lhs: Size3D${suffix}, rhs: Vector3D${suffix}) -> Size3D${suffix} {
+        Size3D${suffix}(width: lhs.width * rhs.x, height: lhs.height * rhs.y, depth: lhs.depth * rhs.z)
+    }
+    public static func * (lhs: Vector3D${suffix}, rhs: AffineTransform3D${suffix}) -> Vector3D${suffix} { lhs.applying(rhs) }
+    public static func * (lhs: Vector3D${suffix}, rhs: ProjectiveTransform3D${suffix}) -> Vector3D${suffix} { lhs.applying(rhs) }
+    public static func * (lhs: Vector3D${suffix}, rhs: Pose3D${suffix}) -> Vector3D${suffix} { lhs * rhs.affineTransform }
+
+    public static func / (lhs: Vector3D${suffix}, rhs: ${scalar}) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: lhs.x / rhs, y: lhs.y / rhs, z: lhs.z / rhs)
+    }
+
+    public static prefix func - (vector: Vector3D${suffix}) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: -vector.x, y: -vector.y, z: -vector.z)
+    }
+
+    public static func += (lhs: inout Vector3D${suffix}, rhs: Vector3D${suffix}) { lhs = lhs + rhs }
+    public static func -= (lhs: inout Vector3D${suffix}, rhs: Vector3D${suffix}) { lhs = lhs - rhs }
+    public static func *= (lhs: inout Vector3D${suffix}, rhs: ${scalar}) { lhs = lhs * rhs }
+    public static func /= (lhs: inout Vector3D${suffix}, rhs: ${scalar}) { lhs = lhs / rhs }
+
+    public static func == (lhs: Vector3D${suffix}, rhs: Vector3D${suffix}) -> Bool {
+        lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
+    }
+
+    public static func + (lhs: Vector3D${suffix}, rhs: Point3D${suffix}) -> Point3D${suffix} {
+        Point3D${suffix}(x: lhs.x + rhs.x, y: lhs.y + rhs.y, z: lhs.z + rhs.z)
+    }
+
+    public static func + (lhs: Size3D${suffix}, rhs: Vector3D${suffix}) -> Size3D${suffix} {
+        Size3D${suffix}(width: lhs.width + rhs.x, height: lhs.height + rhs.y, depth: lhs.depth + rhs.z)
+    }
+
+    public static func + (lhs: Vector3D${suffix}, rhs: Size3D${suffix}) -> Size3D${suffix} {
+        Size3D${suffix}(width: lhs.x + rhs.width, height: lhs.y + rhs.height, depth: lhs.z + rhs.depth)
+    }
+    public static func - (lhs: Point3D${suffix}, rhs: Vector3D${suffix}) -> Point3D${suffix} {
+        Point3D${suffix}(x: lhs.x - rhs.x, y: lhs.y - rhs.y, z: lhs.z - rhs.z)
+    }
+
+    public static func - (lhs: Vector3D${suffix}, rhs: Point3D${suffix}) -> Point3D${suffix} {
+        Point3D${suffix}(x: lhs.x - rhs.x, y: lhs.y - rhs.y, z: lhs.z - rhs.z)
+    }
+
+    public static func - (lhs: Size3D${suffix}, rhs: Vector3D${suffix}) -> Size3D${suffix} {
+        Size3D${suffix}(width: lhs.width - rhs.x, height: lhs.height - rhs.y, depth: lhs.depth - rhs.z)
+    }
+
+    public static func - (lhs: Vector3D${suffix}, rhs: Size3D${suffix}) -> Size3D${suffix} {
+        Size3D${suffix}(width: lhs.x - rhs.width, height: lhs.y - rhs.height, depth: lhs.z - rhs.depth)
+    }
+
+    public static func lerp(from: Vector3D${suffix}, to: Vector3D${suffix}, t: Vector3D${suffix}) -> Vector3D${suffix} {
+        Vector3D${suffix}(x: from.x + (to.x - from.x) * t.x,
+                          y: from.y + (to.y - from.y) * t.y,
+                          z: from.z + (to.z - from.z) * t.z)
+    }
+
+    public static func smoothstep(edge0: Vector3D${suffix}, edge1: Vector3D${suffix}, x: Vector3D${suffix}) -> Vector3D${suffix} {
+        func one(_ low: ${scalar}, _ high: ${scalar}, _ value: ${scalar}) -> ${scalar} {
+            guard low != high else { return value < low ? 0 : 1 }
+            let t = min(max((value - low) / (high - low), 0), 1)
+            return t * t * (3 - 2 * t)
+        }
+        return Vector3D${suffix}(x: one(edge0.x, edge1.x, x.x),
+                                 y: one(edge0.y, edge1.y, x.y),
+                                 z: one(edge0.z, edge1.z, x.z))
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(x)
+        hasher.combine(y)
+        hasher.combine(z)
+    }
+
+    private enum CodingKeys: String, CodingKey { case x, y, z }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(x, forKey: .x)
+        try container.encode(y, forKey: .y)
+        try container.encode(z, forKey: .z)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(x: try container.decode(${scalar}.self, forKey: .x),
+                  y: try container.decode(${scalar}.self, forKey: .y),
+                  z: try container.decode(${scalar}.self, forKey: .z))
+    }
+
+    public var description: String { "(x: \(x), y: \(y), z: \(z))" }
+    public var customMirror: Mirror { Mirror(self, children: ["x": x, "y": y, "z": z]) }
+}
+
+// MARK: - RotationAxis3D${suffix}
+
+@frozen
+public struct RotationAxis3D${suffix}: ${"Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+    public typealias Vector = Vector3D${suffix}
+
+    public var x: ${scalar}
+    public var y: ${scalar}
+    public var z: ${scalar}
+
+    public init() { self.init(x: 0, y: 0, z: 0) }
+    public init(x: ${scalar} = 0, y: ${scalar} = 0, z: ${scalar} = 0) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    public init<T: BinaryFloatingPoint>(x: T, y: T, z: T) { self.init(x: ${scalar}(x), y: ${scalar}(y), z: ${scalar}(z)) }
+    public init(_ xyz: Vector3D${suffix}) { self.init(x: xyz.x, y: xyz.y, z: xyz.z) }
+    public init(_ xyz: ${vector}) { self.init(x: xyz.x, y: xyz.y, z: xyz.z) }
+    public init(_ source: ${packed}) { self.init(x: source.x, y: source.y, z: source.z) }
+    public init(vector: ${vector}) { self.init(x: vector.x, y: vector.y, z: vector.z) }
+
+    public var vector: ${vector} {
+        get { ${vector}(x, y, z) }
+        set { x = newValue.x; y = newValue.y; z = newValue.z }
+    }
+
+    @available(*, deprecated, renamed: "vector")
+    public var simd: ${vector} {
+        get { vector }
+        set { vector = newValue }
+    }
+
+    public var isZero: Bool { x == 0 && y == 0 && z == 0 }
+
+    public static let zero = RotationAxis3D${suffix}()
+    public static let x = RotationAxis3D${suffix}(x: 1, y: 0, z: 0)
+    public static let y = RotationAxis3D${suffix}(x: 0, y: 1, z: 0)
+    public static let z = RotationAxis3D${suffix}(x: 0, y: 0, z: 1)
+    public static let xy = RotationAxis3D${suffix}(x: 1, y: 1, z: 0)
+    public static let yz = RotationAxis3D${suffix}(x: 0, y: 1, z: 1)
+    public static let xz = RotationAxis3D${suffix}(x: 1, y: 0, z: 1)
+    public static let xyz = RotationAxis3D${suffix}(x: 1, y: 1, z: 1)
+
+    public static func == (lhs: RotationAxis3D${suffix}, rhs: RotationAxis3D${suffix}) -> Bool {
+        lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(x)
+        hasher.combine(y)
+        hasher.combine(z)
+    }
+
+    private enum CodingKeys: String, CodingKey { case x, y, z }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(x, forKey: .x)
+        try container.encode(y, forKey: .y)
+        try container.encode(z, forKey: .z)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(x: try container.decode(${scalar}.self, forKey: .x),
+                  y: try container.decode(${scalar}.self, forKey: .y),
+                  z: try container.decode(${scalar}.self, forKey: .z))
+    }
+
+    public var description: String { "(x: \(x), y: \(y), z: \(z))" }
+    public var customMirror: Mirror { Mirror(self, children: ["x": x, "y": y, "z": z]) }
+}
+
+// MARK: - SphericalCoordinates3D${suffix}
+
+/// The C structure is a union of the three fields and a `simd` vector, so `vector` reads and
+/// writes that same storage: the three fields side by side, not the Cartesian point.
+@frozen
+public struct SphericalCoordinates3D${suffix}: ${"Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable" if suffix == "" else "Hashable, Codable, CustomStringConvertible, CustomReflectable, Sendable"} {
+    public typealias Scalar = ${scalar}
+
+    public var radius: ${scalar}
+    public var inclination: Angle2D${suffix}
+    public var azimuth: Angle2D${suffix}
+
+    public init() { self.init(radius: 0, inclination: Angle2D${suffix}(radians: 0), azimuth: Angle2D${suffix}(radians: 0)) }
+    public init(radius: ${scalar}, inclination: Angle2D${suffix}, azimuth: Angle2D${suffix}) {
+        self.radius = radius
+        self.inclination = inclination
+        self.azimuth = azimuth
+    }
+
+    public init(x: ${scalar}, y: ${scalar}, z: ${scalar}) { self.init(cartesian: ${vector}(x, y, z)) }
+    public init(_ vector: ${vector}) { self.init(cartesian: vector) }
+    public init(_ point: Point3D${suffix}) { self.init(cartesian: point.vector) }
+    public init(_ vector: Vector3D${suffix}) { self.init(cartesian: vector.vector) }
+    public init(_ source: ${packed}) { self.init(vector: ${vector}(source.x, source.y, source.z)) }
+
+    public init(vector: ${vector}) {
+        self.radius = vector.x
+        self.inclination = Angle2D${suffix}(radians: vector.y)
+        self.azimuth = Angle2D${suffix}(radians: vector.z)
+    }
+
+    public var vector: ${vector} {
+        get { ${vector}(radius, inclination.radians, azimuth.radians) }
+        set {
+            radius = newValue.x
+            inclination = Angle2D${suffix}(radians: newValue.y)
+            azimuth = Angle2D${suffix}(radians: newValue.z)
+        }
+    }
+
+    /// The inclination is `asin(y / radius)` and the azimuth `atan(x / z)`; a direction that
+    /// reaches either as `0/0` gives zero.
+    private init(cartesian: ${vector}) {
+        let radius = simd_length(cartesian)
+        self.radius = radius
+        let inclination = ${cmath("asin")}(cartesian.y / radius)
+        self.inclination = Angle2D${suffix}(radians: inclination.isNaN ? 0 : inclination)
+        let azimuth = ${cmath("atan")}(cartesian.x / cartesian.z)
+        self.azimuth = Angle2D${suffix}(radians: azimuth.isNaN ? 0 : azimuth)
+    }
+
+    static func cartesian(in coords: SphericalCoordinates3D${suffix}) -> ${vector} {
+        let cosInclination = ${cmath("cos")}(coords.inclination.radians)
+        return ${vector}(coords.radius * cosInclination * ${cmath("sin")}(coords.azimuth.radians),
+                          coords.radius * ${cmath("sin")}(coords.inclination.radians),
+                          coords.radius * cosInclination * ${cmath("cos")}(coords.azimuth.radians))
+    }
+
+    public static func == (lhs: SphericalCoordinates3D${suffix}, rhs: SphericalCoordinates3D${suffix}) -> Bool {
+        lhs.radius == rhs.radius && lhs.inclination == rhs.inclination && lhs.azimuth == rhs.azimuth
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(radius)
+        hasher.combine(inclination.radians)
+        hasher.combine(azimuth.radians)
+    }
+
+    private enum CodingKeys: String, CodingKey { case radius, inclination, azimuth }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(radius, forKey: .radius)
+        try container.encode(inclination.radians, forKey: .inclination)
+        try container.encode(azimuth.radians, forKey: .azimuth)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(radius: try container.decode(${scalar}.self, forKey: .radius),
+                  inclination: Angle2D${suffix}(radians: try container.decode(${scalar}.self, forKey: .inclination)),
+                  azimuth: Angle2D${suffix}(radians: try container.decode(${scalar}.self, forKey: .azimuth)))
+    }
+
+    public var description: String { "(radius: \(radius), inclination: \(inclination), azimuth: \(azimuth))" }
+    public var customMirror: Mirror { Mirror(self, children: ["radius": radius, "inclination": inclination, "azimuth": azimuth]) }
+}
+
+% end

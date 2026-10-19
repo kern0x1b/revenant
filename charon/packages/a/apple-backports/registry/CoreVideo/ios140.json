@@ -1,0 +1,115 @@
+{
+  "framework": "CoreVideo",
+  "entries": [
+    {
+      "api": "kCVPixelBufferProResRAWKey_BlackLevel",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_BlackLevel, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_ColorMatrix",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_ColorMatrix, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_GainFactor",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_GainFactor, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_RecommendedCrop",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_RecommendedCrop, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_SenselSitingOffsets",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_SenselSitingOffsets, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_WhiteBalanceBlueFactor",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_WhiteBalanceBlueFactor, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_WhiteBalanceCCT",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_WhiteBalanceCCT, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_WhiteBalanceRedFactor",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_WhiteBalanceRedFactor, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferProResRAWKey_WhiteLevel",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_WhiteLevel, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    },
+    {
+      "api": "kCVPixelBufferVersatileBayerKey_BayerPattern",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ProResRAW_BayerPattern, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    }
+  ]
+}

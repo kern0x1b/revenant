@@ -1,0 +1,11 @@
+# writing-selectors.port-allow -- path:line: reason, for the PORT's own sources.
+#
+# The same rule as writing-selectors.allow, a different reason, so a different file: a harness line is
+# excused because its sends go through the chokepoint; a port line is excused because it is the
+# DEFINITION of the port's own credential identity store, not a send to a real one. A line number and
+# not a pattern, as before -- a line that moves and the allowlist stops matching, which is the point.
+
+ASCredentialIdentityStore.m:146: the port's own -saveCredentialIdentities:completion:, defined against its own state
+ASCredentialIdentityStore.m:173: the port's own -removeCredentialIdentities:completion:, defined against its own state
+ASCredentialIdentityStore.m:189: the port's own -removeAllCredentialIdentitiesWithCompletion:, defined against its own state
+ASCredentialIdentityStore.m:196: the port's own -replaceCredentialIdentitiesWithIdentities:completion:, defined against its own state

@@ -1,0 +1,53 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+NearbyInteraction	swift-struct	c:@E@NIErrorCode	-	NIError	-	-	-	ios=14.0	-	acea93d684ca847d
+NearbyInteraction	swift-property	s:SC11NIErrorCodeLeV8_nsErrorSo7NSErrorCvp	NIError	_nsError	-	Foundation.NSError	-	-	-	169ef33d4c8888d6
+NearbyInteraction	swift-method	s:SC11NIErrorCodeLeV8_nsErrorABSo7NSErrorC_tcfc	NIError	init(_nsError:)	-	-	NearbyInteraction.NIError | Foundation.NSError	-	-	e4c195edf7690b7b
+NearbyInteraction	swift-property	s:SC11NIErrorCodeLeV11errorDomainSSvpZ	NIError	errorDomain	+	Swift.String	-	-	-	6910db1e9b86b217
+NearbyInteraction	swift-enum	c:@E@NIErrorCode	NIError	Code	-	-	-	ios=14.0	-	e2530b715f7db165
+NearbyInteraction	swift-method	s:So11NIErrorCodeV8rawValueABSgSi_tcfc	NIError.Code	init(rawValue:)	-	-	NearbyInteraction.NIError.Code? | Swift.Int	-	-	ad0b3da120bc5f04
+NearbyInteraction	swift-property	s:So11NIErrorCodeV8rawValueSivp	NIError.Code	rawValue	-	Swift.Int	-	-	-	303611d7a7e53120
+NearbyInteraction	swift-typealias	s:So11NIErrorCodeV8RawValuea	NIError.Code	RawValue	-	-	-	-	-	6841dc427aef5c76
+NearbyInteraction	swift-typealias	c:@E@NIErrorCode	NIError.Code	_ErrorType	-	-	-	-	-	acdd1ccaf48d10c2
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeUnsupportedPlatform	NIError.Code	unsupportedPlatform	-	-	-	-	-	b4b9e028e6013d28
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeInvalidConfiguration	NIError.Code	invalidConfiguration	-	-	-	-	-	4a8b7d46732d0d27
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeSessionFailed	NIError.Code	sessionFailed	-	-	-	-	-	34b3a5f82e1086ce
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeResourceUsageTimeout	NIError.Code	resourceUsageTimeout	-	-	-	-	-	c8046551a624b118
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeActiveSessionsLimitExceeded	NIError.Code	activeSessionsLimitExceeded	-	-	-	-	-	8281320d6dfda371
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeUserDidNotAllow	NIError.Code	userDidNotAllow	-	-	-	-	-	b0d07623fef29080
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeInvalidARConfiguration	NIError.Code	invalidARConfiguration	-	-	-	ios=16.0	-	5f2dc604b24eeae3
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeAccessoryPeerDeviceUnavailable	NIError.Code	accessoryPeerDeviceUnavailable	-	-	-	ios=16.0	-	171d97c0f1430785
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeIncompatiblePeerDevice	NIError.Code	incompatiblePeerDevice	-	-	-	ios=17.0	-	fc02a2fad80f336c
+NearbyInteraction	swift-constant	c:@E@NIErrorCode@NIErrorCodeActiveExtendedDistanceSessionsLimitExceeded	NIError.Code	activeExtendedDistanceSessionsLimitExceeded	-	-	-	ios=17.0	-	a9a230726adbf740
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeUnsupportedPlatform	NIError	unsupportedPlatform	+	NearbyInteraction.NIError.Code	-	-	-	6dcdbdc655af5fb6
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeInvalidConfiguration	NIError	invalidConfiguration	+	NearbyInteraction.NIError.Code	-	-	-	6a0ac56297e1e85c
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeSessionFailed	NIError	sessionFailed	+	NearbyInteraction.NIError.Code	-	-	-	1534f32257adebd7
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeResourceUsageTimeout	NIError	resourceUsageTimeout	+	NearbyInteraction.NIError.Code	-	-	-	7e1d8de6f567b0cd
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeActiveSessionsLimitExceeded	NIError	activeSessionsLimitExceeded	+	NearbyInteraction.NIError.Code	-	-	-	262fb34a0c8a1100
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeUserDidNotAllow	NIError	userDidNotAllow	+	NearbyInteraction.NIError.Code	-	-	-	f115a5b1ebf7d6e5
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeInvalidARConfiguration	NIError	invalidARConfiguration	+	NearbyInteraction.NIError.Code	-	ios=16.0	-	f6816f9124916337
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeAccessoryPeerDeviceUnavailable	NIError	accessoryPeerDeviceUnavailable	+	NearbyInteraction.NIError.Code	-	ios=16.0	-	5d6502672ecd316f
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeIncompatiblePeerDevice	NIError	incompatiblePeerDevice	+	NearbyInteraction.NIError.Code	-	ios=17.0	-	3d637374f8e13c21
+NearbyInteraction	swift-property	c:@E@NIErrorCode@NIErrorCodeActiveExtendedDistanceSessionsLimitExceeded	NIError	activeExtendedDistanceSessionsLimitExceeded	+	NearbyInteraction.NIError.Code	-	ios=17.0	-	924231ac5f7519cc
+NearbyInteraction	swift-enum	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO	-	NIAlgorithmConvergenceStatus	-	-	-	ios=16.0,tvos=16.0,watchos=9.0	-	22473781cc63333d
+NearbyInteraction	swift-constant	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO7unknownyA2CmF	NIAlgorithmConvergenceStatus	unknown	-	-	-	-	-	0256ca1e2e96f990
+NearbyInteraction	swift-constant	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO12notConvergedyACSayAC6ReasonVGcACmF	NIAlgorithmConvergenceStatus	notConverged	-	-	-	-	-	53df131988d30863
+NearbyInteraction	swift-constant	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO9convergedyA2CmF	NIAlgorithmConvergenceStatus	converged	-	-	-	-	-	cce7d7d8de1f41bd
+NearbyInteraction	swift-method	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO2eeoiySbAC_ACtFZ	NIAlgorithmConvergenceStatus	==(_:_:)	+	Swift.Bool	NearbyInteraction.NIAlgorithmConvergenceStatus | NearbyInteraction.NIAlgorithmConvergenceStatus	-	-	f56b087169eed31b
+NearbyInteraction	swift-struct	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV	NIAlgorithmConvergenceStatus	Reason	-	-	-	ios=16.0	-	9927b474c2194ccf
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV8rawValueSSvp	NIAlgorithmConvergenceStatus.Reason	rawValue	-	Swift.String	-	-	-	e6fcf0ba1b143362
+NearbyInteraction	swift-method	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV8rawValueAESS_tcfc	NIAlgorithmConvergenceStatus.Reason	init(rawValue:)	-	-	NearbyInteraction.NIAlgorithmConvergenceStatus.Reason | Swift.String	-	-	d1dd38564047d7f1
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV20localizedDescriptionSSSgvp	NIAlgorithmConvergenceStatus.Reason	localizedDescription	-	Swift.String?	-	-	-	456115af66d6b6bb
+NearbyInteraction	swift-typealias	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV8RawValuea	NIAlgorithmConvergenceStatus.Reason	RawValue	-	-	-	ios=16.0,tvos=16.0,watchos=9.0	-	dceffb224f936981
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV26insufficientSignalStrengthAEvpZ	NIAlgorithmConvergenceStatus.Reason	insufficientSignalStrength	+	NearbyInteraction.NIAlgorithmConvergenceStatus.Reason	-	-	-	74d33a40848496be
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV27insufficientHorizontalSweepAEvpZ	NIAlgorithmConvergenceStatus.Reason	insufficientHorizontalSweep	+	NearbyInteraction.NIAlgorithmConvergenceStatus.Reason	-	-	-	6e82258831677751
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV25insufficientVerticalSweepAEvpZ	NIAlgorithmConvergenceStatus.Reason	insufficientVerticalSweep	+	NearbyInteraction.NIAlgorithmConvergenceStatus.Reason	-	-	-	c4d7babfa792f4d7
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV20insufficientMovementAEvpZ	NIAlgorithmConvergenceStatus.Reason	insufficientMovement	+	NearbyInteraction.NIAlgorithmConvergenceStatus.Reason	-	-	-	1ce4a638db9b63b0
+NearbyInteraction	swift-property	s:17NearbyInteraction28NIAlgorithmConvergenceStatusO6ReasonV20insufficientLightingAEvpZ	NIAlgorithmConvergenceStatus.Reason	insufficientLighting	+	NearbyInteraction.NIAlgorithmConvergenceStatus.Reason	-	-	-	3670f899eb4266c1
+NearbyInteraction	swift-class	c:objc(cs)NINearbyObject	-	NINearbyObject	-	-	-	ios=14.0	-	668261c8955a0413
+NearbyInteraction	swift-property	s:So14NINearbyObjectC17NearbyInteractionE8distanceSfSgvp	NINearbyObject	distance	-	Swift.Float?	-	-	-	13c6d4a9b7e9052f
+NearbyInteraction	swift-property	s:So14NINearbyObjectC17NearbyInteractionE9directions5SIMD3VySfGSgvp	NINearbyObject	direction	-	simd.simd_float3?	-	-	-	dff2e9dc6952a298
+NearbyInteraction	swift-property	s:So14NINearbyObjectC17NearbyInteractionE15horizontalAngleSfSgvp	NINearbyObject	horizontalAngle	-	Swift.Float?	-	ios=16.0,tvos=16.0,watchos=9.0	-	ef65b4dcde67df77
+NearbyInteraction	swift-class	c:objc(cs)NIAlgorithmConvergence	-	NIAlgorithmConvergence	-	-	-	ios=16.0	-	9878df7e61d93790
+NearbyInteraction	swift-property	s:So22NIAlgorithmConvergenceC17NearbyInteractionE6statusAC0aB6StatusOvp	NIAlgorithmConvergence	status	-	NearbyInteraction.NIAlgorithmConvergenceStatus	-	-	-	f7f6dbf762f7be70
+NearbyInteraction	swift-class	c:objc(cs)NISession	-	NISession	-	-	-	ios=14.0	-	ca386f47a2b5728b
+NearbyInteraction	swift-method	s:So9NISessionC17NearbyInteractionE14worldTransform3forSo13simd_float4x4aSgSo14NINearbyObjectC_tF	NISession	worldTransform(for:)	-	simd.simd_float4x4?	NearbyInteraction.NINearbyObject	-	-	4bd6b6af425b1eab

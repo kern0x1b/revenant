@@ -1,0 +1,65 @@
+{
+    "framework": "FileProvider",
+    "entries": [
+        {
+            "api": "+[NSFileProviderManager getIdentifierForUserVisibleFileAtURL:completionHandler:]",
+            "kind": "method",
+            "introduced": "16.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the 6.1.3 cache reads 0 for this selector beside a control of 2, and FileProvider arrived in iOS 11.0 with no framework and no extension host on the release. in the macOS header as FILEPROVIDER_API_AVAILABILITY_V3_IOS, so iOS-only and there is no host line",
+            "effect": "nil identifier and NSFileProviderErrorDomain / -2001",
+            "source": "SDK 26.2 NSFileProviderManager.h, and the host's own FileProvider, measured in tests/backports/host/fileprovider"
+        },
+        {
+            "api": "+[NSFileProviderManager removeDomain:mode:completionHandler:]",
+            "kind": "method",
+            "introduced": "16.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the 6.1.3 cache reads 0 for this selector beside a control of 2, and FileProvider arrived in iOS 11.0 with no framework and no extension host on the release. not in the macOS header at all, so there is no host build of it, and it removes a domain so it is FORBIDDEN on the host in any case; the answer comes from a COPY of the .m",
+            "effect": "the completion with a nil preserved location and NSFileProviderErrorDomain / -2001",
+            "source": "SDK 26.2 NSFileProviderManager.h, and the host's own FileProvider, measured in tests/backports/host/fileprovider"
+        },
+        {
+            "api": "-[NSFileProviderManager getUserVisibleURLForItemIdentifier:completionHandler:]",
+            "kind": "method",
+            "introduced": "16.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the 6.1.3 cache reads 0 for this selector beside a control of 2, and FileProvider arrived in iOS 11.0 with no framework and no extension host on the release. declared by the macOS header with no availability gate and READ-ONLY, so the differential has a line for it and the host answers nil too",
+            "effect": "nil and NSFileProviderErrorDomain / -2001",
+            "source": "SDK 26.2 NSFileProviderManager.h, and the host's own FileProvider, measured in tests/backports/host/fileprovider"
+        },
+        {
+            "api": "-[NSFileProviderManager globalProgressForKind:]",
+            "kind": "method",
+            "introduced": "16.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the 6.1.3 cache reads 0 for this selector beside a control of 2, and FileProvider arrived in iOS 11.0 with no framework and no extension host on the release. FILEPROVIDER_API_AVAILABILITY_V3_1_IOS, iOS-only, and there are no operations to be in progress for",
+            "effect": "nil",
+            "source": "SDK 26.2 NSFileProviderManager.h, and the host's own FileProvider, measured in tests/backports/host/fileprovider"
+        },
+        {
+            "api": "-[NSFileProviderManager signalErrorResolved:completionHandler:]",
+            "kind": "method",
+            "introduced": "16.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the 6.1.3 cache reads 0 for this selector beside a control of 2, and FileProvider arrived in iOS 11.0 with no framework and no extension host on the release. declared by the macOS header with no gate, but NOT CALLED on the host: it tells the system something changed, the same rule as addDomain:; nothing is listening, so resolving an error has no observer",
+            "effect": "the completion with NSFileProviderErrorDomain / -2001",
+            "source": "SDK 26.2 NSFileProviderManager.h, and the host's own FileProvider, measured in tests/backports/host/fileprovider"
+        },
+        {
+            "api": "-[NSFileProviderManager temporaryDirectoryURLWithError:]",
+            "kind": "method",
+            "introduced": "16.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the 6.1.3 cache reads 0 for this selector beside a control of 2, and FileProvider arrived in iOS 11.0 with no framework and no extension host on the release. FILEPROVIDER_API_AVAILABILITY_V3_IOS, iOS-only, so the answer is the header's: a manager with no domain has no temporary directory",
+            "effect": "nil, with NSFileProviderErrorDomain / -2001 in the out-parameter",
+            "source": "SDK 26.2 NSFileProviderManager.h, and the host's own FileProvider, measured in tests/backports/host/fileprovider"
+        }
+    ]
+}

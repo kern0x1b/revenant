@@ -1,0 +1,17 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@ADClientErrorDomain	-			NSString *const	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	181a6fc6ed778cc5	-
+typedef	c:@T@ADClientError	-			enum ADClientError	-	-	-	-	59bd162c38e0a5f1	-
+enum	c:@E@ADClientError	-			NSInteger	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	286442700ad05768	-
+enumconst	c:@E@ADClientError@ADClientErrorUnknown	ADClientError			-	-	-	*deprecated	deprecated: ADClientErrorUnknown is not used and never returned.	ebc9b66b2139f858	0
+enumconst	c:@E@ADClientError@ADClientErrorTrackingRestrictedOrDenied	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	b1c29c8455a3d59a	1
+enumconst	c:@E@ADClientError@ADClientErrorLimitAdTracking	ADClientError			-	-	-	*deprecated	deprecated: ADClientErrorLimitAdTracking has been deprecated use ADClientErrorTrackingRestrictedOrDenied.	2592ef018fa66c29	1
+enumconst	c:@E@ADClientError@ADClientErrorMissingData	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	fcc6caf93a922944	2
+enumconst	c:@E@ADClientError@ADClientErrorCorruptResponse	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	e052adcfb8e8ef86	3
+enumconst	c:@E@ADClientError@ADClientErrorRequestClientError	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	fd2f69c92e11bb61	4
+enumconst	c:@E@ADClientError@ADClientErrorRequestServerError	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	a43ecaa1e5f1f3ba	5
+enumconst	c:@E@ADClientError@ADClientErrorRequestNetworkError	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	75b21ed0e5dc050e	6
+enumconst	c:@E@ADClientError@ADClientErrorUnsupportedPlatform	ADClientError			-	-	-	ios=7.1/15.0/18.0/0,macos=10.14/12.0/28.0/0,tvos=7.1/15.0/18.0/0	-	2a8a0251a9d94aad	7
+interface	c:objc(cs)ADClient	-			-	-	-	ios=7.1/14.5/18.0/0,macos=10.14/11.3/28.0/0,tvos=7.1/14.5/18.0/0	-	c7d16863c591a8c8	-
+super	-	ADClient	NSObject		-	-	-	-	-	6deb9a3880ef1490	-
+method	c:objc(cs)ADClient(cm)sharedClient	-			ADClient *	-	-	ios=7.1/14.5/18.0/0,macos=10.14/11.3/28.0/0,tvos=7.1/14.5/18.0/0	-	ed547a6aed973fbf	-
+method	c:objc(cs)ADClient(im)requestAttributionDetailsWithBlock:	-			void	void (^)(NSDictionary<NSString *,NSObject *> * _Nullable, NSError * _Nullable) completionHandler	-	ios=9.0/14.5/18.0/0,macos=10.14/11.3/28.0/0,tvos=7.1/14.5/18.0/0	-	11910c6326da293f	-

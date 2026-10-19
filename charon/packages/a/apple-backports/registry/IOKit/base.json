@@ -1,0 +1,46 @@
+[
+  {
+    "api": "kIOMainPortDefault",
+    "kind": "constant",
+    "introduced": "15.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 exports no such symbol, and an application that names it is killed by dyld before its main; the value is the MACH_PORT_NULL the IOKit header calls a synonym for NULL",
+    "effect": "the constant is 0, as it is in the arm64e shared cache of iOS 18.0 and on the host; passing it to any IOKit function of the release means the default, which is what the header says of NULL",
+    "facts": "facts/IOKit/IORegistryPaths.md",
+    "source": "the host's own IOKit under MacOSX.sdk, which prints kIOMainPortDefault as 0; IOKitLib.h of the SDK 16.4, which calls the name a synonym for NULL; the 6.1.3 armv7 cache, which exports none of these names"
+  },
+  {
+    "api": "IOMainPort()",
+    "kind": "function",
+    "introduced": "15.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 has no separate IOKit main port to hand out: the release reaches IOKit through the task's own port, which is what MACH_PORT_NULL already names for every IOKit function",
+    "effect": "KERN_SUCCESS, and *mainPort is set to kIOMainPortDefault, so every IOKit call the caller then makes behaves as the release's own; a NULL mainPort answers KERN_INVALID_ARGUMENT instead of reading through it, which is where the host crashes",
+    "facts": "facts/IOKit/IORegistryPaths.md",
+    "source": "the host's own IOKit, which crashes on a NULL out-parameter; IOKitLib.h of the SDK 16.4, which documents kIOMainPortDefault as the synonym for NULL that means the default main port"
+  },
+  {
+    "api": "IORegistryEntryCopyFromPath()",
+    "kind": "function",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 exports no such symbol, and an application that names it is killed by dyld before its main; the release has the same lookup under the name IORegistryEntryFromPath, with a C string where the new one takes a CFString",
+    "effect": "the release's own IORegistryEntryFromPath with the path converted to UTF-8, so the entry it finds is the release's and is released by the caller as both names promise; MACH_PORT_NULL for a path that is nil or does not fit, and for a path no entry has, exactly as the release's own answers",
+    "facts": "facts/IOKit/IORegistryPaths.md",
+    "source": "the host's own IOKit, which answers an entry for IOService:/ and MACH_PORT_NULL for a path no plane has; the 6.1.3 armv7 cache, which exports _IORegistryEntryFromPath"
+  },
+  {
+    "api": "IORegistryEntryCopyPath()",
+    "kind": "function",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 exports no such symbol, and an application that names it is killed by dyld before its main; the release has the same lookup under the name IORegistryEntryGetPath, which fills a buffer where the new one returns a CFString",
+    "effect": "the release's own IORegistryEntryGetPath, and a CFString of the path it wrote, to be released by the caller as the name promises; NULL for an entry of 0 and for any entry the release cannot give a path for, which is what it answers with",
+    "facts": "facts/IOKit/IORegistryPaths.md",
+    "source": "the host's own IOKit, which answers nil for an entry it has no path for; the 6.1.3 armv7 cache, which exports _IORegistryEntryGetPath"
+  }
+]

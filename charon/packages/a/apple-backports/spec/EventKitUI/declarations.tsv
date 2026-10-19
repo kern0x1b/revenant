@@ -1,0 +1,56 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@EKEventEditViewAction	-			enum EKEventEditViewAction	-	-	-	-	0b9d2b80856ad638	-
+enum	c:@E@EKEventEditViewAction	-			NSInteger	-	-	-	-	bacdfd9ad9f5c1e4	-
+enumconst	c:@E@EKEventEditViewAction@EKEventEditViewActionCanceled	EKEventEditViewAction			-	-	-	-	-	fcc981d06a1dbda2	0
+enumconst	c:@E@EKEventEditViewAction@EKEventEditViewActionSaved	EKEventEditViewAction			-	-	-	-	-	e40b952b889dd649	1
+enumconst	c:@E@EKEventEditViewAction@EKEventEditViewActionDeleted	EKEventEditViewAction			-	-	-	-	-	2dbabda05019a6c8	2
+enumconst	c:@E@EKEventEditViewAction@EKEventEditViewActionCancelled	EKEventEditViewAction			-	-	-	-	-	a7d73673abc99920	0
+interface	c:objc(cs)EKEventEditViewController	-			-	-	-	ios=4.0/-/-/0	-	d8f7f333565318ea	-
+super	-	EKEventEditViewController	UINavigationController		-	-	-	-	-	b7cc1a90925a1af0	-
+property	c:objc(cs)EKEventEditViewController(py)editViewDelegate	-			id<EKEventEditViewDelegate>	-	weak,nonatomic	ios=4.0/-/-/0	-	c361b9e7501d7272	-
+property	c:objc(cs)EKEventEditViewController(py)eventStore	-			EKEventStore *	-	retain,nonatomic	ios=4.0/-/-/0	-	08b13afa2fc2dddb	-
+property	c:objc(cs)EKEventEditViewController(py)event	-			EKEvent *	-	retain,nonatomic	ios=4.0/-/-/0	-	9260ec984188985f	-
+method	c:objc(cs)EKEventEditViewController(im)cancelEditing	-			void	-	-	ios=4.0/-/-/0	-	481a5c92e0738d3b	-
+protocol	c:objc(pl)EKEventEditViewDelegate	-			-	-	-	-	-	9c3a9ff52473cf00	-
+conforms	c:objc(pl)EKEventEditViewDelegate	EKEventEditViewDelegate	NSObject		-	-	-	-	-	7edd5aa5059880a3	-
+method	c:objc(pl)EKEventEditViewDelegate(im)eventEditViewController:didCompleteWithAction:	-			void	EKEventEditViewController * controller | EKEventEditViewAction action	-	-	-	75a0e08cb6c660fd	-
+method	c:objc(pl)EKEventEditViewDelegate(im)eventEditViewControllerDefaultCalendarForNewEvents:	-			EKCalendar *	EKEventEditViewController * controller	optional	-	-	f23af31f95e35eb6	-
+function	c:@F@EventKitUIBundle	-			NSBundle * (void)	-	-	-	-	6d0d0f2399475a56	-
+typedef	c:@T@EKEventViewAction	-			enum EKEventViewAction	-	-	-	-	13f0420efbefe8a4	-
+enum	c:@E@EKEventViewAction	-			NSInteger	-	-	-	-	ca6beeb7eae31cf9	-
+enumconst	c:@E@EKEventViewAction@EKEventViewActionDone	EKEventViewAction			-	-	-	-	-	fea8276904d44896	0
+enumconst	c:@E@EKEventViewAction@EKEventViewActionResponded	EKEventViewAction			-	-	-	-	-	d743a519299155c3	1
+enumconst	c:@E@EKEventViewAction@EKEventViewActionDeleted	EKEventViewAction			-	-	-	-	-	d2b6d92c0235e000	2
+interface	c:objc(cs)EKEventViewController	-			-	-	-	ios=4.0/-/-/0	-	3ffc832a764a3d2e	-
+super	-	EKEventViewController	UIViewController		-	-	-	-	-	e3bea9bfdf953138	-
+property	c:objc(cs)EKEventViewController(py)delegate	-			id<EKEventViewDelegate>	-	weak,nonatomic	ios=4.2/-/-/0	-	bd280ba4fe731328	-
+property	c:objc(cs)EKEventViewController(py)event	-			EKEvent *	-	retain,nonatomic	ios=4.0/-/-/0	-	e5c6c31c07a24087	-
+property	c:objc(cs)EKEventViewController(py)allowsEditing	-			BOOL	-	nonatomic	ios=4.0/-/-/0	-	96d885b065823106	-
+property	c:objc(cs)EKEventViewController(py)allowsCalendarPreview	-			BOOL	-	nonatomic	ios=4.0/-/-/0	-	7d9389906dbcf737	-
+protocol	c:objc(pl)EKEventViewDelegate	-			-	-	-	-	-	954b66750969c017	-
+conforms	c:objc(pl)EKEventViewDelegate	EKEventViewDelegate	NSObject		-	-	-	-	-	07bb73253b3c195e	-
+method	c:objc(pl)EKEventViewDelegate(im)eventViewController:didCompleteWithAction:	-			void	EKEventViewController * controller | EKEventViewAction action	-	ios=4.2/-/-/0	-	bc28de5f089a11b2	-
+typedef	c:@T@EKCalendarChooserSelectionStyle	-			enum EKCalendarChooserSelectionStyle	-	-	-	-	222a05f5a7c8d738	-
+enum	c:@E@EKCalendarChooserSelectionStyle	-			NSInteger	-	-	-	-	b18dec5f01a1fddf	-
+enumconst	c:@E@EKCalendarChooserSelectionStyle@EKCalendarChooserSelectionStyleSingle	EKCalendarChooserSelectionStyle			-	-	-	-	-	ec7f7501c0d665a4	0
+enumconst	c:@E@EKCalendarChooserSelectionStyle@EKCalendarChooserSelectionStyleMultiple	EKCalendarChooserSelectionStyle			-	-	-	-	-	e4a1ba42723f6aca	1
+typedef	c:@T@EKCalendarChooserDisplayStyle	-			enum EKCalendarChooserDisplayStyle	-	-	-	-	991e368ab5b0de0e	-
+enum	c:@E@EKCalendarChooserDisplayStyle	-			NSInteger	-	-	-	-	ad04aac109781702	-
+enumconst	c:@E@EKCalendarChooserDisplayStyle@EKCalendarChooserDisplayAllCalendars	EKCalendarChooserDisplayStyle			-	-	-	-	-	29de23b500daf9a4	0
+enumconst	c:@E@EKCalendarChooserDisplayStyle@EKCalendarChooserDisplayWritableCalendarsOnly	EKCalendarChooserDisplayStyle			-	-	-	-	-	26112a1dda6026ad	1
+interface	c:objc(cs)EKCalendarChooser	-			-	-	-	-	-	2ef28a7566b5f3e5	-
+super	-	EKCalendarChooser	UIViewController		-	-	-	-	-	5654020d313a30f8	-
+method	c:objc(cs)EKCalendarChooser(im)initWithSelectionStyle:displayStyle:eventStore:	-			id	EKCalendarChooserSelectionStyle selectionStyle | EKCalendarChooserDisplayStyle displayStyle | EKEventStore * eventStore	-	-	-	6b8fda43686f2e58	-
+method	c:objc(cs)EKCalendarChooser(im)initWithSelectionStyle:displayStyle:entityType:eventStore:	-			id	EKCalendarChooserSelectionStyle style | EKCalendarChooserDisplayStyle displayStyle | EKEntityType entityType | EKEventStore * eventStore	-	-	-	f40c69442515a9aa	-
+property	c:objc(cs)EKCalendarChooser(py)selectionStyle	-			EKCalendarChooserSelectionStyle	-	readonly,nonatomic	-	-	85a7684f445b9ed4	-
+property	c:objc(cs)EKCalendarChooser(py)delegate	-			id<EKCalendarChooserDelegate>	-	weak,nonatomic	-	-	f04b570c1cab2cc6	-
+property	c:objc(cs)EKCalendarChooser(py)showsDoneButton	-			BOOL	-	nonatomic	-	-	510e36d68a6166a8	-
+property	c:objc(cs)EKCalendarChooser(py)showsCancelButton	-			BOOL	-	nonatomic	-	-	53b1d9feb794943d	-
+property	c:objc(cs)EKCalendarChooser(py)selectedCalendars	-			NSSet<EKCalendar *> *	-	copy,nonatomic	-	-	e63b29d3498c6293	-
+protocol	c:objc(pl)EKCalendarChooserDelegate	-			-	-	-	-	-	977827fbd0b1e795	-
+conforms	c:objc(pl)EKCalendarChooserDelegate	EKCalendarChooserDelegate	NSObject		-	-	-	-	-	12dabc5a831d62a9	-
+method	c:objc(pl)EKCalendarChooserDelegate(im)calendarChooserSelectionDidChange:	-			void	EKCalendarChooser * calendarChooser	optional	-	-	12404b138ee275f2	-
+method	c:objc(pl)EKCalendarChooserDelegate(im)calendarChooserDidFinish:	-			void	EKCalendarChooser * calendarChooser	optional	-	-	3512bf870d52449c	-
+method	c:objc(pl)EKCalendarChooserDelegate(im)calendarChooserDidCancel:	-			void	EKCalendarChooser * calendarChooser	optional	-	-	836da6b67a77b7c7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@EKEntityType	-			enum EKEntityType	-	-	-	-	8de3d8c21f49bc10	-

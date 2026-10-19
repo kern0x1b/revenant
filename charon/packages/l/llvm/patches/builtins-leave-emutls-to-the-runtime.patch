@@ -1,0 +1,7 @@
+diff --git a/llvm-project/compiler-rt/lib/builtins/Darwin-excludes/ios.txt b/llvm-project/compiler-rt/lib/builtins/Darwin-excludes/ios.txt
+index 5db24000..10ac8a66 100644
+--- a/llvm-project/compiler-rt/lib/builtins/Darwin-excludes/ios.txt
++++ b/llvm-project/compiler-rt/lib/builtins/Darwin-excludes/ios.txt
+@@ -1 +1,2 @@
+ apple_versioning
++emutls

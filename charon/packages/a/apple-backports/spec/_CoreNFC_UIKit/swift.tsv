@@ -1,0 +1,14 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_CoreNFC_UIKit	swift-enum	s:14_CoreNFC_UIKit19NFCWindowSceneEventO	-	NFCWindowSceneEvent	-	-	-	ios=17.4	-	3b3e140663c52bcf
+_CoreNFC_UIKit	swift-property	s:14_CoreNFC_UIKit19NFCWindowSceneEventO11descriptionSSvp	NFCWindowSceneEvent	description	-	Swift.String	-	-	-	7c969096969d89b1
+_CoreNFC_UIKit	swift-constant	s:14_CoreNFC_UIKit19NFCWindowSceneEventO14readerDetectedyA2CmF	NFCWindowSceneEvent	readerDetected	-	-	-	-	-	bca098c7551280d6
+_CoreNFC_UIKit	swift-constant	s:14_CoreNFC_UIKit19NFCWindowSceneEventO12presentationyA2CmF	NFCWindowSceneEvent	presentation	-	-	-	-	-	005857a0ae5edc8e
+_CoreNFC_UIKit	swift-method	s:14_CoreNFC_UIKit19NFCWindowSceneEventO2eeoiySbAC_ACtFZ	NFCWindowSceneEvent	==(_:_:)	+	Swift.Bool	_CoreNFC_UIKit.NFCWindowSceneEvent | _CoreNFC_UIKit.NFCWindowSceneEvent	-	-	f3f23821c76fef73
+_CoreNFC_UIKit	swift-method	s:14_CoreNFC_UIKit19NFCWindowSceneEventO6encode2toys7Encoder_p_tKF	NFCWindowSceneEvent	encode(to:)	-	()	any Swift.Encoder	-	-	ef33650fd18d323c
+_CoreNFC_UIKit	swift-method	s:14_CoreNFC_UIKit19NFCWindowSceneEventO4hash4intoys6HasherVz_tF	NFCWindowSceneEvent	hash(into:)	-	()	Swift.Hasher	-	-	38c89047c053a38c
+_CoreNFC_UIKit	swift-property	s:14_CoreNFC_UIKit19NFCWindowSceneEventO9hashValueSivp	NFCWindowSceneEvent	hashValue	-	Swift.Int	-	-	-	7beaaa676f839352
+_CoreNFC_UIKit	swift-method	s:14_CoreNFC_UIKit19NFCWindowSceneEventO4fromACs7Decoder_p_tKcfc	NFCWindowSceneEvent	init(from:)	-	-	_CoreNFC_UIKit.NFCWindowSceneEvent | any Swift.Decoder	-	-	c549e84edb8f8464
+_CoreNFC_UIKit	swift-protocol	s:14_CoreNFC_UIKit22NFCWindowSceneDelegateP	-	NFCWindowSceneDelegate	-	-	-	ios=17.4	-	4fd17cc5e74d3037
+_CoreNFC_UIKit	swift-method	s:14_CoreNFC_UIKit22NFCWindowSceneDelegateP06windowE0_010didReceivedE5EventySo08UIWindowE0C_AA0deJ0OtF	NFCWindowSceneDelegate	windowScene(_:didReceiveNFCWindowSceneEvent:)	-	()	UIKit.UIWindowScene | _CoreNFC_UIKit.NFCWindowSceneEvent	-	-	3cf17b6a05e9200a
+_CoreNFC_UIKit	swift-class	c:objc(cs)UISceneConnectionOptions	-	ConnectionOptions	-	-	-	ios=13.0	-	695dcbf5bba23393
+_CoreNFC_UIKit	swift-property	s:So24UISceneConnectionOptionsC14_CoreNFC_UIKitE8nfcEventAC014NFCWindowSceneH0OSgvp	ConnectionOptions	nfcEvent	-	_CoreNFC_UIKit.NFCWindowSceneEvent?	-	-	-	ed6b4c5580e98ea9

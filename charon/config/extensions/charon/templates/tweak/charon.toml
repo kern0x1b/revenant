@@ -1,0 +1,25 @@
+[port]
+name = "$name"
+version = "0.1.0"
+description = "$Name, a MobileSubstrate tweak"
+
+[platform]
+use = "apple-ios"
+arch = "armv7"
+os-version = "6.0"
+distribution = "jailbreak"
+
+[[device-library]]
+name = "$Name"
+sources = ["src/*.m"]
+install = "/Library/MobileSubstrate/DynamicLibraries"
+installs-into = "stage"
+frameworks = ["Foundation"]
+options = ["-Wall", "-Wextra"]
+resources = ["packaging/$Name.plist"]
+
+[package]
+control = "packaging/control"
+
+[pipeline]
+system = ["stage:clear", "build:device-library", "check:imports"]

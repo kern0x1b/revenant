@@ -1,0 +1,111 @@
+{
+ "framework": "ARKit",
+ "entries": [
+  {
+   "api": "ARSkeletonDefinition",
+   "kind": "class",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "carried: the seventeen-joint two-dimensional table is Apple's own and was read out of ARKitCore in the arm64e shared cache of iOS 16.0 and then compared against this Mac's own ARKit, which answers the same seventeen names in the same order with the same seventeen parents. oracle: tests/backports/host/arkit-skeleton/run.sh -- host jointCount, every joint name in order, every parent index in order and -indexForJointName: for every name in the table and one that is in none of it; two mutants, one swapping two joint names and one changing one parent while every name and every count still matches, and both are killed. addresses and both reads in facts/ARKit/Skeleton.md",
+   "effect": "the definition's table: jointCount is 17, jointNames is Apple's seventeen names in its order, parentIndices is 1, 16, 1, 2, 3, 1, 5, 6, 16, 8, 9, 16, 11, 12, 0, 0, -1, and -indexForJointName: answers that index or NSNotFound for a name the table does not have",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "ARSkeletonDefinition.jointCount",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "carried: the seventeen-joint two-dimensional table is Apple's own and was read out of ARKitCore in the arm64e shared cache of iOS 16.0 and then compared against this Mac's own ARKit, which answers the same seventeen names in the same order with the same seventeen parents. oracle: tests/backports/host/arkit-skeleton/run.sh -- host jointCount, every joint name in order, every parent index in order and -indexForJointName: for every name in the table and one that is in none of it; two mutants, one swapping two joint names and one changing one parent while every name and every count still matches, and both are killed. addresses and both reads in facts/ARKit/Skeleton.md",
+   "effect": "the definition's table: jointCount is 17, jointNames is Apple's seventeen names in its order, parentIndices is 1, 16, 1, 2, 3, 1, 5, 6, 16, 8, 9, 16, 11, 12, 0, 0, -1, and -indexForJointName: answers that index or NSNotFound for a name the table does not have",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "ARSkeletonDefinition.jointNames",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "carried: the seventeen-joint two-dimensional table is Apple's own and was read out of ARKitCore in the arm64e shared cache of iOS 16.0 and then compared against this Mac's own ARKit, which answers the same seventeen names in the same order with the same seventeen parents. oracle: tests/backports/host/arkit-skeleton/run.sh -- host jointCount, every joint name in order, every parent index in order and -indexForJointName: for every name in the table and one that is in none of it; two mutants, one swapping two joint names and one changing one parent while every name and every count still matches, and both are killed. addresses and both reads in facts/ARKit/Skeleton.md",
+   "effect": "the definition's table: jointCount is 17, jointNames is Apple's seventeen names in its order, parentIndices is 1, 16, 1, 2, 3, 1, 5, 6, 16, 8, 9, 16, 11, 12, 0, 0, -1, and -indexForJointName: answers that index or NSNotFound for a name the table does not have",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "ARSkeletonDefinition.parentIndices",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "carried: the seventeen-joint two-dimensional table is Apple's own and was read out of ARKitCore in the arm64e shared cache of iOS 16.0 and then compared against this Mac's own ARKit, which answers the same seventeen names in the same order with the same seventeen parents. oracle: tests/backports/host/arkit-skeleton/run.sh -- host jointCount, every joint name in order, every parent index in order and -indexForJointName: for every name in the table and one that is in none of it; two mutants, one swapping two joint names and one changing one parent while every name and every count still matches, and both are killed. addresses and both reads in facts/ARKit/Skeleton.md",
+   "effect": "the definition's table: jointCount is 17, jointNames is Apple's seventeen names in its order, parentIndices is 1, 16, 1, 2, 3, 1, 5, 6, 16, 8, 9, 16, 11, 12, 0, 0, -1, and -indexForJointName: answers that index or NSNotFound for a name the table does not have",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "ARSkeletonDefinition.defaultBody2DSkeletonDefinition",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "carried: the seventeen-joint two-dimensional table is Apple's own and was read out of ARKitCore in the arm64e shared cache of iOS 16.0 and then compared against this Mac's own ARKit, which answers the same seventeen names in the same order with the same seventeen parents. oracle: tests/backports/host/arkit-skeleton/run.sh -- host jointCount, every joint name in order, every parent index in order and -indexForJointName: for every name in the table and one that is in none of it; two mutants, one swapping two joint names and one changing one parent while every name and every count still matches, and both are killed. addresses and both reads in facts/ARKit/Skeleton.md",
+   "effect": "the definition's table: jointCount is 17, jointNames is Apple's seventeen names in its order, parentIndices is 1, 16, 1, 2, 3, 1, 5, 6, 16, 8, 9, 16, 11, 12, 0, 0, -1, and -indexForJointName: answers that index or NSNotFound for a name the table does not have",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "-[ARSkeletonDefinition indexForJointName:]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "carried: the seventeen-joint two-dimensional table is Apple's own and was read out of ARKitCore in the arm64e shared cache of iOS 16.0 and then compared against this Mac's own ARKit, which answers the same seventeen names in the same order with the same seventeen parents. oracle: tests/backports/host/arkit-skeleton/run.sh -- host jointCount, every joint name in order, every parent index in order and -indexForJointName: for every name in the table and one that is in none of it; two mutants, one swapping two joint names and one changing one parent while every name and every count still matches, and both are killed. addresses and both reads in facts/ARKit/Skeleton.md",
+   "effect": "the index of that joint in Apple's seventeen, or NSNotFound for a name the table does not have, which is the one value that cannot be an index into it",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "-[ARSkeletonDefinition init]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/NSObjectInit.md",
+   "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
+  },
+  {
+   "api": "+[ARSkeletonDefinition new]",
+   "kind": "method",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/NSObjectInit.md",
+   "source": "measured on the Catalyst host's ARKit and SensorKit: the selector is the superclass's own IMP and the class defines none of its own; facts/ARKit/NSObjectInit.md"
+  },
+  {
+   "api": "ARSkeletonDefinition.defaultBody3DSkeletonDefinition",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "facts": "facts/ARKit/Skeleton.md",
+   "reason": "owed: not a missing measurement but an unreachable one. The ninety-one names were read out of ARKitCore's __const (a hundred and eight consecutive const char * at 0x1d6d4f988, the last seventeen being CoreIK bone names and the ninety-one joints starting at 0x1d6d4fa10), and the hierarchy behind them is in neither image: -[ARSkeletonDefinition initDefault3DSkeletonDefinition] at 0x1af1a8fc4 builds both arrays in a loop over a CoreIK rig, asking CoreIK for each joint's name and for its parent's name, so the parent table is a result and not a constant. The rig description it reads is ARKitCore's own __const at 0x1af24cce0 through 0x1af24d850 and those words are floats - a bone's rest pose, not an index - and the one run of small integers in that __const is periodic with period 18, which a parent table for ninety-one joints cannot be. A definition with the right ninety-one names and no parents is not Apple's definition, so the row stays owed until that table is read. facts/ARKit/Skeleton.md and facts/ARKit/Pose.md",
+   "effect": "the class is not there for this answer, so a caller that asks for the three-dimensional definition does not get a definition with no parents in it",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  },
+  {
+   "api": "ARSkeletonDefinition.neutralBodySkeleton3D",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "facts": "facts/ARKit/Pose.md",
+   "reason": "owed: it is a three-dimensional skeleton, so it needs the three-dimensional definition and a pose, and neither is available. owed: not a missing measurement but an unreachable one. The ninety-one names were read out of ARKitCore's __const (a hundred and eight consecutive const char * at 0x1d6d4f988, the last seventeen being CoreIK bone names and the ninety-one joints starting at 0x1d6d4fa10), and the hierarchy behind them is in neither image: -[ARSkeletonDefinition initDefault3DSkeletonDefinition] at 0x1af1a8fc4 builds both arrays in a loop over a CoreIK rig, asking CoreIK for each joint's name and for its parent's name, so the parent table is a result and not a constant. The rig description it reads is ARKitCore's own __const at 0x1af24cce0 through 0x1af24d850 and those words are floats - a bone's rest pose, not an index - and the one run of small integers in that __const is periodic with period 18, which a parent table for ninety-one joints cannot be. A definition with the right ninety-one names and no parents is not Apple's definition, so the row stays owed until that table is read. facts/ARKit/Skeleton.md and facts/ARKit/Pose.md",
+   "effect": "the class is not there for this answer, so a caller that asks for the three-dimensional definition does not get a definition with no parents in it",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with this repository's readers: +[ARSkeletonDefinition defaultBody2DSkeletonDefinition] at 0x1af1a93dc (its span 0x1af1a93dc +0x270 is the image's own LC_FUNCTION_STARTS), -jointNames at 0x1af1a9708 and -parentIndices at 0x1af1a9710 (each a single ldr out of the object), the names from the __cfstring constants the initialiser stores with movz w3 = 0x11, and the parents from the constant CFArray at 0x1e0be6b08 (count 17, values 0x1d6d90928, each value an NSNumber in __objc_intobj whose third word is the integer); and this Mac's own ARKit, dlopen'd from /System/Library/Frameworks/ARKit.framework/ARKit and asked through its own selectors"
+  }
+ ]
+}

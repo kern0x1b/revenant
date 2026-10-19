@@ -1,0 +1,14 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+AVKit	swift-struct	c:@E@AVKitError	-	AVKitError	-	-	-	ios=9.0	-	58f531f0881aa9a9
+AVKit	swift-property	s:SC10AVKitErrorLeV03_nsB0So7NSErrorCvp	AVKitError	_nsError	-	Foundation.NSError	-	-	-	bbaae8aea072e990
+AVKit	swift-method	s:SC10AVKitErrorLeV03_nsB0ABSo7NSErrorC_tcfc	AVKitError	init(_nsError:)	-	-	AVKit.AVKitError | Foundation.NSError	-	-	1bf82f3bd1c102ea
+AVKit	swift-property	s:SC10AVKitErrorLeV11errorDomainSSvpZ	AVKitError	errorDomain	+	Swift.String	-	-	-	0b260cec86b34390
+AVKit	swift-enum	c:@E@AVKitError	AVKitError	Code	-	-	-	ios=9.0	-	4fd59e818a7d088b
+AVKit	swift-method	s:So10AVKitErrorV8rawValueABSgSi_tcfc	AVKitError.Code	init(rawValue:)	-	-	AVKit.AVKitError.Code? | Swift.Int	-	-	d26f6cb6ba7b3018
+AVKit	swift-property	s:So10AVKitErrorV8rawValueSivp	AVKitError.Code	rawValue	-	Swift.Int	-	-	-	8618033dc38ed7b0
+AVKit	swift-typealias	s:So10AVKitErrorV8RawValuea	AVKitError.Code	RawValue	-	-	-	-	-	7ed0ca28c4f30ab0
+AVKit	swift-typealias	c:@E@AVKitError	AVKitError.Code	_ErrorType	-	-	-	-	-	a21ee3fb1e1a76d4
+AVKit	swift-constant	c:@E@AVKitError@AVKitErrorUnknown	AVKitError.Code	unknown	-	-	-	-	-	e32a8dba10f5086f
+AVKit	swift-constant	c:@E@AVKitError@AVKitErrorPictureInPictureStartFailed	AVKitError.Code	pictureInPictureStartFailed	-	-	-	-	-	a6fefbf075669175
+AVKit	swift-property	c:@E@AVKitError@AVKitErrorUnknown	AVKitError	unknown	+	AVKit.AVKitError.Code	-	-	-	d342d1facb0764af
+AVKit	swift-property	c:@E@AVKitError@AVKitErrorPictureInPictureStartFailed	AVKitError	pictureInPictureStartFailed	+	AVKit.AVKitError.Code	-	-	-	c6143394aff50dad

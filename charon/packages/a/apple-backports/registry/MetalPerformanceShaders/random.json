@@ -1,0 +1,295 @@
+{
+  "framework": "MetalPerformanceShaders",
+  "entries": [
+    {
+      "api": "MPSMatrixRandom",
+      "kind": "class",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomDistributionDescriptor",
+      "kind": "class",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomMTGP32",
+      "kind": "class",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the generator named by this header: the PhiLox4x32-10 stream, seeded by the caller and drawn on the CPU. Its words are equal to the release's and to the published reference vectors for three seeds; what the release does not reproduce is its Float32 and UInt32 destination path, where it writes all zeros and this port writes the stream, and that is named as owed in tests/backports/host/mpsmatrix/owed.tsv. -initWithCoder:device: is answered by MPSKernel and restores the label only; see facts/MetalPerformanceShaders/Random.md.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomPhilox",
+      "kind": "class",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "+[MPSMatrixRandomDistributionDescriptor defaultDistributionDescriptor]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "+[MPSMatrixRandomDistributionDescriptor normalDistributionDescriptorWithMean:standardDeviation:]",
+      "kind": "method",
+      "introduced": "14",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "+[MPSMatrixRandomDistributionDescriptor normalDistributionDescriptorWithMean:standardDeviation:minimum:maximum:]",
+      "kind": "method",
+      "introduced": "14",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "+[MPSMatrixRandomDistributionDescriptor uniformDistributionDescriptorWithMinimum:maximum:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandom encodeToCommandBuffer:destinationMatrix:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandom encodeToCommandBuffer:destinationVector:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandom initWithDevice:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomMTGP32 initWithCoder:device:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "answered by MPSKernel's own implementation, reached through MPSMatrixRandom: the archive carries the label and the device and nothing else, so a decoded generator answers the default distribution with the default seed rather than the ones it was encoded with. The release's own keys for a generator's state are in no header and an invented key would write an archive it cannot read, so this is recorded as owed in facts/MetalPerformanceShaders/Random.md rather than described as a round trip. Measured: class_copyMethodList puts -initWithCoder:device: in CharonMPSKernel and in no class of the chain below it.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomMTGP32 initWithDevice:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomMTGP32 initWithDevice:destinationDataType:seed:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomMTGP32 initWithDevice:destinationDataType:seed:distributionDescriptor:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomMTGP32 synchronizeStateOnCommandBuffer:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomPhilox initWithCoder:device:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "answered by MPSKernel's own implementation, reached through MPSMatrixRandom: the archive carries the label and the device and nothing else, so a decoded generator answers the default distribution with the default seed rather than the ones it was encoded with. The release's own keys for a generator's state are in no header and an invented key would write an archive it cannot read, so this is recorded as owed in facts/MetalPerformanceShaders/Random.md rather than described as a round trip. Measured: class_copyMethodList puts -initWithCoder:device: in CharonMPSKernel and in no class of the chain below it.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomPhilox initWithDevice:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomPhilox initWithDevice:destinationDataType:seed:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "-[MPSMatrixRandomPhilox initWithDevice:destinationDataType:seed:distributionDescriptor:]",
+      "kind": "method",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the normal distribution draws mean + standardDeviation * invnorm(t) from the same t, with Wichura AS 241 in double precision: measured against the release over 160000 points spanning the whole range, 47.4% are bit for bit, 84.1% are within two units in the last place, and the largest absolute difference anywhere is 3.81e-06. The release uses a different rational approximation, which is in no header, so the two streams are not interchangeable; the uniform and the default distributions, and the raw UInt32 stream, are bit for bit",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandom.batchSize",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a property of the generator's own state, which is the caller's seed and the distribution descriptor it configured: read back it is what was written, on every device, because the port's state is the CPU's. The generator's *numbers* are a separate matter: the release writes all zeros for a Float32 and for a UInt32 destination where this port answers the stream, and those cases are named as owed in tests/backports/host/mpsmatrix/owed.tsv with their reason. Measured: the Philox4x32-10 words are equal to the release's and to the published reference vectors for three seeds.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandom.batchStart",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a property of the generator's own state, which is the caller's seed and the distribution descriptor it configured: read back it is what was written, on every device, because the port's state is the CPU's. The generator's *numbers* are a separate matter: the release writes all zeros for a Float32 and for a UInt32 destination where this port answers the stream, and those cases are named as owed in tests/backports/host/mpsmatrix/owed.tsv with their reason. Measured: the Philox4x32-10 words are equal to the release's and to the published reference vectors for three seeds.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandom.destinationDataType",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a property of the generator's own state, which is the caller's seed and the distribution descriptor it configured: read back it is what was written, on every device, because the port's state is the CPU's. The generator's *numbers* are a separate matter: the release writes all zeros for a Float32 and for a UInt32 destination where this port answers the stream, and those cases are named as owed in tests/backports/host/mpsmatrix/owed.tsv with their reason. Measured: the Philox4x32-10 words are equal to the release's and to the published reference vectors for three seeds.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandom.distributionType",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a property of the generator's own state, which is the caller's seed and the distribution descriptor it configured: read back it is what was written, on every device, because the port's state is the CPU's. The generator's *numbers* are a separate matter: the release writes all zeros for a Float32 and for a UInt32 destination where this port answers the stream, and those cases are named as owed in tests/backports/host/mpsmatrix/owed.tsv with their reason. Measured: the Philox4x32-10 words are equal to the release's and to the published reference vectors for three seeds.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomDistributionDescriptor.distributionType",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomDistributionDescriptor.maximum",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomDistributionDescriptor.mean",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomDistributionDescriptor.minimum",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    },
+    {
+      "api": "MPSMatrixRandomDistributionDescriptor.standardDeviation",
+      "kind": "property",
+      "introduced": "13",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a description the caller reads back: the values are the caller's own and are kept as given, with the documented defaults filled in where the caller leaves one out. Measured over the descriptor cases of tests/backports/host/mpsmatrix, every one bit-identical to the release.",
+      "facts": "facts/MetalPerformanceShaders/Random.md",
+      "source": "the header of MPSMatrixRandom in the SDK of iOS 16.4, and the behaviour measured against the MPS of macOS 26.5 and the published Philox4x32-10 reference vectors (tests/backports/host/mpsmatrix)"
+    }
+  ]
+}

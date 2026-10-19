@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "api": "SecTrustCopyKey()",
+      "effect": "the key the release itself hands over: SecTrustCopyKey is the name Apple gave SecTrustCopyPublicKey in iOS 14, and the header's deprecation message quotes this function as the replacement, so a caller gets the release's own SecKeyRef, +1, unretained by the port",
+      "facts": "facts/Security/SecTrust.md",
+      "introduced": "14.0",
+      "kind": "function",
+      "minimum": "6.0",
+      "reason": "the release answers this one with a call it already has: SecTrustCopyPublicKey is API_DEPRECATED_WITH_REPLACEMENT(\"SecTrustCopyKey\", macos(10.7, 11.0), ios(2.0, 14.0)) (SecTrust.h:471-472), so it is __IPHONE_2_0 and is on 6.1.3, and the two return the same key from the same argument",
+      "source": "SDK 16.4, Security",
+      "status": "implemented"
+    }
+  ],
+  "framework": "Security"
+}

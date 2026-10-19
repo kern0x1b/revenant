@@ -1,0 +1,68 @@
+diff --git a/include/swift/Basic/LangOptions.h b/include/swift/Basic/LangOptions.h
+index 41b3afd1..c120208d 100644
+--- a/include/swift/Basic/LangOptions.h
++++ b/include/swift/Basic/LangOptions.h
+@@ -201,6 +201,10 @@ namespace swift {
+     /// Disable API availability checking.
+     bool DisableAvailabilityChecking = false;
+ 
++    /// The Swift runtime ships with the program, not with the operating
++    /// system the program is deployed to.
++    bool BundledSwiftRuntime = false;
++
+     /// Optimization mode for unavailable declarations.
+     std::optional<UnavailableDeclOptimization> UnavailableDeclOptimizationMode;
+ 
+diff --git a/include/swift/Option/FrontendOptions.td b/include/swift/Option/FrontendOptions.td
+index 1ef13d03..5f6ce313 100644
+--- a/include/swift/Option/FrontendOptions.td
++++ b/include/swift/Option/FrontendOptions.td
+@@ -826,6 +826,12 @@ def disable_availability_checking : Flag<["-"],
+   "disable-availability-checking">,
+   HelpText<"Disable checking for potentially unavailable APIs">;
+ 
++def bundled_swift_runtime : Flag<["-"], "bundled-swift-runtime">,
++  Flags<[FrontendOption, ModuleInterfaceOption]>,
++  HelpText<"The Swift runtime ships with the program instead of the operating "
++           "system, so the features of the compiler's Swift release are "
++           "available at any deployment target">;
++
+ def warn_on_potentially_unavailable_enum_case : Flag<["-"],
+   "warn-on-potentially-unavailable-enum-case">,
+   HelpText<"Deprecated, will be removed in future versions">;
+diff --git a/lib/AST/Availability.cpp b/lib/AST/Availability.cpp
+index 5a4be769..c9b915e1 100644
+--- a/lib/AST/Availability.cpp
++++ b/lib/AST/Availability.cpp
+@@ -892,6 +892,9 @@ AvailabilityRange AvailabilityInference::inferForType(Type t) {
+ AvailabilityRange ASTContext::getSwiftFutureAvailability() const {
+   auto target = LangOpts.Target;
+ 
++  if (LangOpts.BundledSwiftRuntime)
++    return AvailabilityRange::alwaysAvailable();
++
+   auto getFutureAvailabilityRange = []() -> AvailabilityRange {
+     return AvailabilityRange(llvm::VersionTuple(99, 99, 0));
+   };
+@@ -913,6 +916,9 @@ AvailabilityRange ASTContext::getSwiftAvailability(unsigned major,
+                                                    unsigned minor) const {
+   auto target = LangOpts.Target;
+ 
++  if (LangOpts.BundledSwiftRuntime)
++    return AvailabilityRange::alwaysAvailable();
++
+   // Deal with special cases for Swift 5.3 and lower
+   if (major == 5 && minor <= 3) {
+     if (target.getArchName() == "arm64e")
+diff --git a/lib/Frontend/CompilerInvocation.cpp b/lib/Frontend/CompilerInvocation.cpp
+index 933165c9..d8544810 100644
+--- a/lib/Frontend/CompilerInvocation.cpp
++++ b/lib/Frontend/CompilerInvocation.cpp
+@@ -1180,6 +1180,7 @@ static bool ParseLangArgs(LangOptions &Opts, ArgList &Args,
+ 
+   Opts.DisableAvailabilityChecking |=
+       Args.hasArg(OPT_disable_availability_checking);
++  Opts.BundledSwiftRuntime |= Args.hasArg(OPT_bundled_swift_runtime);
+   if (Args.hasArg(OPT_check_api_availability_only))
+     Diags.diagnose(SourceLoc(), diag::warn_flag_deprecated,
+                    "-check-api-availability-only");

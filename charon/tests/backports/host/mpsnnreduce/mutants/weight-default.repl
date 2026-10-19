@@ -1,0 +1,1 @@
+        made->_charonWeight = 0.5f;  // MUTATION: not the header's default of 1.0

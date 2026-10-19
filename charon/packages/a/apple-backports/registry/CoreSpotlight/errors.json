@@ -1,0 +1,15 @@
+{
+  "framework": "CoreSpotlight",
+  "entries": [
+    {
+      "api": "CSIndexErrorCode",
+      "kind": "type",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the codes of CSIndexErrorDomain with the SDK's values (-1 unknown, -1000 to -1006). The port produces -1003 for a fetch of an unknown bundle (measured) and -1000 for a write it cannot make (reasoned, not measured); the others it never produces. The Swift struct CSIndexError that the compiler derives from this enum has no row: it has no runtime and no declaration in any header, so nothing of the port answers for it",
+      "facts": "facts/CoreSpotlight/IndexErrors.md",
+      "source": "the host framework's CoreSpotlight.bridgesupport for the values, and the rendered CoreSpotlight header of the 26.2 SDK (spec/CoreSpotlight/declarations.tsv) for the enum; the -1003 is measured by tests/backports/host/corespotlight-index (see IndexDelegate.md)"
+    }
+  ]
+}

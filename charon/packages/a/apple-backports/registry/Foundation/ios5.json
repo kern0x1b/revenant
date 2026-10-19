@@ -1,0 +1,22 @@
+{
+ "framework": "Foundation",
+ "entries": [
+  {
+   "api": "CFRunLoopObserverCreateWithHandler",
+   "kind": "constant",
+   "introduced": "5.0",
+   "status": "implemented",
+   "facts": "facts/Foundation/CFRunLoopObserverCreateWithHandler.md",
+   "source": "the host's own CoreFoundation, held against the backport by tests/backports/host/uikit2 (runloopobserver)"
+  },
+  {
+   "api": "NSMutableOrderedSet",
+   "kind": "class",
+   "introduced": "5.0",
+   "minimum": "5.0",
+   "status": "implemented",
+   "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+   "source": "the release's own class: the 4.3 gate named it among the weak imports the release it is checked against does not export, because CharonDocumentBrowser.m keeps its selection in one and the registry named no class to place that object by"
+  }
+ ]
+}

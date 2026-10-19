@@ -1,0 +1,38 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLBlitPassDescriptor",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the Tier 2 verdict on Metal/MetalKit: a pass descriptor is a collection of attachment configuration, not GPU work",
+      "effect": "blitPassDescriptor gives a fresh default instance; sampleBufferAttachments holds a real MTLBlitPassSampleBufferAttachmentDescriptorArray, of the 4 MTLMaxBlitPassSampleBuffers slots the header names",
+      "facts": "facts/Metal/BlitPassDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLBlitPassSampleBufferAttachmentDescriptor",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried as MTLBlitPassDescriptor's own dependency",
+      "effect": "sampleBuffer, startOfEncoderSampleIndex and endOfEncoderSampleIndex hold what is set; the two indices default to MTLCounterDontSample as the header documents",
+      "facts": "facts/Metal/BlitPassDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLBlitPassSampleBufferAttachmentDescriptorArray",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried as MTLBlitPassDescriptor's own dependency",
+      "effect": "indexed subscripting reads and writes MTLBlitPassSampleBufferAttachmentDescriptor entries; an unset index answers a fresh default descriptor",
+      "facts": "facts/Metal/BlitPassDescriptor.md",
+      "source": "the header of iOS 16.4 for the contract"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@BEEligibilityContext	-			enum BEEligibilityContext	-	-	-	-	3e5e0890e52fdf51	-
+enum	c:@E@BEEligibilityContext	-			NSInteger	-	-	ios=18.4/-/-/0	-	8de3a75a413ec75d	-
+enumconst	c:@E@BEEligibilityContext@BEEligibilityContextWebBrowser	BEEligibilityContext			-	-	-	ios=18.4/-/-/0	-	117511f6f0d68f0b	0
+interface	c:objc(cs)BEAvailability	-			-	-	-	ios=18.4/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	cc6b32a7df5673e4	-
+super	-	BEAvailability	NSObject		-	-	-	-	-	917acefb8aa15397	-
+method	c:objc(cs)BEAvailability(cm)isEligibleForContext:completionHandler:	-			void	BEEligibilityContext context | void (^)(BOOL, NSError * _Nullable) completionHandler	-	ios=18.4/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	cef0e9316deaae41	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

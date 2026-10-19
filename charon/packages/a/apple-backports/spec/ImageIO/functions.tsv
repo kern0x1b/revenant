@@ -1,0 +1,2 @@
+api	introduced	status	reasons	returns	params	decl
+CGImageSourceSetAllowableTypes	17.2	generable		OSStatus	CFArrayRef allowableTypes	OSStatus CGImageSourceSetAllowableTypes(CFArrayRef allowableTypes)

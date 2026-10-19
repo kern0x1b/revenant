@@ -1,0 +1,5 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+HealthKitUI	method	SwiftUICore.View.healthDataAccessRequest(store:shareTypes:readTypes:trigger:completion:)	17.0				container
+HealthKitUI	method	SwiftUICore.View.healthDataAccessRequest(store:readTypes:trigger:completion:)	17.0				container
+HealthKitUI	method	SwiftUICore.View.healthDataAccessRequest(store:objectType:predicate:trigger:completion:)	17.0				own
+HealthKitUI	property	UIKit.UIScene.ConnectionOptions.shouldHandleActiveWorkoutRecovery	26.0				container

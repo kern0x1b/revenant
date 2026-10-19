@@ -1,0 +1,16 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLCommandBuffer resourceStateCommandEncoder]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the encoder records the mapping of sparse texture pages, and this device has no page mapping, so there is no sparse texture and nothing to record: the hardware's own answer",
+      "effect": "nil, with a log; the buffer carries on without the encoder. REASONED, not measured: the host has sparse textures and cannot show the answer of a device without them",
+      "facts": "facts/Metal/CommandBuffer.md",
+      "source": "SDK 16.4, Metal; the introduction 13.0 from the corpus surface of the 26.2 SDK"
+    }
+  ]
+}

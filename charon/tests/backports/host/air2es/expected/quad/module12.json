@@ -1,0 +1,1 @@
+{"stage":"fragment","entry":"maskMerge","usesVertexId":false,"attributes":[],"uniforms":[],"textures":[],"varyings":[],"constants":[],"inputs":[],"sizes":[],"outputs":[0],"fetches":[{"attachment":1,"name":"charon_attachment1"}],"usesInstanceId":false}

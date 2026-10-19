@@ -1,0 +1,524 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@CVOptionFlags	-			uint64_t	-	-	-	-	c28239e029f82681	-
+struct	c:@S@CVSMPTETime	-			-	-	-	-	-	8fb4cea655142857	-
+field	c:@S@CVSMPTETime@FI@subframes	CVSMPTETime			SInt16	-	-	-	-	9b32fa494e745ec2	-
+field	c:@S@CVSMPTETime@FI@subframeDivisor	CVSMPTETime			SInt16	-	-	-	-	d10ae79ac6ac9f99	-
+field	c:@S@CVSMPTETime@FI@counter	CVSMPTETime			UInt32	-	-	-	-	453c6bafa40ab4bf	-
+field	c:@S@CVSMPTETime@FI@type	CVSMPTETime			UInt32	-	-	-	-	c3934ea7f8001726	-
+field	c:@S@CVSMPTETime@FI@flags	CVSMPTETime			UInt32	-	-	-	-	ad252afe525acf1e	-
+field	c:@S@CVSMPTETime@FI@hours	CVSMPTETime			SInt16	-	-	-	-	96b0df807091ac0c	-
+field	c:@S@CVSMPTETime@FI@minutes	CVSMPTETime			SInt16	-	-	-	-	8d940729290a71c8	-
+field	c:@S@CVSMPTETime@FI@seconds	CVSMPTETime			SInt16	-	-	-	-	b8217574692dd972	-
+field	c:@S@CVSMPTETime@FI@frames	CVSMPTETime			SInt16	-	-	-	-	2bdc92d8bebb2f00	-
+typedef	c:@T@CVSMPTETime	-			struct CVSMPTETime	-	-	-	-	b304e23c8be0ec26	-
+typedef	c:@T@CVSMPTETimeType	-			enum CVSMPTETimeType	-	-	-	-	10006251a8cdd166	-
+enum	c:@E@CVSMPTETimeType	-			uint32_t	-	-	-	-	9302bb17cdeff1fe	-
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType24	CVSMPTETimeType			-	-	-	-	-	25aa3faa8af67e7d	0
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType25	CVSMPTETimeType			-	-	-	-	-	320e362824c3a705	1
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType30Drop	CVSMPTETimeType			-	-	-	-	-	61b2994f1e9f359f	2
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType30	CVSMPTETimeType			-	-	-	-	-	73c80411392799da	3
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType2997	CVSMPTETimeType			-	-	-	-	-	a0b684a115ebefc1	4
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType2997Drop	CVSMPTETimeType			-	-	-	-	-	eb20fa3c8f492ba6	5
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType60	CVSMPTETimeType			-	-	-	-	-	1ffdf1547d661963	6
+enumconst	c:@E@CVSMPTETimeType@kCVSMPTETimeType5994	CVSMPTETimeType			-	-	-	-	-	ae1c81e047921d0c	7
+typedef	c:@T@CVSMPTETimeFlags	-			enum CVSMPTETimeFlags	-	-	-	-	d1b6abe9514499f8	-
+enum	c:@E@CVSMPTETimeFlags	-			uint32_t	-	-	-	-	5465967dae94a918	-
+enumconst	c:@E@CVSMPTETimeFlags@kCVSMPTETimeValid	CVSMPTETimeFlags			-	-	-	-	-	5502422626d21fd7	1
+enumconst	c:@E@CVSMPTETimeFlags@kCVSMPTETimeRunning	CVSMPTETimeFlags			-	-	-	-	-	fe6184fb724e0cae	2
+typedef	c:@T@CVTimeFlags	-			enum CVTimeFlags	-	-	-	-	46779f0d15cad0f0	-
+enum	c:@E@CVTimeFlags	-			int32_t	-	-	-	-	699f7fc5edf46f5c	-
+enumconst	c:@E@CVTimeFlags@kCVTimeIsIndefinite	CVTimeFlags			-	-	-	-	-	414840477a633f0a	1
+struct	c:@SA@CVTime	-			-	-	-	-	-	e57dfabdba54011f	-
+field	c:@SA@CVTime@FI@timeValue	CVTime			int64_t	-	-	-	-	fef11c469020bfe5	-
+field	c:@SA@CVTime@FI@timeScale	CVTime			int32_t	-	-	-	-	10379f0773db3359	-
+field	c:@SA@CVTime@FI@flags	CVTime			int32_t	-	-	-	-	8f9f2111ac3d16e1	-
+typedef	c:@T@CVTime	-			struct CVTime	-	-	-	-	2a41f7be7e2e4502	-
+var	c:@kCVZeroTime	-			const CVTime	-	-	-	deprecated: OpenGL/OpenGLES is no longer supported. Use Metal APIs instead. (Define COREVIDEO_SILENCE_GL_DEPRECATION to silence these warnings)	12e42c401b376764	-
+var	c:@kCVIndefiniteTime	-			const CVTime	-	-	-	deprecated: OpenGL/OpenGLES is no longer supported. Use Metal APIs instead. (Define COREVIDEO_SILENCE_GL_DEPRECATION to silence these warnings)	7a2161e96bcd78e0	-
+struct	c:@SA@CVTimeStamp	-			-	-	-	-	-	214a60a5f051c50a	-
+field	c:@SA@CVTimeStamp@FI@version	CVTimeStamp			uint32_t	-	-	-	-	ec076e681b26685a	-
+field	c:@SA@CVTimeStamp@FI@videoTimeScale	CVTimeStamp			int32_t	-	-	-	-	5d034509e0040b31	-
+field	c:@SA@CVTimeStamp@FI@videoTime	CVTimeStamp			int64_t	-	-	-	-	12002c412e3715f1	-
+field	c:@SA@CVTimeStamp@FI@hostTime	CVTimeStamp			uint64_t	-	-	-	-	4b12d90f411434c0	-
+field	c:@SA@CVTimeStamp@FI@rateScalar	CVTimeStamp			double	-	-	-	-	b078665911098330	-
+field	c:@SA@CVTimeStamp@FI@videoRefreshPeriod	CVTimeStamp			int64_t	-	-	-	-	d563cd63becd49ba	-
+field	c:@SA@CVTimeStamp@FI@smpteTime	CVTimeStamp			CVSMPTETime	-	-	-	-	9af46f7a30cde7f9	-
+field	c:@SA@CVTimeStamp@FI@flags	CVTimeStamp			uint64_t	-	-	-	-	b9d36f4a326e2a93	-
+field	c:@SA@CVTimeStamp@FI@reserved	CVTimeStamp			uint64_t	-	-	-	-	442507bee8516ec8	-
+typedef	c:@T@CVTimeStamp	-			struct CVTimeStamp	-	-	-	-	5ba23d643ee4b4a8	-
+typedef	c:@T@CVTimeStampFlags	-			enum CVTimeStampFlags	-	-	-	-	ce943eb126a2405b	-
+enum	c:@E@CVTimeStampFlags	-			uint64_t	-	-	-	-	205cb919ae10eb12	-
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampVideoTimeValid	CVTimeStampFlags			-	-	-	-	-	ce5714932314a659	1
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampHostTimeValid	CVTimeStampFlags			-	-	-	-	-	8226822db4350233	2
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampSMPTETimeValid	CVTimeStampFlags			-	-	-	-	-	3a64ff33755aa311	4
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampVideoRefreshPeriodValid	CVTimeStampFlags			-	-	-	-	-	6f5341c182a14306	8
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampRateScalarValid	CVTimeStampFlags			-	-	-	-	-	273af617df453ee9	16
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampTopField	CVTimeStampFlags			-	-	-	-	-	84e08a243c0695a1	65536
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampBottomField	CVTimeStampFlags			-	-	-	-	-	bf6a7ee8db847cca	131072
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampVideoHostTimeValid	CVTimeStampFlags			-	-	-	-	-	9b71df076ed70cca	3
+enumconst	c:@E@CVTimeStampFlags@kCVTimeStampIsInterlaced	CVTimeStampFlags			-	-	-	-	-	2cdd5eaedd31ee59	196608
+function	c:@F@CVGetCurrentHostTime	-			uint64_t (void)	-	-	ios=4.0/-/-/0	-	fe930d5ec3b52bc6	-
+function	c:@F@CVGetHostClockFrequency	-			double (void)	-	-	ios=4.0/-/-/0	-	b2f8ce0d3763952e	-
+function	c:@F@CVGetHostClockMinimumTimeDelta	-			uint32_t (void)	-	-	ios=4.0/-/-/0	-	520211116b590aa8	-
+typedef	c:@T@CVReturn	-			int32_t	-	-	-	-	4802a523d59b4b68	-
+enum	c:@Ea@kCVReturnSuccess	-	-		CVReturn	-	-	-	-	130a5fa10967ba92	-
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnSuccess	-			-	-	-	-	-	c950a61086f80dfb	0
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnFirst	-			-	-	-	-	-	8eeda82fca8a943c	-6660
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnError	-			-	-	-	-	-	a14478bd4003f506	-6660
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnInvalidArgument	-			-	-	-	-	-	14913ce4c892ff3c	-6661
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnAllocationFailed	-			-	-	-	-	-	a566fd41a8d4df31	-6662
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnUnsupported	-			-	-	-	-	-	2217e1ef5c31b15d	-6663
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnInvalidDisplay	-			-	-	-	-	-	4b75d0682aa4e0d7	-6670
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnDisplayLinkAlreadyRunning	-			-	-	-	-	-	03afaadcbd931a9d	-6671
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnDisplayLinkNotRunning	-			-	-	-	-	-	b169ee0e706bf756	-6672
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnDisplayLinkCallbacksNotSet	-			-	-	-	-	-	336b0028a0522472	-6673
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnInvalidPixelFormat	-			-	-	-	-	-	dbbaa956db03b97a	-6680
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnInvalidSize	-			-	-	-	-	-	c1e287fdc9e6a89e	-6681
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnInvalidPixelBufferAttributes	-			-	-	-	-	-	78d4cac6558aff7a	-6682
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnPixelBufferNotOpenGLCompatible	-			-	-	-	-	-	a9629cbeebb8277f	-6683
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnPixelBufferNotMetalCompatible	-			-	-	-	-	-	88813a66b87b9871	-6684
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnWouldExceedAllocationThreshold	-			-	-	-	-	-	d08553fa8727a1d6	-6689
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnPoolAllocationFailed	-			-	-	-	-	-	0d92dae79d2bb2c7	-6690
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnInvalidPoolAttributes	-			-	-	-	-	-	b41114be4415a80f	-6691
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnRetry	-			-	-	-	-	-	7b1f1e8dfa368b66	-6692
+enumconst	c:@Ea@kCVReturnSuccess@kCVReturnLast	-			-	-	-	-	-	74f87302d64e898f	-6699
+var	c:@kCVBufferPropagatedAttachmentsKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	96ddb294876825ea	-
+var	c:@kCVBufferNonPropagatedAttachmentsKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a5cc95121d2ae2c6	-
+var	c:@kCVBufferMovieTimeKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a2a4d3bce8429186	-
+var	c:@kCVBufferTimeValueKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	fb46940b3631509b	-
+var	c:@kCVBufferTimeScaleKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	de65809e3722cf9f	-
+typedef	c:@T@CVAttachmentMode	-			enum CVAttachmentMode	-	-	-	-	6f9806f6c536974d	-
+enum	c:@E@CVAttachmentMode	-			uint32_t	-	-	-	-	fa36e3bf76b773d5	-
+enumconst	c:@E@CVAttachmentMode@kCVAttachmentMode_ShouldNotPropagate	CVAttachmentMode			-	-	-	-	-	539c9d60fb99d468	0
+enumconst	c:@E@CVAttachmentMode@kCVAttachmentMode_ShouldPropagate	CVAttachmentMode			-	-	-	-	-	25c6858dbe5493e4	1
+struct	c:@S@__CVBuffer	-			-	-	-	-	-	d0ffa4ee5b6f37c4	-
+typedef	c:@T@CVBufferRef	-			struct __CVBuffer *	-	-	-	-	42f0de1ee06186fb	-
+function	c:@F@CVBufferRetain	-			CVBufferRef (CVBufferRef)	CVBufferRef buffer	-	ios=4.0/-/-/0	-	cf2cec96f4840c06	-
+function	c:@F@CVBufferRelease	-			void (CVBufferRef)	CVBufferRef buffer	-	ios=4.0/-/-/0	-	c133b31b11231f27	-
+function	c:@F@CVBufferSetAttachment	-			void (CVBufferRef, CFStringRef, CFTypeRef, CVAttachmentMode)	CVBufferRef buffer | CFStringRef key | CFTypeRef value | CVAttachmentMode attachmentMode	-	ios=4.0/-/-/0	-	529a9b84571930fc	-
+function	c:@F@CVBufferGetAttachment	-			CFTypeRef (CVBufferRef, CFStringRef, CVAttachmentMode *)	CVBufferRef buffer | CFStringRef key | CVAttachmentMode * attachmentMode	-	ios=4.0/15.0/-/0,macos=10.4/12.0/-/0,tvos=9.0/15.0/-/0,watchos=4.0/8.0/-/0	-	45d704582a1bd812	-
+function	c:@F@CVBufferRemoveAttachment	-			void (CVBufferRef, CFStringRef)	CVBufferRef buffer | CFStringRef key	-	ios=4.0/-/-/0	-	733f387a2a1b139b	-
+function	c:@F@CVBufferRemoveAllAttachments	-			void (CVBufferRef)	CVBufferRef buffer	-	ios=4.0/-/-/0	-	ea656dfae920f403	-
+function	c:@F@CVBufferGetAttachments	-			CFDictionaryRef (CVBufferRef, CVAttachmentMode)	CVBufferRef buffer | CVAttachmentMode attachmentMode	-	ios=4.0/15.0/-/0,macos=10.4/12.0/-/0,tvos=9.0/15.0/-/0,watchos=4.0/8.0/-/0	-	5a1da69df34639f2	-
+function	c:@F@CVBufferSetAttachments	-			void (CVBufferRef, CFDictionaryRef, CVAttachmentMode)	CVBufferRef buffer | CFDictionaryRef theAttachments | CVAttachmentMode attachmentMode	-	ios=4.0/-/-/0	-	d293891a8a8658ed	-
+function	c:@F@CVBufferPropagateAttachments	-			void (CVBufferRef, CVBufferRef)	CVBufferRef sourceBuffer | CVBufferRef destinationBuffer	-	ios=4.0/-/-/0	-	f8e297216ca037a6	-
+function	c:@F@CVBufferCopyAttachments	-			CFDictionaryRef (CVBufferRef, CVAttachmentMode)	CVBufferRef buffer | CVAttachmentMode attachmentMode	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	a1b0a9276ed94d9d	-
+function	c:@F@CVBufferCopyAttachment	-			CFTypeRef (CVBufferRef, CFStringRef, CVAttachmentMode *)	CVBufferRef buffer | CFStringRef key | CVAttachmentMode * attachmentMode	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	28f78a1581f0b883	-
+function	c:@F@CVBufferHasAttachment	-			Boolean (CVBufferRef, CFStringRef)	CVBufferRef buffer | CFStringRef key	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	82cb26f6277bb1b2	-
+var	c:@kCVImageBufferCGColorSpaceKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	db3698ace5b4ff9d	-
+var	c:@kCVImageBufferCleanApertureKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	3f932509cc5a2282	-
+var	c:@kCVImageBufferCleanApertureWidthKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	9ebc1a8e87ddfcf0	-
+var	c:@kCVImageBufferCleanApertureHeightKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a7d2168b6b3d470a	-
+var	c:@kCVImageBufferCleanApertureHorizontalOffsetKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	dfc307312d2dd2ae	-
+var	c:@kCVImageBufferCleanApertureVerticalOffsetKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	035b73f0588bc008	-
+var	c:@kCVImageBufferPreferredCleanApertureKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	5031d0e9f8cdfdfb	-
+var	c:@kCVImageBufferFieldCountKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	2c323d13ff993136	-
+var	c:@kCVImageBufferFieldDetailKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	2e9eb989b417958b	-
+var	c:@kCVImageBufferFieldDetailTemporalTopFirst	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	6b2acccae4d75276	-
+var	c:@kCVImageBufferFieldDetailTemporalBottomFirst	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	802d70bb0e404972	-
+var	c:@kCVImageBufferFieldDetailSpatialFirstLineEarly	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	e3a2ee866e797cd8	-
+var	c:@kCVImageBufferFieldDetailSpatialFirstLineLate	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	fb2ce2aa90a6b7d6	-
+var	c:@kCVImageBufferPixelAspectRatioKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	473ad035d49ddb0b	-
+var	c:@kCVImageBufferPixelAspectRatioHorizontalSpacingKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a73aedf56ab314bf	-
+var	c:@kCVImageBufferPixelAspectRatioVerticalSpacingKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	b58d0c34a624157a	-
+var	c:@kCVImageBufferDisplayDimensionsKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	76ed25623d6faa50	-
+var	c:@kCVImageBufferDisplayWidthKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	ab9cd6de09b69cb2	-
+var	c:@kCVImageBufferDisplayHeightKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	ba6457c99da382d5	-
+var	c:@kCVImageBufferGammaLevelKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	f2907d111e47e81d	-
+var	c:@kCVImageBufferICCProfileKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	6ed8d0d1929b6982	-
+var	c:@kCVImageBufferYCbCrMatrixKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	0c74b31491c27e68	-
+var	c:@kCVImageBufferYCbCrMatrix_ITU_R_709_2	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	fe9c85fcfa0086ff	-
+var	c:@kCVImageBufferYCbCrMatrix_ITU_R_601_4	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	feddc8e52b610d29	-
+var	c:@kCVImageBufferYCbCrMatrix_SMPTE_240M_1995	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	2a440c3a4b06dabb	-
+var	c:@kCVImageBufferYCbCrMatrix_DCI_P3	-			const CFStringRef	-	-	ios=9.0/14.0/-/0,macos=10.11/11.0/-/0	-	4e7e08816ea963f8	-
+var	c:@kCVImageBufferYCbCrMatrix_P3_D65	-			const CFStringRef	-	-	ios=9.0/14.0/-/0,macos=10.11/11.0/-/0	-	424c1e52fd114ec7	-
+var	c:@kCVImageBufferYCbCrMatrix_ITU_R_2020	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	90bcb1a1487cb0bf	-
+var	c:@kCVImageBufferColorPrimariesKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	6a98fc4727983b46	-
+var	c:@kCVImageBufferColorPrimaries_ITU_R_709_2	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	622cfd9251ea4a55	-
+var	c:@kCVImageBufferColorPrimaries_EBU_3213	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a9e885995a58341d	-
+var	c:@kCVImageBufferColorPrimaries_SMPTE_C	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	78962a1bebaa85c0	-
+var	c:@kCVImageBufferColorPrimaries_P22	-			const CFStringRef	-	-	ios=6.0/-/-/0	-	ff5e17bd6632ddcf	-
+var	c:@kCVImageBufferColorPrimaries_DCI_P3	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	78f24e80ff1567c5	-
+var	c:@kCVImageBufferColorPrimaries_P3_D65	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	6a66a1f21f17f30b	-
+var	c:@kCVImageBufferColorPrimaries_ITU_R_2020	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	d7b81ab2d471a22d	-
+var	c:@kCVImageBufferTransferFunctionKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	4896f55c1bdc5f56	-
+var	c:@kCVImageBufferTransferFunction_ITU_R_709_2	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	10d165ad9df9a19f	-
+var	c:@kCVImageBufferTransferFunction_SMPTE_240M_1995	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	2068fc920a1a2dc6	-
+var	c:@kCVImageBufferTransferFunction_UseGamma	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	b0de3e4de5e65ed4	-
+var	c:@kCVImageBufferTransferFunction_EBU_3213	-			const CFStringRef	-	-	ios=-/-/-/1	-	148ea229c1443833	-
+var	c:@kCVImageBufferTransferFunction_SMPTE_C	-			const CFStringRef	-	-	ios=-/-/-/1	-	db559a170e557ea2	-
+var	c:@kCVImageBufferTransferFunction_sRGB	-			const CFStringRef	-	-	ios=11.0/-/-/0	-	8415beb61f029028	-
+var	c:@kCVImageBufferTransferFunction_ITU_R_2020	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	5dc305d0dc381b87	-
+var	c:@kCVImageBufferTransferFunction_SMPTE_ST_428_1	-			const CFStringRef	-	-	ios=10.0/-/-/0	-	74192c2273efc1d8	-
+var	c:@kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ	-			const CFStringRef	-	-	ios=11.0/-/-/0	-	deb3c078e6130577	-
+var	c:@kCVImageBufferTransferFunction_ITU_R_2100_HLG	-			const CFStringRef	-	-	ios=11.0/-/-/0	-	10d39ed547471674	-
+var	c:@kCVImageBufferTransferFunction_Linear	-			const CFStringRef	-	-	ios=12.0/-/-/0	-	e8df006584e3c74a	-
+var	c:@kCVImageBufferChromaLocationTopFieldKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a37f8a9434d24607	-
+var	c:@kCVImageBufferChromaLocationBottomFieldKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	f8937699ada377f1	-
+var	c:@kCVImageBufferChromaLocation_Left	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	edc816df1acc917a	-
+var	c:@kCVImageBufferChromaLocation_Center	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	4f265b9b3891e9db	-
+var	c:@kCVImageBufferChromaLocation_TopLeft	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	c6303f05a0814966	-
+var	c:@kCVImageBufferChromaLocation_Top	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	9dcee07efde1d330	-
+var	c:@kCVImageBufferChromaLocation_BottomLeft	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	f3f62ea2a63f9da6	-
+var	c:@kCVImageBufferChromaLocation_Bottom	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	b7b5af731e130800	-
+var	c:@kCVImageBufferChromaLocation_DV420	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	3fead9fbf15c7184	-
+var	c:@kCVImageBufferChromaSubsamplingKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	fc911eddf044a6f6	-
+var	c:@kCVImageBufferChromaSubsampling_420	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	7486cc027d3ce2c7	-
+var	c:@kCVImageBufferChromaSubsampling_422	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	830163b88aede11e	-
+var	c:@kCVImageBufferChromaSubsampling_411	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	32b682019303c278	-
+var	c:@kCVImageBufferAlphaChannelIsOpaque	-			const CFStringRef	-	-	ios=8.0/-/-/0	-	b51eb8f4391f39d8	-
+var	c:@kCVImageBufferAlphaChannelModeKey	-			const CFStringRef	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=-/-/-/1	-	0e4f7c12a33bd22d	-
+var	c:@kCVImageBufferAlphaChannelMode_StraightAlpha	-			const CFStringRef	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=-/-/-/1	-	916a776dc3554539	-
+var	c:@kCVImageBufferAlphaChannelMode_PremultipliedAlpha	-			const CFStringRef	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=-/-/-/1	-	f95191feb7e57458	-
+var	c:@kCVImageBufferPostDecodeProcessingSequenceMetadataKey	-			const CFStringRef	-	-	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ba940910d71f7955	-
+var	c:@kCVImageBufferPostDecodeProcessingFrameMetadataKey	-			const CFStringRef	-	-	ios=-/-/-/1,macos=15.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8d8009f8fddc2b3e	-
+function	c:@F@CVYCbCrMatrixGetIntegerCodePointForString	-			int (CFStringRef)	CFStringRef yCbCrMatrixString	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	acbea2e345508f64	-
+function	c:@F@CVColorPrimariesGetIntegerCodePointForString	-			int (CFStringRef)	CFStringRef colorPrimariesString	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	bce85d3b6baed1d8	-
+function	c:@F@CVTransferFunctionGetIntegerCodePointForString	-			int (CFStringRef)	CFStringRef transferFunctionString	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2e7f14f9aef2bf11	-
+function	c:@F@CVYCbCrMatrixGetStringForIntegerCodePoint	-			CFStringRef (int)	int yCbCrMatrixCodePoint	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d637c0c8c0439850	-
+function	c:@F@CVColorPrimariesGetStringForIntegerCodePoint	-			CFStringRef (int)	int colorPrimariesCodePoint	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	36371cebcc8b2d4c	-
+function	c:@F@CVTransferFunctionGetStringForIntegerCodePoint	-			CFStringRef (int)	int transferFunctionCodePoint	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	018db8a2b7e8ba57	-
+typedef	c:@T@CVImageBufferRef	-			CVBufferRef	-	-	-	-	04d1786654c45588	-
+function	c:@F@CVImageBufferGetEncodedSize	-			CGSize (CVImageBufferRef)	CVImageBufferRef imageBuffer	-	ios=4.0/-/-/0	-	17060edda2e06922	-
+function	c:@F@CVImageBufferGetDisplaySize	-			CGSize (CVImageBufferRef)	CVImageBufferRef imageBuffer	-	ios=4.0/-/-/0	-	38c4f2a7a9ff07c2	-
+function	c:@F@CVImageBufferGetCleanRect	-			CGRect (CVImageBufferRef)	CVImageBufferRef imageBuffer	-	ios=4.0/-/-/0	-	d08e7ee72669855f	-
+function	c:@F@CVImageBufferIsFlipped	-			Boolean (CVImageBufferRef)	CVImageBufferRef imageBuffer	-	ios=4.0/-/-/0	-	fff658b184f334ff	-
+function	c:@F@CVImageBufferGetColorSpace	-			CGColorSpaceRef (CVImageBufferRef)	CVImageBufferRef imageBuffer	-	ios=4.0/-/-/0	-	4cad796acce11ca7	-
+function	c:@F@CVImageBufferCreateColorSpaceFromAttachments	-			CGColorSpaceRef (CFDictionaryRef)	CFDictionaryRef attachments	-	ios=10.0/-/-/0	-	c3e1daca7cdd5da5	-
+var	c:@kCVImageBufferMasteringDisplayColorVolumeKey	-			const CFStringRef	-	-	ios=11.0/-/-/0	-	760e249e4838c123	-
+var	c:@kCVImageBufferContentLightLevelInfoKey	-			const CFStringRef	-	-	ios=11.0/-/-/0	-	98c906d88e2ae48a	-
+var	c:@kCVImageBufferAmbientViewingEnvironmentKey	-			const CFStringRef	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	ea15f18b967ba206	-
+var	c:@kCVImageBufferSceneIlluminationKey	-			const CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	95411eb3f07c3b5b	-
+var	c:@kCVImageBufferRegionOfInterestKey	-			const CFStringRef	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	5f1aa9267b01f58b	-
+var	c:@kCVImageBufferLogTransferFunctionKey	-			const CFStringRef	-	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=17.2/-/-/0,watchos=10.2/-/-/0,xros=1.1/-/-/0	-	8d87128fd21cdaeb	-
+var	c:@kCVImageBufferLogTransferFunction_AppleLog	-			const CFStringRef	-	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=17.2/-/-/0,watchos=10.2/-/-/0,xros=1.1/-/-/0	-	4ae0c00f21e89b3a	-
+var	c:@kCVImageBufferLogTransferFunction_AppleLog2	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	771e307cdcb394aa	-
+var	c:@kCVImageBufferDisplayMaskRectangleKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	f4184f0d6696aea1	-
+var	c:@kCVImageBufferDisplayMaskRectangle_ReferenceRasterWidthKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	a09e47227fbb2654	-
+var	c:@kCVImageBufferDisplayMaskRectangle_ReferenceRasterHeightKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	b6aae7679d65dcb5	-
+var	c:@kCVImageBufferDisplayMaskRectangle_RectangleLeftKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	2df17cdd87d1841e	-
+var	c:@kCVImageBufferDisplayMaskRectangle_RectangleWidthKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	eb2b71a662508f15	-
+var	c:@kCVImageBufferDisplayMaskRectangle_RectangleTopKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	6836262bca6016f0	-
+var	c:@kCVImageBufferDisplayMaskRectangle_RectangleHeightKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	78d30e7a55b68849	-
+var	c:@kCVImageBufferDisplayMaskRectangleStereoLeftKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	d18a6a1a4fecfb4d	-
+var	c:@kCVImageBufferDisplayMaskRectangleStereoRightKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	d2d6794af21147da	-
+var	c:@kCVImageBufferDisplayMaskRectangle_LeftEdgePointsKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	9d0a51fb6fd04edc	-
+var	c:@kCVImageBufferDisplayMaskRectangle_RightEdgePointsKey	-			const CFStringRef	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	45d2fa39a399ed04	-
+enum	c:@Ea@kCVPixelFormatType_1Monochrome	-	-		OSType	-	-	-	-	3eda9e6005808f45	-
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_1Monochrome	-			-	-	-	-	-	88253261d8259363	1
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_2Indexed	-			-	-	-	-	-	4ca92bb46a5bf523	2
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4Indexed	-			-	-	-	-	-	00470d433c312909	4
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_8Indexed	-			-	-	-	-	-	62fc1b4da7334e20	8
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_1IndexedGray_WhiteIsZero	-			-	-	-	-	-	f6a97c6e30ae7b93	33
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_2IndexedGray_WhiteIsZero	-			-	-	-	-	-	e5f8cd247c25ea64	34
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4IndexedGray_WhiteIsZero	-			-	-	-	-	-	98c8d87b7ba77f0f	36
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_8IndexedGray_WhiteIsZero	-			-	-	-	-	-	98ac1668f144a598	40
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16BE555	-			-	-	-	-	-	d2beb6f08bd4fd40	16
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16LE555	-			-	-	-	-	-	0cd0a345b38c5f2f	1278555445
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16LE5551	-			-	-	-	-	-	3ac8bbf8a2e2c050	892679473
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16BE565	-			-	-	-	-	-	9595451a312609e4	1110783541
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16LE565	-			-	-	-	-	-	6c783f8d8cdae367	1278555701
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_24RGB	-			-	-	-	-	-	a59dfdfb75d6d9a4	24
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_24BGR	-			-	-	-	-	-	7dea849405090b52	842285639
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_32ARGB	-			-	-	-	-	-	21c4dd5e3b44fde0	32
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_32BGRA	-			-	-	-	-	-	297e16a5919997ce	1111970369
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_32ABGR	-			-	-	-	-	-	c38b5b59f3795fdb	1094862674
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_32RGBA	-			-	-	-	-	-	f9ffbf53a23b63f5	1380401729
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_64ARGB	-			-	-	-	-	-	97cc7d336013045f	1647719521
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_64RGBALE	-			-	-	-	-	-	03e66f32bdaf79fe	1815491698
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_48RGB	-			-	-	-	-	-	f73953fcb5f21e44	1647589490
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_32AlphaGray	-			-	-	-	-	-	5ce734ce30308fb2	1647522401
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16Gray	-			-	-	-	-	-	048d641f738a9dba	1647392359
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_30RGB	-			-	-	-	-	-	deed0ee0c65f7a52	1378955371
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_30RGB_r210	-			-	-	-	-	-	c27d7e580bff53ce	1915892016
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr8	-			-	-	-	-	-	e18a801ab98386c0	846624121
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4444YpCbCrA8	-			-	-	-	-	-	5eb10d6de98282ed	1983131704
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4444YpCbCrA8R	-			-	-	-	-	-	861cadfb0913924f	1916022840
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4444AYpCbCr8	-			-	-	-	-	-	17805e6b5638b992	2033463352
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4444AYpCbCr16	-			-	-	-	-	-	e2770903ac69058e	2033463606
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_4444AYpCbCrFloat	-			-	-	-	-	-	217d34d73b803e9f	1916036716
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr8	-			-	-	-	-	-	05a14031ed94e533	1983066168
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr16	-			-	-	-	-	-	6487f9ed753b65e6	1983000886
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr10	-			-	-	-	-	-	82a6a7e5bdb1d2b3	1983000880
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr10	-			-	-	-	-	-	1740acef2d5f162c	1983131952
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr8Planar	-			-	-	-	-	-	f2c401cd079f1674	2033463856
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr8PlanarFullRange	-			-	-	-	-	-	6b4d388120540cd6	1714696752
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr_4A_8BiPlanar	-			-	-	-	-	-	a8cd57f8a7174a97	1630697081
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange	-			-	-	-	-	-	fcb8bf648bd017f4	875704438
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr8BiPlanarFullRange	-			-	-	-	-	-	c149053634716475	875704422
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange	-			-	-	-	-	-	f46e6d85d3c22b3f	875704950
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr8BiPlanarFullRange	-			-	-	-	-	-	c4c9e71ec95d6a76	875704934
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange	-			-	-	-	-	-	916963dd2134702c	875836534
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr8BiPlanarFullRange	-			-	-	-	-	-	352211fdde8913e2	875836518
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr8_yuvs	-			-	-	-	-	-	6500e2cf3343f253	2037741171
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr8FullRange	-			-	-	-	-	-	f09804e3f06ff4f2	2037741158
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_OneComponent8	-			-	-	-	-	-	a8c5a8cc184f507e	1278226488
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_TwoComponent8	-			-	-	-	-	-	3012b5173c33f23f	843264056
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_30RGBLEPackedWideGamut	-			-	-	-	-	-	114106311fdde7bd	1999843442
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_ARGB2101010LEPacked	-			-	-	-	-	-	89d00eaf1d2997f3	1815162994
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_40ARGBLEWideGamut	-			-	-	-	-	-	a0e2912246b51ff4	1999908961
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_40ARGBLEWideGamutPremultiplied	-			-	-	-	-	-	456d3befc2e086a5	1999908973
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_OneComponent10	-			-	-	-	-	-	1721321c9f89c674	1278226736
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_OneComponent12	-			-	-	-	-	-	ec36a9544813f75d	1278226738
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_OneComponent16	-			-	-	-	-	-	0c274423be76dcf5	1278226742
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_TwoComponent16	-			-	-	-	-	-	235d020517f32503	843264310
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_OneComponent16Half	-			-	-	-	-	-	c7ecccc0077f368a	1278226536
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_OneComponent32Float	-			-	-	-	-	-	aebcd4dd0001e185	1278226534
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_TwoComponent16Half	-			-	-	-	-	-	ea4049f7fe89250f	843264104
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_TwoComponent32Float	-			-	-	-	-	-	1a3668906f491add	843264102
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_64RGBAHalf	-			-	-	-	-	-	227c1ee0c2785969	1380411457
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_128RGBAFloat	-			-	-	-	-	-	55fb9dc5667fc792	1380410945
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_14Bayer_GRBG	-			-	-	-	-	-	53753c92b0d6eb49	1735549492
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_14Bayer_RGGB	-			-	-	-	-	-	29abb1df872ad897	1919379252
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_14Bayer_BGGR	-			-	-	-	-	-	56b9c7b91a19986e	1650943796
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_14Bayer_GBRG	-			-	-	-	-	-	5039f5229d3b2634	1734505012
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_DisparityFloat16	-			-	-	-	-	-	04493162c85ca7f5	1751411059
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_DisparityFloat32	-			-	-	-	-	-	9fc26f3cd4d7c288	1717856627
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_DepthFloat16	-			-	-	-	-	-	70e580f14e42c99b	1751410032
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_DepthFloat32	-			-	-	-	-	-	119f3686db8d1204	1717855600
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange	-			-	-	-	-	-	6a7abd49342d5a9d	2016686640
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange	-			-	-	-	-	-	17a3425e30a7a3a8	2016686642
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange	-			-	-	-	-	-	c381c691af0adfe5	2016687156
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr10BiPlanarFullRange	-			-	-	-	-	-	41cdd6c2a0802040	2019963440
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr10BiPlanarFullRange	-			-	-	-	-	-	11a01aabfc1c039c	2019963442
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr10BiPlanarFullRange	-			-	-	-	-	-	ea35eae976b7d244	2019963956
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar	-			-	-	-	-	-	f3ed2e37ae4f24d4	1982882104
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_16VersatileBayer	-			-	-	-	-	-	42606d5736aae91b	1651519798
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_96VersatileBayerPacked12	-			-	-	-	-	-	12a57f161f7680d3	1651798066
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_64RGBA_DownscaledProResRAW	-			-	-	-	-	-	81b8bca0aa72a033	1651521076
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange	-			-	-	-	-	-	6ba3cb09ac11d057	1937125938
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr16BiPlanarVideoRange	-			-	-	-	-	-	4f5f624162d18ccd	1937126452
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar	-			-	-	-	-	-	674d2a0866ac4802	1932812659
+enumconst	c:@Ea@kCVPixelFormatType_1Monochrome@kCVPixelFormatType_30RGBLE_8A_BiPlanar	-			-	-	-	-	-	d125f467dd6f33d9	1647534392
+enum	c:@Ea@kCVPixelFormatType_Lossless_32BGRA	-	-		OSType	-	-	-	-	f13db3a50c60c52e	-
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_32BGRA	-			-	-	-	-	-	afc0c1b48c5cada6	641877825
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_64RGBAHalf	-			-	-	-	-	-	a182a94a7830823a	642934849
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarVideoRange	-			-	-	-	-	-	2bcc786d74fdfaa7	641234480
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarFullRange	-			-	-	-	-	-	b22fc18c25f6b979	641230384
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_420YpCbCr10PackedBiPlanarVideoRange	-			-	-	-	-	-	52ea817a51c3dac5	645428784
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_422YpCbCr10PackedBiPlanarVideoRange	-			-	-	-	-	-	958fb2e935b30061	645428786
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_420YpCbCr10PackedBiPlanarFullRange	-			-	-	-	-	-	c04af239d2594be7	645424688
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_30RGBLE_8A_BiPlanar	-			-	-	-	-	-	2a04ae56a818aa7f	643969848
+enumconst	c:@Ea@kCVPixelFormatType_Lossless_32BGRA@kCVPixelFormatType_Lossless_30RGBLEPackedWideGamut	-			-	-	-	-	-	e045f1a698d00cf8	645346162
+enum	c:@Ea@kCVPixelFormatType_Lossy_32BGRA	-	-		OSType	-	-	-	-	e3125ae10a3a79ef	-
+enumconst	c:@Ea@kCVPixelFormatType_Lossy_32BGRA@kCVPixelFormatType_Lossy_32BGRA	-			-	-	-	-	-	8d6456428be60088	759318337
+enumconst	c:@Ea@kCVPixelFormatType_Lossy_32BGRA@kCVPixelFormatType_Lossy_420YpCbCr8BiPlanarVideoRange	-			-	-	-	-	-	989a6b6f1f81fdaa	758674992
+enumconst	c:@Ea@kCVPixelFormatType_Lossy_32BGRA@kCVPixelFormatType_Lossy_420YpCbCr8BiPlanarFullRange	-			-	-	-	-	-	a4fcbe7d38511546	758670896
+enumconst	c:@Ea@kCVPixelFormatType_Lossy_32BGRA@kCVPixelFormatType_Lossy_420YpCbCr10PackedBiPlanarVideoRange	-			-	-	-	-	-	4e138e9fe0b60f71	762869296
+enumconst	c:@Ea@kCVPixelFormatType_Lossy_32BGRA@kCVPixelFormatType_Lossy_422YpCbCr10PackedBiPlanarVideoRange	-			-	-	-	-	-	ad10caf543ff6852	762869298
+typedef	c:@T@CVPixelBufferLockFlags	-			enum CVPixelBufferLockFlags	-	-	-	-	d1648c9779231f86	-
+enum	c:@E@CVPixelBufferLockFlags	-			CVOptionFlags	-	-	-	-	71a8baaf82ba2b4c	-
+enumconst	c:@E@CVPixelBufferLockFlags@kCVPixelBufferLock_ReadOnly	CVPixelBufferLockFlags			-	-	-	-	-	0071ec84ef0db347	1
+struct	c:@S@CVPlanarComponentInfo	-			-	-	-	-	-	3ba5d2088be807c1	-
+field	c:@S@CVPlanarComponentInfo@FI@offset	CVPlanarComponentInfo			int32_t	-	-	-	-	43cc6a2b8f65e612	-
+field	c:@S@CVPlanarComponentInfo@FI@rowBytes	CVPlanarComponentInfo			uint32_t	-	-	-	-	7e43c083dd8c84ba	-
+typedef	c:@T@CVPlanarComponentInfo	-			struct CVPlanarComponentInfo	-	-	-	-	f5288eedfb1402a2	-
+struct	c:@S@CVPlanarPixelBufferInfo	-			-	-	-	-	-	2869c4277cd77b4a	-
+field	c:@S@CVPlanarPixelBufferInfo@FI@componentInfo	CVPlanarPixelBufferInfo			CVPlanarComponentInfo[1]	-	-	-	-	7c2827ef7d198066	-
+typedef	c:@T@CVPlanarPixelBufferInfo	-			struct CVPlanarPixelBufferInfo	-	-	-	-	0cd3b163d3804f39	-
+struct	c:@S@CVPlanarPixelBufferInfo_YCbCrPlanar	-			-	-	-	-	-	a0fdf3b1a1c8d1b3	-
+field	c:@S@CVPlanarPixelBufferInfo_YCbCrPlanar@FI@componentInfoY	CVPlanarPixelBufferInfo_YCbCrPlanar			CVPlanarComponentInfo	-	-	-	-	ae6071b002466d64	-
+field	c:@S@CVPlanarPixelBufferInfo_YCbCrPlanar@FI@componentInfoCb	CVPlanarPixelBufferInfo_YCbCrPlanar			CVPlanarComponentInfo	-	-	-	-	915ee48ab48bd5bc	-
+field	c:@S@CVPlanarPixelBufferInfo_YCbCrPlanar@FI@componentInfoCr	CVPlanarPixelBufferInfo_YCbCrPlanar			CVPlanarComponentInfo	-	-	-	-	9cab37657c5c46c5	-
+typedef	c:@T@CVPlanarPixelBufferInfo_YCbCrPlanar	-			struct CVPlanarPixelBufferInfo_YCbCrPlanar	-	-	-	-	6e10aa644c62d9da	-
+struct	c:@S@CVPlanarPixelBufferInfo_YCbCrBiPlanar	-			-	-	-	-	-	37cea23f1b08f3dd	-
+field	c:@S@CVPlanarPixelBufferInfo_YCbCrBiPlanar@FI@componentInfoY	CVPlanarPixelBufferInfo_YCbCrBiPlanar			CVPlanarComponentInfo	-	-	-	-	5c7ae2488590b279	-
+field	c:@S@CVPlanarPixelBufferInfo_YCbCrBiPlanar@FI@componentInfoCbCr	CVPlanarPixelBufferInfo_YCbCrBiPlanar			CVPlanarComponentInfo	-	-	-	-	4da1801cc8468f44	-
+typedef	c:@T@CVPlanarPixelBufferInfo_YCbCrBiPlanar	-			struct CVPlanarPixelBufferInfo_YCbCrBiPlanar	-	-	-	-	817b155c4aed2675	-
+var	c:@kCVPixelBufferPixelFormatTypeKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	ad3726ac2a11b75f	-
+var	c:@kCVPixelBufferMemoryAllocatorKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	69ee01b711a9de2c	-
+var	c:@kCVPixelBufferWidthKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	f7e43df2e226f7e2	-
+var	c:@kCVPixelBufferHeightKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	f1533a319fbf35b0	-
+var	c:@kCVPixelBufferExtendedPixelsLeftKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	f6ff4d03e0693956	-
+var	c:@kCVPixelBufferExtendedPixelsTopKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	c9f2e11626167574	-
+var	c:@kCVPixelBufferExtendedPixelsRightKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	1bb2fa8d64f14b5c	-
+var	c:@kCVPixelBufferExtendedPixelsBottomKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	9ba4700dbd0f28fa	-
+var	c:@kCVPixelBufferBytesPerRowAlignmentKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	7055b52e1b1fd96a	-
+var	c:@kCVPixelBufferCGBitmapContextCompatibilityKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	e4424bb4e3305d23	-
+var	c:@kCVPixelBufferCGImageCompatibilityKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	8ca8c571c1a7526a	-
+var	c:@kCVPixelBufferOpenGLCompatibilityKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	8cdb0e8e25fe0edf	-
+var	c:@kCVPixelBufferPlaneAlignmentKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	2551a9e5c300a7ad	-
+var	c:@kCVPixelBufferIOSurfacePropertiesKey	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	7413a49f9e8ef724	-
+var	c:@kCVPixelBufferOpenGLESCompatibilityKey	-			const CFStringRef	-	-	ios=6.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	632005bfd4e030de	-
+var	c:@kCVPixelBufferMetalCompatibilityKey	-			const CFStringRef	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	d6f4a7667c060023	-
+var	c:@kCVPixelBufferOpenGLTextureCacheCompatibilityKey	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.11/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4e5f9ffc5efdd509	-
+var	c:@kCVPixelBufferOpenGLESTextureCacheCompatibilityKey	-			const CFStringRef	-	-	ios=9.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	aa7e646629705339	-
+var	c:@kCVPixelBufferVersatileBayerKey_BayerPattern	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e22668002d53a147	-
+enum	c:@Ea@kCVVersatileBayer_BayerPattern_RGGB	-	-		unsigned int	-	-	-	-	655b5af4fe331747	-
+enumconst	c:@Ea@kCVVersatileBayer_BayerPattern_RGGB@kCVVersatileBayer_BayerPattern_RGGB	-			-	-	-	-	-	80a5fef04a85cdba	0
+enumconst	c:@Ea@kCVVersatileBayer_BayerPattern_RGGB@kCVVersatileBayer_BayerPattern_GRBG	-			-	-	-	-	-	442f1b8d2945f8cd	1
+enumconst	c:@Ea@kCVVersatileBayer_BayerPattern_RGGB@kCVVersatileBayer_BayerPattern_GBRG	-			-	-	-	-	-	c42f7806fa29879d	2
+enumconst	c:@Ea@kCVVersatileBayer_BayerPattern_RGGB@kCVVersatileBayer_BayerPattern_BGGR	-			-	-	-	-	-	f617394319371323	3
+var	c:@kCVPixelBufferProResRAWKey_SenselSitingOffsets	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9d4bf5f0769c09fb	-
+var	c:@kCVPixelBufferProResRAWKey_BlackLevel	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	30c10b9bdf33fa89	-
+var	c:@kCVPixelBufferProResRAWKey_WhiteLevel	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6d7063cade85f3fa	-
+var	c:@kCVPixelBufferProResRAWKey_WhiteBalanceCCT	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	10e0d01d638e8bd9	-
+var	c:@kCVPixelBufferProResRAWKey_WhiteBalanceRedFactor	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	39a02983171ccfa8	-
+var	c:@kCVPixelBufferProResRAWKey_WhiteBalanceBlueFactor	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7c15e22bdf52754d	-
+var	c:@kCVPixelBufferProResRAWKey_ColorMatrix	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	071fa86851bd4703	-
+var	c:@kCVPixelBufferProResRAWKey_GainFactor	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8164b198df73828e	-
+var	c:@kCVPixelBufferProResRAWKey_RecommendedCrop	-			const CFStringRef	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b7d4d55db5a77df3	-
+var	c:@kCVPixelBufferProResRAWKey_MetadataExtension	-			const CFStringRef	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	37b9d79d2d6a551e	-
+var	c:@kCVPixelBufferIOSurfacePurgeableKey	-			const CFStringRef	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0,xros=26.0/-/-/0	-	f36eb8b5138cac9a	-
+typedef	c:@T@CVPixelBufferRef	-			CVImageBufferRef	-	-	-	-	2bcb62a122d941bf	-
+function	c:@F@CVPixelBufferGetTypeID	-			CFTypeID (void)	-	-	ios=4.0/-/-/0	-	252dc6ee57d00071	-
+function	c:@F@CVPixelBufferRetain	-			CVPixelBufferRef (CVPixelBufferRef)	CVPixelBufferRef texture	-	ios=4.0/-/-/0	-	731daea577543700	-
+function	c:@F@CVPixelBufferRelease	-			void (CVPixelBufferRef)	CVPixelBufferRef texture	-	ios=4.0/-/-/0	-	f3deba7578835065	-
+function	c:@F@CVPixelBufferCreateResolvedAttributesDictionary	-			CVReturn (CFAllocatorRef, CFArrayRef, CFDictionaryRef  _Nullable *)	CFAllocatorRef allocator | CFArrayRef attributes | CFDictionaryRef  _Nullable * resolvedDictionaryOut	-	ios=4.0/-/-/0	-	084fe430b250a30c	-
+function	c:@F@CVPixelBufferCreate	-			CVReturn (CFAllocatorRef, size_t, size_t, OSType, CFDictionaryRef, CVPixelBufferRef  _Nullable *)	CFAllocatorRef allocator | size_t width | size_t height | OSType pixelFormatType | CFDictionaryRef pixelBufferAttributes | CVPixelBufferRef  _Nullable * pixelBufferOut	-	ios=4.0/-/-/0	-	8162896041bc3ab4	-
+typedef	c:@T@CVPixelBufferReleaseBytesCallback	-			void (*)(void * _Nullable, const void * _Nullable)	-	-	-	-	1e494f24bae6022a	-
+function	c:@F@CVPixelBufferCreateWithBytes	-			CVReturn (CFAllocatorRef, size_t, size_t, OSType, void *, size_t, CVPixelBufferReleaseBytesCallback, void *, CFDictionaryRef, CVPixelBufferRef  _Nullable *)	CFAllocatorRef allocator | size_t width | size_t height | OSType pixelFormatType | void * baseAddress | size_t bytesPerRow | CVPixelBufferReleaseBytesCallback releaseCallback | void * releaseRefCon | CFDictionaryRef pixelBufferAttributes | CVPixelBufferRef  _Nullable * pixelBufferOut	-	ios=4.0/-/-/0	-	8d5050134693ad9d	-
+typedef	c:@T@CVPixelBufferReleasePlanarBytesCallback	-			void (*)(void * _Nullable, const void * _Nullable, size_t, size_t, const void * _Nullable * _Nullable)	-	-	-	-	5a035c9964ad0baf	-
+function	c:@F@CVPixelBufferCreateWithPlanarBytes	-			CVReturn (CFAllocatorRef, size_t, size_t, OSType, void *, size_t, size_t, void * _Nullable[], size_t[], size_t[], size_t[], CVPixelBufferReleasePlanarBytesCallback, void *, CFDictionaryRef, CVPixelBufferRef  _Nullable *)	CFAllocatorRef allocator | size_t width | size_t height | OSType pixelFormatType | void * dataPtr | size_t dataSize | size_t numberOfPlanes | void * _Nullable[] planeBaseAddress | size_t[] planeWidth | size_t[] planeHeight | size_t[] planeBytesPerRow | CVPixelBufferReleasePlanarBytesCallback releaseCallback | void * releaseRefCon | CFDictionaryRef pixelBufferAttributes | CVPixelBufferRef  _Nullable * pixelBufferOut	-	ios=4.0/-/-/0	-	0ce5a300d933c872	-
+function	c:@F@CVPixelBufferLockBaseAddress	-			CVReturn (CVPixelBufferRef, CVPixelBufferLockFlags)	CVPixelBufferRef pixelBuffer | CVPixelBufferLockFlags lockFlags	-	ios=4.0/-/-/0	-	21f8e0d00c52e767	-
+function	c:@F@CVPixelBufferUnlockBaseAddress	-			CVReturn (CVPixelBufferRef, CVPixelBufferLockFlags)	CVPixelBufferRef pixelBuffer | CVPixelBufferLockFlags unlockFlags	-	ios=4.0/-/-/0	-	1ed485ebe27cd789	-
+function	c:@F@CVPixelBufferGetWidth	-			size_t (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	c959b5190863665d	-
+function	c:@F@CVPixelBufferGetHeight	-			size_t (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	5a158742a9fe31d1	-
+function	c:@F@CVPixelBufferGetPixelFormatType	-			OSType (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	351f4eaa3ebacec3	-
+function	c:@F@CVPixelBufferGetBaseAddress	-			void * (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	7f287fe5b5dae0f9	-
+function	c:@F@CVPixelBufferGetBytesPerRow	-			size_t (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	8d3868180d67bcc0	-
+function	c:@F@CVPixelBufferGetDataSize	-			size_t (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	96e38587ec6a087c	-
+function	c:@F@CVPixelBufferIsPlanar	-			Boolean (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	a50f77f910e18a36	-
+function	c:@F@CVPixelBufferGetPlaneCount	-			size_t (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	b2ef7800ff7a6d5f	-
+function	c:@F@CVPixelBufferGetWidthOfPlane	-			size_t (CVPixelBufferRef, size_t)	CVPixelBufferRef pixelBuffer | size_t planeIndex	-	ios=4.0/-/-/0	-	606ebe83f4314585	-
+function	c:@F@CVPixelBufferGetHeightOfPlane	-			size_t (CVPixelBufferRef, size_t)	CVPixelBufferRef pixelBuffer | size_t planeIndex	-	ios=4.0/-/-/0	-	4e027c8b1cd619ed	-
+function	c:@F@CVPixelBufferGetBaseAddressOfPlane	-			void * (CVPixelBufferRef, size_t)	CVPixelBufferRef pixelBuffer | size_t planeIndex	-	ios=4.0/-/-/0	-	6643a4331e15b232	-
+function	c:@F@CVPixelBufferGetBytesPerRowOfPlane	-			size_t (CVPixelBufferRef, size_t)	CVPixelBufferRef pixelBuffer | size_t planeIndex	-	ios=4.0/-/-/0	-	5ee657ef68cc1f06	-
+function	c:@F@CVPixelBufferGetExtendedPixels	-			void (CVPixelBufferRef, size_t *, size_t *, size_t *, size_t *)	CVPixelBufferRef pixelBuffer | size_t * extraColumnsOnLeft | size_t * extraColumnsOnRight | size_t * extraRowsOnTop | size_t * extraRowsOnBottom	-	ios=4.0/-/-/0	-	48800e16965ba2e4	-
+function	c:@F@CVPixelBufferFillExtendedPixels	-			CVReturn (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0	-	d7ce334dd8ed5d25	-
+function	c:@F@CVPixelBufferCopyCreationAttributes	-			CFDictionaryRef (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	35ae9ed3d98198d1	-
+function	c:@F@CVPixelBufferIsCompatibleWithAttributes	-			Boolean (CVPixelBufferRef, CFDictionaryRef)	CVPixelBufferRef pixelBuffer | CFDictionaryRef attributes	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=4.0/-/-/0,watchos=1.0/-/-/0,xros=1.0/-/-/0	-	2e4a5dc8c2c792bf	-
+var	c:@kCVPixelBufferIOSurfaceOpenGLTextureCompatibilityKey	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.6/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4e440646a16bc54a	-
+var	c:@kCVPixelBufferIOSurfaceOpenGLFBOCompatibilityKey	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.6/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	0201cbbf04e2559b	-
+var	c:@kCVPixelBufferIOSurfaceCoreAnimationCompatibilityKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	a0e214b48449c858	-
+var	c:@kCVPixelBufferIOSurfaceOpenGLESTextureCompatibilityKey	-			const CFStringRef	-	-	ios=5.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	03d5009c5350e3f2	-
+var	c:@kCVPixelBufferIOSurfaceOpenGLESFBOCompatibilityKey	-			const CFStringRef	-	-	ios=5.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	adcb6dd03662cd9e	-
+function	c:@F@CVPixelBufferGetIOSurface	-			IOSurfaceRef (CVPixelBufferRef)	CVPixelBufferRef pixelBuffer	-	ios=4.0/-/-/0,macos=10.6/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	739b1aa6e607b9b3	-
+function	c:@F@CVPixelBufferCreateWithIOSurface	-			CVReturn (CFAllocatorRef, IOSurfaceRef, CFDictionaryRef, CVPixelBufferRef  _Nullable *)	CFAllocatorRef allocator | IOSurfaceRef surface | CFDictionaryRef pixelBufferAttributes | CVPixelBufferRef  _Nullable * pixelBufferOut	-	ios=4.0/-/-/0	-	323e43c5a093f911	-
+struct	c:@S@__CVPixelBufferPool	-			-	-	-	-	-	b5dedb0e954b5848	-
+typedef	c:@T@CVPixelBufferPoolRef	-			struct __CVPixelBufferPool *	-	-	-	-	9d1c2b61e44656ab	-
+var	c:@kCVPixelBufferPoolMinimumBufferCountKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	f1796f4515045822	-
+var	c:@kCVPixelBufferPoolMaximumBufferAgeKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	dae0c20d151cb3ac	-
+function	c:@F@CVPixelBufferPoolGetTypeID	-			CFTypeID (void)	-	-	ios=4.0/-/-/0	-	cf2c773dda161743	-
+function	c:@F@CVPixelBufferPoolRetain	-			CVPixelBufferPoolRef (CVPixelBufferPoolRef)	CVPixelBufferPoolRef pixelBufferPool	-	ios=4.0/-/-/0	-	cfb37ad50a3f7d42	-
+function	c:@F@CVPixelBufferPoolRelease	-			void (CVPixelBufferPoolRef)	CVPixelBufferPoolRef pixelBufferPool	-	ios=4.0/-/-/0	-	1b966bcdc4e2a5e0	-
+function	c:@F@CVPixelBufferPoolCreate	-			CVReturn (CFAllocatorRef, CFDictionaryRef, CFDictionaryRef, CVPixelBufferPoolRef  _Nullable *)	CFAllocatorRef allocator | CFDictionaryRef poolAttributes | CFDictionaryRef pixelBufferAttributes | CVPixelBufferPoolRef  _Nullable * poolOut	-	ios=4.0/-/-/0	-	cd128a731b4d30e0	-
+function	c:@F@CVPixelBufferPoolGetAttributes	-			CFDictionaryRef (CVPixelBufferPoolRef)	CVPixelBufferPoolRef pool	-	ios=4.0/-/-/0	-	2ffcce8dfa5ba248	-
+function	c:@F@CVPixelBufferPoolGetPixelBufferAttributes	-			CFDictionaryRef (CVPixelBufferPoolRef)	CVPixelBufferPoolRef pool	-	ios=4.0/-/-/0	-	c11d33b3b865f926	-
+function	c:@F@CVPixelBufferPoolCreatePixelBuffer	-			CVReturn (CFAllocatorRef, CVPixelBufferPoolRef, CVPixelBufferRef  _Nullable *)	CFAllocatorRef allocator | CVPixelBufferPoolRef pixelBufferPool | CVPixelBufferRef  _Nullable * pixelBufferOut	-	ios=4.0/-/-/0	-	f3d3277479a5ee1c	-
+function	c:@F@CVPixelBufferPoolCreatePixelBufferWithAuxAttributes	-			CVReturn (CFAllocatorRef, CVPixelBufferPoolRef, CFDictionaryRef, CVPixelBufferRef  _Nullable *)	CFAllocatorRef allocator | CVPixelBufferPoolRef pixelBufferPool | CFDictionaryRef auxAttributes | CVPixelBufferRef  _Nullable * pixelBufferOut	-	ios=4.0/-/-/0	-	96e7db40a3f93698	-
+var	c:@kCVPixelBufferPoolAllocationThresholdKey	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	2eec7c45d029213a	-
+var	c:@kCVPixelBufferPoolFreeBufferNotification	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	81215ffae7c375b0	-
+typedef	c:@T@CVPixelBufferPoolFlushFlags	-			enum CVPixelBufferPoolFlushFlags	-	-	-	-	e94bd59e4586e774	-
+enum	c:@E@CVPixelBufferPoolFlushFlags	-			CVOptionFlags	-	-	-	-	12a641087945ed1a	-
+enumconst	c:@E@CVPixelBufferPoolFlushFlags@kCVPixelBufferPoolFlushExcessBuffers	CVPixelBufferPoolFlushFlags			-	-	-	-	-	b3496cb8282a9892	1
+function	c:@F@CVPixelBufferPoolFlush	-			void (CVPixelBufferPoolRef, CVPixelBufferPoolFlushFlags)	CVPixelBufferPoolRef pool | CVPixelBufferPoolFlushFlags options	-	-	-	42ea452fcf39e2bd	-
+typedef	c:@T@CVOpenGLESTextureRef	-			CVImageBufferRef	-	-	-	-	f72fa6f5045721e7	-
+function	c:@F@CVOpenGLESTextureGetTypeID	-			CFTypeID (void)	-	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	eed97985b05c871d	-
+function	c:@F@CVOpenGLESTextureGetTarget	-			GLenum (CVOpenGLESTextureRef)	CVOpenGLESTextureRef image	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	053d7eee85c547a9	-
+function	c:@F@CVOpenGLESTextureGetName	-			GLuint (CVOpenGLESTextureRef)	CVOpenGLESTextureRef image	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	7d852b0bc5789e4b	-
+function	c:@F@CVOpenGLESTextureIsFlipped	-			Boolean (CVOpenGLESTextureRef)	CVOpenGLESTextureRef image	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	818aebaf524e18d4	-
+function	c:@F@CVOpenGLESTextureGetCleanTexCoords	-			void (CVOpenGLESTextureRef, GLfloat[2], GLfloat[2], GLfloat[2], GLfloat[2])	CVOpenGLESTextureRef image | GLfloat[2] lowerLeft | GLfloat[2] lowerRight | GLfloat[2] upperRight | GLfloat[2] upperLeft	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	6fc97c56e25936ea	-
+struct	c:@S@__CVOpenGLESTextureCache	-			-	-	-	-	-	461b5baa85e0b585	-
+typedef	c:@T@CVOpenGLESTextureCacheRef	-			struct __CVOpenGLESTextureCache *	-	-	-	-	c6a6998657be0b32	-
+typedef	c:@T@CVEAGLContext	-			EAGLContext *	-	-	-	-	8b5efcc1e72ffd43	-
+var	c:@kCVOpenGLESTextureCacheMaximumTextureAgeKey	-			const CFStringRef	-	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	af530676247fc717	-
+function	c:@F@CVOpenGLESTextureCacheGetTypeID	-			CFTypeID (void)	-	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	1ef03204158e2e2e	-
+function	c:@F@CVOpenGLESTextureCacheCreate	-			CVReturn (CFAllocatorRef, CFDictionaryRef, CVEAGLContext, CFDictionaryRef, CVOpenGLESTextureCacheRef  _Nullable *)	CFAllocatorRef allocator | CFDictionaryRef cacheAttributes | CVEAGLContext eaglContext | CFDictionaryRef textureAttributes | CVOpenGLESTextureCacheRef  _Nullable * cacheOut	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	f2386c6c5fca352b	-
+function	c:@F@CVOpenGLESTextureCacheCreateTextureFromImage	-			CVReturn (CFAllocatorRef, CVOpenGLESTextureCacheRef, CVImageBufferRef, CFDictionaryRef, GLenum, GLint, GLsizei, GLsizei, GLenum, GLenum, size_t, CVOpenGLESTextureRef  _Nullable *)	CFAllocatorRef allocator | CVOpenGLESTextureCacheRef textureCache | CVImageBufferRef sourceImage | CFDictionaryRef textureAttributes | GLenum target | GLint internalFormat | GLsizei width | GLsizei height | GLenum format | GLenum type | size_t planeIndex | CVOpenGLESTextureRef  _Nullable * textureOut	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	fdb89b85749a9ca4	-
+function	c:@F@CVOpenGLESTextureCacheFlush	-			void (CVOpenGLESTextureCacheRef, CVOptionFlags)	CVOpenGLESTextureCacheRef textureCache | CVOptionFlags options	-	ios=5.0/12.0/-/0,macos=-/-/-/1,tvos=9.0/12.0/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	a605b976efda5ee0	-
+var	c:@kCVPixelFormatName	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	0d0390a37d87261a	-
+var	c:@kCVPixelFormatConstant	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	4f33c8620694868f	-
+var	c:@kCVPixelFormatCodecType	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	23526af7ee5fd5a4	-
+var	c:@kCVPixelFormatFourCC	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	c8c252917eb8f18e	-
+var	c:@kCVPixelFormatContainsAlpha	-			const CFStringRef	-	-	ios=4.3/-/-/0	-	325b7e6df9f29f28	-
+var	c:@kCVPixelFormatContainsYCbCr	-			const CFStringRef	-	-	ios=8.0/-/-/0	-	d7b81f0cc13c6f20	-
+var	c:@kCVPixelFormatContainsRGB	-			const CFStringRef	-	-	ios=8.0/-/-/0	-	efbbd4eb09cc9d44	-
+var	c:@kCVPixelFormatContainsGrayscale	-			const CFStringRef	-	-	ios=12.0/-/-/0	-	fe63658961787df3	-
+var	c:@kCVPixelFormatContainsSenselArray	-			const CFStringRef	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	3418b6c0266b8f48	-
+var	c:@kCVPixelFormatComponentRange	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	c73c7a631458a1ce	-
+var	c:@kCVPixelFormatComponentRange_VideoRange	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	2b281a160ebb2c0d	-
+var	c:@kCVPixelFormatComponentRange_FullRange	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	af8ca62bc1148496	-
+var	c:@kCVPixelFormatComponentRange_WideRange	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	92fdb7ec1b0e9ca9	-
+var	c:@kCVPixelFormatPlanes	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	1922f1efd877240b	-
+var	c:@kCVPixelFormatBlockWidth	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	9bc0d16a35c93473	-
+var	c:@kCVPixelFormatBlockHeight	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	2e390742506addb4	-
+var	c:@kCVPixelFormatBitsPerBlock	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	4a2c2492f1a4bbe8	-
+var	c:@kCVPixelFormatBitsPerComponent	-			const CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	377e0c4e5d3546d3	-
+var	c:@kCVPixelFormatBlockHorizontalAlignment	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	392414ce593a0f52	-
+var	c:@kCVPixelFormatBlockVerticalAlignment	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	5ce45368648d6e19	-
+var	c:@kCVPixelFormatBlackBlock	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	732878d868f3c3e8	-
+var	c:@kCVPixelFormatHorizontalSubsampling	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	aa182be1540bc508	-
+var	c:@kCVPixelFormatVerticalSubsampling	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	828103ac76a14e67	-
+var	c:@kCVPixelFormatOpenGLFormat	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	44ad407bde8ec07c	-
+var	c:@kCVPixelFormatOpenGLType	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	cf9ee04d1d8dfa7e	-
+var	c:@kCVPixelFormatOpenGLInternalFormat	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	b2037a96677464bf	-
+var	c:@kCVPixelFormatCGBitmapInfo	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	7e567091d2380eb9	-
+var	c:@kCVPixelFormatQDCompatibility	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	defef7bfe6ee3959	-
+var	c:@kCVPixelFormatCGBitmapContextCompatibility	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	cc0ffe1bccfbec48	-
+var	c:@kCVPixelFormatCGImageCompatibility	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	c67dea38edce85e1	-
+var	c:@kCVPixelFormatOpenGLCompatibility	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.4/-/-/0,tvos=9.0/-/-/0,watchos=4.0/-/-/0	-	5a301c294328189c	-
+var	c:@kCVPixelFormatOpenGLESCompatibility	-			const CFStringRef	-	-	ios=5.0/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=9.0/-/-/0,watchos=-/-/-/1,xros=-/-/-/1	-	1cb76676ba8debd6	-
+typedef	c:@T@CVFillExtendedPixelsCallBack	-			Boolean (*)(CVPixelBufferRef _Nonnull, void * _Nullable)	-	-	-	-	005d892fc0cdbac1	-
+struct	c:@SA@CVFillExtendedPixelsCallBackData	-			-	-	-	-	-	0370903fcfe9c4ba	-
+field	c:@SA@CVFillExtendedPixelsCallBackData@FI@version	CVFillExtendedPixelsCallBackData			CFIndex	-	-	-	-	18c289b708bb2e19	-
+field	c:@SA@CVFillExtendedPixelsCallBackData@FI@fillCallBack	CVFillExtendedPixelsCallBackData			CVFillExtendedPixelsCallBack	-	-	-	-	fee7f90e34c8bdfe	-
+field	c:@SA@CVFillExtendedPixelsCallBackData@FI@refCon	CVFillExtendedPixelsCallBackData			void *	-	-	-	-	fac98000a58b9e9b	-
+typedef	c:@T@CVFillExtendedPixelsCallBackData	-			struct CVFillExtendedPixelsCallBackData	-	-	-	-	d072fe4a19e33bc8	-
+var	c:@kCVPixelFormatFillExtendedPixelsCallback	-			const CFStringRef	-	-	ios=4.0/-/-/0	-	83c41331ff63e79c	-
+function	c:@F@CVPixelFormatDescriptionCreateWithPixelFormatType	-			CFDictionaryRef (CFAllocatorRef, OSType)	CFAllocatorRef allocator | OSType pixelFormat	-	ios=4.0/-/-/0	-	8411311097d8135d	-
+function	c:@F@CVPixelFormatDescriptionArrayCreateWithAllPixelFormatTypes	-			CFArrayRef (CFAllocatorRef)	CFAllocatorRef allocator	-	ios=4.0/-/-/0	-	01de03495c941452	-
+function	c:@F@CVPixelFormatDescriptionRegisterDescriptionWithPixelFormatType	-			void (CFDictionaryRef, OSType)	CFDictionaryRef description | OSType pixelFormat	-	ios=4.0/-/-/0	-	1ed0fb66583006d8	-
+function	c:@F@CVPixelFormatTypeCopyFourCharCodeString	-			CFStringRef (OSType)	OSType pixelFormat	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0	-	216ad2aae12d0da2	-
+function	c:@F@CVIsCompressedPixelFormatAvailable	-			Boolean (OSType)	OSType pixelFormatType	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0	-	d818222ebcbf04a9	-
+typedef	c:@T@CVMetalTextureRef	-			CVImageBufferRef	-	-	-	-	5173975c5eb17667	-
+function	c:@F@CVMetalTextureGetTypeID	-			CFTypeID (void)	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	d8d2613cf84ebd08	-
+function	c:@F@CVMetalTextureGetTexture	-			id<MTLTexture> (CVMetalTextureRef)	CVMetalTextureRef image	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	68831eab504454ad	-
+function	c:@F@CVMetalTextureIsFlipped	-			Boolean (CVMetalTextureRef)	CVMetalTextureRef image	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	bed7cfe7a78ecdf0	-
+function	c:@F@CVMetalTextureGetCleanTexCoords	-			void (CVMetalTextureRef, float[2], float[2], float[2], float[2])	CVMetalTextureRef image | float[2] lowerLeft | float[2] lowerRight | float[2] upperRight | float[2] upperLeft	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	037779518e041488	-
+var	c:@kCVMetalTextureUsage	-			const CFStringRef	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=-/-/-/1	-	4fe8dfe72f5d4202	-
+var	c:@kCVMetalTextureStorageMode	-			const CFStringRef	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=-/-/-/1	-	fbbd76a8958396b0	-
+var	c:@kCVMetalTextureCacheMaximumTextureAgeKey	-			const CFStringRef	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	49a85e7f23bd6e1d	-
+struct	c:@S@__CVMetalTextureCache	-			-	-	-	-	-	304f6d0c76ec850c	-
+typedef	c:@T@CVMetalTextureCacheRef	-			struct __CVMetalTextureCache *	-	-	-	-	d3c9436562000eea	-
+function	c:@F@CVMetalTextureCacheGetTypeID	-			CFTypeID (void)	-	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	a5bfc05aa8fea654	-
+function	c:@F@CVMetalTextureCacheCreate	-			CVReturn (CFAllocatorRef, CFDictionaryRef, id<MTLDevice>, CFDictionaryRef, CVMetalTextureCacheRef  _Nullable *)	CFAllocatorRef allocator | CFDictionaryRef cacheAttributes | id<MTLDevice> metalDevice | CFDictionaryRef textureAttributes | CVMetalTextureCacheRef  _Nullable * cacheOut	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	fad5350a36c7de61	-
+function	c:@F@CVMetalTextureCacheCreateTextureFromImage	-			CVReturn (CFAllocatorRef, CVMetalTextureCacheRef, CVImageBufferRef, CFDictionaryRef, MTLPixelFormat, size_t, size_t, size_t, CVMetalTextureRef  _Nullable *)	CFAllocatorRef allocator | CVMetalTextureCacheRef textureCache | CVImageBufferRef sourceImage | CFDictionaryRef textureAttributes | MTLPixelFormat pixelFormat | size_t width | size_t height | size_t planeIndex | CVMetalTextureRef  _Nullable * textureOut	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	7a3aaa56c375461e	-
+function	c:@F@CVMetalTextureCacheFlush	-			void (CVMetalTextureCacheRef, CVOptionFlags)	CVMetalTextureCacheRef textureCache | CVOptionFlags options	-	ios=8.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	-	947c4c541221da98	-
+typedef	c:@T@CVMetalBufferRef	-			CVBufferRef	-	-	-	-	f37b76580affd516	-
+function	c:@F@CVMetalBufferGetTypeID	-			CFTypeID (void)	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	89b0085dcfbd002b	-
+function	c:@F@CVMetalBufferGetBuffer	-			id<MTLBuffer> (CVMetalBufferRef)	CVMetalBufferRef buffer	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	5346d44d1d2eec52	-
+var	c:@kCVMetalBufferCacheMaximumBufferAgeKey	-			const CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	2b36a9f2e4021b15	-
+struct	c:@S@__CVMetalBufferCache	-			-	-	-	-	-	d18f9e22dc341339	-
+typedef	c:@T@CVMetalBufferCacheRef	-			struct __CVMetalBufferCache *	-	-	-	-	e3ae09ecc1d34e8f	-
+function	c:@F@CVMetalBufferCacheGetTypeID	-			CFTypeID (void)	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	4ea4667ebf876f72	-
+function	c:@F@CVMetalBufferCacheCreate	-			CVReturn (CFAllocatorRef, CFDictionaryRef, id<MTLDevice>, CVMetalBufferCacheRef  _Nullable *)	CFAllocatorRef allocator | CFDictionaryRef cacheAttributes | id<MTLDevice> metalDevice | CVMetalBufferCacheRef  _Nullable * cacheOut	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	c9a1f63ae988f7c0	-
+function	c:@F@CVMetalBufferCacheCreateBufferFromImage	-			CVReturn (CFAllocatorRef, CVMetalBufferCacheRef, CVImageBufferRef, CVMetalBufferRef  _Nullable *)	CFAllocatorRef allocator | CVMetalBufferCacheRef bufferCache | CVImageBufferRef imageBuffer | CVMetalBufferRef  _Nullable * bufferOut	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	95e0e73e361c7ed7	-
+function	c:@F@CVMetalBufferCacheFlush	-			void (CVMetalBufferCacheRef, CVOptionFlags)	CVMetalBufferCacheRef bufferCache | CVOptionFlags options	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=-/-/-/1	-	a630422f9d1c5f5f	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@SInt16	-			short	-	-	-	-	3eec647098d9543c	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@CFDictionaryRef	-			const struct __CFDictionary *	-	-	-	-	95ab67be7d9fad28	-
+typedef	c:@T@Boolean	-			unsigned char	-	-	-	-	693cf733304c39d9	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@CGRect	-			struct CGRect	-	-	-	-	57cc4af4879304a9	-
+typedef	c:@T@CGColorSpaceRef	-			struct CGColorSpace *	-	-	-	-	046fe86c4865065b	-
+typedef	c:@T@CFTypeID	-			unsigned long	-	-	-	-	1a1b10310e893e1f	-
+typedef	c:@T@CFAllocatorRef	-			const struct __CFAllocator *	-	-	-	-	d153ce1dfad01936	-
+typedef	c:@T@CFArrayRef	-			const struct __CFArray *	-	-	-	-	d3655b482ae0664e	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@OSType	-			FourCharCode	-	-	-	-	01d4dcaaf78349ee	-
+typedef	c:@T@FourCharCode	-			UInt32	-	-	-	-	a0f4e71a4dbfcb9b	-
+typedef	c:@T@IOSurfaceRef	-			struct __IOSurface *	-	-	-	-	b3d7dabcf5bf59d2	-
+typedef	c:@T@GLenum	-			uint32_t	-	-	-	-	ec8bdacac6d03c02	-
+typedef	c:@T@GLuint	-			uint32_t	-	-	-	-	7ac5e2a2dd4b7fe0	-
+typedef	c:@T@GLfloat	-			float	-	-	-	-	d0751d8635be7ec9	-
+typedef	c:@T@GLint	-			int32_t	-	-	-	-	35d739b6c34610f0	-
+typedef	c:@T@GLsizei	-			int32_t	-	-	-	-	9845ae702d50297b	-
+typedef	c:@T@CFIndex	-			long	-	-	-	-	9f50caf8b7c4f278	-
+typedef	c:@T@MTLPixelFormat	-			enum MTLPixelFormat	-	-	-	-	40f56ebf564ac2ed	-

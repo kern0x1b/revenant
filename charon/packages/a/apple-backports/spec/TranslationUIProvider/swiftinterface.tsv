@@ -1,0 +1,16 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+TranslationUIProvider	protocol	TranslationUIProviderExtensionScene	18.4				own
+TranslationUIProvider	struct	TranslationUIProviderSelectedTextScene	18.4				own
+TranslationUIProvider	method	TranslationUIProviderSelectedTextScene.init(content:)	18.4				container
+TranslationUIProvider	property	TranslationUIProviderSelectedTextScene.body	18.4				container
+TranslationUIProvider	typealias	TranslationUIProviderSelectedTextScene.Body	18.4				own
+TranslationUIProvider	protocol	TranslationUIProviderContext	18.4				own
+TranslationUIProvider	property	TranslationUIProviderContext.inputText	18.4				container
+TranslationUIProvider	property	TranslationUIProviderContext.allowsReplacement	18.4				container
+TranslationUIProvider	method	TranslationUIProviderContext.finish(translation:)	18.4				container
+TranslationUIProvider	method	TranslationUIProviderContext.expandSheet()	18.4				container
+TranslationUIProvider	protocol	TranslationUIProviderExtension	18.4				own
+TranslationUIProvider	property	TranslationUIProviderExtension.body	18.4				container
+TranslationUIProvider	property	TranslationUIProviderExtension.configuration	18.4				container
+TranslationUIProvider	struct	TranslationProviderUIExtensionConfiguration	18.4				own
+TranslationUIProvider	method	TranslationProviderUIExtensionConfiguration.init(_:)	18.4				container

@@ -1,0 +1,291 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@S@_xpc_type_s	-			-	-	-	-	-	15089d63650121f4	-
+typedef	c:@T@xpc_type_t	-			const struct _xpc_type_s *	-	-	-	-	59f205f40d3e5031	-
+protocol	c:objc(pl)OS_xpc_object	-			-	-	-	-	-	a0699549e4b541d8	-
+conforms	c:objc(pl)OS_xpc_object	OS_xpc_object	NSObject		-	-	-	-	-	29feffd9447de5b1	-
+typedef	c:@T@xpc_object_t	-			NSObject<OS_xpc_object> *	-	-	-	-	fda4d9d35a3bcdbf	-
+function	c:@F@_xpc_object_validate	-			void (xpc_object_t)	xpc_object_t object	-	-	-	7748aac96f734fb0	-
+typedef	c:@T@xpc_handler_t	-			void ((^))(xpc_object_t)	-	-	-	-	199fe1a6f687545d	-
+var	c:@_xpc_type_connection	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	f30cecd83c55b8cc	-
+typedef	c:@T@xpc_connection_t	-			xpc_object_t	-	-	-	-	f7cfcd90c10b04a4	-
+typedef	c:@T@xpc_connection_handler_t	-			void (*)(xpc_connection_t _Nonnull)	-	-	-	-	f9db69b91108755e	-
+var	c:@_xpc_type_endpoint	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	8e8d760af55c78ce	-
+typedef	c:@T@xpc_endpoint_t	-			xpc_object_t	-	-	-	-	f5aee0c568127f57	-
+var	c:@_xpc_type_null	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	35cb6f49eace247c	-
+var	c:@_xpc_type_bool	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	2de02ce934592c2b	-
+struct	c:@S@_xpc_bool_s	-			-	-	-	-	-	b16ac9a63bc56189	-
+var	c:@_xpc_bool_true	-			const struct _xpc_bool_s	-	-	ios=5.0/-/-/0	-	3cc0cd9299fdbf6e	-
+var	c:@_xpc_bool_false	-			const struct _xpc_bool_s	-	-	ios=5.0/-/-/0	-	1d639ebaee016754	-
+var	c:@_xpc_type_int64	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	9721f61ef417de12	-
+var	c:@_xpc_type_uint64	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	8d18ae9fe117698e	-
+var	c:@_xpc_type_double	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	4b93b9e3f618b444	-
+var	c:@_xpc_type_date	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	34cd2042810a27d5	-
+var	c:@_xpc_type_data	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	49967bef4bda08d0	-
+var	c:@_xpc_type_string	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	0811acd0a311b9b4	-
+var	c:@_xpc_type_uuid	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	a4acacb6b57c8021	-
+var	c:@_xpc_type_fd	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	aabb466b44a4d8f3	-
+var	c:@_xpc_type_shmem	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	f3ca67e4c5f59b8d	-
+var	c:@_xpc_type_array	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	eb6c2b79b71b84cc	-
+var	c:@_xpc_type_dictionary	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	9b8c80eed2ac3a78	-
+var	c:@_xpc_type_error	-			const struct _xpc_type_s	-	-	ios=5.0/-/-/0	-	71e50560694a92d3	-
+var	c:@_xpc_error_key_description	-			const char *const	-	-	ios=5.0/-/-/0	-	4f924fd5038fc0bd	-
+var	c:@_xpc_event_key_name	-			const char *const	-	-	ios=5.0/-/-/0	-	49c3eee3342806c5	-
+var	c:@_xpc_type_rich_error	-			const struct _xpc_type_s	-	-	-	-	1e491f76ab046455	-
+typedef	c:@T@xpc_rich_error_t	-			xpc_object_t	-	-	-	-	e92965d637cf65fa	-
+function	c:@F@xpc_endpoint_create	-			xpc_endpoint_t (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	b369613b0dc590dc	-
+function	c:@F@xpc_debugger_api_misuse_info	-			const char * (void)	-	-	-	-	a4c29f3083e6d249	-
+var	c:@XPC_ACTIVITY_INTERVAL	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	18dae845c33913fd	-
+var	c:@XPC_ACTIVITY_REPEATING	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	c2693c0bbfa8d8b0	-
+var	c:@XPC_ACTIVITY_DELAY	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	cdc2119b9ca18ae7	-
+var	c:@XPC_ACTIVITY_GRACE_PERIOD	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	a4ba0466e9336e14	-
+var	c:@XPC_ACTIVITY_INTERVAL_1_MIN	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	177d84b2c9bc34e4	-
+var	c:@XPC_ACTIVITY_INTERVAL_5_MIN	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	06c6dc73bfa1f016	-
+var	c:@XPC_ACTIVITY_INTERVAL_15_MIN	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	c487769148d8287a	-
+var	c:@XPC_ACTIVITY_INTERVAL_30_MIN	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	576f4bb99e46a2d8	-
+var	c:@XPC_ACTIVITY_INTERVAL_1_HOUR	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	c5342598ec754203	-
+var	c:@XPC_ACTIVITY_INTERVAL_4_HOURS	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	cde048d0b9dabb05	-
+var	c:@XPC_ACTIVITY_INTERVAL_8_HOURS	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	f636dc6672cb349b	-
+var	c:@XPC_ACTIVITY_INTERVAL_1_DAY	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	b14b30abedada1ba	-
+var	c:@XPC_ACTIVITY_INTERVAL_7_DAYS	-			const int64_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	1cfb1aa55fe1fe6b	-
+var	c:@XPC_ACTIVITY_PRIORITY	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	ec25d6b985b15af9	-
+var	c:@XPC_ACTIVITY_PRIORITY_MAINTENANCE	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	bccdba7e19e548af	-
+var	c:@XPC_ACTIVITY_PRIORITY_UTILITY	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	69f012697e3b1a86	-
+var	c:@XPC_ACTIVITY_ALLOW_BATTERY	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	8a1325bafae0cddf	-
+var	c:@XPC_ACTIVITY_REQUIRE_SCREEN_SLEEP	-			const char *const	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	c63e87d6d4eeed54	-
+var	c:@XPC_ACTIVITY_PREVENT_DEVICE_SLEEP	-			const char *const	-	-	ios=-/-/-/1,macos=12.0/-/-/0,watchos=-/-/-/1	-	c94a0a11ecc024f5	-
+var	c:@XPC_ACTIVITY_REQUIRE_BATTERY_LEVEL	-			const char *const	-	-	ios=7.0/7.0/-/0	-	166900d5c2c1a8f6	-
+var	c:@XPC_ACTIVITY_REQUIRE_HDD_SPINNING	-			const char *const	-	-	ios=7.0/7.0/-/0	-	fe204182d0c33ed9	-
+var	c:@_xpc_type_activity	-			const struct _xpc_type_s	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	e114a7a2dd618147	-
+typedef	c:@T@xpc_activity_t	-			xpc_object_t	-	-	-	-	5a505ac3b079557e	-
+typedef	c:@T@xpc_activity_handler_t	-			void ((^))(xpc_activity_t)	-	-	-	-	ebbad7cd87fd5d1c	-
+var	c:@XPC_ACTIVITY_CHECK_IN	-			const xpc_object_t	-	-	ios=-/-/-/1,macos=10.9/-/-/0	-	b1dd8b59a9f116d2	-
+function	c:@F@xpc_activity_register	-			void (const char *, xpc_object_t, xpc_activity_handler_t)	const char * identifier | xpc_object_t criteria | xpc_activity_handler_t handler	-	ios=-/-/-/1,macos=10.9/-/-/0	-	5ded7adc29116389	-
+function	c:@F@xpc_activity_copy_criteria	-			xpc_object_t (xpc_activity_t)	xpc_activity_t activity	-	ios=-/-/-/1,macos=10.9/-/-/0	-	ad3dc0c256dce3ca	-
+function	c:@F@xpc_activity_set_criteria	-			void (xpc_activity_t, xpc_object_t)	xpc_activity_t activity | xpc_object_t criteria	-	ios=-/-/-/1,macos=10.9/-/-/0	-	be8172a4fd40fb24	-
+enum	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN	-	-		unsigned int	-	-	-	-	2f43cc59b149b765	-
+enumconst	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_CHECK_IN	-			-	-	-	-	-	74a6d04f0d1cee87	0
+enumconst	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_WAIT	-			-	-	-	-	-	c9160a5f27f83518	1
+enumconst	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_RUN	-			-	-	-	-	-	86b08d1677cef9b9	2
+enumconst	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_DEFER	-			-	-	-	-	-	42d1115a1e7b0bda	3
+enumconst	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_CONTINUE	-			-	-	-	-	-	f8b68941dc8ba84b	4
+enumconst	c:@Ea@XPC_ACTIVITY_STATE_CHECK_IN@XPC_ACTIVITY_STATE_DONE	-			-	-	-	-	-	13226e2d82a0593c	5
+typedef	c:@T@xpc_activity_state_t	-			long	-	-	-	-	f55cec04706a452c	-
+function	c:@F@xpc_activity_get_state	-			xpc_activity_state_t (xpc_activity_t)	xpc_activity_t activity	-	ios=-/-/-/1,macos=10.9/-/-/0	-	a766496c08955e52	-
+function	c:@F@xpc_activity_set_state	-			_Bool (xpc_activity_t, xpc_activity_state_t)	xpc_activity_t activity | xpc_activity_state_t state	-	ios=-/-/-/1,macos=10.9/-/-/0	-	3b459936060fe1ac	-
+function	c:@F@xpc_activity_should_defer	-			_Bool (xpc_activity_t)	xpc_activity_t activity	-	ios=-/-/-/1,macos=10.9/-/-/0	-	002ca5111e593acd	-
+function	c:@F@xpc_activity_unregister	-			void (const char *)	const char * identifier	-	ios=-/-/-/1,macos=10.9/-/-/0	-	924ebbd27fc2ca54	-
+protocol	c:objc(pl)OS_xpc_peer_requirement	-			-	-	-	swift=-/-/-/1	-	38f9c040d050a3a3	-
+conforms	c:objc(pl)OS_xpc_peer_requirement	OS_xpc_peer_requirement	NSObject		-	-	-	-	-	e1a1bbc0d45b2357	-
+typedef	c:@T@xpc_peer_requirement_t	-			NSObject<OS_xpc_peer_requirement> *	-	-	-	-	a5d8a7e95f9af45d	-
+function	c:@F@xpc_peer_requirement_create_entitlement_exists	-			xpc_peer_requirement_t (const char *, xpc_rich_error_t  _Nullable *)	const char * entitlement | xpc_rich_error_t  _Nullable * error_out	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5fdc2165b5ac63d4	-
+function	c:@F@xpc_peer_requirement_create_entitlement_matches_value	-			xpc_peer_requirement_t (const char *, xpc_object_t, xpc_rich_error_t  _Nullable *)	const char * entitlement | xpc_object_t value | xpc_rich_error_t  _Nullable * error_out	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	9ad790d9dc7b2962	-
+function	c:@F@xpc_peer_requirement_create_team_identity	-			xpc_peer_requirement_t (const char *, xpc_rich_error_t  _Nullable *)	const char * signing_identifier | xpc_rich_error_t  _Nullable * error_out	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ab7e65528058b8cc	-
+function	c:@F@xpc_peer_requirement_create_platform_identity	-			xpc_peer_requirement_t (const char *, xpc_rich_error_t  _Nullable *)	const char * signing_identifier | xpc_rich_error_t  _Nullable * error_out	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7f8b30eac55e7e9c	-
+function	c:@F@xpc_peer_requirement_create_lwcr	-			xpc_peer_requirement_t (xpc_object_t, xpc_rich_error_t  _Nullable *)	xpc_object_t lwcr | xpc_rich_error_t  _Nullable * error_out	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d57a448efd267aeb	-
+function	c:@F@xpc_peer_requirement_match_received_message	-			_Bool (xpc_peer_requirement_t, xpc_object_t, xpc_rich_error_t  _Nullable *)	xpc_peer_requirement_t peer_requirement | xpc_object_t message | xpc_rich_error_t  _Nullable * error_out	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3726e89b731eb8bd	-
+struct	c:@S@_xpc_dictionary_s	-			-	-	-	-	-	9f9176f421d5f3cc	-
+var	c:@_xpc_error_connection_interrupted	-			const struct _xpc_dictionary_s	-	-	ios=5.0/-/-/0	-	10970cdc62921522	-
+var	c:@_xpc_error_connection_invalid	-			const struct _xpc_dictionary_s	-	-	ios=5.0/-/-/0	-	ce0d1a1846a8b27c	-
+var	c:@_xpc_error_termination_imminent	-			const struct _xpc_dictionary_s	-	-	ios=5.0/-/-/0	-	aa9b3b6560b57ded	-
+var	c:@_xpc_error_peer_code_signing_requirement	-			const struct _xpc_dictionary_s	-	-	maccatalyst=15.0/-/-/0,macos=12.0/-/-/0	-	69b71dd36309cbde	-
+typedef	c:@T@xpc_finalizer_t	-			void (*)(void * _Nullable)	-	-	-	-	13d64043a3940c5b	-
+function	c:@F@xpc_connection_create	-			xpc_connection_t (const char *, dispatch_queue_t)	const char * name | dispatch_queue_t targetq	-	ios=5.0/-/-/0	-	012709c2a75126bc	-
+function	c:@F@xpc_connection_create_mach_service	-			xpc_connection_t (const char *, dispatch_queue_t, uint64_t)	const char * name | dispatch_queue_t targetq | uint64_t flags	-	ios=-/-/-/1,maccatalyst=5.0/-/-/0,macos=10.7/-/-/0	-	56c1d6ea1f5c0578	-
+function	c:@F@xpc_connection_create_from_endpoint	-			xpc_connection_t (xpc_endpoint_t)	xpc_endpoint_t endpoint	-	ios=5.0/-/-/0	-	ad7cb9e54b88e84f	-
+function	c:@F@xpc_connection_set_target_queue	-			void (xpc_connection_t, dispatch_queue_t)	xpc_connection_t connection | dispatch_queue_t targetq	-	ios=5.0/-/-/0	-	75ab5307f315116a	-
+function	c:@F@xpc_connection_set_event_handler	-			void (xpc_connection_t, xpc_handler_t)	xpc_connection_t connection | xpc_handler_t handler	-	ios=5.0/-/-/0	-	cbef12bbb27e8ee4	-
+function	c:@F@xpc_connection_activate	-			void (xpc_connection_t)	xpc_connection_t connection	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	abcba29a2ed1092d	-
+function	c:@F@xpc_connection_suspend	-			void (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	01e53302f4344466	-
+function	c:@F@xpc_connection_resume	-			void (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	a25a4576e8cb30d7	-
+function	c:@F@xpc_connection_send_message	-			void (xpc_connection_t, xpc_object_t)	xpc_connection_t connection | xpc_object_t message	-	ios=5.0/-/-/0	-	f35b70628b8d2177	-
+function	c:@F@xpc_connection_send_barrier	-			void (xpc_connection_t, dispatch_block_t)	xpc_connection_t connection | dispatch_block_t barrier	-	ios=5.0/-/-/0	-	d4ea6d27b746803b	-
+function	c:@F@xpc_connection_send_message_with_reply	-			void (xpc_connection_t, xpc_object_t, dispatch_queue_t, xpc_handler_t)	xpc_connection_t connection | xpc_object_t message | dispatch_queue_t replyq | xpc_handler_t handler	-	ios=5.0/-/-/0	-	487dd6c09b155ad7	-
+function	c:@F@xpc_connection_send_message_with_reply_sync	-			xpc_object_t (xpc_connection_t, xpc_object_t)	xpc_connection_t connection | xpc_object_t message	-	ios=5.0/-/-/0	-	0c6ee79eee2f9f29	-
+function	c:@F@xpc_connection_cancel	-			void (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	67f851d0c72719eb	-
+function	c:@F@xpc_connection_get_name	-			const char * (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	23e706412f7c7c9e	-
+function	c:@F@xpc_connection_get_euid	-			uid_t (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	b1da6988a64e00f3	-
+function	c:@F@xpc_connection_get_egid	-			gid_t (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	9c6563321edcbf42	-
+function	c:@F@xpc_connection_get_pid	-			pid_t (xpc_connection_t)	xpc_connection_t connection	-	ios=-/-/-/1,macos=10.7/-/-/0	-	9952fc7e554f0118	-
+function	c:@F@xpc_connection_get_asid	-			au_asid_t (xpc_connection_t)	xpc_connection_t connection	-	ios=-/-/-/1,macos=10.7/-/-/0	-	7252da788dbe030d	-
+function	c:@F@xpc_connection_set_context	-			void (xpc_connection_t, void *)	xpc_connection_t connection | void * context	-	ios=5.0/-/-/0	-	bb44f5c40f9ac7aa	-
+function	c:@F@xpc_connection_get_context	-			void * (xpc_connection_t)	xpc_connection_t connection	-	ios=5.0/-/-/0	-	51a9ee46a00290e4	-
+function	c:@F@xpc_connection_set_finalizer_f	-			void (xpc_connection_t, xpc_finalizer_t)	xpc_connection_t connection | xpc_finalizer_t finalizer	-	ios=5.0/-/-/0	-	c885bbbeb20b3432	-
+function	c:@F@xpc_connection_set_peer_code_signing_requirement	-			int (xpc_connection_t, const char *)	xpc_connection_t connection | const char * requirement	-	ios=-/-/-/1,maccatalyst=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7a647807494b3231	-
+function	c:@F@xpc_connection_set_peer_entitlement_exists_requirement	-			int (xpc_connection_t, const char *)	xpc_connection_t connection | const char * entitlement	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	185b7b888275b4a0	-
+function	c:@F@xpc_connection_set_peer_entitlement_matches_value_requirement	-			int (xpc_connection_t, const char *, xpc_object_t)	xpc_connection_t connection | const char * entitlement | xpc_object_t value	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bfb14f988c1ca15b	-
+function	c:@F@xpc_connection_set_peer_team_identity_requirement	-			int (xpc_connection_t, const char *)	xpc_connection_t connection | const char * signing_identifier	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a0e5291fd76b93ad	-
+function	c:@F@xpc_connection_set_peer_platform_identity_requirement	-			int (xpc_connection_t, const char *)	xpc_connection_t connection | const char * signing_identifier	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	65d2cb8b86a701a1	-
+function	c:@F@xpc_connection_set_peer_lightweight_code_requirement	-			int (xpc_connection_t, xpc_object_t)	xpc_connection_t connection | xpc_object_t lwcr	-	ios=17.4/-/-/0,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d18ecce175919cb1	-
+function	c:@F@xpc_connection_set_peer_requirement	-			void (xpc_connection_t, xpc_peer_requirement_t)	xpc_connection_t connection | xpc_peer_requirement_t peer_requirement	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bee32eb763d52a25	-
+function	c:@F@xpc_connection_copy_invalidation_reason	-			char * (xpc_connection_t)	xpc_connection_t connection	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	163810c390529eba	-
+function	c:@F@xpc_rich_error_copy_description	-			char * (xpc_rich_error_t)	xpc_rich_error_t error	-	-	-	3502eb11c1e0cbee	-
+function	c:@F@xpc_rich_error_can_retry	-			_Bool (xpc_rich_error_t)	xpc_rich_error_t error	-	-	-	fb6ff5fe89dd850f	-
+protocol	c:objc(pl)OS_xpc_session	-			-	-	-	-	-	061a2c6bf8338036	-
+conforms	c:objc(pl)OS_xpc_session	OS_xpc_session	NSObject		-	-	-	-	-	b0a83a741846212f	-
+typedef	c:@T@xpc_session_t	-			NSObject<OS_xpc_session> *	-	-	-	-	c6bc03b4f35f8cd3	-
+enum	c:@EA@xpc_session_create_flags_t	-			uint64_t	-	-	-	-	7ebb6cec9919d9c9	-
+enumconst	c:@EA@xpc_session_create_flags_t@XPC_SESSION_CREATE_NONE	xpc_session_create_flags_t			-	-	-	-	-	b14c57f361ed47ee	0
+enumconst	c:@EA@xpc_session_create_flags_t@XPC_SESSION_CREATE_INACTIVE	xpc_session_create_flags_t			-	-	-	-	-	882f68725a17759b	1
+enumconst	c:@EA@xpc_session_create_flags_t@XPC_SESSION_CREATE_MACH_PRIVILEGED	xpc_session_create_flags_t			-	-	-	-	-	4280350a284c2078	2
+typedef	c:@T@xpc_session_create_flags_t	-			enum xpc_session_create_flags_t	-	-	swift=-/-/-/1	-	b7d6501d3af1e66b	-
+typedef	c:@T@xpc_session_cancel_handler_t	-			void ((^))(xpc_rich_error_t)	-	-	swift=-/-/-/1	-	c4a8b0bc628fb2cd	-
+typedef	c:@T@xpc_session_incoming_message_handler_t	-			void ((^))(xpc_object_t)	-	-	swift=-/-/-/1	-	06e977e753371f2a	-
+typedef	c:@T@xpc_session_reply_handler_t	-			void ((^))(xpc_object_t, xpc_rich_error_t)	-	-	swift=-/-/-/1	-	5c94b957e41f0e5a	-
+function	c:@F@xpc_session_copy_description	-			char * (xpc_session_t)	xpc_session_t session	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	53e32c7bf146beb6	-
+function	c:@F@xpc_session_create_xpc_service	-			xpc_session_t (const char *, dispatch_queue_t, xpc_session_create_flags_t, xpc_rich_error_t  _Nullable *)	const char * name | dispatch_queue_t target_queue | xpc_session_create_flags_t flags | xpc_rich_error_t  _Nullable * error_out	-	ios=-/-/-/1,maccatalyst=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	65b74ebd78f71de7	-
+function	c:@F@xpc_session_create_mach_service	-			xpc_session_t (const char *, dispatch_queue_t, xpc_session_create_flags_t, xpc_rich_error_t  _Nullable *)	const char * mach_service | dispatch_queue_t target_queue | xpc_session_create_flags_t flags | xpc_rich_error_t  _Nullable * error_out	-	ios=-/-/-/1,maccatalyst=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4512ceab9eaf9154	-
+function	c:@F@xpc_session_set_incoming_message_handler	-			void (xpc_session_t, xpc_session_incoming_message_handler_t)	xpc_session_t session | xpc_session_incoming_message_handler_t handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	8b8f197e0cfbf02f	-
+function	c:@F@xpc_session_set_cancel_handler	-			void (xpc_session_t, xpc_session_cancel_handler_t)	xpc_session_t session | xpc_session_cancel_handler_t cancel_handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	0f21c411aeb554a8	-
+function	c:@F@xpc_session_set_target_queue	-			void (xpc_session_t, dispatch_queue_t)	xpc_session_t session | dispatch_queue_t target_queue	-	ios=17.0/-/-/0,macos=14.0/-/-/0,swift=-/-/-/1,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	faf6bb725938ca2a	-
+function	c:@F@xpc_session_activate	-			_Bool (xpc_session_t, xpc_rich_error_t  _Nullable *)	xpc_session_t session | xpc_rich_error_t  _Nullable * error_out	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	04df38e3c1f1c99a	-
+function	c:@F@xpc_session_cancel	-			void (xpc_session_t)	xpc_session_t session	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	5e40dd0c29e2ed6f	-
+function	c:@F@xpc_session_send_message	-			xpc_rich_error_t (xpc_session_t, xpc_object_t)	xpc_session_t session | xpc_object_t message	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	af123fc590f92e82	-
+function	c:@F@xpc_session_send_message_with_reply_sync	-			xpc_object_t (xpc_session_t, xpc_object_t, xpc_rich_error_t  _Nullable *)	xpc_session_t session | xpc_object_t message | xpc_rich_error_t  _Nullable * error_out	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	6ae0cded380ada9e	-
+function	c:@F@xpc_session_send_message_with_reply_async	-			void (xpc_session_t, xpc_object_t, xpc_session_reply_handler_t)	xpc_session_t session | xpc_object_t message | xpc_session_reply_handler_t reply_handler	-	ios=16.0/-/-/0,macos=13.0/-/-/0,swift=-/-/-/1,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	11dbfa642dc3fbfc	-
+function	c:@F@xpc_session_set_peer_code_signing_requirement	-			int (xpc_session_t, const char *)	xpc_session_t session | const char * requirement	-	ios=-/-/-/1,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ddf47405caad49ca	-
+function	c:@F@xpc_session_set_peer_requirement	-			void (xpc_session_t, xpc_peer_requirement_t)	xpc_session_t session | xpc_peer_requirement_t requirement	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	de7b0436ae103d81	-
+var	c:@_xpc_type_session	-			const struct _xpc_type_s	-	-	-	-	b4718eff9bffee35	-
+protocol	c:objc(pl)OS_xpc_listener	-			-	-	-	-	-	a0db898cebb1a4f9	-
+conforms	c:objc(pl)OS_xpc_listener	OS_xpc_listener	NSObject		-	-	-	-	-	1f094947421652c2	-
+typedef	c:@T@xpc_listener_t	-			NSObject<OS_xpc_listener> *	-	-	-	-	171223652a1fea60	-
+enum	c:@EA@xpc_listener_create_flags_t	-			uint64_t	-	-	-	-	85ecf212187d610b	-
+enumconst	c:@EA@xpc_listener_create_flags_t@XPC_LISTENER_CREATE_NONE	xpc_listener_create_flags_t			-	-	-	-	-	9fe0de64e2bdccea	0
+enumconst	c:@EA@xpc_listener_create_flags_t@XPC_LISTENER_CREATE_INACTIVE	xpc_listener_create_flags_t			-	-	-	-	-	ccdaa10cec2de00f	1
+enumconst	c:@EA@xpc_listener_create_flags_t@XPC_LISTENER_CREATE_FORCE_MACH	xpc_listener_create_flags_t			-	-	-	-	-	222cc402c7fa0bef	2
+enumconst	c:@EA@xpc_listener_create_flags_t@XPC_LISTENER_CREATE_FORCE_XPCSERVICE	xpc_listener_create_flags_t			-	-	-	-	-	eb932613698630e8	4
+typedef	c:@T@xpc_listener_create_flags_t	-			enum xpc_listener_create_flags_t	-	-	swift=-/-/-/1	-	9d3369ac451d6c53	-
+typedef	c:@T@xpc_listener_incoming_session_handler_t	-			void ((^))(xpc_session_t)	-	-	-	-	b97e0db894387695	-
+function	c:@F@xpc_listener_copy_description	-			char * (xpc_listener_t)	xpc_listener_t listener	-	ios=-/-/-/1,maccatalyst=17.0/-/-/0,macos=14.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	860159337b2935cb	-
+function	c:@F@xpc_listener_create	-			xpc_listener_t (const char *, dispatch_queue_t, xpc_listener_create_flags_t, xpc_listener_incoming_session_handler_t, xpc_rich_error_t  _Nullable *)	const char * service | dispatch_queue_t target_queue | xpc_listener_create_flags_t flags | xpc_listener_incoming_session_handler_t incoming_session_handler | xpc_rich_error_t  _Nullable * error_out	-	ios=-/-/-/1,maccatalyst=17.0/-/-/0,macos=14.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	349b95c58514b718	-
+function	c:@F@xpc_listener_activate	-			_Bool (xpc_listener_t, xpc_rich_error_t  _Nullable *)	xpc_listener_t listener | xpc_rich_error_t  _Nullable * error_out	-	ios=-/-/-/1,maccatalyst=17.0/-/-/0,macos=14.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b796d0c4f7121b9a	-
+function	c:@F@xpc_listener_cancel	-			void (xpc_listener_t)	xpc_listener_t listener	-	ios=-/-/-/1,maccatalyst=17.0/-/-/0,macos=14.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f4426e011338558f	-
+function	c:@F@xpc_listener_reject_peer	-			void (xpc_session_t, const char *)	xpc_session_t peer | const char * reason	-	ios=-/-/-/1,maccatalyst=17.0/-/-/0,macos=14.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6d3289dd41b141a2	-
+function	c:@F@xpc_listener_set_peer_code_signing_requirement	-			int (xpc_listener_t, const char *)	xpc_listener_t listener | const char * requirement	-	ios=-/-/-/1,macos=14.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	00298bd941ddb25f	-
+function	c:@F@xpc_listener_set_peer_requirement	-			void (xpc_listener_t, xpc_peer_requirement_t)	xpc_listener_t listener | xpc_peer_requirement_t requirement	-	ios=26.0/-/-/0,macos=26.0/-/-/0,swift=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2877dac58c9804e3	-
+function	c:@F@xpc_retain	-			xpc_object_t (xpc_object_t)	xpc_object_t object	-	ios=5.0/-/-/0	-	f140f7a9787d4e1d	-
+function	c:@F@xpc_release	-			void (xpc_object_t)	xpc_object_t object	-	ios=5.0/-/-/0	-	3f7129765dd9ce1b	-
+function	c:@F@xpc_get_type	-			xpc_type_t (xpc_object_t)	xpc_object_t object	-	ios=5.0/-/-/0	-	a9e695e59b36fc56	-
+function	c:@F@xpc_type_get_name	-			const char * (xpc_type_t)	xpc_type_t type	-	ios=13.0/-/-/0	-	c5f58f9ceb4e0eba	-
+function	c:@F@xpc_copy	-			xpc_object_t (xpc_object_t)	xpc_object_t object	-	ios=5.0/-/-/0	-	9113684b67d375fc	-
+function	c:@F@xpc_equal	-			_Bool (xpc_object_t, xpc_object_t)	xpc_object_t object1 | xpc_object_t object2	-	ios=5.0/-/-/0	-	37e62daf92db038d	-
+function	c:@F@xpc_hash	-			size_t (xpc_object_t)	xpc_object_t object	-	ios=5.0/-/-/0	-	12582d7a19704de3	-
+function	c:@F@xpc_copy_description	-			char * (xpc_object_t)	xpc_object_t object	-	ios=5.0/-/-/0	-	d46daf9f7803d786	-
+function	c:@F@xpc_null_create	-			xpc_object_t (void)	-	-	ios=5.0/-/-/0	-	deb5c20f8cf75e54	-
+function	c:@F@xpc_bool_create	-			xpc_object_t (_Bool)	_Bool value	-	ios=5.0/-/-/0	-	1a2b84547e4f3eb8	-
+function	c:@F@xpc_bool_get_value	-			_Bool (xpc_object_t)	xpc_object_t xbool	-	ios=5.0/-/-/0	-	e89a40d72e689e59	-
+function	c:@F@xpc_int64_create	-			xpc_object_t (int64_t)	int64_t value	-	ios=5.0/-/-/0	-	b7c6f68e85d30b34	-
+function	c:@F@xpc_int64_get_value	-			int64_t (xpc_object_t)	xpc_object_t xint	-	ios=5.0/-/-/0	-	f7ba56ec181314a9	-
+function	c:@F@xpc_uint64_create	-			xpc_object_t (uint64_t)	uint64_t value	-	ios=5.0/-/-/0	-	32f3f7711ca76235	-
+function	c:@F@xpc_uint64_get_value	-			uint64_t (xpc_object_t)	xpc_object_t xuint	-	ios=5.0/-/-/0	-	dcd46cc1bf2a28c4	-
+function	c:@F@xpc_double_create	-			xpc_object_t (double)	double value	-	ios=5.0/-/-/0	-	99ca6c8466a0f231	-
+function	c:@F@xpc_double_get_value	-			double (xpc_object_t)	xpc_object_t xdouble	-	ios=5.0/-/-/0	-	ef25707490096379	-
+function	c:@F@xpc_date_create	-			xpc_object_t (int64_t)	int64_t interval	-	ios=5.0/-/-/0	-	fe410724fc0e3744	-
+function	c:@F@xpc_date_create_from_current	-			xpc_object_t (void)	-	-	ios=5.0/-/-/0	-	c9440f8f1b1016d0	-
+function	c:@F@xpc_date_get_value	-			int64_t (xpc_object_t)	xpc_object_t xdate	-	ios=5.0/-/-/0	-	3669f4fc0f1c41c8	-
+function	c:@F@xpc_data_create	-			xpc_object_t (const void *, size_t)	const void * bytes | size_t length	-	ios=5.0/-/-/0	-	881cd58a4bf36b48	-
+function	c:@F@xpc_data_create_with_dispatch_data	-			xpc_object_t (dispatch_data_t)	dispatch_data_t ddata	-	ios=5.0/-/-/0	-	c95d1391a4a39a87	-
+function	c:@F@xpc_data_get_length	-			size_t (xpc_object_t)	xpc_object_t xdata	-	ios=5.0/-/-/0	-	2e2544d7925bf552	-
+function	c:@F@xpc_data_get_bytes_ptr	-			const void * (xpc_object_t)	xpc_object_t xdata	-	ios=5.0/-/-/0	-	396b43cdfd414b5c	-
+function	c:@F@xpc_data_get_bytes	-			size_t (xpc_object_t, void *, size_t, size_t)	xpc_object_t xdata | void * buffer | size_t off | size_t length	-	ios=5.0/-/-/0	-	04e8929320d398a9	-
+function	c:@F@xpc_string_create	-			xpc_object_t (const char *)	const char * string	-	ios=5.0/-/-/0	-	58efa04ceda11dc5	-
+function	c:@F@xpc_string_create_with_format	-			xpc_object_t (const char *, ...)	const char * fmt	variadic	ios=5.0/-/-/0	-	777a745bc45ae575	-
+function	c:@F@xpc_string_create_with_format_and_arguments	-			xpc_object_t (const char *, va_list)	const char * fmt | va_list ap	-	ios=5.0/-/-/0	-	22c27cd2952e0564	-
+function	c:@F@xpc_string_get_length	-			size_t (xpc_object_t)	xpc_object_t xstring	-	ios=5.0/-/-/0	-	b4dd207079bd187c	-
+function	c:@F@xpc_string_get_string_ptr	-			const char * (xpc_object_t)	xpc_object_t xstring	-	ios=5.0/-/-/0	-	195f0894ab1e0328	-
+function	c:@F@xpc_uuid_create	-			xpc_object_t (const uuid_t)	const uuid_t uuid	-	ios=5.0/-/-/0	-	38359e1186084af3	-
+function	c:@F@xpc_uuid_get_bytes	-			const uint8_t * (xpc_object_t)	xpc_object_t xuuid	-	ios=5.0/-/-/0	-	ffeff0e30570ef95	-
+function	c:@F@xpc_fd_create	-			xpc_object_t (int)	int fd	-	ios=5.0/-/-/0	-	4b5186f44f376dec	-
+function	c:@F@xpc_fd_dup	-			int (xpc_object_t)	xpc_object_t xfd	-	ios=5.0/-/-/0	-	4c1a7bd7bd1a4580	-
+function	c:@F@xpc_shmem_create	-			xpc_object_t (void *, size_t)	void * region | size_t length	-	ios=5.0/-/-/0	-	efe74ac616a0c805	-
+function	c:@F@xpc_shmem_map	-			size_t (xpc_object_t, void * _Nullable *)	xpc_object_t xshmem | void * _Nullable * region	-	ios=5.0/-/-/0	-	7ae9c118142732b5	-
+typedef	c:@T@xpc_array_applier_t	-			_Bool ((^))(size_t, xpc_object_t)	-	-	-	-	d1ca3504e0920955	-
+function	c:@F@xpc_array_create	-			xpc_object_t (xpc_object_t  _Nonnull const *, size_t)	xpc_object_t  _Nonnull const * objects | size_t count	-	ios=5.0/-/-/0	-	13a28b87e339dd8f	-
+function	c:@F@xpc_array_create_empty	-			xpc_object_t (void)	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	e06d33c4c871adfc	-
+function	c:@F@xpc_array_set_value	-			void (xpc_object_t, size_t, xpc_object_t)	xpc_object_t xarray | size_t index | xpc_object_t value	-	ios=5.0/-/-/0	-	bf17d801ca2678a4	-
+function	c:@F@xpc_array_append_value	-			void (xpc_object_t, xpc_object_t)	xpc_object_t xarray | xpc_object_t value	-	ios=5.0/-/-/0	-	512f1a105d1c8e32	-
+function	c:@F@xpc_array_get_count	-			size_t (xpc_object_t)	xpc_object_t xarray	-	ios=5.0/-/-/0	-	c4b80762f06054ad	-
+function	c:@F@xpc_array_get_value	-			xpc_object_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	0671106baaa03825	-
+function	c:@F@xpc_array_apply	-			_Bool (xpc_object_t, xpc_array_applier_t)	xpc_object_t xarray | xpc_array_applier_t applier	-	ios=5.0/-/-/0	-	c754657082820ab7	-
+function	c:@F@xpc_array_set_bool	-			void (xpc_object_t, size_t, _Bool)	xpc_object_t xarray | size_t index | _Bool value	-	ios=5.0/-/-/0	-	f153a6fa3499f2c5	-
+function	c:@F@xpc_array_set_int64	-			void (xpc_object_t, size_t, int64_t)	xpc_object_t xarray | size_t index | int64_t value	-	ios=5.0/-/-/0	-	ea6c3e96dbd6d12d	-
+function	c:@F@xpc_array_set_uint64	-			void (xpc_object_t, size_t, uint64_t)	xpc_object_t xarray | size_t index | uint64_t value	-	ios=5.0/-/-/0	-	eb7c0fb6b7586ced	-
+function	c:@F@xpc_array_set_double	-			void (xpc_object_t, size_t, double)	xpc_object_t xarray | size_t index | double value	-	ios=5.0/-/-/0	-	732ec6deee32e7c4	-
+function	c:@F@xpc_array_set_date	-			void (xpc_object_t, size_t, int64_t)	xpc_object_t xarray | size_t index | int64_t value	-	ios=5.0/-/-/0	-	16da543919b9eccc	-
+function	c:@F@xpc_array_set_data	-			void (xpc_object_t, size_t, const void *, size_t)	xpc_object_t xarray | size_t index | const void * bytes | size_t length	-	ios=5.0/-/-/0	-	158d331b371bc3d3	-
+function	c:@F@xpc_array_set_string	-			void (xpc_object_t, size_t, const char *)	xpc_object_t xarray | size_t index | const char * string	-	ios=5.0/-/-/0	-	8761de45d2b7dd55	-
+function	c:@F@xpc_array_set_uuid	-			void (xpc_object_t, size_t, const uuid_t)	xpc_object_t xarray | size_t index | const uuid_t uuid	-	ios=5.0/-/-/0	-	00284066f59e56f8	-
+function	c:@F@xpc_array_set_fd	-			void (xpc_object_t, size_t, int)	xpc_object_t xarray | size_t index | int fd	-	ios=5.0/-/-/0	-	c04b20c34af5b77b	-
+function	c:@F@xpc_array_set_connection	-			void (xpc_object_t, size_t, xpc_connection_t)	xpc_object_t xarray | size_t index | xpc_connection_t connection	-	ios=5.0/-/-/0	-	f3103ede89fc683a	-
+function	c:@F@xpc_array_get_bool	-			_Bool (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	7605187449c7d308	-
+function	c:@F@xpc_array_get_int64	-			int64_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	899ef63b99c5f838	-
+function	c:@F@xpc_array_get_uint64	-			uint64_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	7dfb83e555a73d95	-
+function	c:@F@xpc_array_get_double	-			double (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	e22f2d9153986274	-
+function	c:@F@xpc_array_get_date	-			int64_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	20f56695498173d7	-
+function	c:@F@xpc_array_get_data	-			const void * (xpc_object_t, size_t, size_t *)	xpc_object_t xarray | size_t index | size_t * length	-	ios=5.0/-/-/0	-	4fec8f980eae4d5a	-
+function	c:@F@xpc_array_get_string	-			const char * (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	ebccfde0f6dcd931	-
+function	c:@F@xpc_array_get_uuid	-			const uint8_t * (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	74ca10ad84cb0716	-
+function	c:@F@xpc_array_dup_fd	-			int (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	9f03a8f4049749cb	-
+function	c:@F@xpc_array_create_connection	-			xpc_connection_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=5.0/-/-/0	-	23e6adba48d991e5	-
+function	c:@F@xpc_array_get_dictionary	-			xpc_object_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=9.0/-/-/0	-	d8f2747de3e61ef8	-
+function	c:@F@xpc_array_get_array	-			xpc_object_t (xpc_object_t, size_t)	xpc_object_t xarray | size_t index	-	ios=9.0/-/-/0	-	5436be97694fc3ed	-
+typedef	c:@T@xpc_dictionary_applier_t	-			_Bool ((^))(const char *, xpc_object_t)	-	-	-	-	506f5c4c54c15d38	-
+function	c:@F@xpc_dictionary_create	-			xpc_object_t (const char *const  _Nonnull *, xpc_object_t  _Nullable const *, size_t)	const char *const  _Nonnull * keys | xpc_object_t  _Nullable const * values | size_t count	-	ios=5.0/-/-/0	-	b22564c571a09d7b	-
+function	c:@F@xpc_dictionary_create_empty	-			xpc_object_t (void)	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	59e13b75035f825f	-
+function	c:@F@xpc_dictionary_create_reply	-			xpc_object_t (xpc_object_t)	xpc_object_t original	-	ios=5.0/-/-/0	-	1ed32a2ebea0df35	-
+function	c:@F@xpc_dictionary_set_value	-			void (xpc_object_t, const char *, xpc_object_t)	xpc_object_t xdict | const char * key | xpc_object_t value	-	ios=5.0/-/-/0	-	a0edc62015f313c4	-
+function	c:@F@xpc_dictionary_get_value	-			xpc_object_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	9869e3f380a3be57	-
+function	c:@F@xpc_dictionary_get_count	-			size_t (xpc_object_t)	xpc_object_t xdict	-	ios=5.0/-/-/0	-	dc3626f2ebb40dd3	-
+function	c:@F@xpc_dictionary_apply	-			_Bool (xpc_object_t, xpc_dictionary_applier_t)	xpc_object_t xdict | xpc_dictionary_applier_t applier	-	ios=5.0/-/-/0	-	9a0f5b1679fd97d7	-
+function	c:@F@xpc_dictionary_get_remote_connection	-			xpc_connection_t (xpc_object_t)	xpc_object_t xdict	-	ios=5.0/-/-/0	-	8c9cfda8c1dac2f4	-
+function	c:@F@xpc_dictionary_set_bool	-			void (xpc_object_t, const char *, _Bool)	xpc_object_t xdict | const char * key | _Bool value	-	ios=5.0/-/-/0	-	b4623db5e6714fd3	-
+function	c:@F@xpc_dictionary_set_int64	-			void (xpc_object_t, const char *, int64_t)	xpc_object_t xdict | const char * key | int64_t value	-	ios=5.0/-/-/0	-	f976598b43a24318	-
+function	c:@F@xpc_dictionary_set_uint64	-			void (xpc_object_t, const char *, uint64_t)	xpc_object_t xdict | const char * key | uint64_t value	-	ios=5.0/-/-/0	-	85108b82f375c691	-
+function	c:@F@xpc_dictionary_set_double	-			void (xpc_object_t, const char *, double)	xpc_object_t xdict | const char * key | double value	-	ios=5.0/-/-/0	-	53d4adf8e0515f68	-
+function	c:@F@xpc_dictionary_set_date	-			void (xpc_object_t, const char *, int64_t)	xpc_object_t xdict | const char * key | int64_t value	-	ios=5.0/-/-/0	-	69aa3d63e3962421	-
+function	c:@F@xpc_dictionary_set_data	-			void (xpc_object_t, const char *, const void *, size_t)	xpc_object_t xdict | const char * key | const void * bytes | size_t length	-	ios=5.0/-/-/0	-	4be320c1af5a3ea0	-
+function	c:@F@xpc_dictionary_set_string	-			void (xpc_object_t, const char *, const char *)	xpc_object_t xdict | const char * key | const char * string	-	ios=5.0/-/-/0	-	f2b05e4721cff11f	-
+function	c:@F@xpc_dictionary_set_uuid	-			void (xpc_object_t, const char *, const uuid_t)	xpc_object_t xdict | const char * key | const uuid_t uuid	-	ios=5.0/-/-/0	-	ca533758a663957e	-
+function	c:@F@xpc_dictionary_set_fd	-			void (xpc_object_t, const char *, int)	xpc_object_t xdict | const char * key | int fd	-	ios=5.0/-/-/0	-	a4f5d416537cbb3d	-
+function	c:@F@xpc_dictionary_set_connection	-			void (xpc_object_t, const char *, xpc_connection_t)	xpc_object_t xdict | const char * key | xpc_connection_t connection	-	ios=5.0/-/-/0	-	b7125b822022dfee	-
+function	c:@F@xpc_dictionary_set_mach_send	-			void (xpc_object_t, const char *, mach_port_t)	xpc_object_t xdict | const char * key | mach_port_t p	-	ios=5.0/-/-/0	-	32a52f0b1b4ca487	-
+function	c:@F@xpc_dictionary_get_bool	-			_Bool (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	e78482df248e2716	-
+function	c:@F@xpc_dictionary_get_int64	-			int64_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	e984269ba7d1785d	-
+function	c:@F@xpc_dictionary_get_uint64	-			uint64_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	f917dacdf0538f98	-
+function	c:@F@xpc_dictionary_get_double	-			double (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	2ba62a7298423dee	-
+function	c:@F@xpc_dictionary_get_date	-			int64_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	a61fa831505dad6e	-
+function	c:@F@xpc_dictionary_get_data	-			const void * (xpc_object_t, const char *, size_t *)	xpc_object_t xdict | const char * key | size_t * length	-	ios=5.0/-/-/0	-	77b56813dc36052d	-
+function	c:@F@xpc_dictionary_get_string	-			const char * (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	6d91560a8a3be905	-
+function	c:@F@xpc_dictionary_get_uuid	-			const uint8_t * (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	cd2fd79ea5d5fcaa	-
+function	c:@F@xpc_dictionary_dup_fd	-			int (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	55e9cbe55b76cb5b	-
+function	c:@F@xpc_dictionary_create_connection	-			xpc_connection_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	826ce70bc3574e23	-
+function	c:@F@xpc_dictionary_get_dictionary	-			xpc_object_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=9.0/-/-/0	-	bf688aca3478aab3	-
+function	c:@F@xpc_dictionary_get_array	-			xpc_object_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=9.0/-/-/0	-	8190066637424e69	-
+function	c:@F@xpc_dictionary_copy_mach_send	-			mach_port_t (xpc_object_t, const char *)	xpc_object_t xdict | const char * key	-	ios=5.0/-/-/0	-	79c9af3412fa3789	-
+function	c:@F@xpc_main	-			void (xpc_connection_handler_t)	xpc_connection_handler_t handler	-	ios=-/-/-/1,maccatalyst=5.0/-/-/0,macos=10.7/-/-/0	-	3d57666cdf933c4c	-
+function	c:@F@xpc_transaction_begin	-			void (void)	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	ff8f7f5974359fd3	-
+function	c:@F@xpc_transaction_end	-			void (void)	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	307d510814b22627	-
+function	c:@F@xpc_set_event_stream_handler	-			void (const char *, dispatch_queue_t, xpc_handler_t)	const char * stream | dispatch_queue_t targetq | xpc_handler_t handler	-	ios=-/-/-/1,macos=10.7/-/-/0	-	13bbce47a4c70ea5	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@dispatch_block_t	-			void ((^))(void)	-	-	swift=-/-/-/1	-	802eb6965171e2dc	-
+typedef	c:@T@uid_t	-			__darwin_uid_t	-	-	-	-	6084ffa514638080	-
+typedef	c:@T@__darwin_uid_t	-			__uint32_t	-	-	-	-	073c04a7a5ce4f9c	-
+typedef	c:@T@__uint32_t	-			unsigned int	-	-	-	-	c165177149766f1f	-
+typedef	c:@T@gid_t	-			__darwin_gid_t	-	-	-	-	a7ab6a243ada7837	-
+typedef	c:@T@__darwin_gid_t	-			__uint32_t	-	-	-	-	0bd5f511332b23bd	-
+typedef	c:@T@pid_t	-			__darwin_pid_t	-	-	-	-	bf2c1907ad5396d7	-
+typedef	c:@T@__darwin_pid_t	-			__int32_t	-	-	-	-	cb5c92904c281d82	-
+typedef	c:@T@__int32_t	-			int	-	-	-	-	71b73741152fe871	-
+typedef	c:@T@au_asid_t	-			pid_t	-	-	-	-	53cc1ed22edbbb3e	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@dispatch_data_t	-			NSObject<OS_dispatch_data> *	-	-	-	-	b1e775f000ec6171	-
+typedef	c:@T@va_list	-			__builtin_va_list	-	-	-	-	88519b6121af0d9d	-
+typedef	c:@T@__builtin_va_list	-			char *	-	-	-	-	954c872416ff897e	-
+typedef	c:@T@uuid_t	-			__darwin_uuid_t	-	-	-	-	9f32779f176ee30f	-
+typedef	c:@T@__darwin_uuid_t	-			unsigned char[16]	-	-	-	-	8e41facc8ea29412	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-

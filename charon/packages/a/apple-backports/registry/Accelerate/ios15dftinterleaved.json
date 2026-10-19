@@ -1,0 +1,71 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_DFT_Interleaved_CreateSetup()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "reason": "a setup for the interleaved transform, carrying its length, direction and form, and refusing every length the release refuses",
+      "effect": "a setup for Length = f * 2**n with f in {2, 3, 5, 9, 15} and n >= 2 - the host's set, measured over 1 to 1024 with 0 disagreements, and NOT the header's list, which adds 5*5 = 25 that the release does not implement (25, 100, 200, 400 and 800 are all refused). NULL otherwise",
+      "facts": "facts/Accelerate/vDSPDFTInterleaved.md",
+      "source": "the header of iOS 16.4 and the release's own vDSP on the host: the accepted-length set over 1 to 1024, the packing and unpacking by impulse, and the transforms themselves, held to the error bound of the facts file over the 31 accepted lengths in both forms and both directions by tests/backports/host/vdspdft15, which the host and the port both pass"
+    },
+    {
+      "api": "vDSP_DFT_Interleaved_DestroySetup()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "reason": "frees the setup this band's CreateSetup returned",
+      "effect": "the port's own object freed; NULL is not a crash",
+      "facts": "facts/Accelerate/vDSPDFTInterleaved.md",
+      "source": "the header of iOS 16.4 and the release's own vDSP on the host: the accepted-length set over 1 to 1024, the packing and unpacking by impulse, and the transforms themselves, held to the error bound of the facts file over the 31 accepted lengths in both forms and both directions by tests/backports/host/vdspdft15, which the host and the port both pass"
+    },
+    {
+      "api": "vDSP_DFT_Interleaved_Execute()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "reason": "the interleaved transform, with the length, direction and form taken from the setup - Execute is given no stride, no direction and no length",
+      "effect": "complex-to-complex is a direct sum over N values, accumulated in double and rounded to float once per element, inside the error bound of facts/Accelerate/vDSPDFTInterleaved.md section 5 in both directions (not bit exact with the host, which is inside the same bound); real-to-complex packs the 2*Length real signal as in[n] = (x[2n], x[2n+1]), runs the verified complex forward of length Length, and splits it - E_k = (Z_k + conj Z_{N-k})/2, O_k = (Z_k - conj Z_{N-k})/(2i), X_k = E_k + e^{-i*pi*k/N}*O_k, X_N = E_0 - O_0 - then writes o[0] = (2*X_0, 2*X_N) and o[k] = 2*X_k, the x2 being vDSP's real-transform scale. The inverse is the measured unpacking: o[0].real gives every sample 1, o[0].imag gives (-1)^j, o[k] gives 2*cos and -2*sin",
+      "facts": "facts/Accelerate/vDSPDFTInterleaved.md",
+      "source": "the header of iOS 16.4 and the release's own vDSP on the host: the accepted-length set over 1 to 1024, the packing and unpacking by impulse, and the transforms themselves, held to the error bound of the facts file over the 31 accepted lengths in both forms and both directions by tests/backports/host/vdspdft15, which the host and the port both pass"
+    },
+    {
+      "api": "vDSP_DFT_Interleaved_CreateSetupD()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "reason": "the double-precision form of a setup for the interleaved transform, carrying its length, direction and form, and refusing every length the release refuses; it allocates every buffer Execute needs, so Execute never allocates (vDSPDFTInterleavedD15.m)",
+      "effect": "a setup for Length = f * 2**n with f in {2, 3, 5, 9, 15} and n >= 2 - the host's set, measured over 1 to 1024 with 0 disagreements, and NOT the header's list, which adds 5*5 = 25 that the release does not implement (25, 100, 200, 400 and 800 are all refused). NULL otherwise, including when a buffer cannot be allocated",
+      "facts": "facts/Accelerate/vDSPDFTInterleaved.md",
+      "source": "the header of iOS 16.4 and the release's own vDSP on the host: the accepted-length set over 1 to 1024, and the transforms held to the double-precision error bound of the facts file (section 9) over the 31 accepted lengths in both forms and both directions, against a double-double reference, by tests/backports/host/vdspdftd15, which the host and the port both pass"
+    },
+    {
+      "api": "vDSP_DFT_Interleaved_DestroySetupD()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "reason": "the double-precision form of frees the setup this band's CreateSetupD returned, with every buffer it holds (vDSPDFTInterleavedD15.m)",
+      "effect": "the port's own object and its buffers freed; NULL is not a crash",
+      "facts": "facts/Accelerate/vDSPDFTInterleaved.md",
+      "source": "the header of iOS 16.4 and the release's own vDSP on the host, held by tests/backports/host/vdspdftd15, which the host and the port both pass (see the ExecuteD row for the bound)"
+    },
+    {
+      "api": "vDSP_DFT_Interleaved_ExecuteD()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "15.0",
+      "minimum": "4.3",
+      "reason": "the double-precision form of the interleaved transform, with the length, direction and form taken from the setup - Execute is given no stride, no direction and no length, and allocates nothing (vDSPDFTInterleavedD15.m)",
+      "effect": "in double precision: complex-to-complex is a direct sum with exact products and compensated sums, inside the double-precision bound of facts/Accelerate/vDSPDFTInterleaved.md section 9 in both directions (the host sits inside the same bound); real-to-complex packs the 2*Length real signal as in[n] = (x[2n], x[2n+1]), runs the verified complex forward of length Length, and splits it - E_k = (Z_k + conj Z_{N-k})/2, O_k = (Z_k - conj Z_{N-k})/(2i), X_k = E_k + e^{-i*pi*k/N}*O_k, X_N = E_0 - O_0 - then writes o[0] = (2*X_0, 2*X_N) and o[k] = 2*X_k, the x2 being vDSP's real-transform scale. The inverse is the measured unpacking: o[0].real gives every sample 1, o[0].imag gives (-1)^j, o[k] gives 2*cos and -2*sin",
+      "facts": "facts/Accelerate/vDSPDFTInterleaved.md",
+      "source": "the header of iOS 16.4 and the release's own vDSP on the host: the accepted-length set over 1 to 1024, and the transforms held to the double-precision error bound of the facts file (section 9) over the 31 accepted lengths in both forms and both directions, against a double-double reference, by tests/backports/host/vdspdftd15, which the host and the port both pass"
+    }
+  ]
+}

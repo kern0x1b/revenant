@@ -1,0 +1,203 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIFontDescriptorNameAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorFamilyAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorFaceAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorSizeAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorVisibleNameAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorMatrixAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorCharacterSetAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorCascadeListAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorTraitsAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorFixedAdvanceAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorFeatureSettingsAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontDescriptorTextStyleAttribute",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontSymbolicTrait",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontWeightTrait",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontWidthTrait",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontSlantTrait",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontFeatureTypeIdentifierKey",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    },
+    {
+      "api": "UIFontFeatureSelectorIdentifierKey",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has no UIFontDescriptor, so it exports none of its keys",
+      "effect": "the key is the string UIKit gives it, the name of a CoreText attribute; UIFontDescriptor itself is not carried, so a key is only a dictionary key an application hands to CoreText",
+      "facts": "facts/UIKit/UIFontDescriptorKeys.md",
+      "source": "the host's own UIKit under Mac Catalyst, each string compared with the port by tests/backports/host/fontkeys and read again on an iPhone 4S running 6.1.3"
+    }
+  ]
+}

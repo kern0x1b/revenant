@@ -1,0 +1,155 @@
+{
+    "framework": "CoreData",
+    "entries": [
+        {
+            "api": "NSBatchInsertRequest",
+            "kind": "class",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "+[NSBatchInsertRequest batchInsertRequestWithEntityName:dictionaryHandler:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "+[NSBatchInsertRequest batchInsertRequestWithEntityName:managedObjectHandler:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "+[NSBatchInsertRequest batchInsertRequestWithEntityName:objects:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest initWithEntity:dictionaryHandler:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest initWithEntity:managedObjectHandler:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest initWithEntity:objects:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest initWithEntityName:dictionaryHandler:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest initWithEntityName:managedObjectHandler:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest initWithEntityName:objects:]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "-[NSBatchInsertRequest init]",
+            "kind": "method",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "raises NSInternalInconsistencyException, reason \"-init results in undefined behavior for NSBatchInsertRequest\" - measured on the host, the ONLY one of the ten that raises, the other nine answer non-nil (tests/backports/host/coredata-batchinsert/reference-host.tsv)",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "NSBatchInsertRequest.entity",
+            "kind": "property",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "NSBatchInsertRequest.entityName",
+            "kind": "property",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "NSBatchInsertRequest.objectsToInsert",
+            "kind": "property",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        },
+        {
+            "api": "NSBatchInsertRequest.resultType",
+            "kind": "property",
+            "introduced": "13.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "The batch INSERT arrived in iOS 13.0 and nothing carries it. The 6.1.3 cache reads 0 for the class beside a control of 2 (facts/CoreData/cache-6.1.3.tsv), and the 16.4 header the port lifts declares the class with an empty ivar block, so the class is the port's own: its storage, its six @synthesize and its initialisers.",
+            "effect": "the request is built and carries what the header's property says",
+            "source": "SDK 26.2 NSBatchInsertRequest.h for the version, SDK 16.4 for the shape, and the host's own CoreData measured in tests/backports/host/coredata-batchinsert"
+        }
+    ]
+}

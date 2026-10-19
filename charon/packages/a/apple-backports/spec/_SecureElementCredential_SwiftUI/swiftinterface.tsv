@@ -1,0 +1,12 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_SecureElementCredential_SwiftUI	method	SwiftUICore.View.transactionTask(_:action:)	18.1				container
+_SecureElementCredential_SwiftUI	method	CredentialSession.configuration()	18.1				container
+_SecureElementCredential_SwiftUI	class	CredentialTransaction	18.1				own
+_SecureElementCredential_SwiftUI	class	CredentialTransaction.Configuration	18.1				container
+_SecureElementCredential_SwiftUI	method	CredentialTransaction.Configuration.invalidate()	18.1				container
+_SecureElementCredential_SwiftUI	method	CredentialTransaction.Configuration.==(lhs:rhs:)	18.1				container
+_SecureElementCredential_SwiftUI	method	CredentialTransaction.performTransaction(using:options:)	18.1				container
+_SecureElementCredential_SwiftUI	method	CredentialTransaction.performTransactionInWiredMode(using:instanceAID:)	18.1				container
+_SecureElementCredential_SwiftUI	method	CredentialTransaction.performCardEmulationTransactionWithCurrentCredential(options:)	18.1				container
+_SecureElementCredential_SwiftUI	typealias	Credential	18.1				own
+_SecureElementCredential_SwiftUI	typealias	CardEmulationOptions	18.1				own

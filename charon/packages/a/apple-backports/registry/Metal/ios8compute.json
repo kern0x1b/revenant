@@ -1,0 +1,192 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLComputePipelineState device]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputePipelineState label]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputePipelineState maxTotalThreadsPerThreadgroup]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputePipelineState threadExecutionWidth]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputePipelineState maxThreadgroupsPerThreadgroup]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputePipelineState threadgroupMemoryLengthForIndex:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLCommandBuffer computeCommandEncoder]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLDevice newComputePipelineStateWithFunction:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a pipeline state of the port is the kernel tools/air2cpu translated out of the AIR of the library, and a kernel the tool refused is not in the table it looks in, so the answer is the documented error naming the function and never a pipeline that would compute something else",
+      "effect": "the object answers, and says in one line what it could not do; facts/Metal/Compute.md is the whole of it",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLCommandEncoder device]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an encoder of the port runs a workgroup as one thread per thread of the group and joins them before the dispatch is encoded, with a rendezvous of a mutex and a condition variable because iOS 6 has no pthread_barrier - the member is declared by the protocol MTLCommandEncoder, which MTLComputeCommandEncoder inherits, and a protocol takes no category, so a -[MTLComputeCommandEncoder sel] row is one the lift refuses: the selector is not declared on the owner the row names. Named with the protocol that declares it, which is the spelling the lift reads, and the one the SDK's own header carries (MTLCommandEncoder.h:89 device, :95 label, :101 - (void)endEncoding).",
+      "effect": "the device the encoder of the port answers for",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLCommandEncoder label]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a name an application gives a resource, which the port keeps - the member is declared by the protocol MTLCommandEncoder, which MTLComputeCommandEncoder inherits, and a protocol takes no category, so a -[MTLComputeCommandEncoder sel] row is one the lift refuses: the selector is not declared on the owner the row names. Named with the protocol that declares it, which is the spelling the lift reads, and the one the SDK's own header carries (MTLCommandEncoder.h:89 device, :95 label, :101 - (void)endEncoding).",
+      "effect": "the name, read back",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder setComputePipelineState:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an encoder of the port runs a workgroup as one thread per thread of the group and joins them before the dispatch is encoded, with a rendezvous of a mutex and a condition variable because iOS 6 has no pthread_barrier",
+      "effect": "the pipeline the next dispatch runs, and its threadgroup block the dispatch refuses without a length",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder setBuffer:offset:atIndex:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a buffer of the port is its own bytes, so the offset is carried and the kernel is handed the buffer's own plus it, and an offset past the end of the buffer is refused with the numbers",
+      "effect": "the kernel reads and writes the range the application named, and the binding says so in one line when the offset is past the end",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder setBytes:length:atIndex:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "bytes with no buffer behind them are a buffer of the port of their own length",
+      "effect": "the same, as a buffer of the size given",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder setThreadgroupMemoryLength:atIndex:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a kernel's threadgroup block is a length the encoder is told, which is how Metal hands it, and the AIR a runtime-compiled library carries does not name it",
+      "effect": "the block of that length the next dispatch gives the kernel, and a kernel that declares a block with no length said is refused rather than given a guessed one",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder dispatchThreadgroups:threadsPerThreadgroup:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an encoder of the port runs a workgroup as one thread per thread of the group and joins them before the dispatch is encoded, with a rendezvous of a mutex and a condition variable because iOS 6 has no pthread_barrier",
+      "effect": "the workgroups are run, one pthread per thread of each, and joined before the call returns",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder dispatchThreads:threadsPerGrid:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an encoder of the port runs a workgroup as one thread per thread of the group and joins them before the dispatch is encoded, with a rendezvous of a mutex and a condition variable because iOS 6 has no pthread_barrier",
+      "effect": "the flat form is the same dispatch with the grid worked out of it, so it goes through the same path and gets the same treatment of a shape this port does not run",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    },
+    {
+      "api": "-[MTLComputeCommandEncoder memoryBarrierWithScope:afterStages:beforeStages:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a barrier between encoders on one command queue, and the port has one queue and issues each command as it is encoded, so there is no other work to wait for",
+      "effect": "the call returns, and facts/Metal/Compute.md says why rather than leaving it silent",
+      "facts": "facts/Metal/Compute.md",
+      "source": "SDK 16.4, Metal, MTLComputePipeline.h and MTLComputeCommandEncoder.h"
+    }
+  ]
+}

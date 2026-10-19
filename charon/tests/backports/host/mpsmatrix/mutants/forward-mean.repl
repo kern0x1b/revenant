@@ -1,0 +1,1 @@
+                float root = 1.0f / sqrtf((float)given + _epsilon + 0.5f);  // MUTATION: the default form, division by sqrtf

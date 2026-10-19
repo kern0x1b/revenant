@@ -1,0 +1,2 @@
+api	introduced	status	reasons	returns	params	decl
+ASAuthorizationAllSupportedPublicKeyCredentialDescriptorTransports	15.0	generable		NSArray<ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransport> *		NSArray<ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransport> * ASAuthorizationAllSupportedPublicKeyCredentialDescriptorTransports()

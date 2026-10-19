@@ -1,0 +1,7 @@
+Package: org.charon.srchandlersprobe
+Name: Charon barrier source handler probe
+Architecture: iphoneos-arm
+Description: The release's own calls and this package's shims on a barrier source's cancellation and registration handler, one scenario per process
+Maintainer: charon
+Author: charon
+Section: Development

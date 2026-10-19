@@ -1,0 +1,276 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:gssapi.h@T@OM_uint32	-			uint32_t	-	-	-	-	59e4241e2c1e173c	-
+typedef	c:gssapi.h@T@OM_uint64	-			uint64_t	-	-	-	-	0e9f71883d3aa87e	-
+typedef	c:gssapi.h@T@gss_uint32	-			uint32_t	-	-	-	-	1c321979a82f4be3	-
+struct	c:@S@gss_name_t_desc_struct	-			-	-	-	-	-	4ca5b1f15e1d9087	-
+typedef	c:gssapi.h@T@gss_name_t	-			struct gss_name_t_desc_struct *	-	-	-	-	fae28c62acf2d3f2	-
+typedef	c:gssapi.h@T@gss_const_name_t	-			const struct gss_name_t_desc_struct *	-	-	-	-	4c838326d442f4c4	-
+struct	c:@S@gss_ctx_id_t_desc_struct	-			-	-	-	-	-	badc168663286948	-
+typedef	c:gssapi.h@T@gss_ctx_id_t	-			struct gss_ctx_id_t_desc_struct *	-	-	-	-	d3e4f8999566b48f	-
+typedef	c:gssapi.h@T@gss_const_ctx_id_t	-			const struct gss_ctx_id_t_desc_struct	-	-	-	-	ebe192edc1065881	-
+struct	c:@S@gss_OID_desc_struct	-			-	-	-	-	-	2c1f869b7f2e5756	-
+field	c:@S@gss_OID_desc_struct@FI@length	gss_OID_desc_struct			OM_uint32	-	-	-	-	67acbf72138476dd	-
+field	c:@S@gss_OID_desc_struct@FI@elements	gss_OID_desc_struct			void *	-	-	-	-	f2fb0680fed2cf9c	-
+typedef	c:gssapi.h@T@gss_OID_desc	-			struct gss_OID_desc_struct	-	-	-	-	6f9d8735a94cc940	-
+typedef	c:gssapi.h@T@gss_OID	-			struct gss_OID_desc_struct *	-	-	-	-	e66983a9691d122d	-
+typedef	c:gssapi.h@T@gss_const_OID	-			const gss_OID_desc *	-	-	-	-	ecd06579cad0d506	-
+struct	c:@S@gss_OID_set_desc_struct	-			-	-	-	-	-	33398f07338dae18	-
+field	c:@S@gss_OID_set_desc_struct@FI@count	gss_OID_set_desc_struct			size_t	-	-	-	-	9e3561c1894ffa89	-
+field	c:@S@gss_OID_set_desc_struct@FI@elements	gss_OID_set_desc_struct			gss_OID	-	-	-	-	d2db7aabd831d51e	-
+typedef	c:gssapi.h@T@gss_OID_set_desc	-			struct gss_OID_set_desc_struct	-	-	-	-	d2cf4cc72acfbe29	-
+typedef	c:gssapi.h@T@gss_OID_set	-			struct gss_OID_set_desc_struct *	-	-	-	-	9bb025ff77aa7bd4	-
+typedef	c:gssapi.h@T@gss_const_OID_set	-			const gss_OID_set_desc *	-	-	-	-	6a1bc2e749cbb994	-
+typedef	c:gssapi.h@T@gss_cred_usage_t	-			int	-	-	-	-	8176661a116e5353	-
+struct	c:@S@gss_cred_id_t_desc_struct	-			-	-	-	-	-	c0d3dbbb5400f7f5	-
+typedef	c:gssapi.h@T@gss_cred_id_t	-			struct gss_cred_id_t_desc_struct *	-	-	-	-	154acd802029b819	-
+typedef	c:gssapi.h@T@gss_const_cred_id_t	-			const struct gss_cred_id_t_desc_struct *	-	-	-	-	41612d384042884f	-
+struct	c:@S@gss_buffer_desc_struct	-			-	-	-	-	-	c991e70fb1ec6b19	-
+field	c:@S@gss_buffer_desc_struct@FI@length	gss_buffer_desc_struct			size_t	-	-	-	-	3174f4005f916eb7	-
+field	c:@S@gss_buffer_desc_struct@FI@value	gss_buffer_desc_struct			void *	-	-	-	-	8509e51ee720834c	-
+typedef	c:gssapi.h@T@gss_buffer_desc	-			struct gss_buffer_desc_struct	-	-	-	-	03609af8a0ce3e70	-
+typedef	c:gssapi.h@T@gss_buffer_t	-			struct gss_buffer_desc_struct *	-	-	-	-	c21106f119728612	-
+typedef	c:gssapi.h@T@gss_const_buffer_t	-			const gss_buffer_desc *	-	-	-	-	4757f27a2e6e7a78	-
+struct	c:@S@gss_channel_bindings_struct	-			-	-	-	-	-	5d4b884379c1c9bb	-
+field	c:@S@gss_channel_bindings_struct@FI@initiator_addrtype	gss_channel_bindings_struct			OM_uint32	-	-	-	-	9d2e069b72825829	-
+field	c:@S@gss_channel_bindings_struct@FI@initiator_address	gss_channel_bindings_struct			gss_buffer_desc	-	-	-	-	cd40514be79e1879	-
+field	c:@S@gss_channel_bindings_struct@FI@acceptor_addrtype	gss_channel_bindings_struct			OM_uint32	-	-	-	-	e6c9c91d26932fe8	-
+field	c:@S@gss_channel_bindings_struct@FI@acceptor_address	gss_channel_bindings_struct			gss_buffer_desc	-	-	-	-	7abf53065f5ab15f	-
+field	c:@S@gss_channel_bindings_struct@FI@application_data	gss_channel_bindings_struct			gss_buffer_desc	-	-	-	-	a98b325ee1343d20	-
+typedef	c:gssapi.h@T@gss_channel_bindings_t	-			struct gss_channel_bindings_struct *	-	-	-	-	9a0a2ddd037c896a	-
+typedef	c:gssapi.h@T@gss_const_channel_bindings_t	-			const struct gss_channel_bindings_struct *	-	-	-	-	bb08370298a5cc34	-
+struct	c:@S@gss_buffer_set_desc_struct	-			-	-	-	-	-	d0fd49ca039118d7	-
+field	c:@S@gss_buffer_set_desc_struct@FI@count	gss_buffer_set_desc_struct			size_t	-	-	-	-	212892e3be61cfab	-
+field	c:@S@gss_buffer_set_desc_struct@FI@elements	gss_buffer_set_desc_struct			gss_buffer_desc *	-	-	-	-	d3e2bea20b1ada9e	-
+typedef	c:gssapi.h@T@gss_buffer_set_desc	-			struct gss_buffer_set_desc_struct	-	-	-	-	6dea770b36041ac0	-
+typedef	c:gssapi.h@T@gss_buffer_set_t	-			struct gss_buffer_set_desc_struct *	-	-	-	-	56a9ee8723a0f4e3	-
+struct	c:@S@gss_iov_buffer_desc_struct	-			-	-	-	-	-	fd99975ff7eae653	-
+field	c:@S@gss_iov_buffer_desc_struct@FI@type	gss_iov_buffer_desc_struct			OM_uint32	-	-	-	-	a7d8af246f33c489	-
+field	c:@S@gss_iov_buffer_desc_struct@FI@buffer	gss_iov_buffer_desc_struct			gss_buffer_desc	-	-	-	-	f486e68ff819092d	-
+typedef	c:gssapi.h@T@gss_iov_buffer_desc	-			struct gss_iov_buffer_desc_struct	-	-	-	-	7665a9789c283ac2	-
+typedef	c:gssapi.h@T@gss_iov_buffer_t	-			struct gss_iov_buffer_desc_struct *	-	-	-	-	45af87f6b7d734fc	-
+typedef	c:gssapi.h@T@gss_qop_t	-			OM_uint32	-	-	-	-	3a03c50a25cd14aa	-
+typedef	c:gssapi.h@T@gss_status_id_t	-			OM_uint32 *	-	-	-	-	419c9d7c625383df	-
+struct	c:@S@gss_auth_identity	-			-	-	-	-	-	72fa00e5510dc52f	-
+typedef	c:gssapi.h@T@gss_auth_identity_t	-			struct gss_auth_identity *	-	-	-	-	8231237776c1d388	-
+struct	c:@S@krb5_ccache_data	-			-	-	-	-	-	26c13a3f148e5a13	-
+var	c:@__gss_krb5_copy_ccache_x_oid_desc	-			gss_OID_desc	-	-	-	-	4e6a86592e1372c7	-
+var	c:@__gss_krb5_get_tkt_flags_x_oid_desc	-			gss_OID_desc	-	-	-	-	a5cc6d8ff29f6a3c	-
+var	c:@__gss_krb5_extract_authz_data_from_sec_context_x_oid_desc	-			gss_OID_desc	-	-	-	-	98b5d428a2ab1bc8	-
+var	c:@__gss_krb5_compat_des3_mic_x_oid_desc	-			gss_OID_desc	-	-	-	-	d71ca20eeba256e1	-
+var	c:@__gss_krb5_register_acceptor_identity_x_oid_desc	-			gss_OID_desc	-	-	-	-	2e581c37b67078cb	-
+var	c:@__gss_krb5_export_lucid_context_x_oid_desc	-			gss_OID_desc	-	-	-	-	40f74a5718fed655	-
+var	c:@__gss_krb5_export_lucid_context_v1_x_oid_desc	-			gss_OID_desc	-	-	-	-	ca374dc8b0813a0b	-
+var	c:@__gss_krb5_set_dns_canonicalize_x_oid_desc	-			gss_OID_desc	-	-	-	-	74d9a1dac8153e29	-
+var	c:@__gss_krb5_get_subkey_x_oid_desc	-			gss_OID_desc	-	-	-	-	ca82d3ff168e4eeb	-
+var	c:@__gss_krb5_get_initiator_subkey_x_oid_desc	-			gss_OID_desc	-	-	-	-	ef4741218dd89064	-
+var	c:@__gss_krb5_get_acceptor_subkey_x_oid_desc	-			gss_OID_desc	-	-	-	-	6e01646d03fb3411	-
+var	c:@__gss_krb5_send_to_kdc_x_oid_desc	-			gss_OID_desc	-	-	-	-	dc63af1d08004f86	-
+var	c:@__gss_krb5_get_authtime_x_oid_desc	-			gss_OID_desc	-	-	-	-	2f8dd46c2e63daa8	-
+var	c:@__gss_krb5_get_service_keyblock_x_oid_desc	-			gss_OID_desc	-	-	-	-	295a7550c992e92c	-
+var	c:@__gss_krb5_set_allowable_enctypes_x_oid_desc	-			gss_OID_desc	-	-	-	-	aa36d641ddf905fb	-
+var	c:@__gss_krb5_set_default_realm_x_oid_desc	-			gss_OID_desc	-	-	-	-	de4102342d19b996	-
+var	c:@__gss_krb5_ccache_name_x_oid_desc	-			gss_OID_desc	-	-	-	-	3bdf9b83770925af	-
+var	c:@__gss_krb5_set_time_offset_x_oid_desc	-			gss_OID_desc	-	-	-	-	5600ec83991ee194	-
+var	c:@__gss_krb5_get_time_offset_x_oid_desc	-			gss_OID_desc	-	-	-	-	9540623bdb2aeb10	-
+var	c:@__gss_krb5_plugin_register_x_oid_desc	-			gss_OID_desc	-	-	-	-	f3f8069d66bf665c	-
+var	c:@__gss_ntlm_get_session_key_x_oid_desc	-			gss_OID_desc	-	-	-	-	95ea4fcf645cc8ce	-
+var	c:@__gss_c_nt_ntlm_oid_desc	-			gss_OID_desc	-	-	-	-	dc6012219b5848d4	-
+var	c:@__gss_c_nt_dn_oid_desc	-			gss_OID_desc	-	-	-	-	59313a9a20960f67	-
+var	c:@__gss_krb5_nt_principal_name_referral_oid_desc	-			gss_OID_desc	-	-	-	-	cd24e685f78a3268	-
+var	c:@__gss_c_ntlm_guest_oid_desc	-			gss_OID_desc	-	-	-	-	792b65300a29aaa2	-
+var	c:@__gss_c_ntlm_v1_oid_desc	-			gss_OID_desc	-	-	-	-	a93e9c5393016911	-
+var	c:@__gss_c_ntlm_v2_oid_desc	-			gss_OID_desc	-	-	-	-	5fede35f5d6efb6c	-
+var	c:@__gss_c_ntlm_session_key_oid_desc	-			gss_OID_desc	-	-	-	-	8c688b3ba5ce9168	-
+var	c:@__gss_c_ntlm_force_v1_oid_desc	-			gss_OID_desc	-	-	-	-	298c62dd3b309ece	-
+var	c:@__gss_krb5_cred_no_ci_flags_x_oid_desc	-			gss_OID_desc	-	-	-	-	97e32c90fc23e9e1	-
+var	c:@__gss_c_nt_uuid_oid_desc	-			gss_OID_desc	-	-	-	-	0aba43c90d64d4a2	-
+var	c:@__gss_c_ntlm_support_channelbindings_oid_desc	-			gss_OID_desc	-	-	-	-	bd9cfbfa5983b780	-
+var	c:@__gss_c_ntlm_support_lm2_oid_desc	-			gss_OID_desc	-	-	-	-	8a7d7087cd59a5e6	-
+var	c:@__gss_krb5_import_cred_x_oid_desc	-			gss_OID_desc	-	-	-	-	d29b8c7b7b939592	-
+var	c:@__gss_c_ntlm_reset_keys_oid_desc	-			gss_OID_desc	-	-	-	-	ecf28981da38b4e3	-
+var	c:@__gss_c_cred_diag_oid_desc	-			gss_OID_desc	-	-	-	-	b11adc40ab480195	-
+var	c:@__gss_c_cred_validate_oid_desc	-			gss_OID_desc	-	-	-	-	df034a915beeb2ce	-
+var	c:@__gss_c_cred_set_default_oid_desc	-			gss_OID_desc	-	-	-	-	1de77cc215fb7c0b	-
+var	c:@__gss_c_cred_get_default_oid_desc	-			gss_OID_desc	-	-	-	-	7e3c1e1652729f52	-
+var	c:@__gss_c_cred_renew_oid_desc	-			gss_OID_desc	-	-	-	-	a37ac522b03c7802	-
+var	c:@__gss_c_ctx_pfs_x_oid_desc	-			gss_OID_desc	-	-	-	-	278a1ec6feb039cf	-
+var	c:@__gss_c_ma_sasl_mech_name_oid_desc	-			gss_OID_desc	-	-	-	-	bd9622e97509b2eb	-
+var	c:@__gss_c_ma_mech_name_oid_desc	-			gss_OID_desc	-	-	-	-	7cc148ba94acb45b	-
+var	c:@__gss_c_ma_mech_description_oid_desc	-			gss_OID_desc	-	-	-	-	0de5351eabe222a0	-
+var	c:@__gss_c_cred_password_oid_desc	-			gss_OID_desc	-	-	-	-	8787b57f067d9bc3	-
+var	c:@__gss_c_cred_certificate_oid_desc	-			gss_OID_desc	-	-	-	-	cb72078b4ba1fb87	-
+var	c:@__gss_c_cred_secidentity_oid_desc	-			gss_OID_desc	-	-	-	-	25683da1ccafe6bf	-
+var	c:@__gss_c_cred_heimbase_oid_desc	-			gss_OID_desc	-	-	-	-	2fe49d0b509344e6	-
+var	c:@__gss_sasl_digest_md5_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	c36ed678f4d0842c	-
+var	c:@__gss_netlogon_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	a410eeaf030b9d2f	-
+var	c:@__gss_appl_lkdc_supported_oid_desc	-			gss_OID_desc	-	-	-	-	d72a69b0aae06889	-
+var	c:@__gss_netlogon_set_session_key_x_oid_desc	-			gss_OID_desc	-	-	-	-	e6cd6e631b71a82f	-
+var	c:@__gss_netlogon_set_sign_algorithm_x_oid_desc	-			gss_OID_desc	-	-	-	-	31d45473bf59d5fa	-
+var	c:@__gss_netlogon_nt_netbios_dns_name_oid_desc	-			gss_OID_desc	-	-	-	-	e34f9d61ef330b53	-
+var	c:@__gss_c_inq_win2k_pac_x_oid_desc	-			gss_OID_desc	-	-	-	-	652081c14545b42a	-
+var	c:@__gss_c_inq_sspi_session_key_oid_desc	-			gss_OID_desc	-	-	-	-	1c588a91d8fcc781	-
+var	c:@__gss_krb5_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	62704d3f36954603	-
+var	c:@__gss_ntlm_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	331d970c2487bcdf	-
+var	c:@__gss_iakerb_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	ed719908e59b65d2	-
+var	c:@__gss_pku2u_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	f850bfa1ded4acdf	-
+var	c:@__gss_spnego_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	adcb8e6230bd0b39	-
+var	c:@__gss_scram_mechanism_oid_desc	-			gss_OID_desc	-	-	-	-	6572a57370bd481d	-
+var	c:@__gss_c_nt_user_name_oid_desc	-			gss_OID_desc	-	-	-	-	13707e4c9c98aa3e	-
+var	c:@__gss_c_nt_machine_uid_name_oid_desc	-			gss_OID_desc	-	-	-	-	11864ccf97678fe0	-
+var	c:@__gss_c_nt_string_uid_name_oid_desc	-			gss_OID_desc	-	-	-	-	06c9f3fafad7963b	-
+var	c:@__gss_c_nt_hostbased_service_x_oid_desc	-			gss_OID_desc	-	-	-	-	6978beda5c62accd	-
+var	c:@__gss_c_nt_hostbased_service_oid_desc	-			gss_OID_desc	-	-	-	-	42abdbb2a35b69a1	-
+var	c:@__gss_c_nt_anonymous_oid_desc	-			gss_OID_desc	-	-	-	-	9bea07d5b8893130	-
+var	c:@__gss_c_nt_export_name_oid_desc	-			gss_OID_desc	-	-	-	-	e00a5c47622e7cce	-
+var	c:@__gss_krb5_nt_principal_name_oid_desc	-			gss_OID_desc	-	-	-	-	ddd60731ca4f0b9c	-
+var	c:@__gss_krb5_nt_principal_oid_desc	-			gss_OID_desc	-	-	-	-	87dd27e1e8f54471	-
+var	c:@__gss_c_peer_has_updated_spnego_oid_desc	-			gss_OID_desc	-	-	-	-	4f71332cee12ced3	-
+var	c:@__gss_c_ma_mech_concrete_oid_desc	-			gss_OID_desc	-	-	-	-	bdba117203ec47dd	-
+var	c:@__gss_c_ma_mech_pseudo_oid_desc	-			gss_OID_desc	-	-	-	-	0d1cdc648cd7e245	-
+var	c:@__gss_c_ma_mech_composite_oid_desc	-			gss_OID_desc	-	-	-	-	72fe7d0183e24916	-
+var	c:@__gss_c_ma_mech_nego_oid_desc	-			gss_OID_desc	-	-	-	-	0d50263636a913c2	-
+var	c:@__gss_c_ma_mech_glue_oid_desc	-			gss_OID_desc	-	-	-	-	0c97b1ef28612c79	-
+var	c:@__gss_c_ma_not_mech_oid_desc	-			gss_OID_desc	-	-	-	-	5ababc4228188d85	-
+var	c:@__gss_c_ma_deprecated_oid_desc	-			gss_OID_desc	-	-	-	-	663248e01b059be6	-
+var	c:@__gss_c_ma_not_dflt_mech_oid_desc	-			gss_OID_desc	-	-	-	-	693f6689205039cc	-
+var	c:@__gss_c_ma_itok_framed_oid_desc	-			gss_OID_desc	-	-	-	-	1ef1dc10eb7ec0ba	-
+var	c:@__gss_c_ma_auth_init_oid_desc	-			gss_OID_desc	-	-	-	-	a9878d4e4222cf81	-
+var	c:@__gss_c_ma_auth_targ_oid_desc	-			gss_OID_desc	-	-	-	-	8306716d3e556eaa	-
+var	c:@__gss_c_ma_auth_init_init_oid_desc	-			gss_OID_desc	-	-	-	-	1bb518f5e2f2d969	-
+var	c:@__gss_c_ma_auth_targ_init_oid_desc	-			gss_OID_desc	-	-	-	-	546b91afad555cda	-
+var	c:@__gss_c_ma_auth_init_anon_oid_desc	-			gss_OID_desc	-	-	-	-	eb9ff4b53deab0be	-
+var	c:@__gss_c_ma_auth_targ_anon_oid_desc	-			gss_OID_desc	-	-	-	-	644329c7d816440a	-
+var	c:@__gss_c_ma_deleg_cred_oid_desc	-			gss_OID_desc	-	-	-	-	dc16a04b5d48c3c7	-
+var	c:@__gss_c_ma_integ_prot_oid_desc	-			gss_OID_desc	-	-	-	-	a0394a9f8fb21147	-
+var	c:@__gss_c_ma_conf_prot_oid_desc	-			gss_OID_desc	-	-	-	-	db562b8ece11c9d5	-
+var	c:@__gss_c_ma_mic_oid_desc	-			gss_OID_desc	-	-	-	-	aa5af9f2e219860b	-
+var	c:@__gss_c_ma_wrap_oid_desc	-			gss_OID_desc	-	-	-	-	3bb0875339464464	-
+var	c:@__gss_c_ma_prot_ready_oid_desc	-			gss_OID_desc	-	-	-	-	17d0887c87f48482	-
+var	c:@__gss_c_ma_replay_det_oid_desc	-			gss_OID_desc	-	-	-	-	b359859eb56ba449	-
+var	c:@__gss_c_ma_oos_det_oid_desc	-			gss_OID_desc	-	-	-	-	d599dce9b2093bb1	-
+var	c:@__gss_c_ma_cbindings_oid_desc	-			gss_OID_desc	-	-	-	-	ccd147927d2c063f	-
+var	c:@__gss_c_ma_pfs_oid_desc	-			gss_OID_desc	-	-	-	-	10a2a13e607917be	-
+var	c:@__gss_c_ma_compress_oid_desc	-			gss_OID_desc	-	-	-	-	96d385d7b2ac4b22	-
+var	c:@__gss_c_ma_ctx_trans_oid_desc	-			gss_OID_desc	-	-	-	-	8c7d2298fd203f6b	-
+function	c:@F@gss_accept_sec_context	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t  _Nullable *, const gss_cred_id_t, const gss_buffer_t, const gss_channel_bindings_t, gss_name_t  _Nullable *, gss_OID  _Nullable *, gss_buffer_t, OM_uint32 *, OM_uint32 *, gss_cred_id_t  _Nullable *)	OM_uint32 * minor_status | gss_ctx_id_t  _Nullable * context_handle | const gss_cred_id_t acceptor_cred_handle | const gss_buffer_t input_token | const gss_channel_bindings_t input_chan_bindings | gss_name_t  _Nullable * src_name | gss_OID  _Nullable * mech_type | gss_buffer_t output_token | OM_uint32 * ret_flags | OM_uint32 * time_rec | gss_cred_id_t  _Nullable * delegated_cred_handle	-	ios=5.0/-/-/0	-	b496856404eb33c3	-
+function	c:@F@gss_acquire_cred	-			OM_uint32 (OM_uint32 *, const gss_name_t, OM_uint32, const gss_OID_set, gss_cred_usage_t, gss_cred_id_t  _Nullable *, gss_OID_set  _Nullable *, OM_uint32 *)	OM_uint32 * minor_status | const gss_name_t desired_name | OM_uint32 time_req | const gss_OID_set desired_mechs | gss_cred_usage_t cred_usage | gss_cred_id_t  _Nullable * output_cred_handle | gss_OID_set  _Nullable * actual_mechs | OM_uint32 * time_rec	-	ios=5.0/-/-/0	-	7c2e1d519f7ea7d7	-
+function	c:@F@gss_acquire_cred_with_password	-			OM_uint32 (OM_uint32 *, const gss_name_t, const gss_buffer_t, OM_uint32, const gss_OID_set, gss_cred_usage_t, gss_cred_id_t  _Nullable *, gss_OID_set  _Nullable *, OM_uint32 *)	OM_uint32 * minor_status | const gss_name_t desired_name | const gss_buffer_t password | OM_uint32 time_req | const gss_OID_set desired_mechs | gss_cred_usage_t cred_usage | gss_cred_id_t  _Nullable * output_cred_handle | gss_OID_set  _Nullable * actual_mechs | OM_uint32 * time_rec	-	ios=5.0/-/-/0	-	7ff5035abc4bb0f3	-
+function	c:@F@gss_add_buffer_set_member	-			OM_uint32 (OM_uint32 *, const gss_buffer_t, gss_buffer_set_t  _Nonnull *)	OM_uint32 * minor_status | const gss_buffer_t member_buffer | gss_buffer_set_t  _Nonnull * buffer_set	-	ios=5.0/-/-/0	-	7111670cacf4aca4	-
+function	c:@F@gss_add_cred	-			OM_uint32 (OM_uint32 *, const gss_cred_id_t, const gss_name_t, const gss_OID, gss_cred_usage_t, OM_uint32, OM_uint32, gss_cred_id_t  _Nullable *, gss_OID_set  _Nullable *, OM_uint32 *, OM_uint32 *)	OM_uint32 * minor_status | const gss_cred_id_t input_cred_handle | const gss_name_t desired_name | const gss_OID desired_mech | gss_cred_usage_t cred_usage | OM_uint32 initiator_time_req | OM_uint32 acceptor_time_req | gss_cred_id_t  _Nullable * output_cred_handle | gss_OID_set  _Nullable * actual_mechs | OM_uint32 * initiator_time_rec | OM_uint32 * acceptor_time_rec	-	ios=5.0/-/-/0	-	c24698f5c917ac59	-
+function	c:@F@gss_add_oid_set_member	-			OM_uint32 (OM_uint32 *, gss_const_OID, gss_OID_set  _Nonnull *)	OM_uint32 * minor_status | gss_const_OID member_oid | gss_OID_set  _Nonnull * oid_set	-	ios=5.0/-/-/0	-	a30768d8022cef10	-
+function	c:@F@gss_canonicalize_name	-			OM_uint32 (OM_uint32 *, const gss_name_t, const gss_OID, gss_name_t  _Nullable *)	OM_uint32 * minor_status | const gss_name_t input_name | const gss_OID mech_type | gss_name_t  _Nullable * output_name	-	ios=5.0/-/-/0	-	47facb4ec6a37eb4	-
+function	c:@F@gss_compare_name	-			OM_uint32 (OM_uint32 *, const gss_name_t, const gss_name_t, int *)	OM_uint32 * minor_status | const gss_name_t name1_arg | const gss_name_t name2_arg | int * name_equal	-	ios=5.0/-/-/0	-	aafb1f094ec381fd	-
+function	c:@F@gss_context_time	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, OM_uint32 *)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | OM_uint32 * time_rec	-	ios=5.0/-/-/0	-	191f2f5dd2c1f26f	-
+function	c:@F@gss_create_empty_buffer_set	-			OM_uint32 (OM_uint32 *, gss_buffer_set_t  _Nullable *)	OM_uint32 * minor_status | gss_buffer_set_t  _Nullable * buffer_set	-	ios=5.0/-/-/0	-	bbb2471184a8d007	-
+function	c:@F@gss_create_empty_oid_set	-			OM_uint32 (OM_uint32 *, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | gss_OID_set  _Nullable * oid_set	-	ios=5.0/-/-/0	-	979170b60f4e391d	-
+function	c:@F@gss_decapsulate_token	-			OM_uint32 (gss_const_buffer_t, gss_const_OID, gss_buffer_t)	gss_const_buffer_t input_token | gss_const_OID oid | gss_buffer_t output_token	-	ios=5.0/-/-/0	-	3f92a981c6b0bf2c	-
+function	c:@F@gss_delete_sec_context	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t  _Nullable *, gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t  _Nullable * context_handle | gss_buffer_t output_token	-	ios=5.0/-/-/0	-	a0d2ee3c1642ad9f	-
+function	c:@F@gss_destroy_cred	-			OM_uint32 (OM_uint32 *, gss_cred_id_t  _Nullable *)	OM_uint32 * min_stat | gss_cred_id_t  _Nullable * cred_handle	-	ios=5.0/-/-/0	-	5ef14ca16cf801ba	-
+function	c:@F@gss_display_mech_attr	-			OM_uint32 (OM_uint32 *, gss_const_OID, gss_buffer_t, gss_buffer_t, gss_buffer_t)	OM_uint32 * minor_status | gss_const_OID mech_attr | gss_buffer_t name | gss_buffer_t short_desc | gss_buffer_t long_desc	-	ios=5.0/-/-/0	-	cfb89266eb4972e4	-
+function	c:@F@gss_display_name	-			OM_uint32 (OM_uint32 *, const gss_name_t, gss_buffer_t, gss_OID  _Nullable *)	OM_uint32 * minor_status | const gss_name_t input_name | gss_buffer_t output_name_buffer | gss_OID  _Nullable * output_name_type	-	ios=5.0/-/-/0	-	ab33a5bd78633c0c	-
+function	c:@F@gss_display_status	-			OM_uint32 (OM_uint32 *, OM_uint32, int, const gss_OID, OM_uint32 *, gss_buffer_t)	OM_uint32 * minor_status | OM_uint32 status_value | int status_type | const gss_OID mech_type | OM_uint32 * message_content | gss_buffer_t status_string	-	ios=5.0/-/-/0	-	94d4908ce0ef8739	-
+function	c:@F@gss_duplicate_name	-			OM_uint32 (OM_uint32 *, const gss_name_t, gss_name_t  _Nullable *)	OM_uint32 * minor_status | const gss_name_t src_name | gss_name_t  _Nullable * dest_name	-	ios=5.0/-/-/0	-	930448eb341ee56e	-
+function	c:@F@gss_duplicate_oid	-			OM_uint32 (OM_uint32 *, gss_OID, gss_OID  _Nullable *)	OM_uint32 * minor_status | gss_OID src_oid | gss_OID  _Nullable * dest_oid	-	ios=5.0/7.0/-/0	-	c0d56b57ae0866bb	-
+function	c:@F@gss_encapsulate_token	-			OM_uint32 (gss_const_buffer_t, gss_const_OID, gss_buffer_t)	gss_const_buffer_t input_token | gss_const_OID oid | gss_buffer_t output_token	-	ios=5.0/-/-/0	-	b55320302c18586b	-
+function	c:@F@gss_export_cred	-			OM_uint32 (OM_uint32 *, gss_cred_id_t, gss_buffer_t)	OM_uint32 * minor_status | gss_cred_id_t cred_handle | gss_buffer_t token	-	ios=5.0/-/-/0	-	9a727866e8e3c1dd	-
+function	c:@F@gss_export_name	-			OM_uint32 (OM_uint32 *, const gss_name_t, gss_buffer_t)	OM_uint32 * minor_status | const gss_name_t input_name | gss_buffer_t exported_name	-	ios=5.0/-/-/0	-	913014af9abca5e1	-
+function	c:@F@gss_export_sec_context	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t  _Nullable *, gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t  _Nullable * context_handle | gss_buffer_t interprocess_token	-	ios=5.0/-/-/0	-	c5e6e563c13726da	-
+function	c:@F@gss_get_mic	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, gss_qop_t, const gss_buffer_t, gss_buffer_t)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | gss_qop_t qop_req | const gss_buffer_t message_buffer | gss_buffer_t message_token	-	ios=5.0/-/-/0	-	44f583aad703a246	-
+function	c:@F@gss_import_cred	-			OM_uint32 (OM_uint32 *, gss_buffer_t, gss_cred_id_t  _Nullable *)	OM_uint32 * minor_status | gss_buffer_t token | gss_cred_id_t  _Nullable * cred_handle	-	ios=5.0/-/-/0	-	715e867f7798a361	-
+function	c:@F@gss_import_name	-			OM_uint32 (OM_uint32 *, const gss_buffer_t, gss_const_OID, gss_name_t  _Nullable *)	OM_uint32 * minor_status | const gss_buffer_t input_name_buffer | gss_const_OID input_name_type | gss_name_t  _Nullable * output_name	-	ios=5.0/-/-/0	-	12e0c088fdf6e407	-
+function	c:@F@gss_import_sec_context	-			OM_uint32 (OM_uint32 *, const gss_buffer_t, gss_ctx_id_t  _Nullable *)	OM_uint32 * minor_status | const gss_buffer_t interprocess_token | gss_ctx_id_t  _Nullable * context_handle	-	ios=5.0/-/-/0	-	b753113a89b4d4c9	-
+function	c:@F@gss_indicate_mechs	-			OM_uint32 (OM_uint32 *, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | gss_OID_set  _Nullable * mech_set	-	ios=5.0/-/-/0	-	1e35248fc5d50f2e	-
+function	c:@F@gss_indicate_mechs_by_attrs	-			OM_uint32 (OM_uint32 *, gss_const_OID_set, gss_const_OID_set, gss_const_OID_set, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | gss_const_OID_set desired_mech_attrs | gss_const_OID_set except_mech_attrs | gss_const_OID_set critical_mech_attrs | gss_OID_set  _Nullable * mechs	-	ios=8.0/-/-/0	-	45f81023ae83c86f	-
+function	c:@F@gss_init_sec_context	-			OM_uint32 (OM_uint32 *, const gss_cred_id_t, gss_ctx_id_t  _Nullable *, const gss_name_t, const gss_OID, OM_uint32, OM_uint32, const gss_channel_bindings_t, const gss_buffer_t, gss_OID  _Nullable *, gss_buffer_t, OM_uint32 *, OM_uint32 *)	OM_uint32 * minor_status | const gss_cred_id_t initiator_cred_handle | gss_ctx_id_t  _Nullable * context_handle | const gss_name_t target_name | const gss_OID input_mech_type | OM_uint32 req_flags | OM_uint32 time_req | const gss_channel_bindings_t input_chan_bindings | const gss_buffer_t input_token | gss_OID  _Nullable * actual_mech_type | gss_buffer_t output_token | OM_uint32 * ret_flags | OM_uint32 * time_rec	-	ios=5.0/-/-/0	-	f9309515c893823c	-
+function	c:@F@gss_inquire_attrs_for_mech	-			OM_uint32 (OM_uint32 *, gss_const_OID, gss_OID_set  _Nullable *, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | gss_const_OID mech | gss_OID_set  _Nullable * mech_attr | gss_OID_set  _Nullable * known_mech_attrs	-	ios=5.0/-/-/0	-	9426f36b54ad25e8	-
+function	c:@F@gss_inquire_context	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, gss_name_t  _Nullable *, gss_name_t  _Nullable *, OM_uint32 *, gss_OID  _Nullable *, OM_uint32 *, int *, int *)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | gss_name_t  _Nullable * src_name | gss_name_t  _Nullable * targ_name | OM_uint32 * lifetime_rec | gss_OID  _Nullable * mech_type | OM_uint32 * ctx_flags | int * locally_initiated | int * xopen	-	ios=5.0/-/-/0	-	99f4d90a133a51d2	-
+function	c:@F@gss_inquire_cred	-			OM_uint32 (OM_uint32 *, const gss_cred_id_t, gss_name_t  _Nullable *, OM_uint32 *, gss_cred_usage_t *, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | const gss_cred_id_t cred_handle | gss_name_t  _Nullable * name_ret | OM_uint32 * lifetime | gss_cred_usage_t * cred_usage | gss_OID_set  _Nullable * mechanisms	-	ios=5.0/-/-/0	-	68003bc3e50e87d4	-
+function	c:@F@gss_inquire_cred_by_mech	-			OM_uint32 (OM_uint32 *, const gss_cred_id_t, const gss_OID, gss_name_t  _Nullable *, OM_uint32 *, OM_uint32 *, gss_cred_usage_t *)	OM_uint32 * minor_status | const gss_cred_id_t cred_handle | const gss_OID mech_type | gss_name_t  _Nullable * cred_name | OM_uint32 * initiator_lifetime | OM_uint32 * acceptor_lifetime | gss_cred_usage_t * cred_usage	-	ios=5.0/-/-/0	-	0ca2b977a6c32a58	-
+function	c:@F@gss_inquire_cred_by_oid	-			OM_uint32 (OM_uint32 *, const gss_cred_id_t, const gss_OID, gss_buffer_set_t  _Nullable *)	OM_uint32 * minor_status | const gss_cred_id_t cred_handle | const gss_OID desired_object | gss_buffer_set_t  _Nullable * data_set	-	ios=5.0/-/-/0	-	aacbbbc0539f15dd	-
+function	c:@F@gss_inquire_mech_for_saslname	-			OM_uint32 (OM_uint32 *, const gss_buffer_t, gss_OID  _Nullable *)	OM_uint32 * minor_status | const gss_buffer_t sasl_mech_name | gss_OID  _Nullable * mech_type	-	ios=8.0/-/-/0	-	6ce6135265c09f4e	-
+function	c:@F@gss_inquire_mechs_for_name	-			OM_uint32 (OM_uint32 *, const gss_name_t, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | const gss_name_t input_name | gss_OID_set  _Nullable * mech_types	-	ios=5.0/-/-/0	-	cd052ef065e1f842	-
+function	c:@F@gss_inquire_name	-			OM_uint32 (OM_uint32 *, gss_name_t, int *, gss_OID  _Nullable *, gss_buffer_set_t  _Nullable *)	OM_uint32 * minor_status | gss_name_t input_name | int * name_is_MN | gss_OID  _Nullable * MN_mech | gss_buffer_set_t  _Nullable * attrs	-	ios=5.0/-/-/0	-	d7c1ffe2ea948dc9	-
+function	c:@F@gss_inquire_names_for_mech	-			OM_uint32 (OM_uint32 *, gss_const_OID, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | gss_const_OID mechanism | gss_OID_set  _Nullable * name_types	-	ios=5.0/-/-/0	-	0894d1b9a00cecfe	-
+function	c:@F@gss_inquire_saslname_for_mech	-			OM_uint32 (OM_uint32 *, const gss_OID, gss_buffer_t, gss_buffer_t, gss_buffer_t)	OM_uint32 * minor_status | const gss_OID desired_mech | gss_buffer_t sasl_mech_name | gss_buffer_t mech_name | gss_buffer_t mech_description	-	ios=8.0/-/-/0	-	0c350192a75a5af2	-
+function	c:@F@gss_inquire_sec_context_by_oid	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t  _Nonnull *)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | const gss_OID desired_object | gss_buffer_set_t  _Nonnull * data_set	-	ios=5.0/-/-/0	-	f671d07786467439	-
+function	c:@F@gss_iter_creds	-			OM_uint32 (OM_uint32 *, OM_uint32, gss_const_OID, void (^)(gss_OID _Nullable, gss_cred_id_t _Nullable))	OM_uint32 * min_stat | OM_uint32 flags | gss_const_OID mech | void (^)(gss_OID _Nullable, gss_cred_id_t _Nullable) useriter	-	ios=5.0/-/-/0	-	01d77e5b5a87ca09	-
+function	c:@F@gss_iter_creds_f	-			OM_uint32 (OM_uint32 *, OM_uint32, gss_const_OID, void *, void (*)(void * _Nullable, gss_OID _Nullable, gss_cred_id_t _Nullable))	OM_uint32 * min_stat | OM_uint32 flags | gss_const_OID mech | void * userctx | void (*)(void * _Nullable, gss_OID _Nullable, gss_cred_id_t _Nullable) useriter	-	ios=5.0/-/-/0	-	c74b2bcea391cd5d	-
+function	c:@F@gss_krb5_ccache_name	-			OM_uint32 (OM_uint32 *, const char *, const char * _Nullable *)	OM_uint32 * minor_status | const char * name | const char * _Nullable * out_name	-	ios=5.0/-/-/0	-	0d7f6b529bf5616b	-
+function	c:@F@gss_krb5_copy_ccache	-			OM_uint32 (OM_uint32 *, gss_cred_id_t, struct krb5_ccache_data *)	OM_uint32 * minor_status | gss_cred_id_t cred | struct krb5_ccache_data * out	-	ios=5.0/7.0/-/0	-	84f82c575f7a3f85	-
+function	c:@F@gss_krb5_export_lucid_sec_context	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t  _Nullable *, OM_uint32, void * _Nonnull *)	OM_uint32 * minor_status | gss_ctx_id_t  _Nullable * context_handle | OM_uint32 version | void * _Nonnull * rctx	-	ios=5.0/-/-/0	-	11e4ec0d26ad237c	-
+function	c:@F@gss_krb5_free_lucid_sec_context	-			OM_uint32 (OM_uint32 *, void *)	OM_uint32 * minor_status | void * c	-	ios=5.0/-/-/0	-	a8f21ba28d5205a6	-
+function	c:@F@gss_krb5_set_allowable_enctypes	-			OM_uint32 (OM_uint32 *, gss_cred_id_t, OM_uint32, int32_t *)	OM_uint32 * minor_status | gss_cred_id_t cred | OM_uint32 num_enctypes | int32_t * enctypes	-	ios=5.0/-/-/0	-	5623fd41b14f7c7a	-
+function	c:@F@gss_oid_equal	-			int (gss_const_OID, gss_const_OID)	gss_const_OID a | gss_const_OID b	-	ios=5.0/-/-/0	-	2581ffe707673d3d	-
+function	c:@F@gss_oid_to_str	-			OM_uint32 (OM_uint32 *, gss_OID, gss_buffer_t)	OM_uint32 * minor_status | gss_OID oid | gss_buffer_t oid_str	-	ios=5.0/-/-/0	-	832b4b3a966ff7af	-
+function	c:@F@gss_process_context_token	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, const gss_buffer_t)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | const gss_buffer_t token_buffer	-	ios=5.0/-/-/0	-	44f63dc6fe0dfb63	-
+function	c:@F@gss_pseudo_random	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t, int, const gss_buffer_t, ssize_t, gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t context | int prf_key | const gss_buffer_t prf_in | ssize_t desired_output_len | gss_buffer_t prf_out	-	ios=5.0/-/-/0	-	1a39d6f6869e61b2	-
+function	c:@F@gss_release_buffer	-			OM_uint32 (OM_uint32 *, gss_buffer_t)	OM_uint32 * minor_status | gss_buffer_t buffer	-	ios=5.0/-/-/0	-	966063ea8ad6cd7d	-
+function	c:@F@gss_release_buffer_set	-			OM_uint32 (OM_uint32 *, gss_buffer_set_t  _Nullable *)	OM_uint32 * minor_status | gss_buffer_set_t  _Nullable * buffer_set	-	ios=5.0/-/-/0	-	88dd05118d48ec4f	-
+function	c:@F@gss_release_cred	-			OM_uint32 (OM_uint32 *, gss_cred_id_t  _Nullable *)	OM_uint32 * minor_status | gss_cred_id_t  _Nullable * cred_handle	-	ios=5.0/-/-/0	-	ec4234d18c0b3711	-
+function	c:@F@gss_release_name	-			OM_uint32 (OM_uint32 *, gss_name_t  _Nullable *)	OM_uint32 * minor_status | gss_name_t  _Nullable * input_name	-	ios=5.0/-/-/0	-	a80e1f83fb40baaa	-
+function	c:@F@gss_release_oid	-			OM_uint32 (OM_uint32 *, gss_OID  _Nullable *)	OM_uint32 * minor_status | gss_OID  _Nullable * oid	-	ios=5.0/7.0/-/0	-	1f6b867de6d43929	-
+function	c:@F@gss_release_oid_set	-			OM_uint32 (OM_uint32 *, gss_OID_set  _Nullable *)	OM_uint32 * minor_status | gss_OID_set  _Nullable * set	-	ios=5.0/-/-/0	-	33c255bf06eb3924	-
+function	c:@F@gss_seal	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t, int, int, gss_buffer_t, int *, gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t context_handle | int conf_req_flag | int qop_req | gss_buffer_t input_message_buffer | int * conf_state | gss_buffer_t output_message_buffer	-	ios=5.0/7.0/-/0	-	7b484f17eb2de759	-
+function	c:@F@gss_set_cred_option	-			OM_uint32 (OM_uint32 *, gss_cred_id_t  _Nullable *, const gss_OID, const gss_buffer_t)	OM_uint32 * minor_status | gss_cred_id_t  _Nullable * cred_handle | const gss_OID object | const gss_buffer_t value	-	ios=5.0/-/-/0	-	ef0bf2e2a5d09eed	-
+function	c:@F@gss_set_sec_context_option	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t  _Nonnull *, const gss_OID, const gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t  _Nonnull * context_handle | const gss_OID object | const gss_buffer_t value	-	ios=5.0/-/-/0	-	6a0ac592456780b0	-
+function	c:@F@gss_sign	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t, int, gss_buffer_t, gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t context_handle | int qop_req | gss_buffer_t message_buffer | gss_buffer_t message_token	-	ios=5.0/7.0/-/0	-	7454f111edf508fe	-
+function	c:@F@gss_test_oid_set_member	-			OM_uint32 (OM_uint32 *, gss_const_OID, const gss_OID_set, int *)	OM_uint32 * minor_status | gss_const_OID member | const gss_OID_set set | int * present	-	ios=5.0/-/-/0	-	979a70c589423063	-
+function	c:@F@gss_unseal	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t, gss_buffer_t, gss_buffer_t, int *, int *)	OM_uint32 * minor_status | gss_ctx_id_t context_handle | gss_buffer_t input_message_buffer | gss_buffer_t output_message_buffer | int * conf_state | int * qop_state	-	ios=5.0/7.0/-/0	-	a7213a2eb6df5642	-
+function	c:@F@gss_unwrap	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, const gss_buffer_t, gss_buffer_t, int *, gss_qop_t *)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | const gss_buffer_t input_message_buffer | gss_buffer_t output_message_buffer | int * conf_state | gss_qop_t * qop_state	-	ios=5.0/-/-/0	-	19e152353f5a8053	-
+function	c:@F@gss_userok	-			int (const gss_name_t, const char *)	const gss_name_t name | const char * user	-	ios=7.0/-/-/0	-	6caead626dc7c08d	-
+function	c:@F@gss_verify	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t, gss_buffer_t, gss_buffer_t, int *)	OM_uint32 * minor_status | gss_ctx_id_t context_handle | gss_buffer_t message_buffer | gss_buffer_t token_buffer | int * qop_state	-	ios=5.0/7.0/-/0	-	d5a0f173c03fd14d	-
+function	c:@F@gss_verify_mic	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, const gss_buffer_t, const gss_buffer_t, gss_qop_t *)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | const gss_buffer_t message_buffer | const gss_buffer_t token_buffer | gss_qop_t * qop_state	-	ios=5.0/-/-/0	-	4f769dd240c0e1b8	-
+function	c:@F@gss_wrap	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, int, gss_qop_t, const gss_buffer_t, int *, gss_buffer_t)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | int conf_req_flag | gss_qop_t qop_req | const gss_buffer_t input_message_buffer | int * conf_state | gss_buffer_t output_message_buffer	-	ios=5.0/-/-/0	-	022ae7d050f17ed4	-
+function	c:@F@gss_wrap_size_limit	-			OM_uint32 (OM_uint32 *, const gss_ctx_id_t, int, gss_qop_t, OM_uint32, OM_uint32 *)	OM_uint32 * minor_status | const gss_ctx_id_t context_handle | int conf_req_flag | gss_qop_t qop_req | OM_uint32 req_output_size | OM_uint32 * max_input_size	-	ios=5.0/-/-/0	-	6aed6a20f9943c90	-
+function	c:@F@gsskrb5_extract_authz_data_from_sec_context	-			OM_uint32 (OM_uint32 *, gss_ctx_id_t, int, gss_buffer_t)	OM_uint32 * minor_status | gss_ctx_id_t context_handle | int ad_type | gss_buffer_t ad_data	-	ios=5.0/-/-/0	-	adf424635bc31974	-
+function	c:@F@gsskrb5_register_acceptor_identity	-			OM_uint32 (const char *)	const char * identity	-	ios=5.0/-/-/0	-	db33f96a6db7c528	-
+function	c:@F@krb5_gss_register_acceptor_identity	-			OM_uint32 (const char *)	const char * identity	-	ios=5.0/-/-/0	-	cb5f31b90086b56e	-
+var	c:@__gss_c_attr_local_login_user	-			gss_buffer_desc	-	-	-	-	8ef076c17e1703e5	-
+function	c:@F@GSSCreateCredentialFromUUID	-			gss_cred_id_t (CFUUIDRef)	CFUUIDRef uuid	-	ios=7.0/-/-/0	-	b806ea9ad42ed27f	-
+function	c:@F@GSSCreateError	-			CFErrorRef (gss_const_OID, OM_uint32, OM_uint32)	gss_const_OID mech | OM_uint32 major_status | OM_uint32 minor_status	-	ios=8.0/-/-/0	-	10f722f350547300	-
+function	c:@F@GSSCreateName	-			gss_name_t (CFTypeRef, gss_const_OID, CFErrorRef  _Nullable *)	CFTypeRef name | gss_const_OID name_type | CFErrorRef  _Nullable * error	-	ios=7.0/-/-/0	-	92d9271a4019bab1	-
+function	c:@F@GSSCredentialCopyName	-			gss_name_t (gss_cred_id_t)	gss_cred_id_t cred	-	ios=7.0/-/-/0	-	8ba69bf3f129d428	-
+function	c:@F@GSSCredentialCopyUUID	-			CFUUIDRef (gss_cred_id_t)	gss_cred_id_t credential	-	ios=7.0/-/-/0	-	bd42d59a5fea1ea8	-
+function	c:@F@GSSCredentialGetLifetime	-			OM_uint32 (gss_cred_id_t)	gss_cred_id_t cred	-	ios=7.0/-/-/0	-	b9a46ea553517d1c	-
+function	c:@F@GSSNameCreateDisplayString	-			CFStringRef (gss_name_t)	gss_name_t name	-	ios=7.0/-/-/0	-	ed22be6af952b834	-
+function	c:@F@gss_aapl_change_password	-			OM_uint32 (const gss_name_t, gss_const_OID, CFDictionaryRef, CFErrorRef  _Nullable *)	const gss_name_t name | gss_const_OID mech | CFDictionaryRef attributes | CFErrorRef  _Nullable * error	-	ios=6.0/-/-/0	-	f2f40bdbd373caf7	-
+function	c:@F@gss_aapl_initial_cred	-			OM_uint32 (const gss_name_t, gss_const_OID, CFDictionaryRef, gss_cred_id_t  _Nullable *, CFErrorRef  _Nullable *)	const gss_name_t desired_name | gss_const_OID desired_mech | CFDictionaryRef attributes | gss_cred_id_t  _Nullable * output_cred_handle | CFErrorRef  _Nullable * error	-	ios=5.0/-/-/0	-	9f51b6d0732648e3	-
+struct	c:@S@gss_krb5_lucid_key	-			-	-	-	-	-	4b308f8f3017ecfa	-
+field	c:@S@gss_krb5_lucid_key@FI@type	gss_krb5_lucid_key			OM_uint32	-	-	-	-	d6b309eac6a7865e	-
+field	c:@S@gss_krb5_lucid_key@FI@length	gss_krb5_lucid_key			OM_uint32	-	-	-	-	196a7e72bd500372	-
+field	c:@S@gss_krb5_lucid_key@FI@data	gss_krb5_lucid_key			void *	-	-	-	-	b82d2451d68b41c6	-
+typedef	c:gssapi_krb5.h@T@gss_krb5_lucid_key_t	-			struct gss_krb5_lucid_key	-	-	-	-	93c77e4a39c545a1	-
+struct	c:@S@gss_krb5_rfc1964_keydata	-			-	-	-	-	-	4f1cba92c0372781	-
+field	c:@S@gss_krb5_rfc1964_keydata@FI@sign_alg	gss_krb5_rfc1964_keydata			OM_uint32	-	-	-	-	2576fd51b3a30c77	-
+field	c:@S@gss_krb5_rfc1964_keydata@FI@seal_alg	gss_krb5_rfc1964_keydata			OM_uint32	-	-	-	-	a7c9f25041097707	-
+field	c:@S@gss_krb5_rfc1964_keydata@FI@ctx_key	gss_krb5_rfc1964_keydata			gss_krb5_lucid_key_t	-	-	-	-	14db93a93a2b55ac	-
+typedef	c:gssapi_krb5.h@T@gss_krb5_rfc1964_keydata_t	-			struct gss_krb5_rfc1964_keydata	-	-	-	-	e9c742c681a11216	-
+struct	c:@S@gss_krb5_cfx_keydata	-			-	-	-	-	-	ffccd22ed4f181a5	-
+field	c:@S@gss_krb5_cfx_keydata@FI@have_acceptor_subkey	gss_krb5_cfx_keydata			OM_uint32	-	-	-	-	e3f384a378c9d046	-
+field	c:@S@gss_krb5_cfx_keydata@FI@ctx_key	gss_krb5_cfx_keydata			gss_krb5_lucid_key_t	-	-	-	-	0dd2b4d89c5b8ad7	-
+field	c:@S@gss_krb5_cfx_keydata@FI@acceptor_subkey	gss_krb5_cfx_keydata			gss_krb5_lucid_key_t	-	-	-	-	86f8b299a4615297	-
+typedef	c:gssapi_krb5.h@T@gss_krb5_cfx_keydata_t	-			struct gss_krb5_cfx_keydata	-	-	-	-	099ca5dbcf96a2f2	-
+struct	c:@S@gss_krb5_lucid_context_v1	-			-	-	-	-	-	9ba87c0ada1d4f33	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@version	gss_krb5_lucid_context_v1			OM_uint32	-	-	-	-	6a820bee0829c3e9	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@initiate	gss_krb5_lucid_context_v1			OM_uint32	-	-	-	-	1d65e210a92a6e81	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@endtime	gss_krb5_lucid_context_v1			OM_uint32	-	-	-	-	5a993d70b45117cc	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@send_seq	gss_krb5_lucid_context_v1			OM_uint64	-	-	-	-	706bd6f95280f86b	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@recv_seq	gss_krb5_lucid_context_v1			OM_uint64	-	-	-	-	3e30de8160c4577e	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@protocol	gss_krb5_lucid_context_v1			OM_uint32	-	-	-	-	53f2577f664ba7b3	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@rfc1964_kd	gss_krb5_lucid_context_v1			gss_krb5_rfc1964_keydata_t	-	-	-	-	b1cae87a7e4f85e6	-
+field	c:@S@gss_krb5_lucid_context_v1@FI@cfx_kd	gss_krb5_lucid_context_v1			gss_krb5_cfx_keydata_t	-	-	-	-	8bd1ab24b759a33f	-
+typedef	c:gssapi_krb5.h@T@gss_krb5_lucid_context_v1_t	-			struct gss_krb5_lucid_context_v1	-	-	-	-	fbb946038a68ed12	-
+struct	c:@S@gss_krb5_lucid_context_version	-			-	-	-	-	-	c8bf8e3c135bb090	-
+field	c:@S@gss_krb5_lucid_context_version@FI@version	gss_krb5_lucid_context_version			OM_uint32	-	-	-	-	d63a44cd53d9cfbe	-
+typedef	c:gssapi_krb5.h@T@gss_krb5_lucid_context_version_t	-			struct gss_krb5_lucid_context_version	-	-	-	-	2d669c577726f825	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@ssize_t	-			__darwin_ssize_t	-	-	-	-	e88d0f8d7f363eb2	-
+typedef	c:@T@__darwin_ssize_t	-			long	-	-	-	-	871a2fb075a86142	-
+typedef	c:@T@CFUUIDRef	-			const struct __CFUUID *	-	-	-	-	4bfe0d61060a2df4	-
+typedef	c:@T@CFErrorRef	-			struct __CFError *	-	-	-	-	7e66b8cb53b22edb	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@CFDictionaryRef	-			const struct __CFDictionary *	-	-	-	-	95ab67be7d9fad28	-

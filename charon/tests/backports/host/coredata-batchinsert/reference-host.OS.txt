@@ -1,0 +1,2 @@
+macOS 27.0
+CoreData 120

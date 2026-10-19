@@ -1,0 +1,25 @@
+set_project("charonuikitprinterapp")
+set_version("0.0.1")
+-- The Bonjour printer picker as an installed application, launched through SpringBoard (xmake emulate launch): the port's
+-- UIPrinterPickerController from libUIKitBackports, presented over the application's key window. The addon is the one the
+-- machine's store holds and names active (v0.8.17), so a resolve finds it already installed and moves nothing.
+local root = os.getenv("CHARUIKITPRINTER_ROOT") or path.join(os.scriptdir(), "../../../../..")
+add_repositories("charon " .. root)
+add_addons("charon v0.8.17")
+set_config("apple_minimum", os.getenv("CHARUIKITPRINTER_MINIMUM") or "6.1.3")
+add_requires("charon@apple-backports", {alias = "apple-backports", configs = {uikit = true}})
+includes("@addon/charon/apple-ios")
+includes("@addon/charon/emulate")
+set_defaultplat("iphoneos")
+set_defaultarchs("iphoneos|armv7")
+
+target("charonuikitprinterapp")
+    add_rules("@addon/charon/app")
+    add_files(path.join(root, "tests/backports/emulate/uikitprinter/app/main.m"))
+    add_mflags("-fobjc-arc")
+    add_ldflags("-fobjc-arc", {force = true})
+    add_frameworks("Foundation", "UIKit")
+    add_packages("apple-backports")
+    set_values("charon.libraries", "apple-backports")
+    set_values("app.plist-file", "Info.plist")
+    set_values("charon.control", "control")

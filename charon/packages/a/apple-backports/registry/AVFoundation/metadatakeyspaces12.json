@@ -1,0 +1,38 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVMetadataIdentifierQuickTimeMetadataAutoLivePhoto",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 12.0 release already exports this name and its value is the one measured here, so on a 12.0 band and above the release's own symbol answers; introduced is the release that first exports it rather than Apple's later header annotation, because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"mdta/com.apple.quicktime.live-photo.auto\" - a key or an object type an application writes into a metadata item and gets back as the identifier it was given",
+      "facts": "facts/AVFoundation/MetadataKeySpaces.md",
+      "source": "dyld.first_releases over the armv7/armv7s ladder, and a direct dump of the exports of the arm64 caches of 9.3.6, 10.0.1, 11.0 and 12.0 and the arm64e cache of 16.0 (tools/corpus/dump-cache.lua), with _NSFileSize planted as a control: it answers 3.0 on the armv7 ladder and 7.0 on the arm64 one, so a run that answers nothing for it is a broken measurement and not an answer of 'no release exports this'; and the value itself by the host differential in tests/backports/host/avf-metadata, which reads the table out of two builds - Apple's framework alone and the port's objects beside it in one binary with the names renamed - and diffs it, the text and the bytes both"
+    },
+    {
+      "api": "AVMetadataIdentifierQuickTimeMetadataLivePhotoVitalityScore",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 12.0 release already exports this name and its value is the one measured here, so on a 12.0 band and above the release's own symbol answers; introduced is the release that first exports it rather than Apple's later header annotation, because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"mdta/com.apple.quicktime.live-photo.vitality-score\" - a key or an object type an application writes into a metadata item and gets back as the identifier it was given",
+      "facts": "facts/AVFoundation/MetadataKeySpaces.md",
+      "source": "dyld.first_releases over the armv7/armv7s ladder, and a direct dump of the exports of the arm64 caches of 9.3.6, 10.0.1, 11.0 and 12.0 and the arm64e cache of 16.0 (tools/corpus/dump-cache.lua), with _NSFileSize planted as a control: it answers 3.0 on the armv7 ladder and 7.0 on the arm64 one, so a run that answers nothing for it is a broken measurement and not an answer of 'no release exports this'; and the value itself by the host differential in tests/backports/host/avf-metadata, which reads the table out of two builds - Apple's framework alone and the port's objects beside it in one binary with the names renamed - and diffs it, the text and the bytes both"
+    },
+    {
+      "api": "AVMetadataIdentifierQuickTimeMetadataLivePhotoVitalityScoringVersion",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 12.0 release already exports this name and its value is the one measured here, so on a 12.0 band and above the release's own symbol answers; introduced is the release that first exports it rather than Apple's later header annotation, because carried is introduced <= deployment",
+      "effect": "answers the string the framework itself answers for this name, \"mdta/com.apple.quicktime.live-photo.vitality-scoring-version\" - a key or an object type an application writes into a metadata item and gets back as the identifier it was given",
+      "facts": "facts/AVFoundation/MetadataKeySpaces.md",
+      "source": "dyld.first_releases over the armv7/armv7s ladder, and a direct dump of the exports of the arm64 caches of 9.3.6, 10.0.1, 11.0 and 12.0 and the arm64e cache of 16.0 (tools/corpus/dump-cache.lua), with _NSFileSize planted as a control: it answers 3.0 on the armv7 ladder and 7.0 on the arm64 one, so a run that answers nothing for it is a broken measurement and not an answer of 'no release exports this'; and the value itself by the host differential in tests/backports/host/avf-metadata, which reads the table out of two builds - Apple's framework alone and the port's objects beside it in one binary with the names renamed - and diffs it, the text and the bytes both"
+    }
+  ]
+}

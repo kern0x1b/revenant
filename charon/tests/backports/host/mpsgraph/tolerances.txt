@@ -1,0 +1,83 @@
+# How far two answers of one operation may differ and still be the same answer, in units in the last
+# place, per case. **Every number here is the Metal Shading Language Specification's own figure**, read out
+# of the document and not out of this differential: the release's transcendental kernels are Metal's and
+# are not the C library's, so "the same arithmetic" for one of them is the accuracy the specification
+# documents for that function and not a set of bytes.
+#
+#     <case> <data type> <units in the last place>
+#
+# The source, once: *Metal Shading Language Specification*, version 2026-06-04, section **8.4 "ULPs and
+# Relative Error"**, whose single-precision table is **Table 8.1** (pages 368-369) and whose
+# half-precision table is **Table 8.3** (pages 373-374). Where a row of either table reads "Correctly
+# rounded" the figure is 0, and that is what `sqrt`, `rsqrt`, `rint`, `round`, `ceil` and `floor` carry
+# below: the specification holds them to the correctly rounded answer, so there is no room for a
+# difference and the two are compared byte for byte. The reference value the specification computes a ULP
+# from is the infinitely precise result, and this file compares the two answers with each other rather than
+# with the exact result, which is the difference between a bound and a measurement and is why a cell whose
+# two answers are further apart than the figure fails even where both are within the figure of the exact
+# answer.
+#
+# **A case that is not on this list is compared byte for byte**, which is every case that is not one of the
+# operations the two tables name: a predicate, a logical, both remainders, a minimum, a maximum, a select,
+# a clamp, a rounding, the three questions about a value, a ReLU and a ReLU gradient are compared byte for
+# byte in both types, and the six comparisons and the four orderings byte for byte as one byte each. Their
+# answers are a truth, a whole number or one of two orderings, and "within N units in the last place" is
+# not a thing for any of them. A boolean result has no tolerance either.
+#
+# **Two operations of this family are not in either table, and carry no entry.** `erf` is not a function the
+# Metal Shading Language Specification defines or bounds at all, in either precision, so there is no
+# documented bound to hold it to and its cells are compared byte for byte and recorded where the two differ.
+# A half `pow` is likewise absent from Table 8.3 while the single-precision `pow` is in Table 8.1, so
+# `pow` carries the single-precision figure and its half cells are compared byte for byte.
+#
+# **A sigmoid carries a figure that is the sum of two the specification does give**, and the derivation is
+# here so that it can be checked: `-[MPSGraph sigmoidWithTensor:name:]` is one over one plus an
+# exponential of the negated argument, `exp` is `<= 4 ulp` in Table 8.1 and `<= 1 ulp` in Table 8.3, and
+# `x / y` and `1.0 / x` are both "Correctly rounded" in the same two tables and so add nothing. Four in
+# single precision, one in half.
+#
+# The measured distance between the two answers, over the case file's thirty-two input classes, is in
+# packages/a/apple-backports/facts/MetalPerformanceShadersGraph/Core.md next to the figure it is held to,
+# so a gap between the two is visible rather than hidden.
+
+# Table 8.1, single precision. Page 368 of 383.
+acos float32 4
+acosh float32 4
+asin float32 4
+asinh float32 4
+atan float32 5
+atan2 float32 6
+atanh float32 5
+cos float32 4
+cosh float32 4
+expBase2 float32 4
+expBase10 float32 4
+logBase2 float32 4
+logBase10 float32 4
+power float32 16
+sin float32 4
+sinh float32 4
+tan float32 6
+tanh float32 5
+sigmoid float32 4
+
+# Table 8.3, half precision. Page 373 of 383, and "applies to iOS and macOS, starting with Apple GPU
+# Family 4 hardware" - which is what this host is, and the comparison is against its own kernels.
+acos float16 1
+acosh float16 1
+asin float16 1
+asinh float16 1
+atan float16 1
+atan2 float16 1
+atanh float16 1
+cos float16 1
+cosh float16 1
+expBase2 float16 1
+expBase10 float16 1
+logBase2 float16 1
+logBase10 float16 1
+sin float16 1
+sinh float16 1
+tan float16 1
+tanh float16 1
+sigmoid float16 1

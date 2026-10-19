@@ -1,0 +1,7 @@
+Package: org.charon.avmovie-probe
+Name: Charon AVMovie probe application
+Architecture: iphoneos-arm
+Description: The AVMovie host differential's probe as an application on the 6.1.3 emulator, reading the movies in its bundle
+Maintainer: charon
+Author: charon
+Section: Development

@@ -1,0 +1,14 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "-[NSUndoManager registerUndoWithTarget:handler:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUndoManagerBlocks.md",
+      "source": "the host's own Foundation (macOS carries the same method since 10.11) and the header of SDK 9.3"
+    }
+  ]
+}

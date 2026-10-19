@@ -1,0 +1,60 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPPlayableContentManager",
+   "kind": "class",
+   "introduced": "7.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPPlayableContentManager.h, MP_DEPRECATED(\"Use CarPlay framework\", ios(7.1, 14.0))",
+   "reason": "read CLASS-SCOPED with tools/corpus/objc-inventory.lua over the armv7 caches of 6.1.3 and 4.3, this class reads ABSENT from both, with the controls in the same two files - MPVolumeView and MPMediaPlaylist PRESENT on both ends, and MPNowPlayingInfoCenter PRESENT at 6.1.3 and ABSENT at 4.3, which is what makes this row's zero the release's and not the reader's. A class no release has is new code and cannot shadow anything, so it can be `implemented`; `absent` is for a row whose answer needs a thing the device lacks, and nothing here needs one. WHAT THE HEADER SAYS THE CLASS IS FOR, and it is the limit on this row: MPPlayableContentManager.h:17-21 says it 'manages the interactions between a media application and an external media player interface', taking a data source to browse content with and a delegate to relay playback commands to. The port supplies the APPLICATION's half - it stores the data source and the delegate, weakly as the header declares them, and reaches them, which tests/backports/host/mediaplayeritem/playablecontent.m exercises with a real conforming object through the two @required data source members and the delegate's optional callback. The system half does not exist and is not built: the endpoint is a car head unit, 6.1.3 has none, and every header in this family names CarPlay as its replacement, which arrived in 14.0. So the objects are real and the app's half is wired, and nothing on this release calls it - the same position MPRemoteCommandCenter71.m is in, except that there the mechanism above the port (UIEventTypeRemoteControl) does exist on the release and here there is no mechanism at all",
+   "effect": "NSClassFromString answers the class, +sharedContentManager returns the one instance the header calls 'the application's instance', and the manager holds and reaches the data source and delegate an application gives it. Nothing on 6.1.3 calls into them, for the reason the row gives",
+   "facts": "facts/MediaPlayer/PlayableContent.md"
+  },
+  {
+   "api": "MPContentItem",
+   "kind": "class",
+   "introduced": "7.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPContentItem.h, MP_API(ios(7.1), tvos(7.1), macos(10.12.2))",
+   "reason": "read CLASS-SCOPED with tools/corpus/objc-inventory.lua over the armv7 caches of 6.1.3 and 4.3, this class reads ABSENT from both, controls in the same files as the MPPlayableContentManager row. New code, so nothing to shadow. It is the class the data source protocol hands back: MPPlayableContentDataSource.h's @required -contentItemAtIndexPath: is typed `nullable MPContentItem *`, so an application implementing that protocol on this port needs the class to exist or the protocol has no return type. The identifier is the load-bearing member - the header calls it 'Required' and says a unique identifier is 'required to identify the item for later use' - and it is copied, because it is the handle an external player names the item by later. ITS DEFAULT PROGRESS IS NOT ZERO, which is the one place a plain @synthesize would be wrong: MPContentItem.h:44-45 says '0.0 = not watched/listened/viewed, 1.0 = fully watched/listened/viewed / Default is -1.0 (no progress indicator shown)', so a zero-initialised float ivar would read 0.0 - meaning NOT WATCHED - where the documented default is NO INDICATOR AT ALL. The ivar is initialised to -1.0f explicitly and the check asserts it",
+   "effect": "NSClassFromString answers the class and a caller-built item holds the identifier, title, subtitle, artwork and the four boolean flags its header declares, with the getter= spellings -isStreamingContent, -isExplicitContent, -isContainer and -isPlayable as the selectors the header writes them as, and playbackProgress reading -1.0 until a caller sets it",
+   "facts": "facts/MediaPlayer/PlayableContent.md"
+  },
+  {
+   "api": "MPPlayableContentManagerContext",
+   "kind": "class",
+   "introduced": "8.4",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPPlayableContentManagerContext.h, MP_DEPRECATED(\"Use CarPlay framework\", ios(8.4, 14.0))",
+   "reason": "read CLASS-SCOPED with tools/corpus/objc-inventory.lua over the armv7 caches of 6.1.3 and 4.3, this class reads ABSENT from both, controls in the same files as the MPPlayableContentManager row. New code, so nothing to shadow, and every value it reports is a real answer about an endpoint that is not there rather than a placeholder. endpointAvailable is NO, which is the measured state: the endpoint is an external media player and 6.1.3 has none. contentLimitsEnforced is NO for the same reason. enforcedContentItemsCount is NSIntegerMax, and that is APPLE'S OWN SPELLING for this case rather than a large number chosen to look right - the header says 'Returns NSIntegerMax if the content server will never limit the number of items', and a zero would claim the opposite, that the server will display no items at all. enforcedContentTreeDepth is 0 and is the one value here that is NOT a measured state: the header says 'Exceeding this limit will result in a crash', so it is a limit the caller must not exceed rather than a capability, and with no endpoint there is no hierarchy to walk - a large number would claim a capability that does not exist. The deprecated contentLimitsEnabled is answered from contentLimitsEnforced because the header replaces the first with the second AT THE SAME AVAILABILITY, MP_DEPRECATED_WITH_REPLACEMENT(\"contentLimitsEnforced\", ios(8.4, 9.0)), so there is no state in which the two could disagree",
+   "effect": "NSClassFromString answers the class and a context reports the state of an external media player that this release does not have: endpointAvailable NO, no limits enforced, no item-count limit (NSIntegerMax) and no navigable depth. A caller reading a limit to enforce gets one that is safe rather than one that would crash",
+   "facts": "facts/MediaPlayer/PlayableContent.md"
+  },
+  {
+   "api": "MPPlayableContentDataSource",
+   "kind": "protocol",
+   "introduced": "7.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPPlayableContentDataSource.h, MP_DEPRECATED(\"Use CarPlay framework\", ios(7.1, 14.0))",
+   "reason": "read from the 1171 protocol lines of the same 6.1.3 objc-inventory run, this protocol reads ABSENT, and a protocol is invisible to a per-image __objc_classlist read, so the whole-cache rung is the only one that can decide it - which is why this row and the delegate beside it are read here rather than per-image. A protocol the release does not have is new code and cannot shadow anything. CONFORMING TO IT IS THE EASYER CASE AND NOT THE HARDER ONE, and the difference is worth being exact about: an application's own class conforms, and this port declares the signatures the header declares, so the conformance is a declaration rather than an implementation that could be wrong - the shape the tree already uses in registry/MetalPerformanceShadersGraph/graph.json, whose 13 charon_ rows are all `implemented` for exactly this reason. The two @required members are -numberOfChildItemsAtIndexPath: and -contentItemAtIndexPath:, and both are exercised through the port's manager by a real conforming object in tests/backports/host/mediaplayeritem/playablecontent.m, which is what makes the row a claim about reachable code rather than about a header",
+   "effect": "an application class can declare conformance and the compiler checks it against the header's own signatures; the two required members are reachable through the port's MPPlayableContentManager, and an object with no such endpoint is never asked for them on this release",
+   "facts": "facts/MediaPlayer/PlayableContent.md"
+  },
+  {
+   "api": "MPPlayableContentDelegate",
+   "kind": "protocol",
+   "introduced": "7.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPPlayableContentDelegate.h, MP_DEPRECATED(\"Use CarPlay framework\", ios(7.1, 14.0))",
+   "reason": "read from the 1171 protocol lines of the same 6.1.3 objc-inventory run, ABSENT, and invisible to a per-image classlist read for the reason the data source row gives. New code, so nothing to shadow. Every member of this protocol is @optional and every one of them is a CALLBACK FROM AN EXTERNAL MEDIA PLAYER, which is the limit stated plainly rather than hidden: -playableContentManager:initiatePlaybackOfContentItemAtIndexPath:completionHandler: is 'called when a media player interface wants to play a requested content item', and there is no media player interface on 6.1.3 and this port builds none. The port's side is real and the check reaches it - the port's manager holds a conforming delegate and its callback's completion handler is invoked by the check - but nothing on this release calls it. The two deprecated-in-9.0 queue callbacks are declarations with the same reachability, and their replacements (Intents, 9.0/9.3) are outside this family",
+   "effect": "an application class can declare conformance and be checked against the header's signatures; the port's manager holds and reaches a conforming delegate, and on this release no external media player exists to invoke the callbacks",
+   "facts": "facts/MediaPlayer/PlayableContent.md"
+  }
+ ]
+}

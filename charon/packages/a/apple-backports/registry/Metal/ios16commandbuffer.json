@@ -1,0 +1,16 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLCommandBuffer accelerationStructureCommandEncoderWithDescriptor:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the descriptor form of the acceleration-structure encoder, which needs the ray-tracing unit this device does not have",
+      "effect": "nil, with a log. REASONED, not measured, for the same reason as the 14.0 factory",
+      "facts": "facts/Metal/CommandBuffer.md",
+      "source": "SDK 16.4, Metal; the introduction 16.0 from the corpus surface of the 26.2 SDK"
+    }
+  ]
+}

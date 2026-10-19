@@ -1,0 +1,82 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptureDataOutputSynchronizer",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the camera and microphone are real hardware the device has, and AVCaptureVideoDataOutput/AVCaptureAudioDataOutput's own -setSampleBufferDelegate:queue: has been on iOS 6.0 from the start; the synchronizer sits in front of it",
+      "effect": "initWithDataOutputs: keeps the array, the first output as master; setDelegate:queue: takes over each video or audio output's own sample buffer delegate (real API since 6.0) and, on every buffer the master output receives, delivers a single callback carrying the master's new buffer alongside the most recently received buffer of every other output in the array - an honest simplification of the real presentation-timestamp windowing the header describes, not a full re-implementation of it",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract; AVCaptureVideoDataOutput/AVCaptureAudioDataOutput's setSampleBufferDelegate:queue: and didOutputSampleBuffer:/didDropSampleBuffer: of iOS 6.1.3's own AVFoundation"
+    },
+    {
+      "api": "AVCaptureDataOutputSynchronizerDelegate",
+      "kind": "protocol",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDataOutputSynchronizer calls it; the protocol status is not pushed onto the class that calls it",
+      "effect": "dataOutputSynchronizer:didOutputSynchronizedDataCollection: is called on the delegate's queue as described",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVCaptureSynchronizedData",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the abstract base every synchronized-data class carries",
+      "effect": "timestamp holds the presentation timestamp the concrete subclass was built with",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVCaptureSynchronizedDataCollection",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the dictionary-like collection AVCaptureDataOutputSynchronizer's delegate callback is handed",
+      "effect": "synchronizedDataForCaptureOutput:, the equivalent subscript operator, count and fast enumeration of the held outputs all work over a real NSMapTable built fresh for each delegate callback",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVCaptureSynchronizedSampleBufferData",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the corpus's own crash-demand row, second by exposure at 3 of 3 applications; the camera and microphone are real hardware, so there is no wall",
+      "effect": "sampleBuffer holds a real, CFRetained CMSampleBufferRef from AVCaptureVideoDataOutput or AVCaptureAudioDataOutput's own delegate callback, released on dealloc; sampleBufferWasDropped and droppedReason answer YES/LateData when the buffer came from didDropSampleBuffer:fromConnection: instead of didOutputSampleBuffer:fromConnection: - iOS 6's own drop callback carries no reason, so LateData is always the value given rather than the more specific reasons the header lists, a real and stated gap",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract; AVCaptureVideoDataOutput's didDropSampleBuffer:fromConnection:, present since iOS 6.0"
+    },
+    {
+      "api": "AVCaptureSynchronizedMetadataObjectData",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so the class symbol resolves; AVCaptureDataOutputSynchronizer only wires up video and audio data outputs (the corpus's own demand), not AVCaptureMetadataOutput",
+      "effect": "metadataObjects always answers an empty array; this port's synchronizer never constructs one",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "AVCaptureSynchronizedDepthData",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so the class symbol resolves; the iPhone 4S and iPad 2 this port targets have no depth-capable camera at all, a genuine hardware wall unlike the sample-buffer path above",
+      "effect": "depthData answers nil, depthDataWasDropped answers NO, droppedReason answers None; this port's synchronizer never constructs one",
+      "facts": "facts/AVFoundation/DataOutputSynchronizer.md",
+      "source": "the header of iOS 16.4 for the contract"
+    }
+  ]
+}

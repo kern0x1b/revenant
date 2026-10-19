@@ -1,0 +1,5 @@
+api	introduced	status	reasons	returns	params	decl
+NSStringFromCPJunctionType	17.4	generable		NSString *	CPJunctionType junctionType	NSString * NSStringFromCPJunctionType(CPJunctionType junctionType)
+NSStringFromCPLaneStatus	17.4	generable		NSString *	CPLaneStatus laneStatus	NSString * NSStringFromCPLaneStatus(CPLaneStatus laneStatus)
+NSStringFromCPManeuverType	17.4	generable		NSString *	CPManeuverType maneuverType	NSString * NSStringFromCPManeuverType(CPManeuverType maneuverType)
+NSStringFromCPTrafficSide	17.4	generable		NSString *	CPTrafficSide trafficSide	NSString * NSStringFromCPTrafficSide(CPTrafficSide trafficSide)

@@ -1,0 +1,12 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+HomeKit	class	HMMediaSourceDisplayOrderProfile	18.0				own
+HomeKit	protocol	HMMediaSourceDisplayOrderProfile.Delegate	18.0				own
+HomeKit	method	HMMediaSourceDisplayOrderProfile.Delegate.mediaSourceDisplayOrderProfileDidUpdateOrder(_:)	18.0				container
+HomeKit	property	HMMediaSourceDisplayOrderProfile.canModifyOrder	18.0				container
+HomeKit	property	HMMediaSourceDisplayOrderProfile.order	18.0				container
+HomeKit	property	HMMediaSourceDisplayOrderProfile.delegate	18.0				container
+HomeKit	method	HMMediaSourceDisplayOrderProfile.writeOrder(_:)	18.0				container
+HomeKit	property	HMAccessory.hapInstanceID	26.1				own
+HomeKit	property	HMAccessory.matterNodeID	16.1				own
+HomeKit	constant	HMCharacteristicPropertySupportsEventNotification	8.0				own
+HomeKit	property	HMService.matterEndpointID	18.0				own

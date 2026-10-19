@@ -1,0 +1,4 @@
+{
+  "extensionName": { "message": "The web-extension probe's manifest", "description": "what the host answers for an extension is asked of THIS manifest" },
+  "extensionDescription": { "message": "Every key in this manifest is one the 26.2 SDK's WKWebExtension reads, and each is here to be measured." }
+}

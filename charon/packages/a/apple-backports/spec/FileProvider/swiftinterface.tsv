@@ -1,0 +1,4 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+FileProvider	method	NSFileProviderDomainVersion.<(lhs:rhs:)	16.0				container
+FileProvider	method	NSFileProviderManager.requestDownloadForItem(withIdentifier:requestedRange:completionHandler:)	16.0				container
+FileProvider	method	NSFileProviderManager.requestDownloadForItem(withIdentifier:requestedRange:)	16.0				container

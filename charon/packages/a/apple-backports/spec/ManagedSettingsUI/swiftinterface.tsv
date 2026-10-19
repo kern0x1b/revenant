@@ -1,0 +1,21 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+ManagedSettingsUI	class	ShieldConfigurationDataSource	15.0				own
+ManagedSettingsUI	method	ShieldConfigurationDataSource.configuration(shielding:)	15.0				container
+ManagedSettingsUI	method	ShieldConfigurationDataSource.configuration(shielding:in:)	15.0				container
+ManagedSettingsUI	method	ShieldConfigurationDataSource.configuration(shielding:)	15.0				container
+ManagedSettingsUI	method	ShieldConfigurationDataSource.configuration(shielding:in:)	15.0				container
+ManagedSettingsUI	method	ShieldConfigurationDataSource.init()	15.0				container
+ManagedSettingsUI	struct	ShieldConfiguration	15.0				own
+ManagedSettingsUI	struct	ShieldConfiguration.Label	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.Label.text	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.Label.color	15.0				container
+ManagedSettingsUI	method	ShieldConfiguration.Label.init(text:color:)	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.backgroundBlurStyle	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.backgroundColor	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.icon	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.title	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.subtitle	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.primaryButtonLabel	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.primaryButtonBackgroundColor	15.0				container
+ManagedSettingsUI	property	ShieldConfiguration.secondaryButtonLabel	15.0				container
+ManagedSettingsUI	method	ShieldConfiguration.init(backgroundBlurStyle:backgroundColor:icon:title:subtitle:primaryButtonLabel:primaryButtonBackgroundColor:secondaryButtonLabel:)	15.0				container

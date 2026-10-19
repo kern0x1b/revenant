@@ -1,0 +1,164 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@SA@MPSNDArrayOffsets	-			-	-	-	-	-	dd88048c2946543a	-
+field	c:@SA@MPSNDArrayOffsets@FI@dimensions	MPSNDArrayOffsets			NSInteger[16]	-	-	-	-	5d68b2a43621cdf3	-
+typedef	c:@T@MPSNDArrayOffsets	-			struct MPSNDArrayOffsets	-	-	-	-	269146c393b1b57a	-
+struct	c:@SA@MPSNDArraySizes	-			-	-	-	-	-	81ade92506142e49	-
+field	c:@SA@MPSNDArraySizes@FI@dimensions	MPSNDArraySizes			NSUInteger[16]	-	-	-	-	2545ddf6f9d2306f	-
+typedef	c:@T@MPSNDArraySizes	-			struct MPSNDArraySizes	-	-	-	-	4c3938680357c841	-
+interface	c:objc(cs)MPSNDArrayMultiaryBase	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1e07bd890debc982	-
+super	-	MPSNDArrayMultiaryBase	MPSKernel		-	-	-	-	-	088b2941f9cfe457	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)offsetsAtSourceIndex:	-			MPSNDArrayOffsets	NSUInteger sourceIndex	-	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	926512e47631d7d2	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)edgeModeAtSourceIndex:	-			MPSImageEdgeMode	NSUInteger sourceIndex	-	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	51fa6eca2e2c971d	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)kernelSizesForSourceIndex:	-			MPSNDArraySizes	NSUInteger sourceIndex	-	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	9c54a1c6ecd8e8cc	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)stridesForSourceIndex:	-			MPSNDArrayOffsets	NSUInteger sourceIndex	-	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	600a7831e08785c0	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)dilationRatesForSourceIndex:	-			MPSNDArraySizes	NSUInteger sourceIndex	-	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	d1a4b79144ced615	-
+property	c:objc(cs)MPSNDArrayMultiaryBase(py)destinationArrayAllocator	-			id<MPSNDArrayAllocator>	-	retain,nonatomic	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	38169c263ee3e665	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4447122fa53037a3	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger count	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	6b9c35ec159b6d6a	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	de62589c2be4a4ad	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)encodeWithCoder:	-			void	NSCoder * coder	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	94a959f9f51739ad	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)copyWithZone:device:	-			instancetype	NSZone * zone | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	a13e8a6dda2852ee	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)resultStateForSourceArrays:sourceStates:destinationArray:	-			MPSState *	NSArray<MPSNDArray *> * sourceArrays | NSArray<MPSState *> * sourceStates | MPSNDArray * destinationArray	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	2b2996b8e8b2d04b	-
+method	c:objc(cs)MPSNDArrayMultiaryBase(im)destinationArrayDescriptorForSourceArrays:sourceState:	-			MPSNDArrayDescriptor *	NSArray<MPSNDArray *> * sources | MPSState * state	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	c50c5ce06b46a889	-
+interface	c:objc(cs)MPSNDArrayMultiaryKernel	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4f1b3da6a6577a30	-
+super	-	MPSNDArrayMultiaryKernel	MPSNDArrayMultiaryBase		-	-	-	-	-	517537e2b16a0220	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger count	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	b621d112b3746f76	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ab087cc493dd6f91	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)encodeToCommandBuffer:sourceArrays:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | NSArray<MPSNDArray *> * sourceArrays	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	51a4fb1c21980d36	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)encodeToCommandBuffer:sourceArrays:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | NSArray<MPSNDArray *> * sourceArrays | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4e2e3a239650efb0	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)encodeToCommandBuffer:sourceArrays:resultState:outputStateIsTemporary:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | NSArray<MPSNDArray *> * sourceArrays | MPSState * _Nullable * outGradientState | BOOL outputStateIsTemporary	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	7afeb857bdf46df7	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)encodeToCommandBuffer:sourceArrays:resultState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | NSArray<MPSNDArray *> * sourceArrays | MPSState * outGradientState | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1214233aa76eff82	-
+method	c:objc(cs)MPSNDArrayMultiaryKernel(im)encodeToCommandEncoder:commandBuffer:sourceArrays:destinationArray:	-			void	id<MTLComputeCommandEncoder> encoder | id<MTLCommandBuffer> commandBuffer | NSArray<MPSNDArray *> * sourceArrays | MPSNDArray * destination	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	63a500b6f0500c30	-
+interface	c:objc(cs)MPSNDArrayMultiaryGradientKernel	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	d8fc2ead2dc9b15a	-
+super	-	MPSNDArrayMultiaryGradientKernel	MPSNDArrayMultiaryBase		-	-	-	-	-	1237a1e5c99cd3cb	-
+method	c:objc(cs)MPSNDArrayMultiaryGradientKernel(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger count	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	fbe4fc7dc49d378f	-
+method	c:objc(cs)MPSNDArrayMultiaryGradientKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	00b299e05ccd89a9	-
+method	c:objc(cs)MPSNDArrayMultiaryGradientKernel(im)initWithDevice:sourceCount:sourceGradientIndex:	-			instancetype	id<MTLDevice> device | NSUInteger count | NSUInteger sourceGradientIndex	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	cfa140620e3b30a9	-
+method	c:objc(cs)MPSNDArrayMultiaryGradientKernel(im)encodeToCommandBuffer:sourceArrays:sourceGradient:gradientState:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | NSArray<MPSNDArray *> * sources | MPSNDArray * gradient | MPSState * state	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ae555a8f7d40011f	-
+method	c:objc(cs)MPSNDArrayMultiaryGradientKernel(im)encodeToCommandBuffer:sourceArrays:sourceGradient:gradientState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | NSArray<MPSNDArray *> * sources | MPSNDArray * gradient | MPSState * state | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	e4394b70d8eef4a2	-
+interface	c:objc(cs)MPSNDArrayUnaryKernel	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	7929a113b79b35bf	-
+super	-	MPSNDArrayUnaryKernel	MPSNDArrayMultiaryKernel		-	-	-	-	-	df5872715d9701bb	-
+property	c:objc(cs)MPSNDArrayUnaryKernel(py)offsets	-			MPSNDArrayOffsets	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	0a1ca7927af32fbd	-
+property	c:objc(cs)MPSNDArrayUnaryKernel(py)edgeMode	-			MPSImageEdgeMode	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	e7307f384f28d20c	-
+property	c:objc(cs)MPSNDArrayUnaryKernel(py)kernelSizes	-			MPSNDArraySizes	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	c66b70f4a7155039	-
+property	c:objc(cs)MPSNDArrayUnaryKernel(py)strides	-			MPSNDArrayOffsets	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	76fb00d4e64773d3	-
+property	c:objc(cs)MPSNDArrayUnaryKernel(py)dilationRates	-			MPSNDArraySizes	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	e8e0dcc087fc2b97	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ded560f360953bc8	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger count	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	a0edb16259cb9e9c	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	d8d32939210693e6	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)encodeToCommandBuffer:sourceArray:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	134b1ac245b577aa	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)encodeToCommandBuffer:sourceArray:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	09c4b1a2f8a6bc46	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)encodeToCommandBuffer:sourceArray:resultState:outputStateIsTemporary:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSState * _Nullable * outGradientState | BOOL outputStateIsTemporary	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	2237ad66aab1e13f	-
+method	c:objc(cs)MPSNDArrayUnaryKernel(im)encodeToCommandBuffer:sourceArray:resultState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSState * outGradientState | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	c35500d86498a127	-
+interface	c:objc(cs)MPSNDArrayUnaryGradientKernel	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	4a340e5ed29b9b8f	-
+super	-	MPSNDArrayUnaryGradientKernel	MPSNDArrayMultiaryGradientKernel		-	-	-	-	-	4ae347d514e58d0b	-
+method	c:objc(cs)MPSNDArrayUnaryGradientKernel(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	a67b55d7ceea6172	-
+method	c:objc(cs)MPSNDArrayUnaryGradientKernel(im)initWithDevice:sourceCount:sourceGradientIndex:	-			instancetype	id<MTLDevice> device | NSUInteger count | NSUInteger sourceGradientIndex	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	2a314b6a7425942a	-
+method	c:objc(cs)MPSNDArrayUnaryGradientKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	a7ee7f536abc01a9	-
+method	c:objc(cs)MPSNDArrayUnaryGradientKernel(im)encodeToCommandBuffer:sourceArray:sourceGradient:gradientState:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSNDArray * gradient | MPSState * state	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1380248d49f80a1f	-
+method	c:objc(cs)MPSNDArrayUnaryGradientKernel(im)encodeToCommandBuffer:sourceArray:sourceGradient:gradientState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSNDArray * gradient | MPSState * state | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	1d91c79b53b547cb	-
+interface	c:objc(cs)MPSNDArrayBinaryKernel	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	ac6dbc71d1a62768	-
+super	-	MPSNDArrayBinaryKernel	MPSNDArrayMultiaryKernel		-	-	-	-	-	37c20f0dc7fedd3d	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)primaryOffsets	-			MPSNDArrayOffsets	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	33a3c617a4c7e0ec	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)primaryEdgeMode	-			MPSImageEdgeMode	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	8d0e810474935942	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)primaryKernelSizes	-			MPSNDArraySizes	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	99225f2eae8eb7c3	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)primaryStrides	-			MPSNDArrayOffsets	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	b367d2e8f79b4ec0	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)primaryDilationRates	-			MPSNDArraySizes	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	67f3305ea182aa8e	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)secondaryOffsets	-			MPSNDArrayOffsets	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	cb1d55f81adc71f3	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)secondaryEdgeMode	-			MPSImageEdgeMode	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	94f47684a46dbb3a	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)secondaryKernelSizes	-			MPSNDArraySizes	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	88195f02972a7c29	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)secondaryStrides	-			MPSNDArrayOffsets	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	2fd006aab35af7c1	-
+property	c:objc(cs)MPSNDArrayBinaryKernel(py)secondaryDilationRates	-			MPSNDArraySizes	-	readonly,nonatomic	ios=13.0/14.0/-/0,macos=10.15/11.0/-/0,tvos=13.0/14.0/-/0	-	a9d60fa057ad5564	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	51339973309996dc	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger count	-	*unavailable ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	93cbef31720a85f2	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	536c076afbfb3e83	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	f49f1580a3e0aab3	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	194c18f042283ecb	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:resultState:outputStateIsTemporary:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSState * _Nullable * outGradientState | BOOL outputStateIsTemporary	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	abe3848a0afa0acf	-
+method	c:objc(cs)MPSNDArrayBinaryKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:resultState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSState * outGradientState | MPSNDArray * destination	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	9b3e89c8f7d981ac	-
+interface	c:objc(cs)MPSNDArrayBinaryPrimaryGradientKernel	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	d4245eb1379136ea	-
+super	-	MPSNDArrayBinaryPrimaryGradientKernel	MPSNDArrayMultiaryGradientKernel		-	-	-	-	-	3c9f787a5748d6c9	-
+method	c:objc(cs)MPSNDArrayBinaryPrimaryGradientKernel(im)initWithDevice:sourceCount:sourceGradientIndex:	-			instancetype	id<MTLDevice> device | NSUInteger count | NSUInteger sourceGradientIndex	-	*unavailable ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	a0dfb4d9deda51c3	-
+method	c:objc(cs)MPSNDArrayBinaryPrimaryGradientKernel(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	234131daa93bd470	-
+method	c:objc(cs)MPSNDArrayBinaryPrimaryGradientKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	c559178ef65b08ba	-
+method	c:objc(cs)MPSNDArrayBinaryPrimaryGradientKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:sourceGradient:gradientState:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSNDArray * gradient | MPSState * state	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	d577fe3e68a15d6c	-
+method	c:objc(cs)MPSNDArrayBinaryPrimaryGradientKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:sourceGradient:gradientState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSNDArray * gradient | MPSState * state | MPSNDArray * destination	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	658d839ef4a78e00	-
+interface	c:objc(cs)MPSNDArrayBinarySecondaryGradientKernel	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	37059f73ac4163c3	-
+super	-	MPSNDArrayBinarySecondaryGradientKernel	MPSNDArrayMultiaryGradientKernel		-	-	-	-	-	500748d5f190947c	-
+method	c:objc(cs)MPSNDArrayBinarySecondaryGradientKernel(im)initWithDevice:sourceCount:sourceGradientIndex:	-			instancetype	id<MTLDevice> device | NSUInteger count | NSUInteger sourceGradientIndex	-	*unavailable ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ca2aa477a3d557c8	-
+method	c:objc(cs)MPSNDArrayBinarySecondaryGradientKernel(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	470dd99c467985a8	-
+method	c:objc(cs)MPSNDArrayBinarySecondaryGradientKernel(im)initWithCoder:device:	-			instancetype	NSCoder * coder | id<MTLDevice> device	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	bf7fbe76cd567065	-
+method	c:objc(cs)MPSNDArrayBinarySecondaryGradientKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:sourceGradient:gradientState:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSNDArray * gradient | MPSState * state	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3451c22644f83542	-
+method	c:objc(cs)MPSNDArrayBinarySecondaryGradientKernel(im)encodeToCommandBuffer:primarySourceArray:secondarySourceArray:sourceGradient:gradientState:destinationArray:	-			void	id<MTLCommandBuffer> cmdBuf | MPSNDArray * primarySourceArray | MPSNDArray * secondarySourceArray | MPSNDArray * gradient | MPSState * state | MPSNDArray * destination	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	0fd7129e5ba38331	-
+interface	c:objc(cs)MPSNDArrayGradientState	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	e2307f73b1d3d6b6	-
+super	-	MPSNDArrayGradientState	MPSState		-	-	-	-	-	aa8efcd025f50141	-
+interface	c:objc(cs)MPSNDArrayMatrixMultiplication	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ada253c7fa828ebe	-
+super	-	MPSNDArrayMatrixMultiplication	MPSNDArrayMultiaryKernel		-	-	-	-	-	cc7e439aa7ce7049	-
+property	c:objc(cs)MPSNDArrayMatrixMultiplication(py)alpha	-			double	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3a3f31122d8bac0a	-
+property	c:objc(cs)MPSNDArrayMatrixMultiplication(py)beta	-			double	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	f9869827ebe1fc97	-
+interface	c:objc(cs)MPSNDArrayStridedSlice	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3a6838acfe7c3082	-
+super	-	MPSNDArrayStridedSlice	MPSNDArrayUnaryKernel		-	-	-	-	-	c03ff3a16061aab3	-
+property	c:objc(cs)MPSNDArrayStridedSlice(py)strides	-			MPSNDArrayOffsets	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	9b862a58f527ad6a	-
+interface	c:objc(cs)MPSNDArrayStridedSliceGradient	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	64aa30d55c000edd	-
+super	-	MPSNDArrayStridedSliceGradient	MPSNDArrayUnaryGradientKernel		-	-	-	-	-	a589ab8823ca1375	-
+interface	c:objc(cs)MPSNDArrayGatherGradientState	-			-	-	-	ios=13.0/-/-/0,maccatalyst=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0	-	34402784b72632b3	-
+super	-	MPSNDArrayGatherGradientState	MPSNDArrayGradientState		-	-	-	-	-	5fcb7080fb6d601e	-
+interface	c:objc(cs)MPSNDArrayGather	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	6b12a3ba99900c40	-
+super	-	MPSNDArrayGather	MPSNDArrayBinaryKernel		-	-	-	-	-	b0bd62d36ea016af	-
+property	c:objc(cs)MPSNDArrayGather(py)axis	-			NSUInteger	-	nonatomic	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	30bfb54dfcec6148	-
+interface	c:objc(cs)MPSNDArrayGatherGradient	-			-	-	-	ios=13/-/-/0,maccatalyst=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	0484eae68e665ad6	-
+super	-	MPSNDArrayGatherGradient	MPSNDArrayBinaryPrimaryGradientKernel		-	-	-	-	-	5556390c9314ff9b	-
+interface	c:objc(cs)MPSNDArrayIdentity	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	1b5451a261bb23ec	-
+super	-	MPSNDArrayIdentity	MPSNDArrayUnaryKernel		-	-	-	-	-	c8b7494aabb5ea38	-
+method	c:objc(cs)MPSNDArrayIdentity(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	ca0ea01a989000f1	-
+method	c:objc(cs)MPSNDArrayIdentity(im)reshapeWithCommandBuffer:sourceArray:shape:destinationArray:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSShape * shape | MPSNDArray * destinationArray	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	757c8367892f2476	-
+method	c:objc(cs)MPSNDArrayIdentity(im)reshapeWithCommandBuffer:sourceArray:dimensionCount:dimensionSizes:destinationArray:	-			MPSNDArray *	id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | NSUInteger numberOfDimensions | NSUInteger * dimensionSizes | MPSNDArray * destinationArray	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	296ae6e849cd5628	-
+method	c:objc(cs)MPSNDArrayIdentity(im)reshapeWithCommandEncoder:commandBuffer:sourceArray:shape:destinationArray:	-			MPSNDArray *	id<MTLComputeCommandEncoder> encoder | id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | MPSShape * shape | MPSNDArray * destinationArray	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	cc2fa005ece9c50e	-
+method	c:objc(cs)MPSNDArrayIdentity(im)reshapeWithCommandEncoder:commandBuffer:sourceArray:dimensionCount:dimensionSizes:destinationArray:	-			MPSNDArray *	id<MTLComputeCommandEncoder> encoder | id<MTLCommandBuffer> cmdBuf | MPSNDArray * sourceArray | NSUInteger numberOfDimensions | NSUInteger * dimensionSizes | MPSNDArray * destinationArray	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	53adf43fa54649e3	-
+typedef	c:MPSNDArrayQuantization.h@T@MPSNDArrayQuantizationScheme	-			enum MPSNDArrayQuantizationScheme	-	-	-	-	36e87ae49e09d122	-
+enum	c:@E@MPSNDArrayQuantizationScheme	-			NSUInteger	-	-	-	-	7b74bfd1e99a521e	-
+enumconst	c:@E@MPSNDArrayQuantizationScheme@MPSNDArrayQuantizationTypeNone	MPSNDArrayQuantizationScheme			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	40edd247cd140225	0
+enumconst	c:@E@MPSNDArrayQuantizationScheme@MPSNDArrayQuantizationTypeAffine	MPSNDArrayQuantizationScheme			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	e3547f05c50e4b2a	1
+enumconst	c:@E@MPSNDArrayQuantizationScheme@MPSNDArrayQuantizationTypeLUT	MPSNDArrayQuantizationScheme			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	1c05d0561fb37ed6	2
+interface	c:objc(cs)MPSNDArrayQuantizationDescriptor	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	e27cbc3529d1681a	-
+super	-	MPSNDArrayQuantizationDescriptor	NSObject		-	-	-	-	-	12ca9c0726080666	-
+conforms	c:objc(cs)MPSNDArrayQuantizationDescriptor	MPSNDArrayQuantizationDescriptor	NSCopying		-	-	-	-	-	eec77de5e57f5bf4	-
+property	c:objc(cs)MPSNDArrayQuantizationDescriptor(py)quantizationDataType	-			MPSDataType	-	readonly,nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	d26789a86038308c	-
+property	c:objc(cs)MPSNDArrayQuantizationDescriptor(py)quantizationScheme	-			MPSNDArrayQuantizationScheme	-	readonly,nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	a8cdfb8c3702c82f	-
+interface	c:objc(cs)MPSNDArrayAffineQuantizationDescriptor	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	0df4e99f72cc2c3e	-
+super	-	MPSNDArrayAffineQuantizationDescriptor	MPSNDArrayQuantizationDescriptor		-	-	-	-	-	57f87b7e5b096f47	-
+property	c:objc(cs)MPSNDArrayAffineQuantizationDescriptor(py)hasZeroPoint	-			BOOL	-	nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	50d9d710d2e2a77a	-
+property	c:objc(cs)MPSNDArrayAffineQuantizationDescriptor(py)hasMinValue	-			BOOL	-	nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	94b210fe535ecacd	-
+property	c:objc(cs)MPSNDArrayAffineQuantizationDescriptor(py)implicitZeroPoint	-			_Bool	-	nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	a055213942287cde	-
+method	c:objc(cs)MPSNDArrayAffineQuantizationDescriptor(im)init	-			instancetype	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	b7c44e8e3576d485	-
+method	c:objc(cs)MPSNDArrayAffineQuantizationDescriptor(im)initWithDataType:hasZeroPoint:hasMinValue:	-			instancetype	MPSDataType quantizationDataType | BOOL hasZeroPoint | BOOL hasMinValue	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	af065596b3423150	-
+interface	c:objc(cs)MPSNDArrayLUTQuantizationDescriptor	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	884a555e2c1bbdde	-
+super	-	MPSNDArrayLUTQuantizationDescriptor	MPSNDArrayQuantizationDescriptor		-	-	-	-	-	d0726389643e2ffb	-
+method	c:objc(cs)MPSNDArrayLUTQuantizationDescriptor(im)initWithDataType:	-			instancetype	MPSDataType quantizationDataType	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	073b54182aa3d276	-
+method	c:objc(cs)MPSNDArrayLUTQuantizationDescriptor(im)initWithDataType:vectorAxis:	-			instancetype	MPSDataType quantizationDataType | NSUInteger vectorAxis	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	6463396e0bcaca04	-
+interface	c:objc(cs)MPSNDArrayQuantizedMatrixMultiplication	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	c2496b70ab0cc9c1	-
+super	-	MPSNDArrayQuantizedMatrixMultiplication	MPSNDArrayMatrixMultiplication		-	-	-	-	-	69b60cc55100b3ff	-
+method	c:objc(cs)MPSNDArrayQuantizedMatrixMultiplication(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger sourceCount	-	*unavailable ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	61d3d02a14e8270a	-
+method	c:objc(cs)MPSNDArrayQuantizedMatrixMultiplication(im)initWithDevice:leftQuantizationDescriptor:rightQuantizationDescriptor:	-			instancetype	id<MTLDevice> device | MPSNDArrayQuantizationDescriptor * leftQuantizationDescriptor | MPSNDArrayQuantizationDescriptor * rightQuantizationDescriptor	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	aae2862252f41a4b	-
+interface	c:objc(cs)MPSNDArrayLUTDequantize	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	4b476ea5a3085b26	-
+super	-	MPSNDArrayLUTDequantize	MPSNDArrayMultiaryKernel		-	-	-	-	-	050049ccf43cc874	-
+method	c:objc(cs)MPSNDArrayLUTDequantize(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	ea2383d87dabba19	-
+method	c:objc(cs)MPSNDArrayLUTDequantize(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger sourceCount	-	*unavailable ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	dbb6b3f2ff8e1d8a	-
+interface	c:objc(cs)MPSNDArrayVectorLUTDequantize	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	d13aa21b07a17509	-
+super	-	MPSNDArrayVectorLUTDequantize	MPSNDArrayMultiaryKernel		-	-	-	-	-	7f620b6851a3e75d	-
+property	c:objc(cs)MPSNDArrayVectorLUTDequantize(py)vectorAxis	-			NSUInteger	-	nonatomic	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	bdf8c12901c96d52	-
+method	c:objc(cs)MPSNDArrayVectorLUTDequantize(im)initWithDevice:axis:	-			instancetype	id<MTLDevice> device | NSUInteger axis	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	f9e58c755d21d400	-
+method	c:objc(cs)MPSNDArrayVectorLUTDequantize(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger sourceCount	-	*unavailable ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	945a3bf628a2ba8c	-
+interface	c:objc(cs)MPSNDArrayAffineInt4Dequantize	-			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	fdd4d21ebe986c6c	-
+super	-	MPSNDArrayAffineInt4Dequantize	MPSNDArrayMultiaryKernel		-	-	-	-	-	4511b31252e69075	-
+method	c:objc(cs)MPSNDArrayAffineInt4Dequantize(im)initWithDevice:	-			instancetype	id<MTLDevice> device	-	*unavailable ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	ac146e935ac21397	-
+method	c:objc(cs)MPSNDArrayAffineInt4Dequantize(im)initWithDevice:quantizationDescriptor:	-			instancetype	id<MTLDevice> device | MPSNDArrayAffineQuantizationDescriptor * quantizationDescriptor	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	23947b65be69072a	-
+method	c:objc(cs)MPSNDArrayAffineInt4Dequantize(im)initWithDevice:sourceCount:	-			instancetype	id<MTLDevice> device | NSUInteger sourceCount	-	*unavailable ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,xros=2.0/-/-/0	-	5a640b613e63d732	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:MPSCoreTypes.h@T@MPSImageEdgeMode	-			enum MPSImageEdgeMode	-	-	-	-	f1d9d5c7250d7dd2	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSZone	-			struct _NSZone	-	-	-	-	a6dc1e3b1b8b2ac5	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:MPSCoreTypes.h@T@MPSShape	-			NSArray<NSNumber *>	-	-	-	-	1b1807870552e404	-
+typedef	c:MPSCoreTypes.h@T@MPSDataType	-			enum MPSDataType	-	-	-	-	99a17108960411fb	-

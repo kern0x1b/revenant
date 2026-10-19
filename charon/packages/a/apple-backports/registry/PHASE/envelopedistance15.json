@@ -1,0 +1,54 @@
+{
+  "framework": "PHASE",
+  "entries": [
+    {
+      "api": "+[PHASEEnvelopeDistanceModelParameters new]",
+      "kind": "method",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/PHASE/PHASEEnvelope.md",
+      "source": "SDK 16.4 and 26.2 PHASE.framework PHASEDistanceModel.h and PHASEEnvelope.h, byte-identical on the members; PHASE arrived in iOS 15 and the port's releases are 6.1.3 and 4.3, so there is no PHASE.framework on either and there is no PHASEDistanceModel to convert: what is carried is the holding of an envelope, whose x the header calls distance and whose y it calls gain, compared against the host's own PHASEEnvelopeDistanceModelParameters and the gain both report at 5 m in tests/backports/host/phase/run.sh",
+      "reason": "PHASEDistanceModel.h marks -init and +new NS_UNAVAILABLE and -initWithEnvelope: is its NS_DESIGNATED_INITIALIZER; a distance model with no envelope is not a distance model",
+      "effect": "calling it raises, which is what unavailable means; -initWithEnvelope: is the way to make one"
+    },
+    {
+      "api": "-[PHASEEnvelopeDistanceModelParameters initWithEnvelope:]",
+      "kind": "method",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/PHASE/PHASEEnvelope.md",
+      "source": "SDK 16.4 and 26.2 PHASE.framework PHASEDistanceModel.h and PHASEEnvelope.h, byte-identical on the members; PHASE arrived in iOS 15 and the port's releases are 6.1.3 and 4.3, so there is no PHASE.framework on either and there is no PHASEDistanceModel to convert: what is carried is the holding of an envelope, whose x the header calls distance and whose y it calls gain, compared against the host's own PHASEEnvelopeDistanceModelParameters and the gain both report at 5 m in tests/backports/host/phase/run.sh"
+    },
+    {
+      "api": "-[PHASEEnvelopeDistanceModelParameters init]",
+      "kind": "method",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/PHASE/PHASEEnvelope.md",
+      "source": "SDK 16.4 and 26.2 PHASE.framework PHASEDistanceModel.h and PHASEEnvelope.h, byte-identical on the members; PHASE arrived in iOS 15 and the port's releases are 6.1.3 and 4.3, so there is no PHASE.framework on either and there is no PHASEDistanceModel to convert: what is carried is the holding of an envelope, whose x the header calls distance and whose y it calls gain, compared against the host's own PHASEEnvelopeDistanceModelParameters and the gain both report at 5 m in tests/backports/host/phase/run.sh",
+      "reason": "PHASEDistanceModel.h marks -init and +new NS_UNAVAILABLE and -initWithEnvelope: is its NS_DESIGNATED_INITIALIZER; a distance model with no envelope is not a distance model",
+      "effect": "calling it raises, which is what unavailable means; -initWithEnvelope: is the way to make one"
+    },
+    {
+      "api": "PHASEEnvelopeDistanceModelParameters",
+      "kind": "class",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/PHASE/PHASEEnvelope.md",
+      "source": "SDK 16.4 and 26.2 PHASE.framework PHASEDistanceModel.h and PHASEEnvelope.h, byte-identical on the members; PHASE arrived in iOS 15 and the port's releases are 6.1.3 and 4.3, so there is no PHASE.framework on either and there is no PHASEDistanceModel to convert: what is carried is the holding of an envelope, whose x the header calls distance and whose y it calls gain, compared against the host's own PHASEEnvelopeDistanceModelParameters and the gain both report at 5 m in tests/backports/host/phase/run.sh"
+    },
+    {
+      "api": "PHASEEnvelopeDistanceModelParameters.envelope",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/PHASE/PHASEEnvelope.md",
+      "source": "SDK 16.4 and 26.2 PHASE.framework PHASEDistanceModel.h and PHASEEnvelope.h, byte-identical on the members; PHASE arrived in iOS 15 and the port's releases are 6.1.3 and 4.3, so there is no PHASE.framework on either and there is no PHASEDistanceModel to convert: what is carried is the holding of an envelope, whose x the header calls distance and whose y it calls gain, compared against the host's own PHASEEnvelopeDistanceModelParameters and the gain both report at 5 m in tests/backports/host/phase/run.sh"
+    }
+  ]
+}

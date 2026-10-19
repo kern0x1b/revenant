@@ -1,0 +1,41 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UICollectionViewFlowLayout.estimatedItemSize",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewSelfSizing.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/flowauto (final frames of 13 scenarios of a flow layout that self-sizes), and tests/backports/device/flowauto.m on iOS 6"
+    },
+    {
+      "api": "-[UICollectionReusableView preferredLayoutAttributesFittingAttributes:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewSelfSizing.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/flowauto (final frames of 13 scenarios of a flow layout that self-sizes), and tests/backports/device/flowauto.m on iOS 6"
+    },
+    {
+      "api": "-[UICollectionViewLayout shouldInvalidateLayoutForPreferredLayoutAttributes:withOriginalAttributes:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewSelfSizing.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/flowauto (final frames of 13 scenarios of a flow layout that self-sizes), and tests/backports/device/flowauto.m on iOS 6"
+    },
+    {
+      "api": "-[UICollectionViewLayout invalidationContextForPreferredLayoutAttributes:withOriginalAttributes:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewSelfSizing.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/flowauto (final frames of 13 scenarios of a flow layout that self-sizes), and tests/backports/device/flowauto.m on iOS 6"
+    }
+  ]
+}

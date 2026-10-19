@@ -1,0 +1,103 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CarKey	swift-class	s:6CarKey0aB13RemoteControlC	-	CarKeyRemoteControl	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	2a599f2510aa129a
+CarKey	swift-method	s:6CarKey0aB13RemoteControlC5start8delegate17subscriptionRange4withAA0abcD7SessionCAA0abcdJ8Delegate_p_SNySiGSgSo17OS_dispatch_queueCSgtYaKFZ	CarKeyRemoteControl	start(delegate:subscriptionRange:with:)	+	CarKey.CarKeyRemoteControlSession	any CarKey.CarKeyRemoteControlSessionDelegate | Swift.ClosedRange<Swift.Int>? | Dispatch.DispatchQueue?	ios=16.0,macos=13.3,watchos=9.0	-	9600cb4f0063e98e
+CarKey	swift-method	s:6CarKey0aB13RemoteControlC019registerForLaunchOnaB5EventyyKFZ	CarKeyRemoteControl	registerForLaunchOnCarKeyEvent()	+	()	-	ios=26.0,macos=26.0,watchos=26.0	-	8ff69fedfc083243
+CarKey	swift-method	s:6CarKey0aB13RemoteControlC021unregisterForLaunchOnaB5EventyyKFZ	CarKeyRemoteControl	unregisterForLaunchOnCarKeyEvent()	+	()	-	ios=26.0,macos=26.0,watchos=26.0	-	3b06055d953fe0a8
+CarKey	swift-class	s:6CarKey0aB20RemoteControlSessionC	-	CarKeyRemoteControlSession	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	6ead5efcc52ffdb1
+CarKey	swift-property	s:6CarKey0aB20RemoteControlSessionC14vehicleReportsSayAA13VehicleReportVGvp	CarKeyRemoteControlSession	vehicleReports	-	[CarKey.VehicleReport]	-	-	-	ff7c97e47f72e98e
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC3endyyKF	CarKeyRemoteControlSession	end()	-	()	-	ios=16.0,macos=13.3,watchos=9.0	-	8a066b544e3e9d89
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC7performyAA0C18KeylessEntryActionV16ExecutionRequestCAFKF	CarKeyRemoteControlSession	perform(_:)	-	CarKey.RemoteKeylessEntryAction.ExecutionRequest	CarKey.RemoteKeylessEntryAction	ios=16.0,macos=13.3,watchos=9.0	-	62765391da2b3044
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC7perform_20continuationStrategyAA0C38KeylessEntryConfigurableEnduringActionV0L16ExecutionRequestCAG_AC012ContinuationH0OtKF	CarKeyRemoteControlSession	perform(_:continuationStrategy:)	-	CarKey.RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest	CarKey.RemoteKeylessEntryConfigurableEnduringAction | CarKey.CarKeyRemoteControlSession.ContinuationStrategy	ios=18.0,macos=15.0,watchos=11.0	-	e2f3b9d275c518f8
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC7performyAA0C26KeylessEntryEnduringActionV0I16ExecutionRequestCAFKF	CarKeyRemoteControlSession	perform(_:)	-	CarKey.RemoteKeylessEntryEnduringAction.EnduringExecutionRequest	CarKey.RemoteKeylessEntryEnduringAction	ios=16.0,macos=13.3,watchos=9.0	-	e938b3a879421951
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC19sendPassthroughData_9toVehicley10Foundation0H0V_SStKF	CarKeyRemoteControlSession	sendPassthroughData(_:toVehicle:)	-	()	Foundation.Data | Swift.String	ios=16.0,macos=13.3,watchos=9.0	-	9340e74a83b75d1b
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC23isPassiveEntryAvailable10forVehicleSbSS_tKF	CarKeyRemoteControlSession	isPassiveEntryAvailable(forVehicle:)	-	Swift.Bool	Swift.String	ios=16.0,macos=13.3,watchos=9.0	-	2ed258d7eeb4234a
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC4sign4data10forVehicleAC11AttestationV10Foundation4DataV_SStKF	CarKeyRemoteControlSession	sign(data:forVehicle:)	-	CarKey.CarKeyRemoteControlSession.Attestation	Foundation.Data | Swift.String	ios=18.0,macos=15.0,watchos=11.0	-	447e7e7882071c63
+CarKey	swift-struct	s:6CarKey0aB20RemoteControlSessionC11AttestationV	CarKeyRemoteControlSession	Attestation	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	b11a80eddb4b98ed
+CarKey	swift-property	s:6CarKey0aB20RemoteControlSessionC11AttestationV19appBundleIdentifierSSvp	CarKeyRemoteControlSession.Attestation	appBundleIdentifier	-	Swift.String	-	-	-	bf47603e3d6247d3
+CarKey	swift-property	s:6CarKey0aB20RemoteControlSessionC11AttestationV5nonce10Foundation4DataVvp	CarKeyRemoteControlSession.Attestation	nonce	-	Foundation.Data	-	-	-	76e0774f2e66b442
+CarKey	swift-property	s:6CarKey0aB20RemoteControlSessionC11AttestationV10signedData10Foundation0H0Vvp	CarKeyRemoteControlSession.Attestation	signedData	-	Foundation.Data	-	-	-	1b1cfcba34ba088c
+CarKey	swift-property	s:6CarKey0aB20RemoteControlSessionC11AttestationV9signature10Foundation4DataVvp	CarKeyRemoteControlSession.Attestation	signature	-	Foundation.Data	-	-	-	026a280a521f415a
+CarKey	swift-enum	s:6CarKey0aB20RemoteControlSessionC20ContinuationStrategyO	CarKeyRemoteControlSession	ContinuationStrategy	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	1359ea6a3798d0ed
+CarKey	swift-constant	s:6CarKey0aB20RemoteControlSessionC20ContinuationStrategyO9automaticyA2EmF	CarKeyRemoteControlSession.ContinuationStrategy	automatic	-	-	-	-	-	67a8205a4fc5683f
+CarKey	swift-constant	s:6CarKey0aB20RemoteControlSessionC20ContinuationStrategyO6manualyA2EmF	CarKeyRemoteControlSession.ContinuationStrategy	manual	-	-	-	-	-	34c09beba30bb090
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC20ContinuationStrategyO2eeoiySbAE_AEtFZ	CarKeyRemoteControlSession.ContinuationStrategy	==(_:_:)	+	Swift.Bool	CarKey.CarKeyRemoteControlSession.ContinuationStrategy | CarKey.CarKeyRemoteControlSession.ContinuationStrategy	-	-	bb9282f849d47cf1
+CarKey	swift-method	s:6CarKey0aB20RemoteControlSessionC20ContinuationStrategyO4hash4intoys6HasherVz_tF	CarKeyRemoteControlSession.ContinuationStrategy	hash(into:)	-	()	Swift.Hasher	-	-	ab5619cac431c2ab
+CarKey	swift-property	s:6CarKey0aB20RemoteControlSessionC20ContinuationStrategyO9hashValueSivp	CarKeyRemoteControlSession.ContinuationStrategy	hashValue	-	Swift.Int	-	-	-	5307d7b2350c01fd
+CarKey	swift-protocol	s:6CarKey0aB28RemoteControlSessionDelegateP	-	CarKeyRemoteControlSessionDelegate	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	f91f0f604c30cd92
+CarKey	swift-method	s:6CarKey0aB28RemoteControlSessionDelegateP06remotedE0_22didInvalidateWithErroryAA0abcdE0C_AA0abK4CodeOtF	CarKeyRemoteControlSessionDelegate	remoteControlSession(_:didInvalidateWithError:)	-	()	CarKey.CarKeyRemoteControlSession | CarKey.CarKeyErrorCode	ios=16.0,macos=13.3,watchos=9.0	-	264d51751f5cf55c
+CarKey	swift-method	s:6CarKey0aB28RemoteControlSessionDelegateP06remotedE0_09didCreateB010forVehicleyAA0abcdE0C_S2StF	CarKeyRemoteControlSessionDelegate	remoteControlSession(_:didCreateKey:forVehicle:)	-	()	CarKey.CarKeyRemoteControlSession | Swift.String | Swift.String	ios=18.0,macos=15.0,watchos=11.0	-	6b0cb0f14b5f33b1
+CarKey	swift-method	s:6CarKey0aB28RemoteControlSessionDelegateP06remotedE0_22vehicleDidUpdateReportyAA0abcdE0C_AA07VehicleK0VtF	CarKeyRemoteControlSessionDelegate	remoteControlSession(_:vehicleDidUpdateReport:)	-	()	CarKey.CarKeyRemoteControlSession | CarKey.VehicleReport	ios=16.0,macos=13.3,watchos=9.0	-	07eea003b7dde7f3
+CarKey	swift-method	s:6CarKey0aB28RemoteControlSessionDelegateP06remotedE0_25didReceivePassthroughData11fromVehicleyAA0abcdE0C_10Foundation0K0VSStF	CarKeyRemoteControlSessionDelegate	remoteControlSession(_:didReceivePassthroughData:fromVehicle:)	-	()	CarKey.CarKeyRemoteControlSession | Foundation.Data | Swift.String	ios=16.0,macos=13.3,watchos=9.0	-	d83b7db7982c15d2
+CarKey	swift-method	s:6CarKey0aB28RemoteControlSessionDelegatePAAE06remotedE0_09didCreateB010forVehicleyAA0abcdE0C_S2StF	CarKeyRemoteControlSessionDelegate	remoteControlSession(_:didCreateKey:forVehicle:)	-	()	CarKey.CarKeyRemoteControlSession | Swift.String | Swift.String	ios=18.0,macos=15.0,watchos=11.0	-	4cb7b7b814ee1994
+CarKey	swift-struct	s:6CarKey13VehicleReportV	-	VehicleReport	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	e8ce5a6e3a13d508
+CarKey	swift-property	s:6CarKey13VehicleReportV10identifierSSvp	VehicleReport	identifier	-	Swift.String	-	-	-	c7d42f08102f5ea5
+CarKey	swift-property	s:6CarKey13VehicleReportV11isConnectedSbvp	VehicleReport	isConnected	-	Swift.Bool	-	-	-	4aba976ea56da25a
+CarKey	swift-property	s:6CarKey13VehicleReportV18supportedFunctionsSayAA18FunctionIdentifierVGvp	VehicleReport	supportedFunctions	-	[CarKey.FunctionIdentifier]	-	-	-	38b6a19aa0ef16e5
+CarKey	swift-method	s:6CarKey13VehicleReportV6status3forAA14FunctionStatusVSgAA0G10IdentifierV_tKF	VehicleReport	status(for:)	-	CarKey.FunctionStatus?	CarKey.FunctionIdentifier	-	-	7c05b79a1ea4ae98
+CarKey	swift-method	s:6CarKey13VehicleReportV15proprietaryData3for10Foundation0F0VSgAA18FunctionIdentifierV_tKF	VehicleReport	proprietaryData(for:)	-	Foundation.Data?	CarKey.FunctionIdentifier	-	-	6577315aa3c7acdb
+CarKey	swift-struct	s:6CarKey24RemoteKeylessEntryActionV	-	RemoteKeylessEntryAction	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	fe30b445cdecd82e
+CarKey	swift-property	s:6CarKey24RemoteKeylessEntryActionV10functionIDAA18FunctionIdentifierVvp	RemoteKeylessEntryAction	functionID	-	CarKey.FunctionIdentifier	-	-	-	cd1a70e8018de969
+CarKey	swift-property	s:6CarKey24RemoteKeylessEntryActionV8actionIDAA0F10IdentifierVvp	RemoteKeylessEntryAction	actionID	-	CarKey.ActionIdentifier	-	-	-	cefac833eece176d
+CarKey	swift-property	s:6CarKey24RemoteKeylessEntryActionV18recipientVehicleIDSSvp	RemoteKeylessEntryAction	recipientVehicleID	-	Swift.String	-	-	-	b67045f68dfca544
+CarKey	swift-method	s:6CarKey24RemoteKeylessEntryActionV10functionID06actionH007vehicleH0AcA18FunctionIdentifierV_AA0fL0VSStcfc	RemoteKeylessEntryAction	init(functionID:actionID:vehicleID:)	-	-	CarKey.RemoteKeylessEntryAction | CarKey.FunctionIdentifier | CarKey.ActionIdentifier | Swift.String	-	-	a839719dd5aa15a5
+CarKey	swift-class	s:6CarKey24RemoteKeylessEntryActionV16ExecutionRequestC	RemoteKeylessEntryAction	ExecutionRequest	-	-	-	-	-	25987c5f2141fb2d
+CarKey	swift-method	s:6CarKey24RemoteKeylessEntryActionV16ExecutionRequestC7resultsAA0G6StatusVyYaKF	RemoteKeylessEntryAction.ExecutionRequest	results()	-	CarKey.ExecutionStatus	-	-	-	7b04c11a9a84446e
+CarKey	swift-struct	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV	-	RemoteKeylessEntryConfigurableEnduringAction	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	6ef2ed2ebd7dfa29
+CarKey	swift-property	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV10functionIDAA18FunctionIdentifierVvp	RemoteKeylessEntryConfigurableEnduringAction	functionID	-	CarKey.FunctionIdentifier	-	-	-	65f451c0eb4f73f7
+CarKey	swift-property	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV8actionIDAA0H10IdentifierVvp	RemoteKeylessEntryConfigurableEnduringAction	actionID	-	CarKey.ActionIdentifier	-	-	-	afc751b08430546c
+CarKey	swift-property	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV18recipientVehicleIDSSvp	RemoteKeylessEntryConfigurableEnduringAction	recipientVehicleID	-	Swift.String	-	-	-	d4b4406cbdb4f23d
+CarKey	swift-method	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV10functionID06actionJ007vehicleJ0AcA18FunctionIdentifierV_AA0hN0VSStcfc	RemoteKeylessEntryConfigurableEnduringAction	init(functionID:actionID:vehicleID:)	-	-	CarKey.RemoteKeylessEntryConfigurableEnduringAction | CarKey.FunctionIdentifier | CarKey.ActionIdentifier | Swift.String	-	-	e7e36e3c17011209
+CarKey	swift-class	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC	RemoteKeylessEntryConfigurableEnduringAction	EnduringExecutionRequest	-	-	-	-	-	beb26ddbc769a743
+CarKey	swift-property	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC11eventStreamScSyAE5EventOGvp	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest	eventStream	-	_Concurrency.AsyncStream<CarKey.RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest.Event>	-	-	-	05a34c222826defc
+CarKey	swift-method	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC7resultsAA0I6StatusVyYaKF	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest	results()	-	CarKey.ExecutionStatus	-	-	-	59016a5929afccff
+CarKey	swift-method	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC4stopyyKF	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest	stop()	-	()	-	-	-	e7398760cb9400c0
+CarKey	swift-struct	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC012ContinuationJ0V	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest	ContinuationRequest	-	-	-	-	-	d0f6445500e402d1
+CarKey	swift-property	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC012ContinuationJ0V4data10Foundation4DataVSgvp	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest.ContinuationRequest	data	-	Foundation.Data?	-	-	-	de2eb8da6cb36fbe
+CarKey	swift-method	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC012ContinuationJ0V7confirmyy10Foundation4DataVSgKF	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest.ContinuationRequest	confirm(_:)	-	()	Foundation.Data?	-	-	be92c385804fbbda
+CarKey	swift-enum	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC5EventO	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest	Event	-	-	-	-	-	aed0dfa0cf033137
+CarKey	swift-constant	s:6CarKey44RemoteKeylessEntryConfigurableEnduringActionV0G16ExecutionRequestC5EventO020receivedContinuationJ0yAgE0mJ0VcAGmF	RemoteKeylessEntryConfigurableEnduringAction.EnduringExecutionRequest.Event	receivedContinuationRequest	-	-	-	-	-	d11f66ecc2db44d7
+CarKey	swift-struct	s:6CarKey32RemoteKeylessEntryEnduringActionV	-	RemoteKeylessEntryEnduringAction	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	6c67aaf5a46d24a7
+CarKey	swift-property	s:6CarKey32RemoteKeylessEntryEnduringActionV10functionIDAA18FunctionIdentifierVvp	RemoteKeylessEntryEnduringAction	functionID	-	CarKey.FunctionIdentifier	-	-	-	39587e2e46639896
+CarKey	swift-property	s:6CarKey32RemoteKeylessEntryEnduringActionV8actionIDAA0G10IdentifierVvp	RemoteKeylessEntryEnduringAction	actionID	-	CarKey.ActionIdentifier	-	-	-	26b2860ad5d7ea41
+CarKey	swift-property	s:6CarKey32RemoteKeylessEntryEnduringActionV18recipientVehicleIDSSvp	RemoteKeylessEntryEnduringAction	recipientVehicleID	-	Swift.String	-	-	-	45e7a5ef9659c1e0
+CarKey	swift-method	s:6CarKey32RemoteKeylessEntryEnduringActionV10functionID06actionI007vehicleI0AcA18FunctionIdentifierV_AA0gM0VSStcfc	RemoteKeylessEntryEnduringAction	init(functionID:actionID:vehicleID:)	-	-	CarKey.RemoteKeylessEntryEnduringAction | CarKey.FunctionIdentifier | CarKey.ActionIdentifier | Swift.String	-	-	e3a0204147d27855
+CarKey	swift-class	s:6CarKey32RemoteKeylessEntryEnduringActionV0F16ExecutionRequestC	RemoteKeylessEntryEnduringAction	EnduringExecutionRequest	-	-	-	-	-	14bb1ea0d7462725
+CarKey	swift-method	s:6CarKey32RemoteKeylessEntryEnduringActionV0F16ExecutionRequestC7resultsAA0H6StatusVyYaKF	RemoteKeylessEntryEnduringAction.EnduringExecutionRequest	results()	-	CarKey.ExecutionStatus	-	-	-	a53a0fce711534a5
+CarKey	swift-method	s:6CarKey32RemoteKeylessEntryEnduringActionV0F16ExecutionRequestC4stopyyKF	RemoteKeylessEntryEnduringAction.EnduringExecutionRequest	stop()	-	()	-	-	-	8c063018b2101151
+CarKey	swift-struct	s:6CarKey18FunctionIdentifierV	-	FunctionIdentifier	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	c7522ec9c6f2c848
+CarKey	swift-property	s:6CarKey18FunctionIdentifierV8rawValueSivp	FunctionIdentifier	rawValue	-	Swift.Int	-	-	-	f6a223954c6eaa0b
+CarKey	swift-method	s:6CarKey18FunctionIdentifierVyACSicfc	FunctionIdentifier	init(_:)	-	-	CarKey.FunctionIdentifier | Swift.Int	-	-	facf95d05cbed224
+CarKey	swift-method	s:6CarKey18FunctionIdentifierV8rawValueACSi_tcfc	FunctionIdentifier	init(rawValue:)	-	-	CarKey.FunctionIdentifier | Swift.Int	-	-	e128d919ba5b9cdf
+CarKey	swift-typealias	s:6CarKey18FunctionIdentifierV8RawValuea	FunctionIdentifier	RawValue	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	ea7437d0e5b7ed5e
+CarKey	swift-struct	s:6CarKey16ActionIdentifierV	-	ActionIdentifier	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	11b68efe9f27a48d
+CarKey	swift-property	s:6CarKey16ActionIdentifierV8rawValueSivp	ActionIdentifier	rawValue	-	Swift.Int	-	-	-	7e1e0ed3ff85feff
+CarKey	swift-method	s:6CarKey16ActionIdentifierVyACSicfc	ActionIdentifier	init(_:)	-	-	CarKey.ActionIdentifier | Swift.Int	-	-	ca89d89c3915de35
+CarKey	swift-method	s:6CarKey16ActionIdentifierV8rawValueACSi_tcfc	ActionIdentifier	init(rawValue:)	-	-	CarKey.ActionIdentifier | Swift.Int	-	-	6200032109ee1802
+CarKey	swift-typealias	s:6CarKey16ActionIdentifierV8RawValuea	ActionIdentifier	RawValue	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	3c47e3b4e8e0f2c3
+CarKey	swift-struct	s:6CarKey15ExecutionStatusV	-	ExecutionStatus	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	0cbbf3500beb9252
+CarKey	swift-property	s:6CarKey15ExecutionStatusV8rawValueSivp	ExecutionStatus	rawValue	-	Swift.Int	-	-	-	456188f6ec4c6c6b
+CarKey	swift-method	s:6CarKey15ExecutionStatusVyACSicfc	ExecutionStatus	init(_:)	-	-	CarKey.ExecutionStatus | Swift.Int	-	-	4a59063cfcfda039
+CarKey	swift-method	s:6CarKey15ExecutionStatusV8rawValueACSi_tcfc	ExecutionStatus	init(rawValue:)	-	-	CarKey.ExecutionStatus | Swift.Int	-	-	aee9a4bc718aa558
+CarKey	swift-typealias	s:6CarKey15ExecutionStatusV8RawValuea	ExecutionStatus	RawValue	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	ac9e6091065fc584
+CarKey	swift-struct	s:6CarKey14FunctionStatusV	-	FunctionStatus	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	edafdcce0972de22
+CarKey	swift-property	s:6CarKey14FunctionStatusV8rawValueSivp	FunctionStatus	rawValue	-	Swift.Int	-	-	-	37c2ff54f57f8d86
+CarKey	swift-method	s:6CarKey14FunctionStatusVyACSicfc	FunctionStatus	init(_:)	-	-	CarKey.FunctionStatus | Swift.Int	-	-	439e13dbecc10d7f
+CarKey	swift-method	s:6CarKey14FunctionStatusV8rawValueACSi_tcfc	FunctionStatus	init(rawValue:)	-	-	CarKey.FunctionStatus | Swift.Int	-	-	e578806ea9eaca63
+CarKey	swift-typealias	s:6CarKey14FunctionStatusV8RawValuea	FunctionStatus	RawValue	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	2a16fcb4f0f86f15
+CarKey	swift-enum	s:6CarKey0aB9ErrorCodeO	-	CarKeyErrorCode	-	-	-	ios=16.0,macos=13.3,watchos=9.0	-	32db11263b0efc99
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO8InternalyA2CmF	CarKeyErrorCode	Internal	-	-	-	-	-	bc478db353048df8
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO19VehicleNotConnectedyA2CmF	CarKeyErrorCode	VehicleNotConnected	-	-	-	-	-	d786ea8c87b890af
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO24AnotherRequestInProgressyA2CmF	CarKeyErrorCode	AnotherRequestInProgress	-	-	-	-	-	3f2074ffaf1049da
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO16SessionNotActiveyA2CmF	CarKeyErrorCode	SessionNotActive	-	-	-	-	-	58cb3a53fdcbfc45
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO15FunctionUnknownyA2CmF	CarKeyErrorCode	FunctionUnknown	-	-	-	-	-	8484b46215723da5
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO17SecurityViolationyA2CmF	CarKeyErrorCode	SecurityViolation	-	-	-	-	-	3bee75047828a3ab
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO15VehicleNotFoundyA2CmF	CarKeyErrorCode	VehicleNotFound	-	-	-	-	-	71a5d2b8363d810b
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO14MessageTooLongyA2CmF	CarKeyErrorCode	MessageTooLong	-	-	-	-	-	1ef24c67a367fcc2
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO15RequestTimedOutyA2CmF	CarKeyErrorCode	RequestTimedOut	-	-	-	-	-	c5c74833a08e7bf2
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO31EnduringRequestUsingEventMethodyA2CmF	CarKeyErrorCode	EnduringRequestUsingEventMethod	-	-	-	-	-	c758995be47f604b
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO20RequestNotInProgressyA2CmF	CarKeyErrorCode	RequestNotInProgress	-	-	-	-	-	db964e4d69868944
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO18ClientInBackgroundyA2CmF	CarKeyErrorCode	ClientInBackground	-	-	-	-	-	8d362b06b04929a8
+CarKey	swift-constant	s:6CarKey0aB9ErrorCodeO19FeatureNotSupportedyA2CmF	CarKeyErrorCode	FeatureNotSupported	-	-	-	-	-	46b056fc49623817
+CarKey	swift-method	s:6CarKey0aB9ErrorCodeO2eeoiySbAC_ACtFZ	CarKeyErrorCode	==(_:_:)	+	Swift.Bool	CarKey.CarKeyErrorCode | CarKey.CarKeyErrorCode	-	-	973bf672ea5c8d07
+CarKey	swift-method	s:6CarKey0aB9ErrorCodeO4hash4intoys6HasherVz_tF	CarKeyErrorCode	hash(into:)	-	()	Swift.Hasher	-	-	9832c98ebbe27128
+CarKey	swift-property	s:6CarKey0aB9ErrorCodeO9hashValueSivp	CarKeyErrorCode	hashValue	-	Swift.Int	-	-	-	baa6c63f2375c20b

@@ -1,0 +1,79 @@
+# the frameworks of the sweep with no shard that declare nothing of their own: name, class, targets, reason (TAB separated). Computed by the sweep from the frameworks' own headers and the census of their declarations (ir.lua scan_no_shard), never listed by name.
+AVFoundation/AVFAudio	alias	AVFAudio	its folder is a symbolic link to AVFAudio's
+Accelerate	umbrella	Accelerate/vImage,Accelerate/vecLib	its headers declare nothing; the declarations are those of Accelerate/vImage, Accelerate/vecLib
+ActivityKit	empty	-	its headers hold no code, no macro and no include
+AdAttributionKit	empty	-	its headers hold no code, no macro and no include
+AppIntents	placeholder	-	its headers include Foundation and declare nothing of their own
+AppMigrationKit	placeholder	-	its headers include Foundation and declare nothing of their own
+AudioUnit	alias	AudioToolbox	its headers declare nothing; the declarations are AudioToolbox's
+CoreAudio	umbrella	CoreAudioTypes,CoreFoundation,Darwin,MacTypes,_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3	its headers declare nothing; its declarations belong to CoreAudioTypes (68), CoreFoundation (68), Darwin (6), MacTypes (140), _DarwinFoundation1 (8), _DarwinFoundation2 (156), _DarwinFoundation3 (24)
+DockKit	placeholder	-	its headers include Foundation and declare nothing of their own
+ExtensionFoundation	macros	-	its headers hold macros and no code; no declaration reaches the unit
+ImagePlayground	empty	-	its headers hold no code, no macro and no include
+MarketplaceKit	empty	-	its headers hold no code, no macro and no include
+MatterSupport	placeholder	-	its headers include Foundation and declare nothing of their own
+MetalPerformancePrimitives	metal	-	its code is under Metal guards (__METAL_VERSION__ or __HAVE_BFLOAT__); no declaration reaches the unit
+MobileCoreServices	alias	CoreServices	its headers declare nothing; the declarations are CoreServices's
+RealityKit	metal	-	its code is under Metal guards (__METAL_VERSION__ or __HAVE_BFLOAT__); no declaration reaches the unit
+RelevanceKit	placeholder	-	its headers include Foundation and declare nothing of their own
+StickerFoundation	empty	-	its headers hold no code, no macro and no include
+StickerKit	umbrella	Foundation,OSLog	its headers declare nothing; the declarations are those of Foundation, OSLog
+SwiftUI	alias	UIKit	its headers declare nothing; the declarations are UIKit's
+SwiftUICore	umbrella	CoreGraphics,CoreText,Foundation,QuartzCore	its headers declare nothing; the declarations are those of CoreGraphics, CoreText, Foundation, QuartzCore
+TargetConditionals	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+Translation	placeholder	-	its headers include Foundation and declare nothing of their own
+TranslationUIProvider	placeholder	-	its headers include Foundation and declare nothing of their own
+_AvailabilityInternal	macros	-	its headers hold macros and no code; no declaration reaches the unit
+_CoreData_CloudKit	umbrella	CoreData,CoreFoundation,Darwin,Foundation,MacTypes,ObjectiveC,_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3	its headers declare nothing; its declarations belong to CoreData (86), CoreFoundation (68), Darwin (6), Foundation (160), MacTypes (140), ObjectiveC (24), _DarwinFoundation1 (8), _DarwinFoundation2 (164), _DarwinFoundation3 (205)
+_CoreLocationUI_SwiftUI	placeholder	-	its headers include Foundation and declare nothing of their own
+_Darwin_xlocale	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_ctype_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_inttypes_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_stdio_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_stdlib_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_string_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_time_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_wchar_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+_xlocale_wctype_h	alias	xlocale	its headers declare nothing; the declarations are xlocale's
+alloca	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+assert_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+complex_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+ctype_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+errno_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+fenv_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+float_h	placeholder	-	its headers include headers that reach no declaration
+inttypes_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+iso646_h	placeholder	-	its headers include headers that reach no declaration
+limits_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+locale_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+math_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+nl_types	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+os_availability	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+pthread	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+runetype	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+sched	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+setjmp_h	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+signal_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+stdalign_h	placeholder	-	its headers include headers that reach no declaration
+stdarg_h	placeholder	-	its headers include headers that reach no declaration
+stdatomic_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+stdbool_h	placeholder	-	its headers include headers that reach no declaration
+stddef_h	placeholder	-	its headers include headers that reach no declaration
+stdint_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+stdio_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+stdlib_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+stdnoreturn_h	placeholder	-	its headers include headers that reach no declaration
+string_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+sys_appleapiopts	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+sys_cdefs	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+sys_qos	umbrella	_DarwinFoundation1,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), xlocale (1)
+sys_resource	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+sys_select	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+sys_types	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+sys_wait	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+tgmath_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+time_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), xlocale (1)
+unistd	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+unwind_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,unwind,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), unwind (42), xlocale (1)
+wchar_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)
+wctype_h	umbrella	_DarwinFoundation1,_DarwinFoundation2,_DarwinFoundation3,xlocale	its headers declare nothing; its declarations belong to _DarwinFoundation1 (361), _DarwinFoundation2 (741), _DarwinFoundation3 (729), xlocale (1)

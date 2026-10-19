@@ -1,0 +1,57 @@
+[
+  {
+    "api": "ATTrackingManager",
+    "kind": "class",
+    "introduced": "14.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 runs no tracking authorization: there is no prompt to put up, no setting to change the answer and no service that decides, so the class is here to answer as a release that has none",
+    "effect": "the class exists, an instance is an NSObject's, and every question of it is answered as facts/AppTrackingTransparency/ATTrackingManager.md says",
+    "facts": "facts/AppTrackingTransparency/ATTrackingManager.md",
+    "source": "the host's own AppTrackingTransparency under MacOSX.sdk (its status, the thread and the moment of its completion handler, and that +new/-init are NSObject's), against the armv7 shared cache of iOS 6.1.3, whose AdSupport exports -[ASIdentifierManager advertisingIdentifier] and no -trackingEnabled"
+  },
+  {
+    "api": "ATTrackingManager.trackingAuthorizationStatus",
+    "kind": "property",
+    "introduced": "14.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "nothing on this release ever decides it, so a question has the answer it has everywhere: not determined",
+    "effect": "ATTrackingManagerAuthorizationStatusNotDetermined, always; the release asks the owner nothing, so no answer is invented and none is refused either",
+    "facts": "facts/AppTrackingTransparency/ATTrackingManager.md",
+    "source": "the host's own AppTrackingTransparency, which answers notDetermined on a platform that does not run the system and documents that macOS always answers so"
+  },
+  {
+    "api": "+[ATTrackingManager new]",
+    "kind": "method",
+    "introduced": "14.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, as Apple's own framework does, so no application can name it; at run time it is NSObject's, as it is there",
+    "effect": "an allocated ATTrackingManager, which holds nothing, as NSObject's +new makes of any class",
+    "facts": "facts/AppTrackingTransparency/ATTrackingManager.md",
+    "source": "the header of ATTrackingManager in the SDK 16.4, and the host's own AppTrackingTransparency, where +new is NSObject's and [[ATTrackingManager alloc] init] gives an ATTrackingManager"
+  },
+  {
+    "api": "-[ATTrackingManager init]",
+    "kind": "method",
+    "introduced": "14.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, as Apple's own framework does, so no application can name it; at run time it is NSObject's, as it is there",
+    "effect": "an ATTrackingManager, which holds nothing",
+    "facts": "facts/AppTrackingTransparency/ATTrackingManager.md",
+    "source": "the header of ATTrackingManager in the SDK 16.4, and the host's own AppTrackingTransparency, where -init is NSObject's"
+  },
+  {
+    "api": "+[ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:]",
+    "kind": "method",
+    "introduced": "14.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "there is no prompt this release could put up, and the status the handler is given is the status already there",
+    "effect": "the handler is called once, with ATTrackingManagerAuthorizationStatusNotDetermined, on the thread that asked and before the call returns, as the host answers; a nil handler is allowed, and every further request calls it again the same way",
+    "facts": "facts/AppTrackingTransparency/ATTrackingManager.md",
+    "source": "the host's own AppTrackingTransparency under MacOSX.sdk, measured for the status, the thread and the moment of the call, and for a second request"
+  }
+]

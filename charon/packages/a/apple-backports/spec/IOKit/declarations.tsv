@@ -1,0 +1,336 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+enum	c:@Ea@kIOCFSerializeToBinary	-	-		unsigned int	-	-	-	-	87ff5e14322b7ead	-
+enumconst	c:@Ea@kIOCFSerializeToBinary@kIOCFSerializeToBinary	-			-	-	-	-	-	14f9adec85b417e5	1
+function	c:@F@IOCFSerialize	-			CFDataRef (CFTypeRef, CFOptionFlags)	CFTypeRef object | CFOptionFlags options	-	-	-	64c44ac757cdefe5	-
+function	c:@F@IOCFUnserialize	-			CFTypeRef (const char *, CFAllocatorRef, CFOptionFlags, CFStringRef *)	const char * buffer | CFAllocatorRef allocator | CFOptionFlags options | CFStringRef * errorString	-	-	-	688a5a3f565b9b8a	-
+function	c:@F@IOCFUnserializeBinary	-			CFTypeRef (const char *, size_t, CFAllocatorRef, CFOptionFlags, CFStringRef *)	const char * buffer | size_t bufferSize | CFAllocatorRef allocator | CFOptionFlags options | CFStringRef * errorString	-	-	-	49de6d8d5810ec7d	-
+function	c:@F@IOCFUnserializeWithSize	-			CFTypeRef (const char *, size_t, CFAllocatorRef, CFOptionFlags, CFStringRef *)	const char * buffer | size_t bufferSize | CFAllocatorRef allocator | CFOptionFlags options | CFStringRef * errorString	-	-	-	50b400348a9e419d	-
+typedef	c:@T@IOReturn	-			kern_return_t	-	-	-	-	055362c32e6427e5	-
+struct	c:@S@_IODataQueueEntry	-			-	-	-	-	-	ae2b65ba64f25d3d	-
+field	c:@S@_IODataQueueEntry@FI@size	_IODataQueueEntry			UInt32	-	-	-	-	e0248b62ea542614	-
+field	c:@S@_IODataQueueEntry@FI@data	_IODataQueueEntry			UInt8[4]	-	-	-	-	6ca39093bc2c4668	-
+typedef	c:@T@IODataQueueEntry	-			struct _IODataQueueEntry	-	-	-	-	732ef7cb88b62340	-
+struct	c:@S@_IODataQueueMemory	-			-	-	-	-	-	4eb37876f7aa4da2	-
+field	c:@S@_IODataQueueMemory@FI@queueSize	_IODataQueueMemory			UInt32	-	-	-	-	6a85f30c4aa36f5b	-
+field	c:@S@_IODataQueueMemory@FI@head	_IODataQueueMemory			volatile UInt32	-	-	-	-	3039221e2b2db4e3	-
+field	c:@S@_IODataQueueMemory@FI@tail	_IODataQueueMemory			volatile UInt32	-	-	-	-	a1ab155e14ad6699	-
+field	c:@S@_IODataQueueMemory@FI@queue	_IODataQueueMemory			IODataQueueEntry[1]	-	-	-	-	1dd1f71fcf4827cb	-
+typedef	c:@T@IODataQueueMemory	-			struct _IODataQueueMemory	-	-	-	-	f3d4a8e92c0ba021	-
+struct	c:@S@_IODataQueueAppendix	-			-	-	-	-	-	0f6d91281a5e7dbb	-
+field	c:@S@_IODataQueueAppendix@FI@version	_IODataQueueAppendix			UInt32	-	-	-	-	2437fa51eb293d63	-
+field	c:@S@_IODataQueueAppendix@FI@msgh	_IODataQueueAppendix			mach_msg_header_t	-	-	-	-	e8886a75727669fb	-
+typedef	c:@T@IODataQueueAppendix	-			struct _IODataQueueAppendix	-	-	-	-	b66b05162309dd23	-
+function	c:@F@IODataQueueDataAvailable	-			Boolean (IODataQueueMemory *)	IODataQueueMemory * dataQueue	-	-	-	2827484e028eddcd	-
+function	c:@F@IODataQueuePeek	-			IODataQueueEntry * (IODataQueueMemory *)	IODataQueueMemory * dataQueue	-	-	-	6f61ee3f8afb968a	-
+function	c:@F@IODataQueueDequeue	-			IOReturn (IODataQueueMemory *, void *, uint32_t *)	IODataQueueMemory * dataQueue | void * data | uint32_t * dataSize	-	-	-	f6a1db7b7adba38f	-
+function	c:@F@IODataQueueWaitForAvailableData	-			IOReturn (IODataQueueMemory *, mach_port_t)	IODataQueueMemory * dataQueue | mach_port_t notificationPort	-	-	-	0f1013495a0f5380	-
+function	c:@F@IODataQueueAllocateNotificationPort	-			mach_port_t (...)	-	-	-	-	cae2bab46abcd583	-
+function	c:@F@IODataQueueEnqueue	-			IOReturn (IODataQueueMemory *, void *, uint32_t)	IODataQueueMemory * dataQueue | void * data | uint32_t dataSize	-	ios=4.0/-/-/0	-	340c70f41c1d7350	-
+function	c:@F@IODataQueueSetNotificationPort	-			IOReturn (IODataQueueMemory *, mach_port_t)	IODataQueueMemory * dataQueue | mach_port_t notifyPort	-	ios=4.0/-/-/0	-	bf80855a46f29e87	-
+enum	c:@Ea@kIOSystemStateSleepDescriptionHibernateStateInactive	-	-		unsigned int	-	-	-	-	41d540bd279f017b	-
+enumconst	c:@Ea@kIOSystemStateSleepDescriptionHibernateStateInactive@kIOSystemStateSleepDescriptionHibernateStateInactive	-			-	-	-	-	-	0c8777c53d4fe9bf	0
+enumconst	c:@Ea@kIOSystemStateSleepDescriptionHibernateStateInactive@kIOSystemStateSleepDescriptionHibernateStateHibernating	-			-	-	-	-	-	f2464b7e57b48458	1
+enumconst	c:@Ea@kIOSystemStateSleepDescriptionHibernateStateInactive@kIOSystemStateSleepDescriptionHibernateStateWakingFromHibernate	-			-	-	-	-	-	96d74abbfbd2c286	2
+typedef	c:@T@IOOptionBits	-			UInt32	-	-	-	-	20ee5ad319fdf4b9	-
+typedef	c:@T@IOFixed	-			SInt32	-	-	-	-	b7ce0ca451fae913	-
+typedef	c:@T@IOVersion	-			UInt32	-	-	-	-	ce2e10ed45221fc2	-
+typedef	c:@T@IOItemCount	-			UInt32	-	-	-	-	ce7a5093755bc972	-
+typedef	c:@T@IOCacheMode	-			UInt32	-	-	-	-	d8f56e530e072799	-
+typedef	c:@T@IOByteCount32	-			UInt32	-	-	-	-	8ee049ac62a6acb0	-
+typedef	c:@T@IOByteCount64	-			UInt64	-	-	-	-	5dae0f6cde0df2d3	-
+typedef	c:@T@IOPhysicalAddress32	-			UInt32	-	-	-	-	33f3940d24fcdecf	-
+typedef	c:@T@IOPhysicalAddress64	-			UInt64	-	-	-	-	1418d3cc98981616	-
+typedef	c:@T@IOPhysicalLength32	-			UInt32	-	-	-	-	a700bad40e274a6b	-
+typedef	c:@T@IOPhysicalLength64	-			UInt64	-	-	-	-	1f23b6e170bf733d	-
+typedef	c:@T@IOVirtualAddress	-			mach_vm_address_t	-	-	-	-	5b064ceb5b5dc34a	-
+typedef	c:@T@IOByteCount	-			IOByteCount64	-	-	-	-	bc6e2f28f37e78f6	-
+typedef	c:@T@IOLogicalAddress	-			IOVirtualAddress	-	-	-	-	10599fa8b59cc2cd	-
+typedef	c:@T@IOPhysicalAddress	-			IOPhysicalAddress64	-	-	-	-	8ac192748f57b3a6	-
+typedef	c:@T@IOPhysicalLength	-			IOPhysicalLength64	-	-	-	-	1abc58f21492a7fe	-
+struct	c:@SA@IOPhysicalRange	-			-	-	-	-	-	3f000027a22d8e1b	-
+field	c:@SA@IOPhysicalRange@FI@address	IOPhysicalRange			IOPhysicalAddress	-	-	-	-	66a704b3ca102d8c	-
+field	c:@SA@IOPhysicalRange@FI@length	IOPhysicalRange			IOByteCount	-	-	-	-	2b88730d4b64a5bb	-
+typedef	c:@T@IOPhysicalRange	-			struct IOPhysicalRange	-	-	-	-	bc0a3915d0d51230	-
+struct	c:@SA@IOVirtualRange	-			-	-	-	-	-	17ac2afcada25171	-
+field	c:@SA@IOVirtualRange@FI@address	IOVirtualRange			IOVirtualAddress	-	-	-	-	51e3e74d2bbe9b65	-
+field	c:@SA@IOVirtualRange@FI@length	IOVirtualRange			IOByteCount	-	-	-	-	9a977bf31bcbe8fb	-
+typedef	c:@T@IOVirtualRange	-			struct IOVirtualRange	-	-	-	-	f95590cddbd7401b	-
+typedef	c:@T@IOAddressRange	-			IOVirtualRange	-	-	-	-	32cbe6da330d9890	-
+struct	c:@SA@IONamedValue	-			-	-	-	-	-	4d6cb7576233fe1b	-
+field	c:@SA@IONamedValue@FI@value	IONamedValue			int	-	-	-	-	19e394aa143fcece	-
+field	c:@SA@IONamedValue@FI@name	IONamedValue			const char *	-	-	-	-	24ed466d99e01548	-
+typedef	c:@T@IONamedValue	-			struct IONamedValue	-	-	-	-	14df5cf95e312bee	-
+typedef	c:@T@IOAlignment	-			unsigned int	-	-	-	-	fa2875ebb81cabdd	-
+typedef	c:@T@io_object_t	-			mach_port_t	-	-	-	-	08b7d1420b99084b	-
+typedef	c:@T@io_connect_t	-			io_object_t	-	-	-	-	09fe4b74340ac9d7	-
+typedef	c:@T@io_enumerator_t	-			io_object_t	-	-	-	-	5269b9cbee4e7ec3	-
+typedef	c:@T@io_ident_t	-			io_object_t	-	-	-	-	77883ad6cb395229	-
+typedef	c:@T@io_iterator_t	-			io_object_t	-	-	-	-	4ee90374ba268614	-
+typedef	c:@T@io_registry_entry_t	-			io_object_t	-	-	-	-	3052f8403865819c	-
+typedef	c:@T@io_service_t	-			io_object_t	-	-	-	-	f97f77893d394bce	-
+typedef	c:@T@uext_object_t	-			io_object_t	-	-	-	-	29cd4c29a0063aba	-
+enum	c:@Ea@kIODefaultMemoryType	-	-		unsigned int	-	-	-	-	219a3ac570abc2b2	-
+enumconst	c:@Ea@kIODefaultMemoryType@kIODefaultMemoryType	-			-	-	-	-	-	b2debbd2058cd0e6	0
+enum	c:@Ea@kIODefaultCache	-	-		unsigned int	-	-	-	-	aaf96d29db791543	-
+enumconst	c:@Ea@kIODefaultCache@kIODefaultCache	-			-	-	-	-	-	73d773bfac4084cb	0
+enumconst	c:@Ea@kIODefaultCache@kIOInhibitCache	-			-	-	-	-	-	6dcdd7e570192064	1
+enumconst	c:@Ea@kIODefaultCache@kIOWriteThruCache	-			-	-	-	-	-	700cd62297fb39b3	2
+enumconst	c:@Ea@kIODefaultCache@kIOCopybackCache	-			-	-	-	-	-	860125df2050f65a	3
+enumconst	c:@Ea@kIODefaultCache@kIOWriteCombineCache	-			-	-	-	-	-	c39d954144756768	4
+enumconst	c:@Ea@kIODefaultCache@kIOCopybackInnerCache	-			-	-	-	-	-	e256a730bd01712b	5
+enumconst	c:@Ea@kIODefaultCache@kIOPostedWrite	-			-	-	-	-	-	00c24f298107f385	6
+enumconst	c:@Ea@kIODefaultCache@kIORealTimeCache	-			-	-	-	-	-	c1a57088e808c1ae	7
+enumconst	c:@Ea@kIODefaultCache@kIOPostedReordered	-			-	-	-	-	-	3731afa75333190f	8
+enumconst	c:@Ea@kIODefaultCache@kIOPostedCombinedReordered	-			-	-	-	-	-	1c2a953c7de4c328	9
+enum	c:@Ea@kIOMapAnywhere	-	-		unsigned int	-	-	-	-	8464ef8b81060809	-
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapAnywhere	-			-	-	-	-	-	01e94d9a341a9936	1
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapCacheMask	-			-	-	-	-	-	12088ca3258253bb	3840
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapCacheShift	-			-	-	-	-	-	3d665364bf049e24	8
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapDefaultCache	-			-	-	-	-	-	51f3c34e4a220a19	0
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapInhibitCache	-			-	-	-	-	-	feae8eb31b840ca4	256
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapWriteThruCache	-			-	-	-	-	-	19e4c01d5409146e	512
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapCopybackCache	-			-	-	-	-	-	eb5e619a5d19a8bd	768
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapWriteCombineCache	-			-	-	-	-	-	28e84f955e22c541	1024
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapCopybackInnerCache	-			-	-	-	-	-	21e954e4a35f0895	1280
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapPostedWrite	-			-	-	-	-	-	97891f4bcacc6596	1536
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapRealTimeCache	-			-	-	-	-	-	223796840c8922c7	1792
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapPostedReordered	-			-	-	-	-	-	4de4b4cc5fa3b901	2048
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapPostedCombinedReordered	-			-	-	-	-	-	1899d81370d55c3e	2304
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapUserOptionsMask	-			-	-	-	-	-	6db074533cbc0885	4095
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapReadOnly	-			-	-	-	-	-	4b61344d6f56917f	4096
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapStatic	-			-	-	-	-	-	fa0ff57ba1cec598	16777216
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapReference	-			-	-	-	-	-	cebc6ab2c5ee2a9b	33554432
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapUnique	-			-	-	-	-	-	49a94ee33eadf050	67108864
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapPrefault	-			-	-	-	-	-	30c3a039072c4331	268435456
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapOverwrite	-			-	-	-	-	-	85a2f523371dcf8e	536870912
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapGuardedMask	-			-	-	-	-	-	a412f576cce69d68	3221225472
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapGuardedSmall	-			-	-	-	-	-	2bd3bbaa81f44583	1073741824
+enumconst	c:@Ea@kIOMapAnywhere@kIOMapGuardedLarge	-			-	-	-	-	-	fd0e0987c04c742b	2147483648
+enum	c:@Ea@kNanosecondScale	-	-		unsigned int	-	-	-	-	e6adf2ca469d1ed0	-
+enumconst	c:@Ea@kNanosecondScale@kNanosecondScale	-			-	-	-	-	-	5aa4670fbf8383d8	1
+enumconst	c:@Ea@kNanosecondScale@kMicrosecondScale	-			-	-	-	-	-	a2c8614d1ac872f3	1000
+enumconst	c:@Ea@kNanosecondScale@kMillisecondScale	-			-	-	-	-	-	31bab9cbe7014694	1000000
+enumconst	c:@Ea@kNanosecondScale@kSecondScale	-			-	-	-	-	-	15cee22b30cfb58d	1000000000
+enumconst	c:@Ea@kNanosecondScale@kTickScale	-			-	-	-	-	-	6907a6bd1e651797	10000000
+enum	c:@Ea@kIOConnectMethodVarOutputSize	-	-		int	-	-	-	-	f5881b6e8c448f2b	-
+enumconst	c:@Ea@kIOConnectMethodVarOutputSize@kIOConnectMethodVarOutputSize	-			-	-	-	-	-	31c43365f625fe43	-3
+typedef	c:@T@IODeviceNumber	-			unsigned int	-	-	-	-	4e518e20752df4d4	-
+enum	c:@Ea@kIOMaxBusStall40usec	-	-		unsigned int	-	-	-	-	66e1c48355ec7afa	-
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStall40usec	-			-	-	-	-	-	7f64fe8f90dadb19	40000
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStall30usec	-			-	-	-	-	-	7c6f6297ccb96789	30000
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStall25usec	-			-	-	-	-	-	14407cc71e11a4e2	25000
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStall20usec	-			-	-	-	-	-	7135f12ee2517eb7	20000
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStall10usec	-			-	-	-	-	-	136423dfb0313025	10000
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStall5usec	-			-	-	-	-	-	177914ad925af0eb	5000
+enumconst	c:@Ea@kIOMaxBusStall40usec@kIOMaxBusStallNone	-			-	-	-	-	-	6563751b8d72575b	0
+enum	c:@Ea@kFirstIOKitNotificationType	-	-		unsigned int	-	-	-	-	59066b9213ba262c	-
+enumconst	c:@Ea@kFirstIOKitNotificationType@kFirstIOKitNotificationType	-			-	-	-	-	-	120cecb891c53990	100
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOServicePublishNotificationType	-			-	-	-	-	-	e43f0744306eff18	100
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOServiceMatchedNotificationType	-			-	-	-	-	-	536b4076f58476e5	101
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOServiceTerminatedNotificationType	-			-	-	-	-	-	2e9e211897655f35	102
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOAsyncCompletionNotificationType	-			-	-	-	-	-	d396bc130186ad78	150
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOServiceMessageNotificationType	-			-	-	-	-	-	4dc81edaa8aa0373	160
+enumconst	c:@Ea@kFirstIOKitNotificationType@kLastIOKitNotificationType	-			-	-	-	-	-	b71bf6451d2bb046	199
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOKitNoticationTypeMask	-			-	-	-	-	-	7019ca74b6766f0e	4095
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOKitNoticationTypeSizeAdjShift	-			-	-	-	-	-	f75777216810c9bc	30
+enumconst	c:@Ea@kFirstIOKitNotificationType@kIOKitNoticationMsgSizeMask	-			-	-	-	-	-	2a2cd6503573ae73	3
+enum	c:@Ea@kOSNotificationMessageID	-	-		unsigned int	-	-	-	-	8fcbac415217ace6	-
+enumconst	c:@Ea@kOSNotificationMessageID@kOSNotificationMessageID	-			-	-	-	-	-	e1f4759878cf5f5d	53
+enumconst	c:@Ea@kOSNotificationMessageID@kOSAsyncCompleteMessageID	-			-	-	-	-	-	2a8092922ed957b7	57
+enumconst	c:@Ea@kOSNotificationMessageID@kMaxAsyncArgs	-			-	-	-	-	-	ee77187e19a9e81f	16
+enum	c:@Ea@kIOAsyncReservedIndex	-	-		unsigned int	-	-	-	-	cc33e3f4a819aa13	-
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOAsyncReservedIndex	-			-	-	-	-	-	eb33f54459cc39a5	0
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOAsyncReservedCount	-			-	-	-	-	-	245c423854ce8547	1
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOAsyncCalloutFuncIndex	-			-	-	-	-	-	5dad79ee5731938b	1
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOAsyncCalloutRefconIndex	-			-	-	-	-	-	30402001d43e41e0	2
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOAsyncCalloutCount	-			-	-	-	-	-	2b8d81ea94943759	3
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOMatchingCalloutFuncIndex	-			-	-	-	-	-	ad04e5200e81193b	1
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOMatchingCalloutRefconIndex	-			-	-	-	-	-	c3842e72afba0b28	2
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOMatchingCalloutCount	-			-	-	-	-	-	0b1ae4af47841bfc	3
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOInterestCalloutFuncIndex	-			-	-	-	-	-	b1a1b058d643f43e	1
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOInterestCalloutRefconIndex	-			-	-	-	-	-	140416797121fab7	2
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOInterestCalloutServiceIndex	-			-	-	-	-	-	3bfdef4923881ecc	3
+enumconst	c:@Ea@kIOAsyncReservedIndex@kIOInterestCalloutCount	-			-	-	-	-	-	a5becce9939f6188	4
+enum	c:@Ea@kOSAsyncRef64Count	-	-		unsigned int	-	-	-	-	72031ff198d3302f	-
+enumconst	c:@Ea@kOSAsyncRef64Count@kOSAsyncRef64Count	-			-	-	-	-	-	3718e4b82d41fdff	8
+enumconst	c:@Ea@kOSAsyncRef64Count@kOSAsyncRef64Size	-			-	-	-	-	-	f453583d86822398	64
+typedef	c:@T@OSAsyncReference64	-			io_user_reference_t[8]	-	-	-	-	982554557cda5bb4	-
+struct	c:@S@OSNotificationHeader64	-			-	-	-	-	-	2d25eaa372fa3206	-
+field	c:@S@OSNotificationHeader64@FI@size	OSNotificationHeader64			mach_msg_size_t	-	-	-	-	9bae521fb88258ae	-
+field	c:@S@OSNotificationHeader64@FI@type	OSNotificationHeader64			natural_t	-	-	-	-	9a5402f0a57d4ee9	-
+field	c:@S@OSNotificationHeader64@FI@reference	OSNotificationHeader64			OSAsyncReference64	-	-	-	-	da4b799619b2cb40	-
+field	c:@S@OSNotificationHeader64@FI@content	OSNotificationHeader64			unsigned char[]	-	-	-	-	0c93f506c37ff505	-
+struct	c:@S@IOServiceInterestContent64	-			-	-	-	-	-	2f4be9e5b7c7b19d	-
+field	c:@S@IOServiceInterestContent64@FI@messageType	IOServiceInterestContent64			natural_t	-	-	-	-	3196539c89325645	-
+field	c:@S@IOServiceInterestContent64@FI@messageArgument	IOServiceInterestContent64			io_user_reference_t[1]	-	-	-	-	57792da3ee4fea48	-
+enum	c:@Ea@kOSAsyncRefCount	-	-		unsigned int	-	-	-	-	abc330dadfb62311	-
+enumconst	c:@Ea@kOSAsyncRefCount@kOSAsyncRefCount	-			-	-	-	-	-	1582331e7746a013	8
+enumconst	c:@Ea@kOSAsyncRefCount@kOSAsyncRefSize	-			-	-	-	-	-	e6396902e7f0cfa5	32
+typedef	c:@T@OSAsyncReference	-			natural_t[8]	-	-	-	-	9999bf77a0e54c7a	-
+struct	c:@S@OSNotificationHeader	-			-	-	-	-	-	0457df3c3525581a	-
+field	c:@S@OSNotificationHeader@FI@size	OSNotificationHeader			mach_msg_size_t	-	-	-	-	fdb418c070d2e322	-
+field	c:@S@OSNotificationHeader@FI@type	OSNotificationHeader			natural_t	-	-	-	-	4bb2c61cbbfb6b33	-
+field	c:@S@OSNotificationHeader@FI@reference	OSNotificationHeader			OSAsyncReference	-	-	-	-	92f853488d0cbc1f	-
+field	c:@S@OSNotificationHeader@FI@content	OSNotificationHeader			unsigned char[]	-	-	-	-	f0aa8c1311c77bff	-
+struct	c:@S@IOServiceInterestContent	-			-	-	-	-	-	5e6486fbe0fe25a9	-
+field	c:@S@IOServiceInterestContent@FI@messageType	IOServiceInterestContent			natural_t	-	-	-	-	9d229ba7af7c99a3	-
+field	c:@S@IOServiceInterestContent@FI@messageArgument	IOServiceInterestContent			void *[1]	-	-	-	-	a7b2c063598614fb	-
+struct	c:@S@IOAsyncCompletionContent	-			-	-	-	-	-	e903ad3a54b30f09	-
+field	c:@S@IOAsyncCompletionContent@FI@result	IOAsyncCompletionContent			IOReturn	-	-	-	-	b5996396585ccaf3	-
+field	c:@S@IOAsyncCompletionContent@FI@args	IOAsyncCompletionContent			void *[]	-	-	-	-	a699f0166220cd63	-
+typedef	c:@T@OSNotificationHeader	-			struct OSNotificationHeader	-	-	-	-	c5572e354ba72c31	-
+typedef	c:@T@IOServiceInterestContent	-			struct IOServiceInterestContent	-	-	-	-	cac1de0b16d51b8b	-
+typedef	c:@T@IOAsyncCompletionContent	-			struct IOAsyncCompletionContent	-	-	-	-	d5c11238f69ad171	-
+struct	c:@S@IONotificationPort	-			-	-	-	-	-	6d9def0ca3e690c1	-
+typedef	c:IOKitLib.h@T@IONotificationPortRef	-			struct IONotificationPort *	-	-	-	-	ff69de13d3f0a3cc	-
+typedef	c:IOKitLib.h@T@IOServiceMatchingCallback	-			void (*)(void *, io_iterator_t)	-	-	-	-	1bf303abb9a00a50	-
+typedef	c:IOKitLib.h@T@IOServiceInterestCallback	-			void (*)(void *, io_service_t, uint32_t, void *)	-	-	-	-	99967c55dc86a6cc	-
+var	c:@kIOMainPortDefault	-			const mach_port_t	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	a88714a2486dee69	-
+function	c:@F@IOMainPort	-			kern_return_t (mach_port_t, mach_port_t *)	mach_port_t bootstrapPort | mach_port_t * mainPort	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	b4d3033d7894ea4c	-
+var	c:@kIOMasterPortDefault	-			const mach_port_t	-	-	ios=-/-/-/1,maccatalyst=1.0/-/-/0,macos=10.0/12.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	16d94e7baab1cb33	-
+function	c:@F@IOMasterPort	-			kern_return_t (mach_port_t, mach_port_t *)	mach_port_t bootstrapPort | mach_port_t * mainPort	-	ios=-/-/-/1,maccatalyst=1.0/-/-/0,macos=10.0/12.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	20bed3ff6404ab70	-
+function	c:@F@IONotificationPortCreate	-			IONotificationPortRef (mach_port_t)	mach_port_t mainPort	-	-	-	817fa8526499cc0d	-
+function	c:@F@IONotificationPortDestroy	-			void (IONotificationPortRef)	IONotificationPortRef notify	-	-	-	5ea0734e9f494ba6	-
+function	c:@F@IONotificationPortGetRunLoopSource	-			CFRunLoopSourceRef (IONotificationPortRef)	IONotificationPortRef notify	-	-	-	ecb32054b6078425	-
+function	c:@F@IONotificationPortGetMachPort	-			mach_port_t (IONotificationPortRef)	IONotificationPortRef notify	-	-	-	cb07fbf8447b4c64	-
+function	c:@F@IONotificationPortSetImportanceReceiver	-			kern_return_t (IONotificationPortRef)	IONotificationPortRef notify	-	-	-	76c3b03b7b6b8eae	-
+function	c:@F@IONotificationPortSetDispatchQueue	-			void (IONotificationPortRef, dispatch_queue_t)	IONotificationPortRef notify | dispatch_queue_t queue	-	ios=4.3/-/-/0	-	e0a15b29a858f9f4	-
+function	c:@F@IODispatchCalloutFromMessage	-			void (void *, mach_msg_header_t *, void *)	void * unused | mach_msg_header_t * msg | void * reference	-	-	-	dc55e05153458e0a	-
+function	c:@F@IOCreateReceivePort	-			kern_return_t (uint32_t, mach_port_t *)	uint32_t msgType | mach_port_t * recvPort	-	-	-	4d71bb9d7e06591d	-
+function	c:@F@IOObjectRelease	-			kern_return_t (io_object_t)	io_object_t object	-	-	-	73d0f92cd2d5bdae	-
+function	c:@F@IOObjectRetain	-			kern_return_t (io_object_t)	io_object_t object	-	-	-	b8ea4f45e692edf7	-
+function	c:@F@IOObjectGetClass	-			kern_return_t (io_object_t, io_name_t)	io_object_t object | io_name_t className	-	-	-	19a096fb3ea27977	-
+function	c:@F@IOObjectCopyClass	-			CFStringRef (io_object_t)	io_object_t object	-	ios=4.0/-/-/0	-	7c38b2fcf3d73534	-
+function	c:@F@IOObjectCopySuperclassForClass	-			CFStringRef (CFStringRef)	CFStringRef classname	-	ios=4.0/-/-/0	-	e40cd0365a52e1a6	-
+function	c:@F@IOObjectCopyBundleIdentifierForClass	-			CFStringRef (CFStringRef)	CFStringRef classname	-	ios=4.0/-/-/0	-	b190d31c446311da	-
+function	c:@F@IOObjectConformsTo	-			boolean_t (io_object_t, const io_name_t)	io_object_t object | const io_name_t className	-	-	-	50fb54df75dd6cf2	-
+function	c:@F@IOObjectIsEqualTo	-			boolean_t (io_object_t, io_object_t)	io_object_t object | io_object_t anObject	-	-	-	88dbcca0ac8da917	-
+function	c:@F@IOObjectGetKernelRetainCount	-			uint32_t (io_object_t)	io_object_t object	-	ios=4.0/-/-/0	-	385c65962aa92fc6	-
+function	c:@F@IOObjectGetUserRetainCount	-			uint32_t (io_object_t)	io_object_t object	-	ios=4.0/-/-/0	-	23f695da86e1f224	-
+function	c:@F@IOObjectGetRetainCount	-			uint32_t (io_object_t)	io_object_t object	-	-	-	a3b7858ebed034ce	-
+function	c:@F@IOIteratorNext	-			io_object_t (io_iterator_t)	io_iterator_t iterator	-	-	-	7af566d1a8dc722e	-
+function	c:@F@IOIteratorReset	-			void (io_iterator_t)	io_iterator_t iterator	-	-	-	8fc8c5ad58f91ccb	-
+function	c:@F@IOIteratorIsValid	-			boolean_t (io_iterator_t)	io_iterator_t iterator	-	-	-	221a7f22d30b4275	-
+function	c:@F@IOServiceGetMatchingService	-			io_service_t (mach_port_t, CFDictionaryRef)	mach_port_t mainPort | CFDictionaryRef matching	-	-	-	17dba7c8c8768c12	-
+function	c:@F@IOServiceGetMatchingServices	-			kern_return_t (mach_port_t, CFDictionaryRef, io_iterator_t *)	mach_port_t mainPort | CFDictionaryRef matching | io_iterator_t * existing	-	-	-	d1f863bb62283ad5	-
+function	c:@F@IOServiceAddNotification	-			kern_return_t (mach_port_t, const io_name_t, CFDictionaryRef, mach_port_t, uintptr_t, io_iterator_t *)	mach_port_t mainPort | const io_name_t notificationType | CFDictionaryRef matching | mach_port_t wakePort | uintptr_t reference | io_iterator_t * notification	-	*deprecated ios=-/-/-/1,maccatalyst=-/-/-/1	-	2cd0a3c897a8ee49	-
+function	c:@F@IOServiceAddMatchingNotification	-			kern_return_t (IONotificationPortRef, const io_name_t, CFDictionaryRef, IOServiceMatchingCallback, void *, io_iterator_t *)	IONotificationPortRef notifyPort | const io_name_t notificationType | CFDictionaryRef matching | IOServiceMatchingCallback callback | void * refCon | io_iterator_t * notification	-	-	-	0ab6a575653705c5	-
+function	c:@F@IOServiceAddInterestNotification	-			kern_return_t (IONotificationPortRef, io_service_t, const io_name_t, IOServiceInterestCallback, void *, io_object_t *)	IONotificationPortRef notifyPort | io_service_t service | const io_name_t interestType | IOServiceInterestCallback callback | void * refCon | io_object_t * notification	-	-	-	2b5105317c6c9f6d	-
+function	c:@F@IOServiceMatchPropertyTable	-			kern_return_t (io_service_t, CFDictionaryRef, boolean_t *)	io_service_t service | CFDictionaryRef matching | boolean_t * matches	-	-	-	e0fe22cdd7917a8e	-
+function	c:@F@IOServiceGetBusyState	-			kern_return_t (io_service_t, uint32_t *)	io_service_t service | uint32_t * busyState	-	-	-	1ae1bac767bb1426	-
+function	c:@F@IOServiceWaitQuiet	-			kern_return_t (io_service_t, mach_timespec_t *)	io_service_t service | mach_timespec_t * waitTime	-	-	-	b6324b90f50f9faa	-
+function	c:@F@IOKitGetBusyState	-			kern_return_t (mach_port_t, uint32_t *)	mach_port_t mainPort | uint32_t * busyState	-	-	-	1ab6bcd3f3c98cc9	-
+function	c:@F@IOKitWaitQuietWithOptions	-			kern_return_t (mach_port_t, mach_timespec_t *, IOOptionBits)	mach_port_t mainPort | mach_timespec_t * waitTime | IOOptionBits options	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2121af241f98ab5e	-
+function	c:@F@IOKitWaitQuiet	-			kern_return_t (mach_port_t, mach_timespec_t *)	mach_port_t mainPort | mach_timespec_t * waitTime	-	-	-	dce3d7260c2f7bba	-
+function	c:@F@IOServiceOpen	-			kern_return_t (io_service_t, task_port_t, uint32_t, io_connect_t *)	io_service_t service | task_port_t owningTask | uint32_t type | io_connect_t * connect	-	-	-	de7ac8ae7c3973b9	-
+function	c:@F@IOServiceRequestProbe	-			kern_return_t (io_service_t, uint32_t)	io_service_t service | uint32_t options	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	dc11a3520e601e07	-
+enum	c:@Ea@kIOServiceInteractionAllowed	-	-		unsigned int	-	-	-	-	b0e0e7dbdebc178b	-
+enumconst	c:@Ea@kIOServiceInteractionAllowed@kIOServiceInteractionAllowed	-			-	-	-	-	-	ba023352ef4d62f2	1
+function	c:@F@IOServiceAuthorize	-			kern_return_t (io_service_t, uint32_t)	io_service_t service | uint32_t options	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	901d2db0d063bf88	-
+function	c:@F@IOServiceOpenAsFileDescriptor	-			int (io_service_t, int)	io_service_t service | int oflag	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	5a1a6dec65ea3683	-
+function	c:@F@IOServiceClose	-			kern_return_t (io_connect_t)	io_connect_t connect	-	-	-	85c45c475b4163c9	-
+function	c:@F@IOConnectAddRef	-			kern_return_t (io_connect_t)	io_connect_t connect	-	-	-	751e0fc207bdbe8a	-
+function	c:@F@IOConnectRelease	-			kern_return_t (io_connect_t)	io_connect_t connect	-	-	-	8678ffe648cd51cc	-
+function	c:@F@IOConnectGetService	-			kern_return_t (io_connect_t, io_service_t *)	io_connect_t connect | io_service_t * service	-	-	-	abce1aca2bcffb3a	-
+function	c:@F@IOConnectSetNotificationPort	-			kern_return_t (io_connect_t, uint32_t, mach_port_t, uintptr_t)	io_connect_t connect | uint32_t type | mach_port_t port | uintptr_t reference	-	-	-	1496f68862a925de	-
+function	c:@F@IOConnectMapMemory	-			kern_return_t (io_connect_t, uint32_t, task_port_t, mach_vm_address_t *, mach_vm_size_t *, IOOptionBits)	io_connect_t connect | uint32_t memoryType | task_port_t intoTask | mach_vm_address_t * atAddress | mach_vm_size_t * ofSize | IOOptionBits options	-	-	-	7d1f12904dfe9373	-
+function	c:@F@IOConnectMapMemory64	-			kern_return_t (io_connect_t, uint32_t, task_port_t, mach_vm_address_t *, mach_vm_size_t *, IOOptionBits)	io_connect_t connect | uint32_t memoryType | task_port_t intoTask | mach_vm_address_t * atAddress | mach_vm_size_t * ofSize | IOOptionBits options	-	-	-	effc4f25e64ce20d	-
+function	c:@F@IOConnectUnmapMemory	-			kern_return_t (io_connect_t, uint32_t, task_port_t, mach_vm_address_t)	io_connect_t connect | uint32_t memoryType | task_port_t fromTask | mach_vm_address_t atAddress	-	-	-	79ec466f9535d0af	-
+function	c:@F@IOConnectUnmapMemory64	-			kern_return_t (io_connect_t, uint32_t, task_port_t, mach_vm_address_t)	io_connect_t connect | uint32_t memoryType | task_port_t fromTask | mach_vm_address_t atAddress	-	-	-	a9c99ecb8c4c891e	-
+function	c:@F@IOConnectSetCFProperties	-			kern_return_t (io_connect_t, CFTypeRef)	io_connect_t connect | CFTypeRef properties	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	6e1f649d510f05dc	-
+function	c:@F@IOConnectSetCFProperty	-			kern_return_t (io_connect_t, CFStringRef, CFTypeRef)	io_connect_t connect | CFStringRef propertyName | CFTypeRef property	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	648a8cea6d1e5b3f	-
+function	c:@F@IOConnectCallMethod	-			kern_return_t (mach_port_t, uint32_t, const uint64_t *, uint32_t, const void *, size_t, uint64_t *, uint32_t *, void *, size_t *)	mach_port_t connection | uint32_t selector | const uint64_t * input | uint32_t inputCnt | const void * inputStruct | size_t inputStructCnt | uint64_t * output | uint32_t * outputCnt | void * outputStruct | size_t * outputStructCnt	-	ios=4.0/-/-/0	-	d7879b2973ea8fb1	-
+function	c:@F@IOConnectCallAsyncMethod	-			kern_return_t (mach_port_t, uint32_t, mach_port_t, uint64_t *, uint32_t, const uint64_t *, uint32_t, const void *, size_t, uint64_t *, uint32_t *, void *, size_t *)	mach_port_t connection | uint32_t selector | mach_port_t wake_port | uint64_t * reference | uint32_t referenceCnt | const uint64_t * input | uint32_t inputCnt | const void * inputStruct | size_t inputStructCnt | uint64_t * output | uint32_t * outputCnt | void * outputStruct | size_t * outputStructCnt	-	ios=4.0/-/-/0	-	123e6c5f619863a9	-
+function	c:@F@IOConnectCallStructMethod	-			kern_return_t (mach_port_t, uint32_t, const void *, size_t, void *, size_t *)	mach_port_t connection | uint32_t selector | const void * inputStruct | size_t inputStructCnt | void * outputStruct | size_t * outputStructCnt	-	ios=4.0/-/-/0	-	7cfa66ad26b1cab8	-
+function	c:@F@IOConnectCallAsyncStructMethod	-			kern_return_t (mach_port_t, uint32_t, mach_port_t, uint64_t *, uint32_t, const void *, size_t, void *, size_t *)	mach_port_t connection | uint32_t selector | mach_port_t wake_port | uint64_t * reference | uint32_t referenceCnt | const void * inputStruct | size_t inputStructCnt | void * outputStruct | size_t * outputStructCnt	-	ios=4.0/-/-/0	-	3e7b7e300ec5a383	-
+function	c:@F@IOConnectCallScalarMethod	-			kern_return_t (mach_port_t, uint32_t, const uint64_t *, uint32_t, uint64_t *, uint32_t *)	mach_port_t connection | uint32_t selector | const uint64_t * input | uint32_t inputCnt | uint64_t * output | uint32_t * outputCnt	-	ios=4.0/-/-/0	-	c6657b243c0e99e8	-
+function	c:@F@IOConnectCallAsyncScalarMethod	-			kern_return_t (mach_port_t, uint32_t, mach_port_t, uint64_t *, uint32_t, const uint64_t *, uint32_t, uint64_t *, uint32_t *)	mach_port_t connection | uint32_t selector | mach_port_t wake_port | uint64_t * reference | uint32_t referenceCnt | const uint64_t * input | uint32_t inputCnt | uint64_t * output | uint32_t * outputCnt	-	ios=4.0/-/-/0	-	5275ae5a550b7d05	-
+function	c:@F@IOConnectTrap0	-			kern_return_t (io_connect_t, uint32_t)	io_connect_t connect | uint32_t index	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	674a0744c87e4f78	-
+function	c:@F@IOConnectTrap1	-			kern_return_t (io_connect_t, uint32_t, uintptr_t)	io_connect_t connect | uint32_t index | uintptr_t p1	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	1b5f935c16848129	-
+function	c:@F@IOConnectTrap2	-			kern_return_t (io_connect_t, uint32_t, uintptr_t, uintptr_t)	io_connect_t connect | uint32_t index | uintptr_t p1 | uintptr_t p2	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	09aaa74a07f63d5c	-
+function	c:@F@IOConnectTrap3	-			kern_return_t (io_connect_t, uint32_t, uintptr_t, uintptr_t, uintptr_t)	io_connect_t connect | uint32_t index | uintptr_t p1 | uintptr_t p2 | uintptr_t p3	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	7da7b594dc1f5288	-
+function	c:@F@IOConnectTrap4	-			kern_return_t (io_connect_t, uint32_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)	io_connect_t connect | uint32_t index | uintptr_t p1 | uintptr_t p2 | uintptr_t p3 | uintptr_t p4	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	609b457708861d93	-
+function	c:@F@IOConnectTrap5	-			kern_return_t (io_connect_t, uint32_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)	io_connect_t connect | uint32_t index | uintptr_t p1 | uintptr_t p2 | uintptr_t p3 | uintptr_t p4 | uintptr_t p5	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	469e082eff83545b	-
+function	c:@F@IOConnectTrap6	-			kern_return_t (io_connect_t, uint32_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)	io_connect_t connect | uint32_t index | uintptr_t p1 | uintptr_t p2 | uintptr_t p3 | uintptr_t p4 | uintptr_t p5 | uintptr_t p6	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	20a5492640cba9e5	-
+function	c:@F@IOConnectAddClient	-			kern_return_t (io_connect_t, io_connect_t)	io_connect_t connect | io_connect_t client	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	91bc157c9f0ba205	-
+function	c:@F@IORegistryGetRootEntry	-			io_registry_entry_t (mach_port_t)	mach_port_t mainPort	-	-	-	584e6aeae37d6709	-
+function	c:@F@IORegistryEntryFromPath	-			io_registry_entry_t (mach_port_t, const io_string_t)	mach_port_t mainPort | const io_string_t path	-	-	-	1767f483e3a85145	-
+function	c:@F@IORegistryEntryCopyFromPath	-			io_registry_entry_t (mach_port_t, CFStringRef)	mach_port_t mainPort | CFStringRef path	-	ios=9.0/-/-/0	-	077b3d2ec8ece6d7	-
+enum	c:@Ea@kIORegistryIterateRecursively	-	-		unsigned int	-	-	-	-	a9067c5878e0a135	-
+enumconst	c:@Ea@kIORegistryIterateRecursively@kIORegistryIterateRecursively	-			-	-	-	-	-	6fa07c86b8ca3fb3	1
+enumconst	c:@Ea@kIORegistryIterateRecursively@kIORegistryIterateParents	-			-	-	-	-	-	c71f5478286791f4	2
+function	c:@F@IORegistryCreateIterator	-			kern_return_t (mach_port_t, const io_name_t, IOOptionBits, io_iterator_t *)	mach_port_t mainPort | const io_name_t plane | IOOptionBits options | io_iterator_t * iterator	-	-	-	9bfa2256d2c320c3	-
+function	c:@F@IORegistryEntryCreateIterator	-			kern_return_t (io_registry_entry_t, const io_name_t, IOOptionBits, io_iterator_t *)	io_registry_entry_t entry | const io_name_t plane | IOOptionBits options | io_iterator_t * iterator	-	-	-	b7646d3d6c17ebbd	-
+function	c:@F@IORegistryIteratorEnterEntry	-			kern_return_t (io_iterator_t)	io_iterator_t iterator	-	-	-	cbfb409b85b485db	-
+function	c:@F@IORegistryIteratorExitEntry	-			kern_return_t (io_iterator_t)	io_iterator_t iterator	-	-	-	8316cb0c063bc223	-
+function	c:@F@IORegistryEntryGetName	-			kern_return_t (io_registry_entry_t, io_name_t)	io_registry_entry_t entry | io_name_t name	-	-	-	8e65c877f33ef51d	-
+function	c:@F@IORegistryEntryGetNameInPlane	-			kern_return_t (io_registry_entry_t, const io_name_t, io_name_t)	io_registry_entry_t entry | const io_name_t plane | io_name_t name	-	-	-	b12b91ab1990bf42	-
+function	c:@F@IORegistryEntryGetLocationInPlane	-			kern_return_t (io_registry_entry_t, const io_name_t, io_name_t)	io_registry_entry_t entry | const io_name_t plane | io_name_t location	-	-	-	59689d6c58816da7	-
+function	c:@F@IORegistryEntryGetPath	-			kern_return_t (io_registry_entry_t, const io_name_t, io_string_t)	io_registry_entry_t entry | const io_name_t plane | io_string_t path	-	-	-	e9e454aeeb64177e	-
+function	c:@F@IORegistryEntryCopyPath	-			CFStringRef (io_registry_entry_t, const io_name_t)	io_registry_entry_t entry | const io_name_t plane	-	ios=9.0/-/-/0	-	219f0ab596c824d4	-
+function	c:@F@IORegistryEntryGetRegistryEntryID	-			kern_return_t (io_registry_entry_t, uint64_t *)	io_registry_entry_t entry | uint64_t * entryID	-	-	-	3fcd2263e4999d08	-
+function	c:@F@IORegistryEntryCreateCFProperties	-			kern_return_t (io_registry_entry_t, CFMutableDictionaryRef *, CFAllocatorRef, IOOptionBits)	io_registry_entry_t entry | CFMutableDictionaryRef * properties | CFAllocatorRef allocator | IOOptionBits options	-	-	-	589853d1f7f1c9df	-
+function	c:@F@IORegistryEntryCreateCFProperty	-			CFTypeRef (io_registry_entry_t, CFStringRef, CFAllocatorRef, IOOptionBits)	io_registry_entry_t entry | CFStringRef key | CFAllocatorRef allocator | IOOptionBits options	-	-	-	55a8f5464aa114a6	-
+function	c:@F@IORegistryEntrySearchCFProperty	-			CFTypeRef (io_registry_entry_t, const io_name_t, CFStringRef, CFAllocatorRef, IOOptionBits)	io_registry_entry_t entry | const io_name_t plane | CFStringRef key | CFAllocatorRef allocator | IOOptionBits options	-	-	-	41181e834d7d0257	-
+function	c:@F@IORegistryEntryGetProperty	-			kern_return_t (io_registry_entry_t, const io_name_t, io_struct_inband_t, uint32_t *)	io_registry_entry_t entry | const io_name_t propertyName | io_struct_inband_t buffer | uint32_t * size	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	c92423cd64827cbb	-
+function	c:@F@IORegistryEntrySetCFProperties	-			kern_return_t (io_registry_entry_t, CFTypeRef)	io_registry_entry_t entry | CFTypeRef properties	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	3bb102ba2eb40c99	-
+function	c:@F@IORegistryEntrySetCFProperty	-			kern_return_t (io_registry_entry_t, CFStringRef, CFTypeRef)	io_registry_entry_t entry | CFStringRef propertyName | CFTypeRef property	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	60de9bb416ea0ef5	-
+function	c:@F@IORegistryEntryGetChildIterator	-			kern_return_t (io_registry_entry_t, const io_name_t, io_iterator_t *)	io_registry_entry_t entry | const io_name_t plane | io_iterator_t * iterator	-	-	-	4e2924dcdead46d4	-
+function	c:@F@IORegistryEntryGetChildEntry	-			kern_return_t (io_registry_entry_t, const io_name_t, io_registry_entry_t *)	io_registry_entry_t entry | const io_name_t plane | io_registry_entry_t * child	-	-	-	b96e1890866424d9	-
+function	c:@F@IORegistryEntryGetParentIterator	-			kern_return_t (io_registry_entry_t, const io_name_t, io_iterator_t *)	io_registry_entry_t entry | const io_name_t plane | io_iterator_t * iterator	-	-	-	d2b77553a9417ef6	-
+function	c:@F@IORegistryEntryGetParentEntry	-			kern_return_t (io_registry_entry_t, const io_name_t, io_registry_entry_t *)	io_registry_entry_t entry | const io_name_t plane | io_registry_entry_t * parent	-	-	-	d15caee3b374c9ca	-
+function	c:@F@IORegistryEntryInPlane	-			boolean_t (io_registry_entry_t, const io_name_t)	io_registry_entry_t entry | const io_name_t plane	-	-	-	6e160d456a02abb1	-
+function	c:@F@IOServiceMatching	-			CFMutableDictionaryRef (const char *)	const char * name	-	-	-	0a82df1c986cd753	-
+function	c:@F@IOServiceNameMatching	-			CFMutableDictionaryRef (const char *)	const char * name	-	-	-	152264093ae41969	-
+function	c:@F@IOBSDNameMatching	-			CFMutableDictionaryRef (mach_port_t, uint32_t, const char *)	mach_port_t mainPort | uint32_t options | const char * bsdName	-	-	-	68c0ee6869d55811	-
+function	c:@F@IOOpenFirmwarePathMatching	-			CFMutableDictionaryRef (mach_port_t, uint32_t, const char *)	mach_port_t mainPort | uint32_t options | const char * path	-	*deprecated ios=-/-/-/1,maccatalyst=-/-/-/1	-	951565230a9c7a55	-
+function	c:@F@IORegistryEntryIDMatching	-			CFMutableDictionaryRef (uint64_t)	uint64_t entryID	-	-	-	0c810eed89c0a766	-
+function	c:@F@IOServiceOFPathToBSDName	-			kern_return_t (mach_port_t, const io_name_t, io_name_t)	mach_port_t mainPort | const io_name_t openFirmwarePath | io_name_t bsdName	-	*deprecated ios=-/-/-/1,maccatalyst=-/-/-/1	-	fddff438e15c58df	-
+typedef	c:IOKitLib.h@T@IOAsyncCallback0	-			void (*)(void *, IOReturn)	-	-	-	-	c7ccb55dfe65be87	-
+typedef	c:IOKitLib.h@T@IOAsyncCallback1	-			void (*)(void *, IOReturn, void *)	-	-	-	-	a9d19b54253d4188	-
+typedef	c:IOKitLib.h@T@IOAsyncCallback2	-			void (*)(void *, IOReturn, void *, void *)	-	-	-	-	c9aad961695ec5b3	-
+typedef	c:IOKitLib.h@T@IOAsyncCallback	-			void (*)(void *, IOReturn, void **, uint32_t)	-	-	-	-	946b853488ff394c	-
+function	c:@F@OSGetNotificationFromMessage	-			kern_return_t (mach_msg_header_t *, uint32_t, uint32_t *, uintptr_t *, void **, vm_size_t *)	mach_msg_header_t * msg | uint32_t index | uint32_t * type | uintptr_t * reference | void ** content | vm_size_t * size	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	982ecf1df269b598	-
+function	c:@F@IOCatalogueSendData	-			kern_return_t (mach_port_t, uint32_t, const char *, uint32_t)	mach_port_t mainPort | uint32_t flag | const char * buffer | uint32_t size	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	426479de18b376f6	-
+function	c:@F@IOCatalogueTerminate	-			kern_return_t (mach_port_t, uint32_t, io_name_t)	mach_port_t mainPort | uint32_t flag | io_name_t description	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	7960f51b1b96ec4b	-
+function	c:@F@IOCatalogueGetData	-			kern_return_t (mach_port_t, uint32_t, char **, uint32_t *)	mach_port_t mainPort | uint32_t flag | char ** buffer | uint32_t * size	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	6cd1f1fdf4f516c0	-
+function	c:@F@IOCatalogueModuleLoaded	-			kern_return_t (mach_port_t, io_name_t)	mach_port_t mainPort | io_name_t name	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	04a9ab595475df0c	-
+function	c:@F@IOCatalogueReset	-			kern_return_t (mach_port_t, uint32_t)	mach_port_t mainPort | uint32_t flag	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=1.0/-/-/0	-	05717f62ed86e93c	-
+typedef	c:IOMessage.h@T@IOMessage	-			UInt32	-	-	-	-	0b90e429448bc856	-
+typedef	c:@T@CFDataRef	-			const struct __CFData *	-	-	-	-	d9fe21afe938f144	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@CFOptionFlags	-			unsigned long	-	-	-	-	e34ec2b1f3701ad3	-
+typedef	c:@T@CFAllocatorRef	-			const struct __CFAllocator *	-	-	-	-	d153ce1dfad01936	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@kern_return_t	-			int	-	-	-	-	ed251c61fba39e79	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@UInt8	-			unsigned char	-	-	-	-	a9ef2eddf94d7e81	-
+typedef	c:@T@mach_msg_header_t	-			struct mach_msg_header_t	-	-	-	-	c3dc4157f6344d20	-
+typedef	c:@T@Boolean	-			unsigned char	-	-	-	-	693cf733304c39d9	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+typedef	c:@T@UInt64	-			unsigned long long	-	-	-	-	b41c42eb5e2605ba	-
+typedef	c:@T@mach_vm_address_t	-			uint64_t	-	-	-	-	4482ed4430b3efe8	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@io_user_reference_t	-			uint64_t	-	-	-	-	a44b8edec421c07b	-
+typedef	c:@T@mach_msg_size_t	-			natural_t	-	-	-	-	038e8c3d740a091c	-
+typedef	c:@T@natural_t	-			__darwin_natural_t	-	-	-	-	0942d39489032078	-
+typedef	c:@T@CFRunLoopSourceRef	-			struct __CFRunLoopSource *	-	-	-	-	f19746b14d2401e8	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@io_name_t	-			char[128]	-	-	-	-	e93a7152f8b3f3f0	-
+typedef	c:@T@boolean_t	-			int	-	-	-	-	beea3da3dd8be24e	-
+typedef	c:@T@CFDictionaryRef	-			const struct __CFDictionary *	-	-	-	-	95ab67be7d9fad28	-
+typedef	c:@T@uintptr_t	-			unsigned long	-	-	-	-	d45bca13aaee37a2	-
+typedef	c:@T@mach_timespec_t	-			struct mach_timespec	-	-	-	-	d6cebc88eac675a9	-
+typedef	c:@T@task_port_t	-			task_t	-	-	-	-	161ba9363734bdbe	-
+typedef	c:@T@task_t	-			mach_port_t	-	-	-	-	b2cfd43b2af5e4e4	-
+typedef	c:@T@mach_vm_size_t	-			uint64_t	-	-	-	-	245b71293c02bac1	-
+typedef	c:@T@io_string_t	-			char[512]	-	-	-	-	8849e430879af3c1	-
+typedef	c:@T@CFMutableDictionaryRef	-			struct __CFDictionary *	-	-	-	-	10581bbb3c9a1511	-
+typedef	c:@T@io_struct_inband_t	-			char[4096]	-	-	-	-	6abfbca76d5d9f0e	-
+typedef	c:@T@vm_size_t	-			uintptr_t	-	-	-	-	58917db4e1bfc008	-

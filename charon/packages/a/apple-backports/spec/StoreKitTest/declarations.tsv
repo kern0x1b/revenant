@@ -1,0 +1,165 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:SKAdTestSession.h@T@SKANTestPostbackResponseHandler	-			void ((^))(NSDictionary<NSString *,SKAdTestPostbackResponse *> *, NSError *)	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	b408b2e67c2666df	-
+interface	c:objc(cs)SKAdTestSession	-			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	88a84b43a8cfcdf2	-
+super	-	SKAdTestSession	NSObject		-	-	-	-	-	e04e3132daea68e9	-
+method	c:objc(cs)SKAdTestSession(im)init	-			instancetype	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	af53b5c75ee6f4ed	-
+method	c:objc(cs)SKAdTestSession(im)validateImpressionWithParameters:publicKey:error:	-			BOOL	NSDictionary<NSString *,id> * parameters | NSString * publicKey | NSError * _Nullable * error	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	40fd7b411049c8d7	-
+method	c:objc(cs)SKAdTestSession(im)validateImpression:publicKey:error:	-			BOOL	SKAdImpression * impression | NSString * publicKey | NSError * _Nullable * error	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4c96bfc3a1e229c6	-
+method	c:objc(cs)SKAdTestSession(im)validateWebAdImpressionPayload:publicKey:error:	-			BOOL	NSData * impressionData | NSString * publicKey | NSError * _Nullable * error	-	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c23a6b7aa3347f74	-
+method	c:objc(cs)SKAdTestSession(im)setPostbacks:error:	-			BOOL	NSArray<SKAdTestPostback *> * postbacks | NSError * _Nullable * error	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	57741ddf07fbf8b0	-
+property	c:objc(cs)SKAdTestSession(py)postbacks	-			NSArray<SKAdTestPostback *> *	-	readonly,strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	92b48efed6760830	-
+property	c:objc(cs)SKAdTestSession(py)developerPostbackURL	-			NSURL *	-	readonly,strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	b0acd4e28ec1713a	-
+method	c:objc(cs)SKAdTestSession(im)flushPostbacksWithResponses:	-			void	SKANTestPostbackResponseHandler responses	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f8cfa6686b7d17cb	-
+typedef	c:SKAdTestPostback.h@T@SKAdTestPostbackVersion	-			NSString *	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c988f376862a2892	-
+var	c:@SKAdTestPostbackVersion2_1	-			const SKAdTestPostbackVersion	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	805fed1b5164e426	-
+var	c:@SKAdTestPostbackVersion2_2	-			const SKAdTestPostbackVersion	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	7f9e957ea81d184c	-
+var	c:@SKAdTestPostbackVersion3_0	-			const SKAdTestPostbackVersion	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4b25d116199967ed	-
+var	c:@SKAdTestPostbackVersion4_0	-			const SKAdTestPostbackVersion	-	-	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9020e91b2f68f3c6	-
+interface	c:objc(cs)SKAdTestPostback	-			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a366cbe8e3cdf47e	-
+super	-	SKAdTestPostback	NSObject		-	-	-	-	-	20e7ef2566f9020c	-
+method	c:objc(cs)SKAdTestPostback(im)initWithVersion:adNetworkIdentifier:adCampaignIdentifier:appStoreItemIdentifier:sourceAppStoreItemIdentifier:conversionValue:fidelityType:isRedownload:didWin:postbackURL:	-			instancetype	SKAdTestPostbackVersion version | NSString * adNetworkIdentifier | NSInteger adCampaignIdentifier | NSInteger appStoreItemIdentifier | NSInteger sourceAppStoreItemIdentifier | NSInteger conversionValue | NSInteger fidelityType | BOOL isRedownload | BOOL didWin | NSString * postbackURL	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f2a5137d5a1be19c	-
+method	c:objc(cs)SKAdTestPostback(im)initWithVersion:adNetworkIdentifier:sourceIdentifier:appStoreItemIdentifier:sourceAppStoreItemIdentifier:sourceDomain:fidelityType:isRedownload:didWin:postbackURL:	-			instancetype	SKAdTestPostbackVersion version | NSString * adNetworkIdentifier | NSString * sourceIdentifier | NSInteger appStoreItemIdentifier | NSInteger sourceAppStoreItemIdentifier | NSString * sourceDomain | NSInteger fidelityType | BOOL isRedownload | BOOL didWin | NSString * postbackURL	-	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4b91196e1b7207b4	-
+method	c:objc(cs)SKAdTestPostback(cm)winningPostbacksWithVersion:adNetworkIdentifier:sourceIdentifier:appStoreItemIdentifier:sourceAppStoreItemIdentifier:sourceDomain:fidelityType:isRedownload:postbackURL:	-			NSArray<SKAdTestPostback *> *	SKAdTestPostbackVersion version | NSString * adNetworkIdentifier | NSString * sourceIdentifier | NSInteger appStoreItemIdentifier | NSInteger sourceAppStoreItemIdentifier | NSString * sourceDomain | NSInteger fidelityType | BOOL isRedownload | NSString * postbackURL	-	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	679b6ca0cbc7a7c2	-
+method	c:objc(cs)SKAdTestPostback(im)init	-			instancetype	-	-	*unavailable ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	97fa39072ab53c9b	-
+method	c:objc(cs)SKAdTestPostback(cm)new	-			instancetype	-	-	*unavailable ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	c02b8d8420c5aad1	-
+property	c:objc(cs)SKAdTestPostback(py)version	-			SKAdTestPostbackVersion	-	readonly,strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2078c5f7bfd87c84	-
+property	c:objc(cs)SKAdTestPostback(py)adNetworkIdentifier	-			NSString *	-	readonly,strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1c251d1163187e8e	-
+property	c:objc(cs)SKAdTestPostback(py)adCampaignIdentifier	-			NSInteger	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	799ebaa9e7bd5c7a	-
+property	c:objc(cs)SKAdTestPostback(py)sourceIdentifier	-			NSString *	-	readonly,strong,nonatomic	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	6669104bfad73af2	-
+property	c:objc(cs)SKAdTestPostback(py)appStoreItemIdentifier	-			NSInteger	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	3512b26d83a8bf66	-
+property	c:objc(cs)SKAdTestPostback(py)sourceAppStoreItemIdentifier	-			NSInteger	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	76e035cd2b4eed33	-
+property	c:objc(cs)SKAdTestPostback(py)sourceDomain	-			NSString *	-	readonly,strong,nonatomic	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	63c11d21299edc57	-
+property	c:objc(cs)SKAdTestPostback(py)conversionValue	-			NSInteger	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2613679552db1753	-
+property	c:objc(cs)SKAdTestPostback(py)fineConversionValue	-			NSInteger	-	readonly,assign,nonatomic	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	39b762f969172d77	-
+property	c:objc(cs)SKAdTestPostback(py)coarseConversionValue	-			SKAdNetworkCoarseConversionValue	-	readonly,strong,nonatomic	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	38e48179316839c5	-
+property	c:objc(cs)SKAdTestPostback(py)isRegistered	-			BOOL	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fb724c886ad02449	-
+property	c:objc(cs)SKAdTestPostback(py)transactionIdentifier	-			NSString *	-	readonly,strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	099aaf29acc044be	-
+property	c:objc(cs)SKAdTestPostback(py)fidelityType	-			NSInteger	-	assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	53210754394c2d3d	-
+property	c:objc(cs)SKAdTestPostback(py)isRedownload	-			BOOL	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	83ee7badb2fba763	-
+property	c:objc(cs)SKAdTestPostback(py)didWin	-			BOOL	-	readonly,assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	34c375f3254551c6	-
+property	c:objc(cs)SKAdTestPostback(py)postbackSequenceIndex	-			NSInteger	-	readonly,assign,nonatomic	ios=16.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	9cde9262bb5864d9	-
+property	c:objc(cs)SKAdTestPostback(py)postbackURL	-			NSString *	-	readonly,strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a0e3c686a4c24599	-
+interface	c:objc(cs)SKAdTestPostbackResponse	-			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	596b06eb8bf1e709	-
+super	-	SKAdTestPostbackResponse	NSObject		-	-	-	-	-	4f1fc0fa005380d9	-
+property	c:objc(cs)SKAdTestPostbackResponse(py)error	-			NSError *	-	strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	43c72ccd65faf2d3	-
+property	c:objc(cs)SKAdTestPostbackResponse(py)didSucceed	-			BOOL	-	assign,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	826420aad472bd01	-
+property	c:objc(cs)SKAdTestPostbackResponse(py)httpResponse	-			NSHTTPURLResponse *	-	strong,nonatomic	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	8d9f58ae353c31c8	-
+var	c:@SKTestErrorDomain	-			const NSErrorDomain	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	7109dc9e265db0ff	-
+var	c:@SKAdTestErrorDomain	-			const NSErrorDomain	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c0ca16e9f59588a5	-
+typedef	c:SKTestError.h@T@SKTestErrorCode	-			enum SKTestErrorCode	-	-	-	-	0e68cc846daf5c1d	-
+enum	c:@E@SKTestErrorCode	-			NSInteger	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	f810217e6fb23337	-
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeServiceUnavailable	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	11f44d942a25ae8b	0
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeInvalidProductIdentifier	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	3d65d7241d3cab33	1
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeInvalidProductType	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	51dfc7852986ec83	2
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeInvalidURL	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	64276821b659c3dc	3
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeFileNotFound	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	ec5fcd08b5f5e1bb	4
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeNoSubscriptionFound	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	e8c93267c384acf8	5
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeNoTransactionFound	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	fe937c77f0335253	6
+enumconst	c:@E@SKTestErrorCode@SKTestErrorCodeInvalidAction	SKTestErrorCode			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	1880cee71c60b208	7
+typedef	c:SKTestError.h@T@SKAdTestErrorCode	-			enum SKAdTestErrorCode	-	-	-	-	ad2223b1b2d733e6	-
+enum	c:@E@SKAdTestErrorCode	-			NSInteger	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	dd3483a4965959be	-
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingAdNetworkId	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	284469e55c439198	0
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingCampaignId	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	3ad28950c8f0622e	1
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingAppAdamId	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	81f43c9a162f6ac2	2
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingNonce	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	2f3aedb3664fd7c8	3
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingSourceAppAdamId	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	545686481fa179ba	4
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingFidelityType	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1ba7056fd8cb5b90	5
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingTimestamp	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e21e5c74bf57f04d	6
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureVerificationFailed	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a6d7153174a3a4d8	7
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureInvalidKey	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e28c63a24ce41f74	8
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureInvalidOrder	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	99a29fd393a2db1e	9
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureUnknownError	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ac7ed87ad85647ab	10
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeMisplacedWinnerPostback	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	dc820f13cd83b42c	11
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidRunnerUpPostback	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ebd47f97ca991e32	12
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidConversionValue	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	4cb99d6ac6265d5e	13
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeMissingWinningPostback	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	a5237ad9270ad78d	14
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeMissingPostbacks	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	aaef150ebfecbac9	15
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeMalformedPostbacks	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	e0791337a6502340	16
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeExcessivePostbacks	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	5268300bc8aea7c5	17
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeNoPendingPostbacks	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1d07be982fde36bf	18
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidPostbackURL	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	1aaae3222d31cfe2	19
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeMissingSignature	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	aadce065a3215fa1	20
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeUnknownError	SKAdTestErrorCode			-	-	-	ios=15.4/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	5823cf51c6f8086b	21
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingSourceIdentifier	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	696dde3ced2edcd4	22
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidVersion	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	33744abd40e55c2f	23
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidCampaignId	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	1ca1173d5a3e15a7	24
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidSourceIdentifier	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	a0be54cc54cde05e	25
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidWinningPostbackCount	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	b7a14a278d6db81c	26
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeUnlinkedWinningPostbacks	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	29f786f790684c02	27
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeConflictingSource	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	14aba51fc5892220	28
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidSourceAppAdamId	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	dfb54bd9b6d9ba25	29
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidSourceDomain	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	c5ae8a6b19762d32	30
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeInvalidImpressionId	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	20a8e1a86c3a884f	31
+enumconst	c:@E@SKAdTestErrorCode@SKAdTestErrorCodeSignatureMissingSourceDomain	SKAdTestErrorCode			-	-	-	ios=16.4/-/-/0	-	201b94e44c9ee09b	32
+typedef	c:SKTestSession.h@T@SKTestTimeRate	-			enum SKTestTimeRate	-	-	-	-	ce65b9025e8fac59	-
+enum	c:@E@SKTestTimeRate	-			NSInteger	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	a6490a2b8d80e95b	-
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateRealTime	SKTestTimeRate			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	222be618f2da902f	0
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneHourIsOneDay	SKTestTimeRate			-	-	-	ios=14.0/15.2/-/0,macos=11.0/12.1/-/0,tvos=14.0/15.2/-/0,watchos=7.0/8.3/-/0,xros=-/-/-/1	-	495b8e1faec7f718	1
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateThirtyMinutesIsOneDay	SKTestTimeRate			-	-	-	ios=14.0/15.2/-/0,macos=11.0/12.1/-/0,tvos=14.0/15.2/-/0,watchos=7.0/8.3/-/0,xros=-/-/-/1	-	11b14c705987d269	2
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateFiveMinutesIsOneDay	SKTestTimeRate			-	-	-	ios=14.0/15.2/-/0,macos=11.0/12.1/-/0,tvos=14.0/15.2/-/0,watchos=7.0/8.3/-/0,xros=-/-/-/1	-	64849ff0f9fcdf43	3
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneMinuteIsOneDay	SKTestTimeRate			-	-	-	ios=14.0/15.2/-/0,macos=11.0/12.1/-/0,tvos=14.0/15.2/-/0,watchos=7.0/8.3/-/0,xros=-/-/-/1	-	1bfe341ccb8905a7	4
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateThirtySecondsIsOneDay	SKTestTimeRate			-	-	-	ios=14.0/15.2/-/0,macos=11.0/12.1/-/0,tvos=14.0/15.2/-/0,watchos=7.0/8.3/-/0,xros=-/-/-/1	-	e7bfcdbd4eef0684	5
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneSecondIsOneDay	SKTestTimeRate			-	-	-	ios=14.0/15.2/-/0,macos=11.0/12.1/-/0,tvos=14.0/15.2/-/0,watchos=7.0/8.3/-/0,xros=-/-/-/1	-	c2c0ff64abda8ac9	6
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateMonthlyRenewalEveryHour	SKTestTimeRate			-	-	-	ios=15.2/-/-/0,macos=12.1/-/-/0,tvos=15.2/-/-/0,watchos=8.3/-/-/0,xros=1.0/-/-/0	-	13177cb05af5b6cd	10
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateMonthlyRenewalEveryThirtyMinutes	SKTestTimeRate			-	-	-	ios=15.2/-/-/0,macos=12.1/-/-/0,tvos=15.2/-/-/0,watchos=8.3/-/-/0,xros=1.0/-/-/0	-	db17a23084bab35d	11
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateMonthlyRenewalEveryFifteenMinutes	SKTestTimeRate			-	-	-	ios=15.2/-/-/0,macos=12.1/-/-/0,tvos=15.2/-/-/0,watchos=8.3/-/-/0,xros=1.0/-/-/0	-	a50042946fc48168	12
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateMonthlyRenewalEveryFiveMinutes	SKTestTimeRate			-	-	-	ios=15.2/-/-/0,macos=12.1/-/-/0,tvos=15.2/-/-/0,watchos=8.3/-/-/0,xros=1.0/-/-/0	-	3474e5ad39416d71	13
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateMonthlyRenewalEveryThirtySeconds	SKTestTimeRate			-	-	-	ios=15.2/-/-/0,macos=12.1/-/-/0,tvos=15.2/-/-/0,watchos=8.3/-/-/0,xros=1.0/-/-/0	-	1901c836d41990ad	15
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneRenewalEveryFifteenMinutes	SKTestTimeRate			-	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=16.4/-/-/0,watchos=9.4/-/-/0,xros=1.0/-/-/0	-	b2a2ae4e10703153	1000
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneRenewalEveryFiveMinutes	SKTestTimeRate			-	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=16.4/-/-/0,watchos=9.4/-/-/0,xros=1.0/-/-/0	-	cceeac4094064c70	1001
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneRenewalEveryMinute	SKTestTimeRate			-	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=16.4/-/-/0,watchos=9.4/-/-/0,xros=1.0/-/-/0	-	fa3fc722acfa927a	1002
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneRenewalEveryThirtySeconds	SKTestTimeRate			-	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=16.4/-/-/0,watchos=9.4/-/-/0,xros=1.0/-/-/0	-	ff3a171a1e4e1205	1003
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneRenewalEveryTenSeconds	SKTestTimeRate			-	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=16.4/-/-/0,watchos=9.4/-/-/0,xros=1.0/-/-/0	-	e8adddf809c1e6f8	1004
+enumconst	c:@E@SKTestTimeRate@SKTestTimeRateOneRenewalEveryTwoSeconds	SKTestTimeRate			-	-	-	ios=16.4/-/-/0,macos=13.3/-/-/0,tvos=16.4/-/-/0,watchos=9.4/-/-/0,xros=1.0/-/-/0	-	b4cb0fe46a02423c	1005
+interface	c:objc(cs)SKTestSession	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	deprecated: No longer supported. Use simulatedError(forAPI:).	ae96b32508f77c13	-
+super	-	SKTestSession	NSObject		-	-	-	-	-	73eedf60da654223	-
+property	c:objc(cs)SKTestSession(py)askToBuyEnabled	-			BOOL	-	assign,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	841aae77eac2b1f1	-
+property	c:objc(cs)SKTestSession(py)disableDialogs	-			BOOL	-	assign,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	1507f1d7359fc09b	-
+property	c:objc(cs)SKTestSession(py)failTransactionsEnabled	-			BOOL	-	assign,nonatomic	ios=14.0/17.0/-/0,macos=11.0/14.0/-/0,tvos=14.0/17.0/-/0,watchos=7.0/10.0/-/0,xros=-/-/-/1	-	2e7cc760b9b73732	-
+property	c:objc(cs)SKTestSession(py)interruptedPurchasesEnabled	-			BOOL	-	assign,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	35ff3d7293c8e73f	-
+property	c:objc(cs)SKTestSession(py)billingRetryOnRenewalEnabled	-			BOOL	-	assign,nonatomic	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0,xros=1.0/-/-/0	-	30cd42b960d71ec5	-
+property	c:objc(cs)SKTestSession(py)billingGracePeriodEnabled	-			BOOL	-	assign,nonatomic	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0,xros=1.0/-/-/0	-	3c07fc1af1822773	-
+property	c:objc(cs)SKTestSession(py)failureError	-			SKErrorCode	-	assign,nonatomic	ios=14.0/17.0/-/0,macos=11.0/14.0/-/0,tvos=14.0/17.0/-/0,watchos=7.0/10.0/-/0,xros=-/-/-/1	-	eb0d55bc91087fe9	-
+property	c:objc(cs)SKTestSession(py)storefront	-			NSString *	-	copy,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	75283e39a351b1e3	-
+property	c:objc(cs)SKTestSession(py)locale	-			NSLocale *	-	copy,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	116433d2394e87c1	-
+property	c:objc(cs)SKTestSession(py)timeRate	-			SKTestTimeRate	-	assign,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	8905da6bc36282ea	-
+method	c:objc(cs)SKTestSession(im)initWithConfigurationFileNamed:error:	-			instancetype	NSString * filename | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	ccf7a9c9f8513ce0	-
+method	c:objc(cs)SKTestSession(im)initWithContentsOfURL:error:	-			instancetype	NSURL * fileURL | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	77c7451ef302dadc	-
+method	c:objc(cs)SKTestSession(im)init	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	994b5289e6b7f827	-
+method	c:objc(cs)SKTestSession(cm)new	-			instancetype	-	-	*unavailable ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	6b9f5f1392baa420	-
+method	c:objc(cs)SKTestSession(im)allTransactions	-			NSArray<SKTestTransaction *> *	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	660c5db4d3e50268	-
+method	c:objc(cs)SKTestSession(im)clearTransactions	-			void	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	8589bc69daec6815	-
+method	c:objc(cs)SKTestSession(im)deleteTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	5cc38dc4d63e765b	-
+method	c:objc(cs)SKTestSession(im)expireSubscriptionWithProductIdentifier:error:	-			BOOL	NSString * productIdentifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	55e8bc7b4e137b02	-
+method	c:objc(cs)SKTestSession(im)forceRenewalOfSubscriptionWithProductIdentifier:error:	-			BOOL	NSString * productIdentifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	585aecfe7ea66582	-
+method	c:objc(cs)SKTestSession(im)refundTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	483427e6f1f2c816	-
+method	c:objc(cs)SKTestSession(im)resolveIssueForTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	e7cb68f688caccbb	-
+method	c:objc(cs)SKTestSession(im)resetToDefaultState	-			void	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	81e1e8fa544b228d	-
+method	c:objc(cs)SKTestSession(im)approveAskToBuyTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	e2deeb830e179d57	-
+method	c:objc(cs)SKTestSession(im)declineAskToBuyTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	c01ae15deb83e9f7	-
+method	c:objc(cs)SKTestSession(im)disableAutoRenewForTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	5cdd88e9f18bedaf	-
+method	c:objc(cs)SKTestSession(im)enableAutoRenewForTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	75b2936c5c21109d	-
+method	c:objc(cs)SKTestSession(im)requestPriceIncreaseConsentForTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0,xros=1.0/-/-/0	-	662002ca76a9de39	-
+method	c:objc(cs)SKTestSession(im)consentToPriceIncreaseForTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0,xros=1.0/-/-/0	-	c246b2fe4aad10bf	-
+method	c:objc(cs)SKTestSession(im)declinePriceIncreaseForTransactionWithIdentifier:error:	-			BOOL	NSUInteger identifier | NSError * _Nullable * error	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0,xros=1.0/-/-/0	-	eff3600cc79a97a4	-
+method	c:objc(cs)SKTestSession(im)buyProductWithIdentifier:error:	-			BOOL	NSString * productIdentifier | NSError * _Nullable * error	-	ios=14.0/17.0/-/0,macos=11.0/14.0/-/0,tvos=14.0/17.0/-/0,watchos=7.0/10.0/-/0,xros=-/-/-/1	deprecated: Use the Swift API: SKTestSession.buyProduct(identifier:, options:)	da34ae7a35c6553a	-
+interface	c:objc(cs)SKTestTransaction	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	ae62f7285e8aa63f	-
+super	-	SKTestTransaction	NSObject		-	-	-	-	-	d23b660b7b83f085	-
+property	c:objc(cs)SKTestTransaction(py)autoRenewingEnabled	-			BOOL	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	3556a993935ace47	-
+property	c:objc(cs)SKTestTransaction(py)cancelDate	-			NSDate *	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	b57fcecc7c65293c	-
+property	c:objc(cs)SKTestTransaction(py)expirationDate	-			NSDate *	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	c3ea5ac0dd7a58a6	-
+property	c:objc(cs)SKTestTransaction(py)hasPurchaseIssue	-			BOOL	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	5ec01fc87bce55cb	-
+property	c:objc(cs)SKTestTransaction(py)identifier	-			NSUInteger	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	fca6c32afb6991f6	-
+property	c:objc(cs)SKTestTransaction(py)originalTransactionIdentifier	-			NSUInteger	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	f71ea0016b51bd3d	-
+property	c:objc(cs)SKTestTransaction(py)pendingAskToBuyConfirmation	-			BOOL	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	90ae361b521ef519	-
+property	c:objc(cs)SKTestTransaction(py)productIdentifier	-			NSString *	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	59fc465955358bcf	-
+property	c:objc(cs)SKTestTransaction(py)purchaseDate	-			NSDate *	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	66f23a1cfcf6f988	-
+property	c:objc(cs)SKTestTransaction(py)state	-			SKPaymentTransactionState	-	readonly,nonatomic	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0,xros=1.0/-/-/0	-	36cfe6e630462855	-
+property	c:objc(cs)SKTestTransaction(py)pendingPriceIncreaseConsent	-			BOOL	-	readonly,nonatomic	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0,xros=1.0/-/-/0	-	c1f1595aa4c8594b	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-
+typedef	c:@T@SKErrorCode	-			enum SKErrorCode	-	-	-	-	263991cba242204e	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@SKPaymentTransactionState	-			enum SKPaymentTransactionState	-	-	-	-	37c37f48a02421b9	-

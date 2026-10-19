@@ -1,0 +1,192 @@
+{
+  "framework": "CoreVideo",
+  "entries": [
+    {
+      "api": "kCVImageBufferAlphaChannelIsOpaque",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string AlphaChannelIsOpaque, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferColorPrimaries_DCI_P3",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string DCI_P3, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferColorPrimaries_ITU_R_2020",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ITU_R_2020, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferColorPrimaries_P3_D65",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string P3_D65, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferTransferFunction_ITU_R_2020",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ITU_R_2020, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferTransferFunction_SMPTE_ST_428_1",
+      "kind": "constant",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string SMPTE_ST_428_1, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferYCbCrMatrix_DCI_P3",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string DCI_P3, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferYCbCrMatrix_ITU_R_2020",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ITU_R_2020, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVImageBufferYCbCrMatrix_P3_D65",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string P3_D65, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVMetalTextureCacheMaximumTextureAgeKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string MaximumMetalTextureAge, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelBufferMetalCompatibilityKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string MetalCompatibility, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelFormatComponentRange",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ComponentRange, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelFormatComponentRange_FullRange",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string FullRange, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelFormatComponentRange_VideoRange",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string VideoRange, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelFormatComponentRange_WideRange",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string WideRange, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelFormatContainsRGB",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ContainsRGB, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCVPixelFormatContainsYCbCr",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string ContainsYCbCr, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names.md",
+      "source": "the arm64 shared cache of iOS 12.0, where each constant is a string and its text was read; the header of iOS 16.4 for its type and the release that added it; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    }
+  ]
+}

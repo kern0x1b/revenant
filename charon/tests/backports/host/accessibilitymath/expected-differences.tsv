@@ -1,0 +1,31 @@
+label	system	port	why
+# The two places the two implementations answer differently, and every case that follows from them.
+# Everything else in cases.m answers the same on both sides, and the summary line run.sh prints says how
+# many cases that is and how many of them are behaviour cases rather than declaration checks.
+#
+# ONE CAUSE, EIGHT CASES. `AXMathExpressionRow.expressions` and `AXMathExpressionTable.expressions`
+# answer nil on the host, whatever array the initialiser was given. The measurement is on the host's own
+# Accessibility.framework (macOS 27.0; its SDK's AXMathExpression.h is byte-identical to iPhoneOS
+# 26.2's apart from two copyright lines, so the header under test is the one the corpus was built from):
+# nil for one element, for three, for a mixed array, and nil again for an empty array - six cases, nil in
+# every one. The three other classes that declare the same member - AXMathExpressionFenced,
+# AXMathExpressionTableRow and AXMathExpressionTableCell - answer the very array they were given,
+# identity preserved, and so does the port.
+#
+# The port answers the array. The header declares the property `nonnull` and the initialiser takes it, so
+# the value is the caller's own and the host dropping it is a defect in Apple's implementation rather
+# than a behaviour the header states; a port that reproduced it would break every caller that compiled
+# against the header, on a release where the caller can get nothing better. This is the one decision in
+# the group where the port does not follow the host, and the six cases below it are the same decision seen
+# from further down a tree.
+#
+# The 16.0 Accessibility interface file on the held ladder exports none of these fifteen names, so
+# release-split reads `none` for this object and the band comes from the registry and the availability
+# annotation on each interface, both of which say 18.2 (facts/Accessibility/Accessibility.md).
+mx.row.expressions.is.nil	1	0	a property the header declares nonnull, an initialiser that takes it, and a host that answers nil for it whatever it held
+mx.row.expressions.is.same.array	0	1	the host does not hold the array either, so the port's answer is the array itself and the host's is not it
+mx.row.expressions.count	0	3	three expressions went in and three come back here; the host answers none of them
+mx.row.empty.is.nil	1	0	an empty array is dropped the same way, which is what shows the host is not keeping an empty value and losing a full one
+mx.table.expressions.is.nil	1	0	the same measurement on the second of the two classes: the host drops a table's expression array as well
+mx.table.expressions.is.same.array	0	1	and does not hold it either, so the two answers are not the same array
+mx.table.expressions.count	0	3	three expressions went into the table and three come back here

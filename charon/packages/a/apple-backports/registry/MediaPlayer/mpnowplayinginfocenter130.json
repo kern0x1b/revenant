@@ -1,0 +1,16 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPNowPlayingInfoCenter.playbackState",
+   "kind": "property",
+   "introduced": "13.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPNowPlayingInfoCenter.h, @property (nonatomic) MPNowPlayingPlaybackState playbackState MP_API(macos(10.12.2), ios(13.0), macCatalyst(13.0))",
+   "reason": "read with tools/mach32_methods.py from the armv7 cache of 6.1.3 (MediaPlayer image at 0x31fe3000), MPNowPlayingInfoCenter has 5 own instance methods and 1 own class methods and the five are _pushNowPlayingInfoAndRetry:, setNowPlayingInfo:, nowPlayingInfo, _init and init, the class method is +defaultCenter, and playbackState is not among them; all 41 of the image's categories were read WITH THE CLASS EACH ONE EXTENDS, resolved through each category's own class pointer, and none extends MPNowPlayingInfoCenter, so nothing here can clobber a release accessor and nothing in the release clobbers this one; -aSelectorNoFrameworkHas is absent as the control. The release's whole-cache selector list (selectors_armv7.txt, 113981 DISTINCT names, a list of names and not per-class counts) reads 1 for this selector, which says only that some other framework's class declares that name, which is the trap facts/MediaPlayer/MPMediaItem.md:105 records for albumTrackNumber; the per-class read above decides STORAGE: this is a CATEGORY on a class the release owns, so it cannot add an ivar and the value is an associated object - public API, and what this tree already does for the same problem (WebKit/WKWebpagePreferences13.m:39-42, SensorKit/SRSensorReader.m:120-135), one static address per stored property as WebKit does, so the value a caller sets is the value that reads back and is released with the object",
+   "effect": "an NSNumber holding the enum, so a set value reads back and an unset one answers MPNowPlayingPlaybackStateUnknown - the enum's declared zero at MPNowPlayingInfoCenter.h:44 (Unknown = 0, then Playing, Paused, Stopped, Interrupted) and the SDK's own name for 'the system does not know'. Readwrite as the header declares it: the system writes it on a release that has a way to, a caller reads it on this one",
+   "facts": "facts/MediaPlayer/ReleaseOwnedMembers.md"
+  }
+ ]
+}

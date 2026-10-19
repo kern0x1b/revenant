@@ -1,0 +1,147 @@
+{"framework": "LocalAuthentication", "entries": [
+  {
+    "api": "LAContext",
+    "kind": "class",
+    "introduced": "8.0",
+    "status": "implemented",
+    "facts": "facts/LocalAuthentication/LAContext.md",
+    "source": "the host's own LocalAuthentication, through the differential run of tests/backports/host/uikit2 (localauth); the shared cache of iOS 8.0 for the text of the biometry error; the newest header of the SDK for the rest"
+  },
+  {
+    "api": "LAErrorDomain",
+    "kind": "constant",
+    "introduced": "8.3",
+    "status": "implemented",
+    "facts": "facts/LocalAuthentication/LAContext.md",
+    "source": "the host's own LocalAuthentication"
+  },
+  {
+    "api": "LATouchIDAuthenticationMaximumAllowableReuseDuration",
+    "kind": "constant",
+    "introduced": "9.0",
+    "status": "implemented",
+    "facts": "facts/LocalAuthentication/LAContext.md",
+    "source": "the host's own LocalAuthentication"
+  },
+  {
+    "api": "LAContext.maxBiometryFailures",
+    "kind": "property",
+    "introduced": "8.3",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is kept as given and changes nothing: there is no biometry to fail",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "-[LAContext evaluateAccessControl:operation:localizedReason:reply:]",
+    "kind": "method",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "the reply is called once with NO and LAErrorNotInteractive, after the call returns and off the main thread; a nil or empty reason raises NSInvalidArgumentException, and after invalidate the error is LAErrorInvalidContext",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "-[LAContext invalidate]",
+    "kind": "method",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "after it every question and every evaluation of the context fails with LAErrorInvalidContext",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "-[LAContext isCredentialSet:]",
+    "kind": "method",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "answers whether a credential of the type was set with setCredential:type:",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "-[LAContext setCredential:type:]",
+    "kind": "method",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "a credential of the application password or smart card PIN type is kept and answers YES, a nil credential removes it, type -1 answers NO and any other type raises NSInvalidArgumentException",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "LAContext.evaluatedPolicyDomainState",
+    "kind": "property",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is nil: there is no biometry to have a domain state",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "LAContext.touchIDAuthenticationAllowableReuseDuration",
+    "kind": "property",
+    "introduced": "9.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is kept as given, with no clamp, and changes nothing: no evaluation ever succeeds to be reused",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "LAContext.localizedCancelTitle",
+    "kind": "property",
+    "introduced": "10.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is kept as given and shown nowhere: there is no evaluation interface",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "LAContext.biometryType",
+    "kind": "property",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is LABiometryTypeNone: the devices this release runs on have no fingerprint sensor and no Face ID",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "LAContext.interactionNotAllowed",
+    "kind": "property",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is kept as given and changes nothing, since every evaluation already fails without an interface",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  },
+  {
+    "api": "LAContext.localizedReason",
+    "kind": "property",
+    "introduced": "11.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the class of this package carries the member, and answers as a device with no fingerprint sensor",
+    "effect": "is kept as given",
+    "source": "the host's own LocalAuthentication under Mac Catalyst and the shared cache of iOS 8.0, as facts/LocalAuthentication/LAContext.md records; the members of later releases are carried by the class of this package",
+    "facts": "facts/LocalAuthentication/LAContext.md"
+  }
+]}

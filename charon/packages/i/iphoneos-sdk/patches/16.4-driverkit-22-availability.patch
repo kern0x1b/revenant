@@ -1,0 +1,10 @@
+--- a/usr/include/AvailabilityVersions.h
++++ b/usr/include/AvailabilityVersions.h
+@@ -263,6 +263,7 @@
+ #define __DRIVERKIT_19_0 190000
+ #define __DRIVERKIT_20_0 200000
+ #define __DRIVERKIT_21_0 210000
++#define __DRIVERKIT_22_0 220000
+ 
+ #endif /* __AVAILABILITY_VERSIONS__ */
+ 

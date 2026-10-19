@@ -1,0 +1,71 @@
+{
+  "framework": "CoreSpotlight",
+  "entries": [
+    {
+      "api": "CSSearchableIndex",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is a strong-imported LOAD-FAIL for provenance and telegram; iOS 6.1.3 has no CSSearchableIndex-shaped system index, so this port keeps the journal itself, in a real per-index store under Application Support, and bridges it to the release's own Spotlight.framework private class SPSpotlightManager, whose pull model (startRecordUpdatesForApplication:andCategory:, requestRecordUpdatesForApplication:category:andIDs:, notifyIndexer) already serves Messages and Calendar on this release",
+      "effect": "isIndexingAvailable answers YES; defaultSearchableIndex and initWithName: give a real instance backed by its own plist store; indexSearchableItems:, the two delete methods and deleteAllSearchableItemsWithCompletionHandler: write or remove entries in that store and call their handler with a nil error; beginIndexBatch does nothing since the store commits synchronously, endIndexBatchWithClientState:completionHandler: persists the client state (refusing on the unbatched defaultSearchableIndex, per the header) and fetchLastClientStateWithCompletionHandler: reads it back; every mutation also registers the index's category with SPSpotlightManager and pushes the changed identifiers to it, best-effort and never fatal if the private class or its selectors are absent",
+      "facts": "facts/CoreSpotlight/CoreSpotlight.md",
+      "source": "the header of iOS 16.4 for the contract; Spotlight.framework and Search.framework of the armv7 shared cache of iOS 6.1.3, disassembled with modules/apple/dyld.lua's extract"
+    },
+    {
+      "api": "CSSearchableItem",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is a strong-imported LOAD-FAIL for provenance and telegram; it is the item CSSearchableIndex would index, and it is real independently of whether the index ever writes it",
+      "effect": "initWithUniqueIdentifier:domainIdentifier:attributeSet: generates a UUID when none is given, as the header says; expirationDate defaults to one month out and resets to that default when set to nil, as the header says; NSCopying and NSSecureCoding carry every property",
+      "facts": "facts/CoreSpotlight/CoreSpotlight.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "CSSearchableItemAttributeSet",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is a strong-imported LOAD-FAIL for provenance and telegram; the 19 properties of the CSGeneral category (the ones the header itself gives no later than iOS 9.0) are carried with real storage; the Images, Media, Documents, Events, Places, Messaging and custom-key categories are not",
+      "effect": "initWithItemContentType: and the CSGeneral properties (displayName, alternateNames, path, contentURL, thumbnailURL, thumbnailData, relatedUniqueIdentifier, metadataModificationDate, contentType, contentTypeTree, keywords, title, version, supportsPhoneCall, supportsNavigation, containerTitle, containerDisplayName, containerIdentifier, containerOrder) hold what is set and read it back; NSCopying and NSSecureCoding carry them",
+      "facts": "facts/CoreSpotlight/CoreSpotlight.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "CSSearchableItemActionType",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant is a strong-imported LOAD-FAIL for provenance and telegram; it is the activity type a continued Spotlight tap carries, taken as the real value rather than guessed",
+      "effect": "answers \"com.apple.corespotlightitem\", never posted by this port since no item of this port's is ever surfaced by the system's Spotlight to be tapped",
+      "facts": "facts/CoreSpotlight/CoreSpotlight.md",
+      "source": "CoreSpotlight of the arm64 shared cache of iOS 12.0, _CSSearchableItemActionType, the CFString its pointer resolves to"
+    },
+    {
+      "api": "CSSearchableItemActivityIdentifier",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant is a strong-imported LOAD-FAIL for provenance and telegram; it is the userInfo key of a continued Spotlight tap's unique identifier, taken as the real value rather than guessed",
+      "effect": "answers \"kCSSearchableItemActivityIdentifier\"",
+      "facts": "facts/CoreSpotlight/CoreSpotlight.md",
+      "source": "CoreSpotlight of the arm64 shared cache of iOS 12.0, _CSSearchableItemActivityIdentifier, the CFString its pointer resolves to"
+    },
+    {
+      "api": "CSIndexErrorDomain",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant is the error domain CSSearchableIndex's own write refusal uses; carried alongside the class that names it, not separately demanded",
+      "effect": "answers \"CSIndexErrorDomain\"",
+      "facts": "facts/CoreSpotlight/CoreSpotlight.md",
+      "source": "CoreSpotlight of the arm64 shared cache of iOS 12.0, _CSIndexErrorDomain, the CFString its pointer resolves to"
+    }
+  ]
+}

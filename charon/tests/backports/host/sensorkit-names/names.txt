@@ -1,0 +1,86 @@
+// THE 57 NAMES, in one list both processes walk: the port's own object and the host's framework
+// are compared name by name against it, so a name neither side printed is a failure rather than a
+// row quietly missing from the comparison.
+//
+// The list is not sorted, because these are not one alphabetical family but seven releases' worth of
+// them: the 39 of iOS 14.0 come first, in the order SensorKitNames14.m declares them, and then each later
+// release's constants in theirs. A name's place in this list is the RELEASE ITS OBJECT IS NAMED FOR,
+// which is the release the HELD LADDER places the name at - and that is not always the release
+// SRSensors.h declares. Two of these are the reason this comment exists: SRSensorHeartRate and
+// SRSensorOdometer are API_AVAILABLE(ios(17.0)) in the header and live in SensorKit160.m, while
+// SRSensorFaceMetrics, SRSensorWristTemperature, SRSensorElectrocardiogram and SRSensorPhotoplethysmogram
+// are 17.0 and 17.4 in the header and live in SensorKit180.m. An object carries the API of one release,
+// so the object is named for the measurement and the registry keeps the header's own date.
+//
+// The eighteen after the thirty-nine are the string constants of 15.0, 15.4, 16.0, 16.4, 17.4, 18.0 and
+// 26.0. They live in the port's seven release objects and their VALUES live in one place -
+// CharonSensorKitNames.h - which the harness's own port-side source imports with all seven guards
+// defined, so the eighteen values the comparison walks are the eighteen the objects carry and not a
+// second copy of them.
+static const char *const CHaronNames[] = {
+    "SRDeviceUsageCategoryBooks",
+    "SRDeviceUsageCategoryBusiness",
+    "SRDeviceUsageCategoryCatalogs",
+    "SRDeviceUsageCategoryDeveloperTools",
+    "SRDeviceUsageCategoryEducation",
+    "SRDeviceUsageCategoryEntertainment",
+    "SRDeviceUsageCategoryFinance",
+    "SRDeviceUsageCategoryFoodAndDrink",
+    "SRDeviceUsageCategoryGames",
+    "SRDeviceUsageCategoryGraphicsAndDesign",
+    "SRDeviceUsageCategoryHealthAndFitness",
+    "SRDeviceUsageCategoryKids",
+    "SRDeviceUsageCategoryLifestyle",
+    "SRDeviceUsageCategoryMedical",
+    "SRDeviceUsageCategoryMiscellaneous",
+    "SRDeviceUsageCategoryMusic",
+    "SRDeviceUsageCategoryNavigation",
+    "SRDeviceUsageCategoryNews",
+    "SRDeviceUsageCategoryNewsstand",
+    "SRDeviceUsageCategoryPhotoAndVideo",
+    "SRDeviceUsageCategoryProductivity",
+    "SRDeviceUsageCategoryReference",
+    "SRDeviceUsageCategoryShopping",
+    "SRDeviceUsageCategorySocialNetworking",
+    "SRDeviceUsageCategorySports",
+    "SRDeviceUsageCategoryStickers",
+    "SRDeviceUsageCategoryTravel",
+    "SRDeviceUsageCategoryUtilities",
+    "SRDeviceUsageCategoryWeather",
+    "SRSensorAccelerometer",
+    "SRSensorAmbientLightSensor",
+    "SRSensorDeviceUsageReport",
+    "SRSensorKeyboardMetrics",
+    "SRSensorMessagesUsageReport",
+    "SRSensorOnWristState",
+    "SRSensorPedometerData",
+    "SRSensorPhoneUsageReport",
+    "SRSensorRotationRate",
+    "SRSensorVisits",
+
+    // SensorKit150.m - the ladder's 15.0 - SRSensors.h:194, :213
+    "SRSensorSiriSpeechMetrics",
+    "SRSensorTelephonySpeechMetrics",
+    // SensorKit154.m - the ladder's 15.4 - SRSensors.h:230
+    "SRSensorAmbientPressure",
+    // SensorKit160.m - the ladder's 16.0 - SRSensors.h:276, :307, both ios(17.0) in the header
+    "SRSensorHeartRate",
+    "SRSensorOdometer",
+    // SensorKit164.m - the ladder's 16.4 - SRSensors.h:246
+    "SRSensorMediaEvents",
+    // SensorKit174.m - the ladder's 17.4 - SRPhotoplethysmogramSample.h:14, :15, :213, :223, :232, :242
+    "SRPhotoplethysmogramOpticalSampleConditionSignalSaturation",
+    "SRPhotoplethysmogramOpticalSampleConditionUnreliableNoise",
+    "SRPhotoplethysmogramSampleUsageForegroundHeartRate",
+    "SRPhotoplethysmogramSampleUsageDeepBreathing",
+    "SRPhotoplethysmogramSampleUsageForegroundBloodOxygen",
+    "SRPhotoplethysmogramSampleUsageBackgroundSystem",
+    // SensorKit180.m - the ladder's 18.0 - SRSensors.h:295, :265, :320, :332, none of them 18.0 in the header
+    "SRSensorFaceMetrics",
+    "SRSensorWristTemperature",
+    "SRSensorElectrocardiogram",
+    "SRSensorPhotoplethysmogram",
+    // SensorKit260.m - the ladder's 26.0 - SRSensors.h:345, :357
+    "SRSensorAcousticSettings",
+    "SRSensorSleepSessions",
+};

@@ -1,0 +1,68 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIViewController.topLayoutGuide",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    },
+    {
+      "api": "UIViewController.bottomLayoutGuide",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    },
+    {
+      "api": "UILayoutSupport",
+      "kind": "protocol",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    },
+    {
+      "api": "UILayoutSupport.length",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    },
+    {
+      "api": "UILayoutSupport.topAnchor",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    },
+    {
+      "api": "UILayoutSupport.bottomAnchor",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    },
+    {
+      "api": "UILayoutSupport.heightAnchor",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UILayoutSupport.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/layoutsupport, and tests/backports/device/layoutsupport.m on iOS 6"
+    }
+  ]
+}

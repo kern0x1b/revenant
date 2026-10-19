@@ -1,0 +1,187 @@
+{
+  "framework": "CoreMIDI",
+  "entries": [
+    {
+      "api": "kMIDIPropertyAssociatedEndpoint",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the key macOS CoreMIDI holds once a client exists (associated endpoint, after MIDIClientCreate), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDICIDeviceObjectKey",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDICIProfileObjectKey",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIUMPEndpointObjectKey",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIUMPFunctionBlockObjectKey",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDICIDeviceWasAddedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDICIDeviceWasRemovedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDICIProfileWasRemovedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDICIProfileWasUpdatedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIUMPEndpointWasAddedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIUMPEndpointWasRemovedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIUMPEndpointWasUpdatedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDIUMPFunctionBlockWasUpdatedNotification",
+      "kind": "constant",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/Constants.md",
+      "source": "the value macOS CoreMIDI reads (the name itself), tests/backports/host/coremidi/oracle/constants.m"
+    },
+    {
+      "api": "MIDI2DeviceInfo",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDIUMPFunctionBlock",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDIUMPMutableFunctionBlock",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDIUMPEndpoint",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDIUMPMutableEndpoint",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDIUMPEndpointManager",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "implemented",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDICIDevice",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "owed",
+      "reason": "build the class MIDICIDevice",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDIUMPCIProfile",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "owed",
+      "reason": "build the class MIDIUMPCIProfile",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    },
+    {
+      "api": "MIDICIDeviceManager",
+      "kind": "class",
+      "introduced": "18.0",
+      "status": "owed",
+      "reason": "build the class MIDICIDeviceManager",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/CoreMIDI/UMPClasses.md",
+      "source": "the 26.2 headers for the contract (MIDIUMPEndpoint.h, MIDIUMPFunctionBlock.h, MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h, MIDICIDeviceManager.h, MIDIUMPEndpointManager.h, MIDIUMPCI.h); macOS CoreMIDI for the answers (tests/backports/host/coremidi/oracle/umpclasses.m and umpclasses2.m)"
+    }
+  ]
+}

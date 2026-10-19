@@ -1,0 +1,22 @@
+--- a/cctools-port/cctools/ld64/src/ld/Snapshot.cpp
++++ b/cctools-port/cctools/ld64/src/ld/Snapshot.cpp
+@@ -238,7 +238,18 @@
+         // provide default name and location
+         setSnapshotName();
+         if (fSnapshotLocation == NULL) {
+-			fSnapshotLocation = "/tmp";
++			// A snapshot describes one link, so it belongs beside that link's output. /tmp is shared
++			// with every other process on the machine and nothing cleans it up: an assertion while
++			// linking a 45MB dylib leaves 220MB there per attempt, and a reduction loop over inputs
++			// leaves one per attempt until the disk is gone. -o names the directory to use, and with
++			// no -o the output is a.out in the current directory, which is what "." gives.
++			if (fOutputPath != NULL) {
++				char* outputDir = strdup(fOutputPath);
++				fSnapshotLocation = strdup(dirname(outputDir));
++				free(outputDir);
++			}
++			else
++				fSnapshotLocation = strdup(".");
+ 			// rdar://89496214 (When building in B&I, ld64 asserts should write the snapshot dir to the .BuildData directory, so it can be found later)
+ 			if ( const char* traceFile = getenv("LD_TRACE_FILE") ) {
+ 				char* buildDataDir = strdup(traceFile);

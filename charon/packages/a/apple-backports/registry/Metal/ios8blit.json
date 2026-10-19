@@ -1,0 +1,137 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLBlitCommandEncoder",
+      "kind": "protocol",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the protocol is carried by the classes of the port that answer for it; an application that holds an id of it gets an object of OpenGL ES 2.0 behind it",
+      "effect": "the protocol is there, and the methods of it the port does not do are not implemented; facts/Metal/Blits.md lists what a blit is done of and what it is refused for",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLCommandBuffer blitCommandEncoder]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the command buffer of the port hands out the blit encoder of the port, the way it hands out the render command encoder; before this it answered nil and said in the log that a blit encoder had no form here",
+      "effect": "an object that copies between the buffers and textures of the port, or nil for a resource that is not one of the port's; facts/Metal/Blits.md is the whole of it",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLCommandEncoder endEncoding]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a command is a call into OpenGL ES 2.0 that has already been made by the time it is encoded, so neither encoder of the port has a queue of work to flush: the blit encoder's copies are between CPU-resident buffers and textures, and the compute encoder's workgroup is one thread per thread of the group, joined by a mutex and a condition variable before the dispatch is encoded (facts/Metal/Compute.md). The member is declared by this protocol, which MTLBlitCommandEncoder, MTLRenderCommandEncoder and MTLComputeCommandEncoder all inherit, so it is named here once and not again per encoder.",
+      "effect": "the call returns, and the work it would have flushed has already been issued: for a blit the copy is done, and for a compute dispatch the threads have joined",
+      "facts": "facts/Metal/Blits.md, facts/Metal/Compute.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLCommandEncoder pushDebugGroup:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a debug group of the port is a name on a stack the encoder keeps, so that -popDebugGroup has one to pop and an unbalanced group can be seen",
+      "effect": "the name is pushed; the port does not print it, because the port's log is not a Metal capture",
+      "facts": "facts/Metal/EncoderDebugGroups.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLCommandEncoder popDebugGroup]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a debug group of the port is a name on a stack the encoder keeps",
+      "effect": "the last name is popped, and a pop of an empty stack logs one line and changes nothing, rather than crashing",
+      "facts": "facts/Metal/EncoderDebugGroups.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLCommandEncoder insertDebugSignpost:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a signpost is a string in a capture; the port has no capture to put it in",
+      "effect": "the call returns; a signpost changes no behaviour in Metal either, which is what its header says",
+      "facts": "facts/Metal/EncoderDebugGroups.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder copyFromBuffer:sourceOffset:toBuffer:destinationOffset:size:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder fillBuffer:range:value:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder generateMipmapsForTexture:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a blit on this device is a copy on the CPU: a buffer of the port is its own bytes and a texture of it is an OpenGL ES 2.0 texture the port reads and writes a region at a time, so there is nothing to stage and nothing to transfer between",
+      "effect": "the copy is made, after the range has been checked against the resources it names; a copy the port cannot make writes one line in the log naming the reason and copies nothing, as facts/Metal/Blits.md lists",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    }
+  ]
+}

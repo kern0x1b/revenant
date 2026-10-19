@@ -1,0 +1,95 @@
+{
+ "framework": "PDFKit",
+ "entries": [
+  {
+   "api": "PDFAppearanceCharacteristics",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the appearance characteristics of a widget annotation as a value object: a settable member per key of an /MK dictionary (PDF 1.7 Table 8.40) and the dictionary itself as -appearanceCharacteristicsKeyValues.  Nothing in the 26.2 SDK hands one out - there is no -[PDFAnnotation appearanceCharacteristics], and grep for appearanceCharacteristics across PDFKit.framework/Headers finds this class's own key-values property and nothing else - so both sides build the object with -init and the comparison is object against object.  Every member is implemented on both sides of every pair, and that is what makes it comparable at all: the host's setter and its getter were measured against each other, so a setter that dropped its value or a getter that invented one would be a difference rather than a key the run had never heard of",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.controlType",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "kPDFWidgetUnknownControl (-1) before anything is set, and the value set after that, read back for every value from -1 to 3.  It is NOT published: -appearanceCharacteristicsKeyValues does not gain a key for it, measured - six members set at once still answer six keys and none of them is this one - so it is an ivar here and not an entry in the dictionary, which is what the host does",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.backgroundColor",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /MK /BG value, kept as the colour it was given and read back as it - measured on the host by setting a colour and reading it.  Setting nil REMOVES the key, so a fresh object answers nil and a cleared one does too",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.borderColor",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /MK /BC value, on the same terms as the background colour: kept as given, read back as given, and removed when nil is set",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.rotation",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /MK /R value, and the one member with no absent answer: its key is in the dictionary from -init, so a fresh object answers 0 and -appearanceCharacteristicsKeyValues always carries R - measured on a fresh object, on one whose only other member is a caption, and on one whose rotation was set to 0 explicitly.  A negative rotation is kept as set (measured at -90), so the value is not clamped",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.caption",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /MK /CA value: nil on a fresh object, the string it was set to after that, and nil again once nil is set.  An EMPTY string is a value and not an absent one - measured: caption and downCaption both set to @\"\" answer three keys in the key values, so the test is whether the string is nil and not whether it has characters",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.rolloverCaption",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /MK /RC value, on the same terms as the caption",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.downCaption",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /MK /AC value, on the same terms as the caption",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  },
+  {
+   "api": "PDFAppearanceCharacteristics.appearanceCharacteristicsKeyValues",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the dictionary itself, copied so a caller holding it cannot change this object through it.  R is always in it and the other five keys are in it exactly when their member has a value - measured: one key on a fresh object, two with only a caption set, six with all six dictionary members set, and one again after two of them are set to nil",
+   "facts": "facts/PDFKit/Appearance11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's own objects in a Mac Catalyst process that has a UIColor - tests/backports/host/pdfkit-document/run.sh, three binaries, dladdr proving the two macOS images differ by construction: COMPARED 5329 MISMATCHES 0, of which 72 appearance facts come from the Catalyst side, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key"
+  }
+ ]
+}

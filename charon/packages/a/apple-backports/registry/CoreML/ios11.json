@@ -1,0 +1,929 @@
+{
+ "framework": "CoreML",
+ "entries": [
+  {
+   "api": "MLDictionaryConstraint",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLDictionaryConstraint: the kind of keys a dictionary feature's keys have to be",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLDictionaryFeatureProvider",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLDictionaryFeatureProvider: a provider built from a dictionary, answering a value by name, by subscript and by fast enumeration",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLFeatureDescription: what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureValue",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLFeatureValue: one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLImageConstraint",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLImageConstraint: an image feature's own numbers: the size it wants, the pixel format it wants, and the range or the set of sizes it will take",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModel",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLModel: a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLModelDescription: a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLMultiArray",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLMultiArray: a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArrayConstraint",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLMultiArrayConstraint: the element type and the shape a multi array feature takes, with its shape constraint",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLPredictionOptions",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLPredictionOptions: the options of one prediction: the CPU-only flag and the backing objects the caller proposes for the answers",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLSequence",
+   "kind": "class",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLSequence: an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLModelAuthorKey",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the metadata key of a model's author, read out of a real Core ML on this host",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelCreatorDefinedKey",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the metadata key of whatever else a model's author put in, read out of a real Core ML on this host",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescriptionKey",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the metadata key of a model's own description, read out of a real Core ML on this host",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelErrorDomain",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the domain every Core ML error is in, read out of a real Core ML on this host",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelLicenseKey",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the metadata key of a model's licence, read out of a real Core ML on this host",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelVersionStringKey",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the metadata key of a model's version, read out of a real Core ML on this host",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithDictionary:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithDouble:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithInt64:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithMultiArray:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithPixelBuffer:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithSequence:]",
+   "kind": "method",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue featureValueWithString:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLFeatureValue undefinedFeatureValueWithType:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLModel compileModelAtURL:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "+[MLModel modelWithContentsOfURL:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "+[MLMultiArray multiArrayByConcatenatingMultiArrays:alongAxis:dataType:]",
+   "kind": "method",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLSequence emptySequenceWithType:]",
+   "kind": "method",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLSequence sequenceWithInt64Array:]",
+   "kind": "method",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "+[MLSequence sequenceWithStringArray:]",
+   "kind": "method",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLDictionaryFeatureProvider initWithDictionary:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a provider built from a dictionary, answering a value by name, by subscript and by fast enumeration",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLDictionaryFeatureProvider objectForKeyedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a provider built from a dictionary, answering a value by name, by subscript and by fast enumeration",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLFeatureDescription isAllowedValue:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLFeatureProvider featureValueForName:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the protocol every provider of values answers through: the names it holds and a value by name",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLFeatureValue isEqualToFeatureValue:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLModel predictionFromFeatures:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLModel predictionFromFeatures:options:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "-[MLMultiArray getBytesWithHandler:]",
+   "kind": "method",
+   "introduced": "15.4",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray getMutableBytesWithHandler:]",
+   "kind": "method",
+   "introduced": "15.4",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray initWithDataPointer:shape:dataType:strides:deallocator:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray initWithPixelBuffer:shape:]",
+   "kind": "method",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray initWithShape:dataType:error:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray initWithShape:dataType:strides:]",
+   "kind": "method",
+   "introduced": "18.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray objectAtIndexedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray objectForKeyedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray setObject:atIndexedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "-[MLMultiArray setObject:forKeyedSubscript:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLDictionaryConstraint.keyType",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the kind of keys a dictionary feature's keys have to be",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLDictionaryFeatureProvider.dictionary",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a provider built from a dictionary, answering a value by name, by subscript and by fast enumeration",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription.dictionaryConstraint",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription.imageConstraint",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription.multiArrayConstraint",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription.name",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription.optional",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureDescription.type",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a model says about one of its features, and the whole of the constraint its type carries, read out of the specification's own fields",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureProvider.featureNames",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the protocol every provider of values answers through: the names it holds and a value by name",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLFeatureValue.dictionaryValue",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.doubleValue",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.imageBufferValue",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.int64Value",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.multiArrayValue",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.sequenceValue",
+   "kind": "property",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.stringValue",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.type",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureValue.undefined",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "one value of one feature: every constructor the specification declares that this port builds, every accessor keyed on the value's own type, and the coding that round trips it",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLImageConstraint.pixelFormatType",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an image feature's own numbers: the size it wants, the pixel format it wants, and the range or the set of sizes it will take",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLImageConstraint.pixelsHigh",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an image feature's own numbers: the size it wants, the pixel format it wants, and the range or the set of sizes it will take",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLImageConstraint.pixelsWide",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an image feature's own numbers: the size it wants, the pixel format it wants, and the range or the set of sizes it will take",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModel.modelDescription",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription.inputDescriptionsByName",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription.metadata",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription.outputDescriptionsByName",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription.predictedFeatureName",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription.predictedProbabilitiesName",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLMultiArray.count",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArray.dataPointer",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArray.dataType",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArray.pixelBuffer",
+   "kind": "property",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArray.shape",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArray.strides",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a typed, strided array of numbers: the initialisers the specification declares, the two addressing forms, the two byte handlers, the concatenating factory and the deprecated dataPointer",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLMultiArrayConstraint.dataType",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the element type and the shape a multi array feature takes, with its shape constraint",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLMultiArrayConstraint.shape",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the element type and the shape a multi array feature takes, with its shape constraint",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLPredictionOptions.usesCPUOnly",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the options of one prediction: the CPU-only flag and the backing objects the caller proposes for the answers",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLSequence.int64Values",
+   "kind": "property",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLSequence.stringValues",
+   "kind": "property",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLSequence.type",
+   "kind": "property",
+   "introduced": "12.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "an ordered list of numbers or of strings, which is what a Core ML sequence is, with the three constructors and the two accessors the specification declares",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host"
+  },
+  {
+   "api": "MLFeatureProvider",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the protocol every provider of values answers through: the names it holds and a value by name",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLMultiArrayDataType",
+   "kind": "enum",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build MLMultiArrayDataType",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "SDK 16.4, MLMultiArray.h:17, typedef NS_ENUM(NSInteger, MLMultiArrayDataType) - the declaration read as the SDK writes it; the values are Apple's own and nothing on this device changes one",
+   "effect": "until built: the port does not answer it"
+  },
+  {
+   "api": "MLMultiArrayDataTypeDouble",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the constant MLMultiArrayDataTypeDouble",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "SDK 16.4, MLMultiArray.h:18-23, the enumerator as the SDK writes it: the value is Apple's own, inlined into the consumer's code at compile time, and no release's Core ML carries a different one",
+   "effect": "until built: the symbol is not exported"
+  },
+  {
+   "api": "MLMultiArrayDataTypeFloat32",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the constant MLMultiArrayDataTypeFloat32",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "SDK 16.4, MLMultiArray.h:18-23, the enumerator as the SDK writes it: the value is Apple's own, inlined into the consumer's code at compile time, and no release's Core ML carries a different one",
+   "effect": "until built: the symbol is not exported"
+  },
+  {
+   "api": "MLMultiArrayDataTypeInt32",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the constant MLMultiArrayDataTypeInt32",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "SDK 16.4, MLMultiArray.h:18-23, the enumerator as the SDK writes it: the value is Apple's own, inlined into the consumer's code at compile time, and no release's Core ML carries a different one",
+   "effect": "until built: the symbol is not exported"
+  }
+ ]
+}

@@ -1,0 +1,34 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@NCWidgetDisplayMode	-			enum NCWidgetDisplayMode	-	-	-	-	e03a96e2a8e58ef3	-
+enum	c:@E@NCWidgetDisplayMode	-			NSInteger	-	-	ios=10.0/14.0/-/0	-	258cfe71248d4417	-
+enumconst	c:@E@NCWidgetDisplayMode@NCWidgetDisplayModeCompact	NCWidgetDisplayMode			-	-	-	ios=10.0/14.0/-/0	-	ba774437d405c158	0
+enumconst	c:@E@NCWidgetDisplayMode@NCWidgetDisplayModeExpanded	NCWidgetDisplayMode			-	-	-	ios=10.0/14.0/-/0	-	97b4777ced192b8b	1
+typedef	c:@T@NCUpdateResult	-			enum NCUpdateResult	-	-	ios=8.0/14.0/-/0	-	bf87257d0d99e69b	-
+enum	c:@E@NCUpdateResult	-			NSUInteger	-	-	-	-	6bc8fc4554b50ed1	-
+enumconst	c:@E@NCUpdateResult@NCUpdateResultNewData	NCUpdateResult			-	-	-	-	-	f69592cbc3755431	0
+enumconst	c:@E@NCUpdateResult@NCUpdateResultNoData	NCUpdateResult			-	-	-	-	-	094da7bbf0f376bd	1
+enumconst	c:@E@NCUpdateResult@NCUpdateResultFailed	NCUpdateResult			-	-	-	-	-	3942a496fe3a6506	2
+protocol	c:objc(pl)NCWidgetProviding	-			-	-	-	ios=10.0/14.0/-/0	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	169248e44ddde87e	-
+conforms	c:objc(pl)NCWidgetProviding	NCWidgetProviding	NSObject		-	-	-	-	-	ca4f74cb982d7c9b	-
+method	c:objc(pl)NCWidgetProviding(im)widgetPerformUpdateWithCompletionHandler:	-			void	void (^)(NCUpdateResult) completionHandler	optional	ios=8.0/14.0/-/0	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	bed0385344192ecd	-
+method	c:objc(pl)NCWidgetProviding(im)widgetActiveDisplayModeDidChange:withMaximumSize:	-			void	NCWidgetDisplayMode activeDisplayMode | CGSize maxSize	optional	ios=10.0/14.0/-/0	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	a22e65e0e1a4ccee	-
+method	c:objc(pl)NCWidgetProviding(im)widgetMarginInsetsForProposedMarginInsets:	-			UIEdgeInsets	UIEdgeInsets defaultMarginInsets	optional	ios=8.0/10.0/-/0	deprecated: This method will not be called on widgets linked against iOS versions 10.0 and later.	75d7c11f2d26ec62	-
+category	c:objc(cy)NSExtensionContext@NCWidgetAdditions	-			-	-	-	ios=10.0/14.0/-/0	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	b56027b6d289c244	-
+property	c:objc(cs)NSExtensionContext(py)widgetLargestAvailableDisplayMode	NCWidgetAdditions			NCWidgetDisplayMode	-	assign,nonatomic	ios=10.0/14.0/-/0	-	4891f371755271e9	-
+property	c:objc(cs)NSExtensionContext(py)widgetActiveDisplayMode	NCWidgetAdditions			NCWidgetDisplayMode	-	readonly,assign,nonatomic	ios=10.0/14.0/-/0	-	3d388f0b3bd39610	-
+method	c:objc(cs)NSExtensionContext(im)widgetMaximumSizeForDisplayMode:	NCWidgetAdditions			CGSize	NCWidgetDisplayMode displayMode	-	ios=10.0/14.0/-/0	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	3b00870317a1066c	-
+category	c:objc(cy)UIVibrancyEffect@NCWidgetAdditions	-			-	-	-	ios=8.0/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	a03c18c0d226e352	-
+method	c:objc(cs)UIVibrancyEffect(cm)widgetEffectForVibrancyStyle:	NCWidgetAdditions			UIVibrancyEffect *	UIVibrancyEffectStyle vibrancyStyle	-	ios=13.0/14.0/-/0	deprecated: Use WidgetKit instead. Today View extensions have been deprecated.	2455a36ffab6aa85	-
+category	c:objc(cy)UIVibrancyEffect@NCWidgetDeprecated	-			-	-	-	ios=8.0/-/-/0,tvos=9.0/-/-/0,watchos=-/-/-/1	deprecated: Use widgetEffectForVibrancyStyle: instead	f794dab663481a46	-
+method	c:objc(cs)UIVibrancyEffect(cm)widgetPrimaryVibrancyEffect	NCWidgetDeprecated			UIVibrancyEffect *	-	-	ios=10.0/13.0/-/0	deprecated: Use widgetEffectForVibrancyStyle: instead	143a9e76eb3f14a9	-
+method	c:objc(cs)UIVibrancyEffect(cm)widgetSecondaryVibrancyEffect	NCWidgetDeprecated			UIVibrancyEffect *	-	-	ios=10.0/13.0/-/0	deprecated: Use widgetEffectForVibrancyStyle: instead	63d1703c73eb9d82	-
+method	c:objc(cs)UIVibrancyEffect(cm)notificationCenterVibrancyEffect	NCWidgetDeprecated			UIVibrancyEffect *	-	-	ios=8.0/10.0/-/0	deprecated: Use widgetEffectForVibrancyStyle: instead	8a9332e3417942f7	-
+interface	c:objc(cs)NCWidgetController	-			-	-	-	ios=8.0/14.0/-/0	-	625e62b47e2cbd4e	-
+super	-	NCWidgetController	NSObject		-	-	-	-	-	ad2fe7f81f9df119	-
+method	c:objc(cs)NCWidgetController(cm)widgetController	-			instancetype	-	-	ios=8.0/14.0/-/0	-	1f5c911141542a18	-
+method	c:objc(cs)NCWidgetController(im)setHasContent:forWidgetWithBundleIdentifier:	-			void	BOOL flag | NSString * bundleID	-	ios=8.0/14.0/-/0	-	89abdc7af8c75ceb	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@UIEdgeInsets	-			struct UIEdgeInsets	-	-	-	-	dd3bc2433c254675	-
+typedef	c:@T@UIVibrancyEffectStyle	-			enum UIVibrancyEffectStyle	-	-	-	-	496221db1d657271	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

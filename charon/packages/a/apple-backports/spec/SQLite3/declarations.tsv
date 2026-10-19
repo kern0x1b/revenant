@@ -1,0 +1,835 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@sqlite3_version	-			const char[]	-	-	-	-	d654b5cea6df695c	-
+function	c:@F@sqlite3_libversion	-			const char * (void)	-	-	-	-	43b61a9a1175d1fa	-
+function	c:@F@sqlite3_sourceid	-			const char * (void)	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	45dbbaf787471c27	-
+function	c:@F@sqlite3_libversion_number	-			int (void)	-	-	-	-	68a1b4557a2fb7d9	-
+function	c:@F@sqlite3_compileoption_used	-			int (const char *)	const char * zOptName	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	451591fdc91bd5a8	-
+function	c:@F@sqlite3_compileoption_get	-			const char * (int)	int N	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	644def896087e00c	-
+function	c:@F@sqlite3_threadsafe	-			int (void)	-	-	-	-	3edb9762d5631419	-
+struct	c:@S@sqlite3	-			-	-	-	-	-	7ad5725723539ca0	-
+typedef	c:@T@sqlite3	-			struct sqlite3	-	-	-	-	45dea5b55247359b	-
+typedef	c:@T@sqlite_int64	-			long long	-	-	-	-	d68f306bcbf7b9f8	-
+typedef	c:@T@sqlite_uint64	-			unsigned long long	-	-	-	-	f92266fa290287e9	-
+typedef	c:@T@sqlite3_int64	-			sqlite_int64	-	-	-	-	9563d9c4293a7c6e	-
+typedef	c:@T@sqlite3_uint64	-			sqlite_uint64	-	-	-	-	1c83311b0b246aa2	-
+function	c:@F@sqlite3_close	-			int (sqlite3 *)	sqlite3 * 	-	-	-	27b70e6481ab62a0	-
+function	c:@F@sqlite3_close_v2	-			int (sqlite3 *)	sqlite3 * 	-	ios=8.2/-/-/0,macos=10.10/-/-/0	-	7ed51a63fe4c1221	-
+typedef	c:@T@sqlite3_callback	-			int (*)(void *, int, char **, char **)	-	-	-	-	e3b79ef67c59e4ca	-
+function	c:@F@sqlite3_exec	-			int (sqlite3 *, const char *, int (*)(void *, int, char **, char **), void *, char **)	sqlite3 *  | const char * sql | int (*)(void *, int, char **, char **) callback | void *  | char ** errmsg	-	-	-	fe09dff0d23042fb	-
+typedef	c:@T@sqlite3_file	-			struct sqlite3_file	-	-	-	-	18163c82a1f547a7	-
+struct	c:@S@sqlite3_file	-			-	-	-	-	-	01b1d348166d1129	-
+field	c:@S@sqlite3_file@FI@pMethods	sqlite3_file			const struct sqlite3_io_methods *	-	-	-	-	36c44debf063a594	-
+typedef	c:@T@sqlite3_io_methods	-			struct sqlite3_io_methods	-	-	-	-	6b564bb488b466fd	-
+struct	c:@S@sqlite3_io_methods	-			-	-	-	-	-	2200506ef30565da	-
+field	c:@S@sqlite3_io_methods@FI@iVersion	sqlite3_io_methods			int	-	-	-	-	ffbc8bf631031191	-
+field	c:@S@sqlite3_io_methods@FI@xClose	sqlite3_io_methods			int (*)(sqlite3_file *)	-	-	-	-	ab9a211cb0cc4233	-
+field	c:@S@sqlite3_io_methods@FI@xRead	sqlite3_io_methods			int (*)(sqlite3_file *, void *, int, sqlite3_int64)	-	-	-	-	06c000075ef93359	-
+field	c:@S@sqlite3_io_methods@FI@xWrite	sqlite3_io_methods			int (*)(sqlite3_file *, const void *, int, sqlite3_int64)	-	-	-	-	56d27d701493d2eb	-
+field	c:@S@sqlite3_io_methods@FI@xTruncate	sqlite3_io_methods			int (*)(sqlite3_file *, sqlite3_int64)	-	-	-	-	9418a8e50a56ad84	-
+field	c:@S@sqlite3_io_methods@FI@xSync	sqlite3_io_methods			int (*)(sqlite3_file *, int)	-	-	-	-	0c284b816beacafa	-
+field	c:@S@sqlite3_io_methods@FI@xFileSize	sqlite3_io_methods			int (*)(sqlite3_file *, sqlite3_int64 *)	-	-	-	-	9bb88a7a5ec3e3cf	-
+field	c:@S@sqlite3_io_methods@FI@xLock	sqlite3_io_methods			int (*)(sqlite3_file *, int)	-	-	-	-	5e995d3422226ed8	-
+field	c:@S@sqlite3_io_methods@FI@xUnlock	sqlite3_io_methods			int (*)(sqlite3_file *, int)	-	-	-	-	a6999c117b3d6749	-
+field	c:@S@sqlite3_io_methods@FI@xCheckReservedLock	sqlite3_io_methods			int (*)(sqlite3_file *, int *)	-	-	-	-	5a8aae506cf6972c	-
+field	c:@S@sqlite3_io_methods@FI@xFileControl	sqlite3_io_methods			int (*)(sqlite3_file *, int, void *)	-	-	-	-	44fb3d380f9e3ebe	-
+field	c:@S@sqlite3_io_methods@FI@xSectorSize	sqlite3_io_methods			int (*)(sqlite3_file *)	-	-	-	-	e270b9986e5d07ca	-
+field	c:@S@sqlite3_io_methods@FI@xDeviceCharacteristics	sqlite3_io_methods			int (*)(sqlite3_file *)	-	-	-	-	ab13368eabc520b0	-
+field	c:@S@sqlite3_io_methods@FI@xShmMap	sqlite3_io_methods			int (*)(sqlite3_file *, int, int, int, volatile void **)	-	-	-	-	7ee84deedac028a9	-
+field	c:@S@sqlite3_io_methods@FI@xShmLock	sqlite3_io_methods			int (*)(sqlite3_file *, int, int, int)	-	-	-	-	559e840003f60d5f	-
+field	c:@S@sqlite3_io_methods@FI@xShmBarrier	sqlite3_io_methods			void (*)(sqlite3_file *)	-	-	-	-	cf777891d8758201	-
+field	c:@S@sqlite3_io_methods@FI@xShmUnmap	sqlite3_io_methods			int (*)(sqlite3_file *, int)	-	-	-	-	c400a33584370f60	-
+field	c:@S@sqlite3_io_methods@FI@xFetch	sqlite3_io_methods			int (*)(sqlite3_file *, sqlite3_int64, int, void **)	-	-	-	-	cfce650640ca3661	-
+field	c:@S@sqlite3_io_methods@FI@xUnfetch	sqlite3_io_methods			int (*)(sqlite3_file *, sqlite3_int64, void *)	-	-	-	-	b8dff1503e261743	-
+struct	c:@S@sqlite3_mutex	-			-	-	-	-	-	9c84f3b6dfbaea8c	-
+typedef	c:@T@sqlite3_mutex	-			struct sqlite3_mutex	-	-	-	-	7c0406cb002e091f	-
+typedef	c:@T@sqlite3_api_routines	-			struct sqlite3_api_routines	-	-	-	-	a73801391605bdd9	-
+typedef	c:@T@sqlite3_filename	-			const char *	-	-	-	-	0d7f3fd2bdbc8015	-
+typedef	c:@T@sqlite3_vfs	-			struct sqlite3_vfs	-	-	-	-	b1c06d2337027ec5	-
+typedef	c:@T@sqlite3_syscall_ptr	-			void (*)(void)	-	-	-	-	f2e133a33b235eb7	-
+struct	c:@S@sqlite3_vfs	-			-	-	-	-	-	9c9d9a2f6fa20439	-
+field	c:@S@sqlite3_vfs@FI@iVersion	sqlite3_vfs			int	-	-	-	-	74d30ea8031e3c59	-
+field	c:@S@sqlite3_vfs@FI@szOsFile	sqlite3_vfs			int	-	-	-	-	29bbbe2d195c7188	-
+field	c:@S@sqlite3_vfs@FI@mxPathname	sqlite3_vfs			int	-	-	-	-	4220a7d9027f1961	-
+field	c:@S@sqlite3_vfs@FI@pNext	sqlite3_vfs			sqlite3_vfs *	-	-	-	-	ed094ca6f349a9cc	-
+field	c:@S@sqlite3_vfs@FI@zName	sqlite3_vfs			const char *	-	-	-	-	8e49f2b949a221b8	-
+field	c:@S@sqlite3_vfs@FI@pAppData	sqlite3_vfs			void *	-	-	-	-	19de509832d0630a	-
+field	c:@S@sqlite3_vfs@FI@xOpen	sqlite3_vfs			int (*)(sqlite3_vfs *, sqlite3_filename, sqlite3_file *, int, int *)	-	-	-	-	765839c8cfc711fe	-
+field	c:@S@sqlite3_vfs@FI@xDelete	sqlite3_vfs			int (*)(sqlite3_vfs *, const char *, int)	-	-	-	-	8825ae13cb07ffbe	-
+field	c:@S@sqlite3_vfs@FI@xAccess	sqlite3_vfs			int (*)(sqlite3_vfs *, const char *, int, int *)	-	-	-	-	607a40a072bad0b7	-
+field	c:@S@sqlite3_vfs@FI@xFullPathname	sqlite3_vfs			int (*)(sqlite3_vfs *, const char *, int, char *)	-	-	-	-	ac345b49ec4a3862	-
+field	c:@S@sqlite3_vfs@FI@xDlOpen	sqlite3_vfs			void *(*)(sqlite3_vfs *, const char *)	-	-	-	-	b462b23c2b1ca07b	-
+field	c:@S@sqlite3_vfs@FI@xDlError	sqlite3_vfs			void (*)(sqlite3_vfs *, int, char *)	-	-	-	-	5a196a1a7ef331fc	-
+field	c:@S@sqlite3_vfs@FI@xDlSym	sqlite3_vfs			void (*(*)(sqlite3_vfs *, void *, const char *))(void)	-	-	-	-	c9718a4450d6747b	-
+field	c:@S@sqlite3_vfs@FI@xDlClose	sqlite3_vfs			void (*)(sqlite3_vfs *, void *)	-	-	-	-	66fe628f1845990e	-
+field	c:@S@sqlite3_vfs@FI@xRandomness	sqlite3_vfs			int (*)(sqlite3_vfs *, int, char *)	-	-	-	-	03b64dd9e23fca7a	-
+field	c:@S@sqlite3_vfs@FI@xSleep	sqlite3_vfs			int (*)(sqlite3_vfs *, int)	-	-	-	-	fb18042b8726cbeb	-
+field	c:@S@sqlite3_vfs@FI@xCurrentTime	sqlite3_vfs			int (*)(sqlite3_vfs *, double *)	-	-	-	-	9eda3386783553b7	-
+field	c:@S@sqlite3_vfs@FI@xGetLastError	sqlite3_vfs			int (*)(sqlite3_vfs *, int, char *)	-	-	-	-	2015b536c790ada6	-
+field	c:@S@sqlite3_vfs@FI@xCurrentTimeInt64	sqlite3_vfs			int (*)(sqlite3_vfs *, sqlite3_int64 *)	-	-	-	-	43f68be2c09d4fae	-
+field	c:@S@sqlite3_vfs@FI@xSetSystemCall	sqlite3_vfs			int (*)(sqlite3_vfs *, const char *, sqlite3_syscall_ptr)	-	-	-	-	192cb5226bcff26f	-
+field	c:@S@sqlite3_vfs@FI@xGetSystemCall	sqlite3_vfs			sqlite3_syscall_ptr (*)(sqlite3_vfs *, const char *)	-	-	-	-	5f1e3be0c7fc29e0	-
+field	c:@S@sqlite3_vfs@FI@xNextSystemCall	sqlite3_vfs			const char *(*)(sqlite3_vfs *, const char *)	-	-	-	-	acb1d85f4b3cc9e7	-
+function	c:@F@sqlite3_initialize	-			int (void)	-	-	-	-	09f72a74a6b21563	-
+function	c:@F@sqlite3_shutdown	-			int (void)	-	-	-	-	c67e3191e11413c5	-
+function	c:@F@sqlite3_os_init	-			int (void)	-	-	-	-	4ffa1baf1e2222ed	-
+function	c:@F@sqlite3_os_end	-			int (void)	-	-	-	-	0be15e9d285e7874	-
+function	c:@F@sqlite3_config	-			int (int, ...)	int 	variadic	-	-	48c3d9a748ada05b	-
+function	c:@F@sqlite3_db_config	-			int (sqlite3 *, int, ...)	sqlite3 *  | int op	variadic	-	-	3a423fc68efa35cc	-
+typedef	c:@T@sqlite3_mem_methods	-			struct sqlite3_mem_methods	-	-	-	-	b895c155debb0a9f	-
+struct	c:@S@sqlite3_mem_methods	-			-	-	-	-	-	17627e969cb587f9	-
+field	c:@S@sqlite3_mem_methods@FI@xMalloc	sqlite3_mem_methods			void *(*)(int)	-	-	-	-	a809e9b5f1f13377	-
+field	c:@S@sqlite3_mem_methods@FI@xFree	sqlite3_mem_methods			void (*)(void *)	-	-	-	-	21755b9015958f7a	-
+field	c:@S@sqlite3_mem_methods@FI@xRealloc	sqlite3_mem_methods			void *(*)(void *, int)	-	-	-	-	a3f46d0299df76d5	-
+field	c:@S@sqlite3_mem_methods@FI@xSize	sqlite3_mem_methods			int (*)(void *)	-	-	-	-	ab5c431b297a8003	-
+field	c:@S@sqlite3_mem_methods@FI@xRoundup	sqlite3_mem_methods			int (*)(int)	-	-	-	-	b86a9e0b40a363b3	-
+field	c:@S@sqlite3_mem_methods@FI@xInit	sqlite3_mem_methods			int (*)(void *)	-	-	-	-	71d22f0050251822	-
+field	c:@S@sqlite3_mem_methods@FI@xShutdown	sqlite3_mem_methods			void (*)(void *)	-	-	-	-	de655a8940daa66b	-
+field	c:@S@sqlite3_mem_methods@FI@pAppData	sqlite3_mem_methods			void *	-	-	-	-	f0341f6d304f4a58	-
+function	c:@F@sqlite3_extended_result_codes	-			int (sqlite3 *, int)	sqlite3 *  | int onoff	-	-	-	b45b11881f85823a	-
+function	c:@F@sqlite3_last_insert_rowid	-			sqlite3_int64 (sqlite3 *)	sqlite3 * 	-	-	-	cc9bde5b80984d2a	-
+function	c:@F@sqlite3_set_last_insert_rowid	-			void (sqlite3 *, sqlite3_int64)	sqlite3 *  | sqlite3_int64 	-	-	-	94fe749ae4dd8516	-
+function	c:@F@sqlite3_changes	-			int (sqlite3 *)	sqlite3 * 	-	-	-	cbb834ffcc001db1	-
+function	c:@F@sqlite3_changes64	-			sqlite3_int64 (sqlite3 *)	sqlite3 * 	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0	-	29d43ab1d3388183	-
+function	c:@F@sqlite3_total_changes	-			int (sqlite3 *)	sqlite3 * 	-	-	-	a9dc92a5c26f573f	-
+function	c:@F@sqlite3_total_changes64	-			sqlite3_int64 (sqlite3 *)	sqlite3 * 	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0	-	a969b35e89cf1eb5	-
+function	c:@F@sqlite3_interrupt	-			void (sqlite3 *)	sqlite3 * 	-	-	-	0b2f23fcf85b1102	-
+function	c:@F@sqlite3_is_interrupted	-			int (sqlite3 *)	sqlite3 * 	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=17.2/-/-/0,watchos=10.2/-/-/0	-	b43555d0199a37ac	-
+function	c:@F@sqlite3_complete	-			int (const char *)	const char * sql	-	-	-	370a6f6542c2bd33	-
+function	c:@F@sqlite3_complete16	-			int (const void *)	const void * sql	-	-	-	1b5d92140004e99b	-
+function	c:@F@sqlite3_busy_handler	-			int (sqlite3 *, int (*)(void *, int), void *)	sqlite3 *  | int (*)(void *, int)  | void * 	-	-	-	31e9e209e1a264fb	-
+function	c:@F@sqlite3_busy_timeout	-			int (sqlite3 *, int)	sqlite3 *  | int ms	-	-	-	177de94fd7b4b944	-
+function	c:@F@sqlite3_setlk_timeout	-			int (sqlite3 *, int, int)	sqlite3 *  | int ms | int flags	-	-	-	b32a79f075cc0675	-
+function	c:@F@sqlite3_get_table	-			int (sqlite3 *, const char *, char ***, int *, int *, char **)	sqlite3 * db | const char * zSql | char *** pazResult | int * pnRow | int * pnColumn | char ** pzErrmsg	-	-	-	1fa6195a103ee0ab	-
+function	c:@F@sqlite3_free_table	-			void (char **)	char ** result	-	-	-	26e258e1997a8346	-
+function	c:@F@sqlite3_mprintf	-			char * (const char *, ...)	const char * 	variadic	-	-	5bb92bc21c0fcebc	-
+function	c:@F@sqlite3_vmprintf	-			char * (const char *, va_list)	const char *  | va_list 	-	-	-	2119c7a6eae8902b	-
+function	c:@F@sqlite3_snprintf	-			char * (int, char *, const char *, ...)	int  | char *  | const char * 	variadic	-	-	9e5a0d9ddf5f3796	-
+function	c:@F@sqlite3_vsnprintf	-			char * (int, char *, const char *, va_list)	int  | char *  | const char *  | va_list 	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	f937598678ce7595	-
+function	c:@F@sqlite3_malloc	-			void * (int)	int 	-	-	-	fb765cdba47ff170	-
+function	c:@F@sqlite3_malloc64	-			void * (sqlite3_uint64)	sqlite3_uint64 	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	decf90331577e7c3	-
+function	c:@F@sqlite3_realloc	-			void * (void *, int)	void *  | int 	-	-	-	6a842fdb52d5407d	-
+function	c:@F@sqlite3_realloc64	-			void * (void *, sqlite3_uint64)	void *  | sqlite3_uint64 	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	2a993fb1e0f16c90	-
+function	c:@F@sqlite3_free	-			void (void *)	void * 	-	-	-	55cbcab13bdbfefc	-
+function	c:@F@sqlite3_msize	-			sqlite3_uint64 (void *)	void * 	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	c3f65bcbc607aced	-
+function	c:@F@sqlite3_memory_used	-			sqlite3_int64 (void)	-	-	-	-	c861493a604b13b7	-
+function	c:@F@sqlite3_memory_highwater	-			sqlite3_int64 (int)	int resetFlag	-	-	-	3ad2ec53b3912754	-
+function	c:@F@sqlite3_randomness	-			void (int, void *)	int N | void * P	-	-	-	ef6ee6220a4c681c	-
+function	c:@F@sqlite3_set_authorizer	-			int (sqlite3 *, int (*)(void *, int, const char *, const char *, const char *, const char *), void *)	sqlite3 *  | int (*)(void *, int, const char *, const char *, const char *, const char *) xAuth | void * pUserData	-	-	-	5f8109f22e167c59	-
+function	c:@F@sqlite3_trace	-			void * (sqlite3 *, void (*)(void *, const char *), void *)	sqlite3 *  | void (*)(void *, const char *) xTrace | void * 	-	ios=5.0/10.0/-/0,macos=10.7/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	3e90bf073c17a318	-
+function	c:@F@sqlite3_profile	-			void * (sqlite3 *, void (*)(void *, const char *, sqlite3_uint64), void *)	sqlite3 *  | void (*)(void *, const char *, sqlite3_uint64) xProfile | void * 	-	ios=3.0/10.0/-/0,macos=10.6/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	1219bc7e15d7b3f8	-
+function	c:@F@sqlite3_trace_v2	-			int (sqlite3 *, unsigned int, int (*)(unsigned int, void *, void *, void *), void *)	sqlite3 *  | unsigned int uMask | int (*)(unsigned int, void *, void *, void *) xCallback | void * pCtx	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	69a92ef79085672e	-
+function	c:@F@sqlite3_progress_handler	-			void (sqlite3 *, int, int (*)(void *), void *)	sqlite3 *  | int  | int (*)(void *)  | void * 	-	-	-	f9ce15fc5453dd42	-
+function	c:@F@sqlite3_open	-			int (const char *, sqlite3 **)	const char * filename | sqlite3 ** ppDb	-	-	-	f9f60782c747ecc5	-
+function	c:@F@sqlite3_open16	-			int (const void *, sqlite3 **)	const void * filename | sqlite3 ** ppDb	-	-	-	397adc0a1f8900a7	-
+function	c:@F@sqlite3_open_v2	-			int (const char *, sqlite3 **, int, const char *)	const char * filename | sqlite3 ** ppDb | int flags | const char * zVfs	-	-	-	38345f7927c0a5c5	-
+function	c:@F@sqlite3_uri_parameter	-			const char * (sqlite3_filename, const char *)	sqlite3_filename z | const char * zParam	-	ios=5.0/-/-/0,macos=10.8/-/-/0	-	cf8f0ea9b1aa1b0e	-
+function	c:@F@sqlite3_uri_boolean	-			int (sqlite3_filename, const char *, int)	sqlite3_filename z | const char * zParam | int bDefault	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	86cc34e4cc69da98	-
+function	c:@F@sqlite3_uri_int64	-			sqlite3_int64 (sqlite3_filename, const char *, sqlite3_int64)	sqlite3_filename  | const char *  | sqlite3_int64 	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	9ac6b2836d3b5d16	-
+function	c:@F@sqlite3_uri_key	-			const char * (sqlite3_filename, int)	sqlite3_filename z | int N	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	1eff7435788e6d33	-
+function	c:@F@sqlite3_filename_database	-			const char * (sqlite3_filename)	sqlite3_filename 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	e706523728b6ec9a	-
+function	c:@F@sqlite3_filename_journal	-			const char * (sqlite3_filename)	sqlite3_filename 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	15f29eda440d6ca3	-
+function	c:@F@sqlite3_filename_wal	-			const char * (sqlite3_filename)	sqlite3_filename 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	c4bae606aae7f264	-
+function	c:@F@sqlite3_database_file_object	-			sqlite3_file * (const char *)	const char * 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=6.0/-/-/0	-	6edffc5b0a963bb2	-
+function	c:@F@sqlite3_create_filename	-			sqlite3_filename (const char *, const char *, const char *, int, const char **)	const char * zDatabase | const char * zJournal | const char * zWal | int nParam | const char ** azParam	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=6.0/-/-/0	-	88fbd9946e33c251	-
+function	c:@F@sqlite3_free_filename	-			void (sqlite3_filename)	sqlite3_filename 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=6.0/-/-/0	-	46eccb75db5b9cd8	-
+function	c:@F@sqlite3_errcode	-			int (sqlite3 *)	sqlite3 * db	-	-	-	f32727f3316f9016	-
+function	c:@F@sqlite3_extended_errcode	-			int (sqlite3 *)	sqlite3 * db	-	-	-	238615e11b26c3d8	-
+function	c:@F@sqlite3_errmsg	-			const char * (sqlite3 *)	sqlite3 * 	-	-	-	a4426796407e84e9	-
+function	c:@F@sqlite3_errmsg16	-			const void * (sqlite3 *)	sqlite3 * 	-	-	-	93d28b1d2f5847c6	-
+function	c:@F@sqlite3_errstr	-			const char * (int)	int 	-	ios=8.2/-/-/0,macos=10.10/-/-/0	-	3106a705b433bcc2	-
+function	c:@F@sqlite3_error_offset	-			int (sqlite3 *)	sqlite3 * db	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	151d28b6f9d312fe	-
+struct	c:@S@sqlite3_stmt	-			-	-	-	-	-	9374c816c20eeecc	-
+typedef	c:@T@sqlite3_stmt	-			struct sqlite3_stmt	-	-	-	-	dfcadbf878d8414d	-
+function	c:@F@sqlite3_limit	-			int (sqlite3 *, int, int)	sqlite3 *  | int id | int newVal	-	-	-	5c4c60d10563ca10	-
+function	c:@F@sqlite3_prepare	-			int (sqlite3 *, const char *, int, sqlite3_stmt **, const char **)	sqlite3 * db | const char * zSql | int nByte | sqlite3_stmt ** ppStmt | const char ** pzTail	-	-	-	791cae73100b0b6e	-
+function	c:@F@sqlite3_prepare_v2	-			int (sqlite3 *, const char *, int, sqlite3_stmt **, const char **)	sqlite3 * db | const char * zSql | int nByte | sqlite3_stmt ** ppStmt | const char ** pzTail	-	-	-	04385e63ac6cbf33	-
+function	c:@F@sqlite3_prepare_v3	-			int (sqlite3 *, const char *, int, unsigned int, sqlite3_stmt **, const char **)	sqlite3 * db | const char * zSql | int nByte | unsigned int prepFlags | sqlite3_stmt ** ppStmt | const char ** pzTail	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f442bac84077b317	-
+function	c:@F@sqlite3_prepare16	-			int (sqlite3 *, const void *, int, sqlite3_stmt **, const void **)	sqlite3 * db | const void * zSql | int nByte | sqlite3_stmt ** ppStmt | const void ** pzTail	-	-	-	e637f204e13fb565	-
+function	c:@F@sqlite3_prepare16_v2	-			int (sqlite3 *, const void *, int, sqlite3_stmt **, const void **)	sqlite3 * db | const void * zSql | int nByte | sqlite3_stmt ** ppStmt | const void ** pzTail	-	-	-	818ec6966afca9ba	-
+function	c:@F@sqlite3_prepare16_v3	-			int (sqlite3 *, const void *, int, unsigned int, sqlite3_stmt **, const void **)	sqlite3 * db | const void * zSql | int nByte | unsigned int prepFlags | sqlite3_stmt ** ppStmt | const void ** pzTail	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	573ba7fd6211d6e9	-
+function	c:@F@sqlite3_sql	-			const char * (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	-	-	c06bc31923f6df97	-
+function	c:@F@sqlite3_expanded_sql	-			char * (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	dabd69f9fe6bc5cf	-
+function	c:@F@sqlite3_normalized_sql	-			const char * (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	0f668275b0fe8904	-
+function	c:@F@sqlite3_stmt_readonly	-			int (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	8b72531caeb87e0b	-
+function	c:@F@sqlite3_stmt_isexplain	-			int (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	937072325b80854b	-
+function	c:@F@sqlite3_stmt_explain	-			int (sqlite3_stmt *, int)	sqlite3_stmt * pStmt | int eMode	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=17.2/-/-/0,watchos=10.2/-/-/0	-	92d384bd1e5ed840	-
+function	c:@F@sqlite3_stmt_busy	-			int (sqlite3_stmt *)	sqlite3_stmt * 	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	731737a2694dbb9e	-
+struct	c:@S@sqlite3_value	-			-	-	-	-	-	9aae35d9159581c3	-
+typedef	c:@T@sqlite3_value	-			struct sqlite3_value	-	-	-	-	a63bdb6e8b6a28e1	-
+struct	c:@S@sqlite3_context	-			-	-	-	-	-	df737bf3dd4c6150	-
+typedef	c:@T@sqlite3_context	-			struct sqlite3_context	-	-	-	-	4c603e509fabc1fd	-
+function	c:@F@sqlite3_bind_blob	-			int (sqlite3_stmt *, int, const void *, int, void (*)(void *))	sqlite3_stmt *  | int  | const void *  | int n | void (*)(void *) 	-	-	-	5fd6270b1c7cf8ef	-
+function	c:@F@sqlite3_bind_blob64	-			int (sqlite3_stmt *, int, const void *, sqlite3_uint64, void (*)(void *))	sqlite3_stmt *  | int  | const void *  | sqlite3_uint64  | void (*)(void *) 	-	-	-	4ac6cd7d5f2dbda4	-
+function	c:@F@sqlite3_bind_double	-			int (sqlite3_stmt *, int, double)	sqlite3_stmt *  | int  | double 	-	-	-	7bcc786d0fad5d62	-
+function	c:@F@sqlite3_bind_int	-			int (sqlite3_stmt *, int, int)	sqlite3_stmt *  | int  | int 	-	-	-	296424e7dec64030	-
+function	c:@F@sqlite3_bind_int64	-			int (sqlite3_stmt *, int, sqlite3_int64)	sqlite3_stmt *  | int  | sqlite3_int64 	-	-	-	a7e70cce534058fe	-
+function	c:@F@sqlite3_bind_null	-			int (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	240c281d54d1f0de	-
+function	c:@F@sqlite3_bind_text	-			int (sqlite3_stmt *, int, const char *, int, void (*)(void *))	sqlite3_stmt *  | int  | const char *  | int  | void (*)(void *) 	-	-	-	5c162a8fcf52e28d	-
+function	c:@F@sqlite3_bind_text16	-			int (sqlite3_stmt *, int, const void *, int, void (*)(void *))	sqlite3_stmt *  | int  | const void *  | int  | void (*)(void *) 	-	-	-	cfb893403efb1988	-
+function	c:@F@sqlite3_bind_text64	-			int (sqlite3_stmt *, int, const char *, sqlite3_uint64, void (*)(void *), unsigned char)	sqlite3_stmt *  | int  | const char *  | sqlite3_uint64  | void (*)(void *)  | unsigned char encoding	-	-	-	9e63509bf6824b96	-
+function	c:@F@sqlite3_bind_value	-			int (sqlite3_stmt *, int, const sqlite3_value *)	sqlite3_stmt *  | int  | const sqlite3_value * 	-	-	-	483b31f65474f99e	-
+function	c:@F@sqlite3_bind_pointer	-			int (sqlite3_stmt *, int, void *, const char *, void (*)(void *))	sqlite3_stmt *  | int  | void *  | const char *  | void (*)(void *) 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	a9e734998d9c322c	-
+function	c:@F@sqlite3_bind_zeroblob	-			int (sqlite3_stmt *, int, int)	sqlite3_stmt *  | int  | int n	-	-	-	4cb5579161de53c0	-
+function	c:@F@sqlite3_bind_zeroblob64	-			int (sqlite3_stmt *, int, sqlite3_uint64)	sqlite3_stmt *  | int  | sqlite3_uint64 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	061191c41621cfc9	-
+function	c:@F@sqlite3_bind_parameter_count	-			int (sqlite3_stmt *)	sqlite3_stmt * 	-	-	-	4e097a875051a11e	-
+function	c:@F@sqlite3_bind_parameter_name	-			const char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	a7373736b8c33233	-
+function	c:@F@sqlite3_bind_parameter_index	-			int (sqlite3_stmt *, const char *)	sqlite3_stmt *  | const char * zName	-	-	-	e6035d24481630c0	-
+function	c:@F@sqlite3_clear_bindings	-			int (sqlite3_stmt *)	sqlite3_stmt * 	-	-	-	76999d97148cdefc	-
+function	c:@F@sqlite3_column_count	-			int (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	-	-	da9ff19758d510de	-
+function	c:@F@sqlite3_column_name	-			const char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int N	-	-	-	e3a509d6397a2e41	-
+function	c:@F@sqlite3_column_name16	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int N	-	-	-	668e2dc1f764ed6e	-
+function	c:@F@sqlite3_column_database_name	-			const char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	4dbf3ef840f04af7	-
+function	c:@F@sqlite3_column_database_name16	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	90de290f9b5a471d	-
+function	c:@F@sqlite3_column_table_name	-			const char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	a012dc3c26320182	-
+function	c:@F@sqlite3_column_table_name16	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	a150fdda3cd01d0b	-
+function	c:@F@sqlite3_column_origin_name	-			const char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	f649ebd6e4b20cb2	-
+function	c:@F@sqlite3_column_origin_name16	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	9fb7ac0a13d91cb9	-
+function	c:@F@sqlite3_column_decltype	-			const char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	40803d2de9c4e8f7	-
+function	c:@F@sqlite3_column_decltype16	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int 	-	-	-	522dd2bb3c3f5178	-
+function	c:@F@sqlite3_step	-			int (sqlite3_stmt *)	sqlite3_stmt * 	-	-	-	d101445ce1911f45	-
+function	c:@F@sqlite3_data_count	-			int (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	-	-	41cac5bf424e5583	-
+function	c:@F@sqlite3_column_blob	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	908655284baa8a0a	-
+function	c:@F@sqlite3_column_double	-			double (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	85525705412abd36	-
+function	c:@F@sqlite3_column_int	-			int (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	405995ec3a74642c	-
+function	c:@F@sqlite3_column_int64	-			sqlite3_int64 (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	bc20b3c30a400bfb	-
+function	c:@F@sqlite3_column_text	-			const unsigned char * (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	e4f0c89daa285ca8	-
+function	c:@F@sqlite3_column_text16	-			const void * (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	73c628249511583c	-
+function	c:@F@sqlite3_column_value	-			sqlite3_value * (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	10c619759bf3f716	-
+function	c:@F@sqlite3_column_bytes	-			int (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	709ab34021034434	-
+function	c:@F@sqlite3_column_bytes16	-			int (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	309a2267fa32727b	-
+function	c:@F@sqlite3_column_type	-			int (sqlite3_stmt *, int)	sqlite3_stmt *  | int iCol	-	-	-	e52105475f44a153	-
+function	c:@F@sqlite3_finalize	-			int (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	-	-	b43421f7ebccca21	-
+function	c:@F@sqlite3_reset	-			int (sqlite3_stmt *)	sqlite3_stmt * pStmt	-	-	-	984f4093cb1cfcbe	-
+function	c:@F@sqlite3_create_function	-			int (sqlite3 *, const char *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *))	sqlite3 * db | const char * zFunctionName | int nArg | int eTextRep | void * pApp | void (*)(sqlite3_context *, int, sqlite3_value **) xFunc | void (*)(sqlite3_context *, int, sqlite3_value **) xStep | void (*)(sqlite3_context *) xFinal	-	-	-	25741ddbade6aafe	-
+function	c:@F@sqlite3_create_function16	-			int (sqlite3 *, const void *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *))	sqlite3 * db | const void * zFunctionName | int nArg | int eTextRep | void * pApp | void (*)(sqlite3_context *, int, sqlite3_value **) xFunc | void (*)(sqlite3_context *, int, sqlite3_value **) xStep | void (*)(sqlite3_context *) xFinal	-	-	-	68ad8fd15b663565	-
+function	c:@F@sqlite3_create_function_v2	-			int (sqlite3 *, const char *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *), void (*)(void *))	sqlite3 * db | const char * zFunctionName | int nArg | int eTextRep | void * pApp | void (*)(sqlite3_context *, int, sqlite3_value **) xFunc | void (*)(sqlite3_context *, int, sqlite3_value **) xStep | void (*)(sqlite3_context *) xFinal | void (*)(void *) xDestroy	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	d7891d35b3b65d38	-
+function	c:@F@sqlite3_create_window_function	-			int (sqlite3 *, const char *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *), void (*)(sqlite3_context *), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(void *))	sqlite3 * db | const char * zFunctionName | int nArg | int eTextRep | void * pApp | void (*)(sqlite3_context *, int, sqlite3_value **) xStep | void (*)(sqlite3_context *) xFinal | void (*)(sqlite3_context *) xValue | void (*)(sqlite3_context *, int, sqlite3_value **) xInverse | void (*)(void *) xDestroy	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	17e672c58590a078	-
+function	c:@F@sqlite3_aggregate_count	-			int (sqlite3_context *)	sqlite3_context * 	-	ios=3.0/3.0/-/0,macos=10.6/10.6/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	58d1435c4acea8fe	-
+function	c:@F@sqlite3_expired	-			int (sqlite3_stmt *)	sqlite3_stmt * 	-	ios=3.0/3.0/-/0,macos=10.6/10.6/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	c8c6a1b1baa3b73a	-
+function	c:@F@sqlite3_transfer_bindings	-			int (sqlite3_stmt *, sqlite3_stmt *)	sqlite3_stmt *  | sqlite3_stmt * 	-	ios=3.0/3.0/-/0,macos=10.6/10.6/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	553eb557c27bc1bb	-
+function	c:@F@sqlite3_global_recover	-			int (void)	-	-	ios=3.0/3.0/-/0,macos=10.6/10.6/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	c5375872c7bf25a0	-
+function	c:@F@sqlite3_thread_cleanup	-			void (void)	-	-	ios=3.0/3.0/-/0,macos=10.6/10.6/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	13efd419a307b639	-
+function	c:@F@sqlite3_memory_alarm	-			int (void (*)(void *, sqlite3_int64, int), void *, sqlite3_int64)	void (*)(void *, sqlite3_int64, int)  | void *  | sqlite3_int64 	-	ios=3.0/3.0/-/0,macos=10.6/10.6/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	a721377ed42dc72a	-
+function	c:@F@sqlite3_value_blob	-			const void * (sqlite3_value *)	sqlite3_value * 	-	-	-	850d96474bf76f04	-
+function	c:@F@sqlite3_value_double	-			double (sqlite3_value *)	sqlite3_value * 	-	-	-	89312d5790335c2e	-
+function	c:@F@sqlite3_value_int	-			int (sqlite3_value *)	sqlite3_value * 	-	-	-	b16182e75cc11ec3	-
+function	c:@F@sqlite3_value_int64	-			sqlite3_int64 (sqlite3_value *)	sqlite3_value * 	-	-	-	de770ac7d0d8da69	-
+function	c:@F@sqlite3_value_pointer	-			void * (sqlite3_value *, const char *)	sqlite3_value *  | const char * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	b920d0ed0bca3d6b	-
+function	c:@F@sqlite3_value_text	-			const unsigned char * (sqlite3_value *)	sqlite3_value * 	-	-	-	852d0e182841ed44	-
+function	c:@F@sqlite3_value_text16	-			const void * (sqlite3_value *)	sqlite3_value * 	-	-	-	bf764f3368a8f58d	-
+function	c:@F@sqlite3_value_text16le	-			const void * (sqlite3_value *)	sqlite3_value * 	-	-	-	018344dc7dbd8300	-
+function	c:@F@sqlite3_value_text16be	-			const void * (sqlite3_value *)	sqlite3_value * 	-	-	-	eaaca41fd9a31857	-
+function	c:@F@sqlite3_value_bytes	-			int (sqlite3_value *)	sqlite3_value * 	-	-	-	a4d865672d3c5143	-
+function	c:@F@sqlite3_value_bytes16	-			int (sqlite3_value *)	sqlite3_value * 	-	-	-	111cb1d54595d4bb	-
+function	c:@F@sqlite3_value_type	-			int (sqlite3_value *)	sqlite3_value * 	-	-	-	557487404b11fef6	-
+function	c:@F@sqlite3_value_numeric_type	-			int (sqlite3_value *)	sqlite3_value * 	-	-	-	2702c4c84453ab0c	-
+function	c:@F@sqlite3_value_nochange	-			int (sqlite3_value *)	sqlite3_value * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	bd9d301933daa947	-
+function	c:@F@sqlite3_value_frombind	-			int (sqlite3_value *)	sqlite3_value * 	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	1b3251540fd13988	-
+function	c:@F@sqlite3_value_encoding	-			int (sqlite3_value *)	sqlite3_value * 	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=17.2/-/-/0,watchos=10.2/-/-/0	-	d65dc8363ea5da7b	-
+function	c:@F@sqlite3_value_subtype	-			unsigned int (sqlite3_value *)	sqlite3_value * 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	3e702c990c406218	-
+function	c:@F@sqlite3_value_dup	-			sqlite3_value * (const sqlite3_value *)	const sqlite3_value * 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c7ccedaa9b0ae940	-
+function	c:@F@sqlite3_value_free	-			void (sqlite3_value *)	sqlite3_value * 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	bea6a0aeb383ffab	-
+function	c:@F@sqlite3_aggregate_context	-			void * (sqlite3_context *, int)	sqlite3_context *  | int nBytes	-	-	-	d1fffcd96e6124dc	-
+function	c:@F@sqlite3_user_data	-			void * (sqlite3_context *)	sqlite3_context * 	-	-	-	f66d0aaad5dd93e6	-
+function	c:@F@sqlite3_context_db_handle	-			sqlite3 * (sqlite3_context *)	sqlite3_context * 	-	-	-	8f627e6c8eff70f5	-
+function	c:@F@sqlite3_get_auxdata	-			void * (sqlite3_context *, int)	sqlite3_context *  | int N	-	-	-	29a5486711f2d948	-
+function	c:@F@sqlite3_set_auxdata	-			void (sqlite3_context *, int, void *, void (*)(void *))	sqlite3_context *  | int N | void *  | void (*)(void *) 	-	-	-	1149c845a8884583	-
+function	c:@F@sqlite3_get_clientdata	-			void * (sqlite3 *, const char *)	sqlite3 *  | const char * 	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	e720621402ff0831	-
+function	c:@F@sqlite3_set_clientdata	-			int (sqlite3 *, const char *, void *, void (*)(void *))	sqlite3 *  | const char *  | void *  | void (*)(void *) 	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	fb0228e91afaf4f7	-
+typedef	c:@T@sqlite3_destructor_type	-			void (*)(void *)	-	-	-	-	10aff7daeede1e66	-
+function	c:@F@sqlite3_result_blob	-			void (sqlite3_context *, const void *, int, void (*)(void *))	sqlite3_context *  | const void *  | int  | void (*)(void *) 	-	-	-	4616214c1cab116f	-
+function	c:@F@sqlite3_result_blob64	-			void (sqlite3_context *, const void *, sqlite3_uint64, void (*)(void *))	sqlite3_context *  | const void *  | sqlite3_uint64  | void (*)(void *) 	-	-	-	33abb57212fdf967	-
+function	c:@F@sqlite3_result_double	-			void (sqlite3_context *, double)	sqlite3_context *  | double 	-	-	-	bc8746b4926343d0	-
+function	c:@F@sqlite3_result_error	-			void (sqlite3_context *, const char *, int)	sqlite3_context *  | const char *  | int 	-	-	-	ca752c6ea6c7affa	-
+function	c:@F@sqlite3_result_error16	-			void (sqlite3_context *, const void *, int)	sqlite3_context *  | const void *  | int 	-	-	-	413e4c1883efd1f7	-
+function	c:@F@sqlite3_result_error_toobig	-			void (sqlite3_context *)	sqlite3_context * 	-	-	-	670fc7f9a0870781	-
+function	c:@F@sqlite3_result_error_nomem	-			void (sqlite3_context *)	sqlite3_context * 	-	-	-	d8b4b0485c879016	-
+function	c:@F@sqlite3_result_error_code	-			void (sqlite3_context *, int)	sqlite3_context *  | int 	-	-	-	4e2dcf4847400ade	-
+function	c:@F@sqlite3_result_int	-			void (sqlite3_context *, int)	sqlite3_context *  | int 	-	-	-	73c4ce96190d00df	-
+function	c:@F@sqlite3_result_int64	-			void (sqlite3_context *, sqlite3_int64)	sqlite3_context *  | sqlite3_int64 	-	-	-	2208bddac17db060	-
+function	c:@F@sqlite3_result_null	-			void (sqlite3_context *)	sqlite3_context * 	-	-	-	a749f6a0ed9cda57	-
+function	c:@F@sqlite3_result_text	-			void (sqlite3_context *, const char *, int, void (*)(void *))	sqlite3_context *  | const char *  | int  | void (*)(void *) 	-	-	-	b3ca91d7ddfcf6b6	-
+function	c:@F@sqlite3_result_text64	-			void (sqlite3_context *, const char *, sqlite3_uint64, void (*)(void *), unsigned char)	sqlite3_context *  | const char *  | sqlite3_uint64  | void (*)(void *)  | unsigned char encoding	-	-	-	79981c801d403533	-
+function	c:@F@sqlite3_result_text16	-			void (sqlite3_context *, const void *, int, void (*)(void *))	sqlite3_context *  | const void *  | int  | void (*)(void *) 	-	-	-	c41c13a2d89a75bc	-
+function	c:@F@sqlite3_result_text16le	-			void (sqlite3_context *, const void *, int, void (*)(void *))	sqlite3_context *  | const void *  | int  | void (*)(void *) 	-	-	-	d9d1593b4cb5f61c	-
+function	c:@F@sqlite3_result_text16be	-			void (sqlite3_context *, const void *, int, void (*)(void *))	sqlite3_context *  | const void *  | int  | void (*)(void *) 	-	-	-	07320e6c20aad4ce	-
+function	c:@F@sqlite3_result_value	-			void (sqlite3_context *, sqlite3_value *)	sqlite3_context *  | sqlite3_value * 	-	-	-	9fddb531d3fe0f8b	-
+function	c:@F@sqlite3_result_pointer	-			void (sqlite3_context *, void *, const char *, void (*)(void *))	sqlite3_context *  | void *  | const char *  | void (*)(void *) 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	46f5f4c064643cba	-
+function	c:@F@sqlite3_result_zeroblob	-			void (sqlite3_context *, int)	sqlite3_context *  | int n	-	-	-	c2ac5eda19a1b5bb	-
+function	c:@F@sqlite3_result_zeroblob64	-			int (sqlite3_context *, sqlite3_uint64)	sqlite3_context *  | sqlite3_uint64 n	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	542896585d20dff5	-
+function	c:@F@sqlite3_result_subtype	-			void (sqlite3_context *, unsigned int)	sqlite3_context *  | unsigned int 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f886bc08eddf1fb7	-
+function	c:@F@sqlite3_create_collation	-			int (sqlite3 *, const char *, int, void *, int (*)(void *, int, const void *, int, const void *))	sqlite3 *  | const char * zName | int eTextRep | void * pArg | int (*)(void *, int, const void *, int, const void *) xCompare	-	-	-	b0251e8a04b3252b	-
+function	c:@F@sqlite3_create_collation_v2	-			int (sqlite3 *, const char *, int, void *, int (*)(void *, int, const void *, int, const void *), void (*)(void *))	sqlite3 *  | const char * zName | int eTextRep | void * pArg | int (*)(void *, int, const void *, int, const void *) xCompare | void (*)(void *) xDestroy	-	-	-	0290616c5166cbe7	-
+function	c:@F@sqlite3_create_collation16	-			int (sqlite3 *, const void *, int, void *, int (*)(void *, int, const void *, int, const void *))	sqlite3 *  | const void * zName | int eTextRep | void * pArg | int (*)(void *, int, const void *, int, const void *) xCompare	-	-	-	bf836b418aa63464	-
+function	c:@F@sqlite3_collation_needed	-			int (sqlite3 *, void *, void (*)(void *, sqlite3 *, int, const char *))	sqlite3 *  | void *  | void (*)(void *, sqlite3 *, int, const char *) 	-	-	-	fd1eb3544630c368	-
+function	c:@F@sqlite3_collation_needed16	-			int (sqlite3 *, void *, void (*)(void *, sqlite3 *, int, const void *))	sqlite3 *  | void *  | void (*)(void *, sqlite3 *, int, const void *) 	-	-	-	d069815c010db027	-
+function	c:@F@sqlite3_sleep	-			int (int)	int 	-	-	-	c78794faaa2b115e	-
+var	c:@sqlite3_temp_directory	-			char *	-	-	-	deprecated: Use sqlite3_trace_v2 instead	e3fda99253100aef	-
+var	c:@sqlite3_data_directory	-			char *	-	-	ios=6.0/-/-/0,macos=10.9/-/-/0	-	d2e9bb6dbb51ef95	-
+function	c:@F@sqlite3_get_autocommit	-			int (sqlite3 *)	sqlite3 * 	-	-	-	90e5c4ad7fffd12d	-
+function	c:@F@sqlite3_db_handle	-			sqlite3 * (sqlite3_stmt *)	sqlite3_stmt * 	-	-	-	fd2fd4a556178d97	-
+function	c:@F@sqlite3_db_name	-			const char * (sqlite3 *, int)	sqlite3 * db | int N	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	72bb23a2c6cd7996	-
+function	c:@F@sqlite3_db_filename	-			sqlite3_filename (sqlite3 *, const char *)	sqlite3 * db | const char * zDbName	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	35f0743d499b9c61	-
+function	c:@F@sqlite3_db_readonly	-			int (sqlite3 *, const char *)	sqlite3 * db | const char * zDbName	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	5e5a23fc927095b4	-
+function	c:@F@sqlite3_txn_state	-			int (sqlite3 *, const char *)	sqlite3 *  | const char * zSchema	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	6c982c286c6e5555	-
+function	c:@F@sqlite3_next_stmt	-			sqlite3_stmt * (sqlite3 *, sqlite3_stmt *)	sqlite3 * pDb | sqlite3_stmt * pStmt	-	-	-	c4fac47c1207619b	-
+function	c:@F@sqlite3_commit_hook	-			void * (sqlite3 *, int (*)(void *), void *)	sqlite3 *  | int (*)(void *)  | void * 	-	-	-	80ce70b52e90b126	-
+function	c:@F@sqlite3_rollback_hook	-			void * (sqlite3 *, void (*)(void *), void *)	sqlite3 *  | void (*)(void *)  | void * 	-	-	-	47b7a0e0650a12c0	-
+function	c:@F@sqlite3_autovacuum_pages	-			int (sqlite3 *, unsigned int (*)(void *, const char *, unsigned int, unsigned int, unsigned int), void *, void (*)(void *))	sqlite3 * db | unsigned int (*)(void *, const char *, unsigned int, unsigned int, unsigned int)  | void *  | void (*)(void *) 	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0,watchos=8.5/-/-/0	-	a37a264203dae0b2	-
+function	c:@F@sqlite3_update_hook	-			void * (sqlite3 *, void (*)(void *, int, const char *, const char *, sqlite3_int64), void *)	sqlite3 *  | void (*)(void *, int, const char *, const char *, sqlite3_int64)  | void * 	-	-	-	5f184955b2e7f75a	-
+function	c:@F@sqlite3_enable_shared_cache	-			int (int)	int 	-	ios=3.0/5.0/-/0,macos=10.6/10.7/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	e03c596a1b8f207f	-
+function	c:@F@sqlite3_release_memory	-			int (int)	int 	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	40ced98ca1c64ed4	-
+function	c:@F@sqlite3_db_release_memory	-			int (sqlite3 *)	sqlite3 * 	-	-	-	5d858d745db5c2af	-
+function	c:@F@sqlite3_soft_heap_limit64	-			sqlite3_int64 (sqlite3_int64)	sqlite3_int64 N	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	e63b66aec34f4266	-
+function	c:@F@sqlite3_soft_heap_limit	-			void (int)	int N	-	ios=3.0/5.0/-/0,macos=10.6/10.7/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	d5d7d825acc50b22	-
+function	c:@F@sqlite3_table_column_metadata	-			int (sqlite3 *, const char *, const char *, const char *, const char **, const char **, int *, int *, int *)	sqlite3 * db | const char * zDbName | const char * zTableName | const char * zColumnName | const char ** pzDataType | const char ** pzCollSeq | int * pNotNull | int * pPrimaryKey | int * pAutoinc	-	-	-	0253ee64aabdc58e	-
+function	c:@F@sqlite3_auto_extension	-			int (void (*)(void))	void (*)(void) xEntryPoint	-	ios=8.2/8.2/-/0,macos=10.10/10.10/-/0,tvos=9.0/9.0/-/0,watchos=2.0/2.0/-/0	-	c546c0f1ff0f9e85	-
+function	c:@F@sqlite3_cancel_auto_extension	-			int (void (*)(void))	void (*)(void) xEntryPoint	-	ios=12.0/12.0/-/0,macos=10.14/10.14/-/0,tvos=12.0/12.0/-/0,watchos=5.0/5.0/-/0	-	3b791dce9b10a16c	-
+function	c:@F@sqlite3_reset_auto_extension	-			void (void)	-	-	ios=12.0/12.0/-/0,macos=10.14/10.14/-/0,tvos=12.0/12.0/-/0,watchos=5.0/5.0/-/0	-	1897c428315e8aa8	-
+typedef	c:@T@sqlite3_vtab	-			struct sqlite3_vtab	-	-	-	-	e30e954d988ee611	-
+typedef	c:@T@sqlite3_index_info	-			struct sqlite3_index_info	-	-	-	-	fa71b7fcb939bcd4	-
+typedef	c:@T@sqlite3_vtab_cursor	-			struct sqlite3_vtab_cursor	-	-	-	-	5a4b63d82661a0c2	-
+typedef	c:@T@sqlite3_module	-			struct sqlite3_module	-	-	-	-	01d70e485b3e7867	-
+struct	c:@S@sqlite3_module	-			-	-	-	-	-	cdc31204f7d16415	-
+field	c:@S@sqlite3_module@FI@iVersion	sqlite3_module			int	-	-	-	-	7b9fe2fdd3ebc824	-
+field	c:@S@sqlite3_module@FI@xCreate	sqlite3_module			int (*)(sqlite3 *, void *, int, const char *const *, sqlite3_vtab **, char **)	-	-	-	-	46933891d02ed85d	-
+field	c:@S@sqlite3_module@FI@xConnect	sqlite3_module			int (*)(sqlite3 *, void *, int, const char *const *, sqlite3_vtab **, char **)	-	-	-	-	3a96e043ce890178	-
+field	c:@S@sqlite3_module@FI@xBestIndex	sqlite3_module			int (*)(sqlite3_vtab *, sqlite3_index_info *)	-	-	-	-	a77a4c5cd1f1575a	-
+field	c:@S@sqlite3_module@FI@xDisconnect	sqlite3_module			int (*)(sqlite3_vtab *)	-	-	-	-	3f9e570b8b455a77	-
+field	c:@S@sqlite3_module@FI@xDestroy	sqlite3_module			int (*)(sqlite3_vtab *)	-	-	-	-	cab582564037653a	-
+field	c:@S@sqlite3_module@FI@xOpen	sqlite3_module			int (*)(sqlite3_vtab *, sqlite3_vtab_cursor **)	-	-	-	-	5873b62eea5150e3	-
+field	c:@S@sqlite3_module@FI@xClose	sqlite3_module			int (*)(sqlite3_vtab_cursor *)	-	-	-	-	6c8bc87553e65445	-
+field	c:@S@sqlite3_module@FI@xFilter	sqlite3_module			int (*)(sqlite3_vtab_cursor *, int, const char *, int, sqlite3_value **)	-	-	-	-	18e985e46054cdde	-
+field	c:@S@sqlite3_module@FI@xNext	sqlite3_module			int (*)(sqlite3_vtab_cursor *)	-	-	-	-	2c7b9c6f0533d36f	-
+field	c:@S@sqlite3_module@FI@xEof	sqlite3_module			int (*)(sqlite3_vtab_cursor *)	-	-	-	-	285ec07dd6904c5d	-
+field	c:@S@sqlite3_module@FI@xColumn	sqlite3_module			int (*)(sqlite3_vtab_cursor *, sqlite3_context *, int)	-	-	-	-	ca6d88253f941d42	-
+field	c:@S@sqlite3_module@FI@xRowid	sqlite3_module			int (*)(sqlite3_vtab_cursor *, sqlite3_int64 *)	-	-	-	-	5c78b03c189af633	-
+field	c:@S@sqlite3_module@FI@xUpdate	sqlite3_module			int (*)(sqlite3_vtab *, int, sqlite3_value **, sqlite3_int64 *)	-	-	-	-	6a63d13c5882d069	-
+field	c:@S@sqlite3_module@FI@xBegin	sqlite3_module			int (*)(sqlite3_vtab *)	-	-	-	-	262587f4ac5d43fe	-
+field	c:@S@sqlite3_module@FI@xSync	sqlite3_module			int (*)(sqlite3_vtab *)	-	-	-	-	3c6f5b1352922f69	-
+field	c:@S@sqlite3_module@FI@xCommit	sqlite3_module			int (*)(sqlite3_vtab *)	-	-	-	-	3361d39cfb1ca023	-
+field	c:@S@sqlite3_module@FI@xRollback	sqlite3_module			int (*)(sqlite3_vtab *)	-	-	-	-	a292c003b708a606	-
+field	c:@S@sqlite3_module@FI@xFindFunction	sqlite3_module			int (*)(sqlite3_vtab *, int, const char *, void (**)(sqlite3_context *, int, sqlite3_value **), void **)	-	-	-	-	f6f1b004b9465ed5	-
+field	c:@S@sqlite3_module@FI@xRename	sqlite3_module			int (*)(sqlite3_vtab *, const char *)	-	-	-	-	7bdfb8322702ed0b	-
+field	c:@S@sqlite3_module@FI@xSavepoint	sqlite3_module			int (*)(sqlite3_vtab *, int)	-	-	-	-	93ed1317ffc9ce4b	-
+field	c:@S@sqlite3_module@FI@xRelease	sqlite3_module			int (*)(sqlite3_vtab *, int)	-	-	-	-	a3f2d80e42219de1	-
+field	c:@S@sqlite3_module@FI@xRollbackTo	sqlite3_module			int (*)(sqlite3_vtab *, int)	-	-	-	-	9b55d6ca78899fa2	-
+field	c:@S@sqlite3_module@FI@xShadowName	sqlite3_module			int (*)(const char *)	-	-	-	-	f01f0ac6a267031f	-
+field	c:@S@sqlite3_module@FI@xIntegrity	sqlite3_module			int (*)(sqlite3_vtab *, const char *, const char *, int, char **)	-	-	-	-	54a016191946a3a7	-
+struct	c:@S@sqlite3_index_info	-			-	-	-	-	-	bff0227b457d4a62	-
+field	c:@S@sqlite3_index_info@FI@nConstraint	sqlite3_index_info			int	-	-	-	-	8f35017ed59fa25a	-
+struct	c:@S@sqlite3_index_constraint	-			-	-	-	-	-	96eb7ab1ccd946f1	-
+field	c:@S@sqlite3_index_constraint@FI@iColumn	sqlite3_index_constraint			int	-	-	-	-	4b948b62ac3ff37a	-
+field	c:@S@sqlite3_index_constraint@FI@op	sqlite3_index_constraint			unsigned char	-	-	-	-	2fda5c873dbe2d41	-
+field	c:@S@sqlite3_index_constraint@FI@usable	sqlite3_index_constraint			unsigned char	-	-	-	-	9dbdc420901ffbb5	-
+field	c:@S@sqlite3_index_constraint@FI@iTermOffset	sqlite3_index_constraint			int	-	-	-	-	b2211cfa28939629	-
+field	c:@S@sqlite3_index_info@FI@aConstraint	sqlite3_index_info			struct sqlite3_index_constraint *	-	-	-	-	008ac3f83497fb09	-
+field	c:@S@sqlite3_index_info@FI@nOrderBy	sqlite3_index_info			int	-	-	-	-	6a92aa27bb7bc9aa	-
+struct	c:@S@sqlite3_index_orderby	-			-	-	-	-	-	d0ae47fef1b84d27	-
+field	c:@S@sqlite3_index_orderby@FI@iColumn	sqlite3_index_orderby			int	-	-	-	-	1b623556925094cc	-
+field	c:@S@sqlite3_index_orderby@FI@desc	sqlite3_index_orderby			unsigned char	-	-	-	-	de96f5a6a1b47182	-
+field	c:@S@sqlite3_index_info@FI@aOrderBy	sqlite3_index_info			struct sqlite3_index_orderby *	-	-	-	-	f3f9849b14736a75	-
+struct	c:@S@sqlite3_index_constraint_usage	-			-	-	-	-	-	ab7e77d0c217189c	-
+field	c:@S@sqlite3_index_constraint_usage@FI@argvIndex	sqlite3_index_constraint_usage			int	-	-	-	-	3746c1e8a5e662f2	-
+field	c:@S@sqlite3_index_constraint_usage@FI@omit	sqlite3_index_constraint_usage			unsigned char	-	-	-	-	d184eb5c8549bfc8	-
+field	c:@S@sqlite3_index_info@FI@aConstraintUsage	sqlite3_index_info			struct sqlite3_index_constraint_usage *	-	-	-	-	a4e70189f63f5e4b	-
+field	c:@S@sqlite3_index_info@FI@idxNum	sqlite3_index_info			int	-	-	-	-	6f0a4d7761bd62c4	-
+field	c:@S@sqlite3_index_info@FI@idxStr	sqlite3_index_info			char *	-	-	-	-	aa6838b61c4c671c	-
+field	c:@S@sqlite3_index_info@FI@needToFreeIdxStr	sqlite3_index_info			int	-	-	-	-	06f906bba88815d6	-
+field	c:@S@sqlite3_index_info@FI@orderByConsumed	sqlite3_index_info			int	-	-	-	-	3900e189bf3d9470	-
+field	c:@S@sqlite3_index_info@FI@estimatedCost	sqlite3_index_info			double	-	-	-	-	97e362ec07a8fd50	-
+field	c:@S@sqlite3_index_info@FI@estimatedRows	sqlite3_index_info			sqlite3_int64	-	-	-	-	f18cf10eeaf3d7c3	-
+field	c:@S@sqlite3_index_info@FI@idxFlags	sqlite3_index_info			int	-	-	-	-	62c629f0659a6252	-
+field	c:@S@sqlite3_index_info@FI@colUsed	sqlite3_index_info			sqlite3_uint64	-	-	-	-	5fdcc478b576ec96	-
+function	c:@F@sqlite3_create_module	-			int (sqlite3 *, const char *, const sqlite3_module *, void *)	sqlite3 * db | const char * zName | const sqlite3_module * p | void * pClientData	-	-	-	4c656dd68160daa5	-
+function	c:@F@sqlite3_create_module_v2	-			int (sqlite3 *, const char *, const sqlite3_module *, void *, void (*)(void *))	sqlite3 * db | const char * zName | const sqlite3_module * p | void * pClientData | void (*)(void *) xDestroy	-	-	-	dcbeb407ad794bbb	-
+function	c:@F@sqlite3_drop_modules	-			int (sqlite3 *, const char **)	sqlite3 * db | const char ** azKeep	-	-	-	85465b7c2ea06238	-
+struct	c:@S@sqlite3_vtab	-			-	-	-	-	-	c318482b0606135f	-
+field	c:@S@sqlite3_vtab@FI@pModule	sqlite3_vtab			const sqlite3_module *	-	-	-	-	790c7884477d5416	-
+field	c:@S@sqlite3_vtab@FI@nRef	sqlite3_vtab			int	-	-	-	-	61f462729b4b2060	-
+field	c:@S@sqlite3_vtab@FI@zErrMsg	sqlite3_vtab			char *	-	-	-	-	e698280f21d12e22	-
+struct	c:@S@sqlite3_vtab_cursor	-			-	-	-	-	-	0d1a5db8972dcd46	-
+field	c:@S@sqlite3_vtab_cursor@FI@pVtab	sqlite3_vtab_cursor			sqlite3_vtab *	-	-	-	-	f9cf67077156a3a2	-
+function	c:@F@sqlite3_declare_vtab	-			int (sqlite3 *, const char *)	sqlite3 *  | const char * zSQL	-	-	-	b71bbaaa39ec899c	-
+function	c:@F@sqlite3_overload_function	-			int (sqlite3 *, const char *, int)	sqlite3 *  | const char * zFuncName | int nArg	-	-	-	81bfc34e5b46de86	-
+struct	c:@S@sqlite3_blob	-			-	-	-	-	-	ed69049b38b7df60	-
+typedef	c:@T@sqlite3_blob	-			struct sqlite3_blob	-	-	-	-	10ca45461b41b1ce	-
+function	c:@F@sqlite3_blob_open	-			int (sqlite3 *, const char *, const char *, const char *, sqlite3_int64, int, sqlite3_blob **)	sqlite3 *  | const char * zDb | const char * zTable | const char * zColumn | sqlite3_int64 iRow | int flags | sqlite3_blob ** ppBlob	-	-	-	c23f616bf489a9f2	-
+function	c:@F@sqlite3_blob_reopen	-			int (sqlite3_blob *, sqlite3_int64)	sqlite3_blob *  | sqlite3_int64 	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	8d28364486adf401	-
+function	c:@F@sqlite3_blob_close	-			int (sqlite3_blob *)	sqlite3_blob * 	-	-	-	468d8f2361df02eb	-
+function	c:@F@sqlite3_blob_bytes	-			int (sqlite3_blob *)	sqlite3_blob * 	-	-	-	2693798e4c6958ef	-
+function	c:@F@sqlite3_blob_read	-			int (sqlite3_blob *, void *, int, int)	sqlite3_blob *  | void * Z | int N | int iOffset	-	-	-	5b619a20c16a4dad	-
+function	c:@F@sqlite3_blob_write	-			int (sqlite3_blob *, const void *, int, int)	sqlite3_blob *  | const void * z | int n | int iOffset	-	-	-	d1a94d6690ef5c82	-
+function	c:@F@sqlite3_vfs_find	-			sqlite3_vfs * (const char *)	const char * zVfsName	-	-	-	3307cfd810673328	-
+function	c:@F@sqlite3_vfs_register	-			int (sqlite3_vfs *, int)	sqlite3_vfs *  | int makeDflt	-	-	-	aba3c1629cb81faa	-
+function	c:@F@sqlite3_vfs_unregister	-			int (sqlite3_vfs *)	sqlite3_vfs * 	-	-	-	b284cfdb608c9de6	-
+function	c:@F@sqlite3_mutex_alloc	-			sqlite3_mutex * (int)	int 	-	-	-	4716c257591ae8d8	-
+function	c:@F@sqlite3_mutex_free	-			void (sqlite3_mutex *)	sqlite3_mutex * 	-	-	-	7a444bc5efe916ef	-
+function	c:@F@sqlite3_mutex_enter	-			void (sqlite3_mutex *)	sqlite3_mutex * 	-	-	-	0fed7f14fa465284	-
+function	c:@F@sqlite3_mutex_try	-			int (sqlite3_mutex *)	sqlite3_mutex * 	-	-	-	350adcd102e598f0	-
+function	c:@F@sqlite3_mutex_leave	-			void (sqlite3_mutex *)	sqlite3_mutex * 	-	-	-	a77447b1b6c771f3	-
+typedef	c:@T@sqlite3_mutex_methods	-			struct sqlite3_mutex_methods	-	-	-	-	ea7da83ad52ab396	-
+struct	c:@S@sqlite3_mutex_methods	-			-	-	-	-	-	c124f91d85438203	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexInit	sqlite3_mutex_methods			int (*)(void)	-	-	-	-	a43e262fa025cf2e	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexEnd	sqlite3_mutex_methods			int (*)(void)	-	-	-	-	1c556f37f9368fbc	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexAlloc	sqlite3_mutex_methods			sqlite3_mutex *(*)(int)	-	-	-	-	413aef4828f55abb	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexFree	sqlite3_mutex_methods			void (*)(sqlite3_mutex *)	-	-	-	-	09a54c7876e43fc0	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexEnter	sqlite3_mutex_methods			void (*)(sqlite3_mutex *)	-	-	-	-	d4544ee0da333045	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexTry	sqlite3_mutex_methods			int (*)(sqlite3_mutex *)	-	-	-	-	452c8908348268a6	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexLeave	sqlite3_mutex_methods			void (*)(sqlite3_mutex *)	-	-	-	-	3fa42e705e363fc8	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexHeld	sqlite3_mutex_methods			int (*)(sqlite3_mutex *)	-	-	-	-	15b553a65c4a7b0c	-
+field	c:@S@sqlite3_mutex_methods@FI@xMutexNotheld	sqlite3_mutex_methods			int (*)(sqlite3_mutex *)	-	-	-	-	fb0720bd460d25a0	-
+function	c:@F@sqlite3_db_mutex	-			sqlite3_mutex * (sqlite3 *)	sqlite3 * 	-	-	-	cfd87c803f2b855e	-
+function	c:@F@sqlite3_file_control	-			int (sqlite3 *, const char *, int, void *)	sqlite3 *  | const char * zDbName | int op | void * 	-	-	-	65235a130d09926a	-
+function	c:@F@sqlite3_test_control	-			int (int, ...)	int op	variadic	-	-	14ab867748e67a54	-
+function	c:@F@sqlite3_keyword_count	-			int (void)	-	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	5a2b7338b4ad2207	-
+function	c:@F@sqlite3_keyword_name	-			int (int, const char **, int *)	int  | const char **  | int * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	175127ca0db45270	-
+function	c:@F@sqlite3_keyword_check	-			int (const char *, int)	const char *  | int 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	2a5a7c2b32c14f86	-
+struct	c:@S@sqlite3_str	-			-	-	-	-	-	4b64023353c62251	-
+typedef	c:@T@sqlite3_str	-			struct sqlite3_str	-	-	-	-	9e220b7945ec25d9	-
+function	c:@F@sqlite3_str_new	-			sqlite3_str * (sqlite3 *)	sqlite3 * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	9d5b0a819d1b9979	-
+function	c:@F@sqlite3_str_finish	-			char * (sqlite3_str *)	sqlite3_str * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8d2062a57ceb8903	-
+function	c:@F@sqlite3_str_appendf	-			void (sqlite3_str *, const char *, ...)	sqlite3_str *  | const char * zFormat	variadic	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	d5d3e12e5a777620	-
+function	c:@F@sqlite3_str_vappendf	-			void (sqlite3_str *, const char *, va_list)	sqlite3_str *  | const char * zFormat | va_list 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	ba469adaa7d0a4f8	-
+function	c:@F@sqlite3_str_append	-			void (sqlite3_str *, const char *, int)	sqlite3_str *  | const char * zIn | int N	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8102ec8c7359573e	-
+function	c:@F@sqlite3_str_appendall	-			void (sqlite3_str *, const char *)	sqlite3_str *  | const char * zIn	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	90b252eaf2b8bfe9	-
+function	c:@F@sqlite3_str_appendchar	-			void (sqlite3_str *, int, char)	sqlite3_str *  | int N | char C	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	a784b8b3a0fa508d	-
+function	c:@F@sqlite3_str_reset	-			void (sqlite3_str *)	sqlite3_str * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	b06323205bf34338	-
+function	c:@F@sqlite3_str_errcode	-			int (sqlite3_str *)	sqlite3_str * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8494eb4508b59a31	-
+function	c:@F@sqlite3_str_length	-			int (sqlite3_str *)	sqlite3_str * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	9b371965823bc77e	-
+function	c:@F@sqlite3_str_value	-			char * (sqlite3_str *)	sqlite3_str * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	2c212dce09e888f2	-
+function	c:@F@sqlite3_status	-			int (int, int *, int *, int)	int op | int * pCurrent | int * pHighwater | int resetFlag	-	-	-	ed5ada2278a531b6	-
+function	c:@F@sqlite3_status64	-			int (int, sqlite3_int64 *, sqlite3_int64 *, int)	int op | sqlite3_int64 * pCurrent | sqlite3_int64 * pHighwater | int resetFlag	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	f63cebddaefe3f2b	-
+function	c:@F@sqlite3_db_status	-			int (sqlite3 *, int, int *, int *, int)	sqlite3 *  | int op | int * pCur | int * pHiwtr | int resetFlg	-	-	-	fb671529a3ad51c8	-
+function	c:@F@sqlite3_stmt_status	-			int (sqlite3_stmt *, int, int)	sqlite3_stmt *  | int op | int resetFlg	-	-	-	2fadd3963bec327e	-
+struct	c:@S@sqlite3_pcache	-			-	-	-	-	-	9120d25ddb30fc7d	-
+typedef	c:@T@sqlite3_pcache	-			struct sqlite3_pcache	-	-	-	-	da109f6f9c641d55	-
+typedef	c:@T@sqlite3_pcache_page	-			struct sqlite3_pcache_page	-	-	-	-	3adda00545630db4	-
+struct	c:@S@sqlite3_pcache_page	-			-	-	-	-	-	735fb8c5339ad198	-
+field	c:@S@sqlite3_pcache_page@FI@pBuf	sqlite3_pcache_page			void *	-	-	-	-	4a0b327832362af4	-
+field	c:@S@sqlite3_pcache_page@FI@pExtra	sqlite3_pcache_page			void *	-	-	-	-	d6bed420f8503960	-
+typedef	c:@T@sqlite3_pcache_methods2	-			struct sqlite3_pcache_methods2	-	-	-	-	5246a4313b3caa34	-
+struct	c:@S@sqlite3_pcache_methods2	-			-	-	-	-	-	c616628069de0c3d	-
+field	c:@S@sqlite3_pcache_methods2@FI@iVersion	sqlite3_pcache_methods2			int	-	-	-	-	f5a1ac15e6a92515	-
+field	c:@S@sqlite3_pcache_methods2@FI@pArg	sqlite3_pcache_methods2			void *	-	-	-	-	4aa8b2c3d6e9d932	-
+field	c:@S@sqlite3_pcache_methods2@FI@xInit	sqlite3_pcache_methods2			int (*)(void *)	-	-	-	-	75aa230a2d90261f	-
+field	c:@S@sqlite3_pcache_methods2@FI@xShutdown	sqlite3_pcache_methods2			void (*)(void *)	-	-	-	-	37c04ed93e24318c	-
+field	c:@S@sqlite3_pcache_methods2@FI@xCreate	sqlite3_pcache_methods2			sqlite3_pcache *(*)(int, int, int)	-	-	-	-	66d1a48f076e8048	-
+field	c:@S@sqlite3_pcache_methods2@FI@xCachesize	sqlite3_pcache_methods2			void (*)(sqlite3_pcache *, int)	-	-	-	-	7b29c05ce8ca5f19	-
+field	c:@S@sqlite3_pcache_methods2@FI@xPagecount	sqlite3_pcache_methods2			int (*)(sqlite3_pcache *)	-	-	-	-	e6b4badc00044907	-
+field	c:@S@sqlite3_pcache_methods2@FI@xFetch	sqlite3_pcache_methods2			sqlite3_pcache_page *(*)(sqlite3_pcache *, unsigned int, int)	-	-	-	-	ff951dc3191de83e	-
+field	c:@S@sqlite3_pcache_methods2@FI@xUnpin	sqlite3_pcache_methods2			void (*)(sqlite3_pcache *, sqlite3_pcache_page *, int)	-	-	-	-	31d58ec6f9b80011	-
+field	c:@S@sqlite3_pcache_methods2@FI@xRekey	sqlite3_pcache_methods2			void (*)(sqlite3_pcache *, sqlite3_pcache_page *, unsigned int, unsigned int)	-	-	-	-	e0ee572b382d2994	-
+field	c:@S@sqlite3_pcache_methods2@FI@xTruncate	sqlite3_pcache_methods2			void (*)(sqlite3_pcache *, unsigned int)	-	-	-	-	1681c93238332da9	-
+field	c:@S@sqlite3_pcache_methods2@FI@xDestroy	sqlite3_pcache_methods2			void (*)(sqlite3_pcache *)	-	-	-	-	ae1fe4b4341d6740	-
+field	c:@S@sqlite3_pcache_methods2@FI@xShrink	sqlite3_pcache_methods2			void (*)(sqlite3_pcache *)	-	-	-	-	6743b291a06b0c06	-
+typedef	c:@T@sqlite3_pcache_methods	-			struct sqlite3_pcache_methods	-	-	-	-	a6eea5eb2db4a753	-
+struct	c:@S@sqlite3_pcache_methods	-			-	-	-	-	-	69148f4998d9f8aa	-
+field	c:@S@sqlite3_pcache_methods@FI@pArg	sqlite3_pcache_methods			void *	-	-	-	-	5815ee933429476d	-
+field	c:@S@sqlite3_pcache_methods@FI@xInit	sqlite3_pcache_methods			int (*)(void *)	-	-	-	-	33464a0ac3cb5cf9	-
+field	c:@S@sqlite3_pcache_methods@FI@xShutdown	sqlite3_pcache_methods			void (*)(void *)	-	-	-	-	443f0eef37427925	-
+field	c:@S@sqlite3_pcache_methods@FI@xCreate	sqlite3_pcache_methods			sqlite3_pcache *(*)(int, int)	-	-	-	-	7dd21b79e405a06c	-
+field	c:@S@sqlite3_pcache_methods@FI@xCachesize	sqlite3_pcache_methods			void (*)(sqlite3_pcache *, int)	-	-	-	-	f14b2bb1e4fedd80	-
+field	c:@S@sqlite3_pcache_methods@FI@xPagecount	sqlite3_pcache_methods			int (*)(sqlite3_pcache *)	-	-	-	-	ce59d162674b8399	-
+field	c:@S@sqlite3_pcache_methods@FI@xFetch	sqlite3_pcache_methods			void *(*)(sqlite3_pcache *, unsigned int, int)	-	-	-	-	7e299bcc2e2fadd9	-
+field	c:@S@sqlite3_pcache_methods@FI@xUnpin	sqlite3_pcache_methods			void (*)(sqlite3_pcache *, void *, int)	-	-	-	-	c4e093583f85bf2d	-
+field	c:@S@sqlite3_pcache_methods@FI@xRekey	sqlite3_pcache_methods			void (*)(sqlite3_pcache *, void *, unsigned int, unsigned int)	-	-	-	-	4c5b0757f4cdb273	-
+field	c:@S@sqlite3_pcache_methods@FI@xTruncate	sqlite3_pcache_methods			void (*)(sqlite3_pcache *, unsigned int)	-	-	-	-	dce118fd96d15582	-
+field	c:@S@sqlite3_pcache_methods@FI@xDestroy	sqlite3_pcache_methods			void (*)(sqlite3_pcache *)	-	-	-	-	efe32ce065c2a9b6	-
+struct	c:@S@sqlite3_backup	-			-	-	-	-	-	74d275cdad992c01	-
+typedef	c:@T@sqlite3_backup	-			struct sqlite3_backup	-	-	-	-	7f562b553ebb3ecf	-
+function	c:@F@sqlite3_backup_init	-			sqlite3_backup * (sqlite3 *, const char *, sqlite3 *, const char *)	sqlite3 * pDest | const char * zDestName | sqlite3 * pSource | const char * zSourceName	-	-	-	64c098c72d4e2a0e	-
+function	c:@F@sqlite3_backup_step	-			int (sqlite3_backup *, int)	sqlite3_backup * p | int nPage	-	-	-	f382646201deb1da	-
+function	c:@F@sqlite3_backup_finish	-			int (sqlite3_backup *)	sqlite3_backup * p	-	-	-	1be34efcf90ae697	-
+function	c:@F@sqlite3_backup_remaining	-			int (sqlite3_backup *)	sqlite3_backup * p	-	-	-	a8506dc57f295a1d	-
+function	c:@F@sqlite3_backup_pagecount	-			int (sqlite3_backup *)	sqlite3_backup * p	-	-	-	558a7391195a51fa	-
+function	c:@F@sqlite3_stricmp	-			int (const char *, const char *)	const char *  | const char * 	-	ios=6.0/-/-/0,macos=10.8/-/-/0	-	c9ad36a051517ee5	-
+function	c:@F@sqlite3_strnicmp	-			int (const char *, const char *, int)	const char *  | const char *  | int 	-	ios=4.0/-/-/0,macos=10.7/-/-/0	-	b096d5d74be8f8e9	-
+function	c:@F@sqlite3_strglob	-			int (const char *, const char *)	const char * zGlob | const char * zStr	-	ios=8.2/-/-/0,macos=10.10/-/-/0	-	5f96735d75df723b	-
+function	c:@F@sqlite3_strlike	-			int (const char *, const char *, unsigned int)	const char * zGlob | const char * zStr | unsigned int cEsc	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	063179c80107ad27	-
+function	c:@F@sqlite3_log	-			void (int, const char *, ...)	int iErrCode | const char * zFormat	variadic	ios=5.0/-/-/0,macos=10.7/-/-/0	-	eee0ab6a88c1cb7b	-
+function	c:@F@sqlite3_wal_hook	-			void * (sqlite3 *, int (*)(void *, sqlite3 *, const char *, int), void *)	sqlite3 *  | int (*)(void *, sqlite3 *, const char *, int)  | void * 	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	d9e1302142acd919	-
+function	c:@F@sqlite3_wal_autocheckpoint	-			int (sqlite3 *, int)	sqlite3 * db | int N	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	7b55c8bbaee247b5	-
+function	c:@F@sqlite3_wal_checkpoint	-			int (sqlite3 *, const char *)	sqlite3 * db | const char * zDb	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	82ba88d8b4e0251a	-
+function	c:@F@sqlite3_wal_checkpoint_v2	-			int (sqlite3 *, const char *, int, int *, int *)	sqlite3 * db | const char * zDb | int eMode | int * pnLog | int * pnCkpt	-	ios=5.0/-/-/0,macos=10.8/-/-/0	-	c2109848a7051019	-
+function	c:@F@sqlite3_vtab_config	-			int (sqlite3 *, int, ...)	sqlite3 *  | int op	variadic	ios=5.0/-/-/0,macos=10.8/-/-/0	-	9d06a7ae7f5a7d25	-
+function	c:@F@sqlite3_vtab_on_conflict	-			int (sqlite3 *)	sqlite3 * 	-	ios=5.0/-/-/0,macos=10.8/-/-/0	-	cb08f3b5d4525eed	-
+function	c:@F@sqlite3_vtab_nochange	-			int (sqlite3_context *)	sqlite3_context * 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	2835e27a597b1198	-
+function	c:@F@sqlite3_vtab_collation	-			const char * (sqlite3_index_info *, int)	sqlite3_index_info *  | int 	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	009a1d3a10800f27	-
+function	c:@F@sqlite3_vtab_distinct	-			int (sqlite3_index_info *)	sqlite3_index_info * 	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	93df74a2f5275ac8	-
+function	c:@F@sqlite3_vtab_in	-			int (sqlite3_index_info *, int, int)	sqlite3_index_info *  | int iCons | int bHandle	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	3aa62153ddfc71fd	-
+function	c:@F@sqlite3_vtab_in_first	-			int (sqlite3_value *, sqlite3_value **)	sqlite3_value * pVal | sqlite3_value ** ppOut	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	24af14fb44df7315	-
+function	c:@F@sqlite3_vtab_in_next	-			int (sqlite3_value *, sqlite3_value **)	sqlite3_value * pVal | sqlite3_value ** ppOut	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	151b599a9feffb9a	-
+function	c:@F@sqlite3_vtab_rhs_value	-			int (sqlite3_index_info *, int, sqlite3_value **)	sqlite3_index_info *  | int  | sqlite3_value ** ppVal	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=16.0/-/-/0,watchos=9.0/-/-/0	-	3debfa021b03973a	-
+function	c:@F@sqlite3_stmt_scanstatus	-			int (sqlite3_stmt *, int, int, void *)	sqlite3_stmt * pStmt | int idx | int iScanStatusOp | void * pOut	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=6.0/-/-/0	-	b995c25512a1520e	-
+function	c:@F@sqlite3_stmt_scanstatus_v2	-			int (sqlite3_stmt *, int, int, int, void *)	sqlite3_stmt * pStmt | int idx | int iScanStatusOp | int flags | void * pOut	-	ios=17.2/-/-/0,macos=14.2/-/-/0,tvos=17.2/-/-/0,watchos=10.2/-/-/0	-	5c49facd52f36df8	-
+function	c:@F@sqlite3_stmt_scanstatus_reset	-			void (sqlite3_stmt *)	sqlite3_stmt * 	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=6.0/-/-/0	-	64df5b485c58b073	-
+function	c:@F@sqlite3_db_cacheflush	-			int (sqlite3 *)	sqlite3 * 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a9cf714b3479e3ed	-
+function	c:@F@sqlite3_system_errno	-			int (sqlite3 *)	sqlite3 * 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	794bcc39ed6c8ebe	-
+struct	c:@S@sqlite3_snapshot	-			-	-	-	-	-	ffb4d55bd303361f	-
+field	c:@S@sqlite3_snapshot@FI@hidden	sqlite3_snapshot			unsigned char[48]	-	-	-	-	c9d4c933a861a4fd	-
+typedef	c:@T@sqlite3_snapshot	-			struct sqlite3_snapshot	-	-	-	-	9345e8652b1334ba	-
+function	c:@F@sqlite3_snapshot_get	-			int (sqlite3 *, const char *, sqlite3_snapshot **)	sqlite3 * db | const char * zSchema | sqlite3_snapshot ** ppSnapshot	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	6790e92cc04fdf01	-
+function	c:@F@sqlite3_snapshot_open	-			int (sqlite3 *, const char *, sqlite3_snapshot *)	sqlite3 * db | const char * zSchema | sqlite3_snapshot * pSnapshot	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d7972df41a355dcc	-
+function	c:@F@sqlite3_snapshot_free	-			void (sqlite3_snapshot *)	sqlite3_snapshot * 	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	3385efdeccf1aa21	-
+function	c:@F@sqlite3_snapshot_cmp	-			int (sqlite3_snapshot *, sqlite3_snapshot *)	sqlite3_snapshot * p1 | sqlite3_snapshot * p2	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	308b18bedd274bc9	-
+function	c:@F@sqlite3_snapshot_recover	-			int (sqlite3 *, const char *)	sqlite3 * db | const char * zDb	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	42552be05dd57a17	-
+function	c:@F@sqlite3_serialize	-			unsigned char * (sqlite3 *, const char *, sqlite3_int64 *, unsigned int)	sqlite3 * db | const char * zSchema | sqlite3_int64 * piSize | unsigned int mFlags	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c02eef9938b95acf	-
+function	c:@F@sqlite3_deserialize	-			int (sqlite3 *, const char *, unsigned char *, sqlite3_int64, sqlite3_int64, unsigned int)	sqlite3 * db | const char * zSchema | unsigned char * pData | sqlite3_int64 szDb | sqlite3_int64 szBuf | unsigned int mFlags	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	d65b3c877a50cffe	-
+typedef	c:@T@sqlite3_rtree_geometry	-			struct sqlite3_rtree_geometry	-	-	-	-	2e21b3856cc47eec	-
+typedef	c:@T@sqlite3_rtree_query_info	-			struct sqlite3_rtree_query_info	-	-	-	-	5354ec6cfd44c791	-
+typedef	c:@T@sqlite3_rtree_dbl	-			double	-	-	-	-	26a780201449b749	-
+function	c:@F@sqlite3_rtree_geometry_callback	-			int (sqlite3 *, const char *, int (*)(sqlite3_rtree_geometry *, int, sqlite3_rtree_dbl *, int *), void *)	sqlite3 * db | const char * zGeom | int (*)(sqlite3_rtree_geometry *, int, sqlite3_rtree_dbl *, int *) xGeom | void * pContext	-	ios=5.0/-/-/0,macos=10.7/-/-/0	-	49ba965bc844d94a	-
+struct	c:@S@sqlite3_rtree_geometry	-			-	-	-	-	-	69d52f2f5ede23d1	-
+field	c:@S@sqlite3_rtree_geometry@FI@pContext	sqlite3_rtree_geometry			void *	-	-	-	-	f8f2a30934b622b5	-
+field	c:@S@sqlite3_rtree_geometry@FI@nParam	sqlite3_rtree_geometry			int	-	-	-	-	e5234d2f9d328f7f	-
+field	c:@S@sqlite3_rtree_geometry@FI@aParam	sqlite3_rtree_geometry			sqlite3_rtree_dbl *	-	-	-	-	05a9561eaeead65c	-
+field	c:@S@sqlite3_rtree_geometry@FI@pUser	sqlite3_rtree_geometry			void *	-	-	-	-	cdf1c908444f317b	-
+field	c:@S@sqlite3_rtree_geometry@FI@xDelUser	sqlite3_rtree_geometry			void (*)(void *)	-	-	-	-	5f12591344a95a08	-
+function	c:@F@sqlite3_rtree_query_callback	-			int (sqlite3 *, const char *, int (*)(sqlite3_rtree_query_info *), void *, void (*)(void *))	sqlite3 * db | const char * zQueryFunc | int (*)(sqlite3_rtree_query_info *) xQueryFunc | void * pContext | void (*)(void *) xDestructor	-	ios=8.2/-/-/0,macos=10.10/-/-/0	-	fb2ab410972929fd	-
+struct	c:@S@sqlite3_rtree_query_info	-			-	-	-	-	-	4d0003b8f3452ebf	-
+field	c:@S@sqlite3_rtree_query_info@FI@pContext	sqlite3_rtree_query_info			void *	-	-	-	-	8f12b7be1efab7c2	-
+field	c:@S@sqlite3_rtree_query_info@FI@nParam	sqlite3_rtree_query_info			int	-	-	-	-	95998c7103e778d9	-
+field	c:@S@sqlite3_rtree_query_info@FI@aParam	sqlite3_rtree_query_info			sqlite3_rtree_dbl *	-	-	-	-	79436edcfea83b5c	-
+field	c:@S@sqlite3_rtree_query_info@FI@pUser	sqlite3_rtree_query_info			void *	-	-	-	-	bb3070a4c3f9c25f	-
+field	c:@S@sqlite3_rtree_query_info@FI@xDelUser	sqlite3_rtree_query_info			void (*)(void *)	-	-	-	-	ef2ed691cbcff0f9	-
+field	c:@S@sqlite3_rtree_query_info@FI@aCoord	sqlite3_rtree_query_info			sqlite3_rtree_dbl *	-	-	-	-	ab0da8688c235828	-
+field	c:@S@sqlite3_rtree_query_info@FI@anQueue	sqlite3_rtree_query_info			unsigned int *	-	-	-	-	7ff7e579531b45c1	-
+field	c:@S@sqlite3_rtree_query_info@FI@nCoord	sqlite3_rtree_query_info			int	-	-	-	-	a577ef9c416f8ac8	-
+field	c:@S@sqlite3_rtree_query_info@FI@iLevel	sqlite3_rtree_query_info			int	-	-	-	-	16f2f33ae1d66e9f	-
+field	c:@S@sqlite3_rtree_query_info@FI@mxLevel	sqlite3_rtree_query_info			int	-	-	-	-	ecbd1f49ea823452	-
+field	c:@S@sqlite3_rtree_query_info@FI@iRowid	sqlite3_rtree_query_info			sqlite3_int64	-	-	-	-	a121d30d3a621379	-
+field	c:@S@sqlite3_rtree_query_info@FI@rParentScore	sqlite3_rtree_query_info			sqlite3_rtree_dbl	-	-	-	-	8fbe0e85d3795a22	-
+field	c:@S@sqlite3_rtree_query_info@FI@eParentWithin	sqlite3_rtree_query_info			int	-	-	-	-	72e60d0729b45f9d	-
+field	c:@S@sqlite3_rtree_query_info@FI@eWithin	sqlite3_rtree_query_info			int	-	-	-	-	89de8fd375edbd46	-
+field	c:@S@sqlite3_rtree_query_info@FI@rScore	sqlite3_rtree_query_info			sqlite3_rtree_dbl	-	-	-	-	0695253ec5f9515a	-
+field	c:@S@sqlite3_rtree_query_info@FI@apSqlParam	sqlite3_rtree_query_info			sqlite3_value **	-	-	-	-	fe4ff92cb964c6c1	-
+typedef	c:@T@Fts5ExtensionApi	-			struct Fts5ExtensionApi	-	-	-	-	92eb96850292fe6c	-
+struct	c:@S@Fts5Context	-			-	-	-	-	-	315812958641f325	-
+typedef	c:@T@Fts5Context	-			struct Fts5Context	-	-	-	-	f1574913f20323b0	-
+typedef	c:@T@Fts5PhraseIter	-			struct Fts5PhraseIter	-	-	-	-	32457f7440d37f18	-
+typedef	c:@T@fts5_extension_function	-			void (*)(const Fts5ExtensionApi *, Fts5Context *, sqlite3_context *, int, sqlite3_value **)	-	-	-	-	dc68e7c19a6995bb	-
+struct	c:@S@Fts5PhraseIter	-			-	-	-	-	-	62b4f57d2d347f13	-
+field	c:@S@Fts5PhraseIter@FI@a	Fts5PhraseIter			const unsigned char *	-	-	-	-	2634f9592b4db46d	-
+field	c:@S@Fts5PhraseIter@FI@b	Fts5PhraseIter			const unsigned char *	-	-	-	-	d8bf03e94c4fc31d	-
+struct	c:@S@Fts5ExtensionApi	-			-	-	-	-	-	79714f9fb10e0be5	-
+field	c:@S@Fts5ExtensionApi@FI@iVersion	Fts5ExtensionApi			int	-	-	-	-	d3bb2c6c990d17e1	-
+field	c:@S@Fts5ExtensionApi@FI@xUserData	Fts5ExtensionApi			void *(*)(Fts5Context *)	-	-	-	-	efa85dd175e96eed	-
+field	c:@S@Fts5ExtensionApi@FI@xColumnCount	Fts5ExtensionApi			int (*)(Fts5Context *)	-	-	-	-	40c93221c70401e5	-
+field	c:@S@Fts5ExtensionApi@FI@xRowCount	Fts5ExtensionApi			int (*)(Fts5Context *, sqlite3_int64 *)	-	-	-	-	08d1d6506038a51c	-
+field	c:@S@Fts5ExtensionApi@FI@xColumnTotalSize	Fts5ExtensionApi			int (*)(Fts5Context *, int, sqlite3_int64 *)	-	-	-	-	f2e384fd06005009	-
+field	c:@S@Fts5ExtensionApi@FI@xTokenize	Fts5ExtensionApi			int (*)(Fts5Context *, const char *, int, void *, int (*)(void *, int, const char *, int, int, int))	-	-	-	-	2165a094e0e13d50	-
+field	c:@S@Fts5ExtensionApi@FI@xPhraseCount	Fts5ExtensionApi			int (*)(Fts5Context *)	-	-	-	-	dc22b890b031180f	-
+field	c:@S@Fts5ExtensionApi@FI@xPhraseSize	Fts5ExtensionApi			int (*)(Fts5Context *, int)	-	-	-	-	a25f88ca4de83dcf	-
+field	c:@S@Fts5ExtensionApi@FI@xInstCount	Fts5ExtensionApi			int (*)(Fts5Context *, int *)	-	-	-	-	877587d591a2eb66	-
+field	c:@S@Fts5ExtensionApi@FI@xInst	Fts5ExtensionApi			int (*)(Fts5Context *, int, int *, int *, int *)	-	-	-	-	cd0b7003cdeb8c3c	-
+field	c:@S@Fts5ExtensionApi@FI@xRowid	Fts5ExtensionApi			sqlite3_int64 (*)(Fts5Context *)	-	-	-	-	847802e96c29ca8e	-
+field	c:@S@Fts5ExtensionApi@FI@xColumnText	Fts5ExtensionApi			int (*)(Fts5Context *, int, const char **, int *)	-	-	-	-	421b3767092a5df8	-
+field	c:@S@Fts5ExtensionApi@FI@xColumnSize	Fts5ExtensionApi			int (*)(Fts5Context *, int, int *)	-	-	-	-	2dc65c4374e3c92d	-
+field	c:@S@Fts5ExtensionApi@FI@xQueryPhrase	Fts5ExtensionApi			int (*)(Fts5Context *, int, void *, int (*)(const Fts5ExtensionApi *, Fts5Context *, void *))	-	-	-	-	b65269ec320319c1	-
+field	c:@S@Fts5ExtensionApi@FI@xSetAuxdata	Fts5ExtensionApi			int (*)(Fts5Context *, void *, void (*)(void *))	-	-	-	-	70329ded17b0f39f	-
+field	c:@S@Fts5ExtensionApi@FI@xGetAuxdata	Fts5ExtensionApi			void *(*)(Fts5Context *, int)	-	-	-	-	05da252667cd70a0	-
+field	c:@S@Fts5ExtensionApi@FI@xPhraseFirst	Fts5ExtensionApi			int (*)(Fts5Context *, int, Fts5PhraseIter *, int *, int *)	-	-	-	-	91740cc82851fbd1	-
+field	c:@S@Fts5ExtensionApi@FI@xPhraseNext	Fts5ExtensionApi			void (*)(Fts5Context *, Fts5PhraseIter *, int *, int *)	-	-	-	-	09b6003247f88e15	-
+field	c:@S@Fts5ExtensionApi@FI@xPhraseFirstColumn	Fts5ExtensionApi			int (*)(Fts5Context *, int, Fts5PhraseIter *, int *)	-	-	-	-	bd58453027263733	-
+field	c:@S@Fts5ExtensionApi@FI@xPhraseNextColumn	Fts5ExtensionApi			void (*)(Fts5Context *, Fts5PhraseIter *, int *)	-	-	-	-	31dbf5238c303f4e	-
+field	c:@S@Fts5ExtensionApi@FI@xQueryToken	Fts5ExtensionApi			int (*)(Fts5Context *, int, int, const char **, int *)	-	-	-	-	ca6389622f18ea91	-
+field	c:@S@Fts5ExtensionApi@FI@xInstToken	Fts5ExtensionApi			int (*)(Fts5Context *, int, int, const char **, int *)	-	-	-	-	fca1367297fbef49	-
+field	c:@S@Fts5ExtensionApi@FI@xColumnLocale	Fts5ExtensionApi			int (*)(Fts5Context *, int, const char **, int *)	-	-	-	-	af017e94f4b97e95	-
+field	c:@S@Fts5ExtensionApi@FI@xTokenize_v2	Fts5ExtensionApi			int (*)(Fts5Context *, const char *, int, const char *, int, void *, int (*)(void *, int, const char *, int, int, int))	-	-	-	-	563a91a140d45014	-
+struct	c:@S@Fts5Tokenizer	-			-	-	-	-	-	b2aead27a3b60cbe	-
+typedef	c:@T@Fts5Tokenizer	-			struct Fts5Tokenizer	-	-	-	-	7feb2a7ac13c7601	-
+typedef	c:@T@fts5_tokenizer_v2	-			struct fts5_tokenizer_v2	-	-	-	-	2034920ea7b6921b	-
+struct	c:@S@fts5_tokenizer_v2	-			-	-	-	-	-	a2cd51988d6228c9	-
+field	c:@S@fts5_tokenizer_v2@FI@iVersion	fts5_tokenizer_v2			int	-	-	-	-	5274a4625d6a599b	-
+field	c:@S@fts5_tokenizer_v2@FI@xCreate	fts5_tokenizer_v2			int (*)(void *, const char **, int, Fts5Tokenizer **)	-	-	-	-	bd3a967a412397fe	-
+field	c:@S@fts5_tokenizer_v2@FI@xDelete	fts5_tokenizer_v2			void (*)(Fts5Tokenizer *)	-	-	-	-	0bea3686833b5e56	-
+field	c:@S@fts5_tokenizer_v2@FI@xTokenize	fts5_tokenizer_v2			int (*)(Fts5Tokenizer *, void *, int, const char *, int, const char *, int, int (*)(void *, int, const char *, int, int, int))	-	-	-	-	0d66c7e2c0c7c3a3	-
+typedef	c:@T@fts5_tokenizer	-			struct fts5_tokenizer	-	-	-	-	06344528c839b7f9	-
+struct	c:@S@fts5_tokenizer	-			-	-	-	-	-	eae09104e3e25d04	-
+field	c:@S@fts5_tokenizer@FI@xCreate	fts5_tokenizer			int (*)(void *, const char **, int, Fts5Tokenizer **)	-	-	-	-	08284eaecfd3c241	-
+field	c:@S@fts5_tokenizer@FI@xDelete	fts5_tokenizer			void (*)(Fts5Tokenizer *)	-	-	-	-	ec6742166d5d68ac	-
+field	c:@S@fts5_tokenizer@FI@xTokenize	fts5_tokenizer			int (*)(Fts5Tokenizer *, void *, int, const char *, int, int (*)(void *, int, const char *, int, int, int))	-	-	-	-	b1225dbeb3c2fdf3	-
+typedef	c:@T@fts5_api	-			struct fts5_api	-	-	-	-	da6e8d09528f04f1	-
+struct	c:@S@fts5_api	-			-	-	-	-	-	e5dc1e7941cb613d	-
+field	c:@S@fts5_api@FI@iVersion	fts5_api			int	-	-	-	-	21992b153813fe28	-
+field	c:@S@fts5_api@FI@xCreateTokenizer	fts5_api			int (*)(fts5_api *, const char *, void *, fts5_tokenizer *, void (*)(void *))	-	-	-	-	d7daad1e575f80d8	-
+field	c:@S@fts5_api@FI@xFindTokenizer	fts5_api			int (*)(fts5_api *, const char *, void **, fts5_tokenizer *)	-	-	-	-	952d8db1ff3bdaf3	-
+field	c:@S@fts5_api@FI@xCreateFunction	fts5_api			int (*)(fts5_api *, const char *, void *, fts5_extension_function, void (*)(void *))	-	-	-	-	9ee7ad9f78adcec9	-
+field	c:@S@fts5_api@FI@xCreateTokenizer_v2	fts5_api			int (*)(fts5_api *, const char *, void *, fts5_tokenizer_v2 *, void (*)(void *))	-	-	-	-	2c48748a4246318b	-
+field	c:@S@fts5_api@FI@xFindTokenizer_v2	fts5_api			int (*)(fts5_api *, const char *, void **, fts5_tokenizer_v2 **)	-	-	-	-	b59b08be9fb0e8b1	-
+struct	c:@S@sqlite3_api_routines	-			-	-	-	-	-	09295c3e5579fb32	-
+field	c:@S@sqlite3_api_routines@FI@aggregate_context	sqlite3_api_routines			void *(*)(sqlite3_context *, int)	-	-	-	-	2a32872dddfd8e43	-
+field	c:@S@sqlite3_api_routines@FI@aggregate_count	sqlite3_api_routines			int (*)(sqlite3_context *)	-	-	-	-	108a2694b1502446	-
+field	c:@S@sqlite3_api_routines@FI@bind_blob	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, const void *, int, void (*)(void *))	-	-	-	-	6987d607cd634417	-
+field	c:@S@sqlite3_api_routines@FI@bind_double	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, double)	-	-	-	-	85ef881a04d62c3d	-
+field	c:@S@sqlite3_api_routines@FI@bind_int	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, int)	-	-	-	-	9c50f2bdeee93826	-
+field	c:@S@sqlite3_api_routines@FI@bind_int64	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, sqlite_int64)	-	-	-	-	12fe68ea33152509	-
+field	c:@S@sqlite3_api_routines@FI@bind_null	sqlite3_api_routines			int (*)(sqlite3_stmt *, int)	-	-	-	-	be33bb41a168cd81	-
+field	c:@S@sqlite3_api_routines@FI@bind_parameter_count	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	fd947260868f5d8b	-
+field	c:@S@sqlite3_api_routines@FI@bind_parameter_index	sqlite3_api_routines			int (*)(sqlite3_stmt *, const char *)	-	-	-	-	f4b757c6196e1e02	-
+field	c:@S@sqlite3_api_routines@FI@bind_parameter_name	sqlite3_api_routines			const char *(*)(sqlite3_stmt *, int)	-	-	-	-	ae6e1f22b5ff490e	-
+field	c:@S@sqlite3_api_routines@FI@bind_text	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, const char *, int, void (*)(void *))	-	-	-	-	4124db3a556fdb33	-
+field	c:@S@sqlite3_api_routines@FI@bind_text16	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, const void *, int, void (*)(void *))	-	-	-	-	819c5859b03dfc2e	-
+field	c:@S@sqlite3_api_routines@FI@bind_value	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, const sqlite3_value *)	-	-	-	-	715028fe6a165c68	-
+field	c:@S@sqlite3_api_routines@FI@busy_handler	sqlite3_api_routines			int (*)(sqlite3 *, int (*)(void *, int), void *)	-	-	-	-	59d2800e95b25f94	-
+field	c:@S@sqlite3_api_routines@FI@busy_timeout	sqlite3_api_routines			int (*)(sqlite3 *, int)	-	-	-	-	442920db72694dde	-
+field	c:@S@sqlite3_api_routines@FI@changes	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	dde0481be1babc86	-
+field	c:@S@sqlite3_api_routines@FI@close	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	8e25b3a53fe47889	-
+field	c:@S@sqlite3_api_routines@FI@collation_needed	sqlite3_api_routines			int (*)(sqlite3 *, void *, void (*)(void *, sqlite3 *, int, const char *))	-	-	-	-	2ce09b89215f6a5d	-
+field	c:@S@sqlite3_api_routines@FI@collation_needed16	sqlite3_api_routines			int (*)(sqlite3 *, void *, void (*)(void *, sqlite3 *, int, const void *))	-	-	-	-	66a95551a0acf1c7	-
+field	c:@S@sqlite3_api_routines@FI@column_blob	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	7c783a129fe69979	-
+field	c:@S@sqlite3_api_routines@FI@column_bytes	sqlite3_api_routines			int (*)(sqlite3_stmt *, int)	-	-	-	-	a704d8978bd181d4	-
+field	c:@S@sqlite3_api_routines@FI@column_bytes16	sqlite3_api_routines			int (*)(sqlite3_stmt *, int)	-	-	-	-	4935d9affd64ecea	-
+field	c:@S@sqlite3_api_routines@FI@column_count	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	8afb16129c431775	-
+field	c:@S@sqlite3_api_routines@FI@column_database_name	sqlite3_api_routines			const char *(*)(sqlite3_stmt *, int)	-	-	-	-	88c0acf33f804b4c	-
+field	c:@S@sqlite3_api_routines@FI@column_database_name16	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	af038d98c8a2c163	-
+field	c:@S@sqlite3_api_routines@FI@column_decltype	sqlite3_api_routines			const char *(*)(sqlite3_stmt *, int)	-	-	-	-	64222e76f8d4cf05	-
+field	c:@S@sqlite3_api_routines@FI@column_decltype16	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	1adcd4c5aba5ed38	-
+field	c:@S@sqlite3_api_routines@FI@column_double	sqlite3_api_routines			double (*)(sqlite3_stmt *, int)	-	-	-	-	768ff749d795b2a1	-
+field	c:@S@sqlite3_api_routines@FI@column_int	sqlite3_api_routines			int (*)(sqlite3_stmt *, int)	-	-	-	-	fa9d49662d90c905	-
+field	c:@S@sqlite3_api_routines@FI@column_int64	sqlite3_api_routines			sqlite_int64 (*)(sqlite3_stmt *, int)	-	-	-	-	274182a6cede2f4e	-
+field	c:@S@sqlite3_api_routines@FI@column_name	sqlite3_api_routines			const char *(*)(sqlite3_stmt *, int)	-	-	-	-	e90087ed2b97bcf0	-
+field	c:@S@sqlite3_api_routines@FI@column_name16	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	db2859e264d193ef	-
+field	c:@S@sqlite3_api_routines@FI@column_origin_name	sqlite3_api_routines			const char *(*)(sqlite3_stmt *, int)	-	-	-	-	fb4b98724c603648	-
+field	c:@S@sqlite3_api_routines@FI@column_origin_name16	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	0267779368107c16	-
+field	c:@S@sqlite3_api_routines@FI@column_table_name	sqlite3_api_routines			const char *(*)(sqlite3_stmt *, int)	-	-	-	-	d4dde60b964fa359	-
+field	c:@S@sqlite3_api_routines@FI@column_table_name16	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	ba64a2c7371fcaf4	-
+field	c:@S@sqlite3_api_routines@FI@column_text	sqlite3_api_routines			const unsigned char *(*)(sqlite3_stmt *, int)	-	-	-	-	99927ccab7a15010	-
+field	c:@S@sqlite3_api_routines@FI@column_text16	sqlite3_api_routines			const void *(*)(sqlite3_stmt *, int)	-	-	-	-	23fa68a45971dac2	-
+field	c:@S@sqlite3_api_routines@FI@column_type	sqlite3_api_routines			int (*)(sqlite3_stmt *, int)	-	-	-	-	09a48e93af4e6c43	-
+field	c:@S@sqlite3_api_routines@FI@column_value	sqlite3_api_routines			sqlite3_value *(*)(sqlite3_stmt *, int)	-	-	-	-	31825ee92fad5de7	-
+field	c:@S@sqlite3_api_routines@FI@commit_hook	sqlite3_api_routines			void *(*)(sqlite3 *, int (*)(void *), void *)	-	-	-	-	f85597e8b07cf933	-
+field	c:@S@sqlite3_api_routines@FI@complete	sqlite3_api_routines			int (*)(const char *)	-	-	-	-	feb0f7165a3a8e1b	-
+field	c:@S@sqlite3_api_routines@FI@complete16	sqlite3_api_routines			int (*)(const void *)	-	-	-	-	febe188d8b794f90	-
+field	c:@S@sqlite3_api_routines@FI@create_collation	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, void *, int (*)(void *, int, const void *, int, const void *))	-	-	-	-	9feedca0292e0602	-
+field	c:@S@sqlite3_api_routines@FI@create_collation16	sqlite3_api_routines			int (*)(sqlite3 *, const void *, int, void *, int (*)(void *, int, const void *, int, const void *))	-	-	-	-	8f13860a6f7f34d4	-
+field	c:@S@sqlite3_api_routines@FI@create_function	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *))	-	-	-	-	f3d280e8833e056e	-
+field	c:@S@sqlite3_api_routines@FI@create_function16	sqlite3_api_routines			int (*)(sqlite3 *, const void *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *))	-	-	-	-	707608e8858e97d7	-
+field	c:@S@sqlite3_api_routines@FI@create_module	sqlite3_api_routines			int (*)(sqlite3 *, const char *, const sqlite3_module *, void *)	-	-	-	-	1c2f2a70ba2c6b37	-
+field	c:@S@sqlite3_api_routines@FI@data_count	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	113c185897bcadcd	-
+field	c:@S@sqlite3_api_routines@FI@db_handle	sqlite3_api_routines			sqlite3 *(*)(sqlite3_stmt *)	-	-	-	-	6368596e4396f12a	-
+field	c:@S@sqlite3_api_routines@FI@declare_vtab	sqlite3_api_routines			int (*)(sqlite3 *, const char *)	-	-	-	-	fe43c2c09b1d357d	-
+field	c:@S@sqlite3_api_routines@FI@enable_shared_cache	sqlite3_api_routines			int (*)(int)	-	-	-	-	1dd7f844258ad9c9	-
+field	c:@S@sqlite3_api_routines@FI@errcode	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	475e1bc642217e6e	-
+field	c:@S@sqlite3_api_routines@FI@errmsg	sqlite3_api_routines			const char *(*)(sqlite3 *)	-	-	-	-	4043fd1104b18fe6	-
+field	c:@S@sqlite3_api_routines@FI@errmsg16	sqlite3_api_routines			const void *(*)(sqlite3 *)	-	-	-	-	485bd7fbad7e1095	-
+field	c:@S@sqlite3_api_routines@FI@exec	sqlite3_api_routines			int (*)(sqlite3 *, const char *, sqlite3_callback, void *, char **)	-	-	-	-	9e2b841d4c174e24	-
+field	c:@S@sqlite3_api_routines@FI@expired	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	a8701d99fa8eac3a	-
+field	c:@S@sqlite3_api_routines@FI@finalize	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	4c33c342605a4cc1	-
+field	c:@S@sqlite3_api_routines@FI@free	sqlite3_api_routines			void (*)(void *)	-	-	-	-	e0189f6f9f656a7f	-
+field	c:@S@sqlite3_api_routines@FI@free_table	sqlite3_api_routines			void (*)(char **)	-	-	-	-	eced434cf0bd255e	-
+field	c:@S@sqlite3_api_routines@FI@get_autocommit	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	25d00552112986ff	-
+field	c:@S@sqlite3_api_routines@FI@get_auxdata	sqlite3_api_routines			void *(*)(sqlite3_context *, int)	-	-	-	-	3a544cdd7c3d5540	-
+field	c:@S@sqlite3_api_routines@FI@get_table	sqlite3_api_routines			int (*)(sqlite3 *, const char *, char ***, int *, int *, char **)	-	-	-	-	b1b22a08c953845f	-
+field	c:@S@sqlite3_api_routines@FI@global_recover	sqlite3_api_routines			int (*)(void)	-	-	-	-	2235fec5aa9d0763	-
+field	c:@S@sqlite3_api_routines@FI@interruptx	sqlite3_api_routines			void (*)(sqlite3 *)	-	-	-	-	53dbea0ed5345c44	-
+field	c:@S@sqlite3_api_routines@FI@last_insert_rowid	sqlite3_api_routines			sqlite_int64 (*)(sqlite3 *)	-	-	-	-	4f3d2ecc84bcbf29	-
+field	c:@S@sqlite3_api_routines@FI@libversion	sqlite3_api_routines			const char *(*)(void)	-	-	-	-	2e549c3923beecf3	-
+field	c:@S@sqlite3_api_routines@FI@libversion_number	sqlite3_api_routines			int (*)(void)	-	-	-	-	d079083b8b7d0027	-
+field	c:@S@sqlite3_api_routines@FI@malloc	sqlite3_api_routines			void *(*)(int)	-	-	-	-	40f072dccba9e30f	-
+field	c:@S@sqlite3_api_routines@FI@mprintf	sqlite3_api_routines			char *(*)(const char *, ...)	-	-	-	-	60dbf45179950f01	-
+field	c:@S@sqlite3_api_routines@FI@open	sqlite3_api_routines			int (*)(const char *, sqlite3 **)	-	-	-	-	1dabbe80d1ba770a	-
+field	c:@S@sqlite3_api_routines@FI@open16	sqlite3_api_routines			int (*)(const void *, sqlite3 **)	-	-	-	-	142394e8a94ca2cc	-
+field	c:@S@sqlite3_api_routines@FI@prepare	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, sqlite3_stmt **, const char **)	-	-	-	-	cfceff9b74d454b2	-
+field	c:@S@sqlite3_api_routines@FI@prepare16	sqlite3_api_routines			int (*)(sqlite3 *, const void *, int, sqlite3_stmt **, const void **)	-	-	-	-	064b876b3c50c759	-
+field	c:@S@sqlite3_api_routines@FI@profile	sqlite3_api_routines			void *(*)(sqlite3 *, void (*)(void *, const char *, sqlite_uint64), void *)	-	-	-	-	3d44099da1bb849f	-
+field	c:@S@sqlite3_api_routines@FI@progress_handler	sqlite3_api_routines			void (*)(sqlite3 *, int, int (*)(void *), void *)	-	-	-	-	5f0dbe8015b882af	-
+field	c:@S@sqlite3_api_routines@FI@realloc	sqlite3_api_routines			void *(*)(void *, int)	-	-	-	-	201ab5166237615a	-
+field	c:@S@sqlite3_api_routines@FI@reset	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	b762c2af403ad0e2	-
+field	c:@S@sqlite3_api_routines@FI@result_blob	sqlite3_api_routines			void (*)(sqlite3_context *, const void *, int, void (*)(void *))	-	-	-	-	56be01b9bc56921d	-
+field	c:@S@sqlite3_api_routines@FI@result_double	sqlite3_api_routines			void (*)(sqlite3_context *, double)	-	-	-	-	d71775f2bba30dc1	-
+field	c:@S@sqlite3_api_routines@FI@result_error	sqlite3_api_routines			void (*)(sqlite3_context *, const char *, int)	-	-	-	-	ca918f0d691fd997	-
+field	c:@S@sqlite3_api_routines@FI@result_error16	sqlite3_api_routines			void (*)(sqlite3_context *, const void *, int)	-	-	-	-	d10df578f11aa85b	-
+field	c:@S@sqlite3_api_routines@FI@result_int	sqlite3_api_routines			void (*)(sqlite3_context *, int)	-	-	-	-	490094f1ade0be8b	-
+field	c:@S@sqlite3_api_routines@FI@result_int64	sqlite3_api_routines			void (*)(sqlite3_context *, sqlite_int64)	-	-	-	-	24c5383ea52c1a11	-
+field	c:@S@sqlite3_api_routines@FI@result_null	sqlite3_api_routines			void (*)(sqlite3_context *)	-	-	-	-	e56ec7a7df3c2e80	-
+field	c:@S@sqlite3_api_routines@FI@result_text	sqlite3_api_routines			void (*)(sqlite3_context *, const char *, int, void (*)(void *))	-	-	-	-	4480885066a0789e	-
+field	c:@S@sqlite3_api_routines@FI@result_text16	sqlite3_api_routines			void (*)(sqlite3_context *, const void *, int, void (*)(void *))	-	-	-	-	c6593005087fcb37	-
+field	c:@S@sqlite3_api_routines@FI@result_text16be	sqlite3_api_routines			void (*)(sqlite3_context *, const void *, int, void (*)(void *))	-	-	-	-	b8ab514ce7af4cc7	-
+field	c:@S@sqlite3_api_routines@FI@result_text16le	sqlite3_api_routines			void (*)(sqlite3_context *, const void *, int, void (*)(void *))	-	-	-	-	99df5ec128897646	-
+field	c:@S@sqlite3_api_routines@FI@result_value	sqlite3_api_routines			void (*)(sqlite3_context *, sqlite3_value *)	-	-	-	-	1f3dc05f5ee10166	-
+field	c:@S@sqlite3_api_routines@FI@rollback_hook	sqlite3_api_routines			void *(*)(sqlite3 *, void (*)(void *), void *)	-	-	-	-	b2f59ca551405f4f	-
+field	c:@S@sqlite3_api_routines@FI@set_authorizer	sqlite3_api_routines			int (*)(sqlite3 *, int (*)(void *, int, const char *, const char *, const char *, const char *), void *)	-	-	-	-	4bf802ff8124de51	-
+field	c:@S@sqlite3_api_routines@FI@set_auxdata	sqlite3_api_routines			void (*)(sqlite3_context *, int, void *, void (*)(void *))	-	-	-	-	bb17bfbd3f2f7061	-
+field	c:@S@sqlite3_api_routines@FI@xsnprintf	sqlite3_api_routines			char *(*)(int, char *, const char *, ...)	-	-	-	-	cbeec34db8eb015b	-
+field	c:@S@sqlite3_api_routines@FI@step	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	3af409165f89bdfa	-
+field	c:@S@sqlite3_api_routines@FI@table_column_metadata	sqlite3_api_routines			int (*)(sqlite3 *, const char *, const char *, const char *, const char **, const char **, int *, int *, int *)	-	-	-	-	dba7e4d5299385e1	-
+field	c:@S@sqlite3_api_routines@FI@thread_cleanup	sqlite3_api_routines			void (*)(void)	-	-	-	-	dd4dfc934d604878	-
+field	c:@S@sqlite3_api_routines@FI@total_changes	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	6056a1a7d23be502	-
+field	c:@S@sqlite3_api_routines@FI@trace	sqlite3_api_routines			void *(*)(sqlite3 *, void (*)(void *, const char *), void *)	-	-	-	-	85a4387734e6f458	-
+field	c:@S@sqlite3_api_routines@FI@transfer_bindings	sqlite3_api_routines			int (*)(sqlite3_stmt *, sqlite3_stmt *)	-	-	-	-	214dbc5dd3dd5d37	-
+field	c:@S@sqlite3_api_routines@FI@update_hook	sqlite3_api_routines			void *(*)(sqlite3 *, void (*)(void *, int, const char *, const char *, sqlite_int64), void *)	-	-	-	-	8aee927359934309	-
+field	c:@S@sqlite3_api_routines@FI@user_data	sqlite3_api_routines			void *(*)(sqlite3_context *)	-	-	-	-	f9c08e9131ca5667	-
+field	c:@S@sqlite3_api_routines@FI@value_blob	sqlite3_api_routines			const void *(*)(sqlite3_value *)	-	-	-	-	bd2a7e0b293e20eb	-
+field	c:@S@sqlite3_api_routines@FI@value_bytes	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	321b1419b63f505a	-
+field	c:@S@sqlite3_api_routines@FI@value_bytes16	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	fcd3c32da0d0974f	-
+field	c:@S@sqlite3_api_routines@FI@value_double	sqlite3_api_routines			double (*)(sqlite3_value *)	-	-	-	-	4ebd4f1eec2c79f6	-
+field	c:@S@sqlite3_api_routines@FI@value_int	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	3f1ba9c0f02d04be	-
+field	c:@S@sqlite3_api_routines@FI@value_int64	sqlite3_api_routines			sqlite_int64 (*)(sqlite3_value *)	-	-	-	-	3674b7257a71b9e8	-
+field	c:@S@sqlite3_api_routines@FI@value_numeric_type	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	2af1edc87169b541	-
+field	c:@S@sqlite3_api_routines@FI@value_text	sqlite3_api_routines			const unsigned char *(*)(sqlite3_value *)	-	-	-	-	4d4db4d4ac5b629a	-
+field	c:@S@sqlite3_api_routines@FI@value_text16	sqlite3_api_routines			const void *(*)(sqlite3_value *)	-	-	-	-	4b759c63fcd2ad06	-
+field	c:@S@sqlite3_api_routines@FI@value_text16be	sqlite3_api_routines			const void *(*)(sqlite3_value *)	-	-	-	-	2f1c5701a6d3e440	-
+field	c:@S@sqlite3_api_routines@FI@value_text16le	sqlite3_api_routines			const void *(*)(sqlite3_value *)	-	-	-	-	43670e629f5f0bf0	-
+field	c:@S@sqlite3_api_routines@FI@value_type	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	4ec2c3fd2ebf0eff	-
+field	c:@S@sqlite3_api_routines@FI@vmprintf	sqlite3_api_routines			char *(*)(const char *, va_list)	-	-	-	-	29567f464f9d97f6	-
+field	c:@S@sqlite3_api_routines@FI@overload_function	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int)	-	-	-	-	0a158a464648b2f0	-
+field	c:@S@sqlite3_api_routines@FI@prepare_v2	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, sqlite3_stmt **, const char **)	-	-	-	-	2ae15b09fd614309	-
+field	c:@S@sqlite3_api_routines@FI@prepare16_v2	sqlite3_api_routines			int (*)(sqlite3 *, const void *, int, sqlite3_stmt **, const void **)	-	-	-	-	d034ac946dc0bda4	-
+field	c:@S@sqlite3_api_routines@FI@clear_bindings	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	655c2d00e735a96f	-
+field	c:@S@sqlite3_api_routines@FI@create_module_v2	sqlite3_api_routines			int (*)(sqlite3 *, const char *, const sqlite3_module *, void *, void (*)(void *))	-	-	-	-	fec4abe1b2354c48	-
+field	c:@S@sqlite3_api_routines@FI@bind_zeroblob	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, int)	-	-	-	-	31a75c7ca7c01e85	-
+field	c:@S@sqlite3_api_routines@FI@blob_bytes	sqlite3_api_routines			int (*)(sqlite3_blob *)	-	-	-	-	1ef89d666551c364	-
+field	c:@S@sqlite3_api_routines@FI@blob_close	sqlite3_api_routines			int (*)(sqlite3_blob *)	-	-	-	-	baadf22beee8dfff	-
+field	c:@S@sqlite3_api_routines@FI@blob_open	sqlite3_api_routines			int (*)(sqlite3 *, const char *, const char *, const char *, sqlite3_int64, int, sqlite3_blob **)	-	-	-	-	0c736c25ea77cf69	-
+field	c:@S@sqlite3_api_routines@FI@blob_read	sqlite3_api_routines			int (*)(sqlite3_blob *, void *, int, int)	-	-	-	-	4813d5c7dece6020	-
+field	c:@S@sqlite3_api_routines@FI@blob_write	sqlite3_api_routines			int (*)(sqlite3_blob *, const void *, int, int)	-	-	-	-	bac7af50741ff880	-
+field	c:@S@sqlite3_api_routines@FI@create_collation_v2	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, void *, int (*)(void *, int, const void *, int, const void *), void (*)(void *))	-	-	-	-	af931b5070f12d2f	-
+field	c:@S@sqlite3_api_routines@FI@file_control	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, void *)	-	-	-	-	80319918cbf5757f	-
+field	c:@S@sqlite3_api_routines@FI@memory_highwater	sqlite3_api_routines			sqlite3_int64 (*)(int)	-	-	-	-	23df2920b28f2402	-
+field	c:@S@sqlite3_api_routines@FI@memory_used	sqlite3_api_routines			sqlite3_int64 (*)(void)	-	-	-	-	1714fd85f956ef92	-
+field	c:@S@sqlite3_api_routines@FI@mutex_alloc	sqlite3_api_routines			sqlite3_mutex *(*)(int)	-	-	-	-	e5cc8c03c7a7cc6b	-
+field	c:@S@sqlite3_api_routines@FI@mutex_enter	sqlite3_api_routines			void (*)(sqlite3_mutex *)	-	-	-	-	ff3059a3d5177fd8	-
+field	c:@S@sqlite3_api_routines@FI@mutex_free	sqlite3_api_routines			void (*)(sqlite3_mutex *)	-	-	-	-	e57bae32cce28531	-
+field	c:@S@sqlite3_api_routines@FI@mutex_leave	sqlite3_api_routines			void (*)(sqlite3_mutex *)	-	-	-	-	d5100adf6ed6ed24	-
+field	c:@S@sqlite3_api_routines@FI@mutex_try	sqlite3_api_routines			int (*)(sqlite3_mutex *)	-	-	-	-	5b7a5b00346e8be8	-
+field	c:@S@sqlite3_api_routines@FI@open_v2	sqlite3_api_routines			int (*)(const char *, sqlite3 **, int, const char *)	-	-	-	-	436875cbd3d69cac	-
+field	c:@S@sqlite3_api_routines@FI@release_memory	sqlite3_api_routines			int (*)(int)	-	-	-	-	3055f6a93fd6f48c	-
+field	c:@S@sqlite3_api_routines@FI@result_error_nomem	sqlite3_api_routines			void (*)(sqlite3_context *)	-	-	-	-	9345e613161461ad	-
+field	c:@S@sqlite3_api_routines@FI@result_error_toobig	sqlite3_api_routines			void (*)(sqlite3_context *)	-	-	-	-	5f3f0f616235fba5	-
+field	c:@S@sqlite3_api_routines@FI@sleep	sqlite3_api_routines			int (*)(int)	-	-	-	-	9687576cafc8f116	-
+field	c:@S@sqlite3_api_routines@FI@soft_heap_limit	sqlite3_api_routines			void (*)(int)	-	-	-	-	0d1b0ddf6446e09f	-
+field	c:@S@sqlite3_api_routines@FI@vfs_find	sqlite3_api_routines			sqlite3_vfs *(*)(const char *)	-	-	-	-	77c425f43c053631	-
+field	c:@S@sqlite3_api_routines@FI@vfs_register	sqlite3_api_routines			int (*)(sqlite3_vfs *, int)	-	-	-	-	4b9f2a86dd2dd8a5	-
+field	c:@S@sqlite3_api_routines@FI@vfs_unregister	sqlite3_api_routines			int (*)(sqlite3_vfs *)	-	-	-	-	164cfc2f0f1df29b	-
+field	c:@S@sqlite3_api_routines@FI@xthreadsafe	sqlite3_api_routines			int (*)(void)	-	-	-	-	da3ea9b426e0f06a	-
+field	c:@S@sqlite3_api_routines@FI@result_zeroblob	sqlite3_api_routines			void (*)(sqlite3_context *, int)	-	-	-	-	95df3e83f6e26e12	-
+field	c:@S@sqlite3_api_routines@FI@result_error_code	sqlite3_api_routines			void (*)(sqlite3_context *, int)	-	-	-	-	b70e5dd5bdd880c7	-
+field	c:@S@sqlite3_api_routines@FI@test_control	sqlite3_api_routines			int (*)(int, ...)	-	-	-	-	2f51403959081d95	-
+field	c:@S@sqlite3_api_routines@FI@randomness	sqlite3_api_routines			void (*)(int, void *)	-	-	-	-	30ca24e16818018d	-
+field	c:@S@sqlite3_api_routines@FI@context_db_handle	sqlite3_api_routines			sqlite3 *(*)(sqlite3_context *)	-	-	-	-	e56d8d76786cbb0f	-
+field	c:@S@sqlite3_api_routines@FI@extended_result_codes	sqlite3_api_routines			int (*)(sqlite3 *, int)	-	-	-	-	72eb31512b3af794	-
+field	c:@S@sqlite3_api_routines@FI@limit	sqlite3_api_routines			int (*)(sqlite3 *, int, int)	-	-	-	-	080b48e1c5262352	-
+field	c:@S@sqlite3_api_routines@FI@next_stmt	sqlite3_api_routines			sqlite3_stmt *(*)(sqlite3 *, sqlite3_stmt *)	-	-	-	-	1aabd177083f5796	-
+field	c:@S@sqlite3_api_routines@FI@sql	sqlite3_api_routines			const char *(*)(sqlite3_stmt *)	-	-	-	-	2552a559e2603ce5	-
+field	c:@S@sqlite3_api_routines@FI@status	sqlite3_api_routines			int (*)(int, int *, int *, int)	-	-	-	-	c1026c161a9de403	-
+field	c:@S@sqlite3_api_routines@FI@backup_finish	sqlite3_api_routines			int (*)(sqlite3_backup *)	-	-	-	-	dd16536ca10a83e8	-
+field	c:@S@sqlite3_api_routines@FI@backup_init	sqlite3_api_routines			sqlite3_backup *(*)(sqlite3 *, const char *, sqlite3 *, const char *)	-	-	-	-	5fa2e785f850b5ea	-
+field	c:@S@sqlite3_api_routines@FI@backup_pagecount	sqlite3_api_routines			int (*)(sqlite3_backup *)	-	-	-	-	ede2b7dc3b6c7b9f	-
+field	c:@S@sqlite3_api_routines@FI@backup_remaining	sqlite3_api_routines			int (*)(sqlite3_backup *)	-	-	-	-	07e2ae83732c06b9	-
+field	c:@S@sqlite3_api_routines@FI@backup_step	sqlite3_api_routines			int (*)(sqlite3_backup *, int)	-	-	-	-	b93fea84d30d7875	-
+field	c:@S@sqlite3_api_routines@FI@compileoption_get	sqlite3_api_routines			const char *(*)(int)	-	-	-	-	fdf2b773f355cff8	-
+field	c:@S@sqlite3_api_routines@FI@compileoption_used	sqlite3_api_routines			int (*)(const char *)	-	-	-	-	7cd98717b017d9ad	-
+field	c:@S@sqlite3_api_routines@FI@create_function_v2	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *), void (*)(void *))	-	-	-	-	762ebaecd52eed9a	-
+field	c:@S@sqlite3_api_routines@FI@db_config	sqlite3_api_routines			int (*)(sqlite3 *, int, ...)	-	-	-	-	fe78847a07670b47	-
+field	c:@S@sqlite3_api_routines@FI@db_mutex	sqlite3_api_routines			sqlite3_mutex *(*)(sqlite3 *)	-	-	-	-	b59464e10f1dbbbf	-
+field	c:@S@sqlite3_api_routines@FI@db_status	sqlite3_api_routines			int (*)(sqlite3 *, int, int *, int *, int)	-	-	-	-	21e7db0d99c625eb	-
+field	c:@S@sqlite3_api_routines@FI@extended_errcode	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	6b597abd946294d0	-
+field	c:@S@sqlite3_api_routines@FI@log	sqlite3_api_routines			void (*)(int, const char *, ...)	-	-	-	-	d6742c73f3005a63	-
+field	c:@S@sqlite3_api_routines@FI@soft_heap_limit64	sqlite3_api_routines			sqlite3_int64 (*)(sqlite3_int64)	-	-	-	-	7c7533b559ff6c16	-
+field	c:@S@sqlite3_api_routines@FI@sourceid	sqlite3_api_routines			const char *(*)(void)	-	-	-	-	e6268fa2f655cad9	-
+field	c:@S@sqlite3_api_routines@FI@stmt_status	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, int)	-	-	-	-	e023b3d4729d12eb	-
+field	c:@S@sqlite3_api_routines@FI@strnicmp	sqlite3_api_routines			int (*)(const char *, const char *, int)	-	-	-	-	86ff5a5127924158	-
+field	c:@S@sqlite3_api_routines@FI@unlock_notify	sqlite3_api_routines			int (*)(sqlite3 *, void (*)(void **, int), void *)	-	-	-	-	28037732c6674354	-
+field	c:@S@sqlite3_api_routines@FI@wal_autocheckpoint	sqlite3_api_routines			int (*)(sqlite3 *, int)	-	-	-	-	a212a7268e8a8dbe	-
+field	c:@S@sqlite3_api_routines@FI@wal_checkpoint	sqlite3_api_routines			int (*)(sqlite3 *, const char *)	-	-	-	-	05d44816df9d3afe	-
+field	c:@S@sqlite3_api_routines@FI@wal_hook	sqlite3_api_routines			void *(*)(sqlite3 *, int (*)(void *, sqlite3 *, const char *, int), void *)	-	-	-	-	301b7b7fe18e3d1f	-
+field	c:@S@sqlite3_api_routines@FI@blob_reopen	sqlite3_api_routines			int (*)(sqlite3_blob *, sqlite3_int64)	-	-	-	-	863783468872ac7b	-
+field	c:@S@sqlite3_api_routines@FI@vtab_config	sqlite3_api_routines			int (*)(sqlite3 *, int, ...)	-	-	-	-	a4a8b19ea45bb946	-
+field	c:@S@sqlite3_api_routines@FI@vtab_on_conflict	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	e19c6b380ca1b101	-
+field	c:@S@sqlite3_api_routines@FI@close_v2	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	e6d64523d93c5a90	-
+field	c:@S@sqlite3_api_routines@FI@db_filename	sqlite3_api_routines			const char *(*)(sqlite3 *, const char *)	-	-	-	-	120a53bdeef67ca8	-
+field	c:@S@sqlite3_api_routines@FI@db_readonly	sqlite3_api_routines			int (*)(sqlite3 *, const char *)	-	-	-	-	a0f757e35c2312cf	-
+field	c:@S@sqlite3_api_routines@FI@db_release_memory	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	a826450e084fafa5	-
+field	c:@S@sqlite3_api_routines@FI@errstr	sqlite3_api_routines			const char *(*)(int)	-	-	-	-	18b07057721b3ff9	-
+field	c:@S@sqlite3_api_routines@FI@stmt_busy	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	cf63dc674c918832	-
+field	c:@S@sqlite3_api_routines@FI@stmt_readonly	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	15d9c20db1f96722	-
+field	c:@S@sqlite3_api_routines@FI@stricmp	sqlite3_api_routines			int (*)(const char *, const char *)	-	-	-	-	875f67c035368eb8	-
+field	c:@S@sqlite3_api_routines@FI@uri_boolean	sqlite3_api_routines			int (*)(const char *, const char *, int)	-	-	-	-	ca4960eebde35d84	-
+field	c:@S@sqlite3_api_routines@FI@uri_int64	sqlite3_api_routines			sqlite3_int64 (*)(const char *, const char *, sqlite3_int64)	-	-	-	-	961ac8f50b61707b	-
+field	c:@S@sqlite3_api_routines@FI@uri_parameter	sqlite3_api_routines			const char *(*)(const char *, const char *)	-	-	-	-	d09159cba23a5135	-
+field	c:@S@sqlite3_api_routines@FI@xvsnprintf	sqlite3_api_routines			char *(*)(int, char *, const char *, va_list)	-	-	-	-	f129ca3a731a09a0	-
+field	c:@S@sqlite3_api_routines@FI@wal_checkpoint_v2	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, int *, int *)	-	-	-	-	5572dcd0d6e768c8	-
+field	c:@S@sqlite3_api_routines@FI@auto_extension	sqlite3_api_routines			int (*)(void (*)(void))	-	-	-	-	30b99993d173ec4b	-
+field	c:@S@sqlite3_api_routines@FI@bind_blob64	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, const void *, sqlite3_uint64, void (*)(void *))	-	-	-	-	92e085bca180d368	-
+field	c:@S@sqlite3_api_routines@FI@bind_text64	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, const char *, sqlite3_uint64, void (*)(void *), unsigned char)	-	-	-	-	c4e054c1e91da22e	-
+field	c:@S@sqlite3_api_routines@FI@cancel_auto_extension	sqlite3_api_routines			int (*)(void (*)(void))	-	-	-	-	92cb5a2fd879af9f	-
+field	c:@S@sqlite3_api_routines@FI@load_extension	sqlite3_api_routines			int (*)(sqlite3 *, const char *, const char *, char **)	-	-	-	-	cbd2e99ac44cb941	-
+field	c:@S@sqlite3_api_routines@FI@malloc64	sqlite3_api_routines			void *(*)(sqlite3_uint64)	-	-	-	-	064e9eb59b079d0c	-
+field	c:@S@sqlite3_api_routines@FI@msize	sqlite3_api_routines			sqlite3_uint64 (*)(void *)	-	-	-	-	ed019c13b420d6a9	-
+field	c:@S@sqlite3_api_routines@FI@realloc64	sqlite3_api_routines			void *(*)(void *, sqlite3_uint64)	-	-	-	-	1b880f975268b5b6	-
+field	c:@S@sqlite3_api_routines@FI@reset_auto_extension	sqlite3_api_routines			void (*)(void)	-	-	-	-	9e5ef0678fe1ee44	-
+field	c:@S@sqlite3_api_routines@FI@result_blob64	sqlite3_api_routines			void (*)(sqlite3_context *, const void *, sqlite3_uint64, void (*)(void *))	-	-	-	-	92c06954b349df3b	-
+field	c:@S@sqlite3_api_routines@FI@result_text64	sqlite3_api_routines			void (*)(sqlite3_context *, const char *, sqlite3_uint64, void (*)(void *), unsigned char)	-	-	-	-	8bb911f8817bc3ac	-
+field	c:@S@sqlite3_api_routines@FI@strglob	sqlite3_api_routines			int (*)(const char *, const char *)	-	-	-	-	7cd47f58c94e1505	-
+field	c:@S@sqlite3_api_routines@FI@value_dup	sqlite3_api_routines			sqlite3_value *(*)(const sqlite3_value *)	-	-	-	-	2557373177639974	-
+field	c:@S@sqlite3_api_routines@FI@value_free	sqlite3_api_routines			void (*)(sqlite3_value *)	-	-	-	-	6425a371236fead1	-
+field	c:@S@sqlite3_api_routines@FI@result_zeroblob64	sqlite3_api_routines			int (*)(sqlite3_context *, sqlite3_uint64)	-	-	-	-	521d3968f41046c0	-
+field	c:@S@sqlite3_api_routines@FI@bind_zeroblob64	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, sqlite3_uint64)	-	-	-	-	33cff78ce094b62a	-
+field	c:@S@sqlite3_api_routines@FI@value_subtype	sqlite3_api_routines			unsigned int (*)(sqlite3_value *)	-	-	-	-	28d781c3a13054e8	-
+field	c:@S@sqlite3_api_routines@FI@result_subtype	sqlite3_api_routines			void (*)(sqlite3_context *, unsigned int)	-	-	-	-	c82c87feeb021064	-
+field	c:@S@sqlite3_api_routines@FI@status64	sqlite3_api_routines			int (*)(int, sqlite3_int64 *, sqlite3_int64 *, int)	-	-	-	-	29e56fe8a7109a10	-
+field	c:@S@sqlite3_api_routines@FI@strlike	sqlite3_api_routines			int (*)(const char *, const char *, unsigned int)	-	-	-	-	4f38fe69c3f904f1	-
+field	c:@S@sqlite3_api_routines@FI@db_cacheflush	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	7c84ff62b46ee948	-
+field	c:@S@sqlite3_api_routines@FI@system_errno	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	3c77299e78f7d263	-
+field	c:@S@sqlite3_api_routines@FI@trace_v2	sqlite3_api_routines			int (*)(sqlite3 *, unsigned int, int (*)(unsigned int, void *, void *, void *), void *)	-	-	-	-	0f6262a770dd0a46	-
+field	c:@S@sqlite3_api_routines@FI@expanded_sql	sqlite3_api_routines			char *(*)(sqlite3_stmt *)	-	-	-	-	1a0bf50b91f79b05	-
+field	c:@S@sqlite3_api_routines@FI@set_last_insert_rowid	sqlite3_api_routines			void (*)(sqlite3 *, sqlite3_int64)	-	-	-	-	daccb3e941cffd62	-
+field	c:@S@sqlite3_api_routines@FI@prepare_v3	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, unsigned int, sqlite3_stmt **, const char **)	-	-	-	-	5f8c3854794ea968	-
+field	c:@S@sqlite3_api_routines@FI@prepare16_v3	sqlite3_api_routines			int (*)(sqlite3 *, const void *, int, unsigned int, sqlite3_stmt **, const void **)	-	-	-	-	af2957da9b09b3b4	-
+field	c:@S@sqlite3_api_routines@FI@bind_pointer	sqlite3_api_routines			int (*)(sqlite3_stmt *, int, void *, const char *, void (*)(void *))	-	-	-	-	ef43c168181d7608	-
+field	c:@S@sqlite3_api_routines@FI@result_pointer	sqlite3_api_routines			void (*)(sqlite3_context *, void *, const char *, void (*)(void *))	-	-	-	-	64026c8cd313b919	-
+field	c:@S@sqlite3_api_routines@FI@value_pointer	sqlite3_api_routines			void *(*)(sqlite3_value *, const char *)	-	-	-	-	c0799ce7a80b9b06	-
+field	c:@S@sqlite3_api_routines@FI@vtab_nochange	sqlite3_api_routines			int (*)(sqlite3_context *)	-	-	-	-	cedc071f4fe8e8c6	-
+field	c:@S@sqlite3_api_routines@FI@value_nochange	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	ef158d45efed5c53	-
+field	c:@S@sqlite3_api_routines@FI@vtab_collation	sqlite3_api_routines			const char *(*)(sqlite3_index_info *, int)	-	-	-	-	53118288f08b5e9e	-
+field	c:@S@sqlite3_api_routines@FI@keyword_count	sqlite3_api_routines			int (*)(void)	-	-	-	-	0439d1c9cf49e0e5	-
+field	c:@S@sqlite3_api_routines@FI@keyword_name	sqlite3_api_routines			int (*)(int, const char **, int *)	-	-	-	-	f0beccb93766c3d0	-
+field	c:@S@sqlite3_api_routines@FI@keyword_check	sqlite3_api_routines			int (*)(const char *, int)	-	-	-	-	c9d0241bf9f881de	-
+field	c:@S@sqlite3_api_routines@FI@str_new	sqlite3_api_routines			sqlite3_str *(*)(sqlite3 *)	-	-	-	-	3865886e7df3d840	-
+field	c:@S@sqlite3_api_routines@FI@str_finish	sqlite3_api_routines			char *(*)(sqlite3_str *)	-	-	-	-	2c210dc549446508	-
+field	c:@S@sqlite3_api_routines@FI@str_appendf	sqlite3_api_routines			void (*)(sqlite3_str *, const char *, ...)	-	-	-	-	fe920d1cf9ece60a	-
+field	c:@S@sqlite3_api_routines@FI@str_vappendf	sqlite3_api_routines			void (*)(sqlite3_str *, const char *, va_list)	-	-	-	-	75f15b60f80306cf	-
+field	c:@S@sqlite3_api_routines@FI@str_append	sqlite3_api_routines			void (*)(sqlite3_str *, const char *, int)	-	-	-	-	786a1a1a0c4566d9	-
+field	c:@S@sqlite3_api_routines@FI@str_appendall	sqlite3_api_routines			void (*)(sqlite3_str *, const char *)	-	-	-	-	b5d30950f6bd71b1	-
+field	c:@S@sqlite3_api_routines@FI@str_appendchar	sqlite3_api_routines			void (*)(sqlite3_str *, int, char)	-	-	-	-	a9bd92e824cac436	-
+field	c:@S@sqlite3_api_routines@FI@str_reset	sqlite3_api_routines			void (*)(sqlite3_str *)	-	-	-	-	090ea2c7d41d2612	-
+field	c:@S@sqlite3_api_routines@FI@str_errcode	sqlite3_api_routines			int (*)(sqlite3_str *)	-	-	-	-	bfb313c5059cd364	-
+field	c:@S@sqlite3_api_routines@FI@str_length	sqlite3_api_routines			int (*)(sqlite3_str *)	-	-	-	-	7633e89e206b5d3c	-
+field	c:@S@sqlite3_api_routines@FI@str_value	sqlite3_api_routines			char *(*)(sqlite3_str *)	-	-	-	-	fb85a255964be175	-
+field	c:@S@sqlite3_api_routines@FI@create_window_function	sqlite3_api_routines			int (*)(sqlite3 *, const char *, int, int, void *, void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(sqlite3_context *), void (*)(sqlite3_context *), void (*)(sqlite3_context *, int, sqlite3_value **), void (*)(void *))	-	-	-	-	a8c8a68f6679c59c	-
+field	c:@S@sqlite3_api_routines@FI@normalized_sql	sqlite3_api_routines			const char *(*)(sqlite3_stmt *)	-	-	-	-	3b928b63307510e0	-
+field	c:@S@sqlite3_api_routines@FI@stmt_isexplain	sqlite3_api_routines			int (*)(sqlite3_stmt *)	-	-	-	-	7427afd161ccc2a4	-
+field	c:@S@sqlite3_api_routines@FI@value_frombind	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	0a536a4b48a18665	-
+field	c:@S@sqlite3_api_routines@FI@drop_modules	sqlite3_api_routines			int (*)(sqlite3 *, const char **)	-	-	-	-	c3d055f047a050e0	-
+field	c:@S@sqlite3_api_routines@FI@hard_heap_limit64	sqlite3_api_routines			sqlite3_int64 (*)(sqlite3_int64)	-	-	-	-	7419815e34483503	-
+field	c:@S@sqlite3_api_routines@FI@uri_key	sqlite3_api_routines			const char *(*)(const char *, int)	-	-	-	-	307b4dd902bc49c8	-
+field	c:@S@sqlite3_api_routines@FI@filename_database	sqlite3_api_routines			const char *(*)(const char *)	-	-	-	-	4a90b0a3bc20d950	-
+field	c:@S@sqlite3_api_routines@FI@filename_journal	sqlite3_api_routines			const char *(*)(const char *)	-	-	-	-	3413d72cc4b59f46	-
+field	c:@S@sqlite3_api_routines@FI@filename_wal	sqlite3_api_routines			const char *(*)(const char *)	-	-	-	-	365c3f44ba2a75db	-
+field	c:@S@sqlite3_api_routines@FI@create_filename	sqlite3_api_routines			const char *(*)(const char *, const char *, const char *, int, const char **)	-	-	-	-	7a7534425f5a6753	-
+field	c:@S@sqlite3_api_routines@FI@free_filename	sqlite3_api_routines			void (*)(const char *)	-	-	-	-	86c0c9bd2b1aeaf6	-
+field	c:@S@sqlite3_api_routines@FI@database_file_object	sqlite3_api_routines			sqlite3_file *(*)(const char *)	-	-	-	-	3d59f5d0148d01d9	-
+field	c:@S@sqlite3_api_routines@FI@txn_state	sqlite3_api_routines			int (*)(sqlite3 *, const char *)	-	-	-	-	64635cc584952372	-
+field	c:@S@sqlite3_api_routines@FI@changes64	sqlite3_api_routines			sqlite3_int64 (*)(sqlite3 *)	-	-	-	-	661b2751c747a74b	-
+field	c:@S@sqlite3_api_routines@FI@total_changes64	sqlite3_api_routines			sqlite3_int64 (*)(sqlite3 *)	-	-	-	-	f81e962d23a877e3	-
+field	c:@S@sqlite3_api_routines@FI@autovacuum_pages	sqlite3_api_routines			int (*)(sqlite3 *, unsigned int (*)(void *, const char *, unsigned int, unsigned int, unsigned int), void *, void (*)(void *))	-	-	-	-	18a8881a706ad363	-
+field	c:@S@sqlite3_api_routines@FI@error_offset	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	f0b8d1ba5885b4ea	-
+field	c:@S@sqlite3_api_routines@FI@vtab_rhs_value	sqlite3_api_routines			int (*)(sqlite3_index_info *, int, sqlite3_value **)	-	-	-	-	f55718869bc037a4	-
+field	c:@S@sqlite3_api_routines@FI@vtab_distinct	sqlite3_api_routines			int (*)(sqlite3_index_info *)	-	-	-	-	1c715ef3b7b35999	-
+field	c:@S@sqlite3_api_routines@FI@vtab_in	sqlite3_api_routines			int (*)(sqlite3_index_info *, int, int)	-	-	-	-	f29a7db78e4ace26	-
+field	c:@S@sqlite3_api_routines@FI@vtab_in_first	sqlite3_api_routines			int (*)(sqlite3_value *, sqlite3_value **)	-	-	-	-	5d21ff1a012174c5	-
+field	c:@S@sqlite3_api_routines@FI@vtab_in_next	sqlite3_api_routines			int (*)(sqlite3_value *, sqlite3_value **)	-	-	-	-	b27df2de55f6ce2f	-
+field	c:@S@sqlite3_api_routines@FI@deserialize	sqlite3_api_routines			int (*)(sqlite3 *, const char *, unsigned char *, sqlite3_int64, sqlite3_int64, unsigned int)	-	-	-	-	8e8ffcaa18392c96	-
+field	c:@S@sqlite3_api_routines@FI@serialize	sqlite3_api_routines			unsigned char *(*)(sqlite3 *, const char *, sqlite3_int64 *, unsigned int)	-	-	-	-	c55a380c09a10423	-
+field	c:@S@sqlite3_api_routines@FI@db_name	sqlite3_api_routines			const char *(*)(sqlite3 *, int)	-	-	-	-	ac39561fd411c174	-
+field	c:@S@sqlite3_api_routines@FI@value_encoding	sqlite3_api_routines			int (*)(sqlite3_value *)	-	-	-	-	645cd0dd8e72bba5	-
+field	c:@S@sqlite3_api_routines@FI@is_interrupted	sqlite3_api_routines			int (*)(sqlite3 *)	-	-	-	-	94f34584249efb3a	-
+field	c:@S@sqlite3_api_routines@FI@stmt_explain	sqlite3_api_routines			int (*)(sqlite3_stmt *, int)	-	-	-	-	eae9511f97152cf3	-
+field	c:@S@sqlite3_api_routines@FI@get_clientdata	sqlite3_api_routines			void *(*)(sqlite3 *, const char *)	-	-	-	-	be4d5fcf09cd364f	-
+field	c:@S@sqlite3_api_routines@FI@set_clientdata	sqlite3_api_routines			int (*)(sqlite3 *, const char *, void *, void (*)(void *))	-	-	-	-	27c8e065b495bea9	-
+field	c:@S@sqlite3_api_routines@FI@setlk_timeout	sqlite3_api_routines			int (*)(sqlite3 *, int, int)	-	-	-	-	b6f6a7ec5d105328	-
+typedef	c:@T@sqlite3_loadext_entry	-			int (*)(sqlite3 *, char **, const sqlite3_api_routines *)	-	-	-	-	9c25c6c7a01da148	-
+typedef	c:@T@va_list	-			__builtin_va_list	-	-	-	-	88519b6121af0d9d	-
+typedef	c:@T@__builtin_va_list	-			char *	-	-	-	-	954c872416ff897e	-

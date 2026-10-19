@@ -1,0 +1,189 @@
+[
+  {
+    "api": "LADomainState",
+    "kind": "class",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "an application that reads LAContext's domainState names this class, and a strong reference to a class that is not there stops it at launch",
+    "effect": "the class exists and its three members answer as facts/LocalAuthentication/LAEnvironment.md says: no biometry enrolled, no companion available, and no state to identify",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the headers of LADomainState.h in the SDK 26.2, which the port's own SDK 16.4 does not have; the host's own LocalAuthentication for the shapes, measured (tests/backports/host/localauth18)"
+  },
+  {
+    "api": "+[LADomainState new]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, as Apple's own framework does, so no application can name it; at run time it is NSObject's, as it is there",
+    "effect": "an allocated LADomainState, which holds nothing, as NSObject's +new makes of any class",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2, which marks +new and -init NS_UNAVAILABLE"
+  },
+  {
+    "api": "-[LADomainState init]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, as Apple's own framework does, so no application can name it; at run time it is NSObject's, as it is there",
+    "effect": "an LADomainState, which holds nothing",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2, which marks +new and -init NS_UNAVAILABLE"
+  },
+  {
+    "api": "LADomainState.biometry",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header says the member is there, not nullable, so it is carried as an object that reports the state of the biometry of this release",
+    "effect": "one shared LADomainStateBiometry, whose biometryType is LABiometryTypeNone and whose stateHash is nil",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, whose domainState.biometry is an LADomainStateBiometry carrying the biometry type and a 32 byte hash; the armv7 shared cache of iOS 6.1.3, which has no sensor to have a state for"
+  },
+  {
+    "api": "LADomainState.companion",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header says the member is there, not nullable, so it is carried as an object that reports the state of the companions of this release",
+    "effect": "one shared LADomainStateCompanion, with an empty set of available types, a nil stateHash and nil from -stateHashForCompanionType: for every type",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, whose domainState.companion is an LADomainStateCompanion with an empty availableCompanionTypes set, a null stateHash and nil from -stateHashForCompanionType: for the types asked of it"
+  },
+  {
+    "api": "LADomainState.stateHash",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the hash identifies the state of the domain, and this domain has no biometry enrolled and no companion: there is no state to identify, which is what the host answers as null for a companion that is not there",
+    "effect": "nil, always; nothing is hashed and nothing is invented",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, whose LADomainStateCompanion.stateHash is null where there is no companion, and whose domain stateHash is 32 bytes where a biometry is enrolled"
+  },
+  {
+    "api": "LADomainStateBiometry",
+    "kind": "class",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "LADomainState's biometry member is of this class, and an application that names it must find it",
+    "effect": "the class exists, is made once by LADomainState and answers the type none and a nil hash",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2; the host's own LocalAuthentication for the shape"
+  },
+  {
+    "api": "+[LADomainStateBiometry new]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, so no application can name it; at run time it is NSObject's",
+    "effect": "an allocated LADomainStateBiometry, which holds nothing",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2, which marks +new and -init NS_UNAVAILABLE"
+  },
+  {
+    "api": "-[LADomainStateBiometry init]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, so no application can name it; at run time it is NSObject's",
+    "effect": "an LADomainStateBiometry, which holds nothing",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2, which marks +new and -init NS_UNAVAILABLE"
+  },
+  {
+    "api": "LADomainStateBiometry.biometryType",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "this device has no biometric sensor, and the value the port already answers for -[LAContext biometryType] is the one to answer here",
+    "effect": "LABiometryTypeNone",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "facts/LocalAuthentication/LAContext.md, which records the measured answer of this release; the host's own LocalAuthentication, whose domainState.biometry carries the type of the sensor the host has"
+  },
+  {
+    "api": "LADomainStateBiometry.stateHash",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the hash identifies an enrolled biometry, and none is enrolled: there is no state to identify",
+    "effect": "nil, always; the host answers 32 bytes where a biometry is enrolled and null where a companion is not there, so null is its own answer for a state with nothing in it",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, whose LADomainStateCompanion.stateHash is null with nothing to identify"
+  },
+  {
+    "api": "LADomainStateCompanion",
+    "kind": "class",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "LADomainState's companion member is of this class, and an application that names it must find it",
+    "effect": "the class exists, is made once by LADomainState and answers an empty set of types, a nil hash and nil for every type asked of",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2; the host's own LocalAuthentication for the shape"
+  },
+  {
+    "api": "+[LADomainStateCompanion new]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, so no application can name it; at run time it is NSObject's",
+    "effect": "an allocated LADomainStateCompanion, which holds nothing",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2, which marks +new and -init NS_UNAVAILABLE"
+  },
+  {
+    "api": "-[LADomainStateCompanion init]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the header marks it NS_UNAVAILABLE, so no application can name it; at run time it is NSObject's",
+    "effect": "an LADomainStateCompanion, which holds nothing",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the header of LADomainState.h in the SDK 26.2, which marks +new and -init NS_UNAVAILABLE"
+  },
+  {
+    "api": "LADomainStateCompanion.availableCompanionTypes",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "this release pairs with no watch and no Mac companion, so the set of the types available to it is empty",
+    "effect": "an empty NSSet, which is the shape the host holds for a device with no companion paired",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, whose availableCompanionTypes is an empty set on a device with no companion"
+  },
+  {
+    "api": "LADomainStateCompanion.stateHash",
+    "kind": "property",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "no companion is available, so there is no companion state to identify",
+    "effect": "nil, always, which is what the host answers for exactly that case",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, whose LADomainStateCompanion.stateHash is null with no companion paired"
+  },
+  {
+    "api": "-[LADomainStateCompanion stateHashForCompanionType:]",
+    "kind": "method",
+    "introduced": "18.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the hash of a companion type that is not available is nothing, and no type is available on this release",
+    "effect": "nil for every LACompanionType, which is what the host answers for each type asked of its own",
+    "facts": "facts/LocalAuthentication/LAEnvironment.md",
+    "source": "the host's own LocalAuthentication, asked for types 0, 1 and 2, which answers nil for each"
+  }
+]

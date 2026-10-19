@@ -1,0 +1,3 @@
+MIDIBluetoothDriverActivateAllConnections -> 0
+MIDIBluetoothDriverDisconnect(unknown) -> 0
+MIDIBluetoothDriverDisconnect(empty) -> 0

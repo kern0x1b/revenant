@@ -1,0 +1,41 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_WebKit_SwiftUI	swift-struct	s:15_WebKit_SwiftUI0A4ViewV	-	WebView	-	-	-	ios=26.0,macos=26.0	-	3d9bd8945e5de50d
+_WebKit_SwiftUI	swift-method	s:15_WebKit_SwiftUI0A4ViewVyAC0aB00A4PageCcfc	WebView	init(_:)	-	-	_WebKit_SwiftUI.WebView | WebKit.WebPage	-	-	a129905f5e62b5d2
+_WebKit_SwiftUI	swift-method	s:15_WebKit_SwiftUI0A4ViewV3urlAC10Foundation3URLVSg_tcfc	WebView	init(url:)	-	-	_WebKit_SwiftUI.WebView | Foundation.URL?	-	-	f17611bbc1b1fae3
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV4bodyQrvp	WebView	body	-	some SwiftUI.View	-	-	-	477375533d4da2c8
+_WebKit_SwiftUI	swift-typealias	s:15_WebKit_SwiftUI0A4ViewV4Bodya	WebView	Body	-	-	-	ios=26.0,macos=26.0	-	cc9b0f8b8771c407
+_WebKit_SwiftUI	swift-struct	s:15_WebKit_SwiftUI0A4ViewV37BackForwardNavigationGesturesBehaviorV	WebView	BackForwardNavigationGesturesBehavior	-	-	-	ios=26.0,macos=26.0	-	230814bfdf975f4e
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV37BackForwardNavigationGesturesBehaviorV9automaticAEvpZ	WebView.BackForwardNavigationGesturesBehavior	automatic	+	_WebKit_SwiftUI.WebView.BackForwardNavigationGesturesBehavior	-	-	-	a9d9ece8741d9257
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV37BackForwardNavigationGesturesBehaviorV7enabledAEvpZ	WebView.BackForwardNavigationGesturesBehavior	enabled	+	_WebKit_SwiftUI.WebView.BackForwardNavigationGesturesBehavior	-	-	-	8725dde433ca4a5d
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV37BackForwardNavigationGesturesBehaviorV8disabledAEvpZ	WebView.BackForwardNavigationGesturesBehavior	disabled	+	_WebKit_SwiftUI.WebView.BackForwardNavigationGesturesBehavior	-	-	-	81bbf176a176f8c1
+_WebKit_SwiftUI	swift-struct	s:15_WebKit_SwiftUI0A4ViewV29MagnificationGesturesBehaviorV	WebView	MagnificationGesturesBehavior	-	-	-	ios=26.0,macos=26.0	-	3139d2833cd1f0fb
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV29MagnificationGesturesBehaviorV9automaticAEvpZ	WebView.MagnificationGesturesBehavior	automatic	+	_WebKit_SwiftUI.WebView.MagnificationGesturesBehavior	-	-	-	bdcab59c0cc82908
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV29MagnificationGesturesBehaviorV7enabledAEvpZ	WebView.MagnificationGesturesBehavior	enabled	+	_WebKit_SwiftUI.WebView.MagnificationGesturesBehavior	-	-	-	573b382c2ecff926
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV29MagnificationGesturesBehaviorV8disabledAEvpZ	WebView.MagnificationGesturesBehavior	disabled	+	_WebKit_SwiftUI.WebView.MagnificationGesturesBehavior	-	-	-	8084b10fe5e4fdf0
+_WebKit_SwiftUI	swift-struct	s:15_WebKit_SwiftUI0A4ViewV19LinkPreviewBehaviorV	WebView	LinkPreviewBehavior	-	-	-	ios=26.0,macos=26.0	-	79394514b795000a
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV19LinkPreviewBehaviorV9automaticAEvpZ	WebView.LinkPreviewBehavior	automatic	+	_WebKit_SwiftUI.WebView.LinkPreviewBehavior	-	-	-	31dec312474af1bd
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV19LinkPreviewBehaviorV7enabledAEvpZ	WebView.LinkPreviewBehavior	enabled	+	_WebKit_SwiftUI.WebView.LinkPreviewBehavior	-	-	-	0a27cf910af79623
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV19LinkPreviewBehaviorV8disabledAEvpZ	WebView.LinkPreviewBehavior	disabled	+	_WebKit_SwiftUI.WebView.LinkPreviewBehavior	-	-	-	21f95cca529d55e1
+_WebKit_SwiftUI	swift-struct	s:15_WebKit_SwiftUI0A4ViewV25ElementFullscreenBehaviorV	WebView	ElementFullscreenBehavior	-	-	-	ios=26.0,macos=26.0	-	96daa704dcdf967e
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV25ElementFullscreenBehaviorV9automaticAEvpZ	WebView.ElementFullscreenBehavior	automatic	+	_WebKit_SwiftUI.WebView.ElementFullscreenBehavior	-	-	-	f300ee966b4f7acc
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV25ElementFullscreenBehaviorV7enabledAEvpZ	WebView.ElementFullscreenBehavior	enabled	+	_WebKit_SwiftUI.WebView.ElementFullscreenBehavior	-	-	-	b9fe7735dbfe3f37
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV25ElementFullscreenBehaviorV8disabledAEvpZ	WebView.ElementFullscreenBehavior	disabled	+	_WebKit_SwiftUI.WebView.ElementFullscreenBehavior	-	-	-	045d2821fd720649
+_WebKit_SwiftUI	swift-struct	s:15_WebKit_SwiftUI0A4ViewV20ActivatedElementInfoV	WebView	ActivatedElementInfo	-	-	-	ios=26.0,macos=26.0	-	92920651e5706c0a
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV20ActivatedElementInfoV7linkURL10Foundation0J0VSgvp	WebView.ActivatedElementInfo	linkURL	-	Foundation.URL?	-	-	-	01541a34ae37a8aa
+_WebKit_SwiftUI	swift-method	s:15_WebKit_SwiftUI0A4ViewV20ActivatedElementInfoV2eeoiySbAE_AEtFZ	WebView.ActivatedElementInfo	==(_:_:)	+	Swift.Bool	_WebKit_SwiftUI.WebView.ActivatedElementInfo | _WebKit_SwiftUI.WebView.ActivatedElementInfo	-	-	23633598615e142b
+_WebKit_SwiftUI	swift-method	s:15_WebKit_SwiftUI0A4ViewV20ActivatedElementInfoV4hash4intoys6HasherVz_tF	WebView.ActivatedElementInfo	hash(into:)	-	()	Swift.Hasher	-	-	e61d98964e8fbed6
+_WebKit_SwiftUI	swift-property	s:15_WebKit_SwiftUI0A4ViewV20ActivatedElementInfoV9hashValueSivp	WebView.ActivatedElementInfo	hashValue	-	Swift.Int	-	-	-	68ececc47e50e1bc
+_WebKit_SwiftUI	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC29BackForwardNavigationGesturesyQrAD0dC0V0ghiJ8BehaviorVF	View	webViewBackForwardNavigationGestures(_:)	-	some SwiftUI.View	_WebKit_SwiftUI.WebView.BackForwardNavigationGesturesBehavior	ios=26.0,macos=26.0	-	c921d41c8d4af412
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC21MagnificationGesturesyQrAD0dC0V0gH8BehaviorVF	View	webViewMagnificationGestures(_:)	-	some SwiftUI.View	_WebKit_SwiftUI.WebView.MagnificationGesturesBehavior	ios=26.0,macos=26.0	-	1c035b2b59b18fe5
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC12LinkPreviewsyQrAD0dC0V0G15PreviewBehaviorVF	View	webViewLinkPreviews(_:)	-	some SwiftUI.View	_WebKit_SwiftUI.WebView.LinkPreviewBehavior	ios=26.0,macos=26.0	-	c9f0b82409641655
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC13TextSelectionyQrqd__AA0G13SelectabilityRd__lF	View	webViewTextSelection(_:)	-	some SwiftUI.View	S	ios=26.0,macos=26.0	-	87cb453bfd694a34
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC25ElementFullscreenBehavioryQrAD0dC0V0ghI0VF	View	webViewElementFullscreenBehavior(_:)	-	some SwiftUI.View	_WebKit_SwiftUI.WebView.ElementFullscreenBehavior	ios=26.0,macos=26.0	-	395895eb155efcb5
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC17ContentBackgroundyQrAA10VisibilityOF	View	webViewContentBackground(_:)	-	some SwiftUI.View	SwiftUI.Visibility	ios=26.0,macos=26.0	-	9c649cca7ec19d0d
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC22OnScrollGeometryChange3for2of6actionQrqd__m_qd__AA0hI0Vcyqd___qd__tctSHRd__lF	View	webViewOnScrollGeometryChange(for:of:action:)	-	some SwiftUI.View	T.Type | (SwiftUICore.ScrollGeometry) -> T | (T, T) -> Swift.Void	ios=26.0,macos=26.0	-	dc26759d3d921d02
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC14ScrollPositionyQrAA7BindingVyAA0gH0VGF	View	webViewScrollPosition(_:)	-	some SwiftUI.View	SwiftUI.Binding<SwiftUI.ScrollPosition>	ios=26.0,macos=26.0	-	0e6199ea68ead14a
+_WebKit_SwiftUI	swift-method	s:7SwiftUI4ViewP08_WebKit_aB0E03webC19ScrollInputBehavior_3forQrAA0ghI0V_AA0gH4KindVtF	View	webViewScrollInputBehavior(_:for:)	-	some SwiftUI.View	SwiftUI.ScrollInputBehavior | SwiftUI.ScrollInputKind	ios=26.0,macos=26.0	-	8f9dbdb3620c2341
+_WebKit_SwiftUI	swift-class	s:6WebKit0A4PageC	-	WebPage	-	-	-	ios=26.0,macos=26.0	-	596dea47e6b918ee
+_WebKit_SwiftUI	swift-property	s:6WebKit0A4PageC01_aB8_SwiftUIE10themeColor0dE00G0VSgvp	WebPage	themeColor	-	SwiftUI.Color?	-	ios=26.0,macos=26.0	-	5728348c6bafa690
+_WebKit_SwiftUI	swift-struct	s:6WebKit0A4PageC16NavigationActionV	-	NavigationAction	-	-	-	ios=26.0,macos=26.0	-	d85ddaed1c28a3fd
+_WebKit_SwiftUI	swift-property	s:6WebKit0A4PageC16NavigationActionV01_aB8_SwiftUIE13modifierFlags0fG014EventModifiersVvp	NavigationAction	modifierFlags	-	SwiftUI.EventModifiers	-	ios=26.0,macos=26.0	-	dc13996180140198

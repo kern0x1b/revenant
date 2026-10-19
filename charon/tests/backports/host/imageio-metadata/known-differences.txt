@@ -1,0 +1,11 @@
+# Cases where the port's answer is not the host's, each with the rule the port follows and the measurement.
+#
+# The name of the case is the record's own first field in tests/backports/host/imageio-metadata/cases.m. One
+# case per line, the name before the '#', because run.sh reads this file with cut -d'#' -f1 and a name that
+# wraps onto a second line would be read as two cases. run.sh requires that every difference this file
+# declares really is a difference, and that no difference is missing from it, so a stale line cannot sit here.
+# The full argument for each one is in packages/a/apple-backports/facts/ImageIO/Metadata.md.
+
+tag unknown-ns-no-prefix	# the host returns a NON-NULL tag whose every accessor answers nil and whose type is -1; the port returns NULL. CGImageMetadata.h: "Returns NULL if a tag could not be created with the specified parameters" - a namespace with no prefix and no public prefix to take is not resolvable, so that is what happened. Measured 2026-09-30.
+
+string array	# the path names a tag whose value is an ordered array: the host answers its first element's string, the port answers NULL. The result of CGImageMetadataCopyStringValueWithPath is the tag's string value, and a tag holding an array holds no string. Measured 2026-09-30, after "set array" put two strings at dc:subject.

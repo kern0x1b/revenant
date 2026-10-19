@@ -1,0 +1,5 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_SwiftData_CoreData	method	NSManagedObjectModel.makeManagedObjectModel(for:mergedWith:)	17.0	yes			own
+_SwiftData_CoreData	method	NSManagedObjectModel.makeManagedObjectModel(for:mergedWith:)	17				container
+_SwiftData_CoreData	method	NSManagedObjectModel.makeManagedObjectModel(for:mergedWith:)	26.0				own
+_SwiftData_CoreData	method	NSManagedObjectModel.makeManagedObjectModel(for:mergedWith:)	26.0				own

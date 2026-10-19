@@ -1,0 +1,55 @@
+{
+ "framework": "PDFKit",
+ "entries": [
+  {
+   "api": "PDFBorder",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a value object over one border, and a MUTABLE one: PDFBorder.h:28 declares no initializer of its own, so -init is NSObject's and what it makes is the host's fresh object (style 0, lineWidth 1, a nil pattern, key values {S = 0, W = 1}), all three setters are implemented, and -borderKeyValues is a copy of the dictionary they are read out of.  A border read out of a document comes from the two spellings the format gives one annotation: the /Border array of PDF 1.7 Table 164 for the line width, and the /BS dictionary of Table 8.44 for the style and the dash pattern.  -[PDFAnnotation border] is how a document reaches one, and nil there is a measured answer: a border is answered for an annotation whose dictionary names a /Border or a /BS whatever its subtype, otherwise for the geometry subtypes /Circle /FreeText /Ink /Line /Square, otherwise for a /Widget whose /MK names a border colour the format's four component counts allow, and nil otherwise",
+   "facts": "facts/PDFKit/Border11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh, two macOS binaries whose images dladdr proves differ by construction, plus a Mac Catalyst third for the appearance block whose own output is required before its answers are merged: COMPARED 5329 MISMATCHES 0 over 100 fixtures, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key - each of which goes red when that one value is planted in a scratch copy of whichever side printed it"
+  },
+  {
+   "api": "PDFBorder.style",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /BS /S name of the dictionary the border was read out of, read through a table and not as an ordinal: /S is solid, /D dashed, /B beveled, /I inset, /U underline, and a name the format does not list answers solid.  All five names and the unlisted one are measured (bs-s, bs-d, bs-b, bs-i, bs-u, bs-q), because the enum's order and the format's names run the same way and reading one as the position would fit the same data.  -setStyle: changes the object's own style and nothing else - measured: a fresh object with only the style set answers S = 3 and W = 1, and an object with a pattern set keeps it when the style is set afterwards",
+   "facts": "facts/PDFKit/Border11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh, two macOS binaries whose images dladdr proves differ by construction, plus a Mac Catalyst third for the appearance block whose own output is required before its answers are merged: COMPARED 5329 MISMATCHES 0 over 100 fixtures, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key - each of which goes red when that one value is planted in a scratch copy of whichever side printed it"
+  },
+  {
+   "api": "PDFBorder.lineWidth",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /BS /W when the annotation has a /BS dictionary, and the THIRD number of the /Border array when it has none - bs-width-only writes /Border [0 0 7] beside /W 5 and answers 5, and bs-style-only writes /Border [0 0 9] beside a /BS that has a /S and a /D and no /W and answers the default 1, not 9: a /BS that is present takes the width question entirely and /Border's third element is not its fallback.  The third element and not the last: /Border [1 2 3 4] answers 3.  The two corner radii are not read: /Border [5 7 2] answers 2.  A negative width is a width: [0 0 -2.5] answers -2.5.  A zero is a value: [0 0 0] answers 0.  The default is 1, and three fixtures fix it where the third element is missing.  A /W that is not a number is refused and the width falls through, while the style beside it still answers - measured on bs-width-string.  -setLineWidth: changes the object's own width and nothing else, and keeps a zero and a negative width rather than clamping them - measured at 7, 0 and -3.5",
+   "facts": "facts/PDFKit/Border11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh, two macOS binaries whose images dladdr proves differ by construction, plus a Mac Catalyst third for the appearance block whose own output is required before its answers are merged: COMPARED 5329 MISMATCHES 0 over 100 fixtures, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key - each of which goes red when that one value is planted in a scratch copy of whichever side printed it"
+  },
+  {
+   "api": "PDFBorder.dashPattern",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the /BS /D array of numbers, and nil for every style but dashed - bs-dash-solid carries /S /S beside /D [4 1] and answers nil.  A dashed border with no /D, or with a /D that is not an array, answers the measured default [3 2]; a dashed border with /D [7 5] answers [7 5], which is the fixture that shows the array is read and that [3 2] is a default rather than the only answer.  -setDashPattern: is the one setter that changes more than its own member, and every part is measured: a NON-EMPTY array publishes D and sets the style to dashed (a fresh object with only the pattern set answers S = 1); an EMPTY array publishes an empty D and sets the style to solid, including on a border whose style was dashed; nil does the same as @[] and -dashPattern then answers an EMPTY array rather than nil; and the width is not touched by any of them, in four arrangements measured",
+   "facts": "facts/PDFKit/Border11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh, two macOS binaries whose images dladdr proves differ by construction, plus a Mac Catalyst third for the appearance block whose own output is required before its answers are merged: COMPARED 5329 MISMATCHES 0 over 100 fixtures, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key - each of which goes red when that one value is planted in a scratch copy of whichever side printed it"
+  },
+  {
+   "api": "PDFBorder.borderKeyValues",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the dictionary the three members are read out of, in the header's own key names - @\"W\" and @\"S\" always, and @\"D\" exactly when -dashPattern answers one.  border-plain and bs-dash-solid answer two keys each and bs-d and border-bs answer three.  A COPY, so a caller holding it cannot change the object through it - the same copy -[PDFAppearanceCharacteristics appearanceCharacteristicsKeyValues] hands back",
+   "facts": "facts/PDFKit/Border11.md",
+   "source": "the host's own PDFKit under macOS in a process that holds no port object, against the port's objects in a process that links no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh, two macOS binaries whose images dladdr proves differ by construction, plus a Mac Catalyst third for the appearance block whose own output is required before its answers are merged: COMPARED 5329 MISMATCHES 0 over 100 fixtures, with twenty-five red controls - one automatic and twenty-four naming a border, appearance or identity key - each of which goes red when that one value is planted in a scratch copy of whichever side printed it"
+  }
+ ]
+}

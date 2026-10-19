@@ -1,0 +1,51 @@
+{
+  "cases" : {
+    "archiveRoundTrip" : {
+      "decoded" : "yes",
+      "equal" : false,
+      "raised" : "no",
+      "zoneName" : "probe"
+    },
+    "defaultRecordZone" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1011eacf0; zoneID=<CKRecordZoneID: _defaultZone\/__defaultOwner__>, capabilities=0>",
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "zoneID.ownerName" : "__defaultOwner__",
+      "zoneID.zoneName" : "_defaultZone"
+    },
+    "init" : {
+      "raised" : "no",
+      "value" : "(nil)"
+    },
+    "initWithZoneID" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1011ea590; zoneID=<CKRecordZoneID: probe\/__defaultOwner__>, capabilities=0>",
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "zoneID.ownerName" : "__defaultOwner__",
+      "zoneID.zoneName" : "probe"
+    },
+    "initWithZoneName" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1011ea360; zoneID=<CKRecordZoneID: probe\/__defaultOwner__>, capabilities=0>",
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "zoneID.ownerName" : "__defaultOwner__",
+      "zoneID.zoneName" : "probe"
+    },
+    "new" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1011ea590; zoneID=(null), capabilities=0>",
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "zoneID.ownerName" : "(nil)",
+      "zoneID.zoneName" : "(nil)"
+    }
+  },
+  "conditions" : "the port's own objects, no CloudKit framework linked, in memory only"
+}

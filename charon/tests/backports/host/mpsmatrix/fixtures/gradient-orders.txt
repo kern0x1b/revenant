@@ -1,0 +1,8 @@
+gradient-separating.m run in three argument orders, and the host's dX at (0, 0) in each.
+The variants are evaluated in the declared order, so a match would have to be a variant that
+happens to equal the host of another order; none does, and the closest of the sixteen is 0.0060
+from -1.68092501 and 0.0752 from 0.778845072.
+
+as declared -> 0.778845072
+gradient and source swapped -> -1.68092501
+mean and variance swapped -> -34.5620041

@@ -1,0 +1,60 @@
+{
+ "framework": "ARKit",
+ "entries": [
+  {
+   "api": "ARVideoFormat.videoHDRSupported",
+   "kind": "property",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Configurations.md",
+   "reason": "carried, and the getter is the header's own: ARVideoFormat.h:47 declares `@property (nonatomic, readonly, getter=isVideoHDRSupported) BOOL videoHDRSupported API_AVAILABLE(ios(16.0))`, so the selector is -isVideoHDRSupported and there is no -videoHDRSupported to look for. The release carries exactly that: ARVideoFormat's own instance list in ARKitCore of the arm64e shared cache of iOS 16.0 is 28 twelve-byte entries and one of them is isVideoHDRSupported at 0x1af0f4870. The port answers NO (ARKit/ARVideoFormat.m), and NO is what the camera gives: HDR is a property of the pixel format a capture device offers, and every format this port builds an ARVideoFormat from is an AVCaptureDeviceFormat, which on the releases this package builds carries no HDR format at all. Controls of the read: the list resolves and prints all 28 selectors with their implementation addresses, so a read that found nothing would print nothing",
+   "effect": "NO, which is what a camera whose formats carry no HDR answers; the port's answer and the camera's are the same statement",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARVideoFormat: instance list 0x1af214578 of 28 twelve-byte entries and class list 0x1af2144b0 of 16 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), and isVideoHDRSupported at 0x1af0f4870 on the instance list. The declaration is the 16.4 build SDK's own ARKit.framework/Headers/ARVideoFormat.h:47. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and -isVideoHDRSupported is in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, and +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to"
+  },
+  {
+   "api": "ARConfiguration.videoHDRAllowed",
+   "kind": "property",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Configurations.md",
+   "reason": "carried, and the answer is NO because of the camera rather than the setting: HDR is a property of the pixel format a capture device offers, and every format this port builds an ARVideoFormat from is an AVCaptureDeviceFormat, which on the releases this package builds carries no HDR format at all. The same measurement answers -[ARVideoFormat isVideoHDRSupported] NO, which is its own row and its own accessor in the same file. A setter that stored YES would answer a caller that asked for HDR and then hand the session a camera that cannot deliver it. The release carries both accessors, videoHDRAllowed at 0x1af0f3134 and setVideoHDRAllowed: at 0x1af0f313c",
+   "effect": "NO, and a setter that does not pretend otherwise; ARSession.m reads no configuration setting at all beyond +isSupported, so nothing here is a stored value waiting for a reader",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARConfiguration: instance list 0x1af2140d8 of 61 twelve-byte entries and class list 0x1af214018 of 15 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsFrameSemantics: at 0x1af0f1d6c, +configurableCaptureDeviceForPrimaryCamera at 0x1af0f292c, +recommendedVideoFormatFor4KResolution at 0x1af0f2a14, +recommendedVideoFormatForHighResolutionFrameCapturing at 0x1af0f2a1c, and on the instance list videoHDRAllowed at 0x1af0f3134, setVideoHDRAllowed: at 0x1af0f313c, frameSemantics at 0x1af084078, setFrameSemantics: at 0x1af0f1cd0. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+  },
+  {
+   "api": "ARConfiguration.configurableCaptureDeviceForPrimaryCamera",
+   "kind": "property",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Configurations.md",
+   "reason": "carried: the port's session captures from the back camera's own AVCaptureDevice, and this answers that device, so a caller configuring it configures the camera the session really opens. Measured rather than declared: -[CharonARTracker captureDeviceForPosition:] is what ARConfiguration.m hands back, and ARSession.m's capture setup asks the tracker for the same device, so the object answered here is the one that is opened rather than a copy. The release carries the class method at 0x1af0f292c",
+   "effect": "the AVCaptureDevice the session captures the primary camera from, which is the back camera this device has",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARConfiguration: instance list 0x1af2140d8 of 61 twelve-byte entries and class list 0x1af214018 of 15 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsFrameSemantics: at 0x1af0f1d6c, +configurableCaptureDeviceForPrimaryCamera at 0x1af0f292c, +recommendedVideoFormatFor4KResolution at 0x1af0f2a14, +recommendedVideoFormatForHighResolutionFrameCapturing at 0x1af0f2a1c, and on the instance list videoHDRAllowed at 0x1af0f3134, setVideoHDRAllowed: at 0x1af0f313c, frameSemantics at 0x1af084078, setFrameSemantics: at 0x1af0f1cd0. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+  },
+  {
+   "api": "ARConfiguration.recommendedVideoFormatFor4KResolution",
+   "kind": "property",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Configurations.md",
+   "reason": "carried: the recommendation is chosen out of the formats the camera really has, by the log-distance of each format's two dimensions from 3840x2160, so a format offered here is one the session can be configured with and the nearest one is the nearest the camera's own list allows. The input is +supportedVideoFormats, which reads CharonARTracker's own list of the back camera's formats, so the recommendation cannot name a format the camera does not have; when no format is close the answer is nil, which is what the property's own nullability says. The release carries the class method at 0x1af0f2a14",
+   "effect": "the offered format whose frame is closest to 3840x2160 on the log of each dimension, or nil when the camera offers none that is close",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARConfiguration: instance list 0x1af2140d8 of 61 twelve-byte entries and class list 0x1af214018 of 15 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsFrameSemantics: at 0x1af0f1d6c, +configurableCaptureDeviceForPrimaryCamera at 0x1af0f292c, +recommendedVideoFormatFor4KResolution at 0x1af0f2a14, +recommendedVideoFormatForHighResolutionFrameCapturing at 0x1af0f2a1c, and on the instance list videoHDRAllowed at 0x1af0f3134, setVideoHDRAllowed: at 0x1af0f313c, frameSemantics at 0x1af084078, setFrameSemantics: at 0x1af0f1cd0. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+  },
+  {
+   "api": "ARConfiguration.recommendedVideoFormatForHighResolutionFrameCapturing",
+   "kind": "property",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "facts": "facts/ARKit/Configurations.md",
+   "reason": "carried: the largest frame the primary camera can deliver, taken from the same +supportedVideoFormats the 4K recommendation reads, so the two cannot disagree about what the camera has. The release carries the class method at 0x1af0f2a1c and the instance method -isRecommendedForHighResolutionFrameCapturing at 0x1af0f47e4, which ARVideoFormat.m answers NO for the same reason as -isVideoHDRSupported: the formats these releases describe are not described that way",
+   "effect": "the largest frame among the formats the back camera really has, or nil when it has none",
+   "source": "ARKitCore of the arm64e shared cache of iOS 16.0, read with tools/corpus/skeleton-table.lua impls ARConfiguration: instance list 0x1af2140d8 of 61 twelve-byte entries and class list 0x1af214018 of 15 entries, both entsize_and_flags 0xc000000f (small entries, direct selectors), every implementation address printed, +supportsFrameSemantics: at 0x1af0f1d6c, +configurableCaptureDeviceForPrimaryCamera at 0x1af0f292c, +recommendedVideoFormatFor4KResolution at 0x1af0f2a14, +recommendedVideoFormatForHighResolutionFrameCapturing at 0x1af0f2a1c, and on the instance list videoHDRAllowed at 0x1af0f3134, setVideoHDRAllowed: at 0x1af0f313c, frameSemantics at 0x1af084078, setFrameSemantics: at 0x1af0f1cd0. The declaration is the 16.4 build SDK's own ARKit.framework/Headers. What the port's bands run on: the armv7 shared cache of iOS 6.1.3 and of 4.3, read with tools/corpus/objc-inventory.lua (11378 and 7187 class names, 1171 and 564 protocol names): 0 of them begin AR and the selectors of every row here are in none of their own method lists, while the controls of the same read are non-zero - AVCaptureDevice present with 100 instance and 5 class methods in 6.1.3, CMMotionManager with 74, NSObject with 590 and 104, -init in 2551 class lists, -copyWithZone: in 824, +alloc, +new and +defaultDeviceWithMediaType: in the lists they belong to. A selector the reader cannot see would take all four of those to zero"
+  }
+ ]
+}

@@ -1,0 +1,92 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@WCErrorDomain	-			NSString *const	-	-	ios=9.0/-/-/0	-	fa25ea861cd7c34a	-
+typedef	c:@T@WCErrorCode	-			enum WCErrorCode	-	-	-	-	51208576e4697dc8	-
+enum	c:@E@WCErrorCode	-			NSInteger	-	-	ios=9.0/-/-/0	-	23d11ef1bc2531c7	-
+enumconst	c:@E@WCErrorCode@WCErrorCodeGenericError	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	c1fe5afd44ef4e1a	7001
+enumconst	c:@E@WCErrorCode@WCErrorCodeSessionNotSupported	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	bf3faa5f6c5475ca	7002
+enumconst	c:@E@WCErrorCode@WCErrorCodeSessionMissingDelegate	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	7a723feffb3b9b4e	7003
+enumconst	c:@E@WCErrorCode@WCErrorCodeSessionNotActivated	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	3af626c317ce5077	7004
+enumconst	c:@E@WCErrorCode@WCErrorCodeDeviceNotPaired	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	47b5cffe83c763cc	7005
+enumconst	c:@E@WCErrorCode@WCErrorCodeWatchAppNotInstalled	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	730c7b9093b01f08	7006
+enumconst	c:@E@WCErrorCode@WCErrorCodeNotReachable	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	056fbbdc3bba56d1	7007
+enumconst	c:@E@WCErrorCode@WCErrorCodeInvalidParameter	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	e1268e089b301ddf	7008
+enumconst	c:@E@WCErrorCode@WCErrorCodePayloadTooLarge	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	56e2a7a0a0816214	7009
+enumconst	c:@E@WCErrorCode@WCErrorCodePayloadUnsupportedTypes	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	798a0b091d8e6e9f	7010
+enumconst	c:@E@WCErrorCode@WCErrorCodeMessageReplyFailed	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	bc6be5d946ca02ce	7011
+enumconst	c:@E@WCErrorCode@WCErrorCodeMessageReplyTimedOut	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	b18e293739d7147b	7012
+enumconst	c:@E@WCErrorCode@WCErrorCodeFileAccessDenied	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	ecf8f8f3a1d3205a	7013
+enumconst	c:@E@WCErrorCode@WCErrorCodeDeliveryFailed	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	b18f3794932d1ca1	7014
+enumconst	c:@E@WCErrorCode@WCErrorCodeInsufficientSpace	WCErrorCode			-	-	-	ios=9.0/-/-/0	-	23d662b231cc484a	7015
+enumconst	c:@E@WCErrorCode@WCErrorCodeSessionInactive	WCErrorCode			-	-	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	e360d1cac7cf092f	7016
+enumconst	c:@E@WCErrorCode@WCErrorCodeTransferTimedOut	WCErrorCode			-	-	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	47a6f2f804be738c	7017
+enumconst	c:@E@WCErrorCode@WCErrorCodeCompanionAppNotInstalled	WCErrorCode			-	-	-	ios=13.0/-/-/0,watchos=6.0/-/-/0	-	63db2b0e2ee128c1	7018
+enumconst	c:@E@WCErrorCode@WCErrorCodeWatchOnlyApp	WCErrorCode			-	-	-	ios=13.0/-/-/0,watchos=6.0/-/-/0	-	1bd087ae4dad864f	7019
+typedef	c:@T@WCSessionActivationState	-			enum WCSessionActivationState	-	-	-	-	601f6a9a6dc7d784	-
+enum	c:@E@WCSessionActivationState	-			NSInteger	-	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	935e78acbcd974a1	-
+enumconst	c:@E@WCSessionActivationState@WCSessionActivationStateNotActivated	WCSessionActivationState			-	-	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	abd94c721bb9d3ab	0
+enumconst	c:@E@WCSessionActivationState@WCSessionActivationStateInactive	WCSessionActivationState			-	-	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	73bba7facc18219c	1
+enumconst	c:@E@WCSessionActivationState@WCSessionActivationStateActivated	WCSessionActivationState			-	-	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	376fc23888ab08a4	2
+interface	c:objc(cs)WCSession	-			-	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	886c64a70328c5ec	-
+super	-	WCSession	NSObject		-	-	-	-	-	f619d8577774ae0a	-
+method	c:objc(cs)WCSession(cm)isSupported	-			BOOL	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	b813cb944644b8a4	-
+property	c:objc(cs)WCSession(cpy)defaultSession	-			WCSession *	-	readonly,class	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	19c8f64fad075485	-
+method	c:objc(cs)WCSession(im)init	-			instancetype	-	-	*unavailable ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	5b22ee2facca33b6	-
+property	c:objc(cs)WCSession(py)delegate	-			id<WCSessionDelegate>	-	weak,nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	f0089eca0de3422f	-
+method	c:objc(cs)WCSession(im)activateSession	-			void	-	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	e5f830b6719498bb	-
+property	c:objc(cs)WCSession(py)activationState	-			WCSessionActivationState	-	readonly,nonatomic	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	0d8253074f29417c	-
+property	c:objc(cs)WCSession(py)hasContentPending	-			BOOL	-	readonly,nonatomic	ios=10.0/-/-/0,watchos=3.0/-/-/0	-	985f49b7b57308d5	-
+property	c:objc(cs)WCSession(py)paired	-			BOOL	-	readonly,nonatomic,getter=isPaired	watchos=-/-/-/1	-	b718c522fa33cbc1	-
+property	c:objc(cs)WCSession(py)watchAppInstalled	-			BOOL	-	readonly,nonatomic,getter=isWatchAppInstalled	watchos=-/-/-/1	-	da471d44021dd08c	-
+property	c:objc(cs)WCSession(py)complicationEnabled	-			BOOL	-	readonly,nonatomic,getter=isComplicationEnabled	watchos=-/-/-/1	-	b57009c8028544ea	-
+property	c:objc(cs)WCSession(py)remainingComplicationUserInfoTransfers	-			NSUInteger	-	readonly,nonatomic	ios=10.0/-/-/0,watchos=-/-/-/1	-	cd3e6374c863946d	-
+property	c:objc(cs)WCSession(py)watchDirectoryURL	-			NSURL *	-	readonly,nonatomic	watchos=-/-/-/1	-	fbfb45bb9c6f148f	-
+property	c:objc(cs)WCSession(py)companionAppInstalled	-			BOOL	-	readonly,nonatomic,getter=isCompanionAppInstalled	ios=-/-/-/1,watchos=6.0/-/-/0	-	b35251435e67a68e	-
+property	c:objc(cs)WCSession(py)reachable	-			BOOL	-	readonly,nonatomic,getter=isReachable	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	8a1324a2a9c9b143	-
+property	c:objc(cs)WCSession(py)iOSDeviceNeedsUnlockAfterRebootForReachability	-			BOOL	-	readonly,nonatomic	ios=-/-/-/1,watchos=2.0/-/-/0	-	d54df9075ebac9be	-
+method	c:objc(cs)WCSession(im)sendMessage:replyHandler:errorHandler:	-			void	NSDictionary<NSString *,id> * message | void (^)(NSDictionary<NSString *,id> * _Nonnull) replyHandler | void (^)(NSError * _Nonnull) errorHandler	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	93409848387a78b3	-
+method	c:objc(cs)WCSession(im)sendMessageData:replyHandler:errorHandler:	-			void	NSData * data | void (^)(NSData * _Nonnull) replyHandler | void (^)(NSError * _Nonnull) errorHandler	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	279677ebf6e3bdd3	-
+property	c:objc(cs)WCSession(py)applicationContext	-			NSDictionary<NSString *,id> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	8a1aa9e7328f60b5	-
+method	c:objc(cs)WCSession(im)updateApplicationContext:error:	-			BOOL	NSDictionary<NSString *,id> * applicationContext | NSError * _Nullable * error	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	f7d1240c0e798075	-
+property	c:objc(cs)WCSession(py)receivedApplicationContext	-			NSDictionary<NSString *,id> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	a8d442f1b3510881	-
+method	c:objc(cs)WCSession(im)transferUserInfo:	-			WCSessionUserInfoTransfer *	NSDictionary<NSString *,id> * userInfo	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	0786aafc79e5da32	-
+method	c:objc(cs)WCSession(im)transferCurrentComplicationUserInfo:	-			WCSessionUserInfoTransfer *	NSDictionary<NSString *,id> * userInfo	-	watchos=-/-/-/1	-	6149046191e70286	-
+property	c:objc(cs)WCSession(py)outstandingUserInfoTransfers	-			NSArray<WCSessionUserInfoTransfer *> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	02a7217c9a92d51f	-
+method	c:objc(cs)WCSession(im)transferFile:metadata:	-			WCSessionFileTransfer *	NSURL * file | NSDictionary<NSString *,id> * metadata	-	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	19ee89fd032dcb6a	-
+property	c:objc(cs)WCSession(py)outstandingFileTransfers	-			NSArray<WCSessionFileTransfer *> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=2.0/-/-/0	-	e42a488d2e1292b0	-
+protocol	c:objc(pl)WCSessionDelegate	-			-	-	-	-	-	368fbe9f98b12dca	-
+conforms	c:objc(pl)WCSessionDelegate	WCSessionDelegate	NSObject		-	-	-	-	-	fb3c026fde3b22ea	-
+method	c:objc(pl)WCSessionDelegate(im)session:activationDidCompleteWithState:error:	-			void	WCSession * session | WCSessionActivationState activationState | NSError * error	-	ios=9.3/-/-/0,watchos=2.2/-/-/0	-	48881af7c0eeebe3	-
+method	c:objc(pl)WCSessionDelegate(im)sessionDidBecomeInactive:	-			void	WCSession * session	-	ios=9.3/-/-/0,watchos=-/-/-/1	-	8d3328f3a11bae5e	-
+method	c:objc(pl)WCSessionDelegate(im)sessionDidDeactivate:	-			void	WCSession * session	-	ios=9.3/-/-/0,watchos=-/-/-/1	-	9d3ab7b5d4403af9	-
+method	c:objc(pl)WCSessionDelegate(im)sessionWatchStateDidChange:	-			void	WCSession * session	optional	watchos=-/-/-/1	-	bfabb5ccb527ef1f	-
+method	c:objc(pl)WCSessionDelegate(im)sessionCompanionAppInstalledDidChange:	-			void	WCSession * session	optional	ios=-/-/-/1,watchos=6.0/-/-/0	-	2ea72a96e4ac5c2e	-
+method	c:objc(pl)WCSessionDelegate(im)sessionReachabilityDidChange:	-			void	WCSession * session	optional	-	-	7f23dff791b43bde	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveMessage:	-			void	WCSession * session | NSDictionary<NSString *,id> * message	optional	-	-	7da64a3af537a502	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveMessage:replyHandler:	-			void	WCSession * session | NSDictionary<NSString *,id> * message | void (^)(NSDictionary<NSString *,id> * _Nonnull) replyHandler	optional	-	-	19a897eec25f0fc4	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveMessageData:	-			void	WCSession * session | NSData * messageData	optional	-	-	764990f671768f04	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveMessageData:replyHandler:	-			void	WCSession * session | NSData * messageData | void (^)(NSData * _Nonnull) replyHandler	optional	-	-	87ef72005e31795a	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveApplicationContext:	-			void	WCSession * session | NSDictionary<NSString *,id> * applicationContext	optional	-	-	99e625bd665c90ef	-
+method	c:objc(pl)WCSessionDelegate(im)session:didFinishUserInfoTransfer:error:	-			void	WCSession * session | WCSessionUserInfoTransfer * userInfoTransfer | NSError * error	optional	-	-	f8bbbe1df5ddef1a	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveUserInfo:	-			void	WCSession * session | NSDictionary<NSString *,id> * userInfo	optional	-	-	1adb8cdeccfb88af	-
+method	c:objc(pl)WCSessionDelegate(im)session:didFinishFileTransfer:error:	-			void	WCSession * session | WCSessionFileTransfer * fileTransfer | NSError * error	optional	-	-	9eabf1cccd3ac060	-
+method	c:objc(pl)WCSessionDelegate(im)session:didReceiveFile:	-			void	WCSession * session | WCSessionFile * file	optional	-	-	efdb437276fc77a4	-
+interface	c:objc(cs)WCSessionFile	-			-	-	-	ios=9.0/-/-/0	-	084161551a60e91b	-
+super	-	WCSessionFile	NSObject		-	-	-	-	-	a062832d19008e07	-
+property	c:objc(cs)WCSessionFile(py)fileURL	-			NSURL *	-	readonly,nonatomic	ios=9.0/-/-/0	-	982ace7f64112423	-
+property	c:objc(cs)WCSessionFile(py)metadata	-			NSDictionary<NSString *,id> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0	-	c71dbfb5db2cfc4a	-
+interface	c:objc(cs)WCSessionFileTransfer	-			-	-	-	ios=9.0/-/-/0	-	cfd7d4176bcbb4d9	-
+super	-	WCSessionFileTransfer	NSObject		-	-	-	-	-	9357f85c2e968dee	-
+property	c:objc(cs)WCSessionFileTransfer(py)file	-			WCSessionFile *	-	readonly,nonatomic	ios=9.0/-/-/0	-	5c583916924a6b38	-
+property	c:objc(cs)WCSessionFileTransfer(py)progress	-			NSProgress *	-	readonly,nonatomic	ios=12.0/-/-/0,watchos=5.0/-/-/0	-	4d005d54f3e782e4	-
+property	c:objc(cs)WCSessionFileTransfer(py)transferring	-			BOOL	-	readonly,nonatomic,getter=isTransferring	ios=9.0/-/-/0	-	6b5c94aeb43aabec	-
+method	c:objc(cs)WCSessionFileTransfer(im)cancel	-			void	-	-	ios=9.0/-/-/0	-	d99772fe20639082	-
+interface	c:objc(cs)WCSessionUserInfoTransfer	-			-	-	-	ios=9.0/-/-/0	-	ed278a85642c8acc	-
+super	-	WCSessionUserInfoTransfer	NSObject		-	-	-	-	-	14a675834c00b79e	-
+conforms	c:objc(cs)WCSessionUserInfoTransfer	WCSessionUserInfoTransfer	NSSecureCoding		-	-	-	-	-	e47e445e7f567c2b	-
+property	c:objc(cs)WCSessionUserInfoTransfer(py)currentComplicationInfo	-			BOOL	-	readonly,nonatomic,getter=isCurrentComplicationInfo	watchos=-/-/-/1	-	4fe5bd78a2fe9663	-
+property	c:objc(cs)WCSessionUserInfoTransfer(py)userInfo	-			NSDictionary<NSString *,id> *	-	readonly,copy,nonatomic	ios=9.0/-/-/0	-	93003c3033f62f2b	-
+property	c:objc(cs)WCSessionUserInfoTransfer(py)transferring	-			BOOL	-	readonly,nonatomic,getter=isTransferring	ios=9.0/-/-/0	-	f0f19873c7872254	-
+method	c:objc(cs)WCSessionUserInfoTransfer(im)cancel	-			void	-	-	ios=9.0/-/-/0	-	af10cb36e31ff7e8	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-

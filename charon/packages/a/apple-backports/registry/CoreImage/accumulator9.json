@@ -1,0 +1,126 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "CIImageAccumulator",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIImageAccumulator: the 6.1.3 armv7 cache's whole selector table has no imageAccumulatorWithExtent:format: and no setImage:dirtyRect:",
+      "effect": "a real piece of memory at the extent and format the caller names: image is a CIImage over the accumulator's own bytes, setImage: renders into all of them, setImage:dirtyRect: into the rectangle that changed, and clear empties them",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "+[CIImageAccumulator imageAccumulatorWithExtent:format:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "an accumulator of that extent and format, with its own bytes of the width the format needs a pixel to take",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "+[CIImageAccumulator imageAccumulatorWithExtent:format:colorSpace:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "the same, in a colour space the caller names, which the rendering into it and the image out of it both use",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIImageAccumulator initWithExtent:format:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "an accumulator of that extent and format, with its bytes made whole to the extent",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIImageAccumulator initWithExtent:format:colorSpace:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "the same, in the colour space the caller names",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIImageAccumulator image]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "a CIImage over the accumulator's own bytes, so what was set into them is what comes out",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIImageAccumulator setImage:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "the image rendered into the accumulator's bytes over its whole extent",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIImageAccumulator setImage:dirtyRect:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "the image rendered into the bytes of the rectangle that changed, and of no other",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIImageAccumulator clear]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no such method: the release exports no CIImageAccumulator at all",
+      "effect": "the bytes emptied",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "CIImageAccumulator.extent",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIImageAccumulator at all",
+      "effect": "the whole extent the accumulator was made with, made integral",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "CIImageAccumulator.format",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIImageAccumulator at all",
+      "effect": "the format the caller named",
+      "facts": "facts/CoreImage/ImageAccumulator.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the 6.1.3 armv7 dyld cache for what the release does not export"
+    }
+  ]
+}

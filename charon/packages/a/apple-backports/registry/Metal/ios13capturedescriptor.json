@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLCaptureDescriptor",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a plain descriptor; carried alongside MTLCaptureManager, whose supportsDestination: and startCaptureWithDescriptor:error: it configures",
+      "effect": "captureObject, destination and outputURL hold what is set; startCaptureWithDescriptor:error: refuses with MTLCaptureErrorNotSupported, since this port has no GPU trace capture backend, the same honest refusal its deprecated predecessors already gave",
+      "facts": "facts/Metal/CaptureManager.md",
+      "source": "the header of iOS 16.4 for the contract"
+    },
+    {
+      "api": "MTLCaptureErrorDomain",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the error domain startCaptureWithDescriptor:error:'s own refusal uses; carried alongside the class that names it",
+      "effect": "answers \"MTLCaptureErrorDomain\"",
+      "facts": "facts/Metal/CaptureManager.md",
+      "source": "the release's own literal value, unverified against the shared cache; see facts/Metal/CaptureManager.md"
+    }
+  ]
+}

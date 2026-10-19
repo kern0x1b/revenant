@@ -1,0 +1,6 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+BrowserEngineCore	swift-class	c:@M@BrowserEngineCore@objc(cs)BEAudioSession	-	BEAudioSession	-	-	-	ios=26.0	-	608097982b04fc23
+BrowserEngineCore	swift-method	c:@M@BrowserEngineCore@objc(cs)BEAudioSession(im)initWithAudioSession:	BEAudioSession	init(audioSession:)	-	-	BrowserEngineCore.BEAudioSession | AVFAudio.AVAudioSession	-	-	a3218f56adb377b9
+BrowserEngineCore	swift-property	c:@M@BrowserEngineCore@objc(cs)BEAudioSession(py)availableOutputs	BEAudioSession	availableOutputs	-	[AVFAudio.AVAudioSessionPortDescription]	-	-	-	4f72d24cc4b23b24
+BrowserEngineCore	swift-method	c:@M@BrowserEngineCore@objc(cs)BEAudioSession(im)setPreferredOutput:error:	BEAudioSession	setPreferredOutput(_:)	-	()	AVFAudio.AVAudioSessionPortDescription?	-	-	9e0d9a0112708b3f
+BrowserEngineCore	swift-property	c:@M@BrowserEngineCore@objc(cs)BEAudioSession(py)preferredOutput	BEAudioSession	preferredOutput	-	AVFAudio.AVAudioSessionPortDescription?	-	-	-	66b7152d43d4ef2a

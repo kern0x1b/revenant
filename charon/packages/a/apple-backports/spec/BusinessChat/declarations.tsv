@@ -1,0 +1,17 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@BCParameterName	-			NSString *	-	-	-	-	144a7efed7f44269	-
+var	c:@BCParameterNameIntent	-			const BCParameterName	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	6427ec67dd702388	-
+var	c:@BCParameterNameGroup	-			const BCParameterName	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	0edbe14d39525933	-
+var	c:@BCParameterNameBody	-			const BCParameterName	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	0092a8d55518c0d6	-
+interface	c:objc(cs)BCChatAction	-			-	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	adac08459748cec6	-
+super	-	BCChatAction	NSObject		-	-	-	-	-	d2b0fb13f4ac4431	-
+method	c:objc(cs)BCChatAction(cm)openTranscript:intentParameters:	-			void	NSString * businessIdentifier | NSDictionary<BCParameterName,NSString *> * intentParameters	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	b97f0fc5c02c9960	-
+typedef	c:@T@BCChatButtonStyle	-			enum BCChatButtonStyle	-	-	-	-	d7d74b75b61fe2ce	-
+enum	c:@E@BCChatButtonStyle	-			NSInteger	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	167baf2e44247784	-
+enumconst	c:@E@BCChatButtonStyle@BCChatButtonStyleLight	BCChatButtonStyle			-	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	79a0dd80ad5a62bb	0
+enumconst	c:@E@BCChatButtonStyle@BCChatButtonStyleDark	BCChatButtonStyle			-	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	9f43a522e14192b1	1
+interface	c:objc(cs)BCChatButton	-			-	-	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	af93ff035546b7d0	-
+super	-	BCChatButton	UIControl		-	-	-	-	-	f6f88baa62e7042c	-
+method	c:objc(cs)BCChatButton(im)initWithStyle:	-			instancetype	BCChatButtonStyle style	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	2e116290f2035f01	-
+method	c:objc(cs)BCChatButton(im)initWithCoder:	-			instancetype	NSCoder * coder	-	ios=11.3/16.1/-/0,macos=10.13.4/13.0/-/0	-	cf67dde8ccc29c60	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-

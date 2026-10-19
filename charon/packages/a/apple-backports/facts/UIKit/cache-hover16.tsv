@@ -1,0 +1,23 @@
+release	name	kind	question	answer	control
+6.1.3	UIHoverGestureRecognizer	class	does this release carry the class	no, 0 of the 11378 classes read	-isEnabled on UIView true, -setFrame: on UIView true, -insertDictationResult: on UITextInput true, -textInRange: on UITextInput true
+6.1.3	UITextInputContext	class	does this release carry the class	no, 0 of the 11378 classes read	same four
+6.1.3	UISearchBar	class	does this release carry the class	yes, superclass UIView, 150 instance and 0 class selectors of its own	same four
+6.1.3	-zOffset	selector	how many classes carry the name	0 of 11378 classes and 1171 protocols	same four
+6.1.3	-altitudeAngle	selector	how many classes carry the name	0 of 11378 classes and 1171 protocols	same four
+6.1.3	-azimuthAngleInView:	selector	how many classes carry the name	0 of 11378 classes and 1171 protocols	same four
+6.1.3	-azimuthUnitVectorInView:	selector	how many classes carry the name	0 of 11378 classes and 1171 protocols	same four
+6.1.3	-rollAngle	selector	how many classes carry the name	2 of 11378, AVMetadataFaceObject and AVMetadataFaceObjectInternal, a face's roll and not a recogniser's	same four
+6.1.3	-UISearchBar isEnabled / -UISearchBar setEnabled:	selector	does the search bar declare the accessors of its own	no, it inherits both from UIView, which declares -isEnabled and -setEnabled: itself	same four
+6.1.3	-isEnabled / -setEnabled:	selector	how many classes carry the name	43 and 68 of 11378, UISearchBar in neither	same four
+6.1.3	-isPencilInputExpected / -isDictationInputExpected / -isHardwareKeyboardInputExpected / +current	selector	how many classes or protocols carry the name	0 and 0 of 11378 classes and 1171 protocols	same four
+4.3	UIHoverGestureRecognizer	class	does this release carry the class	no, 0 of the 7187 classes read	isEnabled on UIView true, setFrame: on UIView true, becomeFirstResponder on UIResponder true, text on UILabel true
+4.3	UITextInputContext	class	does this release carry the class	no, 0 of the 7187 classes read	same four
+4.3	UISearchBar	class	does this release carry the class	yes, superclass UIView, 98 instance and 0 class selectors of its own	same four
+4.3	zOffset	selector	how many classes carry the name	0 of 7187	same four
+4.3	altitudeAngle	selector	how many classes carry the name	0 of 7187	same four
+4.3	azimuthAngleInView:	selector	how many classes carry the name	0 of 7187	same four
+4.3	azimuthUnitVectorInView:	selector	how many classes carry the name	0 of 7187	same four
+4.3	rollAngle	selector	how many classes carry the name	0 of 7187	same four
+4.3	UISearchBar isEnabled / UISearchBar setEnabled:	selector	does the search bar declare the accessors of its own	no, it inherits both from UIView, which declares isEnabled and setEnabled: itself	same four
+4.3	isEnabled / setEnabled:	selector	how many classes carry the name	27 and 46 of 7187, UISearchBar in neither	same four
+4.3	isPencilInputExpected / isDictationInputExpected / isHardwareKeyboardInputExpected / current	selector	how many classes carry the name	0 of 7187	same four

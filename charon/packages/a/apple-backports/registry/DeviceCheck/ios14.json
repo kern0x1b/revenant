@@ -1,0 +1,71 @@
+{
+  "framework": "DeviceCheck",
+  "entries": [
+    {
+      "api": "DCAppAttestService",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a continuation of the DeviceCheck surface registry/DeviceCheck/ios11.json carried, which names as not carried \"DCAppAttestService and the attestation keys, came in iOS 14\"",
+      "effect": "the class exists beside DCDevice in the Foundation library; +sharedService is one shared object, -isSupported is NO, and the three calls answer the documented error from a background queue after the call returns",
+      "facts": "facts/DeviceCheck/DCAppAttestService.md",
+      "source": "the host's own DeviceCheck under MacOSX.sdk, which is a platform with no App Attest service: -isSupported answers NO, +sharedService is one object, -generateKeyWithCompletionHandler: answers DCErrorFeatureUnsupported (1) and -attestKey:clientDataHash:completionHandler: and -generateAssertion:clientDataHash:completionHandler: answer DCErrorInvalidInput (2), each after the call and off the main thread"
+    },
+    {
+      "api": "DCAppAttestService.sharedService",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the service of the framework is a single object, as it is where the service runs",
+      "effect": "one DCAppAttestService, made once and the same object every time, as the host's own answers",
+      "facts": "facts/DeviceCheck/DCAppAttestService.md",
+      "source": "the host's own DeviceCheck under MacOSX.sdk, asked twice"
+    },
+    {
+      "api": "DCAppAttestService.supported",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "App Attest is the Secure Enclave's service and these devices have no Secure Enclave - it came with the A7 of the iPhone 5s - so the question has the answer the framework gives a device without it",
+      "effect": "-isSupported is NO; the header documents NO for a device type that does not provide the service",
+      "facts": "facts/DeviceCheck/DCAppAttestService.md",
+      "source": "the host's own DeviceCheck under MacOSX.sdk, whose -[DCAppAttestService isSupported] answers NO"
+    },
+    {
+      "api": "-[DCAppAttestService generateKeyWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key is made in the Secure Enclave, which these devices do not have, and no daemon of the release runs the service",
+      "effect": "the handler is called with a nil key id and an error in DCErrorDomain with code DCErrorFeatureUnsupported (1), which the header defines as DeviceCheck being unavailable on this device; off the main thread and after the call returns, as the host answers and as this package's DCDevice token path does; a nil handler is ignored",
+      "facts": "facts/DeviceCheck/DCAppAttestService.md",
+      "source": "the host's own DeviceCheck under MacOSX.sdk: nil key id, com.apple.devicecheck.error, code 1, on a thread that is not the main one, after the call returned"
+    },
+    {
+      "api": "-[DCAppAttestService attestKey:clientDataHash:completionHandler:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no key of this device was ever made, so no key a caller can name is a key that can be attested",
+      "effect": "the handler is called with a nil attestation object and an error in DCErrorDomain with code DCErrorInvalidInput (2), off the main thread and after the call returns; a nil handler is ignored",
+      "facts": "facts/DeviceCheck/DCAppAttestService.md",
+      "source": "the host's own DeviceCheck under MacOSX.sdk, which answers code 2 both for a nil key id and for a well-formed one with a 32 byte hash"
+    },
+    {
+      "api": "-[DCAppAttestService generateAssertion:clientDataHash:completionHandler:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an assertion is signed by an attested key, and there is none on this device",
+      "effect": "the handler is called with a nil assertion object and an error in DCErrorDomain with code DCErrorInvalidInput (2), off the main thread and after the call returns; a nil handler is ignored",
+      "facts": "facts/DeviceCheck/DCAppAttestService.md",
+      "source": "the host's own DeviceCheck under MacOSX.sdk, which answers code 2"
+    }
+  ]
+}

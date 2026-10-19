@@ -1,0 +1,7 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_DarwinFoundation3	constant	SIG_DFL	7.0				own
+_DarwinFoundation3	constant	SIG_IGN	7.0				own
+_DarwinFoundation3	constant	SIG_ERR	7.0				own
+_DarwinFoundation3	constant	SIG_HOLD	7.0				own
+_DarwinFoundation3	function	fork()				yes	none
+_DarwinFoundation3	function	vfork()				yes	none

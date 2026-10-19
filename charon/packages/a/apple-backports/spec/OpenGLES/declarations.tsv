@@ -1,0 +1,518 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:EAGL.h@T@EAGLRenderingAPI	-			enum EAGLRenderingAPI	-	-	-	-	df1f1b519de57867	-
+enum	c:@E@EAGLRenderingAPI	-			NSUInteger	-	-	-	-	1f505e74a9c8cbb7	-
+enumconst	c:@E@EAGLRenderingAPI@kEAGLRenderingAPIOpenGLES1	EAGLRenderingAPI			-	-	-	-	-	e78f5d487b589393	1
+enumconst	c:@E@EAGLRenderingAPI@kEAGLRenderingAPIOpenGLES2	EAGLRenderingAPI			-	-	-	-	-	d6bf85cb33031532	2
+enumconst	c:@E@EAGLRenderingAPI@kEAGLRenderingAPIOpenGLES3	EAGLRenderingAPI			-	-	-	-	-	4491f007ed77f8e6	3
+function	c:@F@EAGLGetVersion	-			void (unsigned int *, unsigned int *)	unsigned int * major | unsigned int * minor	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bfedc30ab9918be6	-
+interface	c:objc(cs)EAGLSharegroup	-			-	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	dc5ec831ddf6c90a	-
+super	-	EAGLSharegroup	NSObject		-	-	-	-	-	8251dc8de2bcddcc	-
+struct	c:@S@_EAGLSharegroupPrivate	-			-	-	-	-	-	779fd82b662a344c	-
+property	c:objc(cs)EAGLSharegroup(py)debugLabel	-			NSString *	-	copy,nonatomic	ios=6.0/-/-/0	-	5d1b9832d1f37021	-
+interface	c:objc(cs)EAGLContext	-			-	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3bbfe17c206d141d	-
+super	-	EAGLContext	NSObject		-	-	-	-	-	b0efd60629450839	-
+struct	c:@S@_EAGLContextPrivate	-			-	-	-	-	-	8407f7235f32cc16	-
+method	c:objc(cs)EAGLContext(im)init	-			instancetype	-	-	*unavailable ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e665cfefaf57b21b	-
+method	c:objc(cs)EAGLContext(im)initWithAPI:	-			instancetype	EAGLRenderingAPI api	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	872a1d39048a31cf	-
+method	c:objc(cs)EAGLContext(im)initWithAPI:sharegroup:	-			instancetype	EAGLRenderingAPI api | EAGLSharegroup * sharegroup	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e470db465246c122	-
+method	c:objc(cs)EAGLContext(cm)setCurrentContext:	-			BOOL	EAGLContext * context	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ffe92a80a5be45b8	-
+method	c:objc(cs)EAGLContext(cm)currentContext	-			EAGLContext *	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	25aefae5cf5e3c77	-
+property	c:objc(cs)EAGLContext(py)API	-			EAGLRenderingAPI	-	readonly	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9e92246b594cb24c	-
+property	c:objc(cs)EAGLContext(py)sharegroup	-			EAGLSharegroup *	-	readonly	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2976f376388de9e9	-
+property	c:objc(cs)EAGLContext(py)debugLabel	-			NSString *	-	copy,nonatomic	ios=6.0/-/-/0	-	b5767cd82a254735	-
+property	c:objc(cs)EAGLContext(py)multiThreaded	-			BOOL	-	nonatomic,getter=isMultiThreaded	ios=7.1/-/-/0	-	682ba5d1d0d9ee4d	-
+var	c:@kEAGLDrawablePropertyRetainedBacking	-			NSString *const	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	98a48ab283aaf193	-
+var	c:@kEAGLDrawablePropertyColorFormat	-			NSString *const	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d1e91cb0d4b8ced0	-
+var	c:@kEAGLColorFormatRGBA8	-			NSString *const	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	99491b35ed50a1fa	-
+var	c:@kEAGLColorFormatRGB565	-			NSString *const	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ff21c28b53b0b6e8	-
+var	c:@kEAGLColorFormatSRGBA8	-			NSString *const	-	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	db16516d356af749	-
+protocol	c:objc(pl)EAGLDrawable	-			-	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a8ac8f20617be814	-
+property	c:objc(pl)EAGLDrawable(py)drawableProperties	-			NSDictionary<NSString *,id> *	-	copy	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1d65f309848bde53	-
+category	c:objc(cy)EAGLContext@EAGLContextDrawableAdditions	-			-	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ba648e5eba07036c	-
+method	c:objc(cs)EAGLContext(im)renderbufferStorage:fromDrawable:	EAGLContextDrawableAdditions			BOOL	NSUInteger target | id<EAGLDrawable> drawable	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	024e1f7eb022c857	-
+method	c:objc(cs)EAGLContext(im)presentRenderbuffer:	EAGLContextDrawableAdditions			BOOL	NSUInteger target	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	87bbacf96ab5e3fc	-
+method	c:objc(cs)EAGLContext(im)presentRenderbuffer:atTime:	EAGLContextDrawableAdditions			BOOL	NSUInteger target | CFTimeInterval presentationTime	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b837f363ac04cb38	-
+method	c:objc(cs)EAGLContext(im)presentRenderbuffer:afterMinimumDuration:	EAGLContextDrawableAdditions			BOOL	NSUInteger target | CFTimeInterval duration	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a611466d74c46fcb	-
+category	c:objc(cy)EAGLContext@IOSurface	-			-	-	-	ios=11.0/12.0/-/0,tvos=11.0/12.0/-/0	-	eced2a1b77c2f10f	-
+method	c:objc(cs)EAGLContext(im)texImageIOSurface:target:internalFormat:width:height:format:type:plane:	IOSurface			BOOL	IOSurfaceRef ioSurface | NSUInteger target | NSUInteger internalFormat | uint32_t width | uint32_t height | NSUInteger format | NSUInteger type | uint32_t plane	-	ios=11.0/-/-/0	-	d1e834cb13b45c18	-
+typedef	c:@T@GLbitfield	-			uint32_t	-	-	-	-	5d68be5d79c460bc	-
+typedef	c:@T@GLboolean	-			uint8_t	-	-	-	-	c502d8d1bfdf2be5	-
+typedef	c:@T@GLbyte	-			int8_t	-	-	-	-	be2eb46c94758d45	-
+typedef	c:@T@GLclampf	-			float	-	-	-	-	aaef21245f7ef7ad	-
+typedef	c:@T@GLenum	-			uint32_t	-	-	-	-	ec8bdacac6d03c02	-
+typedef	c:@T@GLfloat	-			float	-	-	-	-	d0751d8635be7ec9	-
+typedef	c:@T@GLint	-			int32_t	-	-	-	-	35d739b6c34610f0	-
+typedef	c:@T@GLshort	-			int16_t	-	-	-	-	67ec30b0dd6629fa	-
+typedef	c:@T@GLsizei	-			int32_t	-	-	-	-	9845ae702d50297b	-
+typedef	c:@T@GLubyte	-			uint8_t	-	-	-	-	0f474b0bfa0799ce	-
+typedef	c:@T@GLuint	-			uint32_t	-	-	-	-	7ac5e2a2dd4b7fe0	-
+typedef	c:@T@GLushort	-			uint16_t	-	-	-	-	48a51a0de58c6ac9	-
+typedef	c:@T@GLvoid	-			void	-	-	-	-	6e6d1b2102afc597	-
+typedef	c:@T@GLchar	-			char	-	-	-	-	554f77c221caebde	-
+typedef	c:@T@GLclampx	-			int32_t	-	-	-	-	a3760f050cd99c7c	-
+typedef	c:@T@GLfixed	-			int32_t	-	-	-	-	75841ec7f6d6f8df	-
+typedef	c:@T@GLhalf	-			uint16_t	-	-	-	-	930835b03f302bc3	-
+typedef	c:@T@GLint64	-			int64_t	-	-	-	-	ce99497e00ec2b10	-
+struct	c:@S@__GLsync	-			-	-	-	-	-	e90836b7aa96fe2b	-
+typedef	c:@T@GLsync	-			struct __GLsync *	-	-	-	-	9e43e02eb5c9b383	-
+typedef	c:@T@GLuint64	-			uint64_t	-	-	-	-	91d863a4a23591fb	-
+typedef	c:@T@GLintptr	-			intptr_t	-	-	-	-	9cd9851deaa8dd9b	-
+typedef	c:@T@GLsizeiptr	-			intptr_t	-	-	-	-	4af22a124529d428	-
+function	c:@F@glAlphaFunc	-			void (GLenum, GLclampf)	GLenum func | GLclampf ref	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	28eab7450f44c818	-
+function	c:@F@glClearColor	-			void (GLclampf, GLclampf, GLclampf, GLclampf)	GLclampf red | GLclampf green | GLclampf blue | GLclampf alpha	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		e058da9c3ad646cc	-
+function	c:@F@glClearDepthf	-			void (GLclampf)	GLclampf depth	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		44d0cdbb379a7612	-
+function	c:@F@glClipPlanef	-			void (GLenum, const GLfloat *)	GLenum plane | const GLfloat * equation	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e6bd9da409eadd62	-
+function	c:@F@glColor4f	-			void (GLfloat, GLfloat, GLfloat, GLfloat)	GLfloat red | GLfloat green | GLfloat blue | GLfloat alpha	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	80ef0d1aaac2b7fc	-
+function	c:@F@glDepthRangef	-			void (GLclampf, GLclampf)	GLclampf zNear | GLclampf zFar	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		fffedd80dffd978d	-
+function	c:@F@glFogf	-			void (GLenum, GLfloat)	GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	727b51085f94f45d	-
+function	c:@F@glFogfv	-			void (GLenum, const GLfloat *)	GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	46240528eaeeb437	-
+function	c:@F@glFrustumf	-			void (GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat)	GLfloat left | GLfloat right | GLfloat bottom | GLfloat top | GLfloat zNear | GLfloat zFar	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	57a05db0c64b262d	-
+function	c:@F@glGetClipPlanef	-			void (GLenum, GLfloat *)	GLenum pname | GLfloat * equation	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0d7ede0c39aa7132	-
+function	c:@F@glGetFloatv	-			void (GLenum, GLfloat *)	GLenum pname | GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		b79575f5700acc8f	-
+function	c:@F@glGetLightfv	-			void (GLenum, GLenum, GLfloat *)	GLenum light | GLenum pname | GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	673fc99bccadca3a	-
+function	c:@F@glGetMaterialfv	-			void (GLenum, GLenum, GLfloat *)	GLenum face | GLenum pname | GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a09ee759bca8879b	-
+function	c:@F@glGetTexEnvfv	-			void (GLenum, GLenum, GLfloat *)	GLenum env | GLenum pname | GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ae00946a857b0832	-
+function	c:@F@glGetTexParameterfv	-			void (GLenum, GLenum, GLfloat *)	GLenum target | GLenum pname | GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		65858dc9d9069cd0	-
+function	c:@F@glLightModelf	-			void (GLenum, GLfloat)	GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	129ef631c4cb302f	-
+function	c:@F@glLightModelfv	-			void (GLenum, const GLfloat *)	GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f2ca0939e7339754	-
+function	c:@F@glLightf	-			void (GLenum, GLenum, GLfloat)	GLenum light | GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2d8447cc56c1259b	-
+function	c:@F@glLightfv	-			void (GLenum, GLenum, const GLfloat *)	GLenum light | GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	52c6a025c151f3eb	-
+function	c:@F@glLineWidth	-			void (GLfloat)	GLfloat width	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		91fac4c8afb59255	-
+function	c:@F@glLoadMatrixf	-			void (const GLfloat *)	const GLfloat * m	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	65eb688c4325e224	-
+function	c:@F@glMaterialf	-			void (GLenum, GLenum, GLfloat)	GLenum face | GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d8a98c5bfd662d83	-
+function	c:@F@glMaterialfv	-			void (GLenum, GLenum, const GLfloat *)	GLenum face | GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b1aa85474346bf5d	-
+function	c:@F@glMultMatrixf	-			void (const GLfloat *)	const GLfloat * m	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9a21cdae1e80b3f7	-
+function	c:@F@glMultiTexCoord4f	-			void (GLenum, GLfloat, GLfloat, GLfloat, GLfloat)	GLenum target | GLfloat s | GLfloat t | GLfloat r | GLfloat q	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0cc39f686b880258	-
+function	c:@F@glNormal3f	-			void (GLfloat, GLfloat, GLfloat)	GLfloat nx | GLfloat ny | GLfloat nz	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e73b7c5e4fbc624c	-
+function	c:@F@glOrthof	-			void (GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat)	GLfloat left | GLfloat right | GLfloat bottom | GLfloat top | GLfloat zNear | GLfloat zFar	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	48f1cd550c5e1f4f	-
+function	c:@F@glPointParameterf	-			void (GLenum, GLfloat)	GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9d2201cdda2478b4	-
+function	c:@F@glPointParameterfv	-			void (GLenum, const GLfloat *)	GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d609d510ddac5ad5	-
+function	c:@F@glPointSize	-			void (GLfloat)	GLfloat size	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	eb7be18ac1ddc373	-
+function	c:@F@glPolygonOffset	-			void (GLfloat, GLfloat)	GLfloat factor | GLfloat units	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		195c5f8dceaa0b94	-
+function	c:@F@glRotatef	-			void (GLfloat, GLfloat, GLfloat, GLfloat)	GLfloat angle | GLfloat x | GLfloat y | GLfloat z	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8878f57d76bc983f	-
+function	c:@F@glSampleCoverage	-			void (GLclampf, GLboolean)	GLclampf value | GLboolean invert	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		951030952e423149	-
+function	c:@F@glScalef	-			void (GLfloat, GLfloat, GLfloat)	GLfloat x | GLfloat y | GLfloat z	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1ecd5c57112e8afe	-
+function	c:@F@glTexEnvf	-			void (GLenum, GLenum, GLfloat)	GLenum target | GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9058cd341edbfd79	-
+function	c:@F@glTexEnvfv	-			void (GLenum, GLenum, const GLfloat *)	GLenum target | GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a4256941adb9dde0	-
+function	c:@F@glTexParameterf	-			void (GLenum, GLenum, GLfloat)	GLenum target | GLenum pname | GLfloat param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		58150b9275114a6c	-
+function	c:@F@glTexParameterfv	-			void (GLenum, GLenum, const GLfloat *)	GLenum target | GLenum pname | const GLfloat * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		17505f5f72c0eeab	-
+function	c:@F@glTranslatef	-			void (GLfloat, GLfloat, GLfloat)	GLfloat x | GLfloat y | GLfloat z	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4133c99f4853ae6e	-
+function	c:@F@glActiveTexture	-			void (GLenum)	GLenum texture	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		ee76636874350dbe	-
+function	c:@F@glAlphaFuncx	-			void (GLenum, GLclampx)	GLenum func | GLclampx ref	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a6d925407aa7dab5	-
+function	c:@F@glBindBuffer	-			void (GLenum, GLuint)	GLenum target | GLuint buffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		a8ddb0ce0c112545	-
+function	c:@F@glBindTexture	-			void (GLenum, GLuint)	GLenum target | GLuint texture	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		ba8c9ad64dab1b4e	-
+function	c:@F@glBlendFunc	-			void (GLenum, GLenum)	GLenum sfactor | GLenum dfactor	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		60f17ed9acd768ff	-
+function	c:@F@glBufferData	-			void (GLenum, GLsizeiptr, const GLvoid *, GLenum)	GLenum target | GLsizeiptr size | const GLvoid * data | GLenum usage	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		8d88af6bb1063695	-
+function	c:@F@glBufferSubData	-			void (GLenum, GLintptr, GLsizeiptr, const GLvoid *)	GLenum target | GLintptr offset | GLsizeiptr size | const GLvoid * data	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		531349dd250062b8	-
+function	c:@F@glClear	-			void (GLbitfield)	GLbitfield mask	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		2aab32eb31b5282d	-
+function	c:@F@glClearColorx	-			void (GLclampx, GLclampx, GLclampx, GLclampx)	GLclampx red | GLclampx green | GLclampx blue | GLclampx alpha	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c24f25e3e6c51d89	-
+function	c:@F@glClearDepthx	-			void (GLclampx)	GLclampx depth	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	196db141e34b2665	-
+function	c:@F@glClearStencil	-			void (GLint)	GLint s	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		a413fd0ad7fb5bb5	-
+function	c:@F@glClientActiveTexture	-			void (GLenum)	GLenum texture	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f364b6c641b677cf	-
+function	c:@F@glClipPlanex	-			void (GLenum, const GLfixed *)	GLenum plane | const GLfixed * equation	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	467eb61808a9c0ee	-
+function	c:@F@glColor4ub	-			void (GLubyte, GLubyte, GLubyte, GLubyte)	GLubyte red | GLubyte green | GLubyte blue | GLubyte alpha	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0a400bd3addbef15	-
+function	c:@F@glColor4x	-			void (GLfixed, GLfixed, GLfixed, GLfixed)	GLfixed red | GLfixed green | GLfixed blue | GLfixed alpha	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4c9a572e66d05809	-
+function	c:@F@glColorMask	-			void (GLboolean, GLboolean, GLboolean, GLboolean)	GLboolean red | GLboolean green | GLboolean blue | GLboolean alpha	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		172e9fabcdbf858f	-
+function	c:@F@glColorPointer	-			void (GLint, GLenum, GLsizei, const GLvoid *)	GLint size | GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a300951a56c1f48a	-
+function	c:@F@glCompressedTexImage2D	-			void (GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const GLvoid *)	GLenum target | GLint level | GLenum internalformat | GLsizei width | GLsizei height | GLint border | GLsizei imageSize | const GLvoid * data	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		f19d3c773ee1b309	-
+function	c:@F@glCompressedTexSubImage2D	-			void (GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid *)	GLenum target | GLint level | GLint xoffset | GLint yoffset | GLsizei width | GLsizei height | GLenum format | GLsizei imageSize | const GLvoid * data	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		ea781c0efaa985e5	-
+function	c:@F@glCopyTexImage2D	-			void (GLenum, GLint, GLenum, GLint, GLint, GLsizei, GLsizei, GLint)	GLenum target | GLint level | GLenum internalformat | GLint x | GLint y | GLsizei width | GLsizei height | GLint border	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		f9897c48c6cb3b4b	-
+function	c:@F@glCopyTexSubImage2D	-			void (GLenum, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei)	GLenum target | GLint level | GLint xoffset | GLint yoffset | GLint x | GLint y | GLsizei width | GLsizei height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		ff37e36051729c3c	-
+function	c:@F@glCullFace	-			void (GLenum)	GLenum mode	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		b0d149b752bc085d	-
+function	c:@F@glDeleteBuffers	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * buffers	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		52afdb129a34d48c	-
+function	c:@F@glDeleteTextures	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * textures	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		c84ff414faf9c2ef	-
+function	c:@F@glDepthFunc	-			void (GLenum)	GLenum func	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		adf974a13091db97	-
+function	c:@F@glDepthMask	-			void (GLboolean)	GLboolean flag	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		0bd6c6617c8bbb69	-
+function	c:@F@glDepthRangex	-			void (GLclampx, GLclampx)	GLclampx zNear | GLclampx zFar	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ed7892644fbf1550	-
+function	c:@F@glDisable	-			void (GLenum)	GLenum cap	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		11abd34f48535a63	-
+function	c:@F@glDisableClientState	-			void (GLenum)	GLenum array	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2468e362bd197757	-
+function	c:@F@glDrawArrays	-			void (GLenum, GLint, GLsizei)	GLenum mode | GLint first | GLsizei count	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		e4cc7008a428ecfb	-
+function	c:@F@glDrawElements	-			void (GLenum, GLsizei, GLenum, const GLvoid *)	GLenum mode | GLsizei count | GLenum type | const GLvoid * indices	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		0599987c744ac39d	-
+function	c:@F@glEnable	-			void (GLenum)	GLenum cap	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		e6e13de13a401a68	-
+function	c:@F@glEnableClientState	-			void (GLenum)	GLenum array	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	76dd81d08be41dba	-
+function	c:@F@glFinish	-			void (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		153eb78e88c0331b	-
+function	c:@F@glFlush	-			void (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		6f98b366c060c4d2	-
+function	c:@F@glFogx	-			void (GLenum, GLfixed)	GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5bd370569da7df68	-
+function	c:@F@glFogxv	-			void (GLenum, const GLfixed *)	GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6b71c9d947acfefd	-
+function	c:@F@glFrontFace	-			void (GLenum)	GLenum mode	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		9aaf7961237e8294	-
+function	c:@F@glFrustumx	-			void (GLfixed, GLfixed, GLfixed, GLfixed, GLfixed, GLfixed)	GLfixed left | GLfixed right | GLfixed bottom | GLfixed top | GLfixed zNear | GLfixed zFar	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	93235ebc452b9a1d	-
+function	c:@F@glGenBuffers	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * buffers	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		b285d643f5b4782d	-
+function	c:@F@glGenTextures	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * textures	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		50f1b34af9f0dc80	-
+function	c:@F@glGetBooleanv	-			void (GLenum, GLboolean *)	GLenum pname | GLboolean * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		0100ab636d07c1ed	-
+function	c:@F@glGetBufferParameteriv	-			void (GLenum, GLenum, GLint *)	GLenum target | GLenum pname | GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		e8251370d5d9ae1b	-
+function	c:@F@glGetClipPlanex	-			void (GLenum, GLfixed[4])	GLenum pname | GLfixed[4] eqn	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1b65ac68faad7ccf	-
+function	c:@F@glGetError	-			GLenum (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		144bcc1f1b2756a5	-
+function	c:@F@glGetFixedv	-			void (GLenum, GLfixed *)	GLenum pname | GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	43dc3cb96cad8c5f	-
+function	c:@F@glGetIntegerv	-			void (GLenum, GLint *)	GLenum pname | GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		0cfc201d093f2901	-
+function	c:@F@glGetLightxv	-			void (GLenum, GLenum, GLfixed *)	GLenum light | GLenum pname | GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f9cd2abbe1a2d1a7	-
+function	c:@F@glGetMaterialxv	-			void (GLenum, GLenum, GLfixed *)	GLenum face | GLenum pname | GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	03205e4d578904f1	-
+function	c:@F@glGetPointerv	-			void (GLenum, void **)	GLenum pname | void ** params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7ba84ec994880fec	-
+function	c:@F@glGetString	-			const GLubyte * (GLenum)	GLenum name	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		41f3dbb12e5aeb77	-
+function	c:@F@glGetTexEnviv	-			void (GLenum, GLenum, GLint *)	GLenum env | GLenum pname | GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5546f03d9553f004	-
+function	c:@F@glGetTexEnvxv	-			void (GLenum, GLenum, GLfixed *)	GLenum env | GLenum pname | GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c1f821dc859c69dc	-
+function	c:@F@glGetTexParameteriv	-			void (GLenum, GLenum, GLint *)	GLenum target | GLenum pname | GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		95e94d369657e8d8	-
+function	c:@F@glGetTexParameterxv	-			void (GLenum, GLenum, GLfixed *)	GLenum target | GLenum pname | GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e699aabfe6edb7d5	-
+function	c:@F@glHint	-			void (GLenum, GLenum)	GLenum target | GLenum mode	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		1be96a129496dcce	-
+function	c:@F@glIsBuffer	-			GLboolean (GLuint)	GLuint buffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		6216077bb0be3744	-
+function	c:@F@glIsEnabled	-			GLboolean (GLenum)	GLenum cap	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		153673ef5e73181b	-
+function	c:@F@glIsTexture	-			GLboolean (GLuint)	GLuint texture	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		d29b46c7385ed501	-
+function	c:@F@glLightModelx	-			void (GLenum, GLfixed)	GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4e787f0858057887	-
+function	c:@F@glLightModelxv	-			void (GLenum, const GLfixed *)	GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	758773ea5295971b	-
+function	c:@F@glLightx	-			void (GLenum, GLenum, GLfixed)	GLenum light | GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	93fc963ec2f8dd70	-
+function	c:@F@glLightxv	-			void (GLenum, GLenum, const GLfixed *)	GLenum light | GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a499c19dfb506786	-
+function	c:@F@glLineWidthx	-			void (GLfixed)	GLfixed width	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	238fe05783ee3947	-
+function	c:@F@glLoadIdentity	-			void (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b2f84bea318b11a4	-
+function	c:@F@glLoadMatrixx	-			void (const GLfixed *)	const GLfixed * m	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4ca4af1c59dc4821	-
+function	c:@F@glLogicOp	-			void (GLenum)	GLenum opcode	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	54a5f251e62a9242	-
+function	c:@F@glMaterialx	-			void (GLenum, GLenum, GLfixed)	GLenum face | GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3b046063de636391	-
+function	c:@F@glMaterialxv	-			void (GLenum, GLenum, const GLfixed *)	GLenum face | GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5b3a460a2195d11a	-
+function	c:@F@glMatrixMode	-			void (GLenum)	GLenum mode	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ce7236cfaec81295	-
+function	c:@F@glMultMatrixx	-			void (const GLfixed *)	const GLfixed * m	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	efc2bdc8d230525d	-
+function	c:@F@glMultiTexCoord4x	-			void (GLenum, GLfixed, GLfixed, GLfixed, GLfixed)	GLenum target | GLfixed s | GLfixed t | GLfixed r | GLfixed q	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	661df8a981caf2ea	-
+function	c:@F@glNormal3x	-			void (GLfixed, GLfixed, GLfixed)	GLfixed nx | GLfixed ny | GLfixed nz	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	26e1f8f816a00aad	-
+function	c:@F@glNormalPointer	-			void (GLenum, GLsizei, const GLvoid *)	GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3c38284307bc52ec	-
+function	c:@F@glOrthox	-			void (GLfixed, GLfixed, GLfixed, GLfixed, GLfixed, GLfixed)	GLfixed left | GLfixed right | GLfixed bottom | GLfixed top | GLfixed zNear | GLfixed zFar	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	42b7102e57c5c160	-
+function	c:@F@glPixelStorei	-			void (GLenum, GLint)	GLenum pname | GLint param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		89b9c9952d4ed0fb	-
+function	c:@F@glPointParameterx	-			void (GLenum, GLfixed)	GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ceb2b877ba440f70	-
+function	c:@F@glPointParameterxv	-			void (GLenum, const GLfixed *)	GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bf4d9a17f2472e99	-
+function	c:@F@glPointSizex	-			void (GLfixed)	GLfixed size	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d3b93709974a6c49	-
+function	c:@F@glPolygonOffsetx	-			void (GLfixed, GLfixed)	GLfixed factor | GLfixed units	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8940f24cbdd1bc3a	-
+function	c:@F@glPopMatrix	-			void (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7eebc94f394ac394	-
+function	c:@F@glPushMatrix	-			void (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	811c17293916a431	-
+function	c:@F@glReadPixels	-			void (GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLvoid *)	GLint x | GLint y | GLsizei width | GLsizei height | GLenum format | GLenum type | GLvoid * pixels	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		ba89a7ea0684e5ce	-
+function	c:@F@glRotatex	-			void (GLfixed, GLfixed, GLfixed, GLfixed)	GLfixed angle | GLfixed x | GLfixed y | GLfixed z	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1f477116802bf836	-
+function	c:@F@glSampleCoveragex	-			void (GLclampx, GLboolean)	GLclampx value | GLboolean invert	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6f71a6952012de56	-
+function	c:@F@glScalex	-			void (GLfixed, GLfixed, GLfixed)	GLfixed x | GLfixed y | GLfixed z	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	de6a70caa163b432	-
+function	c:@F@glScissor	-			void (GLint, GLint, GLsizei, GLsizei)	GLint x | GLint y | GLsizei width | GLsizei height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		a88b9e827abbc91f	-
+function	c:@F@glShadeModel	-			void (GLenum)	GLenum mode	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c2bc9e741ad4c680	-
+function	c:@F@glStencilFunc	-			void (GLenum, GLint, GLuint)	GLenum func | GLint ref | GLuint mask	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		f3d196956ab1c122	-
+function	c:@F@glStencilMask	-			void (GLuint)	GLuint mask	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		695e91e619c576a4	-
+function	c:@F@glStencilOp	-			void (GLenum, GLenum, GLenum)	GLenum fail | GLenum zfail | GLenum zpass	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		74b1966b00944134	-
+function	c:@F@glTexCoordPointer	-			void (GLint, GLenum, GLsizei, const GLvoid *)	GLint size | GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	95bbeb466f3e74d8	-
+function	c:@F@glTexEnvi	-			void (GLenum, GLenum, GLint)	GLenum target | GLenum pname | GLint param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d16cb02b3ed8517f	-
+function	c:@F@glTexEnvx	-			void (GLenum, GLenum, GLfixed)	GLenum target | GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	59b5dfaf447f2129	-
+function	c:@F@glTexEnviv	-			void (GLenum, GLenum, const GLint *)	GLenum target | GLenum pname | const GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	19d7b14188e2841d	-
+function	c:@F@glTexEnvxv	-			void (GLenum, GLenum, const GLfixed *)	GLenum target | GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c340dc4826488fbf	-
+function	c:@F@glTexImage2D	-			void (GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *)	GLenum target | GLint level | GLint internalformat | GLsizei width | GLsizei height | GLint border | GLenum format | GLenum type | const GLvoid * pixels	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		8fd106ae6837810f	-
+function	c:@F@glTexParameteri	-			void (GLenum, GLenum, GLint)	GLenum target | GLenum pname | GLint param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		798efc97cea0aae6	-
+function	c:@F@glTexParameterx	-			void (GLenum, GLenum, GLfixed)	GLenum target | GLenum pname | GLfixed param	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	67bf7bb002d56272	-
+function	c:@F@glTexParameteriv	-			void (GLenum, GLenum, const GLint *)	GLenum target | GLenum pname | const GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		271d0f5ceeac5a5c	-
+function	c:@F@glTexParameterxv	-			void (GLenum, GLenum, const GLfixed *)	GLenum target | GLenum pname | const GLfixed * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	891916a8109b0ff1	-
+function	c:@F@glTexSubImage2D	-			void (GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *)	GLenum target | GLint level | GLint xoffset | GLint yoffset | GLsizei width | GLsizei height | GLenum format | GLenum type | const GLvoid * pixels	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		290b16719a6825e2	-
+function	c:@F@glTranslatex	-			void (GLfixed, GLfixed, GLfixed)	GLfixed x | GLfixed y | GLfixed z	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	01feea93ef9dd39f	-
+function	c:@F@glVertexPointer	-			void (GLint, GLenum, GLsizei, const GLvoid *)	GLint size | GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7768719fba1820b0	-
+function	c:@F@glViewport	-			void (GLint, GLint, GLsizei, GLsizei)	GLint x | GLint y | GLsizei width | GLsizei height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		835313129fdcc0e3	-
+function	c:@F@glCurrentPaletteMatrixOES	-			void (GLuint)	GLuint matrixpaletteindex	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	07b72a02a72c6b30	-
+function	c:@F@glLoadPaletteFromModelViewMatrixOES	-			void (void)	-	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3a4a0bd689d3c4ed	-
+function	c:@F@glMatrixIndexPointerOES	-			void (GLint, GLenum, GLsizei, const GLvoid *)	GLint size | GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a3f807ce0755202d	-
+function	c:@F@glWeightPointerOES	-			void (GLint, GLenum, GLsizei, const GLvoid *)	GLint size | GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	47df89ca1ed77a8a	-
+function	c:@F@glPointSizePointerOES	-			void (GLenum, GLsizei, const GLvoid *)	GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8b86548ba4dd6392	-
+function	c:@F@glDrawTexsOES	-			void (GLshort, GLshort, GLshort, GLshort, GLshort)	GLshort x | GLshort y | GLshort z | GLshort width | GLshort height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d62e9304aa122ce2	-
+function	c:@F@glDrawTexiOES	-			void (GLint, GLint, GLint, GLint, GLint)	GLint x | GLint y | GLint z | GLint width | GLint height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	085d78e6d699dccc	-
+function	c:@F@glDrawTexxOES	-			void (GLfixed, GLfixed, GLfixed, GLfixed, GLfixed)	GLfixed x | GLfixed y | GLfixed z | GLfixed width | GLfixed height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	24db0a87cbfc94cb	-
+function	c:@F@glDrawTexsvOES	-			void (const GLshort *)	const GLshort * coords	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8ca7259682368597	-
+function	c:@F@glDrawTexivOES	-			void (const GLint *)	const GLint * coords	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	81b520580e1a1a1e	-
+function	c:@F@glDrawTexxvOES	-			void (const GLfixed *)	const GLfixed * coords	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c3ecbeb3b66ec3ba	-
+function	c:@F@glDrawTexfOES	-			void (GLfloat, GLfloat, GLfloat, GLfloat, GLfloat)	GLfloat x | GLfloat y | GLfloat z | GLfloat width | GLfloat height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5aaeda9051e5067f	-
+function	c:@F@glDrawTexfvOES	-			void (const GLfloat *)	const GLfloat * coords	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bf1f95cd60239488	-
+function	c:@F@glCopyTextureLevelsAPPLE	-			GLvoid (GLuint, GLuint, GLint, GLsizei)	GLuint destinationTexture | GLuint sourceTexture | GLint sourceBaseLevel | GLsizei sourceLevelCount	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b0d678b4aa5068f3	-
+function	c:@F@glRenderbufferStorageMultisampleAPPLE	-			GLvoid (GLenum, GLsizei, GLenum, GLsizei, GLsizei)	GLenum target | GLsizei samples | GLenum internalformat | GLsizei width | GLsizei height	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2ccf120cde390658	-
+function	c:@F@glResolveMultisampleFramebufferAPPLE	-			GLvoid (void)	-	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0		c1a3acfeb6b2a5e8	-
+function	c:@F@glLabelObjectEXT	-			GLvoid (GLenum, GLuint, GLsizei, const char *)	GLenum type | GLuint object | GLsizei length | const char * label	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ff21c2bc573c8d2e	-
+function	c:@F@glGetObjectLabelEXT	-			GLvoid (GLenum, GLuint, GLsizei, GLsizei *, char *)	GLenum type | GLuint object | GLsizei bufSize | GLsizei * length | char * label	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	58734e6b81bec9db	-
+function	c:@F@glInsertEventMarkerEXT	-			GLvoid (GLsizei, const char *)	GLsizei length | const char * marker	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c49b97096593915b	-
+function	c:@F@glPushGroupMarkerEXT	-			GLvoid (GLsizei, const char *)	GLsizei length | const char * marker	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	aa81b7958fc73ce1	-
+function	c:@F@glPopGroupMarkerEXT	-			GLvoid (void)	-	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	80f039c53336e926	-
+function	c:@F@glDiscardFramebufferEXT	-			GLvoid (GLenum, GLsizei, const GLenum *)	GLenum target | GLsizei numAttachments | const GLenum * attachments	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0	-	21f94b5db7cded3a	-
+function	c:@F@glMapBufferRangeEXT	-			GLvoid * (GLenum, GLintptr, GLsizeiptr, GLbitfield)	GLenum target | GLintptr offset | GLsizeiptr length | GLbitfield access	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c98cfdaa15a0937f	-
+function	c:@F@glFlushMappedBufferRangeEXT	-			GLvoid (GLenum, GLintptr, GLsizeiptr)	GLenum target | GLintptr offset | GLsizeiptr length	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bae7aaa5b4fd1bac	-
+function	c:@F@glTexStorage2DEXT	-			GLvoid (GLenum, GLsizei, GLenum, GLsizei, GLsizei)	GLenum target | GLsizei levels | GLenum internalformat | GLsizei width | GLsizei height	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	342587dc976e7ec4	-
+function	c:@F@glBlendEquationSeparateOES	-			GLvoid (GLenum, GLenum)	GLenum modeRGB | GLenum modeAlpha	-	ios=3.1/12.0/-/0,tvos=9.0/12.0/-/0	-	882362cd2de589e0	-
+function	c:@F@glBlendFuncSeparateOES	-			GLvoid (GLenum, GLenum, GLenum, GLenum)	GLenum srcRGB | GLenum dstRGB | GLenum srcAlpha | GLenum dstAlpha	-	ios=3.1/12.0/-/0,tvos=9.0/12.0/-/0	-	61d2f06f0acd1a1e	-
+function	c:@F@glBlendEquationOES	-			GLvoid (GLenum)	GLenum mode	-	-	-	8819ecd89557695c	-
+function	c:@F@glIsRenderbufferOES	-			GLboolean (GLuint)	GLuint renderbuffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5d4fcb0c92f00b06	-
+function	c:@F@glBindRenderbufferOES	-			GLvoid (GLenum, GLuint)	GLenum target | GLuint renderbuffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4409177eba570509	-
+function	c:@F@glDeleteRenderbuffersOES	-			GLvoid (GLsizei, const GLuint *)	GLsizei n | const GLuint * renderbuffers	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9b5a4a2ee08f68f4	-
+function	c:@F@glGenRenderbuffersOES	-			GLvoid (GLsizei, GLuint *)	GLsizei n | GLuint * renderbuffers	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a099093ee128fcb2	-
+function	c:@F@glRenderbufferStorageOES	-			GLvoid (GLenum, GLenum, GLsizei, GLsizei)	GLenum target | GLenum internalformat | GLsizei width | GLsizei height	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d99898a5769b0579	-
+function	c:@F@glGetRenderbufferParameterivOES	-			GLvoid (GLenum, GLenum, GLint *)	GLenum target | GLenum pname | GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0f6e68919340742a	-
+function	c:@F@glIsFramebufferOES	-			GLboolean (GLuint)	GLuint framebuffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b16c4918bfdc8f33	-
+function	c:@F@glBindFramebufferOES	-			GLvoid (GLenum, GLuint)	GLenum target | GLuint framebuffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f26f962d9244ff00	-
+function	c:@F@glDeleteFramebuffersOES	-			GLvoid (GLsizei, const GLuint *)	GLsizei n | const GLuint * framebuffers	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	47a60fcefec57641	-
+function	c:@F@glGenFramebuffersOES	-			GLvoid (GLsizei, GLuint *)	GLsizei n | GLuint * framebuffers	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	31722970806735be	-
+function	c:@F@glCheckFramebufferStatusOES	-			GLenum (GLenum)	GLenum target	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ca062097c375ad04	-
+function	c:@F@glFramebufferRenderbufferOES	-			GLvoid (GLenum, GLenum, GLenum, GLuint)	GLenum target | GLenum attachment | GLenum renderbuffertarget | GLuint renderbuffer	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1ea1dd14d22dad48	-
+function	c:@F@glFramebufferTexture2DOES	-			GLvoid (GLenum, GLenum, GLenum, GLuint, GLint)	GLenum target | GLenum attachment | GLenum textarget | GLuint texture | GLint level	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7e832da77ac6c700	-
+function	c:@F@glGetFramebufferAttachmentParameterivOES	-			GLvoid (GLenum, GLenum, GLenum, GLint *)	GLenum target | GLenum attachment | GLenum pname | GLint * params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	01318f07139a8d9e	-
+function	c:@F@glGenerateMipmapOES	-			GLvoid (GLenum)	GLenum target	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2b2d9a72485306df	-
+function	c:@F@glGetBufferPointervOES	-			GLvoid (GLenum, GLenum, GLvoid **)	GLenum target | GLenum pname | GLvoid ** params	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		6f33e1fadcbce20f	-
+function	c:@F@glMapBufferOES	-			GLvoid * (GLenum, GLenum)	GLenum target | GLenum access	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		02f4c5dde26c1cf3	-
+function	c:@F@glUnmapBufferOES	-			GLboolean (GLenum)	GLenum target	-	ios=2.0/12.0/-/0,tvos=9.0/12.0/-/0		f29d842ba3291397	-
+function	c:@F@glBindVertexArrayOES	-			GLvoid (GLuint)	GLuint array	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6bc7e5b0ebb44157	-
+function	c:@F@glDeleteVertexArraysOES	-			GLvoid (GLsizei, const GLuint *)	GLsizei n | const GLuint * arrays	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0	-	cb3de714bcd350ae	-
+function	c:@F@glGenVertexArraysOES	-			GLvoid (GLsizei, GLuint *)	GLsizei n | GLuint * arrays	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0	-	399a1cb09db2809a	-
+function	c:@F@glIsVertexArrayOES	-			GLboolean (GLuint)	GLuint array	-	ios=4.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e337334aaa2bc107	-
+function	c:@F@glAttachShader	-			void (GLuint, GLuint)	GLuint program | GLuint shader	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	730b1a7f0251aab7	-
+function	c:@F@glBindAttribLocation	-			void (GLuint, GLuint, const GLchar *)	GLuint program | GLuint index | const GLchar * name	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	50619ec24621a418	-
+function	c:@F@glBindFramebuffer	-			void (GLenum, GLuint)	GLenum target | GLuint framebuffer	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	569c16823dfbfa15	-
+function	c:@F@glBindRenderbuffer	-			void (GLenum, GLuint)	GLenum target | GLuint renderbuffer	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9bb73b16a29021d2	-
+function	c:@F@glBlendColor	-			void (GLfloat, GLfloat, GLfloat, GLfloat)	GLfloat red | GLfloat green | GLfloat blue | GLfloat alpha	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d06fecee7d4bce18	-
+function	c:@F@glBlendEquation	-			void (GLenum)	GLenum mode	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5a444fe0dbe212cf	-
+function	c:@F@glBlendEquationSeparate	-			void (GLenum, GLenum)	GLenum modeRGB | GLenum modeAlpha	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	dd442cda7f01adf0	-
+function	c:@F@glBlendFuncSeparate	-			void (GLenum, GLenum, GLenum, GLenum)	GLenum srcRGB | GLenum dstRGB | GLenum srcAlpha | GLenum dstAlpha	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	780bd0c2c08aed24	-
+function	c:@F@glCheckFramebufferStatus	-			GLenum (GLenum)	GLenum target	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e66dc96f93592a39	-
+function	c:@F@glCompileShader	-			void (GLuint)	GLuint shader	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c679476dd7169c68	-
+function	c:@F@glCreateProgram	-			GLuint (void)	-	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bf9cbc7024312f7b	-
+function	c:@F@glCreateShader	-			GLuint (GLenum)	GLenum type	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	423cde11494b9152	-
+function	c:@F@glDeleteFramebuffers	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * framebuffers	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9c23390858ea336c	-
+function	c:@F@glDeleteProgram	-			void (GLuint)	GLuint program	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	17b9f8ebdea294d9	-
+function	c:@F@glDeleteRenderbuffers	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * renderbuffers	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f64289d72f1be68c	-
+function	c:@F@glDeleteShader	-			void (GLuint)	GLuint shader	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c31071695b31e9a9	-
+function	c:@F@glDetachShader	-			void (GLuint, GLuint)	GLuint program | GLuint shader	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	fd8807b68e1c55f2	-
+function	c:@F@glDisableVertexAttribArray	-			void (GLuint)	GLuint index	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	cc49028aa6c8c166	-
+function	c:@F@glEnableVertexAttribArray	-			void (GLuint)	GLuint index	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	59831eb5117f9299	-
+function	c:@F@glFramebufferRenderbuffer	-			void (GLenum, GLenum, GLenum, GLuint)	GLenum target | GLenum attachment | GLenum renderbuffertarget | GLuint renderbuffer	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c38cdf882b7067b6	-
+function	c:@F@glFramebufferTexture2D	-			void (GLenum, GLenum, GLenum, GLuint, GLint)	GLenum target | GLenum attachment | GLenum textarget | GLuint texture | GLint level	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d339e54ef29771bd	-
+function	c:@F@glGenerateMipmap	-			void (GLenum)	GLenum target	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ed711ec1e7e0845c	-
+function	c:@F@glGenFramebuffers	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * framebuffers	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	820af1e11f4f4e66	-
+function	c:@F@glGenRenderbuffers	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * renderbuffers	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5a6d5259be194e97	-
+function	c:@F@glGetActiveAttrib	-			void (GLuint, GLuint, GLsizei, GLsizei *, GLint *, GLenum *, GLchar *)	GLuint program | GLuint index | GLsizei bufsize | GLsizei * length | GLint * size | GLenum * type | GLchar * name	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	65e8c0fcb39567eb	-
+function	c:@F@glGetActiveUniform	-			void (GLuint, GLuint, GLsizei, GLsizei *, GLint *, GLenum *, GLchar *)	GLuint program | GLuint index | GLsizei bufsize | GLsizei * length | GLint * size | GLenum * type | GLchar * name	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0a2edadaae8eea93	-
+function	c:@F@glGetAttachedShaders	-			void (GLuint, GLsizei, GLsizei *, GLuint *)	GLuint program | GLsizei maxcount | GLsizei * count | GLuint * shaders	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	355f45905a005ed1	-
+function	c:@F@glGetAttribLocation	-			int (GLuint, const GLchar *)	GLuint program | const GLchar * name	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bc66d04e0459b686	-
+function	c:@F@glGetFramebufferAttachmentParameteriv	-			void (GLenum, GLenum, GLenum, GLint *)	GLenum target | GLenum attachment | GLenum pname | GLint * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	338e2ac89b12587a	-
+function	c:@F@glGetProgramiv	-			void (GLuint, GLenum, GLint *)	GLuint program | GLenum pname | GLint * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0c6390e67523361c	-
+function	c:@F@glGetProgramInfoLog	-			void (GLuint, GLsizei, GLsizei *, GLchar *)	GLuint program | GLsizei bufsize | GLsizei * length | GLchar * infolog	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4f10896367c30040	-
+function	c:@F@glGetRenderbufferParameteriv	-			void (GLenum, GLenum, GLint *)	GLenum target | GLenum pname | GLint * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c90aa3b5a0a14ecb	-
+function	c:@F@glGetShaderiv	-			void (GLuint, GLenum, GLint *)	GLuint shader | GLenum pname | GLint * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1ecfab7def596ae8	-
+function	c:@F@glGetShaderInfoLog	-			void (GLuint, GLsizei, GLsizei *, GLchar *)	GLuint shader | GLsizei bufsize | GLsizei * length | GLchar * infolog	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	663366227d499366	-
+function	c:@F@glGetShaderPrecisionFormat	-			void (GLenum, GLenum, GLint *, GLint *)	GLenum shadertype | GLenum precisiontype | GLint * range | GLint * precision	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4d52f447b74dc68d	-
+function	c:@F@glGetShaderSource	-			void (GLuint, GLsizei, GLsizei *, GLchar *)	GLuint shader | GLsizei bufsize | GLsizei * length | GLchar * source	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	409d84f642fab4df	-
+function	c:@F@glGetUniformfv	-			void (GLuint, GLint, GLfloat *)	GLuint program | GLint location | GLfloat * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	13c12632868cd3ac	-
+function	c:@F@glGetUniformiv	-			void (GLuint, GLint, GLint *)	GLuint program | GLint location | GLint * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1129c0497d6639b2	-
+function	c:@F@glGetUniformLocation	-			int (GLuint, const GLchar *)	GLuint program | const GLchar * name	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1320229e290ed869	-
+function	c:@F@glGetVertexAttribfv	-			void (GLuint, GLenum, GLfloat *)	GLuint index | GLenum pname | GLfloat * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	86bf70c537358456	-
+function	c:@F@glGetVertexAttribiv	-			void (GLuint, GLenum, GLint *)	GLuint index | GLenum pname | GLint * params	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a1d0e2f6e1305410	-
+function	c:@F@glGetVertexAttribPointerv	-			void (GLuint, GLenum, GLvoid **)	GLuint index | GLenum pname | GLvoid ** pointer	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	72c18a8a539f50a6	-
+function	c:@F@glIsFramebuffer	-			GLboolean (GLuint)	GLuint framebuffer	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bdf2bafe534ef789	-
+function	c:@F@glIsProgram	-			GLboolean (GLuint)	GLuint program	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2950482f779421e5	-
+function	c:@F@glIsRenderbuffer	-			GLboolean (GLuint)	GLuint renderbuffer	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	60201206751a7086	-
+function	c:@F@glIsShader	-			GLboolean (GLuint)	GLuint shader	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	030949e446923e24	-
+function	c:@F@glLinkProgram	-			void (GLuint)	GLuint program	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	884da4e2c653db40	-
+function	c:@F@glReleaseShaderCompiler	-			void (void)	-	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	210b8eea1df01ff1	-
+function	c:@F@glRenderbufferStorage	-			void (GLenum, GLenum, GLsizei, GLsizei)	GLenum target | GLenum internalformat | GLsizei width | GLsizei height	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2527cd17e15139a1	-
+function	c:@F@glShaderBinary	-			void (GLsizei, const GLuint *, GLenum, const GLvoid *, GLsizei)	GLsizei n | const GLuint * shaders | GLenum binaryformat | const GLvoid * binary | GLsizei length	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a7e49bbcd893877e	-
+function	c:@F@glShaderSource	-			void (GLuint, GLsizei, const GLchar *const *, const GLint *)	GLuint shader | GLsizei count | const GLchar *const * string | const GLint * length	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d36a84875a1734d7	-
+function	c:@F@glStencilFuncSeparate	-			void (GLenum, GLenum, GLint, GLuint)	GLenum face | GLenum func | GLint ref | GLuint mask	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2a8746e5e7f2411f	-
+function	c:@F@glStencilMaskSeparate	-			void (GLenum, GLuint)	GLenum face | GLuint mask	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5151cc82e7a290c7	-
+function	c:@F@glStencilOpSeparate	-			void (GLenum, GLenum, GLenum, GLenum)	GLenum face | GLenum fail | GLenum zfail | GLenum zpass	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7f2d55c9fb45b0cd	-
+function	c:@F@glUniform1f	-			void (GLint, GLfloat)	GLint location | GLfloat x	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3170b003b9665e22	-
+function	c:@F@glUniform1fv	-			void (GLint, GLsizei, const GLfloat *)	GLint location | GLsizei count | const GLfloat * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	94b432e1da78122c	-
+function	c:@F@glUniform1i	-			void (GLint, GLint)	GLint location | GLint x	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	83b40ace28c1bdba	-
+function	c:@F@glUniform1iv	-			void (GLint, GLsizei, const GLint *)	GLint location | GLsizei count | const GLint * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bc3c011e9ae23a34	-
+function	c:@F@glUniform2f	-			void (GLint, GLfloat, GLfloat)	GLint location | GLfloat x | GLfloat y	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b263b9b9a04243f7	-
+function	c:@F@glUniform2fv	-			void (GLint, GLsizei, const GLfloat *)	GLint location | GLsizei count | const GLfloat * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	61c0c07a76887bb7	-
+function	c:@F@glUniform2i	-			void (GLint, GLint, GLint)	GLint location | GLint x | GLint y	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	13715a80ed4f8001	-
+function	c:@F@glUniform2iv	-			void (GLint, GLsizei, const GLint *)	GLint location | GLsizei count | const GLint * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	097766cad89a1789	-
+function	c:@F@glUniform3f	-			void (GLint, GLfloat, GLfloat, GLfloat)	GLint location | GLfloat x | GLfloat y | GLfloat z	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4858bb40b30cfd86	-
+function	c:@F@glUniform3fv	-			void (GLint, GLsizei, const GLfloat *)	GLint location | GLsizei count | const GLfloat * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c30092fb980f02a9	-
+function	c:@F@glUniform3i	-			void (GLint, GLint, GLint, GLint)	GLint location | GLint x | GLint y | GLint z	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	36f9dc13b4cb3c37	-
+function	c:@F@glUniform3iv	-			void (GLint, GLsizei, const GLint *)	GLint location | GLsizei count | const GLint * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	611d261f66c9c37c	-
+function	c:@F@glUniform4f	-			void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)	GLint location | GLfloat x | GLfloat y | GLfloat z | GLfloat w	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	730a24f125018f58	-
+function	c:@F@glUniform4fv	-			void (GLint, GLsizei, const GLfloat *)	GLint location | GLsizei count | const GLfloat * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f54a779bfb886132	-
+function	c:@F@glUniform4i	-			void (GLint, GLint, GLint, GLint, GLint)	GLint location | GLint x | GLint y | GLint z | GLint w	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a0432c2321155e84	-
+function	c:@F@glUniform4iv	-			void (GLint, GLsizei, const GLint *)	GLint location | GLsizei count | const GLint * v	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	afe5a8173005cf69	-
+function	c:@F@glUniformMatrix2fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8c68485fe52dbda8	-
+function	c:@F@glUniformMatrix3fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7b8049a4f5c30b19	-
+function	c:@F@glUniformMatrix4fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c3ee0e5c63ac1653	-
+function	c:@F@glUseProgram	-			void (GLuint)	GLuint program	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	516dfbbf68cb3a0b	-
+function	c:@F@glValidateProgram	-			void (GLuint)	GLuint program	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	84bccf10180a64f9	-
+function	c:@F@glVertexAttrib1f	-			void (GLuint, GLfloat)	GLuint indx | GLfloat x	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	35844cfc95203bbb	-
+function	c:@F@glVertexAttrib1fv	-			void (GLuint, const GLfloat *)	GLuint indx | const GLfloat * values	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d9bef6cd3c52cae5	-
+function	c:@F@glVertexAttrib2f	-			void (GLuint, GLfloat, GLfloat)	GLuint indx | GLfloat x | GLfloat y	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d933d4157de86499	-
+function	c:@F@glVertexAttrib2fv	-			void (GLuint, const GLfloat *)	GLuint indx | const GLfloat * values	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2c190f8a5c9d6bd7	-
+function	c:@F@glVertexAttrib3f	-			void (GLuint, GLfloat, GLfloat, GLfloat)	GLuint indx | GLfloat x | GLfloat y | GLfloat z	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2f8d082b88f9a809	-
+function	c:@F@glVertexAttrib3fv	-			void (GLuint, const GLfloat *)	GLuint indx | const GLfloat * values	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a11b65ce0c58267b	-
+function	c:@F@glVertexAttrib4f	-			void (GLuint, GLfloat, GLfloat, GLfloat, GLfloat)	GLuint indx | GLfloat x | GLfloat y | GLfloat z | GLfloat w	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a03a131773965e44	-
+function	c:@F@glVertexAttrib4fv	-			void (GLuint, const GLfloat *)	GLuint indx | const GLfloat * values	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	de2a96e950b5cca3	-
+function	c:@F@glVertexAttribPointer	-			void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid *)	GLuint indx | GLint size | GLenum type | GLboolean normalized | GLsizei stride | const GLvoid * ptr	-	ios=3.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8c2c72f4b0209942	-
+function	c:@F@glFenceSyncAPPLE	-			GLsync (GLenum, GLbitfield)	GLenum condition | GLbitfield flags	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	af0a1110a14dfb9e	-
+function	c:@F@glIsSyncAPPLE	-			GLboolean (GLsync)	GLsync sync	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	13276df5d3169a6e	-
+function	c:@F@glDeleteSyncAPPLE	-			void (GLsync)	GLsync sync	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	06ee47268c9c3b9a	-
+function	c:@F@glClientWaitSyncAPPLE	-			GLenum (GLsync, GLbitfield, GLuint64)	GLsync sync | GLbitfield flags | GLuint64 timeout	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f3bd797528f6b931	-
+function	c:@F@glWaitSyncAPPLE	-			void (GLsync, GLbitfield, GLuint64)	GLsync sync | GLbitfield flags | GLuint64 timeout	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	cdcdfaf6536c6843	-
+function	c:@F@glGetInteger64vAPPLE	-			void (GLenum, GLint64 *)	GLenum pname | GLint64 * params	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f1a177e4742b3c92	-
+function	c:@F@glGetSyncivAPPLE	-			void (GLsync, GLenum, GLsizei, GLsizei *, GLint *)	GLsync sync | GLenum pname | GLsizei bufSize | GLsizei * length | GLint * values	-	ios=6.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1b7df68b42035ac7	-
+function	c:@F@glDrawArraysInstancedEXT	-			GLvoid (GLenum, GLint, GLsizei, GLsizei)	GLenum mode | GLint first | GLsizei count | GLsizei instanceCount	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c027c9064de43c7c	-
+function	c:@F@glDrawElementsInstancedEXT	-			GLvoid (GLenum, GLsizei, GLenum, const GLvoid *, GLsizei)	GLenum mode | GLsizei count | GLenum type | const GLvoid * indices | GLsizei instanceCount	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b11997f69c058232	-
+function	c:@F@glVertexAttribDivisorEXT	-			GLvoid (GLuint, GLuint)	GLuint index | GLuint divisor	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9d4a8941a99cd6dc	-
+function	c:@F@glGenQueriesEXT	-			GLvoid (GLsizei, GLuint *)	GLsizei n | GLuint * ids	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e73bdb38f99b2ca2	-
+function	c:@F@glDeleteQueriesEXT	-			GLvoid (GLsizei, const GLuint *)	GLsizei n | const GLuint * ids	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3c22e6a42f733643	-
+function	c:@F@glIsQueryEXT	-			GLboolean (GLuint)	GLuint id	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	969f8b99ba5e9b8d	-
+function	c:@F@glBeginQueryEXT	-			GLvoid (GLenum, GLuint)	GLenum target | GLuint id	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9daddfe7779ec974	-
+function	c:@F@glEndQueryEXT	-			GLvoid (GLenum)	GLenum target	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5b3018a52044df63	-
+function	c:@F@glGetQueryivEXT	-			GLvoid (GLenum, GLenum, GLint *)	GLenum target | GLenum pname | GLint * params	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e86cf8804c19345a	-
+function	c:@F@glGetQueryObjectuivEXT	-			GLvoid (GLuint, GLenum, GLuint *)	GLuint id | GLenum pname | GLuint * params	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0cc5432be7cb1847	-
+function	c:@F@glUseProgramStagesEXT	-			GLvoid (GLuint, GLbitfield, GLuint)	GLuint pipeline | GLbitfield stages | GLuint program	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a4673a1f2873f062	-
+function	c:@F@glActiveShaderProgramEXT	-			GLvoid (GLuint, GLuint)	GLuint pipeline | GLuint program	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4184db83fbc9c8ad	-
+function	c:@F@glCreateShaderProgramvEXT	-			GLuint (GLenum, GLsizei, const GLchar *const *)	GLenum type | GLsizei count | const GLchar *const * strings	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	aedc45974746009b	-
+function	c:@F@glBindProgramPipelineEXT	-			GLvoid (GLuint)	GLuint pipeline	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8a53665ba2f41fc8	-
+function	c:@F@glDeleteProgramPipelinesEXT	-			GLvoid (GLsizei, const GLuint *)	GLsizei n | const GLuint * pipelines	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	aaefbdfe80a38c54	-
+function	c:@F@glGenProgramPipelinesEXT	-			GLvoid (GLsizei, GLuint *)	GLsizei n | GLuint * pipelines	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	82b2c663dbb7c82e	-
+function	c:@F@glIsProgramPipelineEXT	-			GLboolean (GLuint)	GLuint pipeline	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5714aa1c300be391	-
+function	c:@F@glProgramParameteriEXT	-			GLvoid (GLuint, GLenum, GLint)	GLuint program | GLenum pname | GLint value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e9dbb9325613d6b4	-
+function	c:@F@glGetProgramPipelineivEXT	-			GLvoid (GLuint, GLenum, GLint *)	GLuint pipeline | GLenum pname | GLint * params	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9901ef513cb51d2f	-
+function	c:@F@glValidateProgramPipelineEXT	-			GLvoid (GLuint)	GLuint pipeline	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0bbfa2807413622b	-
+function	c:@F@glGetProgramPipelineInfoLogEXT	-			GLvoid (GLuint, GLsizei, GLsizei *, GLchar *)	GLuint pipeline | GLsizei bufSize | GLsizei * length | GLchar * infoLog	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2ff909cf78f8a795	-
+function	c:@F@glProgramUniform1iEXT	-			GLvoid (GLuint, GLint, GLint)	GLuint program | GLint location | GLint x	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1dddd95ae9afd928	-
+function	c:@F@glProgramUniform2iEXT	-			GLvoid (GLuint, GLint, GLint, GLint)	GLuint program | GLint location | GLint x | GLint y	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b0b8b532af3cf9ba	-
+function	c:@F@glProgramUniform3iEXT	-			GLvoid (GLuint, GLint, GLint, GLint, GLint)	GLuint program | GLint location | GLint x | GLint y | GLint z	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	507510ae09a93b68	-
+function	c:@F@glProgramUniform4iEXT	-			GLvoid (GLuint, GLint, GLint, GLint, GLint, GLint)	GLuint program | GLint location | GLint x | GLint y | GLint z | GLint w	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	09bc2989cbc0159c	-
+function	c:@F@glProgramUniform1fEXT	-			GLvoid (GLuint, GLint, GLfloat)	GLuint program | GLint location | GLfloat x	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	35536726bb3afde5	-
+function	c:@F@glProgramUniform2fEXT	-			GLvoid (GLuint, GLint, GLfloat, GLfloat)	GLuint program | GLint location | GLfloat x | GLfloat y	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6f7b068834b26c7f	-
+function	c:@F@glProgramUniform3fEXT	-			GLvoid (GLuint, GLint, GLfloat, GLfloat, GLfloat)	GLuint program | GLint location | GLfloat x | GLfloat y | GLfloat z	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ddf51f6cff9f3fc6	-
+function	c:@F@glProgramUniform4fEXT	-			GLvoid (GLuint, GLint, GLfloat, GLfloat, GLfloat, GLfloat)	GLuint program | GLint location | GLfloat x | GLfloat y | GLfloat z | GLfloat w	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	645027ce52219e49	-
+function	c:@F@glProgramUniform1ivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLint *)	GLuint program | GLint location | GLsizei count | const GLint * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7ea446f43374f477	-
+function	c:@F@glProgramUniform2ivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLint *)	GLuint program | GLint location | GLsizei count | const GLint * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d8c9b2ac20000385	-
+function	c:@F@glProgramUniform3ivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLint *)	GLuint program | GLint location | GLsizei count | const GLint * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5c86fe6dd1f2f867	-
+function	c:@F@glProgramUniform4ivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLint *)	GLuint program | GLint location | GLsizei count | const GLint * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f5234917df9b4bf3	-
+function	c:@F@glProgramUniform1fvEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLfloat *)	GLuint program | GLint location | GLsizei count | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f292bfad53b755b1	-
+function	c:@F@glProgramUniform2fvEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLfloat *)	GLuint program | GLint location | GLsizei count | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8a258a63e9531cd8	-
+function	c:@F@glProgramUniform3fvEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLfloat *)	GLuint program | GLint location | GLsizei count | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4289113e949d19cd	-
+function	c:@F@glProgramUniform4fvEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLfloat *)	GLuint program | GLint location | GLsizei count | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	598451232f960406	-
+function	c:@F@glProgramUniformMatrix2fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	19d84c0df6721fcb	-
+function	c:@F@glProgramUniformMatrix3fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0f284f362be34c61	-
+function	c:@F@glProgramUniformMatrix4fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=5.0/12.0/-/0,tvos=9.0/12.0/-/0	-	cfe720de2ed0bdd3	-
+function	c:@F@glReadBuffer	-			void (GLenum)	GLenum mode	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	419c8713bac7c95d	-
+function	c:@F@glDrawRangeElements	-			void (GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid *)	GLenum mode | GLuint start | GLuint end | GLsizei count | GLenum type | const GLvoid * indices	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9b9d6025883e1fa6	-
+function	c:@F@glTexImage3D	-			void (GLenum, GLint, GLint, GLsizei, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *)	GLenum target | GLint level | GLint internalformat | GLsizei width | GLsizei height | GLsizei depth | GLint border | GLenum format | GLenum type | const GLvoid * pixels	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a62747dbdeaed34c	-
+function	c:@F@glTexSubImage3D	-			void (GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *)	GLenum target | GLint level | GLint xoffset | GLint yoffset | GLint zoffset | GLsizei width | GLsizei height | GLsizei depth | GLenum format | GLenum type | const GLvoid * pixels	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d3e4a2e2816a29ed	-
+function	c:@F@glCopyTexSubImage3D	-			void (GLenum, GLint, GLint, GLint, GLint, GLint, GLint, GLsizei, GLsizei)	GLenum target | GLint level | GLint xoffset | GLint yoffset | GLint zoffset | GLint x | GLint y | GLsizei width | GLsizei height	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5b1b58e8916ca925	-
+function	c:@F@glCompressedTexImage3D	-			void (GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei, GLint, GLsizei, const GLvoid *)	GLenum target | GLint level | GLenum internalformat | GLsizei width | GLsizei height | GLsizei depth | GLint border | GLsizei imageSize | const GLvoid * data	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ee7e317128680988	-
+function	c:@F@glCompressedTexSubImage3D	-			void (GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLsizei, const GLvoid *)	GLenum target | GLint level | GLint xoffset | GLint yoffset | GLint zoffset | GLsizei width | GLsizei height | GLsizei depth | GLenum format | GLsizei imageSize | const GLvoid * data	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c405d202b348e9d6	-
+function	c:@F@glGenQueries	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * ids	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5a42031fb69c6915	-
+function	c:@F@glDeleteQueries	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * ids	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d71809efad2a88ca	-
+function	c:@F@glIsQuery	-			GLboolean (GLuint)	GLuint id	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5cf9808158b482e1	-
+function	c:@F@glBeginQuery	-			void (GLenum, GLuint)	GLenum target | GLuint id	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a3515dcd0ad827bd	-
+function	c:@F@glEndQuery	-			void (GLenum)	GLenum target	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	46a45e084a1accba	-
+function	c:@F@glGetQueryiv	-			void (GLenum, GLenum, GLint *)	GLenum target | GLenum pname | GLint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	722b17296b3078da	-
+function	c:@F@glGetQueryObjectuiv	-			void (GLuint, GLenum, GLuint *)	GLuint id | GLenum pname | GLuint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1704dc81b5cabda5	-
+function	c:@F@glUnmapBuffer	-			GLboolean (GLenum)	GLenum target	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	a1c0c95509aa3612	-
+function	c:@F@glGetBufferPointerv	-			void (GLenum, GLenum, GLvoid **)	GLenum target | GLenum pname | GLvoid ** params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b27923e20525d77a	-
+function	c:@F@glDrawBuffers	-			void (GLsizei, const GLenum *)	GLsizei n | const GLenum * bufs	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2441a771edb3f494	-
+function	c:@F@glUniformMatrix2x3fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b6beb5e5afde1443	-
+function	c:@F@glUniformMatrix3x2fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6e82e54b0b66dbae	-
+function	c:@F@glUniformMatrix2x4fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	98a669896d60993c	-
+function	c:@F@glUniformMatrix4x2fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3c377336ddaae65b	-
+function	c:@F@glUniformMatrix3x4fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9c4cf0b16b7bea3f	-
+function	c:@F@glUniformMatrix4x3fv	-			void (GLint, GLsizei, GLboolean, const GLfloat *)	GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0a7be1ed745b1b7a	-
+function	c:@F@glBlitFramebuffer	-			void (GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLbitfield, GLenum)	GLint srcX0 | GLint srcY0 | GLint srcX1 | GLint srcY1 | GLint dstX0 | GLint dstY0 | GLint dstX1 | GLint dstY1 | GLbitfield mask | GLenum filter	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b367211680869e01	-
+function	c:@F@glRenderbufferStorageMultisample	-			void (GLenum, GLsizei, GLenum, GLsizei, GLsizei)	GLenum target | GLsizei samples | GLenum internalformat | GLsizei width | GLsizei height	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4dfb4f5fa1324861	-
+function	c:@F@glFramebufferTextureLayer	-			void (GLenum, GLenum, GLuint, GLint, GLint)	GLenum target | GLenum attachment | GLuint texture | GLint level | GLint layer	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	18322545a131a82a	-
+function	c:@F@glMapBufferRange	-			GLvoid * (GLenum, GLintptr, GLsizeiptr, GLbitfield)	GLenum target | GLintptr offset | GLsizeiptr length | GLbitfield access	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d7813f4826d7414d	-
+function	c:@F@glFlushMappedBufferRange	-			void (GLenum, GLintptr, GLsizeiptr)	GLenum target | GLintptr offset | GLsizeiptr length	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7326792b1f407089	-
+function	c:@F@glBindVertexArray	-			void (GLuint)	GLuint array	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	85a725ff43ed0126	-
+function	c:@F@glDeleteVertexArrays	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * arrays	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	41ddbc5a936679b8	-
+function	c:@F@glGenVertexArrays	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * arrays	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	c2ec43197a201a2e	-
+function	c:@F@glIsVertexArray	-			GLboolean (GLuint)	GLuint array	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d21f331e6b238055	-
+function	c:@F@glGetIntegeri_v	-			void (GLenum, GLuint, GLint *)	GLenum target | GLuint index | GLint * data	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b4a04e222d49dd0a	-
+function	c:@F@glBeginTransformFeedback	-			void (GLenum)	GLenum primitiveMode	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	733d5b4e5c981f24	-
+function	c:@F@glEndTransformFeedback	-			void (void)	-	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	fc0e257bc0c4f4fd	-
+function	c:@F@glBindBufferRange	-			void (GLenum, GLuint, GLuint, GLintptr, GLsizeiptr)	GLenum target | GLuint index | GLuint buffer | GLintptr offset | GLsizeiptr size	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e3edcf507f2ed8bc	-
+function	c:@F@glBindBufferBase	-			void (GLenum, GLuint, GLuint)	GLenum target | GLuint index | GLuint buffer	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	acc475c68d95a930	-
+function	c:@F@glTransformFeedbackVaryings	-			void (GLuint, GLsizei, const GLchar *const *, GLenum)	GLuint program | GLsizei count | const GLchar *const * varyings | GLenum bufferMode	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	fd3d3dca1227177a	-
+function	c:@F@glGetTransformFeedbackVarying	-			void (GLuint, GLuint, GLsizei, GLsizei *, GLsizei *, GLenum *, GLchar *)	GLuint program | GLuint index | GLsizei bufSize | GLsizei * length | GLsizei * size | GLenum * type | GLchar * name	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1d3f33232bd95a6c	-
+function	c:@F@glVertexAttribIPointer	-			void (GLuint, GLint, GLenum, GLsizei, const GLvoid *)	GLuint index | GLint size | GLenum type | GLsizei stride | const GLvoid * pointer	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5fb1b308f5c78f1b	-
+function	c:@F@glGetVertexAttribIiv	-			void (GLuint, GLenum, GLint *)	GLuint index | GLenum pname | GLint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	05df8877fac8bae2	-
+function	c:@F@glGetVertexAttribIuiv	-			void (GLuint, GLenum, GLuint *)	GLuint index | GLenum pname | GLuint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b3dcfa656f65f82e	-
+function	c:@F@glVertexAttribI4i	-			void (GLuint, GLint, GLint, GLint, GLint)	GLuint index | GLint x | GLint y | GLint z | GLint w	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	20e4c5ae569b7d72	-
+function	c:@F@glVertexAttribI4ui	-			void (GLuint, GLuint, GLuint, GLuint, GLuint)	GLuint index | GLuint x | GLuint y | GLuint z | GLuint w	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f69923e5f3e7220f	-
+function	c:@F@glVertexAttribI4iv	-			void (GLuint, const GLint *)	GLuint index | const GLint * v	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	461967bbe20e06ef	-
+function	c:@F@glVertexAttribI4uiv	-			void (GLuint, const GLuint *)	GLuint index | const GLuint * v	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9a3a1375a837c0d8	-
+function	c:@F@glGetUniformuiv	-			void (GLuint, GLint, GLuint *)	GLuint program | GLint location | GLuint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b1d09c12740038cd	-
+function	c:@F@glGetFragDataLocation	-			GLint (GLuint, const GLchar *)	GLuint program | const GLchar * name	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f85426ab48ba87ed	-
+function	c:@F@glUniform1ui	-			void (GLint, GLuint)	GLint location | GLuint v0	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5bb2a74559915c6f	-
+function	c:@F@glUniform2ui	-			void (GLint, GLuint, GLuint)	GLint location | GLuint v0 | GLuint v1	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8b0d97a146b2b468	-
+function	c:@F@glUniform3ui	-			void (GLint, GLuint, GLuint, GLuint)	GLint location | GLuint v0 | GLuint v1 | GLuint v2	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6a4abcdd3181f85d	-
+function	c:@F@glUniform4ui	-			void (GLint, GLuint, GLuint, GLuint, GLuint)	GLint location | GLuint v0 | GLuint v1 | GLuint v2 | GLuint v3	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	97a8bae573414485	-
+function	c:@F@glUniform1uiv	-			void (GLint, GLsizei, const GLuint *)	GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3b82349b51cb4798	-
+function	c:@F@glUniform2uiv	-			void (GLint, GLsizei, const GLuint *)	GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2fede3bded2a78ce	-
+function	c:@F@glUniform3uiv	-			void (GLint, GLsizei, const GLuint *)	GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d56574822140ced2	-
+function	c:@F@glUniform4uiv	-			void (GLint, GLsizei, const GLuint *)	GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ccfff6a9758f54af	-
+function	c:@F@glClearBufferiv	-			void (GLenum, GLint, const GLint *)	GLenum buffer | GLint drawbuffer | const GLint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d7703b8c064b6d53	-
+function	c:@F@glClearBufferuiv	-			void (GLenum, GLint, const GLuint *)	GLenum buffer | GLint drawbuffer | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	40827b0e90a0bed9	-
+function	c:@F@glClearBufferfv	-			void (GLenum, GLint, const GLfloat *)	GLenum buffer | GLint drawbuffer | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6a71344a5bcc36b0	-
+function	c:@F@glClearBufferfi	-			void (GLenum, GLint, GLfloat, GLint)	GLenum buffer | GLint drawbuffer | GLfloat depth | GLint stencil	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5a0cda490b7731d3	-
+function	c:@F@glGetStringi	-			const GLubyte * (GLenum, GLuint)	GLenum name | GLuint index	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	115201d085c20940	-
+function	c:@F@glCopyBufferSubData	-			void (GLenum, GLenum, GLintptr, GLintptr, GLsizeiptr)	GLenum readTarget | GLenum writeTarget | GLintptr readOffset | GLintptr writeOffset | GLsizeiptr size	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	04e5a2dbe38fcd27	-
+function	c:@F@glGetUniformIndices	-			void (GLuint, GLsizei, const GLchar *const *, GLuint *)	GLuint program | GLsizei uniformCount | const GLchar *const * uniformNames | GLuint * uniformIndices	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	47e576dec4b748f6	-
+function	c:@F@glGetActiveUniformsiv	-			void (GLuint, GLsizei, const GLuint *, GLenum, GLint *)	GLuint program | GLsizei uniformCount | const GLuint * uniformIndices | GLenum pname | GLint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	273e31b820ed9eca	-
+function	c:@F@glGetUniformBlockIndex	-			GLuint (GLuint, const GLchar *)	GLuint program | const GLchar * uniformBlockName	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f68ae86bada645f3	-
+function	c:@F@glGetActiveUniformBlockiv	-			void (GLuint, GLuint, GLenum, GLint *)	GLuint program | GLuint uniformBlockIndex | GLenum pname | GLint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	dbc32e110bb368ea	-
+function	c:@F@glGetActiveUniformBlockName	-			void (GLuint, GLuint, GLsizei, GLsizei *, GLchar *)	GLuint program | GLuint uniformBlockIndex | GLsizei bufSize | GLsizei * length | GLchar * uniformBlockName	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	d0d3b3e46951dd96	-
+function	c:@F@glUniformBlockBinding	-			void (GLuint, GLuint, GLuint)	GLuint program | GLuint uniformBlockIndex | GLuint uniformBlockBinding	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	63b052031c89382c	-
+function	c:@F@glDrawArraysInstanced	-			void (GLenum, GLint, GLsizei, GLsizei)	GLenum mode | GLint first | GLsizei count | GLsizei instancecount	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	30d201f0f9e4f871	-
+function	c:@F@glDrawElementsInstanced	-			void (GLenum, GLsizei, GLenum, const GLvoid *, GLsizei)	GLenum mode | GLsizei count | GLenum type | const GLvoid * indices | GLsizei instancecount	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	17410c6410975b94	-
+function	c:@F@glFenceSync	-			GLsync (GLenum, GLbitfield)	GLenum condition | GLbitfield flags	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	3580931539c9bac1	-
+function	c:@F@glIsSync	-			GLboolean (GLsync)	GLsync sync	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b3258f2737d50fe3	-
+function	c:@F@glDeleteSync	-			void (GLsync)	GLsync sync	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5cc4720381b2d508	-
+function	c:@F@glClientWaitSync	-			GLenum (GLsync, GLbitfield, GLuint64)	GLsync sync | GLbitfield flags | GLuint64 timeout	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	986454a54115af24	-
+function	c:@F@glWaitSync	-			void (GLsync, GLbitfield, GLuint64)	GLsync sync | GLbitfield flags | GLuint64 timeout	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b62da6c18ef3512b	-
+function	c:@F@glGetInteger64v	-			void (GLenum, GLint64 *)	GLenum pname | GLint64 * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ca48ce6931b01f96	-
+function	c:@F@glGetSynciv	-			void (GLsync, GLenum, GLsizei, GLsizei *, GLint *)	GLsync sync | GLenum pname | GLsizei bufSize | GLsizei * length | GLint * values	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7d39eeefc166b15a	-
+function	c:@F@glGetInteger64i_v	-			void (GLenum, GLuint, GLint64 *)	GLenum target | GLuint index | GLint64 * data	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	4a0c15450f4e73e9	-
+function	c:@F@glGetBufferParameteri64v	-			void (GLenum, GLenum, GLint64 *)	GLenum target | GLenum pname | GLint64 * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f730f903af45f652	-
+function	c:@F@glGenSamplers	-			void (GLsizei, GLuint *)	GLsizei count | GLuint * samplers	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bac0425a617cb70a	-
+function	c:@F@glDeleteSamplers	-			void (GLsizei, const GLuint *)	GLsizei count | const GLuint * samplers	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	73d7a983dff1ca54	-
+function	c:@F@glIsSampler	-			GLboolean (GLuint)	GLuint sampler	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	017eb6ec1a7e1a57	-
+function	c:@F@glBindSampler	-			void (GLuint, GLuint)	GLuint unit | GLuint sampler	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	13db3ae33a494d57	-
+function	c:@F@glSamplerParameteri	-			void (GLuint, GLenum, GLint)	GLuint sampler | GLenum pname | GLint param	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1c4f0666d2252ccb	-
+function	c:@F@glSamplerParameteriv	-			void (GLuint, GLenum, const GLint *)	GLuint sampler | GLenum pname | const GLint * param	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	1d22f1829c1095b9	-
+function	c:@F@glSamplerParameterf	-			void (GLuint, GLenum, GLfloat)	GLuint sampler | GLenum pname | GLfloat param	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	bcd40e1cbdc72868	-
+function	c:@F@glSamplerParameterfv	-			void (GLuint, GLenum, const GLfloat *)	GLuint sampler | GLenum pname | const GLfloat * param	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b62e132796360105	-
+function	c:@F@glGetSamplerParameteriv	-			void (GLuint, GLenum, GLint *)	GLuint sampler | GLenum pname | GLint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	43382441874e572a	-
+function	c:@F@glGetSamplerParameterfv	-			void (GLuint, GLenum, GLfloat *)	GLuint sampler | GLenum pname | GLfloat * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e4cfe747119482ab	-
+function	c:@F@glVertexAttribDivisor	-			void (GLuint, GLuint)	GLuint index | GLuint divisor	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b95dae361d4cc261	-
+function	c:@F@glBindTransformFeedback	-			void (GLenum, GLuint)	GLenum target | GLuint id	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b8b7cdb96d27055d	-
+function	c:@F@glDeleteTransformFeedbacks	-			void (GLsizei, const GLuint *)	GLsizei n | const GLuint * ids	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	0d9e4be3394bf551	-
+function	c:@F@glGenTransformFeedbacks	-			void (GLsizei, GLuint *)	GLsizei n | GLuint * ids	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	dcb2c2da557f32be	-
+function	c:@F@glIsTransformFeedback	-			GLboolean (GLuint)	GLuint id	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5be043081ecace6c	-
+function	c:@F@glPauseTransformFeedback	-			void (void)	-	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	70a6eca2fdac8d4e	-
+function	c:@F@glResumeTransformFeedback	-			void (void)	-	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	752a38e4f588cb2d	-
+function	c:@F@glGetProgramBinary	-			void (GLuint, GLsizei, GLsizei *, GLenum *, GLvoid *)	GLuint program | GLsizei bufSize | GLsizei * length | GLenum * binaryFormat | GLvoid * binary	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7056e71eb97395ba	-
+function	c:@F@glProgramBinary	-			void (GLuint, GLenum, const GLvoid *, GLsizei)	GLuint program | GLenum binaryFormat | const GLvoid * binary | GLsizei length	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	10ff26b2804c4fa4	-
+function	c:@F@glProgramParameteri	-			void (GLuint, GLenum, GLint)	GLuint program | GLenum pname | GLint value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	9c09786161f17a5d	-
+function	c:@F@glInvalidateFramebuffer	-			void (GLenum, GLsizei, const GLenum *)	GLenum target | GLsizei numAttachments | const GLenum * attachments	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	5191014b0d7bc058	-
+function	c:@F@glInvalidateSubFramebuffer	-			void (GLenum, GLsizei, const GLenum *, GLint, GLint, GLsizei, GLsizei)	GLenum target | GLsizei numAttachments | const GLenum * attachments | GLint x | GLint y | GLsizei width | GLsizei height	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	91b6e3a42299f968	-
+function	c:@F@glTexStorage2D	-			void (GLenum, GLsizei, GLenum, GLsizei, GLsizei)	GLenum target | GLsizei levels | GLenum internalformat | GLsizei width | GLsizei height	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6c38844d3020e28e	-
+function	c:@F@glTexStorage3D	-			void (GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei)	GLenum target | GLsizei levels | GLenum internalformat | GLsizei width | GLsizei height | GLsizei depth	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	28ef91adc1959ef5	-
+function	c:@F@glGetInternalformativ	-			void (GLenum, GLenum, GLenum, GLsizei, GLint *)	GLenum target | GLenum internalformat | GLenum pname | GLsizei bufSize | GLint * params	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	2c0fdf27df1ba26b	-
+function	c:@F@glProgramUniform1uiEXT	-			GLvoid (GLuint, GLint, GLuint)	GLuint program | GLint location | GLuint x	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	62e841939ba2b4f5	-
+function	c:@F@glProgramUniform2uiEXT	-			GLvoid (GLuint, GLint, GLuint, GLuint)	GLuint program | GLint location | GLuint x | GLuint y	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	f22a56f56a691d75	-
+function	c:@F@glProgramUniform3uiEXT	-			GLvoid (GLuint, GLint, GLuint, GLuint, GLuint)	GLuint program | GLint location | GLuint x | GLuint y | GLuint z	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	b185c51db2eaba41	-
+function	c:@F@glProgramUniform4uiEXT	-			GLvoid (GLuint, GLint, GLuint, GLuint, GLuint, GLuint)	GLuint program | GLint location | GLuint x | GLuint y | GLuint z | GLuint w	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	09d17b597c87a5e6	-
+function	c:@F@glProgramUniform1uivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLuint *)	GLuint program | GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	95d5bd6398e082d4	-
+function	c:@F@glProgramUniform2uivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLuint *)	GLuint program | GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	de0e8f04521a9731	-
+function	c:@F@glProgramUniform3uivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLuint *)	GLuint program | GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	085b4c7e5f641110	-
+function	c:@F@glProgramUniform4uivEXT	-			GLvoid (GLuint, GLint, GLsizei, const GLuint *)	GLuint program | GLint location | GLsizei count | const GLuint * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8b3b6121e3534763	-
+function	c:@F@glProgramUniformMatrix2x3fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	7f380a588254b9e8	-
+function	c:@F@glProgramUniformMatrix3x2fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	8638f1ce4718f413	-
+function	c:@F@glProgramUniformMatrix2x4fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	e946fe2680424cd4	-
+function	c:@F@glProgramUniformMatrix4x2fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	6e3bd4dd27d07315	-
+function	c:@F@glProgramUniformMatrix3x4fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	ab99b50f49cef4f1	-
+function	c:@F@glProgramUniformMatrix4x3fvEXT	-			GLvoid (GLuint, GLint, GLsizei, GLboolean, const GLfloat *)	GLuint program | GLint location | GLsizei count | GLboolean transpose | const GLfloat * value	-	ios=7.0/12.0/-/0,tvos=9.0/12.0/-/0	-	85938a6eeba06c5e	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@CFTimeInterval	-			double	-	-	-	-	11d627848397cf44	-
+typedef	c:@T@IOSurfaceRef	-			struct __IOSurface *	-	-	-	-	b3d7dabcf5bf59d2	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@int8_t	-			signed char	-	-	-	-	e405b6a7be656ab1	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@int16_t	-			short	-	-	-	-	a957af8a2c7c6b0a	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@intptr_t	-			__darwin_intptr_t	-	-	-	-	fdac1ab2f2a027a6	-
+typedef	c:@T@__darwin_intptr_t	-			long	-	-	-	-	e10930324992848e	-

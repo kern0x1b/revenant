@@ -1,0 +1,29 @@
+$ xcrun swiftc -O -o preprocessor-applied-host preprocessor-applied-host.swift
+$ ./preprocessor-applied-host
+stdbuf: /tmp/pah: No such file or directory
+(no binary)
+
+## DOES NOT COMPILE: the host's answer here is NOT measured
+
+The question is whether a pipeline **applies** the preprocessor it was given or passes its input
+through - which the three earlier probes could not tell, because all three used
+`LinearTransformer(scale: 1, offset: 0)`, the identity. A non-identity preprocessor tells them
+apart: `scale: 2` doubles and an `offset` shifts, so unchanged values would mean the
+preprocessor is ignored.
+
+**It does not build.** `swiftc -typecheck` passes - the conformers satisfy the interface - and then
+both `-O` and `-Onone` abort:
+
+```
+$ xcrun swiftc -O -o preprocessor-applied-host preprocessor-applied-host.swift
+error: compile command failed due to signal 6 (use -v to see invocation)
+$ xcrun swiftc -Onone -o preprocessor-applied-host preprocessor-applied-host.swift
+error: compile command failed due to signal 6 (use -v to see invocation)
+```
+
+So the file is committed as a **question**, not as evidence, and nothing in the tree claims the
+host applies the preprocessor. Two pipelines' `preprocessed(from:)` are recorded as returning
+the identity-transformed values with the identity preprocessor, which is consistent with
+either reading. The next step is to get this to build - most likely by moving the top-level
+code into a `@main` entry point, since the three earlier probes with top-level `await` did build
+and this one does not.

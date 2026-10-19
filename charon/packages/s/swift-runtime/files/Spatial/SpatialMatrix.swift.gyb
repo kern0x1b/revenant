@@ -1,0 +1,492 @@
+//===--- SpatialMatrix.swift.gyb ------------*- swift -*-===//
+//
+// The matrix arithmetic the two transformations of Spatial share, once for each scalar.
+//
+// The matrices are column-major, as `simd` and every graphics API on the platform spell them: a
+// point and a direction are column vectors on the right of the matrix, which is why the geometry
+// types apply one with `simd_mul(matrix, vector)` and not the other way round, and why a vector of
+// the affine four-by-three carries a `w` of zero where the four-by-four carries a one.
+//
+// What this release's `simd` has no spelling for is written out here and named for what it is: the
+// first three components of a column of four, the four-by-four's inverse, and the tolerances of
+// `SPBase.h`.
+//
+//===----------------------------------------------------------------------===//
+
+import Foundation
+import simd
+
+% for scalar, vector, matrix, matrix3, matrix4, quat, suffix, tolerance in [ ("Double", "simd_double3", "simd_double4x3", "simd_double3x3", "simd_double4x4", "simd_quatd", "", "defaultTolerance"), ("Float", "simd_float3", "simd_float4x3", "simd_float3x3", "simd_float4x4", "simd_quatf", "Float", "defaultToleranceFloat"), ]:
+
+// MARK: - The tolerance each half compares with.
+
+/// `SPDefaultTolerance` for the `Double` half and `SPDefaultToleranceFloat` for the `Float` half:
+/// under it, two lengths are the same length.
+@inlinable
+func spatialDefaultTolerance() -> ${scalar} {
+    ${tolerance}
+}
+
+// MARK: - The quaternion arithmetic, on the four numbers a quaternion is made of.
+
+// A `simd_quatd` at this deployment target has no operators, no `==`, no `.normalized` and no
+// `.inverse`: those come from the `simd` module's Swift overlay, which this release's headers do
+// not bring. The four numbers are the same storage either way - the SDK's `SPRotation3D` is a union
+// of `simd_double4 vector` and `simd_quatd` - so the arithmetic is done on the vector, and the
+// quaternion is only ever a reading of it. The real part comes first, then the imaginary part.
+
+/// Hamilton's product: the rotation `lhs` followed by the rotation `rhs`. The imaginary part comes
+/// first in `x`, `y` and `z` and the real part is `w`, which is the layout the `vector` of a
+/// quaternion has - a `simd_quatd` prints its real part first, which is the other way round.
+@inlinable
+func quaternionProduct(_ lhs: SIMD4<${scalar}>, _ rhs: SIMD4<${scalar}>) -> SIMD4<${scalar}> {
+    let (x1, y1, z1, w1) = (lhs.x, lhs.y, lhs.z, lhs.w)
+    let (x2, y2, z2, w2) = (rhs.x, rhs.y, rhs.z, rhs.w)
+    return SIMD4<${scalar}>(w1 * x2 + x1 * w2 + (y1 * z2 - z1 * y2),
+                           w1 * y2 + y1 * w2 + (z1 * x2 - x1 * z2),
+                           w1 * z2 + z1 * w2 + (x1 * y2 - y1 * x2),
+                           w1 * w2 - (x1 * x2 + y1 * y2 + z1 * z2))
+}
+
+@inlinable
+func normalizedQuaternion(_ q: SIMD4<${scalar}>) -> SIMD4<${scalar}> {
+    let squared = simd_length_squared(q)
+    guard squared != 0, squared.isFinite else { return SIMD4<${scalar}>(0, 0, 0, 1) }
+    return q / squared.squareRoot()
+}
+
+/// The rotation that undoes a quaternion, which is its conjugate over the squared length.
+@inlinable
+func inverseQuaternion(_ q: SIMD4<${scalar}>) -> SIMD4<${scalar}> {
+    let squared = simd_length_squared(q)
+    guard squared != 0, squared.isFinite else { return SIMD4<${scalar}>(0, 0, 0, 1) }
+    return SIMD4<${scalar}>(-q.x, -q.y, -q.z, q.w) / squared
+}
+
+/// The shortest rotation taking `from` onto `to`, as `simd_quaternion(from:to:)` builds it: the
+/// cross product and `1 + dot` normalised together, which is exact where an angle from `acos` is
+/// not. Two opposite directions have no shortest rotation, and the framework answers a half turn
+/// about any axis across both.
+@inlinable
+func quaternionBetween(_ from: ${vector}, _ to: ${vector}) -> SIMD4<${scalar}> {
+    let a = from / simd_length(from)
+    let b = to / simd_length(to)
+    let cross = simd_cross(a, b)
+    let w = 1 + simd_dot(a, b)
+    if simd_length_squared(cross) < 1e-24 && w < 1e-12 {
+        var across = simd_cross(a, ${vector}(1, 0, 0))
+        if simd_length_squared(across) < 1e-24 {
+            across = simd_cross(a, ${vector}(0, 1, 0))
+        }
+        return SIMD4<${scalar}>(across / simd_length(across), 0)
+    }
+    let q = SIMD4<${scalar}>(cross, w)
+    return q / simd_length(q)
+}
+
+/// A vector turned by a quaternion, which is what `q.act(v)` is where this release has no such
+/// member: the vector is taken along the imaginary axis twice, which is Hamilton's product done
+/// with three cross products instead of a matrix.
+@inlinable
+func vectorRotated(_ v: ${vector}, by q: SIMD4<${scalar}>) -> ${vector} {
+    let u = SIMD3<${scalar}>(q.y, q.z, q.w)
+    let t = 2 * simd_cross(u, v)
+    return v + q.w * t + simd_cross(u, t)
+}
+
+// MARK: - The four-by-four, which the projective transformation and the two poses store as.
+
+extension ${matrix4} {
+    /// The scale the columns of the three-by-three part carry.
+    func scalingBy(x: ${scalar}, y: ${scalar}, z: ${scalar}) -> ${matrix4} {
+        var m = self
+        m.columns.0 = m.columns.0 * x
+        m.columns.1 = m.columns.1 * y
+        m.columns.2 = m.columns.2 * z
+        return m
+    }
+
+    /// The rotation the columns of the three-by-three part carry, applied to all three of them.
+    ///
+    /// Composed on the right, which is what the framework does: a scale of (2, 3, 4) turned by a
+    /// rotation of 0.7 rad about (1, 2, 3) answers the first column
+    /// (1.5632783478140497, 1.650351692113075, -1.1758315137543223) on the host, and that is
+    /// `self * r`; `r * self` is (1.5632783478140497, 1.1002344614087167, -0.58791575687716113).
+    /// A column of `self * r` is the three columns of `self` weighted by the three components of
+    /// the rotation's own column, which is what `turned` writes out - `simd` has no operator
+    /// between a matrix and a vector at this deployment target.
+    func rotatingBy(_ rotation: Rotation3D${suffix}) -> ${matrix4} {
+        let r = simd_matrix3x3(rotation.quaternion)
+        let first = first3(columns.0), second = first3(columns.1), third = first3(columns.2)
+        func turned(_ axis: ${vector}) -> ${vector} {
+            first * axis.x + second * axis.y + third * axis.z
+        }
+        var m = self
+        m.columns.0 = SIMD4<${scalar}>(turned(r.columns.0), 0)
+        m.columns.1 = SIMD4<${scalar}>(turned(r.columns.1), 0)
+        m.columns.2 = SIMD4<${scalar}>(turned(r.columns.2), 0)
+        return m
+    }
+
+    /// A translation composed on the right, so the linear part carries the offset through: the
+    /// host's (scale (2, 3, 4) turned by that rotation) translated by (5, 6, 7) answers the
+    /// translation 7.5475975029328994 on the x, and 5 - the offset untouched - is not it.
+    func translatingBy(_ offset: Vector3D${suffix}) -> ${matrix4} {
+        var m = self
+        m.columns.3 = columns.0 * offset.x + columns.1 * offset.y + columns.2 * offset.z + columns.3
+        return m
+    }
+
+    /// `SPAffineTransform3DShear`: the shear about one axis, applied after what is already there.
+    func shearing(_ shear: AxisWithFactors${suffix}) -> ${matrix4} {
+        let c0: ${vector}
+        let c1: ${vector}
+        let c2: ${vector}
+        switch shear {
+        case .xAxis(let yFactor, let zFactor):
+            c0 = ${vector}(1, yFactor, zFactor)
+            c1 = ${vector}(0, 1, 0)
+            c2 = ${vector}(0, 0, 1)
+        case .yAxis(let xFactor, let zFactor):
+            c0 = ${vector}(1, 0, 0)
+            c1 = ${vector}(xFactor, 1, zFactor)
+            c2 = ${vector}(0, 0, 1)
+        case .zAxis(let xFactor, let yFactor):
+            c0 = ${vector}(1, 0, 0)
+            c1 = ${vector}(0, 1, 0)
+            c2 = ${vector}(xFactor, yFactor, 1)
+        }
+        return simd_mul(self, simd_matrix(SIMD4<${scalar}>(c0, 0), SIMD4<${scalar}>(c1, 0),
+                                            SIMD4<${scalar}>(c2, 0), SIMD4<${scalar}>(0, 0, 0, 1)))
+    }
+
+    /// The reflection on both sides of the linear part, which is what the framework's
+    /// `flipped(along:)` does: negating every entry of the three-by-three that involves the named
+    /// axis - its row and its column - and the translation's component on it. That is `D * M * D`
+    /// for the `D` that carries -1 on that axis. Measured on the host: the first column
+    /// (1.5632783478140497, 1.650351692113075, -1.1758315137543223) becomes
+    /// (1.5632783478140497, -1.650351692113075, 1.1758315137543223) and the translation's x
+    /// 7.5475975029328994 becomes -7.5475975029328994, while the x of the second column becomes
+    /// +0.96585856842842444 from -0.96585856842842444 and the diagonal keeps its own sign. The
+    /// C header's `SPAffineTransform3DFlip` puts a -1 on that axis of the linear part and
+    /// concatenates, which is a different matrix again; the running framework wins (COORDINATION
+    /// section 5) and the difference is recorded in facts/Spatial/README.md.
+    func flippingColumn(_ index: Int) -> ${matrix4} {
+        guard index >= 0, index < 3 else { return self }
+        let alongX: ${scalar} = index == 0 ? -1 : 1
+        let alongY: ${scalar} = index == 1 ? -1 : 1
+        let alongZ: ${scalar} = index == 2 ? -1 : 1
+        // A column is signed by its own axis on the left and by the flipped axis on the right.
+        func side(_ column: SIMD4<${scalar}>, _ j: Int) -> SIMD4<${scalar}> {
+            let across: ${scalar} = j == index ? -1 : 1
+            return SIMD4<${scalar}>(column.x * alongX * across, column.y * alongY * across,
+                                    column.z * alongZ * across, column.w)
+        }
+        var m = self
+        m.columns.0 = side(columns.0, 0)
+        m.columns.1 = side(columns.1, 1)
+        m.columns.2 = side(columns.2, 2)
+        m.columns.3 = SIMD4<${scalar}>(columns.3.x * alongX, columns.3.y * alongY, columns.3.z * alongZ,
+                                       columns.3.w)
+        return m
+    }
+
+    /// The same, within the tolerance: a matrix comparison, written out because this release's
+    /// `simd_almost_equal_elements` has no overload for a matrix.
+    func isApproximatelyEqual(to other: ${matrix4}, tolerance: ${scalar}) -> Bool {
+        func close(_ a: SIMD4<${scalar}>, _ b: SIMD4<${scalar}>) -> Bool {
+            abs(a.x - b.x) < tolerance && abs(a.y - b.y) < tolerance &&
+                abs(a.z - b.z) < tolerance && abs(a.w - b.w) < tolerance
+        }
+        return close(columns.0, other.columns.0) && close(columns.1, other.columns.1) &&
+            close(columns.2, other.columns.2) && close(columns.3, other.columns.3)
+    }
+}
+
+// MARK: - The four-by-three, which is how an affine transformation is stored.
+
+extension ${matrix} {
+    func scalingBy(x: ${scalar}, y: ${scalar}, z: ${scalar}) -> ${matrix} {
+        simd_matrix(columns.0 * x, columns.1 * y, columns.2 * z, columns.3)
+    }
+
+    /// Composed on the right, as the four-by-four above is and for the measured reason: the
+    /// rotation follows the transform's own linear part and not the other way round.
+    func rotatingBy(_ rotation: Rotation3D${suffix}) -> ${matrix} {
+        let r = simd_matrix3x3(rotation.quaternion)
+        func turned(_ axis: ${vector}) -> ${vector} {
+            columns.0 * axis.x + columns.1 * axis.y + columns.2 * axis.z
+        }
+        return simd_matrix(turned(r.columns.0), turned(r.columns.1), turned(r.columns.2), columns.3)
+    }
+
+    /// A translation composed on the right, so the linear part carries the offset through: the
+    /// host's turned scale of (2, 3, 4) translated by (5, 6, 7) answers 7.5475975029328994 on the x.
+    func translatingBy(_ offset: Vector3D${suffix}) -> ${matrix} {
+        simd_matrix(columns.0, columns.1, columns.2,
+                    columns.0 * offset.x + columns.1 * offset.y + columns.2 * offset.z + columns.3)
+    }
+
+    func shearing(_ shear: AxisWithFactors${suffix}) -> ${matrix} {
+        var full = ${matrix4}()
+        full.columns.0 = SIMD4<${scalar}>(columns.0, 0)
+        full.columns.1 = SIMD4<${scalar}>(columns.1, 0)
+        full.columns.2 = SIMD4<${scalar}>(columns.2, 0)
+        full.columns.3 = SIMD4<${scalar}>(columns.3, 1)
+        let sheared = full.shearing(shear)
+        return simd_matrix(first3(sheared.columns.0), first3(sheared.columns.1),
+                           first3(sheared.columns.2), first3(sheared.columns.3))
+    }
+
+    /// The reflection on both sides of the linear part, which is what the framework's
+    /// `flipped(along:)` does: negating every entry of the three-by-three that involves the named
+    /// axis - its row and its column - and the translation's component on it. That is `D * M * D`
+    /// for the `D` that carries -1 on that axis. Measured on the host: the first column
+    /// (1.5632783478140497, 1.650351692113075, -1.1758315137543223) becomes
+    /// (1.5632783478140497, -1.650351692113075, 1.1758315137543223) and the translation's x
+    /// 7.5475975029328994 becomes -7.5475975029328994, while the x of the second column becomes
+    /// +0.96585856842842444 from -0.96585856842842444 and the diagonal keeps its own sign. The
+    /// C header's `SPAffineTransform3DFlip` puts a -1 on that axis of the linear part and
+    /// concatenates, which is a different matrix again; the running framework wins (COORDINATION
+    /// section 5) and the difference is recorded in facts/Spatial/README.md.
+    func flippingColumn(_ index: Int) -> ${matrix} {
+        guard index >= 0, index < 3 else { return self }
+        let alongX: ${scalar} = index == 0 ? -1 : 1
+        let alongY: ${scalar} = index == 1 ? -1 : 1
+        let alongZ: ${scalar} = index == 2 ? -1 : 1
+        func side(_ column: ${vector}, _ j: Int) -> ${vector} {
+            let across: ${scalar} = j == index ? -1 : 1
+            return ${vector}(column.x * alongX * across, column.y * alongY * across,
+                             column.z * alongZ * across)
+        }
+        return simd_matrix(side(columns.0, 0), side(columns.1, 1), side(columns.2, 2),
+                           ${vector}(columns.3.x * alongX, columns.3.y * alongY, columns.3.z * alongZ))
+    }
+
+    /// The whole thing as a four-by-four, which is the form the rest of the framework shares.
+    var asFourByFour: ${matrix4} {
+        var full = ${matrix4}()
+        full.columns.0 = SIMD4<${scalar}>(columns.0, 0)
+        full.columns.1 = SIMD4<${scalar}>(columns.1, 0)
+        full.columns.2 = SIMD4<${scalar}>(columns.2, 0)
+        full.columns.3 = SIMD4<${scalar}>(columns.3, 1)
+        return full
+    }
+}
+
+// MARK: - The inverse of a four-by-four.
+
+// `simd` gives no `inverse` on a four-by-four at this deployment target, and a transformation that
+// cannot be pulled back has no inverse to answer. Gauss-Jordan elimination with partial pivoting: a
+// column whose largest entry is zero leaves the matrix singular, and that is the only way it
+// happens.
+func invertedMatrix(_ matrix: ${matrix4}) -> ${matrix4}? {
+    // Gauss-Jordan elimination with partial pivoting, the matrix on the left and the identity on the
+    // right of one flat list, and both halves row-major: the entry (row, column) of the matrix is
+    // at row * 4 + column and of the identity at 16 + row * 4 + column. Row-major is what makes a
+    // row operation four consecutive entries and the pivot for a column the largest entry down it.
+    //
+    // The archived version laid the list out column-major and then did row operations on it, which
+    // is neither: `work[row * 4 + offset]` walked a column. It trapped before that mattered - it
+    // indexed a sixteen-entry array to 31 - and the sixteen entries it did write were the matrix's
+    // columns, so the elimination that followed was reading and writing a matrix that was never
+    // there.
+    var work: [${scalar}] = []
+    work.reserveCapacity(32)
+    // `matrix.columns` is a tuple of four vectors and takes no subscript, so it becomes an array
+    // here and the loop below indexes that.
+    let source = [matrix.columns.0, matrix.columns.1, matrix.columns.2, matrix.columns.3]
+    // The two halves are written one after the other and not interleaved row by row: a list that
+    // holds a matrix row and then the matching identity row, four times over, has the identity's
+    // row r at 8 * r and not at 16 + 4 * r, and every row operation then lands on the wrong four
+    // entries. Measured: that interleaving is what left the identity half holding the matrix's own
+    // third column where the identity's first row belongs.
+    for row in 0..<4 {
+        for column in 0..<4 {
+            work.append(source[column][row])
+        }
+    }
+    for row in 0..<4 {
+        for column in 0..<4 {
+            work.append(row == column ? 1 : 0)
+        }
+    }
+    assert(work.count == 32, "the working copy is the matrix and the identity, sixteen entries each")
+
+    for step in 0..<4 {
+        // The pivot: the largest entry left in this column, so the division is as well conditioned
+        // as the matrix allows.
+        var pivotRow = step
+        var pivotValue = work[step * 4 + step]
+        for row in (step + 1)..<4 {
+            let candidate = work[row * 4 + step]
+            if abs(candidate) > abs(pivotValue) {
+                pivotValue = candidate
+                pivotRow = row
+            }
+        }
+        guard pivotValue != 0, pivotValue.isFinite else { return nil }
+        // Each row operation reaches into both halves at once, and a row of each is four
+        // consecutive entries at 4 * r and at 16 + 4 * r - never eight consecutive ones, which
+        // would run off the end of a row into the next.
+        if pivotRow != step {
+            for offset in 0..<4 {
+                work.swapAt(step * 4 + offset, pivotRow * 4 + offset)
+                work.swapAt(16 + step * 4 + offset, 16 + pivotRow * 4 + offset)
+            }
+        }
+
+        // Divide the pivot's row through, then take the pivot out of every other row.
+        for offset in 0..<4 {
+            work[step * 4 + offset] /= pivotValue
+            work[16 + step * 4 + offset] /= pivotValue
+        }
+        for row in 0..<4 where row != step {
+            let factor = work[row * 4 + step]
+            guard factor != 0 else { continue }
+            for offset in 0..<4 {
+                work[row * 4 + offset] -= factor * work[step * 4 + offset]
+                work[16 + row * 4 + offset] -= factor * work[16 + step * 4 + offset]
+            }
+        }
+    }
+
+    // The identity half now holds the inverse, row for row, and `matrix.columns` is column-major:
+    // the inverse's column c is the four rows at 16 + 4k + c.
+    var out = ${matrix4}()
+    out.columns.0 = SIMD4<${scalar}>(work[16], work[20], work[24], work[28])
+    out.columns.1 = SIMD4<${scalar}>(work[17], work[21], work[25], work[29])
+    out.columns.2 = SIMD4<${scalar}>(work[18], work[22], work[26], work[30])
+    out.columns.3 = SIMD4<${scalar}>(work[19], work[23], work[27], work[31])
+    return out
+}
+
+// MARK: - The inverse of a three-by-three, which the rotation is read out of.
+
+// `simd` gives no `inverse` on a three-by-three either, and a three-by-three that turns an axis over
+// has none, which is the same answer as the scale being zero: no rotation to read.
+@inlinable
+func invertedMatrix3x3(_ m: ${matrix3}) -> ${matrix3}? {
+    let determinant = simd_determinant(m)
+    guard determinant != 0, determinant.isFinite else { return nil }
+    // The adjugate over the determinant, which is the inverse: for the matrix
+    //   | a b c |   | d e f |   | g h i |
+    // the inverse's column k is the cofactors of row k transposed, over the determinant:
+    //   (ei - fh, ch - bi, bf - ce), (fg - di, ai - cg, cd - af), (dh - eg, bg - ah, ae - bd).
+    // `simd_float3x3`'s columns are (a, d, g), (b, e, h) and (c, f, i).
+    let a = m.columns.0.x, b = m.columns.1.x, c = m.columns.2.x
+    let d = m.columns.0.y, e = m.columns.1.y, f = m.columns.2.y
+    let g = m.columns.0.z, h = m.columns.1.z, i = m.columns.2.z
+    return ${matrix3}(columns: (
+        ${vector}(e * i - f * h, c * h - b * i, b * f - c * e) / determinant,
+        ${vector}(f * g - d * i, a * i - c * g, c * d - a * f) / determinant,
+        ${vector}(d * h - e * g, b * g - a * h, a * e - b * d) / determinant))
+}
+
+// MARK: - The lengths and the angles compared with a tolerance.
+
+extension ${vector} {
+    func isApproximatelyEqual(to other: ${vector}, tolerance: ${scalar}) -> Bool {
+        abs(x - other.x) < tolerance && abs(y - other.y) < tolerance && abs(z - other.z) < tolerance
+    }
+}
+
+extension SIMD4<${scalar}> {
+    func isApproximatelyEqual(to other: SIMD4<${scalar}>, tolerance: ${scalar}) -> Bool {
+        abs(x - other.x) < tolerance && abs(y - other.y) < tolerance &&
+            abs(z - other.z) < tolerance && abs(w - other.w) < tolerance
+    }
+}
+
+extension Rotation3D${suffix} {
+    func isApproximatelyEqual(to other: Rotation3D${suffix}, tolerance: ${scalar}) -> Bool {
+        vector.isApproximatelyEqual(to: other.vector, tolerance: tolerance)
+    }
+}
+
+extension Point3D${suffix} {
+    func isApproximatelyEqual(to other: Point3D${suffix}, tolerance: ${scalar}) -> Bool {
+        vector.isApproximatelyEqual(to: other.vector, tolerance: tolerance)
+    }
+}
+
+% end
+
+// MARK: - What this release's `simd` has no spelling for, once for both halves.
+
+/// The identity of a three-by-three, which `simd` names `matrix_identity_*` and which this release
+/// does not bring, so its three columns are written out.
+extension simd_float3x3 {
+    /// A three-by-three is not `Equatable` here, so its three columns are compared.
+    var isIdentity: Bool {
+        columns.0 == SIMD3<Float>(1, 0, 0) && columns.1 == SIMD3<Float>(0, 1, 0) && columns.2 == SIMD3<Float>(0, 0, 1)
+    }
+}
+
+extension simd_double3x3 {
+    /// A three-by-three is not `Equatable` here, so its three columns are compared.
+    var isIdentity: Bool {
+        columns.0 == SIMD3<Double>(1, 0, 0) && columns.1 == SIMD3<Double>(0, 1, 0) && columns.2 == SIMD3<Double>(0, 0, 1)
+    }
+}
+
+extension simd_float4x3 {
+    func isApproximatelyEqual(to other: simd_float4x3, tolerance: Float) -> Bool {
+        columns.0.isApproximatelyEqual(to: other.columns.0, tolerance: tolerance) &&
+            columns.1.isApproximatelyEqual(to: other.columns.1, tolerance: tolerance) &&
+            columns.2.isApproximatelyEqual(to: other.columns.2, tolerance: tolerance) &&
+            columns.3.isApproximatelyEqual(to: other.columns.3, tolerance: tolerance)
+    }
+}
+
+extension simd_double4x3 {
+    func isApproximatelyEqual(to other: simd_double4x3, tolerance: Double) -> Bool {
+        columns.0.isApproximatelyEqual(to: other.columns.0, tolerance: tolerance) &&
+            columns.1.isApproximatelyEqual(to: other.columns.1, tolerance: tolerance) &&
+            columns.2.isApproximatelyEqual(to: other.columns.2, tolerance: tolerance) &&
+            columns.3.isApproximatelyEqual(to: other.columns.3, tolerance: tolerance)
+    }
+}
+
+@inlinable
+func identity3x3(_ element: Float) -> simd_float3x3 {
+    simd_float3x3(columns: (SIMD3<Float>(element, 0, 0), SIMD3<Float>(0, element, 0), SIMD3<Float>(0, 0, element)))
+}
+
+@inlinable
+func identity3x3(_ element: Double) -> simd_double3x3 {
+    simd_double3x3(columns: (SIMD3<Double>(element, 0, 0), SIMD3<Double>(0, element, 0), SIMD3<Double>(0, 0, element)))
+}
+
+/// The column `SPAxis` names, or `nil` for a set of axes that names no single one.
+func indexOfFlip(_ axis: Axis3D) -> Int? {
+    switch axis {
+    case .x: return 0
+    case .y: return 1
+    case .z: return 2
+    default: return nil
+    }
+}
+
+// `simd_mul` of a four-by-four and a four-wide vector gives four components; the framework's headers
+// take the first three. This release's SIMD4 has no `xyz` to say so with, and adding one collides
+// with what the `simd` module already declares, so the two helpers stand in for it.
+@inlinable
+func first3(_ v: simd_double4) -> simd_double3 { simd_double3(v.x, v.y, v.z) }
+
+@inlinable
+func first3(_ v: simd_float4) -> simd_float3 { simd_float3(v.x, v.y, v.z) }
+
+// `simd_floor` and `simd_ceil` over a vector are not here either, and the headers take them per
+// component, so they are written out.
+@inlinable
+func floor3(_ v: simd_double3) -> simd_double3 { simd_double3(Darwin.floor(v.x), Darwin.floor(v.y), Darwin.floor(v.z)) }
+
+@inlinable
+func floor3(_ v: simd_float3) -> simd_float3 { simd_float3(Darwin.floorf(v.x), Darwin.floorf(v.y), Darwin.floorf(v.z)) }
+
+@inlinable
+func ceil3(_ v: simd_double3) -> simd_double3 { simd_double3(Darwin.ceil(v.x), Darwin.ceil(v.y), Darwin.ceil(v.z)) }
+
+@inlinable
+func ceil3(_ v: simd_float3) -> simd_float3 { simd_float3(Darwin.ceilf(v.x), Darwin.ceilf(v.y), Darwin.ceilf(v.z)) }

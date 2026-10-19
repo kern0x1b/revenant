@@ -1,0 +1,1210 @@
+# inputs: class-overlap.tsv 12920bf9; corpus 8a111fcf; headers 3f4968af
+class	real-stack	in-closure	reason	emit
+MTRAccessControlClusterAccessControlEntryChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterAccessControlEntryStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterAccessControlExtensionChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterAccessControlExtensionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterAccessControlTargetStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterAccessRestrictionEntryStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterAccessRestrictionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterCommissioningAccessRestrictionEntryStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterFabricRestrictionReviewUpdateEvent	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterReviewFabricRestrictionsParams	yes	yes	root: corpus class row, not provisional	no
+MTRAccessControlClusterReviewFabricRestrictionsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRAccountLoginClusterGetSetupPINParams	yes	yes	root: corpus class row, not provisional	no
+MTRAccountLoginClusterGetSetupPINResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRAccountLoginClusterLoggedOutEvent	yes	yes	root: corpus class row, not provisional	no
+MTRAccountLoginClusterLoginParams	yes	yes	root: corpus class row, not provisional	no
+MTRAccountLoginClusterLogoutParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterActionFailedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterActionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterDisableActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterDisableActionWithDurationParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterEnableActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterEnableActionWithDurationParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterEndpointListStruct	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterInstantActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterInstantActionWithTransitionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterPauseActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterPauseActionWithDurationParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterResumeActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterStartActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterStartActionWithDurationParams	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterStateChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRActionsClusterStopActionParams	yes	yes	root: corpus class row, not provisional	no
+MTRActivatedCarbonFilterMonitoringClusterReplacementProductStruct	yes	yes	root: corpus class row, not provisional	no
+MTRActivatedCarbonFilterMonitoringClusterResetConditionParams	yes	yes	root: corpus class row, not provisional	no
+MTRAdministratorCommissioningClusterOpenBasicCommissioningWindowParams	yes	yes	root: corpus class row, not provisional	no
+MTRAdministratorCommissioningClusterOpenCommissioningWindowParams	yes	yes	root: corpus class row, not provisional	no
+MTRAdministratorCommissioningClusterRevokeCommissioningParams	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationBasicClusterApplicationStruct	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationLauncherClusterApplicationEPStruct	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationLauncherClusterApplicationStruct	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationLauncherClusterHideAppParams	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationLauncherClusterLaunchAppParams	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationLauncherClusterLauncherResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRApplicationLauncherClusterStopAppParams	yes	yes	root: corpus class row, not provisional	no
+MTRAudioOutputClusterOutputInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRAudioOutputClusterRenameOutputParams	yes	yes	root: corpus class row, not provisional	no
+MTRAudioOutputClusterSelectOutputParams	yes	yes	root: corpus class row, not provisional	no
+MTRBarrierControlClusterBarrierControlGoToPercentParams	yes	yes	root: corpus class row, not provisional	no
+MTRBarrierControlClusterBarrierControlStopParams	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterAccessControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterAccountLogin	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterActions	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterActivatedCarbonFilterMonitoring	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterAdministratorCommissioning	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterAirQuality	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterAppleDeviceInformation	no	no	none	no
+MTRBaseClusterAppleLockCluster	no	no	none	no
+MTRBaseClusterApplicationBasic	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterApplicationLauncher	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterAudioOutput	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBallastConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBasic	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBasicInformation	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBinding	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBooleanState	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBooleanStateConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBridgedDeviceBasic	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterBridgedDeviceBasicInformation	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterCameraAVSettingsUserLevelManagement	yes	no	none	no
+MTRBaseClusterCameraAVStreamManagement	yes	no	none	no
+MTRBaseClusterCarbonDioxideConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterCarbonMonoxideConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterChannel	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterChime	yes	no	none	no
+MTRBaseClusterClosureControl	yes	no	none	no
+MTRBaseClusterClosureDimension	yes	no	none	no
+MTRBaseClusterColorControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterCommissionerControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterCommodityMetering	yes	no	none	no
+MTRBaseClusterCommodityPrice	yes	no	none	no
+MTRBaseClusterCommodityTariff	yes	no	none	no
+MTRBaseClusterContentAppObserver	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterContentControl	yes	no	none	no
+MTRBaseClusterContentLauncher	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDescriptor	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDeviceEnergyManagement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDeviceEnergyManagementMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDiagnosticLogs	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDishwasherAlarm	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDishwasherMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterDoorLock	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterEcosystemInformation	yes	no	none	no
+MTRBaseClusterElectricalEnergyMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterElectricalGridConditions	yes	no	none	no
+MTRBaseClusterElectricalPowerMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterEnergyEVSE	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterEnergyEVSEMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterEnergyPreference	yes	no	none	no
+MTRBaseClusterEthernetNetworkDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterFanControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterFixedLabel	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterFlowMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterFormaldehydeConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterGeneralCommissioning	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterGeneralDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterGroupKeyManagement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterGroupcast	yes	no	none	no
+MTRBaseClusterGroups	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterHEPAFilterMonitoring	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterICDManagement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterIdentify	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterIlluminanceMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterJointFabricAdministrator	yes	no	none	no
+MTRBaseClusterJointFabricDatastore	yes	no	none	no
+MTRBaseClusterKeypadInput	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterLaundryDryerControls	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterLaundryWasherControls	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterLaundryWasherMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterLevelControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterLocalizationConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterLowPower	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterMediaInput	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterMediaPlayback	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterMessages	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterMeterIdentification	yes	no	none	no
+MTRBaseClusterMicrowaveOvenControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterMicrowaveOvenMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterModeSelect	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterNetworkCommissioning	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterNitrogenDioxideConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOTASoftwareUpdateProvider	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOTASoftwareUpdateRequestor	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOccupancySensing	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOnOff	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOperationalCredentials	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOperationalState	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOvenCavityOperationalState	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOvenMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterOzoneConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPM10ConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPM1ConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPM25ConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPowerSource	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPowerSourceConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPowerTopology	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPressureMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPulseWidthModulation	yes	no	none	no
+MTRBaseClusterPumpConfigurationAndControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterPushAVStreamTransport	yes	no	none	no
+MTRBaseClusterRVCCleanMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterRVCOperationalState	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterRVCRunMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterRadonConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterRefrigeratorAlarm	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterRefrigeratorAndTemperatureControlledCabinetMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterRelativeHumidityMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterSampleMEI	yes	no	none	no
+MTRBaseClusterScenesManagement	yes	no	none	no
+MTRBaseClusterServiceArea	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterSmokeCOAlarm	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterSoftwareDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterSoilMeasurement	yes	no	none	no
+MTRBaseClusterSwitch	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTLSCertificateManagement	yes	no	none	no
+MTRBaseClusterTLSClientManagement	yes	no	none	no
+MTRBaseClusterTargetNavigator	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTemperatureControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTemperatureMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTestCluster	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterThermostat	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterThermostatUserInterfaceConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterThreadBorderRouterManagement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterThreadNetworkDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterThreadNetworkDirectory	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTimeFormatLocalization	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTimeSynchronization	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterTimer	no	no	none	no
+MTRBaseClusterTotalVolatileOrganicCompoundsConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterUnitLocalization	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterUnitTesting	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterUserLabel	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterValveConfigurationAndControl	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterWakeOnLAN	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterWaterHeaterManagement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterWaterHeaterMode	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterWebRTCTransportProvider	yes	no	none	no
+MTRBaseClusterWebRTCTransportRequestor	yes	no	none	no
+MTRBaseClusterWiFiNetworkDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterWiFiNetworkManagement	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterWindowCovering	yes	yes	root: corpus class row, not provisional	no
+MTRBaseClusterZoneManagement	yes	no	none	no
+MTRBasicClusterCapabilityMinimaStruct	yes	yes	root: corpus class row, not provisional	no
+MTRBasicClusterLeaveEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicClusterMfgSpecificPingParams	yes	yes	root: corpus class row, not provisional	no
+MTRBasicClusterReachableChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicClusterShutDownEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicClusterStartUpEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicInformationClusterCapabilityMinimaStruct	yes	yes	root: corpus class row, not provisional	no
+MTRBasicInformationClusterLeaveEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicInformationClusterProductAppearanceStruct	yes	yes	root: corpus class row, not provisional	no
+MTRBasicInformationClusterReachableChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicInformationClusterShutDownEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBasicInformationClusterStartUpEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBindingClusterTargetStruct	yes	yes	root: corpus class row, not provisional	no
+MTRBooleanStateClusterStateChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBooleanStateConfigurationClusterAlarmsStateChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBooleanStateConfigurationClusterEnableDisableAlarmParams	yes	yes	root: corpus class row, not provisional	no
+MTRBooleanStateConfigurationClusterSensorFaultEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBooleanStateConfigurationClusterSuppressAlarmParams	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicClusterLeaveEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicClusterReachableChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicClusterShutDownEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicClusterStartUpEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterActiveChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterKeepActiveParams	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterLeaveEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterProductAppearanceStruct	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterReachableChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterShutDownEvent	yes	yes	root: corpus class row, not provisional	no
+MTRBridgedDeviceBasicInformationClusterStartUpEvent	yes	yes	root: corpus class row, not provisional	no
+MTRCameraAVSettingsUserLevelManagementClusterDPTZRelativeMoveParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterDPTZSetViewportParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterDPTZStruct	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZMoveToPresetParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZPresetStruct	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZRelativeMoveParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZRemovePresetParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZSavePresetParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZSetPositionParams	yes	no	none	no
+MTRCameraAVSettingsUserLevelManagementClusterMPTZStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterAudioCapabilitiesStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterAudioStreamAllocateParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterAudioStreamAllocateResponseParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterAudioStreamDeallocateParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterAudioStreamStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterCaptureSnapshotParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterCaptureSnapshotResponseParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterRateDistortionTradeOffPointsStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterSetStreamPrioritiesParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterSnapshotCapabilitiesStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterSnapshotStreamAllocateParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterSnapshotStreamAllocateResponseParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterSnapshotStreamDeallocateParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterSnapshotStreamModifyParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterSnapshotStreamStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoResolutionStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoSensorParamsStruct	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoStreamAllocateParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoStreamAllocateResponseParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoStreamDeallocateParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoStreamModifyParams	yes	no	none	no
+MTRCameraAVStreamManagementClusterVideoStreamStruct	yes	no	none	no
+MTRChannelClusterAdditionalInfoStruct	yes	no	none	no
+MTRChannelClusterCancelRecordProgramParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterChangeChannelByNumberParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterChangeChannelParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterChangeChannelResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterChannelInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterChannelPagingStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterGetProgramGuideParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterLineupInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterPageTokenStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterProgramCastStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterProgramCategoryStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterProgramGuideResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterProgramStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterRecordProgramParams	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterSeriesInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRChannelClusterSkipChannelParams	yes	yes	root: corpus class row, not provisional	no
+MTRChimeClusterChimeSoundStruct	yes	no	none	no
+MTRChimeClusterPlayChimeSoundParams	yes	no	none	no
+MTRClosureControlClusterCalibrateParams	yes	no	none	no
+MTRClosureControlClusterEngageStateChangedEvent	yes	no	none	no
+MTRClosureControlClusterMoveToParams	yes	no	none	no
+MTRClosureControlClusterMovementCompletedEvent	yes	no	none	no
+MTRClosureControlClusterOperationalErrorEvent	yes	no	none	no
+MTRClosureControlClusterOverallCurrentStateStruct	yes	no	none	no
+MTRClosureControlClusterOverallTargetStateStruct	yes	no	none	no
+MTRClosureControlClusterSecureStateChangedEvent	yes	no	none	no
+MTRClosureControlClusterStopParams	yes	no	none	no
+MTRClosureDimensionClusterDimensionStateStruct	yes	no	none	no
+MTRClosureDimensionClusterRangePercent100thsStruct	yes	no	none	no
+MTRClosureDimensionClusterSetTargetParams	yes	no	none	no
+MTRClosureDimensionClusterStepParams	yes	no	none	no
+MTRClosureDimensionClusterUnitRangeStruct	yes	no	none	no
+MTRCluster	yes	yes	root: corpus class row, not provisional	no
+MTRClusterAccessControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterAccountLogin	yes	yes	root: corpus class row, not provisional	no
+MTRClusterActions	yes	yes	root: corpus class row, not provisional	no
+MTRClusterActivatedCarbonFilterMonitoring	yes	yes	root: corpus class row, not provisional	no
+MTRClusterAdministratorCommissioning	yes	yes	root: corpus class row, not provisional	no
+MTRClusterAirQuality	yes	yes	root: corpus class row, not provisional	no
+MTRClusterAppleDeviceInformation	no	no	none	no
+MTRClusterAppleLockCluster	no	no	none	no
+MTRClusterApplicationBasic	yes	yes	root: corpus class row, not provisional	no
+MTRClusterApplicationLauncher	yes	yes	root: corpus class row, not provisional	no
+MTRClusterAudioOutput	yes	yes	root: corpus class row, not provisional	no
+MTRClusterBallastConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRClusterBasicInformation	yes	yes	root: corpus class row, not provisional	no
+MTRClusterBinding	yes	yes	root: corpus class row, not provisional	no
+MTRClusterBooleanState	yes	yes	root: corpus class row, not provisional	no
+MTRClusterBooleanStateConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRClusterBridgedDeviceBasicInformation	yes	yes	root: corpus class row, not provisional	no
+MTRClusterCameraAVSettingsUserLevelManagement	yes	no	none	no
+MTRClusterCameraAVStreamManagement	yes	no	none	no
+MTRClusterCarbonDioxideConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterCarbonMonoxideConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterChannel	yes	yes	root: corpus class row, not provisional	no
+MTRClusterChime	yes	no	none	no
+MTRClusterClosureControl	yes	no	none	no
+MTRClusterClosureDimension	yes	no	none	no
+MTRClusterColorControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterCommissionerControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterCommodityMetering	yes	no	none	no
+MTRClusterCommodityPrice	yes	no	none	no
+MTRClusterCommodityTariff	yes	no	none	no
+MTRClusterContentAppObserver	yes	yes	root: corpus class row, not provisional	no
+MTRClusterContentControl	yes	no	none	no
+MTRClusterContentLauncher	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDescriptor	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDeviceEnergyManagement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDeviceEnergyManagementMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDiagnosticLogs	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDishwasherAlarm	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDishwasherMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterDoorLock	yes	yes	root: corpus class row, not provisional	no
+MTRClusterEcosystemInformation	yes	no	none	no
+MTRClusterElectricalEnergyMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterElectricalGridConditions	yes	no	none	no
+MTRClusterElectricalPowerMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterEnergyEVSE	yes	yes	root: corpus class row, not provisional	no
+MTRClusterEnergyEVSEMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterEnergyPreference	yes	no	none	no
+MTRClusterEthernetNetworkDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRClusterFanControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterFixedLabel	yes	yes	root: corpus class row, not provisional	no
+MTRClusterFlowMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterFormaldehydeConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterGeneralCommissioning	yes	yes	root: corpus class row, not provisional	no
+MTRClusterGeneralDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRClusterGroupKeyManagement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterGroupcast	yes	no	none	no
+MTRClusterGroups	yes	yes	root: corpus class row, not provisional	no
+MTRClusterHEPAFilterMonitoring	yes	yes	root: corpus class row, not provisional	no
+MTRClusterICDManagement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterIdentify	yes	yes	root: corpus class row, not provisional	no
+MTRClusterIlluminanceMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterJointFabricAdministrator	yes	no	none	no
+MTRClusterJointFabricDatastore	yes	no	none	no
+MTRClusterKeypadInput	yes	yes	root: corpus class row, not provisional	no
+MTRClusterLaundryDryerControls	yes	yes	root: corpus class row, not provisional	no
+MTRClusterLaundryWasherControls	yes	yes	root: corpus class row, not provisional	no
+MTRClusterLaundryWasherMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterLevelControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterLocalizationConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRClusterLowPower	yes	yes	root: corpus class row, not provisional	no
+MTRClusterMediaInput	yes	yes	root: corpus class row, not provisional	no
+MTRClusterMediaPlayback	yes	yes	root: corpus class row, not provisional	no
+MTRClusterMessages	yes	yes	root: corpus class row, not provisional	no
+MTRClusterMeterIdentification	yes	no	none	no
+MTRClusterMicrowaveOvenControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterMicrowaveOvenMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterModeSelect	yes	yes	root: corpus class row, not provisional	no
+MTRClusterNetworkCommissioning	yes	yes	root: corpus class row, not provisional	no
+MTRClusterNitrogenDioxideConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOTASoftwareUpdateProvider	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOTASoftwareUpdateRequestor	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOccupancySensing	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOnOff	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOperationalCredentials	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOperationalState	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOvenCavityOperationalState	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOvenMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterOzoneConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPM10ConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPM1ConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPM25ConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPowerSource	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPowerSourceConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPowerTopology	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPressureMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPulseWidthModulation	yes	no	none	no
+MTRClusterPumpConfigurationAndControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterPushAVStreamTransport	yes	no	none	no
+MTRClusterRVCCleanMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterRVCOperationalState	yes	yes	root: corpus class row, not provisional	no
+MTRClusterRVCRunMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterRadonConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterRefrigeratorAlarm	yes	yes	root: corpus class row, not provisional	no
+MTRClusterRefrigeratorAndTemperatureControlledCabinetMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterRelativeHumidityMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterSampleMEI	yes	no	none	no
+MTRClusterScenesManagement	yes	no	none	no
+MTRClusterServiceArea	yes	yes	root: corpus class row, not provisional	no
+MTRClusterSmokeCOAlarm	yes	yes	root: corpus class row, not provisional	no
+MTRClusterSoftwareDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRClusterSoilMeasurement	yes	no	none	no
+MTRClusterSwitch	yes	yes	root: corpus class row, not provisional	no
+MTRClusterTLSCertificateManagement	yes	no	none	no
+MTRClusterTLSClientManagement	yes	no	none	no
+MTRClusterTargetNavigator	yes	yes	root: corpus class row, not provisional	no
+MTRClusterTemperatureControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterTemperatureMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterThermostat	yes	yes	root: corpus class row, not provisional	no
+MTRClusterThermostatUserInterfaceConfiguration	yes	yes	root: corpus class row, not provisional	no
+MTRClusterThreadBorderRouterManagement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterThreadNetworkDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRClusterThreadNetworkDirectory	yes	yes	root: corpus class row, not provisional	no
+MTRClusterTimeFormatLocalization	yes	yes	root: corpus class row, not provisional	no
+MTRClusterTimeSynchronization	yes	yes	root: corpus class row, not provisional	no
+MTRClusterTimer	no	no	none	no
+MTRClusterTotalVolatileOrganicCompoundsConcentrationMeasurement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterUnitLocalization	yes	yes	root: corpus class row, not provisional	no
+MTRClusterUnitTesting	yes	yes	root: corpus class row, not provisional	no
+MTRClusterUserLabel	yes	yes	root: corpus class row, not provisional	no
+MTRClusterValveConfigurationAndControl	yes	yes	root: corpus class row, not provisional	no
+MTRClusterWakeOnLAN	yes	yes	root: corpus class row, not provisional	no
+MTRClusterWaterHeaterManagement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterWaterHeaterMode	yes	yes	root: corpus class row, not provisional	no
+MTRClusterWebRTCTransportProvider	yes	no	none	no
+MTRClusterWebRTCTransportRequestor	yes	no	none	no
+MTRClusterWiFiNetworkDiagnostics	yes	yes	root: corpus class row, not provisional	no
+MTRClusterWiFiNetworkManagement	yes	yes	root: corpus class row, not provisional	no
+MTRClusterWindowCovering	yes	yes	root: corpus class row, not provisional	no
+MTRClusterZoneManagement	yes	no	none	no
+MTRColorControlClusterColorLoopSetParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterEnhancedMoveHueParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterEnhancedMoveToHueAndSaturationParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterEnhancedMoveToHueParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterEnhancedStepHueParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveColorParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveColorTemperatureParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveHueParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveSaturationParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveToColorParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveToColorTemperatureParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveToHueAndSaturationParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveToHueParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterMoveToSaturationParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterStepColorParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterStepColorTemperatureParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterStepHueParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterStepSaturationParams	yes	yes	root: corpus class row, not provisional	no
+MTRColorControlClusterStopMoveStepParams	yes	yes	root: corpus class row, not provisional	no
+MTRCommissionerControlClusterCommissionNodeParams	yes	yes	root: corpus class row, not provisional	no
+MTRCommissionerControlClusterCommissioningRequestResultEvent	yes	yes	root: corpus class row, not provisional	no
+MTRCommissionerControlClusterRequestCommissioningApprovalParams	yes	yes	root: corpus class row, not provisional	no
+MTRCommissionerControlClusterReverseOpenCommissioningWindowParams	yes	yes	root: corpus class row, not provisional	no
+MTRCommodityMeteringClusterMeteredQuantityStruct	yes	no	none	no
+MTRCommodityPriceClusterCommodityPriceComponentStruct	yes	no	none	no
+MTRCommodityPriceClusterCommodityPriceStruct	yes	no	none	no
+MTRCommodityPriceClusterGetDetailedForecastRequestParams	yes	no	none	no
+MTRCommodityPriceClusterGetDetailedForecastResponseParams	yes	no	none	no
+MTRCommodityPriceClusterGetDetailedPriceRequestParams	yes	no	none	no
+MTRCommodityPriceClusterGetDetailedPriceResponseParams	yes	no	none	no
+MTRCommodityPriceClusterPriceChangeEvent	yes	no	none	no
+MTRCommodityTariffClusterAuxiliaryLoadSwitchSettingsStruct	yes	no	none	no
+MTRCommodityTariffClusterCalendarPeriodStruct	yes	no	none	no
+MTRCommodityTariffClusterDayEntryStruct	yes	no	none	no
+MTRCommodityTariffClusterDayPatternStruct	yes	no	none	no
+MTRCommodityTariffClusterDayStruct	yes	no	none	no
+MTRCommodityTariffClusterGetDayEntryParams	yes	no	none	no
+MTRCommodityTariffClusterGetDayEntryResponseParams	yes	no	none	no
+MTRCommodityTariffClusterGetTariffComponentParams	yes	no	none	no
+MTRCommodityTariffClusterGetTariffComponentResponseParams	yes	no	none	no
+MTRCommodityTariffClusterPeakPeriodStruct	yes	no	none	no
+MTRCommodityTariffClusterTariffComponentStruct	yes	no	none	no
+MTRCommodityTariffClusterTariffInformationStruct	yes	no	none	no
+MTRCommodityTariffClusterTariffPeriodStruct	yes	no	none	no
+MTRCommodityTariffClusterTariffPriceStruct	yes	no	none	no
+MTRContentAppObserverClusterContentAppMessageParams	yes	yes	root: corpus class row, not provisional	no
+MTRContentAppObserverClusterContentAppMessageResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRContentControlClusterAddBonusTimeParams	yes	no	none	no
+MTRContentControlClusterBlockUnratedContentParams	yes	no	none	no
+MTRContentControlClusterDisableParams	yes	no	none	no
+MTRContentControlClusterEnableParams	yes	no	none	no
+MTRContentControlClusterRatingNameStruct	yes	no	none	no
+MTRContentControlClusterRemainingScreenTimeExpiredEvent	yes	no	none	no
+MTRContentControlClusterResetPINParams	yes	no	none	no
+MTRContentControlClusterResetPINResponseParams	yes	no	none	no
+MTRContentControlClusterSetOnDemandRatingThresholdParams	yes	no	none	no
+MTRContentControlClusterSetScheduledContentRatingThresholdParams	yes	no	none	no
+MTRContentControlClusterSetScreenDailyTimeParams	yes	no	none	no
+MTRContentControlClusterUnblockUnratedContentParams	yes	no	none	no
+MTRContentControlClusterUpdatePINParams	yes	no	none	no
+MTRContentLauncherClusterAdditionalInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterBrandingInformationStruct	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterContentSearchStruct	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterDimensionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterLaunchContentParams	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterLaunchResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterLaunchURLParams	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterLauncherResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterParameterStruct	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterPlaybackPreferencesStruct	yes	no	none	no
+MTRContentLauncherClusterStyleInformationStruct	yes	yes	root: corpus class row, not provisional	no
+MTRContentLauncherClusterTrackPreferenceStruct	yes	no	none	no
+MTRControllerFactoryParams	yes	yes	root: corpus class row, not provisional	no
+MTRDataTypeAtomicAttributeStatusStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDataTypeCurrencyStruct	yes	no	none	no
+MTRDataTypeICECandidateStruct	yes	no	none	no
+MTRDataTypeICEServerStruct	yes	no	none	no
+MTRDataTypeLocationDescriptorStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDataTypeMeasurementAccuracyRangeStruct	yes	no	none	no
+MTRDataTypeMeasurementAccuracyStruct	yes	no	none	no
+MTRDataTypePowerThresholdStruct	yes	no	none	no
+MTRDataTypePriceStruct	yes	no	none	no
+MTRDataTypeSemanticTagStruct	yes	no	none	no
+MTRDataTypeTestGlobalStruct	yes	no	none	no
+MTRDataTypeViewportStruct	yes	no	none	no
+MTRDataTypeWebRTCSessionStruct	yes	no	none	no
+MTRDescriptorClusterDeviceTypeStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceControllerFactoryParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceControllerStartupParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterCancelPowerAdjustRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterCancelRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterConstraintsStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterCostStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterForecastStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterModifyForecastRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPauseRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPausedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPowerAdjustCapabilityStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPowerAdjustEndEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPowerAdjustRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPowerAdjustStartEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterPowerAdjustStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterRequestConstraintBasedForecastParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterResumeRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterResumedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterSlotAdjustmentStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterSlotStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementClusterStartTimeAdjustRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDeviceEnergyManagementModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDiagnosticLogsClusterRetrieveLogsRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRDiagnosticLogsClusterRetrieveLogsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherAlarmClusterModifyEnabledAlarmsParams	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherAlarmClusterNotifyEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherAlarmClusterResetParams	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDishwasherModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterAppleAliroCredentialStruct	no	no	none	no
+MTRDoorLockClusterAppleAliroLockOperationErrorEvent	no	no	none	no
+MTRDoorLockClusterAppleAliroLockOperationEvent	no	no	none	no
+MTRDoorLockClusterAppleAliroLockUserChangeEvent	no	no	none	no
+MTRDoorLockClusterAppleClearAliroCredentialParams	no	no	none	no
+MTRDoorLockClusterAppleClearAliroReaderConfigParams	no	no	none	no
+MTRDoorLockClusterAppleGetAliroCredentialStatusParams	no	no	none	no
+MTRDoorLockClusterAppleSetAliroCredentialParams	no	no	none	no
+MTRDoorLockClusterAppleSetAliroReaderConfigParams	no	no	none	no
+MTRDoorLockClusterClearAliroReaderConfigParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterClearCredentialParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterClearHolidayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterClearUserParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterClearWeekDayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterClearYearDayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterCredentialStruct	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterDoorLockAlarmEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterDoorStateChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetCredentialStatusParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetCredentialStatusResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetHolidayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetHolidayScheduleResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetUserParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetUserResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetWeekDayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetWeekDayScheduleResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetYearDayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterGetYearDayScheduleResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterLockDoorParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterLockOperationErrorEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterLockOperationEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterLockUserChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetAliroReaderConfigParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetCredentialParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetCredentialResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetHolidayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetUserParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetWeekDayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterSetYearDayScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterUnboltDoorParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterUnlockDoorParams	yes	yes	root: corpus class row, not provisional	no
+MTRDoorLockClusterUnlockWithTimeoutParams	yes	yes	root: corpus class row, not provisional	no
+MTREcosystemInformationClusterDeviceTypeStruct	yes	no	none	no
+MTREcosystemInformationClusterEcosystemDeviceStruct	yes	no	none	no
+MTREcosystemInformationClusterEcosystemLocationStruct	yes	no	none	no
+MTRElectricalEnergyMeasurementClusterCumulativeEnergyMeasuredEvent	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalEnergyMeasurementClusterCumulativeEnergyResetStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalEnergyMeasurementClusterEnergyMeasurementStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalEnergyMeasurementClusterMeasurementAccuracyRangeStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalEnergyMeasurementClusterMeasurementAccuracyStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalEnergyMeasurementClusterPeriodicEnergyMeasuredEvent	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalGridConditionsClusterCurrentConditionsChangedEvent	yes	no	none	no
+MTRElectricalGridConditionsClusterElectricalGridConditionsStruct	yes	no	none	no
+MTRElectricalMeasurementClusterGetMeasurementProfileCommandParams	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalMeasurementClusterGetMeasurementProfileResponseCommandParams	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalMeasurementClusterGetProfileInfoCommandParams	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalMeasurementClusterGetProfileInfoResponseCommandParams	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalPowerMeasurementClusterHarmonicMeasurementStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalPowerMeasurementClusterMeasurementAccuracyRangeStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalPowerMeasurementClusterMeasurementAccuracyStruct	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalPowerMeasurementClusterMeasurementPeriodRangesEvent	yes	yes	root: corpus class row, not provisional	no
+MTRElectricalPowerMeasurementClusterMeasurementRangeStruct	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterChargingTargetScheduleStruct	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterChargingTargetStruct	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterClearTargetsParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterDisableParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterEVConnectedEvent	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterEVNotDetectedEvent	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterEnableChargingParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterEnableDischargingParams	yes	no	none	no
+MTREnergyEVSEClusterEnergyTransferStartedEvent	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterEnergyTransferStoppedEvent	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterFaultEvent	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterGetTargetsParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterGetTargetsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterRFIDEvent	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterSetTargetsParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEClusterStartDiagnosticsParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTREnergyEVSEModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTREnergyPreferenceClusterBalanceStruct	yes	no	none	no
+MTREthernetNetworkDiagnosticsClusterResetCountsParams	yes	yes	root: corpus class row, not provisional	no
+MTRFanControlClusterStepParams	yes	yes	root: corpus class row, not provisional	no
+MTRFixedLabelClusterLabelStruct	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterArmFailSafeParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterArmFailSafeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterCommissioningCompleteParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterCommissioningCompleteResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterSetRegulatoryConfigParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterSetRegulatoryConfigResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralCommissioningClusterSetTCAcknowledgementsParams	yes	no	none	no
+MTRGeneralCommissioningClusterSetTCAcknowledgementsResponseParams	yes	no	none	no
+MTRGeneralDiagnosticsClusterBootReasonEvent	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterHardwareFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterNetworkFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterPayloadTestRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterPayloadTestResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterRadioFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterTestEventTriggerParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterTimeSnapshotParams	yes	yes	root: corpus class row, not provisional	no
+MTRGeneralDiagnosticsClusterTimeSnapshotResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGenericBaseCluster	yes	yes	root: corpus class row, not provisional	no
+MTRGenericCluster	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterGroupInfoMapStruct	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterGroupKeyMapStruct	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterGroupKeySetStruct	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterKeySetReadAllIndicesParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterKeySetReadAllIndicesResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterKeySetReadParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterKeySetReadResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterKeySetRemoveParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupKeyManagementClusterKeySetWriteParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupcastClusterConfigureAuxiliaryACLParams	yes	no	none	no
+MTRGroupcastClusterExpireGracePeriodParams	no	no	none	no
+MTRGroupcastClusterJoinGroupParams	yes	no	none	no
+MTRGroupcastClusterLeaveGroupParams	yes	no	none	no
+MTRGroupcastClusterLeaveGroupResponseParams	yes	no	none	no
+MTRGroupcastClusterMembershipStruct	yes	no	none	no
+MTRGroupcastClusterUpdateGroupKeyParams	yes	no	none	no
+MTRGroupsClusterAddGroupIfIdentifyingParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterAddGroupParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterAddGroupResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterGetGroupMembershipParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterGetGroupMembershipResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterRemoveAllGroupsParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterRemoveGroupParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterRemoveGroupResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterViewGroupParams	yes	yes	root: corpus class row, not provisional	no
+MTRGroupsClusterViewGroupResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRHEPAFilterMonitoringClusterReplacementProductStruct	yes	yes	root: corpus class row, not provisional	no
+MTRHEPAFilterMonitoringClusterResetConditionParams	yes	yes	root: corpus class row, not provisional	no
+MTRICDManagementClusterMonitoringRegistrationStruct	yes	yes	root: corpus class row, not provisional	no
+MTRICDManagementClusterRegisterClientParams	yes	yes	root: corpus class row, not provisional	no
+MTRICDManagementClusterRegisterClientResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRICDManagementClusterStayActiveRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRICDManagementClusterStayActiveResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRICDManagementClusterUnregisterClientParams	yes	yes	root: corpus class row, not provisional	no
+MTRIdentifyClusterIdentifyParams	yes	yes	root: corpus class row, not provisional	no
+MTRIdentifyClusterTriggerEffectParams	yes	yes	root: corpus class row, not provisional	no
+MTRJointFabricAdministratorClusterAddICACParams	yes	no	none	no
+MTRJointFabricAdministratorClusterAnnounceJointFabricAdministratorParams	yes	no	none	no
+MTRJointFabricAdministratorClusterICACCSRRequestParams	yes	no	none	no
+MTRJointFabricAdministratorClusterICACCSRResponseParams	yes	no	none	no
+MTRJointFabricAdministratorClusterICACResponseParams	yes	no	none	no
+MTRJointFabricAdministratorClusterOpenJointCommissioningWindowParams	yes	no	none	no
+MTRJointFabricAdministratorClusterTransferAnchorCompleteParams	yes	no	none	no
+MTRJointFabricAdministratorClusterTransferAnchorRequestParams	yes	no	none	no
+MTRJointFabricAdministratorClusterTransferAnchorResponseParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddACLToNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddAdminParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddBindingToEndpointForNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddGroupIDToEndpointForNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddGroupParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddKeySetParams	yes	no	none	no
+MTRJointFabricDatastoreClusterAddPendingNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreACLEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreAccessControlEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreAccessControlTargetStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreAdministratorInformationEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreBindingTargetStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreEndpointBindingEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreEndpointEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreEndpointGroupIDEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreGroupInformationEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreGroupKeySetStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreNodeInformationEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreNodeKeySetEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterDatastoreStatusEntryStruct	yes	no	none	no
+MTRJointFabricDatastoreClusterRefreshNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveACLFromNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveAdminParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveBindingFromEndpointForNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveGroupIDFromEndpointForNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveGroupParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveKeySetParams	yes	no	none	no
+MTRJointFabricDatastoreClusterRemoveNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterUpdateAdminParams	yes	no	none	no
+MTRJointFabricDatastoreClusterUpdateEndpointForNodeParams	yes	no	none	no
+MTRJointFabricDatastoreClusterUpdateGroupParams	yes	no	none	no
+MTRJointFabricDatastoreClusterUpdateKeySetParams	yes	no	none	no
+MTRJointFabricDatastoreClusterUpdateNodeParams	yes	no	none	no
+MTRKeypadInputClusterSendKeyParams	yes	yes	root: corpus class row, not provisional	no
+MTRKeypadInputClusterSendKeyResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRLaundryWasherModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRLaundryWasherModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRLaundryWasherModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRLaundryWasherModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterMoveParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterMoveToClosestFrequencyParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterMoveToLevelParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterMoveToLevelWithOnOffParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterMoveWithOnOffParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterStepParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterStepWithOnOffParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterStopParams	yes	yes	root: corpus class row, not provisional	no
+MTRLevelControlClusterStopWithOnOffParams	yes	yes	root: corpus class row, not provisional	no
+MTRLowPowerClusterSleepParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaInputClusterHideInputStatusParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaInputClusterInputInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRMediaInputClusterRenameInputParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaInputClusterSelectInputParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaInputClusterShowInputStatusParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterActivateAudioTrackParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterActivateTextTrackParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterDeactivateTextTrackParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterFastForwardParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterNextParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterPauseParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterPlayParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterPlaybackPositionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterPlaybackResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterPreviousParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterRewindParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterSeekParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterSkipBackwardParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterSkipForwardParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterStartOverParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterStateChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterStopParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterStopPlaybackParams	yes	yes	root: corpus class row, not provisional	no
+MTRMediaPlaybackClusterTrackAttributesStruct	yes	no	none	no
+MTRMediaPlaybackClusterTrackStruct	yes	no	none	no
+MTRMessagesClusterCancelMessagesRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRMessagesClusterMessageCompleteEvent	yes	yes	root: corpus class row, not provisional	no
+MTRMessagesClusterMessagePresentedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRMessagesClusterMessageQueuedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRMessagesClusterMessageResponseOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRMessagesClusterMessageStruct	yes	yes	root: corpus class row, not provisional	no
+MTRMessagesClusterPresentMessagesRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRMicrowaveOvenControlClusterAddMoreTimeParams	yes	yes	root: corpus class row, not provisional	no
+MTRMicrowaveOvenControlClusterSetCookingParametersParams	yes	yes	root: corpus class row, not provisional	no
+MTRMicrowaveOvenModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRMicrowaveOvenModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRModeSelectClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRModeSelectClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRModeSelectClusterSemanticTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterAddOrUpdateThreadNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterAddOrUpdateWiFiNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterConnectNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterConnectNetworkResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterNetworkConfigResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterNetworkInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterQueryIdentityParams	yes	no	none	no
+MTRNetworkCommissioningClusterQueryIdentityResponseParams	yes	no	none	no
+MTRNetworkCommissioningClusterRemoveNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterReorderNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterScanNetworksParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterScanNetworksResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterThreadInterfaceScanResultStruct	yes	yes	root: corpus class row, not provisional	no
+MTRNetworkCommissioningClusterWiFiInterfaceScanResultStruct	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateProviderClusterApplyUpdateRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateProviderClusterApplyUpdateResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateProviderClusterNotifyUpdateAppliedParams	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateProviderClusterQueryImageParams	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateProviderClusterQueryImageResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateRequestorClusterAnnounceOTAProviderParams	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateRequestorClusterDownloadErrorEvent	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateRequestorClusterStateTransitionEvent	yes	yes	root: corpus class row, not provisional	no
+MTROTASoftwareUpdateRequestorClusterVersionAppliedEvent	yes	yes	root: corpus class row, not provisional	no
+MTROccupancySensingClusterHoldTimeLimitsStruct	yes	yes	root: corpus class row, not provisional	no
+MTROccupancySensingClusterOccupancyChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTROnOffClusterOffParams	yes	yes	root: corpus class row, not provisional	no
+MTROnOffClusterOffWithEffectParams	yes	yes	root: corpus class row, not provisional	no
+MTROnOffClusterOnParams	yes	yes	root: corpus class row, not provisional	no
+MTROnOffClusterOnWithRecallGlobalSceneParams	yes	yes	root: corpus class row, not provisional	no
+MTROnOffClusterOnWithTimedOffParams	yes	yes	root: corpus class row, not provisional	no
+MTROnOffClusterToggleParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterAddNOCParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterAddTrustedRootCertificateParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterAttestationRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterAttestationResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterCSRRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterCSRResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterCertificateChainRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterCertificateChainResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterFabricDescriptorStruct	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterNOCResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterNOCStruct	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterRemoveFabricParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterSetVIDVerificationStatementParams	yes	no	none	no
+MTROperationalCredentialsClusterSignVIDVerificationRequestParams	yes	no	none	no
+MTROperationalCredentialsClusterSignVIDVerificationResponseParams	yes	no	none	no
+MTROperationalCredentialsClusterUpdateFabricLabelParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalCredentialsClusterUpdateNOCParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterErrorStateStruct	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterOperationCompletionEvent	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterOperationalCommandResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterOperationalErrorEvent	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterOperationalStateStruct	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterPauseParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterResumeParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterStartParams	yes	yes	root: corpus class row, not provisional	no
+MTROperationalStateClusterStopParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateProviderClusterApplyUpdateRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateProviderClusterApplyUpdateResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateProviderClusterNotifyUpdateAppliedParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateProviderClusterQueryImageParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateProviderClusterQueryImageResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateRequestorClusterAnnounceOtaProviderParams	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateRequestorClusterDownloadErrorEvent	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateRequestorClusterStateTransitionEvent	yes	yes	root: corpus class row, not provisional	no
+MTROtaSoftwareUpdateRequestorClusterVersionAppliedEvent	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterErrorStateStruct	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterOperationCompletionEvent	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterOperationalCommandResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterOperationalErrorEvent	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterOperationalStateStruct	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterStartParams	yes	yes	root: corpus class row, not provisional	no
+MTROvenCavityOperationalStateClusterStopParams	yes	yes	root: corpus class row, not provisional	no
+MTROvenModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTROvenModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTROvenModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTROvenModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRPowerSourceClusterBatChargeFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPowerSourceClusterBatFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPowerSourceClusterWiredFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPowerTopologyClusterCircuitNodeStruct	yes	no	none	no
+MTRPumpConfigurationAndControlClusterAirDetectionEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterDryRunningEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterElectronicFatalFailureEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterElectronicNonFatalFailureEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterElectronicTemperatureHighEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterGeneralFaultEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterLeakageEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterMotorTemperatureHighEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterPowerMissingPhaseEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterPumpBlockedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterPumpMotorFatalFailureEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterSensorFailureEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterSupplyVoltageHighEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterSupplyVoltageLowEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterSystemPressureHighEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterSystemPressureLowEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPumpConfigurationAndControlClusterTurbineOperationEvent	yes	yes	root: corpus class row, not provisional	no
+MTRPushAVStreamTransportClusterAllocatePushTransportParams	yes	no	none	no
+MTRPushAVStreamTransportClusterAllocatePushTransportResponseParams	yes	no	none	no
+MTRPushAVStreamTransportClusterCMAFContainerOptionsStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterContainerOptionsStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterDeallocatePushTransportParams	yes	no	none	no
+MTRPushAVStreamTransportClusterFindTransportParams	yes	no	none	no
+MTRPushAVStreamTransportClusterFindTransportResponseParams	yes	no	none	no
+MTRPushAVStreamTransportClusterManuallyTriggerTransportParams	yes	no	none	no
+MTRPushAVStreamTransportClusterModifyPushTransportParams	yes	no	none	no
+MTRPushAVStreamTransportClusterPushTransportBeginEvent	yes	no	none	no
+MTRPushAVStreamTransportClusterPushTransportEndEvent	yes	no	none	no
+MTRPushAVStreamTransportClusterSetTransportStatusParams	yes	no	none	no
+MTRPushAVStreamTransportClusterSupportedFormatStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterTransportConfigurationStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterTransportMotionTriggerTimeControlStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterTransportOptionsStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterTransportTriggerOptionsStruct	yes	no	none	no
+MTRPushAVStreamTransportClusterTransportZoneOptionsStruct	yes	no	none	no
+MTRRVCCleanModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCCleanModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCCleanModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRRVCCleanModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterErrorStateStruct	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterGoHomeParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterOperationCompletionEvent	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterOperationalCommandResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterOperationalErrorEvent	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterOperationalStateStruct	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterPauseParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCOperationalStateClusterResumeParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCRunModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCRunModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRRVCRunModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRRVCRunModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRReadParams	yes	yes	root: corpus class row, not provisional	no
+MTRRefrigeratorAlarmClusterNotifyEvent	yes	yes	root: corpus class row, not provisional	no
+MTRRefrigeratorAndTemperatureControlledCabinetModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRRefrigeratorAndTemperatureControlledCabinetModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRRefrigeratorAndTemperatureControlledCabinetModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRRefrigeratorAndTemperatureControlledCabinetModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRSampleMEIClusterAddArgumentsParams	yes	no	none	no
+MTRSampleMEIClusterAddArgumentsResponseParams	yes	no	none	no
+MTRSampleMEIClusterPingCountEventEvent	yes	no	none	no
+MTRSampleMEIClusterPingParams	yes	no	none	no
+MTRScenesManagementClusterAddSceneParams	yes	no	none	no
+MTRScenesManagementClusterAddSceneResponseParams	yes	no	none	no
+MTRScenesManagementClusterAttributeValuePairStruct	yes	no	none	no
+MTRScenesManagementClusterCopySceneParams	yes	no	none	no
+MTRScenesManagementClusterCopySceneResponseParams	yes	no	none	no
+MTRScenesManagementClusterExtensionFieldSetStruct	yes	no	none	no
+MTRScenesManagementClusterGetSceneMembershipParams	yes	no	none	no
+MTRScenesManagementClusterGetSceneMembershipResponseParams	yes	no	none	no
+MTRScenesManagementClusterRecallSceneParams	yes	no	none	no
+MTRScenesManagementClusterRemoveAllScenesParams	yes	no	none	no
+MTRScenesManagementClusterRemoveAllScenesResponseParams	yes	no	none	no
+MTRScenesManagementClusterRemoveSceneParams	yes	no	none	no
+MTRScenesManagementClusterRemoveSceneResponseParams	yes	no	none	no
+MTRScenesManagementClusterSceneInfoStruct	yes	no	none	no
+MTRScenesManagementClusterStoreSceneParams	yes	no	none	no
+MTRScenesManagementClusterStoreSceneResponseParams	yes	no	none	no
+MTRScenesManagementClusterViewSceneParams	yes	no	none	no
+MTRScenesManagementClusterViewSceneResponseParams	yes	no	none	no
+MTRServiceAreaClusterAreaInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterAreaStruct	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterLandmarkInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterMapStruct	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterProgressStruct	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterSelectAreasParams	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterSelectAreasResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterSkipAreaParams	yes	yes	root: corpus class row, not provisional	no
+MTRServiceAreaClusterSkipAreaResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterAlarmMutedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterAllClearEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterCOAlarmEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterEndOfServiceEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterHardwareFaultEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterInterconnectCOAlarmEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterInterconnectSmokeAlarmEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterLowBatteryEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterMuteEndedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterSelfTestCompleteEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterSelfTestRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRSmokeCOAlarmClusterSmokeAlarmEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSoftwareDiagnosticsClusterResetWatermarksParams	yes	yes	root: corpus class row, not provisional	no
+MTRSoftwareDiagnosticsClusterSoftwareFaultEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSoftwareDiagnosticsClusterThreadMetricsStruct	yes	yes	root: corpus class row, not provisional	no
+MTRSubscribeParams	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterInitialPressEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterLongPressEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterLongReleaseEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterMultiPressCompleteEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterMultiPressOngoingEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterShortReleaseEvent	yes	yes	root: corpus class row, not provisional	no
+MTRSwitchClusterSwitchLatchedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTLSCertificateManagementClusterClientCSRParams	yes	no	none	no
+MTRTLSCertificateManagementClusterClientCSRResponseParams	yes	no	none	no
+MTRTLSCertificateManagementClusterFindClientCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterFindClientCertificateResponseParams	yes	no	none	no
+MTRTLSCertificateManagementClusterFindRootCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterFindRootCertificateResponseParams	yes	no	none	no
+MTRTLSCertificateManagementClusterLookupClientCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterLookupClientCertificateResponseParams	yes	no	none	no
+MTRTLSCertificateManagementClusterLookupRootCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterLookupRootCertificateResponseParams	yes	no	none	no
+MTRTLSCertificateManagementClusterProvisionClientCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterProvisionRootCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterProvisionRootCertificateResponseParams	yes	no	none	no
+MTRTLSCertificateManagementClusterRemoveClientCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterRemoveRootCertificateParams	yes	no	none	no
+MTRTLSCertificateManagementClusterTLSCertStruct	yes	no	none	no
+MTRTLSCertificateManagementClusterTLSClientCertificateDetailStruct	yes	no	none	no
+MTRTLSClientManagementClusterFindEndpointParams	yes	no	none	no
+MTRTLSClientManagementClusterFindEndpointResponseParams	yes	no	none	no
+MTRTLSClientManagementClusterProvisionEndpointParams	yes	no	none	no
+MTRTLSClientManagementClusterProvisionEndpointResponseParams	yes	no	none	no
+MTRTLSClientManagementClusterRemoveEndpointParams	yes	no	none	no
+MTRTLSClientManagementClusterTLSEndpointStruct	yes	no	none	no
+MTRTargetNavigatorClusterNavigateTargetParams	yes	yes	root: corpus class row, not provisional	no
+MTRTargetNavigatorClusterNavigateTargetResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTargetNavigatorClusterTargetInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTargetNavigatorClusterTargetUpdatedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTemperatureControlClusterSetTemperatureParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterBooleanResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterNestedStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterNullablesAndOptionalsStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterSimpleStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterSimpleStructEchoRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterSimpleStructResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestAddArgumentsParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestAddArgumentsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestComplexNullableOptionalRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestComplexNullableOptionalResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEmitTestEventRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEmitTestEventResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEmitTestFabricScopedEventRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEmitTestFabricScopedEventResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEnumsRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEnumsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestEventEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestFabricScopedEventEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestListInt8UArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestListInt8UReverseRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestListInt8UReverseResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestListNestedStructListArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestListStructArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestNestedStructArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestNestedStructListArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestNotHandledParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestNullableOptionalRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestNullableOptionalResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestSimpleArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestSimpleArgumentResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestSimpleOptionalArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestSpecificParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestSpecificResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestStructArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestStructArrayArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestStructArrayArgumentResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTestUnknownCommandParams	yes	yes	root: corpus class row, not provisional	no
+MTRTestClusterClusterTimedInvokeRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterActivePresetChangeEvent	yes	no	none	no
+MTRThermostatClusterActiveScheduleChangeEvent	yes	no	none	no
+MTRThermostatClusterAddThermostatSuggestionParams	yes	no	none	no
+MTRThermostatClusterAddThermostatSuggestionResponseParams	yes	no	none	no
+MTRThermostatClusterAtomicRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterAtomicResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterClearWeeklyScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterGetWeeklyScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterGetWeeklyScheduleResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterLocalTemperatureChangeEvent	yes	no	none	no
+MTRThermostatClusterOccupancyChangeEvent	yes	no	none	no
+MTRThermostatClusterPresetStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterPresetTypeStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterRemoveThermostatSuggestionParams	yes	no	none	no
+MTRThermostatClusterRunningModeChangeEvent	yes	no	none	no
+MTRThermostatClusterRunningStateChangeEvent	yes	no	none	no
+MTRThermostatClusterScheduleStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterScheduleTransitionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterScheduleTypeStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterSetActivePresetRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterSetActiveScheduleRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterSetWeeklyScheduleParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterSetpointChangeEvent	yes	no	none	no
+MTRThermostatClusterSetpointRaiseLowerParams	yes	yes	root: corpus class row, not provisional	no
+MTRThermostatClusterSystemModeChangeEvent	yes	no	none	no
+MTRThermostatClusterThermostatSuggestionStruct	yes	no	none	no
+MTRThermostatClusterWeeklyScheduleTransitionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThreadBorderRouterManagementClusterDatasetResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadBorderRouterManagementClusterGetActiveDatasetRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadBorderRouterManagementClusterGetPendingDatasetRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadBorderRouterManagementClusterSetActiveDatasetRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadBorderRouterManagementClusterSetPendingDatasetRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDiagnosticsClusterConnectionStatusEvent	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDiagnosticsClusterNeighborTableStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDiagnosticsClusterNetworkFaultChangeEvent	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDiagnosticsClusterResetCountsParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDiagnosticsClusterRouteTableStruct	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDirectoryClusterAddNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDirectoryClusterGetOperationalDatasetParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDirectoryClusterOperationalDatasetResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDirectoryClusterRemoveNetworkParams	yes	yes	root: corpus class row, not provisional	no
+MTRThreadNetworkDirectoryClusterThreadNetworkStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterDSTOffsetStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterDSTStatusEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterDSTTableEmptyEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterFabricScopedTrustedTimeSourceStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterMissingTrustedTimeSourceEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetDSTOffsetParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetDefaultNTPParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetTimeZoneParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetTimeZoneResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetTrustedTimeSourceParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetUTCTimeParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterSetUtcTimeParams	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterTimeFailureEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterTimeZoneStatusEvent	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterTimeZoneStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTimeSynchronizationClusterTrustedTimeSourceStruct	yes	yes	root: corpus class row, not provisional	no
+MTRTimerClusterAddTimeParams	no	no	none	no
+MTRTimerClusterReduceTimeParams	no	no	none	no
+MTRTimerClusterResetTimerParams	no	no	none	no
+MTRTimerClusterSetTimerParams	no	no	none	no
+MTRUnitTestingClusterBooleanResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterGlobalEchoRequestParams	yes	no	none	no
+MTRUnitTestingClusterGlobalEchoResponseParams	yes	no	none	no
+MTRUnitTestingClusterNestedStruct	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterNestedStructList	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterNullablesAndOptionalsStruct	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterSimpleStruct	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterSimpleStructEchoRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterSimpleStructResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterStringEchoRequestParams	yes	no	none	no
+MTRUnitTestingClusterStringEchoResponseParams	yes	no	none	no
+MTRUnitTestingClusterTestAddArgumentsParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestAddArgumentsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestBatchHelperRequestParams	yes	no	none	no
+MTRUnitTestingClusterTestBatchHelperResponseParams	yes	no	none	no
+MTRUnitTestingClusterTestCheckCommandFlagsParams	yes	no	none	no
+MTRUnitTestingClusterTestComplexNullableOptionalRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestComplexNullableOptionalResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestDifferentVendorMeiEventEvent	yes	no	none	no
+MTRUnitTestingClusterTestDifferentVendorMeiRequestParams	yes	no	none	no
+MTRUnitTestingClusterTestDifferentVendorMeiResponseParams	yes	no	none	no
+MTRUnitTestingClusterTestEmitTestEventRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestEmitTestEventResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestEmitTestFabricScopedEventRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestEmitTestFabricScopedEventResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestEnumsRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestEnumsResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestEventEvent	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestFabricScopedEventEvent	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestListInt8UArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestListInt8UReverseRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestListInt8UReverseResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestListNestedStructListArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestListStructArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestNestedStructArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestNestedStructListArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestNotHandledParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestNullableOptionalRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestNullableOptionalResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestSecondBatchHelperRequestParams	yes	no	none	no
+MTRUnitTestingClusterTestSimpleArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestSimpleArgumentResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestSimpleOptionalArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestSpecificParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestSpecificResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestStructArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestStructArrayArgumentRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestStructArrayArgumentResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTestUnknownCommandParams	yes	yes	root: corpus class row, not provisional	no
+MTRUnitTestingClusterTimedInvokeRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRUserLabelClusterLabelStruct	yes	yes	root: corpus class row, not provisional	no
+MTRValveConfigurationAndControlClusterCloseParams	yes	yes	root: corpus class row, not provisional	no
+MTRValveConfigurationAndControlClusterOpenParams	yes	yes	root: corpus class row, not provisional	no
+MTRValveConfigurationAndControlClusterValveFaultEvent	yes	yes	root: corpus class row, not provisional	no
+MTRValveConfigurationAndControlClusterValveStateChangedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterManagementClusterBoostEndedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterManagementClusterBoostParams	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterManagementClusterBoostStartedEvent	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterManagementClusterCancelBoostParams	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterManagementClusterWaterHeaterBoostInfoStruct	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterModeClusterChangeToModeParams	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterModeClusterChangeToModeResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterModeClusterModeOptionStruct	yes	yes	root: corpus class row, not provisional	no
+MTRWaterHeaterModeClusterModeTagStruct	yes	yes	root: corpus class row, not provisional	no
+MTRWebRTCTransportProviderClusterEndSessionParams	yes	no	none	no
+MTRWebRTCTransportProviderClusterProvideAnswerParams	yes	no	none	no
+MTRWebRTCTransportProviderClusterProvideICECandidatesParams	yes	no	none	no
+MTRWebRTCTransportProviderClusterProvideOfferParams	yes	no	none	no
+MTRWebRTCTransportProviderClusterProvideOfferResponseParams	yes	no	none	no
+MTRWebRTCTransportProviderClusterSFrameStruct	yes	no	none	no
+MTRWebRTCTransportProviderClusterSolicitOfferParams	yes	no	none	no
+MTRWebRTCTransportProviderClusterSolicitOfferResponseParams	yes	no	none	no
+MTRWebRTCTransportRequestorClusterAnswerParams	yes	no	none	no
+MTRWebRTCTransportRequestorClusterEndParams	yes	no	none	no
+MTRWebRTCTransportRequestorClusterICECandidatesParams	yes	no	none	no
+MTRWebRTCTransportRequestorClusterOfferParams	yes	no	none	no
+MTRWiFiNetworkDiagnosticsClusterAssociationFailureEvent	yes	yes	root: corpus class row, not provisional	no
+MTRWiFiNetworkDiagnosticsClusterConnectionStatusEvent	yes	yes	root: corpus class row, not provisional	no
+MTRWiFiNetworkDiagnosticsClusterDisconnectionEvent	yes	yes	root: corpus class row, not provisional	no
+MTRWiFiNetworkDiagnosticsClusterResetCountsParams	yes	yes	root: corpus class row, not provisional	no
+MTRWiFiNetworkManagementClusterNetworkPassphraseRequestParams	yes	yes	root: corpus class row, not provisional	no
+MTRWiFiNetworkManagementClusterNetworkPassphraseResponseParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterDownOrCloseParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterGoToLiftPercentageParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterGoToLiftValueParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterGoToTiltPercentageParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterGoToTiltValueParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterStopMotionParams	yes	yes	root: corpus class row, not provisional	no
+MTRWindowCoveringClusterUpOrOpenParams	yes	yes	root: corpus class row, not provisional	no
+MTRWriteParams	yes	yes	root: corpus class row, not provisional	no
+MTRZoneManagementClusterCreateOrUpdateTriggerParams	yes	no	none	no
+MTRZoneManagementClusterCreateTwoDCartesianZoneParams	yes	no	none	no
+MTRZoneManagementClusterCreateTwoDCartesianZoneResponseParams	yes	no	none	no
+MTRZoneManagementClusterRemoveTriggerParams	yes	no	none	no
+MTRZoneManagementClusterRemoveZoneParams	yes	no	none	no
+MTRZoneManagementClusterTwoDCartesianVertexStruct	yes	no	none	no
+MTRZoneManagementClusterTwoDCartesianZoneStruct	yes	no	none	no
+MTRZoneManagementClusterUpdateTwoDCartesianZoneParams	yes	no	none	no
+MTRZoneManagementClusterZoneInformationStruct	yes	no	none	no
+MTRZoneManagementClusterZoneStoppedEvent	yes	no	none	no
+MTRZoneManagementClusterZoneTriggerControlStruct	yes	no	none	no
+MTRZoneManagementClusterZoneTriggeredEvent	yes	no	none	no

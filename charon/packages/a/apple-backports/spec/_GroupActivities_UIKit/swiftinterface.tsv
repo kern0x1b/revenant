@@ -1,0 +1,21 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_GroupActivities_UIKit	enum	GroupActivitySharingResult	15.4				own
+_GroupActivities_UIKit	constant	GroupActivitySharingResult.success	15.4				container
+_GroupActivities_UIKit	constant	GroupActivitySharingResult.cancelled	15.4				container
+_GroupActivities_UIKit	method	GroupActivitySharingResult.==(a:b:)	15.4				container
+_GroupActivities_UIKit	method	GroupActivitySharingResult.hash(into:)	15.4				container
+_GroupActivities_UIKit	property	GroupActivitySharingResult.hashValue	15.4				container
+_GroupActivities_UIKit	class	GroupActivitySharingController	15.4				own
+_GroupActivities_UIKit	property	GroupActivitySharingController.modalPresentationStyle	15.4				container
+_GroupActivities_UIKit	property	GroupActivitySharingController.result	15.4				container
+_GroupActivities_UIKit	method	GroupActivitySharingController.init(_:)	15.4				container
+_GroupActivities_UIKit	method	GroupActivitySharingController.init(preparationHandler:)	15.4				container
+_GroupActivities_UIKit	method	GroupActivitySharingController.viewWillAppear(_:)	15.4				container
+_GroupActivities_UIKit	method	GroupActivitySharingController.viewDidLoad()	15.4				container
+_GroupActivities_UIKit	class	GroupActivityAssociationInteraction				yes	none
+_GroupActivities_UIKit	property	GroupActivityAssociationInteraction.view				yes	none
+_GroupActivities_UIKit	method	GroupActivityAssociationInteraction.init(associationKind:)				yes	none
+_GroupActivities_UIKit	property	GroupActivityAssociationInteraction.associationKind				yes	none
+_GroupActivities_UIKit	method	GroupActivityAssociationInteraction.willMove(to:)				yes	none
+_GroupActivities_UIKit	method	GroupActivityAssociationInteraction.didMove(to:)				yes	none
+_GroupActivities_UIKit	method	GroupActivityAssociationInteraction._didMove(from:to:)				yes	none

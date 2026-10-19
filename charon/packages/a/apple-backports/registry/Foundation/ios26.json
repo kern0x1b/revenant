@@ -1,0 +1,275 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSHTTPCookieSetByJavaScript",
+      "kind": "constant",
+      "introduced": "18.2",
+      "minimum": "6.0",
+      "maximum": "18.2",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSMutableURLRequest.cookiePartitionIdentifier",
+      "kind": "property",
+      "introduced": "18.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a fresh request answers nil; setting a string reads that string back, and it survives -copy and -mutableCopy",
+      "source": "the host's own Foundation, measured in tests/backports/host/netext-requests/run.sh: fresh=(nil) roundtrip=read back copy=carried mutablecopy=carried, dladdr naming CFNetwork.framework for both selectors"
+    },
+    {
+      "api": "-[NSBundle localizedStringForKey:value:table:localizations:]",
+      "kind": "method",
+      "introduced": "18.4",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSBundle localizedStringForKey:value:table:localizations:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "-[NSCoder decodeBytesForKey:minimumLength:]",
+      "kind": "method",
+      "introduced": "18.4",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSCoder decodeBytesForKey:minimumLength:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "-[NSCoder decodeBytesWithMinimumLength:]",
+      "kind": "method",
+      "introduced": "18.4",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSCoder decodeBytesWithMinimumLength:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "-[NSFileManager fetchLatestRemoteVersionOfItemAtURL:completionHandler:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSFileManager fetchLatestRemoteVersionOfItemAtURL:completionHandler:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "-[NSFileManager pauseSyncForUbiquitousItemAtURL:completionHandler:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSFileManager pauseSyncForUbiquitousItemAtURL:completionHandler:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "-[NSFileManager resumeSyncForUbiquitousItemAtURL:withBehavior:completionHandler:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSFileManager resumeSyncForUbiquitousItemAtURL:withBehavior:completionHandler:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "-[NSFileManager uploadLocalVersionOfUbiquitousItemAtURL:withConflictResolutionPolicy:completionHandler:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[NSFileManager uploadLocalVersionOfUbiquitousItemAtURL:withConflictResolutionPolicy:completionHandler:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "NSCalendarIdentifierBangla",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierDangi",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierGujarati",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierKannada",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierMalayalam",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierMarathi",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierOdia",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierTamil",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierTelugu",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierVietnamese",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSCalendarIdentifierVikram",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSDateComponents.repeatedDay",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property NSDateComponents.repeatedDay",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "NSListItemDelimiterAttributeName",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the constant NSListItemDelimiterAttributeName",
+      "effect": "until built: the symbol is not exported",
+      "source": "SDK 26.5, Mac Catalyst, Foundation"
+    },
+    {
+      "api": "NSURLUbiquitousItemIsSyncPausedKey",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSURLUbiquitousItemSupportedSyncControlsKey",
+      "kind": "constant",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLResourceKeyStrings.md",
+      "source": "SDK 26.2 headers for the declaration and its availability; the value read out of the host's own Foundation by dlsym in tests/backports/host/foundation-constants/, which compares every value it carries against the host's and mutates each one to show the comparison notices that constant; no dyld_shared_cache is held on this machine, so the first release that exports the name is not measured here and the port carries it in every band below 26.0"
+    },
+    {
+      "api": "NSMutableURLRequest.allowsUltraConstrainedNetworkAccess",
+      "kind": "property",
+      "introduced": "26.1",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a fresh request answers NO; setting YES reads back YES and the value survives -copy and -mutableCopy",
+      "source": "the host's own Foundation, measured in tests/backports/host/netext-requests/run.sh: fresh=NO roundtrip=YES copy=carried mutablecopy=carried, dladdr naming CFNetwork.framework for both selectors"
+    },
+    {
+      "api": "-[NSPredicate allowEvaluationWithValidator:error:]",
+      "kind": "method",
+      "introduced": "26.4",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/Foundation/NSPredicateValidating.md",
+      "reason": "build -[NSPredicate allowEvaluationWithValidator:error:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the 16.4 build SDK this package compiles against and the 26.2 SDK tools/intents/generate.sh calls SDK_262, both read whole - 0 files of either name NSPredicateValidating and 0 name allowEvaluationWithValidator, NSPredicate itself in 95 files of the 16.4 and 88 of the 26.2 as the control; the row's introduced 26.4 from coordination/corpus/registry-last.tsv against a newest readable SDK of 26.2; the 53 held rungs tools/cache-index/first-rung.lua reads, 18.0 the newest of them"
+    },
+    {
+      "api": "NSPredicateValidating",
+      "kind": "protocol",
+      "introduced": "26.4",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/Foundation/NSPredicateValidating.md",
+      "reason": "build the protocol NSPredicateValidating",
+      "effect": "until built: NSProtocolFromString answers nil",
+      "source": "the 16.4 build SDK this package compiles against and the 26.2 SDK tools/intents/generate.sh calls SDK_262, both read whole - 0 files of either name NSPredicateValidating and 0 name allowEvaluationWithValidator, NSPredicate itself in 95 files of the 16.4 and 88 of the 26.2 as the control; the row's introduced 26.4 from coordination/corpus/registry-last.tsv against a newest readable SDK of 26.2; the 53 held rungs tools/cache-index/first-rung.lua reads, 18.0 the newest of them"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "framework": "CoreMedia",
+  "entries": [
+    {
+      "api": "CMTimeMultiplyByRatio()",
+      "kind": "function",
+      "introduced": "7.1",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has 66 CMTime and CMTimeRange functions, CMTimeMultiplyByRatio is not one of them, and the armv7 cache ladder first exports it at 7.1; what the release does carry is the CMTime itself, a (value, timescale, epoch, flags) quadruple this arithmetic runs on",
+      "effect": "answers (time * multiplier) / divisor as an exact rational at timescale * divisor whenever a CMTime holds one, the fraction not reduced any further, and otherwise the exact value at 1000000000 rounded half away from zero with kCMTimeFlags_HasBeenRounded, then an infinity of the right sign; an invalid and an indefinite time are themselves, an infinity multiplied by zero is kCMTimeInvalid, a zero multiplier or a zero value at epoch 0 is zero at the input timescale, and a zero divisor is kCMTimeInvalid when the multiplier or the value is zero",
+      "facts": "facts/CoreMedia/CMTimeMultiplyByRatio.md",
+      "source": "the host's own CoreMedia, which the port is held against case by case by tests/backports/host/coremedia7; the armv7 cache ladder, which first exports the function at 7.1, and iOS 6.0's own 66 CMTime and CMTimeRange exports"
+    }
+  ]
+}

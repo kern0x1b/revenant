@@ -1,0 +1,38 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLHeap.currentAllocatedSize",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a heap on this device is one allocation resources are taken out of, which is what a heap is where every resource is already CPU memory: a buffer from it is a view into those bytes and a texture from it takes its size out of them, so size, usedSize, currentAllocatedSize, maxAvailableSizeWithAlignment: and an explicit offset all mean what Apple's headers say they mean",
+      "effect": "the sum of the sizes actually handed out, which is what makes it differ from usedSize: that one is the offset the next allocation starts at and includes the padding each was aligned up to",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "-[MTLRenderCommandEncoder useHeap:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the heaps of the port are one allocation each, and the encoder is told which of them its resources come from",
+      "effect": "the heap is recorded, and a resource bound afterwards that did not come from one of the recorded heaps is named in the log with them, because Metal leaves that case undefined and passing it by in silence would be worse; an encoder given no heap is not checked at all",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    },
+    {
+      "api": "-[MTLRenderCommandEncoder useHeaps:count:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the heaps of the port are one allocation each, and the encoder is told which of them its resources come from",
+      "effect": "the heaps are recorded, up to the eight this port keeps, and a resource bound afterwards that came from another heap is named in the log with the ones that were given",
+      "source": "SDK 16.4, Metal (the SDK this package builds against); the behaviour is the one its headers document",
+      "facts": "facts/Metal/Heaps.md"
+    }
+  ]
+}

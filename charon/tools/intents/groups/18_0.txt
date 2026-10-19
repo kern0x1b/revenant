@@ -1,0 +1,4 @@
+INEditMessageIntent
+INEditMessageIntentResponse
+INMessageReaction
+INSticker

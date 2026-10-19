@@ -1,0 +1,119 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSOrderedCollectionChange",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "one insertion or removal with its object, index and associated index, equal and described as the system's are; it neither copies nor archives",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "NSOrderedCollectionDifference",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the changes that turn one ordered collection into another, enumerated, compared, inverted and described as the system's, and built and refused by the same rules",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSArray differenceFromArray:withOptions:usingEquivalenceTest:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4",
+      "effect": "the indexes are the system's, so are the calls the block receives; the option to infer moves is refused as the system refuses it, and a nil block raises instead of crashing",
+      "reason": "the system dereferences a nil block; the port raises NSInvalidArgumentException"
+    },
+    {
+      "api": "-[NSArray differenceFromArray:withOptions:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSArray differenceFromArray:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSArray arrayByApplyingDifference:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSOrderedSet differenceFromOrderedSet:withOptions:usingEquivalenceTest:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSOrderedSet differenceFromOrderedSet:withOptions:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSOrderedSet differenceFromOrderedSet:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSOrderedSet orderedSetByApplyingDifference:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSMutableArray applyDifference:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the difference is applied to the receiver, removals first; a bad index or a nil object raises what the release's own array raises",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    },
+    {
+      "api": "-[NSMutableOrderedSet applyDifference:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the difference is applied to the receiver, removals first; a bad index raises what the release's own ordered set raises",
+      "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
+      "source": "the host's own Foundation (macOS 27.0), held against the backport by tests/backports/host/uikit2 (the orderedcollections group); the header of SDK 16.4"
+    }
+  ]
+}

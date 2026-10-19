@@ -1,0 +1,3 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+ClockKit	property	CLKComplicationFamily.allCases				yes	none
+ClockKit	typealias	CLKComplicationFamily.AllCases				yes	none

@@ -1,0 +1,14 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "-[AVAudioSession setCategory:mode:options:error:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioSessionCategoryModeOptions.md",
+      "source": "SDK 16.4, AVFAudio; behaviour measured against a live AVAudioSession on a real iPad 2, iOS 6.1.3"
+    }
+  ]
+}

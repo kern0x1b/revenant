@@ -1,0 +1,148 @@
+{
+  "framework": "CoreVideo",
+  "entries": [
+    {
+      "api": "CVColorPrimariesGetStringForIntegerCodePoint()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the name the release gives a code point, the same object for the same code point; NULL for 0 and 2, which mean unspecified; a code point the release names nothing for, negative ones included, gets the string ColorPrimaries#<code>, made once and kept",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the switch of the function at 0x18428d738, read case by case with the strings its slots hold; the host's CoreVideo through the differential test for what comes out"
+    },
+    {
+      "api": "CVColorPrimariesGetIntegerCodePointForString()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the code point of a name the release knows; ColorPrimaries#<n> is read back as n; 2, unspecified, for NULL, for anything that is not a string and for any other string",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the comparisons of the function at 0x18428d5a4, in order, with the strings its slots hold and what they return; the host's CoreVideo through the differential test for what comes out"
+    },
+    {
+      "api": "CVTransferFunctionGetStringForIntegerCodePoint()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the name the release gives a code point, the same object for the same code point; NULL for 0 and 2, which mean unspecified; a code point the release names nothing for, negative ones included, gets the string TransferFunction#<code>, made once and kept",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the switch of the function at 0x18428da58, read case by case with the strings its slots hold; the host's CoreVideo through the differential test for what comes out"
+    },
+    {
+      "api": "CVTransferFunctionGetIntegerCodePointForString()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the code point of a name the release knows; TransferFunction#<n> is read back as n; 2, unspecified, for NULL, for anything that is not a string and for any other string",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the comparisons of the function at 0x18428d894, in order, with the strings its slots hold and what they return; the host's CoreVideo through the differential test for what comes out"
+    },
+    {
+      "api": "CVYCbCrMatrixGetStringForIntegerCodePoint()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from the newest CoreVideo, which names the codes 14, 15 and 248 as well: iOS 12 names nothing for them, and this function answers what iOS 12 answers",
+      "effect": "the name the release gives a code point, the same object for the same code point; NULL for 0 and 2, which mean unspecified; a code point the release names nothing for, negative ones included, gets the string YCbCrMatrix#<code>, made once and kept",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the switch of the function at 0x18428d370, read case by case with the strings its slots hold; the host's CoreVideo through the differential test for what comes out"
+    },
+    {
+      "api": "CVYCbCrMatrixGetIntegerCodePointForString()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from the newest CoreVideo, which knows the names of the codes 14, 15 and 248 as well: iOS 12 knows none of them, and this function answers what iOS 12 answers",
+      "effect": "the code point of a name the release knows; YCbCrMatrix#<n> is read back as n; 2, unspecified, for NULL, for anything that is not a string and for any other string",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the comparisons of the function at 0x18428d23c, in order, with the strings its slots hold and what they return; the host's CoreVideo through the differential test for what comes out"
+    },
+    {
+      "api": "kCVImageBufferTransferFunction_sRGB",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value IEC_sRGB, the one iOS 12 gives it; it names the value only, the release does nothing for it",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVImageBufferTransferFunction_ITU_R_2100_HLG",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ITU_R_2100_HLG, the one iOS 12 gives it; it names the value only, the release does nothing for it",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value SMPTE_ST_2084_PQ, the one iOS 12 gives it; it names the value only, the release does nothing for it",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVImageBufferTransferFunction_Linear",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value Linear, the one iOS 12 gives it; it names the value only, the release does nothing for it",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVImageBufferContentLightLevelInfoKey",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ContentLightLevelInfo, the one iOS 12 gives it; nothing of ours attaches a value under it, so a lookup on a buffer or a format description answers what the release answers for a key it does not know",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVImageBufferMasteringDisplayColorVolumeKey",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value MasteringDisplayColorVolume, the one iOS 12 gives it; nothing of ours attaches a value under it, so a lookup on a buffer or a format description answers what the release answers for a key it does not know",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVPixelFormatContainsGrayscale",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the constant is there with the value ContainsGrayscale, the one iOS 12 gives it; nothing of ours attaches a value under it, so a lookup on a buffer or a format description answers what the release answers for a key it does not know",
+      "facts": "facts/CoreVideo/CVCodePoints.md",
+      "source": "CoreVideo of iOS 12.0 arm64: the slot of the constant and the string it holds; an iPad 2 running 6.1.3, where the symbol is not there"
+    },
+    {
+      "api": "kCVMetalTextureUsage",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6.1.3 and iOS 4.3 export none of this name, measured in the export trie of CoreVideo in each armv7 shared cache (204 and 178 CoreVideo exports); it is carried with the text the newer release gives it, so that an application that names it loads",
+      "effect": "the string MetalTextureUsage, carried with the text the newer release gives it; nothing of iOS 6 produces it, and where an application hands it to the release the release treats it as it treats any string it does not know",
+      "facts": "facts/CoreVideo/Names9to16.md",
+      "source": "the host's own CoreVideo, the symbol's address from the export trie and the __cfstring stored there; the header of iOS 16.4 for the type and the release that added the name"
+    }
+  ]
+}

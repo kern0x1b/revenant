@@ -1,0 +1,27 @@
+diff --git a/stdlib/public/Darwin/Foundation/NSDictionary.swift b/stdlib/public/Darwin/Foundation/NSDictionary.swift
+--- a/stdlib/public/Darwin/Foundation/NSDictionary.swift
++++ b/stdlib/public/Darwin/Foundation/NSDictionary.swift
+@@ -246,7 +246,10 @@
+       
+       result = Dictionary(_unsafeUninitializedCapacity: numElems,
+         allowingDuplicates: handleDuplicates) { keys, vals in
+-        
++
++        // An empty dictionary has no storage to bridge into: the standard library hands over buffers with no base address.
++        guard numElems > 0 else { return 0 }
++
+         let objectKeys = UnsafeMutableRawPointer(mutating:
+           keys.baseAddress!).assumingMemoryBound(to: AnyObject.self)
+         let objectVals = UnsafeMutableRawPointer(mutating:
+@@ -301,7 +304,10 @@
+     
+     let tmpResult = Dictionary(_unsafeUninitializedCapacity: numElems,
+       allowingDuplicates: handleDuplicates) { keys, vals in
+-      
++
++      // An empty dictionary has no storage to bridge into: the standard library hands over buffers with no base address.
++      guard numElems > 0 else { return 0 }
++
+       let objectKeys = UnsafeMutableRawPointer(mutating:
+         keys.baseAddress!).assumingMemoryBound(to: AnyObject.self)
+       let objectVals = UnsafeMutableRawPointer(mutating:

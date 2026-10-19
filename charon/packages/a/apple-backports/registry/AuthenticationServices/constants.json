@@ -1,0 +1,295 @@
+{
+  "framework": "AuthenticationServices",
+  "entries": [
+    {
+      "api": "ASAuthorizationAppleIDProviderCredentialRevokedNotification",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"ASAuthorizationAppleIDCredentialRevokedNotification\", which is the value the release gives ASAuthorizationAppleIDProviderCredentialRevokedNotification",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationErrorDomain",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"com.apple.AuthenticationServices.AuthorizationError\", which is the value the release gives ASAuthorizationErrorDomain",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationOperationImplicit",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"implicit\", which is the value the release gives ASAuthorizationOperationImplicit",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationOperationLogin",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"login\", which is the value the release gives ASAuthorizationOperationLogin",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationOperationLogout",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"logout\", which is the value the release gives ASAuthorizationOperationLogout",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationOperationRefresh",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"refresh\", which is the value the release gives ASAuthorizationOperationRefresh",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationProviderAuthorizationOperationConfigurationRemoved",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"configuration_removed\", which is the value the release gives ASAuthorizationProviderAuthorizationOperationConfigurationRemoved",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationProviderAuthorizationOperationDirectRequest",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"direct_request\", which is the value the release gives ASAuthorizationProviderAuthorizationOperationDirectRequest",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialAttestationKindDirect",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"direct\", which is the value the release gives ASAuthorizationPublicKeyCredentialAttestationKindDirect",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialAttestationKindEnterprise",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"enterprise\", which is the value the release gives ASAuthorizationPublicKeyCredentialAttestationKindEnterprise",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialAttestationKindIndirect",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"indirect\", which is the value the release gives ASAuthorizationPublicKeyCredentialAttestationKindIndirect",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialAttestationKindNone",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"none\", which is the value the release gives ASAuthorizationPublicKeyCredentialAttestationKindNone",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialResidentKeyPreferenceDiscouraged",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"discouraged\", which is the value the release gives ASAuthorizationPublicKeyCredentialResidentKeyPreferenceDiscouraged",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialResidentKeyPreferencePreferred",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"preferred\", which is the value the release gives ASAuthorizationPublicKeyCredentialResidentKeyPreferencePreferred",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialResidentKeyPreferenceRequired",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"required\", which is the value the release gives ASAuthorizationPublicKeyCredentialResidentKeyPreferenceRequired",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialUserVerificationPreferenceDiscouraged",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"discouraged\", which is the value the release gives ASAuthorizationPublicKeyCredentialUserVerificationPreferenceDiscouraged",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialUserVerificationPreferencePreferred",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"preferred\", which is the value the release gives ASAuthorizationPublicKeyCredentialUserVerificationPreferencePreferred",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationPublicKeyCredentialUserVerificationPreferenceRequired",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"required\", which is the value the release gives ASAuthorizationPublicKeyCredentialUserVerificationPreferenceRequired",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationScopeEmail",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"email\", which is the value the release gives ASAuthorizationScopeEmail",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationScopeFullName",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"full_name\", which is the value the release gives ASAuthorizationScopeFullName",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransportBluetooth",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"ble\", which is the value the release gives ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransportBluetooth",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransportNFC",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"nfc\", which is the value the release gives ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransportNFC",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransportUSB",
+      "kind": "constant",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"usb\", which is the value the release gives ASAuthorizationSecurityKeyPublicKeyCredentialDescriptorTransportUSB",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASCredentialIdentityStoreErrorDomain",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"ASCredentialIdentityStoreErrorDomain\", which is the value the release gives ASCredentialIdentityStoreErrorDomain",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASExtensionErrorDomain",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"ASExtensionErrorDomain\", which is the value the release gives ASExtensionErrorDomain",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASExtensionLocalizedFailureReasonErrorKey",
+      "kind": "constant",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"ASExtensionLocalizedFailureReasonErrorKey\", which is the value the release gives ASExtensionLocalizedFailureReasonErrorKey",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "AuthenticationServices.framework of the 16.0, 18.0 shared caches, read with modules/apple/dyld.lua: the symbol's pointer resolved through the cache's slide information, then the __CFConstantString's char* and its length, with the bytes agreeing with that length"
+    },
+    {
+      "api": "ASGeneratedPasswordKindAlphanumeric",
+      "kind": "constant",
+      "introduced": "26.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"ALPHANUMERIC\", which is the value the release gives ASGeneratedPasswordKindAlphanumeric",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "the host's own macOS 27.0 AuthenticationServices.framework, read with dlsym: the symbol's own pointer, then the __CFConstantString's char* and its length, with the bytes at that address agreeing with that length"
+    },
+    {
+      "api": "ASGeneratedPasswordKindPassphrase",
+      "kind": "constant",
+      "introduced": "26.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"PASSPHRASE\", which is the value the release gives ASGeneratedPasswordKindPassphrase",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "the host's own macOS 27.0 AuthenticationServices.framework, read with dlsym: the symbol's own pointer, then the __CFConstantString's char* and its length, with the bytes at that address agreeing with that length"
+    },
+    {
+      "api": "ASGeneratedPasswordKindStrong",
+      "kind": "constant",
+      "introduced": "26.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string \"STRONG\", which is the value the release gives ASGeneratedPasswordKindStrong",
+      "facts": "facts/AuthenticationServices/ASConstants.md",
+      "source": "the host's own macOS 27.0 AuthenticationServices.framework, read with dlsym: the symbol's own pointer, then the __CFConstantString's char* and its length, with the bytes at that address agreeing with that length"
+    }
+  ]
+}

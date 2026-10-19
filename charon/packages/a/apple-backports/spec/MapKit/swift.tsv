@@ -1,0 +1,46 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+MapKit	swift-struct	c:@E@MKErrorCode	-	MKError	-	-	-	ios=3.0	-	87fd18da62e6f480
+MapKit	swift-property	s:SC11MKErrorCodeLeV8_nsErrorSo7NSErrorCvp	MKError	_nsError	-	Foundation.NSError	-	-	-	2c5ef3cddfbdcd20
+MapKit	swift-method	s:SC11MKErrorCodeLeV8_nsErrorABSo7NSErrorC_tcfc	MKError	init(_nsError:)	-	-	MapKit.MKError | Foundation.NSError	-	-	7204381e0f125a25
+MapKit	swift-property	s:SC11MKErrorCodeLeV11errorDomainSSvpZ	MKError	errorDomain	+	Swift.String	-	-	-	bd924eb8a6cf5595
+MapKit	swift-enum	c:@E@MKErrorCode	MKError	Code	-	-	-	ios=3.0	-	25ba213d4c9efb2f
+MapKit	swift-method	s:So11MKErrorCodeV8rawValueABSgSu_tcfc	MKError.Code	init(rawValue:)	-	-	MapKit.MKError.Code? | Swift.UInt	-	-	b6b29e76bd1c9a22
+MapKit	swift-property	s:So11MKErrorCodeV8rawValueSuvp	MKError.Code	rawValue	-	Swift.UInt	-	-	-	0ce54b5d90b04b5b
+MapKit	swift-typealias	s:So11MKErrorCodeV8RawValuea	MKError.Code	RawValue	-	-	-	-	-	beda442c7ac398f0
+MapKit	swift-typealias	c:@E@MKErrorCode	MKError.Code	_ErrorType	-	-	-	-	-	6361d972f0068d3d
+MapKit	swift-constant	c:@E@MKErrorCode@MKErrorUnknown	MKError.Code	unknown	-	-	-	-	-	91a4a3534b1c2af9
+MapKit	swift-constant	c:@E@MKErrorCode@MKErrorServerFailure	MKError.Code	serverFailure	-	-	-	-	-	13a9193520a5b590
+MapKit	swift-constant	c:@E@MKErrorCode@MKErrorLoadingThrottled	MKError.Code	loadingThrottled	-	-	-	-	-	4082998775c35a1d
+MapKit	swift-constant	c:@E@MKErrorCode@MKErrorPlacemarkNotFound	MKError.Code	placemarkNotFound	-	-	-	-	-	2777e7b54086e2f0
+MapKit	swift-constant	c:@E@MKErrorCode@MKErrorDirectionsNotFound	MKError.Code	directionsNotFound	-	-	-	ios=7.0	-	0a45278744ce164c
+MapKit	swift-constant	c:@E@MKErrorCode@MKErrorDecodingFailed	MKError.Code	decodingFailed	-	-	-	ios=13.0	-	7cb5f3df67d5a345
+MapKit	swift-property	c:@E@MKErrorCode@MKErrorUnknown	MKError	unknown	+	MapKit.MKError.Code	-	-	-	e1115897aa2acc72
+MapKit	swift-property	c:@E@MKErrorCode@MKErrorServerFailure	MKError	serverFailure	+	MapKit.MKError.Code	-	-	-	6e32cedfad9f14da
+MapKit	swift-property	c:@E@MKErrorCode@MKErrorLoadingThrottled	MKError	loadingThrottled	+	MapKit.MKError.Code	-	-	-	ac1efa2ef87b1450
+MapKit	swift-property	c:@E@MKErrorCode@MKErrorPlacemarkNotFound	MKError	placemarkNotFound	+	MapKit.MKError.Code	-	-	-	1e133956c8f35c09
+MapKit	swift-property	c:@E@MKErrorCode@MKErrorDirectionsNotFound	MKError	directionsNotFound	+	MapKit.MKError.Code	-	ios=7.0	-	289c19fbe194c756
+MapKit	swift-property	c:@E@MKErrorCode@MKErrorDecodingFailed	MKError	decodingFailed	+	MapKit.MKError.Code	-	ios=13.0	-	eaaeb9837e1e9dc7
+MapKit	swift-class	c:objc(cs)MKMapItemIdentifier	-	Identifier	-	-	-	ios=18.0	-	a97a24ab8e5d81c4
+MapKit	swift-typealias	s:So19MKMapItemIdentifierC6MapKitE8RawValuea	Identifier	RawValue	-	-	-	-	-	167d6db318bd38dd
+MapKit	swift-class	c:objc(cs)MKAddressRepresentations	-	MKAddressRepresentations	-	-	-	ios=26.0	-	0cd1c2d23f52e27f
+MapKit	swift-property	s:So24MKAddressRepresentationsC6MapKitE6region10Foundation6LocaleV6RegionVSgvp	MKAddressRepresentations	region	-	Foundation.Locale.Region?	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	330a723d0ba678b0
+MapKit	swift-class	c:objc(cs)MKGradientPolylineRenderer	-	MKGradientPolylineRenderer	-	-	-	ios=14.0	-	6f234c1d671a626a
+MapKit	swift-property	s:So26MKGradientPolylineRendererC6MapKitE9locationsSay14CoreFoundation7CGFloatVGvp	MKGradientPolylineRenderer	locations	-	[CoreGraphics.CGFloat]	-	-	-	9744215a87a5f09c
+MapKit	swift-method	s:So26MKGradientPolylineRendererC6MapKitE9setColors_9locationsySaySo7UIColorCG_Say14CoreFoundation7CGFloatVGtF	MKGradientPolylineRenderer	setColors(_:locations:)	-	()	[UIKit.UIColor] | [CoreGraphics.CGFloat]	-	-	709f3661cee2062e
+MapKit	swift-struct	c:@SA@MKCoordinateSpan	-	MKCoordinateSpan	-	-	-	-	-	a4a8a4de9bc35850
+MapKit	swift-class	c:objc(cs)MKMapItemDetailSelectionAccessoryPresentationStyle	MKSelectionAccessory	MapItemDetailPresentationStyle	-	-	-	ios=18.0	-	5a1210c543c4a6a2
+MapKit	swift-method	s:So50MKMapItemDetailSelectionAccessoryPresentationStyleC6MapKitE9automatic26presentationViewControllerABSo06UIViewM0CSg_tFZ	MKSelectionAccessory.MapItemDetailPresentationStyle	automatic(presentationViewController:)	+	MapKit.MKSelectionAccessory.MapItemDetailPresentationStyle	UIKit.UIViewController?	-	-	61a34a1964dd0664
+MapKit	swift-method	s:So50MKMapItemDetailSelectionAccessoryPresentationStyleC6MapKitE7calloutyABSo0abcde7CalloutG0VFZ	MKSelectionAccessory.MapItemDetailPresentationStyle	callout(_:)	+	MapKit.MKSelectionAccessory.MapItemDetailPresentationStyle	MapKit.MKSelectionAccessory.MapItemDetailPresentationStyle.CalloutStyle	-	-	c014400ea08e83e4
+MapKit	swift-struct	s:10GeoToolbox15PlaceDescriptorV	-	PlaceDescriptor	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	a7914219ca96c923
+MapKit	swift-method	s:10GeoToolbox15PlaceDescriptorV6MapKitE4itemACSgSo9MKMapItemC_tcfc	PlaceDescriptor	init(item:)	-	-	GeoToolbox.PlaceDescriptor? | MapKit.MKMapItem	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	02c1b0b3c78bf24e
+MapKit	swift-class	c:objc(cs)MKMultiPoint	-	MKMultiPoint	-	-	-	ios=4.0	-	2b4d38b362fa4b4d
+MapKit	swift-method	s:So12MKMultiPointC6MapKitE9locations2atSay14CoreFoundation7CGFloatVG0H08IndexSetV_tF	MKMultiPoint	locations(at:)	-	[CoreGraphics.CGFloat]	Foundation.IndexSet	-	-	ebce1b51da1902f4
+MapKit	swift-class	c:objc(cs)MKLocalSearchRequest	-	Request	-	-	-	ios=6.1	-	b15a9d157fe54b79
+MapKit	swift-typealias	s:So20MKLocalSearchRequestC6MapKitE10ResultTypea	Request	ResultType	-	-	-	-	-	560aec6cfe1aaad1
+MapKit	swift-class	c:objc(cs)MKMapItemRequest	-	MKMapItemRequest	-	-	-	ios=16.0	-	f7ef7797ebdb24da
+MapKit	swift-method	s:So16MKMapItemRequestC6MapKitE15placeDescriptorAB10GeoToolbox05PlaceG0V_tcfc	MKMapItemRequest	init(placeDescriptor:)	-	-	MapKit.MKMapItemRequest | GeoToolbox.PlaceDescriptor	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	79b151c3fb222ed8
+MapKit	swift-property	s:So16MKMapItemRequestC6MapKitE15placeDescriptor10GeoToolbox05PlaceG0VSgvp	MKMapItemRequest	placeDescriptor	-	GeoToolbox.PlaceDescriptor?	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	4d2c6261610be840
+MapKit	swift-method	s:So16MKCoordinateSpana6MapKitE19_bridgeToObjectiveCSo7NSValueCyF	MKCoordinateSpan	_bridgeToObjectiveC()	-	Foundation.NSValue	-	-	-	923d5e5f2b9ec1c2
+MapKit	swift-method	s:So16MKCoordinateSpana6MapKitE26_forceBridgeFromObjectiveC_6resultySo7NSValueC_ABSgztFZ	MKCoordinateSpan	_forceBridgeFromObjectiveC(_:result:)	+	()	Foundation.NSValue | MapKit.MKCoordinateSpan?	-	-	0a7577951c94dbb8
+MapKit	swift-method	s:So16MKCoordinateSpana6MapKitE34_conditionallyBridgeFromObjectiveC_6resultSbSo7NSValueC_ABSgztFZ	MKCoordinateSpan	_conditionallyBridgeFromObjectiveC(_:result:)	+	Swift.Bool	Foundation.NSValue | MapKit.MKCoordinateSpan?	-	-	25aa49dee5080bf9
+MapKit	swift-method	s:So16MKCoordinateSpana6MapKitE36_unconditionallyBridgeFromObjectiveCyABSo7NSValueCSgFZ	MKCoordinateSpan	_unconditionallyBridgeFromObjectiveC(_:)	+	MapKit.MKCoordinateSpan	Foundation.NSValue?	-	-	cfb3f5e3a1f65594

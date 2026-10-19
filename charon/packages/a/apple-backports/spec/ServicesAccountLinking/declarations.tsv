@@ -1,0 +1,11 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@SA@SALResellerAccount	-			-	-	-	-	-	bc34a6e8d41f1366	-
+field	c:@SA@SALResellerAccount@FI@_reserved	SALResellerAccount			void *	-	-	-	-	0847601369f5eeb9	-
+typedef	c:@T@SALResellerAccount	-			struct SALResellerAccount	-	-	-	-	17feecb4a2259739	-
+typedef	c:@T@SALRegistrationError	-			enum SALRegistrationError	-	-	-	-	b25ec618065a022c	-
+enum	c:@E@SALRegistrationError	-			NSInteger	-	-	-	-	b278a6345e32a722	-
+enumconst	c:@E@SALRegistrationError@SALRegistrationErrorNotEligible	SALRegistrationError			-	-	-	-	-	8cbe9745426665ce	0
+enumconst	c:@E@SALRegistrationError@SALRegistrationErrorFailed	SALRegistrationError			-	-	-	-	-	2451a5821f811729	1
+var	c:@ServicesAccountLinkingVersionNumber	-			double	-	-	-	-	eb698acc1c205e8f	-
+var	c:@ServicesAccountLinkingVersionString	-			const unsigned char[]	-	-	-	-	aea7e0d44886fe1f	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-

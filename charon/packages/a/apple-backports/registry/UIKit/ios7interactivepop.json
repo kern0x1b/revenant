@@ -1,0 +1,15 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UINavigationController.interactivePopGestureRecognizer",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the recognizer is an edge pan of the left edge, and a drag from it pops the page interactively with the release's slide over the page below",
+      "facts": "facts/UIKit/UINavigationControllerInteractivePop.md",
+      "source": "tests/backports/device/interactivepop.m with real touches on iOS 6"
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "AVSpeechUtterance",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; the host's own AVSpeechUtterance in tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "+[AVSpeechUtterance speechUtteranceWithString:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "-[AVSpeechUtterance initWithString:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "-[AVSpeechUtterance copyWithZone:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "+[AVSpeechUtterance supportsSecureCoding]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "-[AVSpeechUtterance encodeWithCoder:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the host's encoder writes speechString as nil (the archive holds $null for it); the port writes the string. Pinned as a divergence in checks.m",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "-[AVSpeechUtterance initWithCoder:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the voice is decoded as NSObject until AVSpeechSynthesisVoice is carried; it narrows to that class with the synthesizer",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.voice",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.speechString",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.rate",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "effect": "a negative or NaN rate becomes 0; no ceiling",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.pitchMultiplier",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "effect": "a value below 0.5 or NaN becomes 0.5; no ceiling",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.volume",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "effect": "a negative or NaN volume becomes 0; no ceiling",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.preUtteranceDelay",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "no counterpart in VoiceServices, so the synthesizer ignores the delay; the host's callbacks do not move with it either (measured; the synthesizer section of the facts)",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtterance.postUtteranceDelay",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "no counterpart in VoiceServices, so the synthesizer ignores the delay; the host's callbacks do not move with it either (measured; the synthesizer section of the facts)",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/checks.m"
+    },
+    {
+      "api": "AVSpeechUtteranceMinimumSpeechRate",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "effect": "a const float of 0.0",
+      "source": "the value read from the host in tests/backports/host/avf-speech/checks.m, and from the iOS 7.0 armv7 shared cache with tools/corpus/cache-value.lua (bytes 00000000)"
+    },
+    {
+      "api": "AVSpeechUtteranceMaximumSpeechRate",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "effect": "a const float of 1.0",
+      "source": "the value read from the host in tests/backports/host/avf-speech/checks.m, and from the iOS 7.0 armv7 shared cache with tools/corpus/cache-value.lua (bytes 0000803f)"
+    },
+    {
+      "api": "AVSpeechUtteranceDefaultSpeechRate",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "effect": "a const float of 0.5",
+      "source": "the value read from the host in tests/backports/host/avf-speech/checks.m, and from the iOS 7.0 armv7 shared cache with tools/corpus/cache-value.lua (bytes 0000003f)"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; the host's own AVSpeechSynthesisVoice in tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "+[AVSpeechSynthesisVoice speechVoices]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "+[AVSpeechSynthesisVoice currentLanguageCode]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the host names ar-SA as ar-001 and zh-Hans-CN as cmn-CN; the port answers the release's own codes (zh-CN, ar-SA). Pinned as divergences in voice-checks.m",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "+[AVSpeechSynthesisVoice voiceWithLanguage:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the list is the release's (36 codes), so the host's 180 voices are not the port's; a bare language answers as the host does, the current language first. Pinned as divergences in voice-checks.m (ar)",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "+[AVSpeechSynthesisVoice voiceWithIdentifier:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "+[AVSpeechSynthesisVoice supportsSecureCoding]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice.language",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice.identifier",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the 6.1.3 listing carries no identifier: the host's identifier where the host answers the voice under its name and language (22 of the 36), else the host's pattern (14). Facts name both",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice.name",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice.quality",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the listing has no quality: every voice is the default quality, which is what the host answers for all its voices",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "-[AVSpeechSynthesisVoice encodeWithCoder:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "-[AVSpeechSynthesisVoice initWithCoder:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/voice-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice.gender",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property AVSpeechSynthesisVoice.gender",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, AVFAudio; facts/AVFoundation/AVSpeech.md (the listing, measured in the 6.1.3 guest)"
+    },
+    {
+      "api": "AVSpeechSynthesisVoice.audioFileSettings",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property AVSpeechSynthesisVoice.audioFileSettings",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, AVFAudio; facts/AVFoundation/AVSpeech.md (the listing, measured in the 6.1.3 guest)"
+    },
+    {
+      "api": "AVSpeechSynthesizer",
+      "kind": "class",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m (the host's class against the port's, one driver, one transcript per scenario)"
+    },
+    {
+      "api": "-[AVSpeechSynthesizer init]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; creates the port's engine (AVFoundation/AVSpeechSynthesizer7.m)"
+    },
+    {
+      "api": "AVSpeechSynthesizer.delegate",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesizer.speaking",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesizer.paused",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "-[AVSpeechSynthesizer speakUtterance:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the queue is the port's: the release's synthesizer replaces a string that is started while another speaks, so the port sends one string at a time",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "-[AVSpeechSynthesizer stopSpeakingAtBoundary:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the release's stop answers nil or an error, not a flag: the port answers YES while speaking and NO otherwise, from its own state",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "-[AVSpeechSynthesizer pauseSpeakingAtBoundary:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "reason": "the port answers YES while speaking and NO otherwise, and a pause while paused answers YES, as the host does; the release's word-boundary pause lands one or two words after the call on the guest (the host's at the next word), measured in facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "-[AVSpeechSynthesizer continueSpeaking]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; tests/backports/host/avf-speech/synth-checks.m"
+    },
+    {
+      "api": "AVSpeechSynthesizerDelegate",
+      "kind": "protocol",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVSpeech.md",
+      "source": "SDK 16.4, AVFAudio; the members are the protocol's own, carried as for AVCaptureSessionControlsDelegate (no member rows); willSpeakMarker (iOS 17) is not carried"
+    }
+  ]
+}

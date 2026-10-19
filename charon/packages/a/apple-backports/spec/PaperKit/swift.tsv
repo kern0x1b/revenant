@@ -1,0 +1,147 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+PaperKit	swift-struct	s:8PaperKit0A6MarkupV	-	PaperMarkup	-	-	-	ios=26.0,macos=26.0	-	dabb5ff88cd36219
+PaperKit	swift-method	s:8PaperKit0A6MarkupV2eeoiySbAC_ACtFZ	PaperMarkup	==(_:_:)	+	Swift.Bool	PaperKit.PaperMarkup | PaperKit.PaperMarkup	-	-	c226086cc496833f
+PaperKit	swift-method	s:8PaperKit0A6MarkupV18dataRepresentationAC10Foundation4DataV_tKcfc	PaperMarkup	init(dataRepresentation:)	-	-	PaperKit.PaperMarkup | Foundation.Data	-	-	eea6a687d560b823
+PaperKit	swift-method	s:8PaperKit0A6MarkupV6boundsACSo6CGRectV_tcfc	PaperMarkup	init(bounds:)	-	-	PaperKit.PaperMarkup | CoreFoundation.CGRect	-	-	f0ceaba776816ebd
+PaperKit	swift-method	s:8PaperKit0A6MarkupV18dataRepresentation10Foundation4DataVyYaKF	PaperMarkup	dataRepresentation()	-	Foundation.Data	-	-	-	38987a4dc633b22c
+PaperKit	swift-property	s:8PaperKit0A6MarkupV16indexableContentSSSgvp	PaperMarkup	indexableContent	-	Swift.String?	-	-	-	97a9832b72d77d6c
+PaperKit	swift-property	s:8PaperKit0A6MarkupV6boundsSo6CGRectVvp	PaperMarkup	bounds	-	CoreFoundation.CGRect	-	-	-	32c28fc73030dd26
+PaperKit	swift-property	s:8PaperKit0A6MarkupV19contentsRenderFrameSo6CGRectVvp	PaperMarkup	contentsRenderFrame	-	CoreFoundation.CGRect	-	-	-	bc68d369f8a58c88
+PaperKit	swift-method	s:8PaperKit0A6MarkupV4draw2in5frame7optionsySo12CGContextRefa_So6CGRectVAA16RenderingOptionsVtYaF	PaperMarkup	draw(in:frame:options:)	-	()	CoreGraphics.CGContext | CoreFoundation.CGRect | PaperKit.RenderingOptions	-	-	6f8a18214ec9ef10
+PaperKit	swift-method	s:8PaperKit0A6MarkupV6append10contentsOfyAC_tF	PaperMarkup	append(contentsOf:)	-	()	PaperKit.PaperMarkup	-	-	ba621d7ab591c9c4
+PaperKit	swift-method	s:8PaperKit0A6MarkupV6append10contentsOfy06PencilB09PKDrawingV_tF	PaperMarkup	append(contentsOf:)	-	()	PencilKit.PKDrawing	-	-	06b464c6fe5dc86e
+PaperKit	swift-method	s:8PaperKit0A6MarkupV16transformContentyySo17CGAffineTransformVF	PaperMarkup	transformContent(_:)	-	()	CoreFoundation.CGAffineTransform	-	-	a38339474a5440ff
+PaperKit	swift-method	s:8PaperKit0A6MarkupV14insertNewShape13configuration5frame8rotationyAA0F13ConfigurationV_So6CGRectV14CoreFoundation7CGFloatVtF	PaperMarkup	insertNewShape(configuration:frame:rotation:)	-	()	PaperKit.ShapeConfiguration | CoreFoundation.CGRect | CoreGraphics.CGFloat	-	-	0b65b0472c216f93
+PaperKit	swift-method	s:8PaperKit0A6MarkupV13insertNewLine13configuration4from2to11startMarker03endK0yAA18ShapeConfigurationV_So7CGPointVAMS2btF	PaperMarkup	insertNewLine(configuration:from:to:startMarker:endMarker:)	-	()	PaperKit.ShapeConfiguration | CoreFoundation.CGPoint | CoreFoundation.CGPoint | Swift.Bool | Swift.Bool	-	-	8aa10e602a846411
+PaperKit	swift-method	s:8PaperKit0A6MarkupV16insertNewTextbox14attributedText5frame8rotationySo18NSAttributedStringC_So6CGRectV14CoreFoundation7CGFloatVtF	PaperMarkup	insertNewTextbox(attributedText:frame:rotation:)	-	()	Foundation.NSAttributedString | CoreFoundation.CGRect | CoreGraphics.CGFloat	-	-	5366aeb38736c69a
+PaperKit	swift-method	s:8PaperKit0A6MarkupV16insertNewTextbox14attributedText5frame8rotationy10Foundation16AttributedStringV_So6CGRectV04CoreK07CGFloatVtF	PaperMarkup	insertNewTextbox(attributedText:frame:rotation:)	-	()	Foundation.AttributedString | CoreFoundation.CGRect | CoreGraphics.CGFloat	-	-	3ff76010e1c99a0a
+PaperKit	swift-method	s:8PaperKit0A6MarkupV14insertNewImage_5frame8rotationySo10CGImageRefa_So6CGRectV14CoreFoundation7CGFloatVtF	PaperMarkup	insertNewImage(_:frame:rotation:)	-	()	CoreGraphics.CGImage | CoreFoundation.CGRect | CoreGraphics.CGFloat	-	-	30cc2b3ca5bb29ce
+PaperKit	swift-property	s:8PaperKit0A6MarkupV10featureSetAA07FeatureE0Vvp	PaperMarkup	featureSet	-	PaperKit.FeatureSet	-	-	-	e1c0fa6cc5c99cb1
+PaperKit	swift-method	s:8PaperKit0A6MarkupV24removeContentUnsupported2byyAA10FeatureSetV_tF	PaperMarkup	removeContentUnsupported(by:)	-	()	PaperKit.FeatureSet	-	-	1d551ce60e5b78e0
+PaperKit	swift-class	c:@M@PaperKit@objc(cs)PaperMarkupViewController	-	PaperMarkupViewController	-	-	-	ios=26.0	-	154dfea3cbad65c0
+PaperKit	swift-protocol	s:8PaperKit0A20MarkupViewControllerC8DelegateP	PaperMarkupViewController	Delegate	-	-	-	-	-	3f442db6101e7d73
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC8DelegateP05papercde9DidChangeC0yyACF	PaperMarkupViewController.Delegate	paperMarkupViewControllerDidChangeMarkup(_:)	-	()	PaperKit.PaperMarkupViewController	-	-	aa5be32ab4f87bce
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC8DelegateP05papercdE18DidChangeSelectionyyACF	PaperMarkupViewController.Delegate	paperMarkupViewControllerDidChangeSelection(_:)	-	()	PaperKit.PaperMarkupViewController	-	-	8a7c2f1aa14e5df2
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC8DelegateP05papercdE15DidBeginDrawingyyACF	PaperMarkupViewController.Delegate	paperMarkupViewControllerDidBeginDrawing(_:)	-	()	PaperKit.PaperMarkupViewController	-	-	e2f56245170d4eec
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC8DelegateP05papercdE28DidChangeContentVisibleFrameyyACF	PaperMarkupViewController.Delegate	paperMarkupViewControllerDidChangeContentVisibleFrame(_:)	-	()	PaperKit.PaperMarkupViewController	-	-	f9f6f5a639a19a26
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC8delegateAC8Delegate_pSgvp	PaperMarkupViewController	delegate	-	(any PaperKit.PaperMarkupViewController.Delegate)?	-	-	-	96d474f4013fa57e
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC6markupAA0aC0VSgvp	PaperMarkupViewController	markup	-	PaperKit.PaperMarkup?	-	-	-	5d088b51498a2555
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC6markup19supportedFeatureSetAcA0aC0VSg_AA0hI0Vtcfc	PaperMarkupViewController	init(markup:supportedFeatureSet:)	-	-	PaperKit.PaperMarkupViewController | PaperKit.PaperMarkup? | PaperKit.FeatureSet	-	-	60c6e8235c795973
+PaperKit	swift-property	c:@M@PaperKit@objc(cs)PaperMarkupViewController(py)canBecomeFirstResponder	PaperMarkupViewController	canBecomeFirstResponder	-	Swift.Bool	-	-	-	f44120f147b8fa51
+PaperKit	swift-property	c:@M@PaperKit@objc(cs)PaperMarkupViewController(py)undoManager	PaperMarkupViewController	undoManager	-	Foundation.UndoManager?	-	-	-	78b781e7bfb4867b
+PaperKit	swift-method	c:@M@PaperKit@objc(cs)PaperMarkupViewController(im)viewDidLoad	PaperMarkupViewController	viewDidLoad()	-	()	-	-	-	66ab6eaf7252ba1f
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC07contentD0So6UIViewCSgvp	PaperMarkupViewController	contentView	-	UIKit.UIView?	-	-	-	162cd258b14a5ee1
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC10isEditableSbvp	PaperMarkupViewController	isEditable	-	Swift.Bool	-	-	-	759b8c91954b25f4
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC11drawingTool06PencilB06PKTool_pvp	PaperMarkupViewController	drawingTool	-	any PencilKit.PKTool	-	-	-	b0a9c0132ba44daa
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC15directTouchModeAC0gH0Ovp	PaperMarkupViewController	directTouchMode	-	PaperKit.PaperMarkupViewController.TouchMode	-	-	-	8364b185965722d0
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC29directTouchAutomaticallyDrawsSbvp	PaperMarkupViewController	directTouchAutomaticallyDraws	-	Swift.Bool	-	-	-	27595db335056167
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC24indirectPointerTouchModeAC0hI0Ovp	PaperMarkupViewController	indirectPointerTouchMode	-	PaperKit.PaperMarkupViewController.TouchMode	-	-	-	dee68c2aeaf153bb
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC26suggestedFrameForInserting09contentInG0So6CGRectVAG_tF	PaperMarkupViewController	suggestedFrameForInserting(contentInFrame:)	-	CoreFoundation.CGRect	CoreFoundation.CGRect	-	-	05bb0cb07e7cfaf7
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC08selectedC0AA0aC0Vvp	PaperMarkupViewController	selectedMarkup	-	PaperKit.PaperMarkup	-	-	-	bd69b88a22186f97
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC13isRulerActiveSbvp	PaperMarkupViewController	isRulerActive	-	Swift.Bool	-	-	-	d66a1f3a2ac6d5b9
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC28showsVerticalScrollIndicatorSbvp	PaperMarkupViewController	showsVerticalScrollIndicator	-	Swift.Bool	-	ios=26.1	-	62be539293de3c11
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC30showsHorizontalScrollIndicatorSbvp	PaperMarkupViewController	showsHorizontalScrollIndicator	-	Swift.Bool	-	ios=26.1	-	b3a9de0acaa27365
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC19contentVisibleFrameSo6CGRectVvp	PaperMarkupViewController	contentVisibleFrame	-	CoreFoundation.CGRect	-	-	-	38e425b79a8ba026
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC22setContentVisibleFrame_8animatedySo6CGRectV_SbtF	PaperMarkupViewController	setContentVisibleFrame(_:animated:)	-	()	CoreFoundation.CGRect | Swift.Bool	-	-	ef29ef291595db26
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC9zoomRangeSNy14CoreFoundation7CGFloatVGvp	PaperMarkupViewController	zoomRange	-	Swift.ClosedRange<CoreGraphics.CGFloat>	-	-	-	6a5ee0426bb931fb
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC19supportedFeatureSetAA0gH0Vvp	PaperMarkupViewController	supportedFeatureSet	-	PaperKit.FeatureSet	-	-	-	d03f0e6cf76c64d1
+PaperKit	swift-method	c:@M@PaperKit@objc(cs)PaperMarkupViewController(im)toolPickerSelectedToolItemDidChange:	PaperMarkupViewController	toolPickerSelectedToolItemDidChange(_:)	-	()	PencilKit.PKToolPicker	-	-	62416816405bcb95
+PaperKit	swift-method	c:@M@PaperKit@objc(cs)PaperMarkupViewController(im)toolPickerIsRulerActiveDidChange:	PaperMarkupViewController	toolPickerIsRulerActiveDidChange(_:)	-	()	PencilKit.PKToolPicker	-	-	dd866a97474dd95f
+PaperKit	swift-enum	s:8PaperKit0A20MarkupViewControllerC9TouchModeO	PaperMarkupViewController	TouchMode	-	-	-	ios=26.0,macos=26.0	-	d5ca2c79fca92e83
+PaperKit	swift-constant	s:8PaperKit0A20MarkupViewControllerC9TouchModeO9selectionyA2EmF	PaperMarkupViewController.TouchMode	selection	-	-	-	-	-	7e43caf4642f747e
+PaperKit	swift-constant	s:8PaperKit0A20MarkupViewControllerC9TouchModeO7drawingyA2EmF	PaperMarkupViewController.TouchMode	drawing	-	-	-	-	-	c3aadf65d3b5f475
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC9TouchModeO2eeoiySbAE_AEtFZ	PaperMarkupViewController.TouchMode	==(_:_:)	+	Swift.Bool	PaperKit.PaperMarkupViewController.TouchMode | PaperKit.PaperMarkupViewController.TouchMode	-	-	2ca008c3647005f5
+PaperKit	swift-method	s:8PaperKit0A20MarkupViewControllerC9TouchModeO4hash4intoys6HasherVz_tF	PaperMarkupViewController.TouchMode	hash(into:)	-	()	Swift.Hasher	-	-	16b30aa622fd3c11
+PaperKit	swift-property	s:8PaperKit0A20MarkupViewControllerC9TouchModeO9hashValueSivp	PaperMarkupViewController.TouchMode	hashValue	-	Swift.Int	-	-	-	f4c34480d0930ccd
+PaperKit	swift-struct	s:8PaperKit18ShapeConfigurationV	-	ShapeConfiguration	-	-	-	ios=26.0,macos=26.0	-	4f51c20003c65466
+PaperKit	swift-property	s:8PaperKit18ShapeConfigurationV4typeAC0C0Ovp	ShapeConfiguration	type	-	PaperKit.ShapeConfiguration.Shape	-	-	-	52c18a7767d4833b
+PaperKit	swift-property	s:8PaperKit18ShapeConfigurationV9fillColorSo10CGColorRefaSgvp	ShapeConfiguration	fillColor	-	CoreGraphics.CGColor?	-	-	-	2bfe096b9f16bc8f
+PaperKit	swift-property	s:8PaperKit18ShapeConfigurationV11strokeColorSo10CGColorRefaSgvp	ShapeConfiguration	strokeColor	-	CoreGraphics.CGColor?	-	-	-	127589e8d3c3f850
+PaperKit	swift-property	s:8PaperKit18ShapeConfigurationV9lineWidth14CoreFoundation7CGFloatVvp	ShapeConfiguration	lineWidth	-	CoreGraphics.CGFloat	-	-	-	e125abeec2562937
+PaperKit	swift-method	s:8PaperKit18ShapeConfigurationV4type9fillColor06strokeG09lineWidthA2C0C0O_So10CGColorRefaSgAL14CoreFoundation7CGFloatVtcfc	ShapeConfiguration	init(type:fillColor:strokeColor:lineWidth:)	-	-	PaperKit.ShapeConfiguration | PaperKit.ShapeConfiguration.Shape | CoreGraphics.CGColor? | CoreGraphics.CGColor? | CoreGraphics.CGFloat	-	-	3eb47d964afd511e
+PaperKit	swift-enum	s:8PaperKit18ShapeConfigurationV0C0O	ShapeConfiguration	Shape	-	-	-	-	-	6711156e54e31b35
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O9rectangleyA2EmF	ShapeConfiguration.Shape	rectangle	-	-	-	-	-	3875bf1d89a752b9
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O7ellipseyA2EmF	ShapeConfiguration.Shape	ellipse	-	-	-	-	-	a586d806d059d883
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O4lineyA2EmF	ShapeConfiguration.Shape	line	-	-	-	-	-	1e45291c9772e473
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O10chatBubbleyA2EmF	ShapeConfiguration.Shape	chatBubble	-	-	-	-	-	e776b2f3f046bdec
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O16roundedRectangleyA2EmF	ShapeConfiguration.Shape	roundedRectangle	-	-	-	-	-	8375bc760ab563c1
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O14regularPolygonyA2EmF	ShapeConfiguration.Shape	regularPolygon	-	-	-	-	-	edba5f25bc8a134d
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O4staryA2EmF	ShapeConfiguration.Shape	star	-	-	-	-	-	729cbbf340c4dbd3
+PaperKit	swift-constant	s:8PaperKit18ShapeConfigurationV0C0O05arrowC0yA2EmF	ShapeConfiguration.Shape	arrowShape	-	-	-	-	-	09242dea34d4f368
+PaperKit	swift-method	s:8PaperKit18ShapeConfigurationV0C0O2eeoiySbAE_AEtFZ	ShapeConfiguration.Shape	==(_:_:)	+	Swift.Bool	PaperKit.ShapeConfiguration.Shape | PaperKit.ShapeConfiguration.Shape	-	-	e9774f88447ad4c4
+PaperKit	swift-typealias	s:8PaperKit18ShapeConfigurationV0C0O8AllCasesa	ShapeConfiguration.Shape	AllCases	-	-	-	ios=26.0,macos=26.0	-	28ddbedd2ee4c3ad
+PaperKit	swift-property	s:8PaperKit18ShapeConfigurationV0C0O8allCasesSayAEGvpZ	ShapeConfiguration.Shape	allCases	+	[PaperKit.ShapeConfiguration.Shape]	-	-	-	129497c08d3119da
+PaperKit	swift-method	s:8PaperKit18ShapeConfigurationV0C0O4hash4intoys6HasherVz_tF	ShapeConfiguration.Shape	hash(into:)	-	()	Swift.Hasher	-	-	a80a744bf0559638
+PaperKit	swift-property	s:8PaperKit18ShapeConfigurationV0C0O9hashValueSivp	ShapeConfiguration.Shape	hashValue	-	Swift.Int	-	-	-	a3d117448b9142bc
+PaperKit	swift-enum	s:8PaperKit11MarkupErrorO	-	MarkupError	-	-	-	ios=26.0,macos=26.0	-	3e5ede2a821df03e
+PaperKit	swift-constant	s:8PaperKit11MarkupErrorO15incorrectFormatyA2CmF	MarkupError	incorrectFormat	-	-	-	-	-	5959800581c45873
+PaperKit	swift-constant	s:8PaperKit11MarkupErrorO13malformedDatayA2CmF	MarkupError	malformedData	-	-	-	-	-	766518f242981a6e
+PaperKit	swift-constant	s:8PaperKit11MarkupErrorO24incompatibleFormatTooNewyA2CmF	MarkupError	incompatibleFormatTooNew	-	-	-	-	-	23528915caafe23a
+PaperKit	swift-method	s:8PaperKit11MarkupErrorO2eeoiySbAC_ACtFZ	MarkupError	==(_:_:)	+	Swift.Bool	PaperKit.MarkupError | PaperKit.MarkupError	-	-	26f03bb48d59cbeb
+PaperKit	swift-method	s:8PaperKit11MarkupErrorO4hash4intoys6HasherVz_tF	MarkupError	hash(into:)	-	()	Swift.Hasher	-	-	7f6bb761725a0e72
+PaperKit	swift-property	s:8PaperKit11MarkupErrorO9hashValueSivp	MarkupError	hashValue	-	Swift.Int	-	-	-	6f89a7b590a9377c
+PaperKit	swift-struct	s:8PaperKit16RenderingOptionsV	-	RenderingOptions	-	-	-	ios=26.0,macos=26.0	-	2d2932efb39857e2
+PaperKit	swift-property	s:8PaperKit16RenderingOptionsV22darkUserInterfaceStyleSbvp	RenderingOptions	darkUserInterfaceStyle	-	Swift.Bool	-	-	-	3e8b851fccb974b7
+PaperKit	swift-property	s:8PaperKit16RenderingOptionsV26rightToLeftLayoutDirectionSbvp	RenderingOptions	rightToLeftLayoutDirection	-	Swift.Bool	-	-	-	1220fc58d219208a
+PaperKit	swift-method	s:8PaperKit16RenderingOptionsV15traitCollectionACSo07UITraitF0C_tcfc	RenderingOptions	init(traitCollection:)	-	-	PaperKit.RenderingOptions | UIKit.UITraitCollection	-	-	c01485dab96e7a2d
+PaperKit	swift-method	s:8PaperKit16RenderingOptionsV22darkUserInterfaceStyle17layoutRightToLeftACSb_Sbtcfc	RenderingOptions	init(darkUserInterfaceStyle:layoutRightToLeft:)	-	-	PaperKit.RenderingOptions | Swift.Bool | Swift.Bool	-	-	384c05a0a05abd35
+PaperKit	swift-method	s:8PaperKit16RenderingOptionsV2eeoiySbAC_ACtFZ	RenderingOptions	==(_:_:)	+	Swift.Bool	PaperKit.RenderingOptions | PaperKit.RenderingOptions	-	-	9e0ce0bebf240fad
+PaperKit	swift-class	c:@M@PaperKit@objc(cs)MarkupEditViewController	-	MarkupEditViewController	-	-	-	ios=26.0	-	11a4f33416ed50db
+PaperKit	swift-protocol	s:8PaperKit24MarkupEditViewControllerC8DelegateP	MarkupEditViewController	Delegate	-	-	-	ios=26.0	-	6ce72e17e615b8b7
+PaperKit	swift-method	s:8PaperKit24MarkupEditViewControllerC8DelegateP06markupdeF0_14insertNewShapeyAC_AA0K13ConfigurationV0K0OtF	MarkupEditViewController.Delegate	markupEditViewController(_:insertNewShape:)	-	()	PaperKit.MarkupEditViewController | PaperKit.ShapeConfiguration.Shape	-	-	e8ae9d20f696c6d7
+PaperKit	swift-method	s:8PaperKit24MarkupEditViewControllerC8DelegateP06markupdeF16InsertNewTextboxyyACF	MarkupEditViewController.Delegate	markupEditViewControllerInsertNewTextbox(_:)	-	()	PaperKit.MarkupEditViewController	-	-	ba7f3bbdff3ff642
+PaperKit	swift-method	s:8PaperKit24MarkupEditViewControllerC8DelegateP06markupdeF0_28insertNewLineWithStartMarker03endN0yAC_S2btF	MarkupEditViewController.Delegate	markupEditViewController(_:insertNewLineWithStartMarker:endMarker:)	-	()	PaperKit.MarkupEditViewController | Swift.Bool | Swift.Bool	-	-	429ed84b41df2576
+PaperKit	swift-method	s:8PaperKit24MarkupEditViewControllerC8DelegateP06markupdeF0_17insertNewContentsyAC_AA0aC0VtF	MarkupEditViewController.Delegate	markupEditViewController(_:insertNewContents:)	-	()	PaperKit.MarkupEditViewController | PaperKit.PaperMarkup	-	-	40ab6adb0dec6681
+PaperKit	swift-property	s:8PaperKit24MarkupEditViewControllerC19supportedFeatureSetAA0hI0Vvp	MarkupEditViewController	supportedFeatureSet	-	PaperKit.FeatureSet	-	-	-	b95ff6dce2805831
+PaperKit	swift-property	s:8PaperKit24MarkupEditViewControllerC8delegateAC8Delegate_pSgvp	MarkupEditViewController	delegate	-	(any PaperKit.MarkupEditViewController.Delegate)?	-	-	-	fe9c084d9d8de076
+PaperKit	swift-method	s:8PaperKit24MarkupEditViewControllerC19supportedFeatureSet17additionalActionsAcA0hI0V_SaySo13UIMenuElementCGtcfc	MarkupEditViewController	init(supportedFeatureSet:additionalActions:)	-	-	PaperKit.MarkupEditViewController | PaperKit.FeatureSet | [UIKit.UIMenuElement]	-	-	6ee5a24f98828229
+PaperKit	swift-method	c:@M@PaperKit@objc(cs)MarkupEditViewController(im)viewDidLoad	MarkupEditViewController	viewDidLoad()	-	()	-	-	-	87826bb28de2c7cb
+PaperKit	swift-struct	s:8PaperKit10FeatureSetV	-	FeatureSet	-	-	-	ios=26.0,macos=26.0	-	34194e68327de23c
+PaperKit	swift-property	s:8PaperKit10FeatureSetV14contentVersionAC07ContentF0Ovp	FeatureSet	contentVersion	-	PaperKit.FeatureSet.ContentVersion	-	-	-	941559a756ebb9df
+PaperKit	swift-property	s:8PaperKit10FeatureSetV6shapesShyAA18ShapeConfigurationV0F0OGvp	FeatureSet	shapes	-	Swift.Set<PaperKit.ShapeConfiguration.Shape>	-	-	-	06fa0b01cb3155c1
+PaperKit	swift-enum	s:8PaperKit10FeatureSetV0C0O	FeatureSet	Feature	-	-	-	-	-	1262387f63e6172e
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O6imagesyA2EmF	FeatureSet.Feature	images	-	-	-	-	-	86b4e6246ed6a971
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O8stickersyA2EmF	FeatureSet.Feature	stickers	-	-	-	-	-	ee6139fd6528ba92
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O6loupesyA2EmF	FeatureSet.Feature	loupes	-	-	-	-	-	689c159455792a3e
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O5linksyA2EmF	FeatureSet.Feature	links	-	-	-	-	-	87225277ece475ff
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O10shapeFillsyA2EmF	FeatureSet.Feature	shapeFills	-	-	-	-	-	dd8b22481b82c80e
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O12shapeStrokesyA2EmF	FeatureSet.Feature	shapeStrokes	-	-	-	-	-	0aa173c4db659aa7
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O12shapeOpacityyA2EmF	FeatureSet.Feature	shapeOpacity	-	-	-	-	-	d9be89cc22789181
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O4textyA2EmF	FeatureSet.Feature	text	-	-	-	-	-	44e10eebee900ef9
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV0C0O7drawingyA2EmF	FeatureSet.Feature	drawing	-	-	-	-	-	9ffca064ae82dad9
+PaperKit	swift-method	s:8PaperKit10FeatureSetV0C0O2eeoiySbAE_AEtFZ	FeatureSet.Feature	==(_:_:)	+	Swift.Bool	PaperKit.FeatureSet.Feature | PaperKit.FeatureSet.Feature	-	-	44fbd2fd89bdfe93
+PaperKit	swift-typealias	s:8PaperKit10FeatureSetV0C0O8AllCasesa	FeatureSet.Feature	AllCases	-	-	-	ios=26.0,macos=26.0	-	3b9da48a83df900a
+PaperKit	swift-property	s:8PaperKit10FeatureSetV0C0O8allCasesSayAEGvpZ	FeatureSet.Feature	allCases	+	[PaperKit.FeatureSet.Feature]	-	-	-	6e2f4a36ad823d3b
+PaperKit	swift-method	s:8PaperKit10FeatureSetV0C0O4hash4intoys6HasherVz_tF	FeatureSet.Feature	hash(into:)	-	()	Swift.Hasher	-	-	5ebacb8e086ee370
+PaperKit	swift-property	s:8PaperKit10FeatureSetV0C0O9hashValueSivp	FeatureSet.Feature	hashValue	-	Swift.Int	-	-	-	40c7a21f2e13f45a
+PaperKit	swift-property	s:8PaperKit10FeatureSetV8featuresShyAC0C0OGvp	FeatureSet	features	-	Swift.Set<PaperKit.FeatureSet.Feature>	-	-	-	86dd8c5dc05df7f0
+PaperKit	swift-method	s:8PaperKit10FeatureSetV8containsySbAC0C0OF	FeatureSet	contains(_:)	-	Swift.Bool	PaperKit.FeatureSet.Feature	-	-	7018eb84a9d870e9
+PaperKit	swift-method	s:8PaperKit10FeatureSetV6insertyyAC0C0OF	FeatureSet	insert(_:)	-	()	PaperKit.FeatureSet.Feature	-	-	94ff784d86b4b8d1
+PaperKit	swift-method	s:8PaperKit10FeatureSetV6removeyyAC0C0OF	FeatureSet	remove(_:)	-	()	PaperKit.FeatureSet.Feature	-	-	e4e86737bf9c97cf
+PaperKit	swift-property	s:8PaperKit10FeatureSetV4inksShy06PencilB012PKInkingToolV7InkTypeOGvp	FeatureSet	inks	-	Swift.Set<PencilKit.PKInkingTool.InkType>	-	-	-	ccb12b02841dd131
+PaperKit	swift-struct	s:8PaperKit10FeatureSetV19LineMarkerPositionsV	FeatureSet	LineMarkerPositions	-	-	-	-	-	113077dbe01a92a4
+PaperKit	swift-property	s:8PaperKit10FeatureSetV19LineMarkerPositionsV8rawValueSivp	FeatureSet.LineMarkerPositions	rawValue	-	Swift.Int	-	-	-	2e781f7ddf2b04e5
+PaperKit	swift-property	s:8PaperKit10FeatureSetV19LineMarkerPositionsV5plainAEvpZ	FeatureSet.LineMarkerPositions	plain	+	PaperKit.FeatureSet.LineMarkerPositions	-	-	-	f7a1ddb417484c01
+PaperKit	swift-property	s:8PaperKit10FeatureSetV19LineMarkerPositionsV6singleAEvpZ	FeatureSet.LineMarkerPositions	single	+	PaperKit.FeatureSet.LineMarkerPositions	-	-	-	6958b4d8812e9ef2
+PaperKit	swift-property	s:8PaperKit10FeatureSetV19LineMarkerPositionsV6doubleAEvpZ	FeatureSet.LineMarkerPositions	double	+	PaperKit.FeatureSet.LineMarkerPositions	-	-	-	2299ae71039f3dc1
+PaperKit	swift-property	s:8PaperKit10FeatureSetV19LineMarkerPositionsV3allAEvpZ	FeatureSet.LineMarkerPositions	all	+	PaperKit.FeatureSet.LineMarkerPositions	-	-	-	5155a8d72f45841d
+PaperKit	swift-method	s:8PaperKit10FeatureSetV19LineMarkerPositionsV8rawValueAESi_tcfc	FeatureSet.LineMarkerPositions	init(rawValue:)	-	-	PaperKit.FeatureSet.LineMarkerPositions | Swift.Int	-	-	0608f4d7cbb8fd44
+PaperKit	swift-typealias	s:8PaperKit10FeatureSetV19LineMarkerPositionsV19ArrayLiteralElementa	FeatureSet.LineMarkerPositions	ArrayLiteralElement	-	-	-	ios=26.0,macos=26.0	-	0a32a834515801e3
+PaperKit	swift-typealias	s:8PaperKit10FeatureSetV19LineMarkerPositionsV7Elementa	FeatureSet.LineMarkerPositions	Element	-	-	-	ios=26.0,macos=26.0	-	f45352209d48fe3a
+PaperKit	swift-typealias	s:8PaperKit10FeatureSetV19LineMarkerPositionsV8RawValuea	FeatureSet.LineMarkerPositions	RawValue	-	-	-	ios=26.0,macos=26.0	-	b65ef7a632a6781e
+PaperKit	swift-property	s:8PaperKit10FeatureSetV19lineMarkerPositionsAC04LinefG0Vvp	FeatureSet	lineMarkerPositions	-	PaperKit.FeatureSet.LineMarkerPositions	-	-	-	bd4b651772eed959
+PaperKit	swift-property	s:8PaperKit10FeatureSetV26colorMaximumLinearExposure14CoreFoundation7CGFloatVvp	FeatureSet	colorMaximumLinearExposure	-	CoreGraphics.CGFloat	-	-	-	dd7bdc382479f9d1
+PaperKit	swift-property	s:8PaperKit10FeatureSetV8version1ACvpZ	FeatureSet	version1	+	PaperKit.FeatureSet	-	-	-	cb21d5ec5857861d
+PaperKit	swift-property	s:8PaperKit10FeatureSetV6latestACvpZ	FeatureSet	latest	+	PaperKit.FeatureSet	-	-	-	6f3b6c37a630167c
+PaperKit	swift-property	s:8PaperKit10FeatureSetV5emptyACvpZ	FeatureSet	empty	+	PaperKit.FeatureSet	-	-	-	12ff71f1b94923f1
+PaperKit	swift-method	s:8PaperKit10FeatureSetV8isSubset2ofSbAC_tF	FeatureSet	isSubset(of:)	-	Swift.Bool	PaperKit.FeatureSet	-	-	7998d99d0b253677
+PaperKit	swift-method	s:8PaperKit10FeatureSetV2eeoiySbAC_ACtFZ	FeatureSet	==(_:_:)	+	Swift.Bool	PaperKit.FeatureSet | PaperKit.FeatureSet	-	-	cb04f8cf15e8d2db
+PaperKit	swift-enum	s:8PaperKit10FeatureSetV14ContentVersionO	FeatureSet	ContentVersion	-	-	-	-	-	428eabd932a3a9cf
+PaperKit	swift-constant	s:8PaperKit10FeatureSetV14ContentVersionO8version1yA2EmF	FeatureSet.ContentVersion	version1	-	-	-	-	-	41bd4fd8415ba527
+PaperKit	swift-property	s:8PaperKit10FeatureSetV14ContentVersionO06pencilbeF0So09PKContentF0Vvp	FeatureSet.ContentVersion	pencilKitContentVersion	-	PencilKit.PKContentVersion	-	-	-	c71bb26ec68e7611
+PaperKit	swift-property	s:8PaperKit10FeatureSetV14ContentVersionO6latestAEvpZ	FeatureSet.ContentVersion	latest	+	PaperKit.FeatureSet.ContentVersion	-	-	-	bf0e4bf794a1df4d
+PaperKit	swift-method	s:8PaperKit10FeatureSetV14ContentVersionO8rawValueAESgSi_tcfc	FeatureSet.ContentVersion	init(rawValue:)	-	-	PaperKit.FeatureSet.ContentVersion? | Swift.Int	-	-	5b7bf73f4f76c431
+PaperKit	swift-typealias	s:8PaperKit10FeatureSetV14ContentVersionO8RawValuea	FeatureSet.ContentVersion	RawValue	-	-	-	ios=26.0,macos=26.0	-	e94d1cf18f67f47a
+PaperKit	swift-property	s:8PaperKit10FeatureSetV14ContentVersionO8rawValueSivp	FeatureSet.ContentVersion	rawValue	-	Swift.Int	-	-	-	1dd38e15ab16ea8e
+PaperKit	swift-struct	s:22UniformTypeIdentifiers6UTTypeV	-	UTType	-	-	-	ios=14.0,macos=11.0,tvos=14.0,watchos=7.0	-	70e83e017bbbd131
+PaperKit	swift-property	s:22UniformTypeIdentifiers6UTTypeV8PaperKitE8paperkitACvpZ	UTType	paperkit	+	UniformTypeIdentifiers.UTType	-	ios=26.0,macos=26.0	-	4859b225cebe43c8

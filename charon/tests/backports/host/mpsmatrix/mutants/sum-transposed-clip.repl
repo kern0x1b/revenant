@@ -1,0 +1,1 @@
+    NSUInteger extent = _rows;  // MUTATION: the whole shape, not the intersection

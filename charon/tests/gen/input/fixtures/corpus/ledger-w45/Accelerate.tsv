@@ -1,0 +1,827 @@
+kind	lang	api	introduced	header-introduced	status	needs	reason
+constant	swift	AccelerateMatrixOrder.columnMajor	18.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	AccelerateMatrixOrder.rowMajor	18.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.abs	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.celu	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.clamp	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.clampedLeakyRectifiedLinear	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.elu	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.geluApproximation	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.geluApproximation2	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.gumbel	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.gumbelMax	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.hardShrink	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.hardSigmoid	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.hardSwish	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.identity	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.leakyRectifiedLinear	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.linear	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.linearWithBias	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.logSigmoid	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.logSoftmax	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.rectifiedLinear	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.scaledTanh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.selu	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.sigmoid	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.silu	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.softShrink	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.softmax	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.softplus	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.softsign	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.tanh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.tanhShrink	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ActivationFunction.threshold	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.add	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.divide	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.divideNoNaN	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.flooringDivide	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.max	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.min	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.multiply	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.multiplyNoNaN	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.pow	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.subtract	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.truncatingDivide	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticBinaryFunction.truncatingRemainder	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticTernaryFunction.multiplyAdd	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.abs	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.acos	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.acosh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.asin	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.asinh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.atan	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.atanh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.ceil	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.cos	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.cosh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.erf	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.exp	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.exp2	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.floor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.log	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.log2	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.negate	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.reciprocal	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.reciprocalSquareRoot	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.round	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.sign	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.sin	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.sinh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.square	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.squareRoot	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.tan	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ArithmeticUnaryFunction.tanh	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ConvolutionPadding.asymmetric	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ConvolutionPadding.symmetric	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ConvolutionType.standard	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ConvolutionType.transposed	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.BoxCoordinateMode.centerSizeHeightFirst	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.BoxCoordinateMode.centerSizeWidthFirst	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.BoxCoordinateMode.cornersHeightFirst	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.BoxCoordinateMode.cornersWidthFirst	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.LinearSamplingMode.alignCorners	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.LinearSamplingMode.default	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.LinearSamplingMode.offsetCorners	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.LinearSamplingMode.strictAlignCorners	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.CropResizeLayer.LinearSamplingMode.unalignCorners	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.convolutionWeightsOIHW	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.imageCHW	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.matrixColumnMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.matrixFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.matrixLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.matrixRowMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor3DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor3DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor3DNSE	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor3DSNE	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor4DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor4DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor5DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor5DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor6DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor6DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor7DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor7DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor8DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.tensor8DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DataLayout.vector	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DescriptorType.constant	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DescriptorType.parameter	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.DescriptorType.sample	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Error.arrayDescriptorInvalidData	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Error.layerApplyFail	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Error.optimizerStepFail	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Error.unableToCreateLayer	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.GradientClipping.byGlobalNorm	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.GradientClipping.byNorm	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.GradientClipping.byValue	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.GradientClipping.none	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.InterpolationMethod.linear	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.InterpolationMethod.nearestNeighbor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LearningPhase.inference	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LearningPhase.training	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.categoricalCrossEntropy	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.cosineDistance	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.hinge	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.huber	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.log	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.meanAbsoluteError	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.meanSquareError	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.sigmoidCrossEntropy	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.softmaxCrossEntropy	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossFunction.yolo	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossReduction.none	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossReduction.reductionMean	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossReduction.sum	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossReduction.weightedMean	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.LossReduction.zeroWeightMean	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.NormalizationType.batch	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.NormalizationType.group	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.NormalizationType.instance	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.NormalizationType.layer	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PaddingMode.constantBitPattern	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PaddingMode.constantScalar	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PaddingMode.reflect	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PaddingMode.symmetric	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PoolingType.average	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PoolingType.l2Norm	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PoolingType.max	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PoolingType.maxEx	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PoolingType.unMax	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.PoolingType.unMaxEx	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.RandomGeneratorMethod.aesCtr	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.all	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.any	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.argMax	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.argMin	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.l2Norm	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.logSumExp	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.logicalAnd	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.logicalOr	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.max	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.maxIndex	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.mean	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.meanNonZero	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.min	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.minIndex	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.product	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.sum	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.sumOfAbsolutes	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.sumOfLogs	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ReductionFunction.sumOfSquares	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.convolutionWeightsOIHW	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.imageCHW	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.matrixColumnMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.matrixFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.matrixLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.matrixRowMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor3DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor3DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor3DNSE	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor3DSNE	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor4DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor4DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor5DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor5DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor6DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor6DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor7DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor7DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor8DFirstMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.tensor8DLastMajor	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.Shape.vector	14.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ShuffleType.depthToSpaceNCHW	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.ShuffleType.spaceToDepthNCHW	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.SparseLayout.coo	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.SparseLayout.csr	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNS.SparsityType.unstructured	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionAbs	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionIdentity	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionLeakyRectifiedLinear	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionRectifiedLinear	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionScaledTanh	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionSigmoid	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSActivationFunctionTanh	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSDataTypeFloat16	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSDataTypeFloat32	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSDataTypeIndexed8	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSDataTypeInt16	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSDataTypeInt32	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSDataTypeInt8	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSFlagsUseClientPtr	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Activation.hardSigmoid	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Activation.linear	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Activation.relu	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Activation.scaledTanh	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Activation.sigmoid	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Activation.tanh	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.CeilingMode.ceiling	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.CeilingMode.floor	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ConvolutionPadding.custom	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ConvolutionPadding.lower	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ConvolutionPadding.same	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ConvolutionPadding.valid	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Direction.forward	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Direction.reverse	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Intent.input	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Intent.inputOutput	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Padding.constant	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Padding.reflection	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.Padding.replication	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.PoolingFunction.average	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.PoolingFunction.l2Norm	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.PoolingFunction.max	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.add	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.divide	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.maximum	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.minimum	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.multiply	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.subtract	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.ScatterMode.update	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.SortOrder.ascending	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Builder.SortOrder.descending	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Error.unableToCreateContext	18.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Error.unableToCreateGraph	18.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Error.unableToExecute	18.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Error.unableToMakeGraph	26.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSGraph.Error.unableToSetDynamicShapes	18.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSPoolingFunctionAverage	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	BNNSPoolingFunctionMax	10.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Error.badIntegrandBehaviour	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Error.generic	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Error.integrateMaxEval	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Error.internal	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Error.invalidArgument	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Integrator.qag	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Integrator.qags	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	Quadrature.Integrator.qng	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DCTTransformType.II	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DCTTransformType.III	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DCTTransformType.IV	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DFTError.invalidInterleavedCount	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DFTError.invalidSplitComplexCount	15.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DFTTransformType.complexComplex	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.DFTTransformType.complexReal	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.FourierTransformDirection.forward	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.FourierTransformDirection.inverse	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.IntegrationRule.runningSum	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.IntegrationRule.simpson	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.IntegrationRule.trapezoidal	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.Radix.radix2	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.Radix.radix3	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.Radix.radix5	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.RoundingMode.towardNearestInteger	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.RoundingMode.towardZero	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.SortOrder.ascending	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.SortOrder.descending	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.ThresholdRule.clampToThreshold	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.ThresholdRule.signedConstant	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.ThresholdRule.zeroFill	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.WindowSequence.blackman	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.WindowSequence.hamming	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.WindowSequence.hanningDenormalized	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vDSP.WindowSequence.hanningNormalized	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BlendMode.darken	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BlendMode.lighten	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BlendMode.multiply	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BlendMode.screen	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.Cb	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.Cr	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.YCbCr	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.alpha	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.chroma	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.chunky	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.cmykBlack	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.cmykCyan	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.cmykMagenta	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.cmykYellow	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.coreGraphics	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.indexed	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.labA	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.labB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.labL	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.luminance	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.monochrome	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.rgbBlue	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.rgbGreen	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.rgbRed	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.xyzX	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.xyzY	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.BufferType.xyzZ	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.ChannelOrdering.ARGB	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.ChannelOrdering.RGBA	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.CompositeMode.nonpremultiplied	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.CompositeMode.nonpremultipliedToPremultiplied	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.CompositeMode.premultiplied	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.CompositeMode.premultipliedWithConstantAlpha	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.EdgeMode.copyInPlace	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.EdgeMode.extend	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.EdgeMode.fill	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.EdgeMode.truncateKernel	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.bufferSizeMismatch	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.colorSyncIsAbsent	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.coreVideoIsAbsent	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.internalError	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidCVImageFormat	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidEdgeStyle	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidImageFormat	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidImageObject	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidKernelSize	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidOffset_X	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidOffset_Y	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidParameter	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.invalidRowBytes	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.memoryAllocationError	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.noError	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.nullPointerArgument	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.outOfPlaceOperationRequired	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.roiLargerThanInputBuffer	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.unknownFlagsBit	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Error.unsupportedConversion	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.FloodFillConnectivity.edges	17.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.FloodFillConnectivity.edgesAndCorners	17.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.bt709ForwardHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.bt709ReverseHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.elevenOverFiveHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.elevenOverNineHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.fiveOverElevenHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.fiveOverNineHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.fullPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.halfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.nineOverElevenHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.nineOverFiveHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.sRGBForwardHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Gamma.sRGBReverseHalfPrecision	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MorphologyOperation.dilate	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MorphologyOperation.erode	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MorphologyOperation.maximize	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MorphologyOperation.minimize	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MultidimensionalLookupTable.InterpolationMethod.full	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MultidimensionalLookupTable.InterpolationMethod.half	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.MultidimensionalLookupTable.InterpolationMethod.none	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.ReflectionAxis.horizontal	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.ReflectionAxis.vertical	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.angleInDegrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.angleInRadians	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.clockwise0Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.clockwise180Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.clockwise270Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.clockwise90Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.counterClockwise0Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.counterClockwise180Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.counterClockwise270Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.Rotation.counterClockwise90Degrees	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.ShearDirection.horizontal	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage.ShearDirection.vertical	16.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.bottom	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.bottomLeft	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.center	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.dv420	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.left	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.top	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.ChromaSiting.topLeft	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format128RGBAFloat	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format14Bayer_BGGR	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format14Bayer_GBRG	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format14Bayer_GRBG	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format14Bayer_RGGB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format16BE555	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format16BE565	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format16Gray	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format16LE555	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format16LE5551	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format16LE565	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format1IndexedGray_WhiteIsZero	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format1Monochrome	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format24BGR	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format24RGB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format2Indexed	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format2IndexedGray_WhiteIsZero	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format30RGB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format30RGBLEPackedWideGamut	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format32ABGR	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format32ARGB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format32AlphaGray	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format32BGRA	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format32RGBA	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format420YpCbCr10BiPlanarFullRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format420YpCbCr10BiPlanarVideoRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format420YpCbCr8BiPlanarFullRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format420YpCbCr8BiPlanarVideoRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format420YpCbCr8Planar	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format420YpCbCr8PlanarFullRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr10	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr10BiPlanarFullRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr10BiPlanarVideoRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr16	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr8	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr8FullRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr8_yuvs	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format422YpCbCr_4A_8BiPlanar	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format4444AYpCbCr16	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format4444AYpCbCr8	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format4444YpCbCrA8	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format4444YpCbCrA8R	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format444YpCbCr10	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format444YpCbCr10BiPlanarFullRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format444YpCbCr10BiPlanarVideoRange	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format444YpCbCr8	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format48RGB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format4Indexed	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format4IndexedGray_WhiteIsZero	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format64ARGB	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format64RGBAHalf	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format8Indexed	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.format8IndexedGray_WhiteIsZero	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatARGB2101010LEPacked	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatDepthFloat16	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatDepthFloat32	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatDisparityFloat16	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatDisparityFloat32	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatOneComponent16Half	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatOneComponent32Float	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatOneComponent8	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatTwoComponent16Half	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatTwoComponent32Float	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImageCVImageFormat.Format.formatTwoComponent8	13.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage_PerpsectiveTransform.Interpolation.linear	17.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	swift	vImage_PerpsectiveTransform.Interpolation.nearest	17.0		undecided	swift-module	no module this port builds for armv7-apple-ios6.1.3 stands for Accelerate, so nothing here can place this row
+constant	objc	BLAS_THREADING_MAX_OPTIONS	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BLAS_THREADING_MULTI_THREADED	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BLAS_THREADING_SINGLE_THREADED	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionAbs	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionCELU	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionClamp	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionClampedLeakyRectifiedLinear	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionELU	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionErf	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionGELU	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionGELUApproximation	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionGELUApproximation2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionGELUApproximationSigmoid	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionGumbel	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionGumbelMax	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionHardShrink	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionHardSigmoid	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionHardSwish	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionIdentity	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionIntegerLinearSaturate	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionIntegerLinearSaturatePerChannel	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionLeakyRectifiedLinear	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionLinear	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionLinearWithBias	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionLogSigmoid	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionLogSoftmax	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionPReLUPerChannel	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionReLU6	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionRectifiedLinear	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSELU	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionScaledTanh	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSiLU	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSigmoid	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSoftShrink	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSoftmax	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSoftplus	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionSoftsign	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionTanh	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionTanhShrink	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSActivationFunctionThreshold	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmetic	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAbs	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAcos	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAcosh	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAdd	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAsin	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAsinh	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAtan	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticAtanh	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticCeil	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticCos	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticCosh	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticDivide	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticDivideNoNaN	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticErf	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticExp	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticExp2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticFloor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticFloorDivide	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticLog	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticLog2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticMaximum	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticMinimum	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticMultiply	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticMultiplyAdd	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticMultiplyNoNaN	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticNegate	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticPow	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticReciprocal	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticReciprocalSquareRoot	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticRound	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSelect	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSign	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSin	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSinh	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSquare	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSquareRoot	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticSubtract	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticTan	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticTanh	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticTruncDivide	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSArithmeticTruncRemainder	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSBatchNorm	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSCenterSizeHeightFirst	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSCenterSizeWidthFirst	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSConstant	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSConvolution	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSCornersHeightFirst	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSCornersWidthFirst	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout1DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout1DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout2DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout2DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout3DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout3DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout4DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout4DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout5DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout5DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout6DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout6DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout7DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout7DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout8DFirstMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayout8DLastMajor	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutColumnMajorMatrix	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutConvolutionWeightsIOHrWr	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutConvolutionWeightsOIHW	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutConvolutionWeightsOIHW_Pack32	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutConvolutionWeightsOIHrWr	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutFullyConnectedSparse	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutImageCHW	13.0	13.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutMHA_DHK	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutNSE	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutRowMajorMatrix	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutSNE	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataLayoutVector	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeBFloat16	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeBoolean	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeFloat16	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeFloat32	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeFloatBit	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeIndexed1	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeIndexed2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeIndexed4	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeIndexed8	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeIndexedBit	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt1	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt16	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt32	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt4	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt64	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeInt8	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeIntBit	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeMiscellaneousBit	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt1	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt16	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt3	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt32	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt4	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt6	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt64	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUInt8	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSDataTypeUIntBit	11.0	11.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSEmbeddingFlagScaleGradientByFrequency	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSFlagsUseClientPtr	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSFullyConnected	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphArgumentIntentIn	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphArgumentIntentInOut	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphArgumentIntentOut	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphArgumentTypePointer	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphArgumentTypeTensor	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphMessageLevelError	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphMessageLevelInfo	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphMessageLevelUnsupported	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphMessageLevelWarning	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphOptimizationPreferenceIRSize	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGraphOptimizationPreferencePerformance	18.0	18.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSGroupNorm	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSInstanceNorm	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSInterpolationMethodLinear	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSInterpolationMethodNearest	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSL2Norm	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLayerFlagsLSTMBidirectional	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLayerFlagsLSTMDefaultActivations	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLayerNorm	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLinearSamplingAlignCorners	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLinearSamplingDefault	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLinearSamplingOffsetCorners	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLinearSamplingStrictAlignCorners	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLinearSamplingUnalignCorners	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionCategoricalCrossEntropy	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionCosineDistance	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionHinge	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionHuber	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionLog	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionMeanAbsoluteError	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionMeanSquareError	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionSigmoidCrossEntropy	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionSoftmaxCrossEntropy	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossFunctionYolo	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossReductionMean	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossReductionNonZeroWeightMean	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossReductionNone	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossReductionSum	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSLossReductionWeightedMean	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSNDArrayFlagBackpropAccumulate	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSNDArrayFlagBackpropSet	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerClippingByGlobalNorm	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerClippingByNorm	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerClippingByValue	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerClippingNone	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdam	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamAMSGrad	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamAMSGradWithClipping	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamW	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamWAMSGrad	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamWAMSGradWithClipping	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamWWithClipping	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionAdamWithClipping	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionRMSProp	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionRMSPropWithClipping	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionSGDMomentum	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerFunctionSGDMomentumWithClipping	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerRegularizationL1	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerRegularizationL2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSOptimizerRegularizationNone	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPaddingModeConstant	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPaddingModeReflect	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPaddingModeSymmetric	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSParameter	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPointerSpecifierAlpha	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPointerSpecifierBeta	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPoolingFunctionAverage	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPoolingFunctionAverageCountExcludePadding	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPoolingFunctionAverageCountIncludePadding	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPoolingFunctionL2Norm	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPoolingFunctionMax	10.0	10.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSPoolingFunctionUnMax	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSQuantization	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSQuantizerFunctionDequantize	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSQuantizerFunctionQuantize	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRandomGeneratorMethodAES_CTR	15.0	15.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionAll	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionAny	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionArgMax	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionArgMin	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionL1Norm	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionL2Norm	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionLogSum	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionLogSumExp	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionLogicalAnd	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionLogicalOr	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionMax	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionMean	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionMeanNonZero	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionMin	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionNone	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionProduct	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionSum	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionSumLog	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSReduceFunctionSumSquare	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorEqual	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorGreater	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorGreaterEqual	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLess	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLessEqual	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLogicalAND	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLogicalNAND	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLogicalNOR	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLogicalNOT	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLogicalOR	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorLogicalXOR	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSRelationalOperatorNotEqual	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSSGDMomentumVariant0	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSSGDMomentumVariant1	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSSGDMomentumVariant2	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSSample	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSShuffleTypeDepthToSpaceNCHW	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSShuffleTypePixelShuffleNCHW	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSShuffleTypePixelUnshuffleNCHW	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSShuffleTypeSpaceToDepthNCHW	16.4	16.4	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSSparsityTypeUnstructured	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSTargetSystemGeneric	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	BNNSTransposedConvolution	14.0	14.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationCholesky	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationCholeskyAtA	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLDLT	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLDLTSBK	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLDLTTPP	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLDLTUnpivoted	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLU	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLUSPP	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLUTPP	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationLUUnpivoted	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseFactorizationQR	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseHermitian	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseLowerTriangle	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrderAMD	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrderCOLAMD	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrderDefault	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrderMTMetis	26.0	26.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrderMetis	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrderUser	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseOrdinary	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseScalingDefault	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseScalingEquilibriationInf	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseScalingHungarianScalingAndOrdering	26.0	26.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseScalingHungarianScalingOnly	26.0	26.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseScalingUser	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorD	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorInvalid	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorL	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorP	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorPLPS	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorQ	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorR	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorRP	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorS	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorSc	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSubfactorSr	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseSymmetric	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseTriangular	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseUnitTriangular	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseUpdatePartialRefactor	18.5	18.5	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	SparseUpperTriangle	11	11	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage420Yp8_Cb8_Cr8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage420Yp8_CbCr8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage422CbYpCrYp16	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage422CbYpCrYp8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage422CbYpCrYp8_AA8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage422CrYpCbYpCbYpCbYpCrYpCrYp10	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage422YpCbYpCr8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage444AYpCbCr16	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage444AYpCbCr8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage444CbYpCrA8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage444CrYpCb10	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImage444CrYpCb8	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageARGB16Q12	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageARGB16U	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageARGB8888	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Alpha	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_CGFormat	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_CMYK_Black	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_CMYK_Cyan	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_CMYK_Magenta	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_CMYK_Yellow	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_CVPixelBuffer_YCbCr	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Cb	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Chroma	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Chunky	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel1	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel10	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel11	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel12	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel13	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel14	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel15	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel16	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel2	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel3	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel4	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel5	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel6	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel7	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel8	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_ColorSpaceChannel9	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Cr	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_EndOfList	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Indexed	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_LAB_A	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_LAB_B	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_LAB_L	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Luminance	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_Monochrome	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_RGB_Blue	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_RGB_Green	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_RGB_Red	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_UniqueFormatCount	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_XYZ_X	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_XYZ_Y	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageBufferTypeCode_XYZ_Z	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageCVImageFormat_AlphaIsOneHint	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageCVImageFormat_ChromaSiting	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageCVImageFormat_ColorSpace	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageCVImageFormat_ConversionMatrix	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageCVImageFormat_NoError	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageCVImageFormat_VideoChannelDescription	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageDoNotClamp	9.3	9.3	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageHDRContent	9.0	9.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageInterpolationLinear	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageInterpolationNearest	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageMatrixType_ARGBToYpCbCrMatrix	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageMatrixType_None	8.0	8.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageNoAllocate	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImagePrintDiagnosticsToConsole	7.0	7.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction
+constant	objc	kvImageUseFP16Accumulator	16.0	16.0	header-ok	lift	enum case in the lifted headers, no run-time symbol by construction

@@ -1,0 +1,27 @@
+{
+ "framework": "VideoToolbox",
+ "entries": [
+  {
+   "api": "kVTDecompressionPropertyKey_RealTime",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 30 of the frameworks demand table, LOAD-FAIL for session and telegram; iOS 6 carries the decompression session and its property interface, and only lacks the key's symbol",
+   "effect": "the string RealTime, the value iOS 8 exports; the 6.1.3 decoder is given it through VTSessionSetProperty and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 8.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTPixelTransferPropertyKey_DestinationYCbCrMatrix",
+   "kind": "constant",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 9.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 8.0; SDK 26.2, VideoToolbox/Headers, states 9.0"
+  }
+ ]
+}

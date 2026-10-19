@@ -1,0 +1,15 @@
+{
+  "framework": "CoreServices",
+  "entries": [
+    {
+      "api": "UTTypeCopyAllTagsWithClass()",
+      "kind": "function",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a declared identifier answers its declaration's UTTypeTagSpecification for the class (a string as a one-element array, an array as it is, NULL when the class is absent, no parent walk); a dynamic identifier answers the tags its own records carry, decoded as the facts measure, and NULL when it carries none",
+      "facts": "facts/MobileCoreServices/UTTypeAllTags.md",
+      "source": "the host's CoreServices, which the port is held against by tests/backports/host/uttypetags (1429542 comparisons, 0 mismatches); the header of CoreServices/UTType.h in the SDK 26.2, which marks the function deprecated for ios 8.0 to 15.0; the 6.1.3 guest (tests/backports/emulate/uttypetags, 10646 lines: the generated dynamic identifiers agree on all 10000 lines, the declared lists differ on 46 lines, which are the release's own declarations, facts section Release)"
+    }
+  ]
+}

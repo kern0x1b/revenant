@@ -1,0 +1,137 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "MTLSharedEvent",
+      "kind": "protocol",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the protocol is carried by the classes of the port that answer for it; an application that holds an id of it gets an object of OpenGL ES 2.0 behind it",
+      "effect": "the protocol is there, and the methods of it the port does not do are not implemented; facts/Metal/Blits.md lists what a blit is done of and what it is refused for",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "MTLSharedEventListener",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 carries no class of this name, and an application constructs a listener by name, so the port carries the class of the SDK: a listener is a dispatch queue that a notification block is run on",
+      "effect": "an object that answers -dispatchQueue with the queue it was made with; facts/Metal/Blits.md",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLSharedEventListener init]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a listener with no queue of its own gets a global queue, as Metal's own -init does",
+      "effect": "an object whose -dispatchQueue answers the queue its notifications run on",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLSharedEventListener initWithDispatchQueue:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the listener of the port is the queue it was made with, held for as long as the listener is",
+      "effect": "an object whose -dispatchQueue answers the queue given",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "MTLSharedEventListener.dispatchQueue",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the listener of the port is the queue it was made with",
+      "effect": "the queue the notification blocks of an event notified to this listener run on",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "MTLSharedEvent.signaledValue",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an event of the port is a signal value and a condition broadcast when the value is set, so a value set on one thread ends a wait on another",
+      "effect": "reading it answers the value, and setting it ends every wait and runs every notification block whose value it reached, on the queue of the listener each was given",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLSharedEvent notifyListener:atValue:block:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a notification of the port is a block, the value it waits for and the queue it runs on",
+      "effect": "the block runs on the listener's queue once the value is reached, immediately when it already is",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLDevice newSharedEvent]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an event of the port is created out of nothing: a signal value and a condition, which is all a shared event on a device with one process needs to be",
+      "effect": "an event of the port, whose -device answers nil, as the header of a shared event says it should",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLDevice newSharedEventWithHandle:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a handle of the port names the state of an event, and this device's device opens it: the event it hands back is a different object over the same value and the same wait",
+      "effect": "the event the handle names, and nil with a line in the log for a handle that is not one of the port's; a handle cannot be opened in another process, because the port runs one (facts/Metal/Blits.md)",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLSharedEvent newSharedEventHandle]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a handle names the value and the wait of an event, which live in a state of their own so that an event opened from a handle is a different object over the same value",
+      "effect": "a handle of the port, never nil: Apple's header does not allow nil here, and -[MTLDevice newSharedEventWithHandle:] opens it into an event over the same value",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "MTLSharedEventHandle",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a handle names the value and the wait of an event, and Apple's header does not allow nil from -newSharedEventHandle:, so the port carries the class of the SDK and gives it the state of an event to name; iOS 6 carries no class of this name, so this is the only one there is",
+      "effect": "an object that -[MTLDevice newSharedEventWithHandle:] opens, handing back a different event over the very same value; its label is the label of the event it was made from. What it cannot do is be opened in another process, because the port runs one (facts/Metal/Blits.md)",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 16.4, Metal, MTLEvent.h; the header's -newSharedEventHandle is not nullable, and the port answers it"
+    },
+    {
+      "api": "CharonMetalSharedEvent",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalSharedEvent",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, MTLEvent.h, whose protocol arrived in 12.0",
+      "facts": "facts/Metal/PortInternals.md"
+    }
+  ]
+}

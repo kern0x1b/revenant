@@ -1,0 +1,4 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	BCParameterNameBody	-	BCParameterNameBody	11.3	BCParameterName const	API_DEPRECATED("", macos(10.13.4, 13.0), ios(11.3, 16.1))	86b4fda5ec9f3b91	found	body	body	host-macos	-	exported	ns	-
+constant	BCParameterNameGroup	-	BCParameterNameGroup	11.3	BCParameterName const	API_DEPRECATED("", macos(10.13.4, 13.0), ios(11.3, 16.1))	bf68d67ece9933fc	found	biz-group-id	biz-group-id	host-macos	-	exported	ns	-
+constant	BCParameterNameIntent	-	BCParameterNameIntent	11.3	BCParameterName const	API_DEPRECATED("", macos(10.13.4, 13.0), ios(11.3, 16.1))	382ef1c1be537f29	found	biz-intent-id	biz-intent-id	host-macos	-	exported	ns	-

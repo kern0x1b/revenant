@@ -1,0 +1,1 @@
+                    NSUInteger which = startIndex + index;  // MUTATION: a vector index, which is what the port did before the fix and answered all zeros

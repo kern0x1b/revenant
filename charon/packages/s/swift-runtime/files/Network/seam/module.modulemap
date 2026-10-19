@@ -1,0 +1,4 @@
+module CharonNetworkSeam {
+    header "charon_network_seam.h"
+    export *
+}

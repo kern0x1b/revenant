@@ -1,0 +1,71 @@
+diff --git a/Runtimes/Core/cmake/modules/EmitSwiftInterface.cmake b/Runtimes/Core/cmake/modules/EmitSwiftInterface.cmake
+index 8c300f6..8b033c8 100644
+--- a/Runtimes/Core/cmake/modules/EmitSwiftInterface.cmake
++++ b/Runtimes/Core/cmake/modules/EmitSwiftInterface.cmake
+@@ -57,21 +57,24 @@ function(emit_swift_interface target)
+     INTERFACE
+       $<BUILD_INTERFACE:${module_directory}/${SwiftCore_MODULE_TRIPLE}.swiftmodule>)
+ 
+-  # Generate textual swift interfaces is library-evolution is enabled
++  # Generate textual swift interfaces is library-evolution is enabled, unless the build says nothing reads them: a
++  # client of the binary module needs no interface, and the compiler compiles one it writes again to check it.
+   if(SwiftCore_ENABLE_LIBRARY_EVOLUTION)
+-    target_compile_options(${target} PRIVATE
+-      $<$<COMPILE_LANGUAGE:Swift>:-emit-module-interface-path$<SEMICOLON>${module_directory}/${SwiftCore_MODULE_TRIPLE}.swiftinterface>
+-      $<$<COMPILE_LANGUAGE:Swift>:-emit-private-module-interface-path$<SEMICOLON>${module_directory}/${SwiftCore_MODULE_TRIPLE}.private.swiftinterface>)
+-    set_property(TARGET "${target}" APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+-      "${module_directory}/${SwiftCore_MODULE_TRIPLE}.swiftinterface"
+-      "${module_directory}/${SwiftCore_MODULE_TRIPLE}.private.swiftinterface")
+-    if(SwiftCore_VARIANT_MODULE_TRIPLE)
++    if(NOT SwiftCore_NO_MODULE_INTERFACE)
+       target_compile_options(${target} PRIVATE
+-        "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-module-interface-path ${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.swiftinterface>"
+-        "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-private-module-interface-path ${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.private.swiftinterface>")
++        $<$<COMPILE_LANGUAGE:Swift>:-emit-module-interface-path$<SEMICOLON>${module_directory}/${SwiftCore_MODULE_TRIPLE}.swiftinterface>
++        $<$<COMPILE_LANGUAGE:Swift>:-emit-private-module-interface-path$<SEMICOLON>${module_directory}/${SwiftCore_MODULE_TRIPLE}.private.swiftinterface>)
+       set_property(TARGET "${target}" APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+-        "${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.swiftinterface"
+-        "${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.private.swiftinterface")
++        "${module_directory}/${SwiftCore_MODULE_TRIPLE}.swiftinterface"
++        "${module_directory}/${SwiftCore_MODULE_TRIPLE}.private.swiftinterface")
++      if(SwiftCore_VARIANT_MODULE_TRIPLE)
++        target_compile_options(${target} PRIVATE
++          "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-module-interface-path ${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.swiftinterface>"
++          "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-private-module-interface-path ${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.private.swiftinterface>")
++        set_property(TARGET "${target}" APPEND PROPERTY ADDITIONAL_CLEAN_FILES
++          "${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.swiftinterface"
++          "${module_directory}/${SwiftCore_VARIANT_MODULE_TRIPLE}.private.swiftinterface")
++      endif()
+     endif()
+     target_compile_options(${target} PRIVATE
+       $<$<COMPILE_LANGUAGE:Swift>:-library-level$<SEMICOLON>api>
+diff --git a/Runtimes/Supplemental/cmake/modules/EmitSwiftInterface.cmake b/Runtimes/Supplemental/cmake/modules/EmitSwiftInterface.cmake
+index 8a3540d..f050251 100644
+--- a/Runtimes/Supplemental/cmake/modules/EmitSwiftInterface.cmake
++++ b/Runtimes/Supplemental/cmake/modules/EmitSwiftInterface.cmake
+@@ -37,15 +37,18 @@ function(emit_swift_interface target)
+     INTERFACE
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_MODULE_TRIPLE}.swiftmodule>)
+ 
+-  # Generate textual swift interfaces is library-evolution is enabled
++  # Generate textual swift interfaces is library-evolution is enabled, unless the build says nothing reads them: a
++  # client of the binary module needs no interface, and the compiler compiles one it writes again to check it.
+   if(${PROJECT_NAME}_ENABLE_LIBRARY_EVOLUTION)
+-    target_compile_options(${target} PRIVATE
+-      $<$<COMPILE_LANGUAGE:Swift>:-emit-module-interface-path$<SEMICOLON>${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_MODULE_TRIPLE}.swiftinterface>
+-      $<$<COMPILE_LANGUAGE:Swift>:-emit-private-module-interface-path$<SEMICOLON>${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_MODULE_TRIPLE}.private.swiftinterface>)
+-    if(${PROJECT_NAME}_VARIANT_MODULE_TRIPLE)
++    if(NOT SwiftCore_NO_MODULE_INTERFACE)
+       target_compile_options(${target} PRIVATE
+-        "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-module-interface-path ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_VARIANT_MODULE_TRIPLE}.swiftinterface>"
+-        "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-private-module-interface-path ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_VARIANT_MODULE_TRIPLE}.private.swiftinterface>")
++        $<$<COMPILE_LANGUAGE:Swift>:-emit-module-interface-path$<SEMICOLON>${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_MODULE_TRIPLE}.swiftinterface>
++        $<$<COMPILE_LANGUAGE:Swift>:-emit-private-module-interface-path$<SEMICOLON>${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_MODULE_TRIPLE}.private.swiftinterface>)
++      if(${PROJECT_NAME}_VARIANT_MODULE_TRIPLE)
++        target_compile_options(${target} PRIVATE
++          "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-module-interface-path ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_VARIANT_MODULE_TRIPLE}.swiftinterface>"
++          "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-emit-variant-private-module-interface-path ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.swiftmodule/${${PROJECT_NAME}_VARIANT_MODULE_TRIPLE}.private.swiftinterface>")
++      endif()
+     endif()
+     target_compile_options(${target} PRIVATE
+       $<$<COMPILE_LANGUAGE:Swift>:-library-level$<SEMICOLON>api>

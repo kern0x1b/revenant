@@ -1,0 +1,55 @@
+# host-expectations.txt - the command queue and buffer probe (commandbuffer.m) run on Apple's Metal, macOS 27.0.1.
+# Captured by: clang -fobjc-arc -framework Foundation -framework Metal -framework QuartzCore commandbuffer.m, then the binary with no argument,
+# and with 'late-completed' and 'late-scheduled' (each its own process: Metal aborts those two forms, see the probe's comment).
+# Times are asked as relations only; no value of Apple's clock is recorded. Each line is key=value, read by key.
+## main
+device.present=1
+queue.present=1
+queue.label.nil=1
+queue.device.same=1
+queue.insertDebugCaptureBoundary.responds=1
+queue.commandBufferWithDescriptor.responds=1
+buffer.present=1
+buffer.status.fresh=0
+buffer.label.nil=1
+buffer.device.same=1
+buffer.commandQueue.same=1
+buffer.error.nil=1
+buffer.retainedReferences=1
+buffer.errorOptions.default=0
+buffer.logs.count=0
+buffer.GPUStartTime.beforeCommit.zero=1
+buffer.GPUEndTime.beforeCommit.zero=1
+buffer.kernelStartTime.beforeCommit.zero=1
+buffer.kernelEndTime.beforeCommit.zero=1
+buffer.pushDebugGroup.responds=1
+buffer.popDebugGroup.responds=1
+unretained.retainedReferences=0
+descriptor.retainedReferences.default=1
+described.present=1
+described.retainedReferences=0
+described.errorOptions=1
+run.status.beforeEnqueue=0
+run.status.afterEnqueue=1
+run.computeWithDispatchType.present=1
+run.status.beforeCommit=1
+run.status.afterCommit=2
+run.status.afterWait=4
+run.error.nil.afterWait=1
+run.GPUStartTime.positive=1
+run.GPUEndTime.positive=1
+run.GPUEndTime.notBeforeStart=1
+run.kernelStartTime.positive=1
+run.kernelEndTime.positive=1
+run.kernelEndTime.notBeforeStart=1
+run.order.scheduled:3
+run.order.completed:4
+after.boundary.status=4
+blitting.encoder.present=1
+blitting.status=4
+## late-completed (exit 134: Metal aborts after the handler line)
+device.present=1
+late.status.beforeHandler=4
+## late-scheduled (exit 134: Metal aborts after the handler line)
+device.present=1
+late.status.beforeHandler=4

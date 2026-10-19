@@ -1,0 +1,7 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+ServicesAccountLinking	method	ResellerAccount.registerToken(_:)	16.4				own
+ServicesAccountLinking	method	ResellerAccount.registerIdentifier(_:)	16.4				own
+ServicesAccountLinking	property	ResellerAccount.bindingToken	16.4				container
+ServicesAccountLinking	property	ResellerAccount._	16.4				container
+ServicesAccountLinking	property	ResellerAccount.payload	16.4				container
+ServicesAccountLinking	property	ResellerAccount.payloadData	16.4				container

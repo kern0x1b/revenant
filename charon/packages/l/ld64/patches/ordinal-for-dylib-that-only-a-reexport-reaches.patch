@@ -1,0 +1,43 @@
+--- a/cctools-port/cctools/ld64/src/ld/OutputFile.cpp
++++ b/cctools-port/cctools/ld64/src/ld/OutputFile.cpp
+@@ -5309,6 +5309,40 @@
+ 					allReExports[symbolName] = aDylib;
+ 				}
+ 			});
++		}
++	}
++
++	// A dylib that owns an import proxy but is in neither of the two lists this loop walks gets no
++	// ordinal, and encoding that proxy then aborts in dylibToOrdinal() and in
++	// compressedOrdinalForAtom(). state.dylibs is filled from _inputFiles, which holds only the files
++	// named on the command line (InputFiles.cpp:1053), and from the implicitly linked entries of
++	// _installPathToDylibs (InputFiles.cpp:1582). A dylib reached only through another one is not on
++	// the command line, so it is not in _inputFiles; and addDylib keeps one file per install path
++	// (InputFiles.cpp:1205), so if another file already holds that path this one is not the map's
++	// entry either. The SDK's usr/lib/libobjc.tbd is exactly that: never named on the link line, its
++	// install name /usr/lib/libobjc.A.dylib is held by usr/lib/libobjc.A.tbd, and it owns the
++	// proxies for _objc_getClass and the rest of the ObjC runtime. Give every dylib that owns a
++	// proxy an ordinal, and add it to the load list unless some dylib already loaded carries that
++	// install path, so the library the symbol came from is the one the output loads and the one the
++	// symbol binds to. Nothing that linked before changes: a dylib that already has an ordinal is
++	// skipped, and one without an ordinal whose proxy is encoded is exactly the case that used to
++	// abort.
++	for (const ld::Internal::FinalSection* sect : state.sections) {
++		if ( sect->type() != ld::Section::typeImportProxies ) { continue; }
++		for (const ld::Atom* rawAtom : sect->atoms) {
++			const ld::dylib::File* aDylib = dynamic_cast<const ld::dylib::File*>(rawAtom->file());
++			if ( aDylib == NULL ) { continue; }
++			if ( _dylibToOrdinal.find(aDylib) != _dylibToOrdinal.end() ) { continue; }
++			int ordinal;
++			if ( this->hasOrdinalForInstallPath(aDylib->installPath(), &ordinal) ) {
++				// some dylib already in the load list carries that install path, bind to it
++				_dylibToOrdinal[aDylib] = ordinal;
++			}
++			else {
++				// the dylib exporting this symbol is not loaded, so load it and give it an ordinal
++				_dylibsToLoad.push_back(const_cast<ld::dylib::File*>(aDylib));
++				_dylibToOrdinal[aDylib] = _dylibsToLoad.size();
++			}
+ 		}
+ 	}
+ 

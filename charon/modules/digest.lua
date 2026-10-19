@@ -1,0 +1,92 @@
+-- The digest of a Lua source that a recipe puts into its build hash. What only the reader sees, the comments and the layout
+-- of code, is left out of it, so that rewording a comment or breaking a line is not a new build: a compiler or a runtime
+-- rebuilt from source for that would be hours of work that changed nothing. Strings, which can hold a script or a flag,
+-- count in full.
+-- A recipe's description can read no file, so it cannot compute this: the digests live in a digest.lua beside each recipe,
+-- which the recipe includes, tools/recipe-digests.lua writes, and a test checks against the sources.
+
+local function long_bracket(source, at)
+    return source:match("^%[(=*)%[", at)
+end
+
+-- The source with its comments taken out, the blanks around a line of code and the lines left empty dropped, outside of strings.
+function stripped(source)
+    local out, line = {}, {}
+    local at, size = 1, #source
+    local function flush()
+        local text = table.concat(line):gsub("^%s+", ""):gsub("%s+$", "")
+        if text ~= "" then
+            table.insert(out, text)
+        end
+        line = {}
+    end
+    while at <= size do
+        local char = source:sub(at, at)
+        if source:sub(at, at + 1) == "--" then
+            local level = source:match("^%-%-%[(=*)%[", at)
+            if level then
+                local close = "]" .. level .. "]"
+                local found = source:find(close, at, true)
+                at = found and found + #close or size + 1
+            else
+                at = source:find("\n", at, true) or size + 1
+            end
+        elseif char == '"' or char == "'" then
+            local cursor = at + 1
+            while cursor <= size do
+                local next = source:sub(cursor, cursor)
+                if next == "\\" then
+                    cursor = cursor + 2
+                elseif next == char then
+                    break
+                else
+                    cursor = cursor + 1
+                end
+            end
+            table.insert(line, source:sub(at, cursor))
+            at = cursor + 1
+        elseif char == "[" and long_bracket(source, at) then
+            local close = "]" .. long_bracket(source, at) .. "]"
+            local found = source:find(close, at, true)
+            local last = found and found + #close - 1 or size
+            -- a long string is kept as it is, its newlines included
+            table.insert(line, source:sub(at, last))
+            at = last + 1
+        elseif char == "\n" then
+            flush()
+            at = at + 1
+        else
+            table.insert(line, char)
+            at = at + 1
+        end
+    end
+    flush()
+    return table.concat(out, "\n")
+end
+
+-- The recipes whose build hash covers the Lua they are made of: the variable their digest.lua sets, and the Lua sources.
+local RECIPES = {
+    -- the modules that make the headers the backports variant installs and every port compiles against
+    {folder = "packages/s/swift-runtime", variable = "swift_runtime_sources_digest",
+     inputs = {"packages/s/swift-runtime/xmake.lua", "modules/apple/shared_runtime.lua",
+               "modules/apple/backports.lua", "modules/apple/compat.lua", "modules/apple/dyld.lua"}},
+    {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
+     inputs = {"packages/l/libcxx/xmake.lua", "modules/apple/shared_runtime.lua"}}
+}
+
+function recipes()
+    return RECIPES
+end
+
+-- The digest of these sources of a recipe, as their names and their digests without comments.
+function sources(root, inputs)
+    local digests = {}
+    for _, input in ipairs(inputs) do
+        table.insert(digests, input .. "=" .. hash.strhash128(stripped(io.readfile(path.join(root, input)))))
+    end
+    return hash.strhash128(table.concat(digests, ";"))
+end
+
+function digest_file(recipe, value)
+    return string.format("-- Written by tools/recipe-digests.lua; a test compares it with the sources. It is what the recipe's build hash takes of\n-- its own Lua, and it does not change when only a comment or the layout does.\n%s = \"%s\"\n", recipe.variable, value)
+end

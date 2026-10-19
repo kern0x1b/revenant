@@ -1,0 +1,236 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVAudioEngineConfigurationChangeNotification",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "a notification name or key that is carried with its text, AVAudioEngineConfigurationChangeNotification, and that is never posted or delivered: nothing of iOS 6 sends it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVAudioSessionMediaServicesWereLostNotification",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "a notification name or key that is carried with its text, AVAudioSessionMediaServicesWereLostNotification, and that is never posted or delivered: nothing of iOS 6 sends it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVAudioSessionModeVideoChat",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the string AVAudioSessionModeVideoChat that names the mode or the port; no route of iOS 6 reports it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVAudioSessionPortBluetoothLE",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the string BluetoothLE that names the mode or the port; no route of iOS 6 reports it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVAudioSessionSilenceSecondaryAudioHintNotification",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "a notification name or key that is carried with its text, AVAudioSessionSilenceSecondaryAudioHintNotification, and that is never posted or delivered: nothing of iOS 6 sends it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVAudioSessionSilenceSecondaryAudioHintTypeKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "a notification name or key that is carried with its text, AVAudioSessionSilenceSecondaryAudioHintTypeKey, and that is never posted or delivered: nothing of iOS 6 sends it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVCaptureSessionPreset3840x2160",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the preset string AVCaptureSessionPreset3840x2160; no session accepts it, so canSetSessionPreset: answers NO",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVCaptureSessionPresetInputPriority",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the preset string AVCaptureSessionPresetInputPriority; no session accepts it, so canSetSessionPreset: answers NO",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeAztecCode",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.Aztec; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeCode128Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.Code128; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeCode39Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.Code39; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeCode39Mod43Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.Code39Mod43; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeCode93Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string com.intermec.Code93; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeDataMatrixCode",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.DataMatrix; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeEAN13Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.gs1.EAN-13; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeEAN8Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.gs1.EAN-8; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeITF14Code",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.gs1.ITF14; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeInterleaved2of5Code",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.ansi.Interleaved2of5; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypePDF417Code",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.PDF417; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeQRCode",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.iso.QRCode; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "AVMetadataObjectTypeUPCECode",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 has nothing behind it",
+      "effect": "the type string org.gs1.UPC-E; the machine readable code objects of iOS 7 are not made, so a capture output never lists it among its available types and never delivers an object of it",
+      "facts": "facts/AVFoundation/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    }
+  ]
+}

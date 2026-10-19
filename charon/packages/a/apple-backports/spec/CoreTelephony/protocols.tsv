@@ -1,0 +1,3 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+CTSubscriberDelegate	12.1	refused	CTSubscriberDelegate: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-
+CTTelephonyNetworkInfoDelegate	13.0	refused	CTTelephonyNetworkInfoDelegate: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-

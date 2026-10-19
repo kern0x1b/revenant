@@ -1,0 +1,113 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIFocusUpdateContext",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFocusUpdateContext.md",
+      "source": "SDK 16.4 UIFocus.h for the contract; the host (Mac Catalyst) for the superclass, the init failure and the answers of an allocated context, measured with a probe"
+    },
+    {
+      "api": "UIFocusUpdateContext.previouslyFocusedItem",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFocusUpdateContext.md",
+      "source": "SDK 16.4 UIFocus.h; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UIFocusUpdateContext.nextFocusedItem",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFocusUpdateContext.md",
+      "source": "SDK 16.4 UIFocus.h; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UIFocusUpdateContext.focusHeading",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFocusUpdateContext.md",
+      "source": "SDK 16.4 UIFocus.h; the host answers 0 (UIFocusHeadingNone) for an allocated context"
+    },
+    {
+      "api": "UIFocusUpdateContext.previouslyFocusedView",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFocusUpdateContext.md",
+      "source": "SDK 16.4 UIFocus.h, UIKitAdditions category; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UIFocusUpdateContext.nextFocusedView",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIFocusUpdateContext.md",
+      "source": "SDK 16.4 UIFocus.h, UIKitAdditions category; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UICollectionViewFocusUpdateContext",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewFocusUpdateContext.md",
+      "source": "SDK 16.4 UICollectionView.h for the contract; the host for the superclass and the init failure, measured with a probe"
+    },
+    {
+      "api": "UICollectionViewFocusUpdateContext.previouslyFocusedIndexPath",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewFocusUpdateContext.md",
+      "source": "SDK 16.4 UICollectionView.h, NSIndexPath strong and readonly; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UICollectionViewFocusUpdateContext.nextFocusedIndexPath",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UICollectionViewFocusUpdateContext.md",
+      "source": "SDK 16.4 UICollectionView.h, NSIndexPath strong and readonly; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UITableViewFocusUpdateContext",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITableViewFocusUpdateContext.md",
+      "source": "SDK 16.4 UITableView.h for the contract; the host for the superclass and the init failure, measured with a probe"
+    },
+    {
+      "api": "UITableViewFocusUpdateContext.previouslyFocusedIndexPath",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITableViewFocusUpdateContext.md",
+      "source": "SDK 16.4 UITableView.h, NSIndexPath strong and readonly; the host answers nil for an allocated context"
+    },
+    {
+      "api": "UITableViewFocusUpdateContext.nextFocusedIndexPath",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UITableViewFocusUpdateContext.md",
+      "source": "SDK 16.4 UITableView.h, NSIndexPath strong and readonly; the host answers nil for an allocated context"
+    }
+  ]
+}

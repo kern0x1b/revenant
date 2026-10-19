@@ -1,0 +1,27 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_12UTo16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a packed twelve-bit unsigned row widened to sixteen, which the header prints as a multiply over a twenty-four-bit pair",
+      "effect": "(t * 65535 + (t << 4) + 2055) >> 12, exact for all 4096 values measured; the row is (width + 1) / 2 * 3 bytes, two pixels to a triple, pixel p at bit offset 12 * p, big endian",
+      "facts": "facts/Accelerate/vImagePacked12U.md",
+      "source": "the header of iOS 16.4, which declares both at 7.0, and the host's own answers at every width from 1 to 17"
+    },
+    {
+      "api": "vImageConvert_16UTo12U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a sixteen-bit unsigned row narrowed into the same packed twelve-bit row, which the header prints as a multiply and a pack",
+      "effect": "(t * 4095 + 32767 + (t >> 4)) >> 16, agreeing at every seventh value of 65536 measured; the row is (width + 1) / 2 * 3 bytes, two pixels to a triple, pixel p at bit offset 12 * p, big endian, and only a pixel's own twelve bits are written",
+      "facts": "facts/Accelerate/vImagePacked12U.md",
+      "source": "the header of iOS 16.4, which declares both at 7.0, and the host's own answers at every width from 1 to 17"
+    }
+  ]
+}

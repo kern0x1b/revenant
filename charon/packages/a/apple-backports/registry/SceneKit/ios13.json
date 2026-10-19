@@ -1,0 +1,27 @@
+{
+  "framework": "SceneKit",
+  "entries": [
+    {
+      "api": "SCNLightTypeArea",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "measured ios 13.0, not the 8.0 baseline; gift.scn's and star2.scn's real 'frontal' light is an area light, confirmed by loading the real asset with macOS SceneKit -- so this constant is load-bearing for the very first tier, not a later-tier nicety",
+      "effect": "SCNLight.type accepts this string; the area light's own geometry (areaExtentsX/Y/Z, areaPolygonVertices, drawsArea) is not decoded yet, so it currently falls back to a point-light approximation",
+      "source": "coordination/corpus/sdk-introduced.json: SCNLightTypeArea, constant, version '13.0'",
+      "facts": "facts/SceneKit/SceneKit.md"
+    },
+    {
+      "api": "SCNLightingModelShadowOnly",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "measured ios 13.0, not the 8.0 baseline",
+      "effect": "SCNMaterial.lightingModelName compares and stores this exact string; none of the four target assets use it",
+      "source": "coordination/corpus/sdk-introduced.json: SCNLightingModelShadowOnly, constant, version '13.0'",
+      "facts": "facts/SceneKit/SceneKit.md"
+    }
+  ]
+}

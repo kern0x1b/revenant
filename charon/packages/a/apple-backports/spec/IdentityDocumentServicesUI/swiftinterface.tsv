@@ -1,0 +1,31 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+IdentityDocumentServicesUI	typealias	IdentityDocumentPresentationAnchor					none
+IdentityDocumentServicesUI	protocol	IdentityDocumentPresentmentControllerPresentationContextProviding	26.0				own
+IdentityDocumentServicesUI	method	IdentityDocumentPresentmentControllerPresentationContextProviding.presentationAnchorForPresentmentController(_:)	26.0				container
+IdentityDocumentServicesUI	protocol	IdentityDocumentPresentmentControlling	26.0				own
+IdentityDocumentServicesUI	class	IdentityDocumentWebPresentmentController	26.0				own
+IdentityDocumentServicesUI	property	IdentityDocumentWebPresentmentController.delegate	26.0				container
+IdentityDocumentServicesUI	property	IdentityDocumentWebPresentmentController.presentationContextProvider	26.0				container
+IdentityDocumentServicesUI	method	IdentityDocumentWebPresentmentController.init()	26.0				container
+IdentityDocumentServicesUI	method	IdentityDocumentWebPresentmentController.performRequests(_:origin:)	26.0				container
+IdentityDocumentServicesUI	protocol	IdentityDocumentWebPresentmentControllerDelegate	26.0				own
+IdentityDocumentServicesUI	method	IdentityDocumentWebPresentmentControllerDelegate.rawRequestsForWebPresentmentController(_:)	26.0				container
+IdentityDocumentServicesUI	struct	ISO18013MobileDocumentRequestContext	26.0				own
+IdentityDocumentServicesUI	property	ISO18013MobileDocumentRequestContext.requestingWebsiteOrigin	26.0				container
+IdentityDocumentServicesUI	property	ISO18013MobileDocumentRequestContext.request	26.0				container
+IdentityDocumentServicesUI	method	ISO18013MobileDocumentRequestContext.sendResponse(_:)	26.0				container
+IdentityDocumentServicesUI	method	ISO18013MobileDocumentRequestContext.cancel()	26.0				container
+IdentityDocumentServicesUI	struct	ISO18013MobileDocumentRequestScene	26.0				own
+IdentityDocumentServicesUI	method	ISO18013MobileDocumentRequestScene.init(content:)	26.0				container
+IdentityDocumentServicesUI	property	ISO18013MobileDocumentRequestScene.body	26.0				container
+IdentityDocumentServicesUI	typealias	ISO18013MobileDocumentRequestScene.Body	26.0				own
+IdentityDocumentServicesUI	protocol	IdentityDocumentProvider	26.0				own
+IdentityDocumentServicesUI	property	IdentityDocumentProvider.body	26.0				container
+IdentityDocumentServicesUI	method	IdentityDocumentProvider.performRegistrationUpdates()	26.0				container
+IdentityDocumentServicesUI	property	IdentityDocumentProvider.configuration	26.0				container
+IdentityDocumentServicesUI	protocol	IdentityDocumentRequestScene	26.0				own
+IdentityDocumentServicesUI	struct	IdentityDocumentRequestSceneBuilder	26.0				own
+IdentityDocumentServicesUI	method	IdentityDocumentRequestSceneBuilder.buildBlock(_:)	26.0				container
+IdentityDocumentServicesUI	method	IdentityDocumentRequestSceneBuilder.buildBlock(_:_:)	26.0				container
+IdentityDocumentServicesUI	method	IdentityDocumentRequestSceneBuilder.buildOptional(_:)	26.0				container
+IdentityDocumentServicesUI	method	IdentityDocumentRequestSceneBuilder.buildLimitedAvailability(_:)	26.0				container

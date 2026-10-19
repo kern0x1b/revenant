@@ -1,0 +1,12 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+SharedWithYou	property	SWCollaborationMetadata.transferRepresentation					none
+SharedWithYou	typealias	SWCollaborationMetadata.Representation	16.0				own
+SharedWithYou	method	SWHighlightCenter.collaborationHighlight(forIdentifier:)	16				container
+SharedWithYou	method	SWCollaborationView.setDetailViewListContent(_:)	16				container
+SharedWithYou	method	SWCollaborationView.setDetailViewListContent(_:)	16				container
+SharedWithYou	struct	_CollaborationDetailView	16				own
+SharedWithYou	method	_CollaborationDetailView.init(itemProvider:listContent:)	16				container
+SharedWithYou	method	_CollaborationDetailView.init(itemProvider:contentTitle:collaborators:listContent:)	16				container
+SharedWithYou	property	_CollaborationDetailView.body	16				container
+SharedWithYou	typealias	_CollaborationDetailView.Body	16				own
+SharedWithYou	method	_CollaborationDetailView.init(itemProvider:)	16				container

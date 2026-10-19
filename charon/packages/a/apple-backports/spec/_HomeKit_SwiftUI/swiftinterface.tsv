@@ -1,0 +1,5 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_HomeKit_SwiftUI	struct	CameraView	14.0				own
+_HomeKit_SwiftUI	method	CameraView.init(source:)	14.0				container
+_HomeKit_SwiftUI	property	CameraView.body	14.0				container
+_HomeKit_SwiftUI	typealias	CameraView.Body	14.0				own

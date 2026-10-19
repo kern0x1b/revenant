@@ -1,0 +1,40 @@
+# The differences this differential is KNOWN to still report, by name.
+#
+# The run prints this count beside its own tally and FAILS if the two disagree, so the number of open
+# differences can never drift from the record of them. A run that silently passed while carrying these would
+# be a green run meaning nothing, which is the whole reason this file exists.
+#
+# One key per line, exactly as compare.py prints it: the text up to the first number is the key, so the
+# lines below are matched by PREFIX, and a difference whose key is not listed here FAILS the run.
+#
+# Every item is owed, with its measurement in packages/a/apple-backports/facts/ModelIO/Owed.md.
+#
+# Known open: 27
+
+canImport obj 1 ply 1 usda 1 usd 1
+cylinder s12 v2 vertices 67 indices 234
+cylinder s8 v1 vertices 38 indices 108
+cylinder s8 v2 vertices 47 indices 162
+cylinder s8 v3 vertices 56 indices 216
+mesh attributes 31
+mesh min 0.00000 0.00000 0.00000 max -1.00000 -1.00000 -1.00000
+share cylinder r12 v2 vertices 67 indices 234
+share cylinder r12 v3 vertices 80 indices 312
+share cylinder r3 v3 vertices 26 indices 96
+share cylinder r4 v2 vertices 27 indices 90
+share cylinder r6 v2 vertices 37 indices 126
+share cylinder r6 v3 vertices 44 indices 168
+share cylinder r8 v2 vertices 47 indices 162
+share cylinder r8 v3 vertices 56 indices 216
+voxel extent 0 0 0 to 1 1 0
+voxel indices 32 a3bb2e35
+voxels after difference 2
+voxels after union 3
+voxrule 1 voxels of 1 data 1 extent 2147483647 2147483647 2147483647 to -2147483647 -2147483647 -2147483647
+voxrule 1 voxels of 2 data 1 extent 2147483647 2147483647 2147483647 to -2147483647 -2147483647 -2147483647
+voxrule 2 voxels of 1 data 8 extent 2147483647 2147483647 2147483647 to -2147483647 -2147483647 -2147483647
+voxrule 2 voxels of 2 data 8 extent 2147483647 2147483647 2147483647 to -2147483647 -2147483647 -2147483647
+voxrule 3 voxels of 1 data 27 extent 0 0 0 to 0 0 0
+voxrule 3 voxels of 2 data 27 extent 0 0 0 to 0 0 0
+voxrule 4 voxels of 1 data 64 extent 0 0 0 to 0 0 0
+voxrule 4 voxels of 2 data 64 extent 0 0 0 to 0 0 0

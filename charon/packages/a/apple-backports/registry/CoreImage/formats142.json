@@ -1,0 +1,16 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "kCIFormatRGBX16",
+      "kind": "constant",
+      "introduced": "14.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name - the header declares each format as an exported constant rather than as an enum case, so a strong reference is a link failure on the release - and no held rung carries the symbol either, the ladder ending at 10.3.4, so the SDK's own NS_AVAILABLE(11_0, 14_2) places it at iOS 14.2",
+      "effect": "the pixel format code 1804, which is what the host's own CoreImage holds for this name and is not the characters of the name itself; a context, a destination or a bitmap written with it is read by the release as it reads any code it is given",
+      "facts": "facts/CoreImage/Constants.md",
+      "source": "the host's own CoreImage, by tests/backports/host/ciimageformats, which COMPILES the port's two band objects and LINKS them into a reader so the code compared against Apple's is the port's own: 'GREEN (port vs host): 4 agree, 0 differ' and 'ciimageformats: 4 codes, 4 mutants run, 4 RED', the last line being one mutant per code, each of which must be seen to change the comparison"
+    }
+  ]
+}

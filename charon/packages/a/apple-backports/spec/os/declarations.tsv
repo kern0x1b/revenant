@@ -1,0 +1,159 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@os_function_t	-			void (*)(void * _Nullable)	-	-	-	-	f51984428741919d	-
+typedef	c:@T@os_block_t	-			void ((^))(void)	-	-	-	-	e40bd475d3141bb6	-
+enum	c:@EA@os_clockid_t	-			uint32_t	-	-	-	-	d5a0e2047a1f413a	-
+enumconst	c:@EA@os_clockid_t@OS_CLOCK_MACH_ABSOLUTE_TIME	os_clockid_t			-	-	-	-	-	13fbbb7f49263a32	32
+typedef	c:@T@os_clockid_t	-			enum os_clockid_t	-	-	-	-	f68d0accf7de6c82	-
+struct	c:@S@os_unfair_lock_s	-			-	-	-	-	-	4edbf5e270dba3e1	-
+field	c:@S@os_unfair_lock_s@FI@_os_unfair_lock_opaque	os_unfair_lock_s			uint32_t	-	-	-	-	57ffb91da2c9de78	-
+typedef	c:@T@os_unfair_lock	-			struct os_unfair_lock_s	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	18013bd2a27d5e69	-
+typedef	c:@T@os_unfair_lock_t	-			struct os_unfair_lock_s *	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	07f14c728b52515f	-
+function	c:@F@os_unfair_lock_lock	-			void (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b9db125bda5758a6	-
+function	c:@F@os_unfair_lock_trylock	-			_Bool (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1bff8c92d9d6d8d2	-
+function	c:@F@os_unfair_lock_unlock	-			void (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	2cfbbf3f09475bc4	-
+function	c:@F@os_unfair_lock_assert_owner	-			void (const os_unfair_lock *)	const os_unfair_lock * lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c5c83a5d87e9e027	-
+function	c:@F@os_unfair_lock_assert_not_owner	-			void (const os_unfair_lock *)	const os_unfair_lock * lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a2a2dd9176b75ed4	-
+enum	c:@EA@os_unfair_lock_flags_t	-			uint32_t	-	-	-	-	367d0f7c1f6032a2	-
+enumconst	c:@EA@os_unfair_lock_flags_t@OS_UNFAIR_LOCK_FLAG_NONE	os_unfair_lock_flags_t			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,swift=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	e70ee85e80733c29	0
+enumconst	c:@EA@os_unfair_lock_flags_t@OS_UNFAIR_LOCK_FLAG_ADAPTIVE_SPIN	os_unfair_lock_flags_t			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,swift=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	24247e9726837880	262144
+typedef	c:@T@os_unfair_lock_flags_t	-			enum os_unfair_lock_flags_t	-	-	-	-	4f3bc6a04c3559ee	-
+function	c:@F@os_unfair_lock_lock_with_flags	-			void (os_unfair_lock_t, os_unfair_lock_flags_t)	os_unfair_lock_t lock | os_unfair_lock_flags_t flags	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	3b6d7f180a322936	-
+function	c:@F@os_proc_available_memory	-			size_t (void)	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	37f1bc3bc9ce15f7	-
+interface	c:objc(cs)OS_object	-			-	-	-	-	-	88c111defa440c82	-
+super	-	OS_object	NSObject		-	-	-	-	-	a02681f4cb2df454	-
+method	c:objc(cs)OS_object(im)init	-			instancetype	-	-	swift=-/-/-/1	-	d702d56755a6c7ef	-
+function	c:@F@os_retain	-			void * (void *)	void * object	-	ios=8.0/-/-/0,macos=10.10/-/-/0,swift=-/-/-/1	-	22d7960c2f596dac	-
+function	c:@F@os_release	-			void (void *)	void * object	-	ios=8.0/-/-/0,macos=10.10/-/-/0,swift=-/-/-/1	-	1daaa58bd7324547	-
+struct	c:@S@os_workgroup_attr_opaque_s	-			-	-	-	-	-	f7edf83c8a969b5c	-
+field	c:@S@os_workgroup_attr_opaque_s@FI@sig	os_workgroup_attr_opaque_s			uint32_t	-	-	-	-	2b5936b0bee26d5a	-
+field	c:@S@os_workgroup_attr_opaque_s@FI@opaque	os_workgroup_attr_opaque_s			char[60]	-	-	-	-	0bf67ae562365e8c	-
+struct	c:@S@os_workgroup_interval_data_opaque_s	-			-	-	-	-	-	b58caf1e3245216d	-
+field	c:@S@os_workgroup_interval_data_opaque_s@FI@sig	os_workgroup_interval_data_opaque_s			uint32_t	-	-	-	-	1bfc2bc3703eff22	-
+field	c:@S@os_workgroup_interval_data_opaque_s@FI@opaque	os_workgroup_interval_data_opaque_s			char[56]	-	-	-	-	a10c6112e22b3355	-
+struct	c:@S@os_workgroup_join_token_opaque_s	-			-	-	-	-	-	d31a2f00aeeacca1	-
+field	c:@S@os_workgroup_join_token_opaque_s@FI@sig	os_workgroup_join_token_opaque_s			uint32_t	-	-	-	-	567753301c2d4b35	-
+field	c:@S@os_workgroup_join_token_opaque_s@FI@opaque	os_workgroup_join_token_opaque_s			char[36]	-	-	-	-	9a0992e8be8b9df5	-
+interface	c:objc(cs)OS_os_workgroup	-			-	-	-	-	-	6cc5563336bd31f3	-
+super	-	OS_os_workgroup	OS_object		-	-	-	-	-	39538af6f8c4403c	-
+method	c:objc(cs)OS_os_workgroup(im)init	-			instancetype	-	-	swift=-/-/-/1	-	4284a66235f89a97	-
+typedef	c:@T@os_workgroup_t	-			OS_os_workgroup *	-	-	-	-	ef59d9ddac6f3736	-
+typedef	c:@T@os_workgroup_attr_s	-			struct os_workgroup_attr_opaque_s	-	-	-	-	cd06fa9daf8ab6ec	-
+typedef	c:@T@os_workgroup_attr_t	-			struct os_workgroup_attr_opaque_s *	-	-	-	-	48fc4b2481689539	-
+function	c:@F@os_workgroup_copy_port	-			int (os_workgroup_t, mach_port_t *)	os_workgroup_t wg | mach_port_t * mach_port_out	-	ios=-/-/-/1,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	63981b3b9273ed40	-
+function	c:@F@os_workgroup_create_with_port	-			os_workgroup_t (const char *, mach_port_t)	const char * name | mach_port_t mach_port	-	ios=-/-/-/1,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	035ec8e9288b701e	-
+function	c:@F@os_workgroup_create_with_workgroup	-			os_workgroup_t (const char *, os_workgroup_t)	const char * name | os_workgroup_t wg	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	f66a7c83da966c5c	-
+typedef	c:@T@os_workgroup_join_token_s	-			struct os_workgroup_join_token_opaque_s	-	-	-	-	c4988360afc599f4	-
+typedef	c:@T@os_workgroup_join_token_t	-			struct os_workgroup_join_token_opaque_s *	-	-	-	-	62bd59ddf1f89d06	-
+function	c:@F@os_workgroup_join	-			int (os_workgroup_t, os_workgroup_join_token_t)	os_workgroup_t wg | os_workgroup_join_token_t token_out	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	32e9ad226d4049d6	-
+function	c:@F@os_workgroup_leave	-			void (os_workgroup_t, os_workgroup_join_token_t)	os_workgroup_t wg | os_workgroup_join_token_t token	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	28939d212723e653	-
+typedef	c:@T@os_workgroup_index	-			uint32_t	-	-	-	-	d53e194ddbc16e93	-
+typedef	c:@T@os_workgroup_working_arena_destructor_t	-			void (*)(void * _Nullable)	-	-	-	-	79f0e8aff95e1c53	-
+function	c:@F@os_workgroup_set_working_arena	-			int (os_workgroup_t, void *, uint32_t, os_workgroup_working_arena_destructor_t)	os_workgroup_t wg | void * arena | uint32_t max_workers | os_workgroup_working_arena_destructor_t destructor	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	26a91968b3068d0e	-
+function	c:@F@os_workgroup_get_working_arena	-			void * (os_workgroup_t, os_workgroup_index *)	os_workgroup_t wg | os_workgroup_index * index_out	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	df81417c56ca609e	-
+function	c:@F@os_workgroup_cancel	-			void (os_workgroup_t)	os_workgroup_t wg	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	d6ab6c084649e2ce	-
+function	c:@F@os_workgroup_testcancel	-			_Bool (os_workgroup_t)	os_workgroup_t wg	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	c0991859a05ca70c	-
+struct	c:@S@os_workgroup_max_parallel_threads_attr_s	-			-	-	-	-	-	0f289c254baffd85	-
+typedef	c:@T@os_workgroup_mpt_attr_s	-			struct os_workgroup_max_parallel_threads_attr_s	-	-	-	-	e60014a4c70387ab	-
+typedef	c:@T@os_workgroup_mpt_attr_t	-			struct os_workgroup_max_parallel_threads_attr_s *	-	-	-	-	0e6d6f55d840e08c	-
+function	c:@F@os_workgroup_max_parallel_threads	-			int (os_workgroup_t, os_workgroup_mpt_attr_t)	os_workgroup_t wg | os_workgroup_mpt_attr_t attr	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	9e8394c846d60633	-
+protocol	c:objc(pl)OS_os_workgroup_interval	-			-	-	-	-	-	ee9b17b97ea3000e	-
+interface	c:objc(cs)OS_os_workgroup_interval	-			-	-	-	-	-	792c42faaec51d55	-
+super	-	OS_os_workgroup_interval	OS_os_workgroup		-	-	-	-	-	bcfe04f4eb90db27	-
+conforms	c:objc(cs)OS_os_workgroup_interval	OS_os_workgroup_interval	OS_os_workgroup_interval		-	-	-	-	-	200ec7881a75cf59	-
+method	c:objc(cs)OS_os_workgroup_interval(im)init	-			instancetype	-	-	swift=-/-/-/1	-	c8318ef4a4544ad1	-
+typedef	c:@T@os_workgroup_interval_t	-			OS_os_workgroup<OS_os_workgroup_interval> *	-	-	-	-	83660923ca8d8360	-
+typedef	c:@T@os_workgroup_interval_data_s	-			struct os_workgroup_interval_data_opaque_s	-	-	-	-	616e4ebe22c6e7be	-
+typedef	c:@T@os_workgroup_interval_data_t	-			struct os_workgroup_interval_data_opaque_s *	-	-	-	-	6f818cc502d68814	-
+function	c:@F@os_workgroup_interval_start	-			int (os_workgroup_interval_t, uint64_t, uint64_t, os_workgroup_interval_data_t)	os_workgroup_interval_t wg | uint64_t start | uint64_t deadline | os_workgroup_interval_data_t data	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	ab5e3381d219b656	-
+function	c:@F@os_workgroup_interval_update	-			int (os_workgroup_interval_t, uint64_t, os_workgroup_interval_data_t)	os_workgroup_interval_t wg | uint64_t deadline | os_workgroup_interval_data_t data	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	9c8c5327b3657f26	-
+function	c:@F@os_workgroup_interval_finish	-			int (os_workgroup_interval_t, os_workgroup_interval_data_t)	os_workgroup_interval_t wg | os_workgroup_interval_data_t data	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	2684a35842b18f92	-
+protocol	c:objc(pl)OS_os_workgroup_parallel	-			-	-	-	-	-	2b2c561e773727bc	-
+interface	c:objc(cs)OS_os_workgroup_parallel	-			-	-	-	-	-	87e233a7ad9105b8	-
+super	-	OS_os_workgroup_parallel	OS_os_workgroup		-	-	-	-	-	161b401dba53d40c	-
+conforms	c:objc(cs)OS_os_workgroup_parallel	OS_os_workgroup_parallel	OS_os_workgroup_parallel		-	-	-	-	-	3cbf9a9dfe62e341	-
+method	c:objc(cs)OS_os_workgroup_parallel(im)init	-			instancetype	-	-	swift=-/-/-/1	-	7c55cc9e56a94df3	-
+typedef	c:@T@os_workgroup_parallel_t	-			OS_os_workgroup<OS_os_workgroup_parallel> *	-	-	-	-	102f54e6bd76257e	-
+function	c:@F@os_workgroup_parallel_create	-			os_workgroup_parallel_t (const char *, os_workgroup_attr_t)	const char * name | os_workgroup_attr_t attr	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	9ca4a7e71458bfdf	-
+function	c:@F@__os_warn_unused	-			_Bool (const _Bool)	const _Bool x	-	-	-	b7490b19a358059c	-
+struct	c:@S@mach_header	-			-	-	-	-	-	67d1c2115d9002cf	-
+var	c:@__dso_handle	-			struct mach_header	-	-	-	-	e525fea313bd0ce8	-
+enum	c:@EA@os_activity_flag_t	-			uint32_t	-	-	-	-	c100e4ad1b610fb4	-
+enumconst	c:@EA@os_activity_flag_t@OS_ACTIVITY_FLAG_DEFAULT	os_activity_flag_t			-	-	-	-	-	e30bf5612cb3374b	0
+enumconst	c:@EA@os_activity_flag_t@OS_ACTIVITY_FLAG_DETACHED	os_activity_flag_t			-	-	-	-	-	ae8961e796b18907	1
+enumconst	c:@EA@os_activity_flag_t@OS_ACTIVITY_FLAG_IF_NONE_PRESENT	os_activity_flag_t			-	-	-	-	-	836743e9d395005f	2
+typedef	c:@T@os_activity_flag_t	-			enum os_activity_flag_t	-	-	-	-	f2e1f6cd3b277ecf	-
+protocol	c:objc(pl)OS_os_activity	-			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	44c5486887d4538f	-
+conforms	c:objc(pl)OS_os_activity	OS_os_activity	NSObject		-	-	-	-	-	873f48d7d5d0d657	-
+typedef	c:@T@os_activity_t	-			NSObject<OS_os_activity> *	-	-	-	-	c75984cc204534ee	-
+struct	c:@S@os_activity_s	-			-	-	-	-	-	62f60d7e64febb22	-
+var	c:@_os_activity_none	-			struct os_activity_s	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	eae8f7b9b52df18c	-
+var	c:@_os_activity_current	-			struct os_activity_s	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	aef413affa901a6a	-
+typedef	c:@T@os_activity_id_t	-			uint64_t	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	ecd8b1e43696b5b1	-
+struct	c:@S@os_activity_scope_state_s	-			-	-	-	-	-	5264249a042810ae	-
+field	c:@S@os_activity_scope_state_s@FI@opaque	os_activity_scope_state_s			uint64_t[2]	-	-	-	-	1fbbb44cb99a0927	-
+typedef	c:@T@os_activity_scope_state_t	-			struct os_activity_scope_state_s *	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	bb0e294430af30ef	-
+function	c:@F@_os_activity_create	-			os_activity_t (void *, const char *, os_activity_t, os_activity_flag_t)	void * dso | const char * description | os_activity_t activity | os_activity_flag_t flags	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	99cf95a37d495489	-
+function	c:@F@_os_activity_label_useraction	-			void (void *, const char *)	void * dso | const char * name	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	fd80513bff04c22e	-
+function	c:@F@_os_activity_initiate	-			void (void *, const char *, os_activity_flag_t, os_block_t)	void * dso | const char * description | os_activity_flag_t flags | os_block_t activity_block	-	ios=8.0/-/-/0,macos=10.10/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	d08071801ebb0ecb	-
+function	c:@F@_os_activity_initiate_f	-			void (void *, const char *, os_activity_flag_t, void *, os_function_t)	void * dso | const char * description | os_activity_flag_t flags | void * context | os_function_t function	-	ios=8.0/-/-/0,macos=10.10/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	01cd6c9ca716423a	-
+function	c:@F@os_activity_apply	-			void (os_activity_t, os_block_t)	os_activity_t activity | os_block_t block	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a2bc9add31b9c5d7	-
+function	c:@F@os_activity_apply_f	-			void (os_activity_t, void *, os_function_t)	os_activity_t activity | void * context | os_function_t function	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	47bf0079979ba2ce	-
+function	c:@F@os_activity_scope_enter	-			void (os_activity_t, os_activity_scope_state_t)	os_activity_t activity | os_activity_scope_state_t state	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e704c392afe8366e	-
+function	c:@F@os_activity_scope_leave	-			void (os_activity_scope_state_t)	os_activity_scope_state_t state	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1d10f1102569d141	-
+function	c:@F@os_activity_get_active	-			unsigned int (os_activity_id_t *, unsigned int *)	os_activity_id_t * entries | unsigned int * count	-	ios=8.0/10.0/-/0,macos=10.10/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	6bb62e064d59abd2	-
+function	c:@F@os_activity_get_identifier	-			os_activity_id_t (os_activity_t, os_activity_id_t *)	os_activity_t activity | os_activity_id_t * parent_id	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	38158174ab9164c7	-
+function	c:@F@_os_activity_start	-			os_activity_t (void *, const char *, os_activity_flag_t)	void * dso | const char * description | os_activity_flag_t flags	-	ios=8.0/10.0/-/0,macos=10.10/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	b621a314bc04f547	-
+function	c:@F@os_activity_end	-			void (os_activity_t)	os_activity_t activity	-	ios=8.0/10.0/-/0,macos=10.10/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	26f8a74382748299	-
+typedef	c:@T@os_breadcrumb_t	-			uint32_t	-	-	ios=8.0/10.0/-/0,macos=10.10/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	8f218fb4ac808843	-
+function	c:@F@_os_activity_set_breadcrumb	-			void (void *, const char *)	void * dso | const char * name	-	ios=8.0/10.0/-/0,macos=10.10/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	dfed7ecbc4f213c2	-
+typedef	c:@T@os_trace_payload_object_t	-			xpc_object_t	-	-	-	-	df7103c5ccbc2afc	-
+function	c:@F@_os_trace_verify_printf	-			void (const char *, ...)	const char * msg	variadic	-	-	0deabbb8011df5ac	-
+typedef	c:@T@os_trace_payload_t	-			void ((^))(os_trace_payload_object_t)	-	-	-	-	fce247cdd6f9ec3f	-
+function	c:@F@os_trace_info_enabled	-			_Bool (void)	-	-	ios=10.0/11.0/-/0,macos=10.12/10.13/-/0,tvos=10.0/11.0/-/0,watchos=3.0/4.0/-/0	-	12321f134b258dc6	-
+function	c:@F@os_trace_debug_enabled	-			_Bool (void)	-	-	ios=8.0/11.0/-/0,macos=10.10/10.13/-/0,tvos=8.0/11.0/-/0,watchos=2.0/4.0/-/0	-	1d2d2bf45e583ac0	-
+function	c:@F@os_trace_type_enabled	-			_Bool (uint8_t)	uint8_t type	-	ios=8.0/11.0/-/0,macos=10.10/10.13/-/0,tvos=8.0/11.0/-/0,watchos=2.0/4.0/-/0	-	88f68cb63676b55a	-
+function	c:@F@_os_trace_with_buffer	-			void (void *, const char *, uint8_t, const void *, size_t, os_trace_payload_t)	void * dso | const char * message | uint8_t type | const void * buffer | size_t buffer_size | os_trace_payload_t payload	-	ios=8.0/11.0/-/0,macos=10.10/10.13/-/0,tvos=8.0/11.0/-/0,watchos=2.0/4.0/-/0	-	168e9818b7c4602a	-
+protocol	c:objc(pl)OS_os_log	-			-	-	-	-	-	2e9c080bca7a2850	-
+conforms	c:objc(pl)OS_os_log	OS_os_log	NSObject		-	-	-	-	-	62893819566eab8d	-
+typedef	c:@T@os_log_t	-			NSObject<OS_os_log> *	-	-	-	-	05283e72d8a81eca	-
+struct	c:@S@os_log_s	-			-	-	-	-	-	5a92d4deb069a80c	-
+var	c:@_os_log_disabled	-			struct os_log_s	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	6310bf0fddd1e3d7	-
+var	c:@_os_log_default	-			struct os_log_s	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	97479c440a6140d6	-
+enum	c:@EA@os_log_type_t	-			uint8_t	-	-	-	-	5f171d8941bf4798	-
+enumconst	c:@EA@os_log_type_t@OS_LOG_TYPE_DEFAULT	os_log_type_t			-	-	-	-	-	967708fdf42a780a	0
+enumconst	c:@EA@os_log_type_t@OS_LOG_TYPE_INFO	os_log_type_t			-	-	-	-	-	b7c074e9d5812d5a	1
+enumconst	c:@EA@os_log_type_t@OS_LOG_TYPE_DEBUG	os_log_type_t			-	-	-	-	-	aab396c60b28c961	2
+enumconst	c:@EA@os_log_type_t@OS_LOG_TYPE_ERROR	os_log_type_t			-	-	-	-	-	666ded45000ac800	16
+enumconst	c:@EA@os_log_type_t@OS_LOG_TYPE_FAULT	os_log_type_t			-	-	-	-	-	ab5a6f2918c3d3b4	17
+typedef	c:@T@os_log_type_t	-			enum os_log_type_t	-	-	-	-	96a07f34888f97a1	-
+function	c:@F@os_log_create	-			os_log_t (const char *, const char *)	const char * subsystem | const char * category	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	de4fff7d904e918e	-
+function	c:@F@os_log_type_enabled	-			_Bool (os_log_t, os_log_type_t)	os_log_t oslog | os_log_type_t type	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e272d6c9b12a9f5d	-
+function	c:@F@_os_log_impl	-			void (void *, os_log_t, os_log_type_t, const char *, uint8_t *, uint32_t)	void * dso | os_log_t log | os_log_type_t type | const char * format | uint8_t * buf | uint32_t size	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c9f5f655f5a7cf7e	-
+function	c:@F@_os_log_debug_impl	-			void (void *, os_log_t, os_log_type_t, const char *, uint8_t *, uint32_t)	void * dso | os_log_t log | os_log_type_t type | const char * format | uint8_t * buf | uint32_t size	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	dc2e5bade2fe33a8	-
+function	c:@F@_os_log_error_impl	-			void (void *, os_log_t, os_log_type_t, const char *, uint8_t *, uint32_t)	void * dso | os_log_t log | os_log_type_t type | const char * format | uint8_t * buf | uint32_t size	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	e89753e5516fa262	-
+function	c:@F@_os_log_fault_impl	-			void (void *, os_log_t, os_log_type_t, const char *, uint8_t *, uint32_t)	void * dso | os_log_t log | os_log_type_t type | const char * format | uint8_t * buf | uint32_t size	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	63f073b63b0cb75d	-
+function	c:@F@_os_log_internal	-			void (void *, os_log_t, os_log_type_t, const char *, ...)	void * dso | os_log_t log | os_log_type_t type | const char * message	variadic	ios=9.0/10.0/-/0,macos=10.11/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	8c7b9d651fc74544	-
+function	c:@F@_os_log_create	-			os_log_t (void *, const char *, const char *)	void * dso | const char * subsystem | const char * category	-	ios=9.0/-/-/0,macos=10.11/-/-/0,tvos=9.0/-/-/0,watchos=2.0/-/-/0	-	88bc08e84cfbc94a	-
+function	c:@F@os_log_is_enabled	-			_Bool (os_log_t)	os_log_t log	-	ios=9.0/10.0/-/0,macos=10.11/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	46bea450c03bd6c0	-
+function	c:@F@os_log_is_debug_enabled	-			_Bool (os_log_t)	os_log_t log	-	ios=9.0/10.0/-/0,macos=10.11/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	3e3566aee8def5e0	-
+function	c:@F@_os_log_sensitive_deprecated	-			void (void)	-	-	ios=9.0/10.0/-/0,macos=10.11/10.12/-/0,tvos=9.0/10.0/-/0,watchos=2.0/3.0/-/0	-	84a813216876b10b	-
+typedef	c:@T@os_signpost_id_t	-			uint64_t	-	-	-	-	ba8ae1412d96fa34	-
+function	c:@F@os_signpost_id_make_with_pointer	-			os_signpost_id_t (os_log_t, const void *)	os_log_t log | const void * ptr	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	15176bc877a4a86b	-
+function	c:@F@os_signpost_id_generate	-			os_signpost_id_t (os_log_t)	os_log_t log	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	931fa2c1d159b482	-
+function	c:@F@os_signpost_enabled	-			_Bool (os_log_t)	os_log_t log	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	495d4768b93e46a7	-
+enum	c:@EA@os_signpost_type_t	-			uint8_t	-	-	-	-	2af0f71675676525	-
+enumconst	c:@EA@os_signpost_type_t@OS_SIGNPOST_EVENT	os_signpost_type_t			-	-	-	-	-	6c3d2e295b38ac80	0
+enumconst	c:@EA@os_signpost_type_t@OS_SIGNPOST_INTERVAL_BEGIN	os_signpost_type_t			-	-	-	-	-	3422693946d213ae	1
+enumconst	c:@EA@os_signpost_type_t@OS_SIGNPOST_INTERVAL_END	os_signpost_type_t			-	-	-	-	-	5e1207839b581415	2
+typedef	c:@T@os_signpost_type_t	-			enum os_signpost_type_t	-	-	-	-	470884964213569d	-
+function	c:@F@_os_signpost_emit_with_name_impl	-			void (void *, os_log_t, os_signpost_type_t, os_signpost_id_t, const char *, const char *, uint8_t *, uint32_t)	void * dso | os_log_t log | os_signpost_type_t type | os_signpost_id_t spid | const char * name | const char * format | uint8_t * buf | uint32_t size	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	f9feeefa4adc3a15	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@mach_port_t	-			__darwin_mach_port_t	-	-	-	-	d879e9c90b7054f5	-
+typedef	c:@T@__darwin_mach_port_t	-			__darwin_mach_port_name_t	-	-	-	-	fac676185e9ebfd4	-
+typedef	c:@T@__darwin_mach_port_name_t	-			__darwin_natural_t	-	-	-	-	27fc59fe218c8642	-
+typedef	c:@T@__darwin_natural_t	-			unsigned int	-	-	-	-	a1798ee04c7e4456	-
+typedef	c:@T@uint64_t	-			unsigned long long	-	-	-	-	e7c1cd95ea4ec29b	-
+typedef	c:@T@xpc_object_t	-			NSObject<OS_xpc_object> *	-	-	-	-	fda4d9d35a3bcdbf	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-

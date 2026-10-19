@@ -1,0 +1,15 @@
+{
+ "entries": [
+  {
+   "api": "kSecImportToMemoryOnly",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/SecImportToMemoryOnly.md",
+   "introduced": "18.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecImportToMemoryOnly",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no symbol of this name (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecImportExport.h",
+   "status": "owed"
+  }
+ ]
+}

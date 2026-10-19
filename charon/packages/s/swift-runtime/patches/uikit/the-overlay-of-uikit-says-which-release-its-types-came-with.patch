@@ -1,0 +1,12 @@
+diff --git a/stdlib/public/Darwin/UIKit/UIKit.swift b/stdlib/public/Darwin/UIKit/UIKit.swift
+index ba8dd37..9dd1a0a 100644
+--- a/stdlib/public/Darwin/UIKit/UIKit.swift
++++ b/stdlib/public/Darwin/UIKit/UIKit.swift
+@@ -361,6 +361,7 @@ extension UIFont.TextStyle {
+ }
+ 
+ #if !os(watchOS) // UIContentSizeCategory not available on watchOS
++@available(iOS 7.0, tvOS 9.0, *)
+ extension UIContentSizeCategory {
+ 
+     @available(iOS 11.0, tvOS 11.0,  *)

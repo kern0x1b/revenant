@@ -1,0 +1,75 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "-[NSProgress isIndeterminate]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProgressState.md",
+      "source": "SDK 26.2 headers; the host's own Foundation through tests/backports/host/foundationbatch, and tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSProgress isPaused]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProgressState.md",
+      "source": "SDK 26.2 headers; the host's own Foundation through tests/backports/host/foundationbatch, and tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSOperation isAsynchronous]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOperationAsynchronous.md",
+      "source": "SDK 26.2 headers; the host's own Foundation through tests/backports/host/foundationbatch, and tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSPredicate allowsEvaluation]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSAllowEvaluation.md",
+      "source": "SDK 26.2 headers; the host's own Foundation through tests/backports/host/foundationbatch, and tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSSortDescriptor allowsEvaluation]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSAllowEvaluation.md",
+      "source": "SDK 26.2 headers; the host's own Foundation through tests/backports/host/foundationbatch, and tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSNumberFormatter stringFromNumber:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSNumberFormatterContext.md",
+      "source": "SDK 26.2 headers; the host's own Foundation through tests/backports/host/foundationbatch, and tests/backports/device/foundation15batch.m on the device"
+    },
+    {
+      "api": "-[NSURLCredentialStorage removeCredential:forProtectionSpace:task:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLCacheAndCredentials.md",
+      "source": "SDK 26.2 headers; tests/backports/device/foundation15batch.m on the device"
+    }
+  ]
+}

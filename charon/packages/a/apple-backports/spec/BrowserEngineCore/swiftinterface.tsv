@@ -1,0 +1,6 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+BrowserEngineCore	class	BEAudioSession	26.0				own
+BrowserEngineCore	method	BEAudioSession.init(audioSession:)	26.0				container
+BrowserEngineCore	property	BEAudioSession.availableOutputs	26.0				container
+BrowserEngineCore	method	BEAudioSession.setPreferredOutput(_:)	26.0				container
+BrowserEngineCore	property	BEAudioSession.preferredOutput	26.0				container

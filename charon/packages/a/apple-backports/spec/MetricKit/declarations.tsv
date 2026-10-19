@@ -1,0 +1,280 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)MXMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use Use dictionaryRepresentation instead	ce962933ea17d0d1	-
+super	-	MXMetric	NSObject		-	-	-	-	-	2be6fba081961c2a	-
+conforms	c:objc(cs)MXMetric	MXMetric	NSSecureCoding		-	-	-	-	-	0ddf039559de6b92	-
+method	c:objc(cs)MXMetric(im)JSONRepresentation	-			NSData *	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6e9b427568eef16e	-
+method	c:objc(cs)MXMetric(im)DictionaryRepresentation	-			NSDictionary *	-	-	ios=13.0/100000/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use Use dictionaryRepresentation instead	12b19b600acfe882	-
+method	c:objc(cs)MXMetric(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=13.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8025c91f3f1c51e4	-
+interface	c:objc(cs)MXCPUMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2990e8cb01364d2b	-
+super	-	MXCPUMetric	MXMetric		-	-	-	-	-	6fb55e91915597b4	-
+property	c:objc(cs)MXCPUMetric(py)cumulativeCPUTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7caf72a0b3a25d90	-
+property	c:objc(cs)MXCPUMetric(py)cumulativeCPUInstructions	-			NSMeasurement<NSUnit *> *	-	readonly,strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	63274c2b482cc12f	-
+interface	c:objc(cs)MXGPUMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4083a76c377e253f	-
+super	-	MXGPUMetric	MXMetric		-	-	-	-	-	2c87f9086e89ccc0	-
+property	c:objc(cs)MXGPUMetric(py)cumulativeGPUTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a6483c7f61e4a944	-
+interface	c:objc(cs)MXUnitSignalBars	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8d732ef92adb5ff4	-
+super	-	MXUnitSignalBars	NSDimension		-	-	-	-	-	a9a919bea39041c2	-
+property	c:objc(cs)MXUnitSignalBars(cpy)bars	-			MXUnitSignalBars *	-	readonly,copy,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	04659f34e1198a37	-
+interface	c:objc(cs)MXUnitAveragePixelLuminance	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6b82c659994d2165	-
+super	-	MXUnitAveragePixelLuminance	NSDimension		-	-	-	-	-	ba5471932ed611f0	-
+property	c:objc(cs)MXUnitAveragePixelLuminance(cpy)apl	-			MXUnitAveragePixelLuminance *	-	readonly,copy,class	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	256f2c774daaa3d1	-
+interface	c:objc(cs)MXHistogramBucket	-			-	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	014d9f621ae3b97a	-
+super	-	MXHistogramBucket	NSObject		-	-	-	-	-	829043846a05e78b	-
+conforms	c:objc(cs)MXHistogramBucket	MXHistogramBucket	NSSecureCoding		-	-	-	-	-	63545745d3a09c42	-
+property	c:objc(cs)MXHistogramBucket(py)bucketStart	-			NSMeasurement<UnitType> *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f545784f3cf0d311	-
+property	c:objc(cs)MXHistogramBucket(py)bucketEnd	-			NSMeasurement<UnitType> *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e637c32e47ecae2c	-
+property	c:objc(cs)MXHistogramBucket(py)bucketCount	-			NSUInteger	-	readonly	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2dd85d155afb5a46	-
+interface	c:objc(cs)MXHistogram	-			-	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ca88d5e96d8a4db5	-
+super	-	MXHistogram	NSObject		-	-	-	-	-	16cb007aabcf82a6	-
+conforms	c:objc(cs)MXHistogram	MXHistogram	NSSecureCoding		-	-	-	-	-	302ac31296485cc7	-
+property	c:objc(cs)MXHistogram(py)totalBucketCount	-			NSUInteger	-	readonly	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	42ae0c531416d758	-
+property	c:objc(cs)MXHistogram(py)bucketEnumerator	-			NSEnumerator<MXHistogramBucket<UnitType> *> *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	99418e034e8ccec7	-
+interface	c:objc(cs)MXCellularConditionMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e7285f38398e5211	-
+super	-	MXCellularConditionMetric	MXMetric		-	-	-	-	-	0dff6180ebd31ef1	-
+property	c:objc(cs)MXCellularConditionMetric(py)histogrammedCellularConditionTime	-			MXHistogram<MXUnitSignalBars *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	475823f9f76cedef	-
+interface	c:objc(cs)MXMetaData	-			-	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use Use dictionaryRepresentation instead	e414d334092331ab	-
+super	-	MXMetaData	NSObject		-	-	-	-	-	047713598b955367	-
+conforms	c:objc(cs)MXMetaData	MXMetaData	NSSecureCoding		-	-	-	-	-	67e6c9f2f5b60472	-
+property	c:objc(cs)MXMetaData(py)regionFormat	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c601a14464e7b0c1	-
+property	c:objc(cs)MXMetaData(py)osVersion	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	13ae4844a2f4ccc2	-
+property	c:objc(cs)MXMetaData(py)deviceType	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2d0a84d5894b8569	-
+property	c:objc(cs)MXMetaData(py)applicationBuildVersion	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	49f77b8982c9ae26	-
+property	c:objc(cs)MXMetaData(py)platformArchitecture	-			NSString *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0eb580faa1ef1772	-
+property	c:objc(cs)MXMetaData(py)lowPowerModeEnabled	-			_Bool	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b20d91d228fd2411	-
+property	c:objc(cs)MXMetaData(py)isTestFlightApp	-			_Bool	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4513ea660a7f53a2	-
+property	c:objc(cs)MXMetaData(py)pid	-			pid_t	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8acc650a9f081803	-
+property	c:objc(cs)MXMetaData(py)bundleIdentifier	-			NSString *	-	readonly	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e974d1e58318f0ed	-
+method	c:objc(cs)MXMetaData(im)JSONRepresentation	-			NSData *	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c425124a5d4963fe	-
+method	c:objc(cs)MXMetaData(im)DictionaryRepresentation	-			NSDictionary *	-	-	ios=13.0/100000/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use Use dictionaryRepresentation instead	2376666125f8f2ca	-
+method	c:objc(cs)MXMetaData(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	45e94c9804079f53	-
+interface	c:objc(cs)MXAppRunTimeMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	36186b604ca733fe	-
+super	-	MXAppRunTimeMetric	MXMetric		-	-	-	-	-	d6c59a35b0879be7	-
+property	c:objc(cs)MXAppRunTimeMetric(py)cumulativeForegroundTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	93f205422968f127	-
+property	c:objc(cs)MXAppRunTimeMetric(py)cumulativeBackgroundTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	69eebd8bb33d81da	-
+property	c:objc(cs)MXAppRunTimeMetric(py)cumulativeBackgroundAudioTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	48e3ff3ce1b519ba	-
+property	c:objc(cs)MXAppRunTimeMetric(py)cumulativeBackgroundLocationTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	be8cb169bc1845af	-
+interface	c:objc(cs)MXLocationActivityMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	77c2b287e542c9d5	-
+super	-	MXLocationActivityMetric	MXMetric		-	-	-	-	-	59893ba4ec300968	-
+property	c:objc(cs)MXLocationActivityMetric(py)cumulativeBestAccuracyTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	59101b791c309e8a	-
+property	c:objc(cs)MXLocationActivityMetric(py)cumulativeBestAccuracyForNavigationTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f71bc46204ec4c35	-
+property	c:objc(cs)MXLocationActivityMetric(py)cumulativeNearestTenMetersAccuracyTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	50822d763e78cac1	-
+property	c:objc(cs)MXLocationActivityMetric(py)cumulativeHundredMetersAccuracyTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fe152e23fd270889	-
+property	c:objc(cs)MXLocationActivityMetric(py)cumulativeKilometerAccuracyTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6eb1b2299822d139	-
+property	c:objc(cs)MXLocationActivityMetric(py)cumulativeThreeKilometersAccuracyTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	534b9eb04bbc4128	-
+interface	c:objc(cs)MXNetworkTransferMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bdf2e8bbcec57707	-
+super	-	MXNetworkTransferMetric	MXMetric		-	-	-	-	-	85f81e11d13a509e	-
+property	c:objc(cs)MXNetworkTransferMetric(py)cumulativeWifiUpload	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	35cff0929d60eb39	-
+property	c:objc(cs)MXNetworkTransferMetric(py)cumulativeWifiDownload	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3628a9ef83207a63	-
+property	c:objc(cs)MXNetworkTransferMetric(py)cumulativeCellularUpload	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ac8ead50effe6b11	-
+property	c:objc(cs)MXNetworkTransferMetric(py)cumulativeCellularDownload	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	06d10584e8827a1e	-
+interface	c:objc(cs)MXAppLaunchMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f604406bb9e5e60d	-
+super	-	MXAppLaunchMetric	MXMetric		-	-	-	-	-	94da8a60014b892f	-
+property	c:objc(cs)MXAppLaunchMetric(py)histogrammedTimeToFirstDraw	-			MXHistogram<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e95d6ea04eba544f	-
+property	c:objc(cs)MXAppLaunchMetric(py)histogrammedApplicationResumeTime	-			MXHistogram<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	907c563c10d3bc1f	-
+property	c:objc(cs)MXAppLaunchMetric(py)histogrammedOptimizedTimeToFirstDraw	-			MXHistogram<NSUnitDuration *> *	-	readonly,strong	ios=15.2/-/-/0,macos=12.2/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	248f98fc3cf5a611	-
+property	c:objc(cs)MXAppLaunchMetric(py)histogrammedExtendedLaunch	-			MXHistogram<NSUnitDuration *> *	-	readonly,strong	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bd9afbab03ad0f6f	-
+interface	c:objc(cs)MXAppResponsivenessMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	692d6e3eef0bf64e	-
+super	-	MXAppResponsivenessMetric	MXMetric		-	-	-	-	-	8824a577e65c4aa3	-
+property	c:objc(cs)MXAppResponsivenessMetric(py)histogrammedApplicationHangTime	-			MXHistogram<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5e59142cfa0503e7	-
+interface	c:objc(cs)MXDiskIOMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d8d044325112c417	-
+super	-	MXDiskIOMetric	MXMetric		-	-	-	-	-	0349c08b74e7e5b2	-
+property	c:objc(cs)MXDiskIOMetric(py)cumulativeLogicalWrites	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fa11139378db6c8f	-
+interface	c:objc(cs)MXAverage	-			-	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3f77c7569eb2c5de	-
+super	-	MXAverage	NSObject		-	-	-	-	-	03fa9a681454c622	-
+conforms	c:objc(cs)MXAverage	MXAverage	NSSecureCoding		-	-	-	-	-	643b7de5aaf8de2a	-
+property	c:objc(cs)MXAverage(py)averageMeasurement	-			NSMeasurement<UnitType> *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c483b24f4501014c	-
+property	c:objc(cs)MXAverage(py)sampleCount	-			NSInteger	-	readonly	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	23fa039f13e81c00	-
+property	c:objc(cs)MXAverage(py)standardDeviation	-			double	-	readonly	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ea061f41f81e8721	-
+interface	c:objc(cs)MXMemoryMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a0fcdddcba2d5ef3	-
+super	-	MXMemoryMetric	MXMetric		-	-	-	-	-	df366af57f45153c	-
+property	c:objc(cs)MXMemoryMetric(py)peakMemoryUsage	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	187b68ec43d6d797	-
+property	c:objc(cs)MXMemoryMetric(py)averageSuspendedMemory	-			MXAverage<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	15bbb6bb0d7b5156	-
+interface	c:objc(cs)MXDisplayMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ba82963e0b3255a9	-
+super	-	MXDisplayMetric	MXMetric		-	-	-	-	-	b8869bdd9a381df3	-
+property	c:objc(cs)MXDisplayMetric(py)averagePixelLuminance	-			MXAverage<MXUnitAveragePixelLuminance *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	17323d215acc0492	-
+interface	c:objc(cs)MXAnimationMetric	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	54ffd709ae69cdc1	-
+super	-	MXAnimationMetric	MXMetric		-	-	-	-	-	212fb0e3e5172bf3	-
+property	c:objc(cs)MXAnimationMetric(py)scrollHitchTimeRatio	-			NSMeasurement<NSUnit *> *	-	readonly,strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	01c9355a569009ec	-
+property	c:objc(cs)MXAnimationMetric(py)hitchTimeRatio	-			NSMeasurement<NSUnit *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ee6d58bd182507ac	-
+interface	c:objc(cs)MXForegroundExitData	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	beaf119ce3fef080	-
+super	-	MXForegroundExitData	NSObject		-	-	-	-	-	70de858f9a902782	-
+conforms	c:objc(cs)MXForegroundExitData	MXForegroundExitData	NSSecureCoding		-	-	-	-	-	6c7e0377a2d38cf3	-
+property	c:objc(cs)MXForegroundExitData(py)cumulativeNormalAppExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1721d119318b96f2	-
+property	c:objc(cs)MXForegroundExitData(py)cumulativeMemoryResourceLimitExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	84fd5152f024e8d2	-
+property	c:objc(cs)MXForegroundExitData(py)cumulativeBadAccessExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c5f26bace0383fea	-
+property	c:objc(cs)MXForegroundExitData(py)cumulativeAbnormalExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	eb16faa2828a6522	-
+property	c:objc(cs)MXForegroundExitData(py)cumulativeIllegalInstructionExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	77b50be626d7505a	-
+property	c:objc(cs)MXForegroundExitData(py)cumulativeAppWatchdogExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e5f6302375701c83	-
+interface	c:objc(cs)MXBackgroundExitData	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5c8c057a13c52189	-
+super	-	MXBackgroundExitData	NSObject		-	-	-	-	-	b003b66454e30138	-
+conforms	c:objc(cs)MXBackgroundExitData	MXBackgroundExitData	NSSecureCoding		-	-	-	-	-	7e3247eb2fe6b542	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeNormalAppExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	85823212b2503975	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeMemoryResourceLimitExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0181bb3100dce9d5	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeCPUResourceLimitExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	33988880e9766a96	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeMemoryPressureExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9eaef25657e15c78	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeBadAccessExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1f70c660c1af5834	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeAbnormalExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1b88a4fa35d28bca	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeIllegalInstructionExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	faeb338954f81d1e	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeAppWatchdogExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d1e28e4d573f0444	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeSuspendedWithLockedFileExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fed55474dfadfe9c	-
+property	c:objc(cs)MXBackgroundExitData(py)cumulativeBackgroundTaskAssertionTimeoutExitCount	-			NSUInteger	-	readonly	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	28cb087e22906a86	-
+interface	c:objc(cs)MXAppExitMetric	-			-	-	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6286ddf511089087	-
+super	-	MXAppExitMetric	MXMetric		-	-	-	-	-	be7edc1bfaea5d9b	-
+property	c:objc(cs)MXAppExitMetric(py)foregroundExitData	-			MXForegroundExitData *	-	readonly,strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	304e3e1c5c23adec	-
+property	c:objc(cs)MXAppExitMetric(py)backgroundExitData	-			MXBackgroundExitData *	-	readonly,strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c4bff05d36d34384	-
+interface	c:objc(cs)MXDiskSpaceUsageMetric	-			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bc1bb469a78995ae	-
+super	-	MXDiskSpaceUsageMetric	MXMetric		-	-	-	-	-	2add577e5b213eb6	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalBinaryFileSize	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	24f511a52d3f7c6b	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalBinaryFileCount	-			NSInteger	-	readonly	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	98e65727a40268e7	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalDataFileSize	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a83eaa5bfa75b744	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalDataFileCount	-			NSInteger	-	readonly	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	54d17eac31f41dc9	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalCacheFolderSize	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	41ca4ea751f97465	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalCloneSize	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8ccb79d81435331b	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalDiskSpaceUsedSize	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ec9dde0489c12010	-
+property	c:objc(cs)MXDiskSpaceUsageMetric(py)totalDiskSpaceCapacity	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d1e0c5cac527bb74	-
+interface	c:objc(cs)MXSignpostIntervalData	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	55847f9664ea8428	-
+super	-	MXSignpostIntervalData	NSObject		-	-	-	-	-	bb7f784cc47f40c8	-
+conforms	c:objc(cs)MXSignpostIntervalData	MXSignpostIntervalData	NSSecureCoding		-	-	-	-	-	afbfc8c02495662d	-
+property	c:objc(cs)MXSignpostIntervalData(py)histogrammedSignpostDuration	-			MXHistogram<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	261bf8d4951b335b	-
+property	c:objc(cs)MXSignpostIntervalData(py)cumulativeCPUTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3a4932880811400b	-
+property	c:objc(cs)MXSignpostIntervalData(py)averageMemory	-			MXAverage<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a06d51a919d6fb28	-
+property	c:objc(cs)MXSignpostIntervalData(py)cumulativeLogicalWrites	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fa8413844d112617	-
+property	c:objc(cs)MXSignpostIntervalData(py)cumulativeHitchTimeRatio	-			NSMeasurement<NSUnit *> *	-	readonly,strong	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4990fd673574ec7c	-
+interface	c:objc(cs)MXSignpostMetric	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	aa9a1f59ffd174b4	-
+super	-	MXSignpostMetric	MXMetric		-	-	-	-	-	333ca5c176cbfff4	-
+property	c:objc(cs)MXSignpostMetric(py)signpostName	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	12af3904370ac3e8	-
+property	c:objc(cs)MXSignpostMetric(py)signpostCategory	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	74e9878a32ccd6cb	-
+property	c:objc(cs)MXSignpostMetric(py)signpostIntervalData	-			MXSignpostIntervalData *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	eaf10eb620c23bb2	-
+property	c:objc(cs)MXSignpostMetric(py)totalCount	-			NSUInteger	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	32a267d99613779b	-
+interface	c:objc(cs)MXMetricPayload	-			-	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use Use dictionaryRepresentation instead	549eae8d4313ef81	-
+super	-	MXMetricPayload	NSObject		-	-	-	-	-	b6cc47c31635a0bd	-
+conforms	c:objc(cs)MXMetricPayload	MXMetricPayload	NSSecureCoding		-	-	-	-	-	611ebe6864dd936c	-
+property	c:objc(cs)MXMetricPayload(py)latestApplicationVersion	-			NSString *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4e3a94ac81d0b634	-
+property	c:objc(cs)MXMetricPayload(py)includesMultipleApplicationVersions	-			BOOL	-	readonly	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	209e03fc10413932	-
+property	c:objc(cs)MXMetricPayload(py)timeStampBegin	-			NSDate *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	459cb089e7a1db68	-
+property	c:objc(cs)MXMetricPayload(py)timeStampEnd	-			NSDate *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5e3cc3fe96110a5d	-
+property	c:objc(cs)MXMetricPayload(py)cpuMetrics	-			MXCPUMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	830bdbf8e77693d0	-
+property	c:objc(cs)MXMetricPayload(py)gpuMetrics	-			MXGPUMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4aca928d3c93a727	-
+property	c:objc(cs)MXMetricPayload(py)cellularConditionMetrics	-			MXCellularConditionMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e322414174619a64	-
+property	c:objc(cs)MXMetricPayload(py)applicationTimeMetrics	-			MXAppRunTimeMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bc04250bb4ea3781	-
+property	c:objc(cs)MXMetricPayload(py)locationActivityMetrics	-			MXLocationActivityMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	32b2b755fe6d7f2e	-
+property	c:objc(cs)MXMetricPayload(py)networkTransferMetrics	-			MXNetworkTransferMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	5f3932eff9ba2b05	-
+property	c:objc(cs)MXMetricPayload(py)applicationLaunchMetrics	-			MXAppLaunchMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e68b89363845482b	-
+property	c:objc(cs)MXMetricPayload(py)applicationResponsivenessMetrics	-			MXAppResponsivenessMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1156d7bd86341586	-
+property	c:objc(cs)MXMetricPayload(py)diskIOMetrics	-			MXDiskIOMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c5bae9a1366a49ac	-
+property	c:objc(cs)MXMetricPayload(py)memoryMetrics	-			MXMemoryMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	523c8f282b07d792	-
+property	c:objc(cs)MXMetricPayload(py)displayMetrics	-			MXDisplayMetric *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6926af2009d809db	-
+property	c:objc(cs)MXMetricPayload(py)animationMetrics	-			MXAnimationMetric *	-	readonly,strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	4f13a044cb793e20	-
+property	c:objc(cs)MXMetricPayload(py)applicationExitMetrics	-			MXAppExitMetric *	-	readonly,strong	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7083c9340abae98b	-
+property	c:objc(cs)MXMetricPayload(py)diskSpaceUsageMetrics	-			MXDiskSpaceUsageMetric *	-	readonly,strong	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	20a8d4c07de1c85c	-
+property	c:objc(cs)MXMetricPayload(py)signpostMetrics	-			NSArray<MXSignpostMetric *> *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	62bb781acab56e8b	-
+property	c:objc(cs)MXMetricPayload(py)metaData	-			MXMetaData *	-	readonly,strong	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	48bcf85e0a46d87f	-
+method	c:objc(cs)MXMetricPayload(im)JSONRepresentation	-			NSData *	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	89d4d8fe19690c0a	-
+method	c:objc(cs)MXMetricPayload(im)DictionaryRepresentation	-			NSDictionary *	-	-	ios=13.0/100000/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use Use dictionaryRepresentation instead	0cbcbf9e692f5827	-
+method	c:objc(cs)MXMetricPayload(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=13.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	39c2125ef9946bb2	-
+interface	c:objc(cs)MXSignpostRecord	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	9c4a3f583fd0f9b7	-
+super	-	MXSignpostRecord	NSObject		-	-	-	-	-	951f5710dd026ce0	-
+conforms	c:objc(cs)MXSignpostRecord	MXSignpostRecord	NSSecureCoding		-	-	-	-	-	dfabb572b70f2e40	-
+property	c:objc(cs)MXSignpostRecord(py)subsystem	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e539482598d12a86	-
+property	c:objc(cs)MXSignpostRecord(py)category	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	26d2e9caee0de3f8	-
+property	c:objc(cs)MXSignpostRecord(py)name	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c738036733b54eac	-
+property	c:objc(cs)MXSignpostRecord(py)beginTimeStamp	-			NSDate *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bd8f26a13141aa57	-
+property	c:objc(cs)MXSignpostRecord(py)endTimeStamp	-			NSDate *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	40a9aa71329da0fb	-
+property	c:objc(cs)MXSignpostRecord(py)duration	-			NSMeasurement<NSUnitDuration *> *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	579f45bce75fe9e5	-
+property	c:objc(cs)MXSignpostRecord(py)isInterval	-			BOOL	-	readonly	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7f974bcb88640fcb	-
+method	c:objc(cs)MXSignpostRecord(im)JSONRepresentation	-			NSData *	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d9c1f84b71416097	-
+method	c:objc(cs)MXSignpostRecord(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0ec3ef615f764a41	-
+interface	c:objc(cs)MXDiagnostic	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	051570c780acbe87	-
+super	-	MXDiagnostic	NSObject		-	-	-	-	-	8c9dfe63d444d5a2	-
+conforms	c:objc(cs)MXDiagnostic	MXDiagnostic	NSSecureCoding		-	-	-	-	-	863610e9991fb1b2	-
+property	c:objc(cs)MXDiagnostic(py)metaData	-			MXMetaData *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	efe28b9c6d360dd5	-
+property	c:objc(cs)MXDiagnostic(py)applicationVersion	-			NSString *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ae260db8d5864186	-
+property	c:objc(cs)MXDiagnostic(py)signpostData	-			NSArray<MXSignpostRecord *> *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7d8ff76b357cd3bb	-
+method	c:objc(cs)MXDiagnostic(im)JSONRepresentation	-			NSData *	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	640aa901e80bdfd4	-
+method	c:objc(cs)MXDiagnostic(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	14ec3eb4d9cf6e6b	-
+interface	c:objc(cs)MXCallStackTree	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f58a9075ba9eb90a	-
+super	-	MXCallStackTree	NSObject		-	-	-	-	-	df3cd7eb6910c98b	-
+conforms	c:objc(cs)MXCallStackTree	MXCallStackTree	NSSecureCoding		-	-	-	-	-	48b20f4668249862	-
+method	c:objc(cs)MXCallStackTree(im)JSONRepresentation	-			NSData *	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	743ec602dfb6728f	-
+interface	c:objc(cs)MXCPUExceptionDiagnostic	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ea35925f2819bcd4	-
+super	-	MXCPUExceptionDiagnostic	MXDiagnostic		-	-	-	-	-	a6aa429f63b8bc4d	-
+property	c:objc(cs)MXCPUExceptionDiagnostic(py)callStackTree	-			MXCallStackTree *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b66ed0b130e8e62c	-
+property	c:objc(cs)MXCPUExceptionDiagnostic(py)totalCPUTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7ab57c653e0c36cc	-
+property	c:objc(cs)MXCPUExceptionDiagnostic(py)totalSampledTime	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a331912b1bde3e47	-
+interface	c:objc(cs)MXDiskWriteExceptionDiagnostic	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c4e95539c4936b0e	-
+super	-	MXDiskWriteExceptionDiagnostic	MXDiagnostic		-	-	-	-	-	6ed3eda9c1272ec2	-
+property	c:objc(cs)MXDiskWriteExceptionDiagnostic(py)callStackTree	-			MXCallStackTree *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	8459f46f2cf3def4	-
+property	c:objc(cs)MXDiskWriteExceptionDiagnostic(py)totalWritesCaused	-			NSMeasurement<NSUnitInformationStorage *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	c1102770901fa865	-
+interface	c:objc(cs)MXHangDiagnostic	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	a94372dfe2bd1f81	-
+super	-	MXHangDiagnostic	MXDiagnostic		-	-	-	-	-	95ee04dab8744cd4	-
+property	c:objc(cs)MXHangDiagnostic(py)callStackTree	-			MXCallStackTree *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fbed2b2b89d8a3ba	-
+property	c:objc(cs)MXHangDiagnostic(py)hangDuration	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	0a00e693ad6d5c19	-
+interface	c:objc(cs)MXAppLaunchDiagnostic	-			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	832ccbb9cc26f37c	-
+super	-	MXAppLaunchDiagnostic	MXDiagnostic		-	-	-	-	-	238c74afcf0c2c4e	-
+property	c:objc(cs)MXAppLaunchDiagnostic(py)callStackTree	-			MXCallStackTree *	-	readonly,strong	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	076a6ba4e1f60652	-
+property	c:objc(cs)MXAppLaunchDiagnostic(py)launchDuration	-			NSMeasurement<NSUnitDuration *> *	-	readonly,strong	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	491bd0baaaed2bf6	-
+interface	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	39e0c29e4dc422e3	-
+super	-	MXCrashDiagnosticObjectiveCExceptionReason	NSObject		-	-	-	-	-	7d37c32951de9edc	-
+conforms	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason	MXCrashDiagnosticObjectiveCExceptionReason	NSSecureCoding		-	-	-	-	-	2b16c0f11ee1119a	-
+property	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(py)composedMessage	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	010066409c2f3c1c	-
+property	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(py)formatString	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	83d491cc44d55b7e	-
+property	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(py)arguments	-			NSArray<NSString *> *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	463e31e3b6f2d531	-
+property	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(py)exceptionType	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	aef168ad858b29f4	-
+property	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(py)className	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d8c6cca5bc931994	-
+property	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(py)exceptionName	-			NSString *	-	readonly,copy	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dccb9d86b4df8210	-
+method	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(im)JSONRepresentation	-			NSData *	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e9c305b0e8a61f11	-
+method	c:objc(cs)MXCrashDiagnosticObjectiveCExceptionReason(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	93d7b9f5449a8fe4	-
+interface	c:objc(cs)MXCrashDiagnostic	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b4272a98d38221a4	-
+super	-	MXCrashDiagnostic	MXDiagnostic		-	-	-	-	-	63564f45a8accb2e	-
+property	c:objc(cs)MXCrashDiagnostic(py)callStackTree	-			MXCallStackTree *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	94e3bb07805ddb91	-
+property	c:objc(cs)MXCrashDiagnostic(py)terminationReason	-			NSString *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	591efc714d537d28	-
+property	c:objc(cs)MXCrashDiagnostic(py)virtualMemoryRegionInfo	-			NSString *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	588abfc101d2760c	-
+property	c:objc(cs)MXCrashDiagnostic(py)exceptionType	-			NSNumber *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f34114ad33a7fcad	-
+property	c:objc(cs)MXCrashDiagnostic(py)exceptionCode	-			NSNumber *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	15eb1441c6533791	-
+property	c:objc(cs)MXCrashDiagnostic(py)signal	-			NSNumber *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	56b797499612d52c	-
+property	c:objc(cs)MXCrashDiagnostic(py)exceptionReason	-			MXCrashDiagnosticObjectiveCExceptionReason *	-	readonly,strong	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b4032d43e13b0e62	-
+interface	c:objc(cs)MXDiagnosticPayload	-			-	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f159a7d98dc42e44	-
+super	-	MXDiagnosticPayload	NSObject		-	-	-	-	-	de757f2002ba5729	-
+conforms	c:objc(cs)MXDiagnosticPayload	MXDiagnosticPayload	NSSecureCoding		-	-	-	-	-	0b8cb431e6864a59	-
+property	c:objc(cs)MXDiagnosticPayload(py)cpuExceptionDiagnostics	-			NSArray<MXCPUExceptionDiagnostic *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b0f86572dca51cdc	-
+property	c:objc(cs)MXDiagnosticPayload(py)diskWriteExceptionDiagnostics	-			NSArray<MXDiskWriteExceptionDiagnostic *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	df053e3cb8a6cc66	-
+property	c:objc(cs)MXDiagnosticPayload(py)hangDiagnostics	-			NSArray<MXHangDiagnostic *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	27fd575937627b71	-
+property	c:objc(cs)MXDiagnosticPayload(py)appLaunchDiagnostics	-			NSArray<MXAppLaunchDiagnostic *> *	-	readonly,strong	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e8a35c3c488af66d	-
+property	c:objc(cs)MXDiagnosticPayload(py)crashDiagnostics	-			NSArray<MXCrashDiagnostic *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	b4c58eb2bb7dd942	-
+property	c:objc(cs)MXDiagnosticPayload(py)timeStampBegin	-			NSDate *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ddee8fee1f8c7d3f	-
+property	c:objc(cs)MXDiagnosticPayload(py)timeStampEnd	-			NSDate *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	75c68623f267942d	-
+method	c:objc(cs)MXDiagnosticPayload(im)JSONRepresentation	-			NSData *	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	019fb60a0382b4d4	-
+method	c:objc(cs)MXDiagnosticPayload(im)dictionaryRepresentation	-			NSDictionary *	-	-	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	248c25a95262e2da	-
+typedef	c:@T@MXLaunchTaskID	-			const NSString *const	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	1ff9eb3616204b3a	-
+interface	c:objc(cs)MXMetricManager	-			-	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	923f6e1af3dc4281	-
+super	-	MXMetricManager	NSObject		-	-	-	-	-	7970adad10df85e5	-
+property	c:objc(cs)MXMetricManager(py)pastPayloads	-			NSArray<MXMetricPayload *> *	-	readonly,strong	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	ab72d4b639f646a9	-
+property	c:objc(cs)MXMetricManager(py)pastDiagnosticPayloads	-			NSArray<MXDiagnosticPayload *> *	-	readonly,strong	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	6d5a70fac8e46ffa	-
+property	c:objc(cs)MXMetricManager(cpy)sharedManager	-			MXMetricManager *	-	readonly,strong,class	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2a123296bfed25c3	-
+method	c:objc(cs)MXMetricManager(cm)makeLogHandleWithCategory:	-			os_log_t	NSString * category	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	dd3037a1f3475c98	-
+method	c:objc(cs)MXMetricManager(im)addSubscriber:	-			void	id<MXMetricManagerSubscriber> subscriber	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7895ad9cf2a22af6	-
+method	c:objc(cs)MXMetricManager(im)removeSubscriber:	-			void	id<MXMetricManagerSubscriber> subscriber	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	57fdeceb32ba2241	-
+method	c:objc(cs)MXMetricManager(cm)extendLaunchMeasurementForTaskID:error:	-			BOOL	const MXLaunchTaskID taskID | NSError * _Nullable * error	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	7cc52e148edf6af5	-
+method	c:objc(cs)MXMetricManager(cm)finishExtendedLaunchMeasurementForTaskID:error:	-			BOOL	const MXLaunchTaskID taskID | NSError * _Nullable * error	-	ios=16.0/-/-/0,macos=13.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	fc5b8c211eca1ed3	-
+protocol	c:objc(pl)MXMetricManagerSubscriber	-			-	-	-	ios=13.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	3c2a72b20772e6a8	-
+conforms	c:objc(pl)MXMetricManagerSubscriber	MXMetricManagerSubscriber	NSObject		-	-	-	-	-	a1a28877fe115265	-
+method	c:objc(pl)MXMetricManagerSubscriber(im)didReceiveMetricPayloads:	-			void	NSArray<MXMetricPayload *> * payloads	optional	macos=10.15/-/-/0	-	ffdf397d74b41c4e	-
+method	c:objc(pl)MXMetricManagerSubscriber(im)didReceiveDiagnosticPayloads:	-			void	NSArray<MXDiagnosticPayload *> * payloads	optional	ios=14.0/-/-/0,macos=12.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d9f2cc0c3dbf4399	-
+function	c:@F@_MXSignpostMetricsSnapshot	-			void * (void)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	bbdd88cc5a304adc	-
+var	c:@MXErrorDomain	-			const NSErrorDomain	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	af3dea112a2ba315	-
+typedef	c:@T@MXErrorCode	-			enum MXErrorCode	-	-	-	-	b1b95d01dada846f	-
+enum	c:@E@MXErrorCode	-			NSInteger	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e0e926241dac708b	-
+enumconst	c:@E@MXErrorCode@MXErrorLaunchTaskInvalidID	MXErrorCode			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	97761e62cc2fe263	0
+enumconst	c:@E@MXErrorCode@MXErrorLaunchTaskMaxCount	MXErrorCode			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	56af3d9ca54eb21a	1
+enumconst	c:@E@MXErrorCode@MXErrorLaunchTaskPastDeadline	MXErrorCode			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	32c87508ab70ca3b	2
+enumconst	c:@E@MXErrorCode@MXErrorLaunchTaskDuplicated	MXErrorCode			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	80c50e3fc72070c6	3
+enumconst	c:@E@MXErrorCode@MXErrorLaunchTaskUnknown	MXErrorCode			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f54d2bb12892cafd	4
+enumconst	c:@E@MXErrorCode@MXErrorLaunchTaskInternalFailure	MXErrorCode			-	-	-	ios=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	10af44d572311258	5
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@pid_t	-			__darwin_pid_t	-	-	-	-	bf2c1907ad5396d7	-
+typedef	c:@T@__darwin_pid_t	-			__int32_t	-	-	-	-	cb5c92904c281d82	-
+typedef	c:@T@__int32_t	-			int	-	-	-	-	71b73741152fe871	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@os_log_t	-			NSObject<OS_os_log> *	-	-	-	-	05283e72d8a81eca	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-

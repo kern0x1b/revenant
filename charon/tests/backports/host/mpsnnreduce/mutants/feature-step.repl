@@ -1,0 +1,3 @@
+        if (_byFeatureChannel) {
+            pixel = r;
+            step = 1;  // MUTATION: a feature-channel run walks pixels too

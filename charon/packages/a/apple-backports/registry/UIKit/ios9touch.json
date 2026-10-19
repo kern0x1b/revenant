@@ -1,0 +1,44 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIGestureRecognizer.allowedTouchTypes",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/TouchTypes.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/touchtypes (defaults iOS 10 values), and tests/backports/device/touchtypes.m with real touches on iOS 6"
+    },
+    {
+      "api": "UIGestureRecognizer.requiresExclusiveTouchType",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/TouchTypes.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/touchtypes (defaults iOS 10 values), and tests/backports/device/touchtypes.m with real touches on iOS 6"
+    },
+    {
+      "api": "UIGestureRecognizer.allowedPressTypes",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/UIKit/TouchTypes.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/touchtypes (defaults iOS 10 values), and tests/backports/device/touchtypes.m with real touches on iOS 6",
+      "reason": "build the property UIGestureRecognizer.allowedPressTypes",
+      "effect": "a stand-in is built and answers; the real behaviour is owed"
+    },
+    {
+      "api": "UITouch.type",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/TouchTypes.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/touchtypes (defaults iOS 10 values), and tests/backports/device/touchtypes.m with real touches on iOS 6",
+      "effect": "always UITouchTypeDirect: a finger is the only touch these devices have"
+    }
+  ]
+}

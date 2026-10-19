@@ -1,0 +1,7 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_GameController_SwiftUI	swift-struct	s:23_GameController_SwiftUI0aB20EventHandlingOptionsV	-	GameControllerEventHandlingOptions	-	-	-	ios=26.0	-	8dcf851a7f356164
+_GameController_SwiftUI	swift-method	s:23_GameController_SwiftUI0aB20EventHandlingOptionsVACycfc	GameControllerEventHandlingOptions	init()	-	-	_GameController_SwiftUI.GameControllerEventHandlingOptions	-	-	d66351b49a4ad869
+_GameController_SwiftUI	swift-method	s:23_GameController_SwiftUI0aB20EventHandlingOptionsV20receivesEventsInViewyACSbFZ	GameControllerEventHandlingOptions	receivesEventsInView(_:)	+	_GameController_SwiftUI.GameControllerEventHandlingOptions	Swift.Bool	-	-	843aa229dc412dc3
+_GameController_SwiftUI	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
+_GameController_SwiftUI	swift-method	s:7SwiftUI4ViewP016_GameController_aB0E07handlesdE6Events8matchingQrSo14GCUIEventTypesV_tF	View	handlesGameControllerEvents(matching:)	-	some SwiftUI.View	GameController.GCUIEventTypes	-	-	974bf43010e6f9e8
+_GameController_SwiftUI	swift-method	s:7SwiftUI4ViewP016_GameController_aB0E07handlesdE6Events8matching11withOptionsQrSo14GCUIEventTypesV_AD0de13EventHandlingJ0VSgtF	View	handlesGameControllerEvents(matching:withOptions:)	-	some SwiftUI.View	GameController.GCUIEventTypes | _GameController_SwiftUI.GameControllerEventHandlingOptions?	ios=26.0	-	521fc6f20f693e4f

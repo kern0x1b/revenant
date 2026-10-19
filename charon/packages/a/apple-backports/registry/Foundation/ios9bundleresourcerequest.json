@@ -1,0 +1,170 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSBundleResourceRequest",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class arrived in iOS 9 and the release has none of it, so the class, its two initialisers, its three resource methods and its four properties are carried whole",
+      "effect": "an application can ask a bundle for its on-demand resources by tag: the request holds the tags it was given and the bundle they resolve in, its progress is complete the moment it exists because the packs are already in the bundle, and a tag the bundle's manifest does not name completes with NSBundleOnDemandResourceInvalidTagError, 4994, in NSCocoaErrorDomain",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the host's own class, through tests/backports/host/bundlerequest: 82 checks, none differing, and 14 host rows of one-line changes of the rules they rest on, each caught, with a fifteenth row marked device-only"
+    },
+    {
+      "api": "NSBundleResourceRequestLoadingPriorityUrgent",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant arrived in iOS 9 with the class, and the release has neither",
+      "effect": "the symbol is there, with the value the header's own words give: the property's range is 0 to 1 with 1 the highest, and this one is documented as the maximum available to finishing a request as soon as possible, so 1.0",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's words, not a measurement: the constant is API_UNAVAILABLE(macos), so the macOS framework does not emit it and there is nothing on the host to read"
+    },
+    {
+      "api": "NSBundleResourceRequestLowDiskSpaceNotification",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the constant arrived in iOS 9 with the class, and the release has neither",
+      "effect": "the symbol is there, with the string of its own name, as every NSNotificationName const is",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's declaration, not a measurement: API_UNAVAILABLE(macos) and the macOS framework does not emit it"
+    },
+    {
+      "api": "-[NSBundleResourceRequest init]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 and the header marks it unavailable on every platform, and the host answers it by refusing",
+      "effect": "-init raises NSInvalidArgumentException with the reason \"init is unavailable\", which is what the host answers and what the header marks; a request has tags, so there is nothing for it to be",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the host's own -init, measured: the same exception and the same reason"
+    },
+    {
+      "api": "-[NSBundleResourceRequest initWithTags:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 and the release has none of it",
+      "effect": "a request over a set of tags, in the main bundle; the tags are the caller's own set, not a live reference to it",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the host's own class, through tests/backports/host/bundlerequest; the host's public -initWithTags: forwards to a private -initWithTag: which answers nil on this platform, so the class's state is held to the header's own words"
+    },
+    {
+      "api": "-[NSBundleResourceRequest initWithTags:bundle:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 and the release has none of it, and it is the designated initialiser",
+      "effect": "a request over a set of tags in a given bundle, defaulting to the main bundle when none is given, with a progress that is complete the moment it exists",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the host's own class, through tests/backports/host/bundlerequest, against the header's own sentences for the default bundle, the default priority and the progress"
+    },
+    {
+      "api": "-[NSBundleResourceRequest beginAccessingResourcesWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 and the release has none of it, and the release has no on-demand resource system either",
+      "effect": "the handler is called once, with no error when every tag the manifest names, and with 4994 in NSCocoaErrorDomain for a tag it does not; nothing is ever downloaded, because every resolvable pack is already in the bundle",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the ruling's documented behaviour when the packs are in the bundle, held by tests/backports/host/bundlerequest; the host cannot complete a request at all, so there is no host answer for this one"
+    },
+    {
+      "api": "-[NSBundleResourceRequest conditionallyBeginAccessingResourcesWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 and the release has none of it",
+      "effect": "the handler is called once with YES, whatever the tags are: the packs are in the bundle, so there is nothing to wait for",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the host's own answer, measured: YES, and tests/backports/host/bundlerequest holds it"
+    },
+    {
+      "api": "-[NSBundleResourceRequest endAccessingResources]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 and the release has none of it",
+      "effect": "the call answers, and nothing is released, because nothing was taken: the packs never left the bundle",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's own contract, and the ruling's; there is no host instance to call it on"
+    },
+    {
+      "api": "-[NSBundleResourceRequest tags]",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property arrived in iOS 9 and the release has none of it",
+      "effect": "the set of tags the request was given, a copy of the caller's",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's words, held by tests/backports/host/bundlerequest against what was passed in"
+    },
+    {
+      "api": "-[NSBundleResourceRequest bundle]",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property arrived in iOS 9 and the release has none of it",
+      "effect": "the bundle the request resolves in, the main bundle when none was given",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's words, held by tests/backports/host/bundlerequest"
+    },
+    {
+      "api": "-[NSBundleResourceRequest loadingPriority]",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property arrived in iOS 9 and the release has none of it",
+      "effect": "a double beginning at 0.5 and holding whatever the caller sets, the header's own range being 0 to 1 with 1 the highest",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's own words for the default and the range, held by tests/backports/host/bundlerequest"
+    },
+    {
+      "api": "-[NSBundleResourceRequest progress]",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property arrived in iOS 9 and the release has none of it",
+      "effect": "an NSProgress with its counts left alone, which is what makes it read as complete: a fresh NSProgress is indeterminate and finished and its fractionCompleted reads 1",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the host's own shape, measured - the class, isFinished, isIndeterminate, both counts and the fraction - and held by tests/backports/host/bundlerequest"
+    },
+    {
+      "api": "-[NSBundle setPreservationPriority:forTags:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 in a category on NSBundle, and the release has neither the class this family's request needs nor these two methods",
+      "effect": "the priority is held per bundle and tag, and the call raises NSInvalidArgumentException when the receiver bundle has no on demand resource tag information, which is what the header promises; the two are installed only where NSBundle does not already answer, so a host that has them keeps its own",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "the header's own contract, and the host's own copies measured: they store and read a priority on a bundle that has a manifest (level1 reads 0.25) and refuse nothing there. On a host that already has them the port installs nothing - the fleet rule - so these two are held on a release that has none, which is the device, and tests/backports/host/bundlerequest records what the host does rather than comparing it with itself"
+    },
+    {
+      "api": "-[NSBundle preservationPriorityForTag:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the method arrived in iOS 9 in a category on NSBundle, and the release has neither",
+      "effect": "the priority held for a tag of that bundle, and 0 for a tag the bundle's manifest does not name; installed only where NSBundle does not already answer",
+      "facts": "facts/Foundation/NSBundleResourceRequest.md",
+      "source": "as -setPreservationPriority:forTags:: the host's own copy is the oracle where the port installs nothing, and the port's copy runs, and is held, on a release that has neither"
+    }
+  ]
+}

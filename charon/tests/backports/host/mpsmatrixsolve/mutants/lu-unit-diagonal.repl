@@ -1,0 +1,5 @@
+            double luDiagonal = CharonMatrixSolveGet(&a, 0, row, row);
+            if (luDiagonal == 0.0) { return; }
+            CharonMatrixSolvePut(&x, 0, row, side, sum / luDiagonal);
+        }
+        // Backward through U.

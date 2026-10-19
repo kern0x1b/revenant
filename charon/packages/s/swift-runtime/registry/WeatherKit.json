@@ -1,0 +1,5 @@
+{
+    "framework": "WeatherKit",
+    "entries": [],
+    "note": "The Swift half of WeatherKit this package builds is files/WeatherKit: WeatherCondition (41 rows, facts/WeatherKit/WeatherCondition.md) and Wind.CompassDirection (25 rows, facts/WeatherKit/CompassDirection.md). Wind itself is declared with no members; its members are open. No entry is written here, and by this directory's README that means no name in it is claimed implemented: the module is wired into xmake.lua but not yet built, because the runtime install is blocked on the lift's measured set for iPhoneOS16.4 (the lift left-alone check fails with 43 differences). When the install passes and the module is measured, the containers become rows here as implemented."
+}

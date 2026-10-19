@@ -1,0 +1,234 @@
+diff -ruN a/swift-system-1.8.1/Sources/CSystem/csystem_port.c b/swift-system-1.8.1/Sources/CSystem/csystem_port.c
+--- a/Sources/CSystem/csystem_port.c
++++ b/Sources/CSystem/csystem_port.c
+@@ -0,0 +1,59 @@
++// The calls the port's libSystem lacks at iOS 6.1.3, routed through apple-compat (fstatat, unlinkat, fdopendir) and
++// through weak references (the mach port guards: the 6.1.3 export list has no wrapper for them).
++#include <dirent.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#include <mach/mach.h>
++#include <charon/fdopendir.h>
++#include <charon/fstatat.h>
++#include <charon/unlinkat.h>
++#include "CSystemDarwin.h"
++
++#pragma weak mach_port_guard
++#pragma weak mach_port_unguard
++#pragma weak mach_port_destruct
++
++int csystem_fstatat(int fd, const char *path, struct stat *buffer, int flags)
++{
++    return fstatat(fd, path, buffer, flags);
++}
++
++int csystem_unlinkat(int fd, const char *path, int flag)
++{
++    return unlinkat(fd, path, flag);
++}
++
++DIR *csystem_fdopendir(int fd)
++{
++    return fdopendir(fd);
++}
++
++kern_return_t csystem_mach_port_guard(mach_port_name_t name, mach_port_context_t guard, boolean_t strict)
++{
++    if (&mach_port_guard == NULL) {
++        return KERN_NOT_SUPPORTED;
++    }
++    return mach_port_guard(mach_task_self(), name, guard, strict);
++}
++
++kern_return_t csystem_mach_port_unguard(mach_port_name_t name, mach_port_context_t guard)
++{
++    if (&mach_port_unguard == NULL) {
++        return KERN_NOT_SUPPORTED;
++    }
++    return mach_port_unguard(mach_task_self(), name, guard);
++}
++
++kern_return_t csystem_mach_port_destruct(mach_port_name_t name, mach_port_delta_t delta, mach_port_context_t guard)
++{
++    if (&mach_port_destruct == NULL) {
++        return KERN_NOT_SUPPORTED;
++    }
++    return mach_port_destruct(mach_task_self(), name, delta, guard);
++}
++
++// The task port, read in C: a Swift reference to the C global mach_task_self_ is refused in Swift 6 mode.
++mach_port_t csystem_mach_task_self(void)
++{
++    return mach_task_self();
++}
+diff -ruN a/swift-system-1.8.1/Sources/CSystem/include/CSystemDarwin.h b/swift-system-1.8.1/Sources/CSystem/include/CSystemDarwin.h
+--- a/Sources/CSystem/include/CSystemDarwin.h
++++ b/Sources/CSystem/include/CSystemDarwin.h
+@@ -9,12 +9,24 @@
+ 
+ #if defined(__APPLE__)
+ 
++#include <dirent.h>
+ #include <fcntl.h>
++#include <mach/mach.h>
++#include <sys/stat.h>
+ 
+ #ifdef O_CLOFORK
+ #define COMPATIBILITY_O_CLOFORK O_CLOFORK
+ #else
+ #define COMPATIBILITY_O_CLOFORK 0
+ #endif
++
++// The port's wrappers (csystem_port.c): the calls below are routed through them, see the port's patch.
++int csystem_fstatat(int fd, const char *path, struct stat *buffer, int flags);
++int csystem_unlinkat(int fd, const char *path, int flag);
++DIR *csystem_fdopendir(int fd);
++kern_return_t csystem_mach_port_guard(mach_port_name_t name, mach_port_context_t guard, boolean_t strict);
++kern_return_t csystem_mach_port_unguard(mach_port_name_t name, mach_port_context_t guard);
++kern_return_t csystem_mach_port_destruct(mach_port_name_t name, mach_port_delta_t delta, mach_port_context_t guard);
++mach_port_t csystem_mach_task_self(void);
+ 
+ #endif // defined(__APPLE__)
+diff -ruN a/swift-system-1.8.1/Sources/System/Internals/Exports.swift b/swift-system-1.8.1/Sources/System/Internals/Exports.swift
+--- a/Sources/System/Internals/Exports.swift
++++ b/Sources/System/Internals/Exports.swift
+@@ -13,6 +13,7 @@
+ // TODO: Should CSystem just include all the header files we need?
+ 
+ #if SYSTEM_PACKAGE_DARWIN
++import CSystem
+ import Darwin
+ #elseif os(Windows)
+ import CSystem
+@@ -106,7 +107,7 @@
+ }
+ @available(System 1.7.0, *)
+ internal func system_fstatat(_ fd: CInt, _ p: UnsafePointer<CChar>, _ s: inout CInterop.Stat, _ flags: CInt) -> Int32 {
+-  fstatat(fd, p, &s, flags)
++  csystem_fstatat(fd, p, &s, flags)
+ }
+ #endif
+ 
+diff -ruN a/swift-system-1.8.1/Sources/System/Internals/Syscalls.swift b/swift-system-1.8.1/Sources/System/Internals/Syscalls.swift
+--- a/Sources/System/Internals/Syscalls.swift
++++ b/Sources/System/Internals/Syscalls.swift
+@@ -227,13 +227,13 @@
+ #if ENABLE_MOCKING
+   if mockingEnabled { return _mock(fd, path, flag) }
+ #endif
+-return unlinkat(fd, path, flag)
++return csystem_unlinkat(fd, path, flag)
+ }
+ 
+ internal func system_fdopendir(
+   _ fd: CInt
+ ) -> system_DIRPtr? {
+-  return fdopendir(fd)
++  return csystem_fdopendir(fd)
+ }
+ 
+ internal func system_readdir(
+diff -ruN a/swift-system-1.8.1/Sources/System/MachPort.swift b/swift-system-1.8.1/Sources/System/MachPort.swift
+--- a/Sources/System/MachPort.swift
++++ b/Sources/System/MachPort.swift
+@@ -10,9 +10,11 @@
+ #if SYSTEM_PACKAGE_DARWIN
+ 
+ #if canImport(Darwin, _version: 310)
++import CSystem
+ import Darwin.Mach
+ #else
+ @preconcurrency import Darwin.Mach
++import CSystem
+ #endif
+ 
+ @available(System 1.4.0, *)
+@@ -66,7 +68,7 @@
+         )
+ 
+         let secret = mach_port_context_t(arc4random())
+-        _machPrecondition(mach_port_guard(mach_task_self_, name, secret, 0))
++        _machPrecondition(csystem_mach_port_guard(name, secret, 0))
+         self._context = secret
+       }
+       else {
+@@ -98,14 +100,14 @@
+           "Receive rights cannot be dead names"
+         )
+         _machPrecondition(
+-          mach_port_destruct(mach_task_self_, _name, 0, _context)
++          csystem_mach_port_destruct(_name, 0, _context)
+         )
+       } else {
+         assert(
+           RightType.self == SendRight.self ||
+           RightType.self == SendOnceRight.self
+         )
+-        _machPrecondition(mach_port_deallocate(mach_task_self_, _name))
++        _machPrecondition(mach_port_deallocate(csystem_mach_task_self(), _name))
+       }
+     }
+   }
+@@ -167,7 +169,7 @@
+   public init() {
+     var storage: mach_port_name_t = mach_port_name_t(MACH_PORT_NULL)
+     _machPrecondition(
+-      mach_port_allocate(mach_task_self_, MACH_PORT_RIGHT_RECEIVE, &storage)
++      mach_port_allocate(csystem_mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &storage)
+     )
+ 
+     // name-only init will guard ReceiveRights
+@@ -211,7 +213,7 @@
+   @available(System 1.4.0, *)
+   public consuming func unguardAndRelinquish() -> mach_port_name_t {
+     let (name, context) = self.relinquish()
+-    _machPrecondition(mach_port_unguard(mach_task_self_, name, context))
++    _machPrecondition(csystem_mach_port_unguard(name, context))
+     return name
+   }
+ 
+@@ -247,7 +249,7 @@
+ 
+     _machPrecondition(
+       mach_port_extract_right(
+-        mach_task_self_,
++        csystem_mach_task_self(),
+         _name,
+         mach_msg_type_name_t(MACH_MSG_TYPE_MAKE_SEND_ONCE),
+         &newRight,
+@@ -275,7 +277,7 @@
+     // name is the same because send and recv rights are coalesced
+     _machPrecondition(
+       mach_port_insert_right(
+-        mach_task_self_, _name, _name, mach_msg_type_name_t(how)
++        csystem_mach_task_self(), _name, _name, mach_msg_type_name_t(how)
+       )
+     )
+ 
+@@ -301,7 +303,7 @@
+           let info = $0.baseAddress
+           _machPrecondition(
+             mach_port_get_attributes(
+-              mach_task_self_, _name, MACH_PORT_RECEIVE_STATUS, info, &size
++              csystem_mach_task_self(), _name, MACH_PORT_RECEIVE_STATUS, info, &size
+             )
+           )
+         }
+@@ -310,7 +312,7 @@
+     }
+ 
+     set {
+-      _machPrecondition(mach_port_set_mscount(mach_task_self_, _name, newValue))
++      _machPrecondition(mach_port_set_mscount(csystem_mach_task_self(), _name, newValue))
+     }
+   }
+ }
+@@ -347,7 +349,7 @@
+ 
+     // name is the same because send rights are coalesced
+     let kr = mach_port_insert_right(
+-      mach_task_self_, _name, _name, mach_msg_type_name_t(how)
++      csystem_mach_task_self(), _name, _name, mach_msg_type_name_t(how)
+     )
+     if kr == KERN_INVALID_NAME || kr == KERN_INVALID_CAPABILITY {
+       throw Mach.PortRightError.deadName

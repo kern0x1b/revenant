@@ -1,0 +1,60 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_biquadm_SetActiveFiltersD()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as the 9.0 one, for a double setup",
+      "effect": "as vDSP_biquadm_SetActiveFilters",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_SetCoefficientsSingleD()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the array is read in the element type the declaration names, which is measured by handing it a float array and a double array and watching which sets the coefficient",
+      "effect": "as vDSP_biquadm_SetCoefficientsSingle, in single precision, on a double setup",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_SetCoefficientsDoubleD()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as above, in double",
+      "effect": "as vDSP_biquadm_SetCoefficientsDouble, on a double setup",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_SetTargetsSingleD()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a double setup has its targets in place before the first sample whatever the rate and the threshold are, so the two rate arguments of this call are stored and change nothing - measured, and a difference from the header's wording",
+      "effect": "each named coefficient takes its target at once, and interp_rate and interp_threshold are recorded with it and change no answer. Measured with a b0 going from 1 to 9: the rates and thresholds 0.1/0.25, 0.9/0.25, 0.5/100 and 0/0.25 all answer 9 from the first sample, where the single-precision setup answers 1, 8.2, 9 and 1, 1.8, 2.52 for the first two In a cascade the walk differs from a single section's: a coefficient lands on its target when what is left of the distance is at most interp_threshold *and* every section after it has landed too, so the snap travels backwards through the cascade. Measured over eleven host cases at rates of 0.25, 0.5 and 0.75 and thresholds of 0.1 to 0.5, and the port answers every one of them",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    },
+    {
+      "api": "vDSP_biquadm_SetTargetsDoubleD()",
+      "kind": "function",
+      "introduced": "16.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as vDSP_biquadm_SetTargetsSingleD, with the caller's values in double",
+      "effect": "each named coefficient takes its target at once, and interp_rate and interp_threshold are recorded with it and change no answer In a cascade the walk differs from a single section's: a coefficient lands on its target when what is left of the distance is at most interp_threshold *and* every section after it has landed too, so the snap travels backwards through the cascade. Measured over eleven host cases at rates of 0.25, 0.5 and 0.75 and thresholds of 0.1 to 0.5, and the port answers every one of them",
+      "facts": "facts/Accelerate/vDSPBiquad.md",
+      "source": "the host's own vDSP, held against the port for every case by tests/backports/host/vdspbiquad, which runs the port's five files and the host's vDSP over the same inputs and compares every element; the header of iOS 16.4 for the declarations; the release's own armv7 caches, which say which release first exports each name and are the release the file answers to"
+    }
+  ]
+}

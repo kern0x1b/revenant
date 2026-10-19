@@ -1,0 +1,215 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+PassKit	swift-struct	c:@E@PKAddSecureElementPassErrorCode	-	PKAddSecureElementPassError	-	-	-	ios=13.4	-	67e976d276fbbc13
+PassKit	swift-property	s:SC31PKAddSecureElementPassErrorCodeLeV03_nsE0So7NSErrorCvp	PKAddSecureElementPassError	_nsError	-	Foundation.NSError	-	-	-	c3d04c0678d76201
+PassKit	swift-method	s:SC31PKAddSecureElementPassErrorCodeLeV03_nsE0ABSo7NSErrorC_tcfc	PKAddSecureElementPassError	init(_nsError:)	-	-	PassKit.PKAddSecureElementPassError | Foundation.NSError	-	-	36366b6f58c8e665
+PassKit	swift-property	s:SC31PKAddSecureElementPassErrorCodeLeV11errorDomainSSvpZ	PKAddSecureElementPassError	errorDomain	+	Swift.String	-	-	-	e6353f5425a267e3
+PassKit	swift-enum	c:@E@PKAddSecureElementPassErrorCode	PKAddSecureElementPassError	Code	-	-	-	ios=13.4	-	a2a659f57b9da17f
+PassKit	swift-method	s:So31PKAddSecureElementPassErrorCodeV8rawValueABSgSi_tcfc	PKAddSecureElementPassError.Code	init(rawValue:)	-	-	PassKit.PKAddSecureElementPassError.Code? | Swift.Int	-	-	c0767b6afa1125e2
+PassKit	swift-property	s:So31PKAddSecureElementPassErrorCodeV8rawValueSivp	PKAddSecureElementPassError.Code	rawValue	-	Swift.Int	-	-	-	d29f3b77c51e8621
+PassKit	swift-typealias	s:So31PKAddSecureElementPassErrorCodeV8RawValuea	PKAddSecureElementPassError.Code	RawValue	-	-	-	-	-	43cd0efbb5da78a6
+PassKit	swift-typealias	c:@E@PKAddSecureElementPassErrorCode	PKAddSecureElementPassError.Code	_ErrorType	-	-	-	-	-	c30fcc7c13f7dd89
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassGenericError	PKAddSecureElementPassError.Code	genericError	-	-	-	ios=18.0	-	0eb11c01ca728119
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassUnknownError	PKAddSecureElementPassError.Code	unknownError	+	PassKit.PKAddSecureElementPassError.Code	-	ios=13.4	-	65f2a42debcddc6f
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassUserCanceledError	PKAddSecureElementPassError.Code	userCanceledError	-	-	-	-	-	0574417272c54bd9
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassUnavailableError	PKAddSecureElementPassError.Code	unavailableError	-	-	-	-	-	568d7483c2b5c19a
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassInvalidConfigurationError	PKAddSecureElementPassError.Code	invalidConfigurationError	-	-	-	-	-	c4cf47021ba275c0
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassDeviceNotSupportedError	PKAddSecureElementPassError.Code	deviceNotSupportedError	-	-	-	-	-	f6af1deabffe7808
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassDeviceNotReadyError	PKAddSecureElementPassError.Code	deviceNotReadyError	-	-	-	-	-	36fc6328ece417d4
+PassKit	swift-constant	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassOSVersionNotSupportedError	PKAddSecureElementPassError.Code	osVersionNotSupportedError	-	-	-	-	-	5a99eba053a2d5b0
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassGenericError	PKAddSecureElementPassError	genericError	+	PassKit.PKAddSecureElementPassError.Code	-	ios=18.0	-	74be51bf9a39f8b0
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassUnknownError	PKAddSecureElementPassError	unknownError	+	PassKit.PKAddSecureElementPassError.Code	-	ios=13.4	-	6c711b8f4b8c9aa8
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassUserCanceledError	PKAddSecureElementPassError	userCanceledError	+	PassKit.PKAddSecureElementPassError.Code	-	-	-	7dad57128b911ced
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassUnavailableError	PKAddSecureElementPassError	unavailableError	+	PassKit.PKAddSecureElementPassError.Code	-	-	-	7bf96c046cac5674
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassInvalidConfigurationError	PKAddSecureElementPassError	invalidConfigurationError	+	PassKit.PKAddSecureElementPassError.Code	-	-	-	fcd7ffb99c80a685
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassDeviceNotSupportedError	PKAddSecureElementPassError	deviceNotSupportedError	+	PassKit.PKAddSecureElementPassError.Code	-	-	-	4dadc1eec588fb8c
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassDeviceNotReadyError	PKAddSecureElementPassError	deviceNotReadyError	+	PassKit.PKAddSecureElementPassError.Code	-	-	-	d18de8c81e2a355a
+PassKit	swift-property	c:@E@PKAddSecureElementPassErrorCode@PKAddSecureElementPassOSVersionNotSupportedError	PKAddSecureElementPassError	osVersionNotSupportedError	+	PassKit.PKAddSecureElementPassError.Code	-	-	-	2a99f89dd0c2de82
+PassKit	swift-struct	c:@E@PKDisbursementErrorCode	-	PKDisbursementError	-	-	-	ios=17.0	-	19940030f7151233
+PassKit	swift-property	s:SC23PKDisbursementErrorCodeLeV03_nsB0So7NSErrorCvp	PKDisbursementError	_nsError	-	Foundation.NSError	-	-	-	b8f28e6451741f26
+PassKit	swift-method	s:SC23PKDisbursementErrorCodeLeV03_nsB0ABSo7NSErrorC_tcfc	PKDisbursementError	init(_nsError:)	-	-	PassKit.PKDisbursementError | Foundation.NSError	-	-	35f57643053b0360
+PassKit	swift-property	s:SC23PKDisbursementErrorCodeLeV11errorDomainSSvpZ	PKDisbursementError	errorDomain	+	Swift.String	-	-	-	bcaf2121e21a29ca
+PassKit	swift-enum	c:@E@PKDisbursementErrorCode	PKDisbursementError	Code	-	-	-	ios=17.0	-	d40c7a93203fe4a8
+PassKit	swift-method	s:So23PKDisbursementErrorCodeV8rawValueABSgSi_tcfc	PKDisbursementError.Code	init(rawValue:)	-	-	PassKit.PKDisbursementError.Code? | Swift.Int	-	-	c1f866770318987a
+PassKit	swift-property	s:So23PKDisbursementErrorCodeV8rawValueSivp	PKDisbursementError.Code	rawValue	-	Swift.Int	-	-	-	d3bfc40c5eb1f177
+PassKit	swift-typealias	s:So23PKDisbursementErrorCodeV8RawValuea	PKDisbursementError.Code	RawValue	-	-	-	-	-	43e1eb6e0ceaed94
+PassKit	swift-typealias	c:@E@PKDisbursementErrorCode	PKDisbursementError.Code	_ErrorType	-	-	-	-	-	6771e91afb93fa50
+PassKit	swift-constant	c:@E@PKDisbursementErrorCode@PKDisbursementUnknownError	PKDisbursementError.Code	unknownError	-	-	-	-	-	85fcfe4faf510282
+PassKit	swift-constant	c:@E@PKDisbursementErrorCode@PKDisbursementUnsupportedCardError	PKDisbursementError.Code	unsupportedCardError	-	-	-	-	-	0f05fdee3d756c54
+PassKit	swift-constant	c:@E@PKDisbursementErrorCode@PKDisbursementRecipientContactInvalidError	PKDisbursementError.Code	recipientContactInvalidError	-	-	-	-	-	937eb555be335a7e
+PassKit	swift-property	c:@E@PKDisbursementErrorCode@PKDisbursementUnknownError	PKDisbursementError	unknownError	+	PassKit.PKDisbursementError.Code	-	-	-	57944d70df7d1c5e
+PassKit	swift-property	c:@E@PKDisbursementErrorCode@PKDisbursementUnsupportedCardError	PKDisbursementError	unsupportedCardError	+	PassKit.PKDisbursementError.Code	-	-	-	362fcf68ae45f8a9
+PassKit	swift-property	c:@E@PKDisbursementErrorCode@PKDisbursementRecipientContactInvalidError	PKDisbursementError	recipientContactInvalidError	+	PassKit.PKDisbursementError.Code	-	-	-	fbdeef478d91c5a9
+PassKit	swift-struct	c:@E@PKIdentityError	-	PKIdentityError	-	-	-	ios=16.0	-	1ad330cca603ec34
+PassKit	swift-property	s:SC15PKIdentityErrorLeV03_nsB0So7NSErrorCvp	PKIdentityError	_nsError	-	Foundation.NSError	-	-	-	803bc499e0ae0456
+PassKit	swift-method	s:SC15PKIdentityErrorLeV03_nsB0ABSo7NSErrorC_tcfc	PKIdentityError	init(_nsError:)	-	-	PassKit.PKIdentityError | Foundation.NSError	-	-	ef332dd22821a6d1
+PassKit	swift-property	s:SC15PKIdentityErrorLeV11errorDomainSSvpZ	PKIdentityError	errorDomain	+	Swift.String	-	-	-	2f0c9f90f9e3fed3
+PassKit	swift-enum	c:@E@PKIdentityError	PKIdentityError	Code	-	-	-	ios=16.0	-	b5b7d1425eda8ba8
+PassKit	swift-method	s:So15PKIdentityErrorV8rawValueABSgSi_tcfc	PKIdentityError.Code	init(rawValue:)	-	-	PassKit.PKIdentityError.Code? | Swift.Int	-	-	c66d25b92c90594a
+PassKit	swift-property	s:So15PKIdentityErrorV8rawValueSivp	PKIdentityError.Code	rawValue	-	Swift.Int	-	-	-	f929009af1fb8b5f
+PassKit	swift-typealias	s:So15PKIdentityErrorV8RawValuea	PKIdentityError.Code	RawValue	-	-	-	-	-	3b7a0b71857e7db5
+PassKit	swift-typealias	c:@E@PKIdentityError	PKIdentityError.Code	_ErrorType	-	-	-	-	-	2085ea3a268e5d23
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorUnknown	PKIdentityError.Code	unknown	-	-	-	-	-	38ed42433b8dcf75
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorNotSupported	PKIdentityError.Code	notSupported	-	-	-	-	-	cb213ad6d0ae7f54
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorCancelled	PKIdentityError.Code	cancelled	-	-	-	-	-	e7a28fc14e047b90
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorNetworkUnavailable	PKIdentityError.Code	networkUnavailable	-	-	-	-	-	01896227ce8a1034
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorNoElementsRequested	PKIdentityError.Code	noElementsRequested	-	-	-	-	-	94d996f6870eb0a8
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorRequestAlreadyInProgress	PKIdentityError.Code	requestAlreadyInProgress	-	-	-	-	-	350a3525ddf3dc58
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorInvalidNonce	PKIdentityError.Code	invalidNonce	-	-	-	-	-	f2da6611cc8506f9
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorInvalidElement	PKIdentityError.Code	invalidElement	-	-	-	-	-	94eb1c8a19380170
+PassKit	swift-constant	c:@E@PKIdentityError@PKIdentityErrorRegionNotSupported	PKIdentityError.Code	regionNotSupported	-	-	-	ios=18.0	-	c4df451a391a5491
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorUnknown	PKIdentityError	unknown	+	PassKit.PKIdentityError.Code	-	-	-	827511aebc818502
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorNotSupported	PKIdentityError	notSupported	+	PassKit.PKIdentityError.Code	-	-	-	c66a047cc21f84d4
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorCancelled	PKIdentityError	cancelled	+	PassKit.PKIdentityError.Code	-	-	-	a3d233111e5ae272
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorNetworkUnavailable	PKIdentityError	networkUnavailable	+	PassKit.PKIdentityError.Code	-	-	-	a961490e392476eb
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorNoElementsRequested	PKIdentityError	noElementsRequested	+	PassKit.PKIdentityError.Code	-	-	-	a12192d8b75a1a81
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorRequestAlreadyInProgress	PKIdentityError	requestAlreadyInProgress	+	PassKit.PKIdentityError.Code	-	-	-	f2ca1c00fe1b0d7d
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorInvalidNonce	PKIdentityError	invalidNonce	+	PassKit.PKIdentityError.Code	-	-	-	ffcb3070b4f32bfc
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorInvalidElement	PKIdentityError	invalidElement	+	PassKit.PKIdentityError.Code	-	-	-	9c7e45e8864f4133
+PassKit	swift-property	c:@E@PKIdentityError@PKIdentityErrorRegionNotSupported	PKIdentityError	regionNotSupported	+	PassKit.PKIdentityError.Code	-	ios=18.0	-	75d1add065ecb9b2
+PassKit	swift-struct	c:@E@PKPassKitErrorCode	-	PKPassKitError	-	-	-	ios=6.0	-	bb6da75f26533ec8
+PassKit	swift-property	s:SC18PKPassKitErrorCodeLeV03_nsC0So7NSErrorCvp	PKPassKitError	_nsError	-	Foundation.NSError	-	-	-	c84e1041e2311f70
+PassKit	swift-method	s:SC18PKPassKitErrorCodeLeV03_nsC0ABSo7NSErrorC_tcfc	PKPassKitError	init(_nsError:)	-	-	PassKit.PKPassKitError | Foundation.NSError	-	-	59c842e8eae3a609
+PassKit	swift-property	s:SC18PKPassKitErrorCodeLeV11errorDomainSSvpZ	PKPassKitError	errorDomain	+	Swift.String	-	-	-	1df69c837fe29b50
+PassKit	swift-enum	c:@E@PKPassKitErrorCode	PKPassKitError	Code	-	-	-	ios=6.0	-	6132f5cf86f45aca
+PassKit	swift-method	s:So18PKPassKitErrorCodeV8rawValueABSgSi_tcfc	PKPassKitError.Code	init(rawValue:)	-	-	PassKit.PKPassKitError.Code? | Swift.Int	-	-	f7e38461d94e0430
+PassKit	swift-property	s:So18PKPassKitErrorCodeV8rawValueSivp	PKPassKitError.Code	rawValue	-	Swift.Int	-	-	-	6bb783cd13550946
+PassKit	swift-typealias	s:So18PKPassKitErrorCodeV8RawValuea	PKPassKitError.Code	RawValue	-	-	-	-	-	6a86a012f8d4a59a
+PassKit	swift-typealias	c:@E@PKPassKitErrorCode	PKPassKitError.Code	_ErrorType	-	-	-	-	-	b5569c679c8bdc40
+PassKit	swift-constant	c:@E@PKPassKitErrorCode@PKUnknownError	PKPassKitError.Code	unknownError	-	-	-	-	-	25cadc3922a5bd21
+PassKit	swift-constant	c:@E@PKPassKitErrorCode@PKInvalidDataError	PKPassKitError.Code	invalidDataError	-	-	-	-	-	f8bcbc42c00fd936
+PassKit	swift-constant	c:@E@PKPassKitErrorCode@PKUnsupportedVersionError	PKPassKitError.Code	unsupportedVersionError	-	-	-	-	-	74512b671b2cdfb0
+PassKit	swift-constant	c:@E@PKPassKitErrorCode@PKInvalidSignature	PKPassKitError.Code	invalidSignature	-	-	-	-	-	48b6398e1cd6e39c
+PassKit	swift-constant	c:@E@PKPassKitErrorCode@PKNotEntitledError	PKPassKitError.Code	notEntitledError	-	-	-	-	-	aa0c7e30238c6a04
+PassKit	swift-property	c:@E@PKPassKitErrorCode@PKUnknownError	PKPassKitError	unknownError	+	PassKit.PKPassKitError.Code	-	-	-	c5c0ef96e53f7ddf
+PassKit	swift-property	c:@E@PKPassKitErrorCode@PKInvalidDataError	PKPassKitError	invalidDataError	+	PassKit.PKPassKitError.Code	-	-	-	110949c6ee13a341
+PassKit	swift-property	c:@E@PKPassKitErrorCode@PKUnsupportedVersionError	PKPassKitError	unsupportedVersionError	+	PassKit.PKPassKitError.Code	-	-	-	4dde3eb1064dca60
+PassKit	swift-property	c:@E@PKPassKitErrorCode@PKInvalidSignature	PKPassKitError	invalidSignature	+	PassKit.PKPassKitError.Code	-	-	-	73cd9f3880a8d313
+PassKit	swift-property	c:@E@PKPassKitErrorCode@PKNotEntitledError	PKPassKitError	notEntitledError	+	PassKit.PKPassKitError.Code	-	-	-	ac9d417de003a278
+PassKit	swift-struct	c:@E@PKPaymentErrorCode	-	PKPaymentError	-	-	-	ios=11.0	-	678fe17ad744db3a
+PassKit	swift-property	s:SC18PKPaymentErrorCodeLeV03_nsB0So7NSErrorCvp	PKPaymentError	_nsError	-	Foundation.NSError	-	-	-	711be253ade23ea7
+PassKit	swift-method	s:SC18PKPaymentErrorCodeLeV03_nsB0ABSo7NSErrorC_tcfc	PKPaymentError	init(_nsError:)	-	-	PassKit.PKPaymentError | Foundation.NSError	-	-	41c884e1d292d0bc
+PassKit	swift-property	s:SC18PKPaymentErrorCodeLeV11errorDomainSSvpZ	PKPaymentError	errorDomain	+	Swift.String	-	-	-	36248a1735b2e476
+PassKit	swift-enum	c:@E@PKPaymentErrorCode	PKPaymentError	Code	-	-	-	ios=11.0	-	70ddabd86569c690
+PassKit	swift-method	s:So18PKPaymentErrorCodeV8rawValueABSgSi_tcfc	PKPaymentError.Code	init(rawValue:)	-	-	PassKit.PKPaymentError.Code? | Swift.Int	-	-	e9b2134532399d12
+PassKit	swift-property	s:So18PKPaymentErrorCodeV8rawValueSivp	PKPaymentError.Code	rawValue	-	Swift.Int	-	-	-	734b5932880fa930
+PassKit	swift-typealias	s:So18PKPaymentErrorCodeV8RawValuea	PKPaymentError.Code	RawValue	-	-	-	-	-	51193368784a6d13
+PassKit	swift-typealias	c:@E@PKPaymentErrorCode	PKPaymentError.Code	_ErrorType	-	-	-	-	-	c03e1b5d659b76fb
+PassKit	swift-constant	c:@E@PKPaymentErrorCode@PKPaymentUnknownError	PKPaymentError.Code	unknownError	-	-	-	-	-	ece2867f610cff31
+PassKit	swift-constant	c:@E@PKPaymentErrorCode@PKPaymentShippingContactInvalidError	PKPaymentError.Code	shippingContactInvalidError	-	-	-	-	-	8e26f77cdbb237c7
+PassKit	swift-constant	c:@E@PKPaymentErrorCode@PKPaymentBillingContactInvalidError	PKPaymentError.Code	billingContactInvalidError	-	-	-	-	-	a56fa039976ed49b
+PassKit	swift-constant	c:@E@PKPaymentErrorCode@PKPaymentShippingAddressUnserviceableError	PKPaymentError.Code	shippingAddressUnserviceableError	-	-	-	-	-	2d886c3cd1589a90
+PassKit	swift-constant	c:@E@PKPaymentErrorCode@PKPaymentCouponCodeInvalidError	PKPaymentError.Code	couponCodeInvalidError	-	-	-	ios=15.0	-	32a273a5ec1b3f1e
+PassKit	swift-constant	c:@E@PKPaymentErrorCode@PKPaymentCouponCodeExpiredError	PKPaymentError.Code	couponCodeExpiredError	-	-	-	ios=15.0	-	7368cdac599705a9
+PassKit	swift-property	c:@E@PKPaymentErrorCode@PKPaymentUnknownError	PKPaymentError	unknownError	+	PassKit.PKPaymentError.Code	-	-	-	fbfe7357f921e9cd
+PassKit	swift-property	c:@E@PKPaymentErrorCode@PKPaymentShippingContactInvalidError	PKPaymentError	shippingContactInvalidError	+	PassKit.PKPaymentError.Code	-	-	-	20834af6245cac5f
+PassKit	swift-property	c:@E@PKPaymentErrorCode@PKPaymentBillingContactInvalidError	PKPaymentError	billingContactInvalidError	+	PassKit.PKPaymentError.Code	-	-	-	eb24b81a40f7b54e
+PassKit	swift-property	c:@E@PKPaymentErrorCode@PKPaymentShippingAddressUnserviceableError	PKPaymentError	shippingAddressUnserviceableError	+	PassKit.PKPaymentError.Code	-	-	-	5cfb75513038cf45
+PassKit	swift-property	c:@E@PKPaymentErrorCode@PKPaymentCouponCodeInvalidError	PKPaymentError	couponCodeInvalidError	+	PassKit.PKPaymentError.Code	-	ios=15.0	-	aedfa51ded6e0e93
+PassKit	swift-property	c:@E@PKPaymentErrorCode@PKPaymentCouponCodeExpiredError	PKPaymentError	couponCodeExpiredError	+	PassKit.PKPaymentError.Code	-	ios=15.0	-	a65e278145579fec
+PassKit	swift-struct	c:@E@PKShareSecureElementPassErrorCode	-	PKShareSecureElementPassError	-	-	-	ios=16.0	-	1d3b6afefea687ab
+PassKit	swift-property	s:SC33PKShareSecureElementPassErrorCodeLeV03_nsE0So7NSErrorCvp	PKShareSecureElementPassError	_nsError	-	Foundation.NSError	-	-	-	6bb30741cb959519
+PassKit	swift-method	s:SC33PKShareSecureElementPassErrorCodeLeV03_nsE0ABSo7NSErrorC_tcfc	PKShareSecureElementPassError	init(_nsError:)	-	-	PassKit.PKShareSecureElementPassError | Foundation.NSError	-	-	16b2441c7684b8fe
+PassKit	swift-property	s:SC33PKShareSecureElementPassErrorCodeLeV11errorDomainSSvpZ	PKShareSecureElementPassError	errorDomain	+	Swift.String	-	-	-	1818cdd963433d58
+PassKit	swift-enum	c:@E@PKShareSecureElementPassErrorCode	PKShareSecureElementPassError	Code	-	-	-	ios=16.0	-	c9ad830b556068de
+PassKit	swift-method	s:So33PKShareSecureElementPassErrorCodeV8rawValueABSgSi_tcfc	PKShareSecureElementPassError.Code	init(rawValue:)	-	-	PassKit.PKShareSecureElementPassError.Code? | Swift.Int	-	-	c0f6366ee50f5e37
+PassKit	swift-property	s:So33PKShareSecureElementPassErrorCodeV8rawValueSivp	PKShareSecureElementPassError.Code	rawValue	-	Swift.Int	-	-	-	d604662d64843e3c
+PassKit	swift-typealias	s:So33PKShareSecureElementPassErrorCodeV8RawValuea	PKShareSecureElementPassError.Code	RawValue	-	-	-	-	-	bef222bbae002812
+PassKit	swift-typealias	c:@E@PKShareSecureElementPassErrorCode	PKShareSecureElementPassError.Code	_ErrorType	-	-	-	-	-	fd245885f409923c
+PassKit	swift-constant	c:@E@PKShareSecureElementPassErrorCode@PKShareSecureElementPassUnknownError	PKShareSecureElementPassError.Code	unknownError	-	-	-	-	-	4b6420ff2f6b5320
+PassKit	swift-constant	c:@E@PKShareSecureElementPassErrorCode@PKShareSecureElementPassSetupError	PKShareSecureElementPassError.Code	setupError	-	-	-	-	-	f7d840280d56db36
+PassKit	swift-property	c:@E@PKShareSecureElementPassErrorCode@PKShareSecureElementPassUnknownError	PKShareSecureElementPassError	unknownError	+	PassKit.PKShareSecureElementPassError.Code	-	-	-	dd09b7e1261c97e0
+PassKit	swift-property	c:@E@PKShareSecureElementPassErrorCode@PKShareSecureElementPassSetupError	PKShareSecureElementPassError	setupError	+	PassKit.PKShareSecureElementPassError.Code	-	-	-	80eee9681b2b3fff
+PassKit	swift-struct	s:7PassKit16JPKIPassContentsV	-	JPKIPassContents	-	-	-	ios=18.0	-	c0f9a2653eea36dc
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV12userIdentityAC04UserF0VSgvp	JPKIPassContents	userIdentity	-	PassKit.JPKIPassContents.UserIdentity?	-	-	-	9ba61539f0039c37
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV15signingIdentityAC07SigningF0VSgvp	JPKIPassContents	signingIdentity	-	PassKit.JPKIPassContents.SigningIdentity?	-	-	-	d90c74727676c50a
+PassKit	swift-method	s:7PassKit16JPKIPassContentsVyACSo6PKPassCYaKcfc	JPKIPassContents	init(_:)	-	-	PassKit.JPKIPassContents | PassKit.PKPass	-	-	fae4aca58eaa89ff
+PassKit	swift-protocol	s:7PassKit16JPKIPassContentsV8IdentityP	JPKIPassContents	Identity	-	-	-	-	-	f12086215ea65e4d
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV8IdentityP28authenticationTriesRemainingSivp	JPKIPassContents.Identity	authenticationTriesRemaining	-	Swift.Int	-	-	-	ee6a0e655c49bbd6
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV8IdentityP11certificate5usingAC11CertificateVy_0E4TypeQzGAC21AuthenticationRequestVy_AKG_tYaKF	JPKIPassContents.Identity	certificate(using:)	-	PassKit.JPKIPassContents.Certificate<Self.IdentityType>	PassKit.JPKIPassContents.AuthenticationRequest<Self.IdentityType>	-	-	ec00a9aa27fafb7e
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV8IdentityP9signature3for5usingAC9SignatureVy_0E4TypeQzG10Foundation4DataV_AC21AuthenticationRequestVy_ALGtYaKF	JPKIPassContents.Identity	signature(for:using:)	-	PassKit.JPKIPassContents.Signature<Self.IdentityType>	Foundation.Data | PassKit.JPKIPassContents.AuthenticationRequest<Self.IdentityType>	-	-	00bdb6c870e63fe0
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV8IdentityP9signature3for5usingSayAC9SignatureVy_0E4TypeQzGGSay10Foundation4DataVG_AC21AuthenticationRequestVy_ALGtYaKF	JPKIPassContents.Identity	signature(for:using:)	-	[PassKit.JPKIPassContents.Signature<Self.IdentityType>]	[Foundation.Data] | PassKit.JPKIPassContents.AuthenticationRequest<Self.IdentityType>	-	-	9b963b73b6220b27
+PassKit	swift-struct	s:7PassKit16JPKIPassContentsV12UserIdentityV	JPKIPassContents	UserIdentity	-	-	-	-	-	8782e8a71b4f907e
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV12UserIdentityV28authenticationTriesRemainingSivp	JPKIPassContents.UserIdentity	authenticationTriesRemaining	-	Swift.Int	-	-	-	c92f65d728fce9a1
+PassKit	swift-enum	s:7PassKit16JPKIPassContentsV12UserIdentityV18AuthenticationTypeO	JPKIPassContents.UserIdentity	AuthenticationType	-	-	-	-	-	ae27cfcc749a64a9
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV12UserIdentityV18AuthenticationTypeO3pinyAGSScAGmF	JPKIPassContents.UserIdentity.AuthenticationType	pin	-	-	-	-	-	ad6cdc16dc812404
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV12UserIdentityV18AuthenticationTypeO15systemBiometricyA2GmF	JPKIPassContents.UserIdentity.AuthenticationType	systemBiometric	-	-	-	-	-	30efd923f59157ec
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV12UserIdentityV11certificate5usingAC11CertificateVy_AEGAC21AuthenticationRequestVy_AEG_tYaKF	JPKIPassContents.UserIdentity	certificate(using:)	-	PassKit.JPKIPassContents.Certificate<PassKit.JPKIPassContents.UserIdentity>	PassKit.JPKIPassContents.AuthenticationRequest<PassKit.JPKIPassContents.UserIdentity>	-	-	e7825d150aec053c
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV12UserIdentityV9signature3for5usingAC9SignatureVy_AEG10Foundation4DataV_AC21AuthenticationRequestVy_AEGtYaKF	JPKIPassContents.UserIdentity	signature(for:using:)	-	PassKit.JPKIPassContents.Signature<PassKit.JPKIPassContents.UserIdentity>	Foundation.Data | PassKit.JPKIPassContents.AuthenticationRequest<PassKit.JPKIPassContents.UserIdentity>	-	-	da55bff023d5138b
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV12UserIdentityV9signature3for5usingSayAC9SignatureVy_AEGGSay10Foundation4DataVG_AC21AuthenticationRequestVy_AEGtYaKF	JPKIPassContents.UserIdentity	signature(for:using:)	-	[PassKit.JPKIPassContents.Signature<PassKit.JPKIPassContents.UserIdentity>]	[Foundation.Data] | PassKit.JPKIPassContents.AuthenticationRequest<PassKit.JPKIPassContents.UserIdentity>	-	-	0afd0674079a18ca
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV12UserIdentityV9changePIN4from2toySS_SStYaKF	JPKIPassContents.UserIdentity	changePIN(from:to:)	-	()	Swift.String | Swift.String	-	-	a20574927912d87b
+PassKit	swift-typealias	s:7PassKit16JPKIPassContentsV12UserIdentityV0F4Typea	JPKIPassContents.UserIdentity	IdentityType	-	-	-	ios=18.0	-	7049f206e2530842
+PassKit	swift-struct	s:7PassKit16JPKIPassContentsV15SigningIdentityV	JPKIPassContents	SigningIdentity	-	-	-	-	-	7ffe873bff011f5b
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV15SigningIdentityV28authenticationTriesRemainingSivp	JPKIPassContents.SigningIdentity	authenticationTriesRemaining	-	Swift.Int	-	-	-	74fdb7b91dad384f
+PassKit	swift-enum	s:7PassKit16JPKIPassContentsV15SigningIdentityV18AuthenticationTypeO	JPKIPassContents.SigningIdentity	AuthenticationType	-	-	-	-	-	a7a48026a0a83ae2
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV15SigningIdentityV18AuthenticationTypeO8passwordyAGSScAGmF	JPKIPassContents.SigningIdentity.AuthenticationType	password	-	-	-	-	-	7d904d6607479c6c
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV15SigningIdentityV11certificate5usingAC11CertificateVy_AEGAC21AuthenticationRequestVy_AEG_tYaKF	JPKIPassContents.SigningIdentity	certificate(using:)	-	PassKit.JPKIPassContents.Certificate<PassKit.JPKIPassContents.SigningIdentity>	PassKit.JPKIPassContents.AuthenticationRequest<PassKit.JPKIPassContents.SigningIdentity>	-	-	3b8bffcefa6fa08c
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV15SigningIdentityV9signature3for5usingAC9SignatureVy_AEG10Foundation4DataV_AC21AuthenticationRequestVy_AEGtYaKF	JPKIPassContents.SigningIdentity	signature(for:using:)	-	PassKit.JPKIPassContents.Signature<PassKit.JPKIPassContents.SigningIdentity>	Foundation.Data | PassKit.JPKIPassContents.AuthenticationRequest<PassKit.JPKIPassContents.SigningIdentity>	-	-	eab0b7eccbb8073e
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV15SigningIdentityV9signature3for5usingSayAC9SignatureVy_AEGGSay10Foundation4DataVG_AC21AuthenticationRequestVy_AEGtYaKF	JPKIPassContents.SigningIdentity	signature(for:using:)	-	[PassKit.JPKIPassContents.Signature<PassKit.JPKIPassContents.SigningIdentity>]	[Foundation.Data] | PassKit.JPKIPassContents.AuthenticationRequest<PassKit.JPKIPassContents.SigningIdentity>	-	-	b3e8cab6042a5e7e
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV15SigningIdentityV14changePassword4from2toySS_SStYaKF	JPKIPassContents.SigningIdentity	changePassword(from:to:)	-	()	Swift.String | Swift.String	-	-	e4a4978709da2788
+PassKit	swift-typealias	s:7PassKit16JPKIPassContentsV15SigningIdentityV0F4Typea	JPKIPassContents.SigningIdentity	IdentityType	-	-	-	ios=18.0	-	7cdab4af81f7a12c
+PassKit	swift-struct	s:7PassKit16JPKIPassContentsV11CertificateV	JPKIPassContents	Certificate	-	-	-	-	-	d27eddd4033d3951
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV11CertificateV4data10Foundation4DataVvp	JPKIPassContents.Certificate	data	-	Foundation.Data	-	-	-	66f8b8e0a11db900
+PassKit	swift-struct	s:7PassKit16JPKIPassContentsV9SignatureV	JPKIPassContents	Signature	-	-	-	-	-	6ca6ae479d4123aa
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV9SignatureV13signatureData10Foundation0G0Vvp	JPKIPassContents.Signature	signatureData	-	Foundation.Data	-	-	-	174cb13fbcad04af
+PassKit	swift-property	s:7PassKit16JPKIPassContentsV9SignatureV11certificateAC11CertificateVy_xGvp	JPKIPassContents.Signature	certificate	-	PassKit.JPKIPassContents.Certificate<IdentityType>	-	-	-	f5bee10768b2040c
+PassKit	swift-struct	s:7PassKit16JPKIPassContentsV21AuthenticationRequestV	JPKIPassContents	AuthenticationRequest	-	-	-	-	-	e125997fa569d938
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV21AuthenticationRequestVAaC12UserIdentityVRszrlE4typeAEy_AGGAG0E4TypeO_tcfc	JPKIPassContents.AuthenticationRequest	init(type:)	-	-	PassKit.JPKIPassContents.AuthenticationRequest<IdentityType> | PassKit.JPKIPassContents.UserIdentity.AuthenticationType	-	-	6356978f7fed6236
+PassKit	swift-method	s:7PassKit16JPKIPassContentsV21AuthenticationRequestVAaC15SigningIdentityVRszrlE4typeAEy_AGGAG0E4TypeO_tcfc	JPKIPassContents.AuthenticationRequest	init(type:)	-	-	PassKit.JPKIPassContents.AuthenticationRequest<IdentityType> | PassKit.JPKIPassContents.SigningIdentity.AuthenticationType	-	-	92cf6b9baea93ad1
+PassKit	swift-enum	s:7PassKit16JPKIPassContentsV5ErrorO	JPKIPassContents	Error	-	-	-	-	-	bf0b629afec14e53
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO16appNotForegroundyA2EmF	JPKIPassContents.Error	appNotForeground	-	-	-	-	-	c937ce4f19bf3cf8
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO12invalidInputyA2EmF	JPKIPassContents.Error	invalidInput	-	-	-	-	-	32885b8c4c5c9b0d
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO20biometricUnavailableyA2EmF	JPKIPassContents.Error	biometricUnavailable	-	-	-	ios=18.0	-	073f6fc1b6093f8d
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO29biometricAuthenticationFailedyAESC7LAErrorLeV_tcAEmF	JPKIPassContents.Error	biometricAuthenticationFailed	-	-	-	ios=18.4	-	7df554a8a0563e53
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO27incorrectUserAuthenticationyA2EmF	JPKIPassContents.Error	incorrectUserAuthentication	-	-	-	ios=18.0	-	3ae51a3b6fb10f34
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO24userAuthenticationFailedyAESi_tcAEmF	JPKIPassContents.Error	userAuthenticationFailed	-	-	-	ios=18.4	-	af42dbdf24a5eccf
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO20resourceNotAvailableyA2EmF	JPKIPassContents.Error	resourceNotAvailable	-	-	-	-	-	b0bdf8dc0521a98d
+PassKit	swift-constant	s:7PassKit16JPKIPassContentsV5ErrorO07unknownE0yA2EmF	JPKIPassContents.Error	unknownError	-	-	-	ios=18.4	-	88cd34f059f7e792
+PassKit	swift-enum	s:7PassKit10PKPayLaterO	-	PKPayLater	-	-	-	ios=17.0	-	96cfd281116ec94d
+PassKit	swift-method	s:7PassKit10PKPayLaterO8validate6amount8currencySbSo9NSDecimala_10Foundation6LocaleV8CurrencyVtYaFZ	PKPayLater	validate(amount:currency:)	+	Swift.Bool	Foundation.Decimal | Foundation.Locale.Currency	-	-	77a7b6e87bd7428e
+PassKit	swift-class	c:objc(cs)PKStoredValuePassProperties	-	PKStoredValuePassProperties	-	-	-	ios=15.0	-	8e523db01b67a987
+PassKit	swift-property	c:@CM@PassKit@@objc(cs)PKStoredValuePassProperties(py)isBlocked	PKStoredValuePassProperties	isBlocked	-	Swift.Bool	-	-	-	b00ed0308eb87da7
+PassKit	swift-class	c:objc(cs)PKTransitPassProperties	-	PKTransitPassProperties	-	-	-	ios=11.3	-	351fd079c925e10d
+PassKit	swift-property	c:@CM@PassKit@@objc(cs)PKTransitPassProperties(py)isBlocked	PKTransitPassProperties	isBlocked	-	Swift.Bool	-	ios=14.5,macos=11.3,watchos=7.5	-	7b59e58c0ed7aa7f
+PassKit	swift-class	c:objc(cs)PKSuicaPassProperties	-	PKSuicaPassProperties	-	-	-	ios=10.1	-	b791859976fa0788
+PassKit	swift-property	c:@CM@PassKit@@objc(cs)PKSuicaPassProperties(py)isBlocked	PKSuicaPassProperties	isBlocked	-	Swift.Bool	-	-	-	1892f1846513d4c4
+PassKit	swift-class	c:objc(cs)PKStoredValuePassBalance	-	PKStoredValuePassBalance	-	-	-	ios=15.0	-	b5a9108a58cd2c95
+PassKit	swift-method	s:So24PKStoredValuePassBalanceC0C3KitE2eeoiySbAB_ABtFZ	PKStoredValuePassBalance	==(_:_:)	+	Swift.Bool	PassKit.PKStoredValuePassBalance | PassKit.PKStoredValuePassBalance	-	-	6c4fab0ad301cb40
+PassKit	swift-property	s:So24PKStoredValuePassBalanceC0C3KitE6amountSo9NSDecimalavp	PKStoredValuePassBalance	amount	-	Foundation.Decimal	-	-	-	d0366768d59a4a5d
+PassKit	swift-class	c:objc(cs)PKPaymentRequest	-	PKPaymentRequest	-	-	-	ios=8.0	-	8bb5c7cca08fe5d0
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE29paymentCouponCodeInvalidError20localizedDescriptions0I0_pSSSg_tFZ	PKPaymentRequest	paymentCouponCodeInvalidError(localizedDescription:)	+	any Swift.Error	Swift.String?	ios=15.0,macos=12.0	-	962e9ae7b65d3e58
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE29paymentCouponCodeExpiredError20localizedDescriptions0I0_pSSSg_tFZ	PKPaymentRequest	paymentCouponCodeExpiredError(localizedDescription:)	+	any Swift.Error	Swift.String?	ios=15.0,macos=12.0	-	1136396b885ce2f0
+PassKit	swift-property	s:So16PKPaymentRequestC7PassKitE25applePayLaterAvailabilityAbCE05ApplefgH0Ovp	PKPaymentRequest	applePayLaterAvailability	-	PassKit.PKPaymentRequest.ApplePayLaterAvailability	-	ios=17.0,macos=14.0	-	3e50ae1264a66948
+PassKit	swift-enum	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO	PKPaymentRequest	ApplePayLaterAvailability	-	-	-	ios=17.0,macos=14.0	-	e743c62f51c0da81
+PassKit	swift-constant	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO9availableyA2EmF	PKPaymentRequest.ApplePayLaterAvailability	available	-	-	-	-	-	899a6c3a27ef9cc7
+PassKit	swift-constant	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO11unavailableyA2E6ReasonOcAEmF	PKPaymentRequest.ApplePayLaterAvailability	unavailable	-	-	-	-	-	4ebe261980806ab8
+PassKit	swift-enum	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO6ReasonO	PKPaymentRequest.ApplePayLaterAvailability	Reason	-	-	-	ios=17.0,macos=14.0	-	117a7158e96ff967
+PassKit	swift-constant	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO6ReasonO14itemIneligibleyA2GmF	PKPaymentRequest.ApplePayLaterAvailability.Reason	itemIneligible	-	-	-	-	-	c52f08aff1310855
+PassKit	swift-constant	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO6ReasonO20recurringTransactionyA2GmF	PKPaymentRequest.ApplePayLaterAvailability.Reason	recurringTransaction	-	-	-	-	-	d9b3c1a46c02ae7f
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO6ReasonO2eeoiySbAG_AGtFZ	PKPaymentRequest.ApplePayLaterAvailability.Reason	==(_:_:)	+	Swift.Bool	PassKit.PKPaymentRequest.ApplePayLaterAvailability.Reason | PassKit.PKPaymentRequest.ApplePayLaterAvailability.Reason	-	-	b24069d16e026c7c
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO6ReasonO4hash4intoys6HasherVz_tF	PKPaymentRequest.ApplePayLaterAvailability.Reason	hash(into:)	-	()	Swift.Hasher	-	-	1dede1c91c70d35e
+PassKit	swift-property	s:So16PKPaymentRequestC7PassKitE25ApplePayLaterAvailabilityO6ReasonO9hashValueSivp	PKPaymentRequest.ApplePayLaterAvailability.Reason	hashValue	-	Swift.Int	-	-	-	382ee39b158dd40c
+PassKit	swift-property	s:So16PKPaymentRequestC7PassKitE20merchantCategoryCodeAbCE08MerchantfG0VSgvp	PKPaymentRequest	merchantCategoryCode	-	PassKit.PKPaymentRequest.MerchantCategoryCode?	-	ios=18.0,macos=15.0,watchos=11.0	-	d466e0c534fbe341
+PassKit	swift-struct	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV	PKPaymentRequest	MerchantCategoryCode	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	8b3250f9562c7212
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV8rawValueAEs5Int16V_tcfc	PKPaymentRequest.MerchantCategoryCode	init(rawValue:)	-	-	PassKit.PKPaymentRequest.MerchantCategoryCode | Swift.Int16	-	-	ca6b791582fe874a
+PassKit	swift-property	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV8rawValues5Int16Vvp	PKPaymentRequest.MerchantCategoryCode	rawValue	-	Swift.Int16	-	-	-	9faa78c8e34064ca
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeVyAESgSScfc	PKPaymentRequest.MerchantCategoryCode	init(_:)	-	-	PassKit.PKPaymentRequest.MerchantCategoryCode? | Swift.String	-	-	6657e62f85f9c16f
+PassKit	swift-property	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV11descriptionSSvp	PKPaymentRequest.MerchantCategoryCode	description	-	Swift.String	-	-	-	a5b57051666d677a
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV4fromAEs7Decoder_p_tKcfc	PKPaymentRequest.MerchantCategoryCode	init(from:)	-	-	PassKit.PKPaymentRequest.MerchantCategoryCode | any Swift.Decoder	-	-	060e5df010d89b76
+PassKit	swift-method	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV6encode2toys7Encoder_p_tKF	PKPaymentRequest.MerchantCategoryCode	encode(to:)	-	()	any Swift.Encoder	-	-	977835979ed0d1b6
+PassKit	swift-typealias	s:So16PKPaymentRequestC7PassKitE20MerchantCategoryCodeV8RawValuea	PKPaymentRequest.MerchantCategoryCode	RawValue	-	-	-	ios=18.0,macos=15.0,watchos=11.0	-	3b84570bae04c2f7
+PassKit	swift-struct	c:@E@PKMerchantCapability	-	PKMerchantCapability	-	-	-	ios=8.0	-	785a1e195fbb904f
+PassKit	swift-property	s:So20PKMerchantCapabilityV7PassKitE13capability3DSABvpZ	PKMerchantCapability	capability3DS	+	PassKit.PKMerchantCapability	-	ios=8,macos=11,watchos=3	-	f569a3dc5073d074
+PassKit	swift-property	s:So20PKMerchantCapabilityV7PassKitE13capabilityEMVABvpZ	PKMerchantCapability	capabilityEMV	+	PassKit.PKMerchantCapability	-	ios=8,macos=11,watchos=3	-	85df80b9ddc9ae5c
+PassKit	swift-property	s:So20PKMerchantCapabilityV7PassKitE16capabilityCreditABvpZ	PKMerchantCapability	capabilityCredit	+	PassKit.PKMerchantCapability	-	ios=9,macos=11.0,watchos=3	-	d00da695a8a3e415
+PassKit	swift-property	s:So20PKMerchantCapabilityV7PassKitE15capabilityDebitABvpZ	PKMerchantCapability	capabilityDebit	+	PassKit.PKMerchantCapability	-	ios=9,macos=11.0,watchos=3	-	7218e7b893b44f67
+PassKit	swift-class	c:objc(cs)PKDisbursementRequest	-	PKDisbursementRequest	-	-	-	ios=17.0	-	0b73a83946e22825
+PassKit	swift-property	s:So21PKDisbursementRequestC7PassKitE6region10Foundation6LocaleV6RegionVvp	PKDisbursementRequest	region	-	Foundation.Locale.Region	-	-	-	73f499dbba11af9b
+PassKit	swift-property	s:So21PKDisbursementRequestC7PassKitE8currency10Foundation6LocaleV8CurrencyVvp	PKDisbursementRequest	currency	-	Foundation.Locale.Currency	-	-	-	4bd6d322471bef77
+PassKit	swift-property	s:So21PKDisbursementRequestC7PassKitE16supportedRegionsSay10Foundation6LocaleV6RegionVGSgvp	PKDisbursementRequest	supportedRegions	-	[Foundation.Locale.Region]?	-	-	-	27ea5b5a9b5bf5e4
+PassKit	swift-method	s:So21PKDisbursementRequestC7PassKitE18merchantIdentifier8currency6region17supportedNetworks0E12Capabilities12summaryItemsABSS_10Foundation6LocaleV8CurrencyVAL6RegionVSaySo16PKPaymentNetworkaGSo20PKMerchantCapabilityVSaySo0R11SummaryItemCGtcfc	PKDisbursementRequest	init(merchantIdentifier:currency:region:supportedNetworks:merchantCapabilities:summaryItems:)	-	-	PassKit.PKDisbursementRequest | Swift.String | Foundation.Locale.Currency | Foundation.Locale.Region | [PassKit.PKPaymentNetwork] | PassKit.PKMerchantCapability | [PassKit.PKPaymentSummaryItem]	-	-	0cb0e860e058864f
+PassKit	swift-class	c:objc(cs)PKPayLaterView	-	PKPayLaterView	-	-	-	ios=17.0	-	3c7f8c48d5d50e06
+PassKit	swift-method	s:So14PKPayLaterViewC7PassKitE6amount8currencyABSo9NSDecimala_10Foundation6LocaleV8CurrencyVtcfc	PKPayLaterView	init(amount:currency:)	-	-	PassKit.PKPayLaterView | Foundation.Decimal | Foundation.Locale.Currency	-	-	6e9ad27a599f049a
+PassKit	swift-property	s:So14PKPayLaterViewC7PassKitE6amountSo9NSDecimalavp	PKPayLaterView	amount	-	Foundation.Decimal	-	-	-	21952c560aa3dc51
+PassKit	swift-property	s:So14PKPayLaterViewC7PassKitE8currency10Foundation6LocaleV8CurrencyVvp	PKPayLaterView	currency	-	Foundation.Locale.Currency	-	-	-	885bb8d91563fce5
+PassKit	swift-class	c:objc(cs)PKIdentityNationalIDCardDescriptor	-	PKIdentityNationalIDCardDescriptor	-	-	-	ios=18.0	-	10cce137720c161e
+PassKit	swift-property	s:So34PKIdentityNationalIDCardDescriptorC7PassKitE6region10Foundation6LocaleV6RegionVSgvp	PKIdentityNationalIDCardDescriptor	region	-	Foundation.Locale.Region?	-	-	-	bfcffe723762643b

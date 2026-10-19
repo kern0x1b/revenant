@@ -1,0 +1,209 @@
+{
+  "framework": "CoreNFC",
+  "entries": [
+    {
+      "api": "NFCReaderSession",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a reader session is made and begun as CoreNFC makes it on a device with no radio: never ready, and invalidated with NFCReaderErrorUnsupportedFeature",
+      "effect": "+readingAvailable answers NO on this class and on NFCNDEFReaderSession and NFCISO15693ReaderSession, which inherit it; the members of a session are the rows of this file",
+      "facts": "facts/CoreNFC/NFCReaderSession.md",
+      "source": "the SDK 16.4 header NFCReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCNDEFReaderSession",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the session that reads NDEF messages, made by its initializer with a delegate that can take the messages it reads",
+      "effect": "a subclass of NFCReaderSession (measured); the initializer answers nil for a nil delegate, and for one without readerSession:didDetectNDEFs:",
+      "facts": "facts/CoreNFC/NFCReaderSession.md",
+      "source": "the SDK 16.4 header NFCNDEFReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCErrorDomain",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/CoreNFC/NFCReaderSession.md",
+      "source": "the host's CoreNFC through Mac Catalyst, where the string is NFCError; the value was read there, and the release caches were not the instrument that decided it (tools/corpus/cache-census.lua NFC shows CoreNFC present from 11.0 on, so a claim that this package holds no cache of it would be false - facts/CoreNFC/NFCReaderSession.md)"
+    },
+    {
+      "api": "NFCReaderSession.delegate",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the delegate is held weakly, as the header declares it, and is the one the session's callbacks go to",
+      "effect": "the delegate the session was made with, and nil once that delegate is released (measured); there is no setDelegate:, as the host has none",
+      "source": "the SDK 16.4 header NFCReaderSession.h (readonly, weak); the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCReaderSession.sessionQueue",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the queue the session was made with is the queue its callbacks run on; a nil queue gets a serial queue of the session's own",
+      "effect": "the queue given answers itself (measured identity), and nil answers a serial queue of its own (measured non-nil)",
+      "source": "the SDK 16.4 header NFCReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCReaderSession.ready",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a session on a device with no radio is never ready, so the property answers NO",
+      "effect": "-isReady answers NO (measured); there is no -ready selector, as the host has none",
+      "source": "the SDK 16.4 header NFCReaderSession.h (getter isReady); the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCReaderSession.alertMessage",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the alert message is kept as the application copies it in, nil until it is set",
+      "effect": "nil until set (measured); setAlertMessage: keeps a copy and the getter answers it back (measured)",
+      "source": "the SDK 16.4 header NFCReaderSession.h (copy); the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "-[NFCReaderSession beginSession]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a begun session calls its delegate once with the unsupported-feature error, on its queue, as the host does",
+      "effect": "readerSession:didInvalidateWithError: with NFCError code 1 on the session's queue, once per begin (measured); a session invalidated before it is begun calls nothing afterwards",
+      "source": "the SDK 16.4 header NFCReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "-[NFCReaderSession invalidateSession]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "an invalidate after a begin calls the delegate again with the same error, and before a begin it ends the session silently, as the host does",
+      "effect": "readerSession:didInvalidateWithError: with NFCError code 1 after a begin (measured); nothing before one",
+      "source": "the SDK 16.4 header NFCReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "-[NFCNDEFReaderSession initWithDelegate:queue:invalidateAfterFirstRead:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the initializer makes the session for a delegate that can take the NDEF messages it reads, and answers nil for any other delegate",
+      "effect": "an object for a delegate with readerSession:didDetectNDEFs:, nil for a nil delegate or one without it (measured); invalidateAfterFirstRead: is kept by no tag, since no tag is read here",
+      "source": "the SDK 16.4 header NFCNDEFReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCReaderSessionDelegate",
+      "kind": "protocol",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the protocol is declared by the header the generator writes from the snapshot and the CoreNFC rows of the declaration table",
+      "effect": "required readerSessionDidBecomeActive: and readerSession:didInvalidateWithError:, optional readerSession:didDetectTags:, as the host's protocol has them (tests/backports/host/nfc-protocols)",
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 bodies), spec/protocol-headers.tsv (the CoreNFC rows); the header is CharonCoreNFCProtocols.h"
+    },
+    {
+      "api": "NFCNDEFReaderSessionDelegate",
+      "kind": "protocol",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the protocol is declared by the header the generator writes from the snapshot and the CoreNFC rows of the declaration table",
+      "effect": "required readerSession:didInvalidateWithError: and readerSession:didDetectNDEFs:, optional readerSession:didDetectTags: and readerSessionDidBecomeActive:, as the host's protocol has them (tests/backports/host/nfc-protocols)",
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 bodies), spec/protocol-headers.tsv (the CoreNFC rows); the header is CharonCoreNFCProtocols.h"
+    },
+    {
+      "api": "NFCISO15693CustomCommandConfiguration",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a configuration is a value, not a session: the manufacturer code, the command code and the request bytes are set by an application, read back and copied, and none of that needs an NFC radio, so the subclass of the carried NFCTagCommandConfiguration is carried with it",
+      "effect": "the class exists with the three properties the header declares, its superclass is the port's NFCTagCommandConfiguration, and every field is kept exactly as it was given: a manufacturer code of 0x1FF stays 0x1FF and a command code of 0x5 stays 0x5, although the header calls 0x00 to 0xFF and 0xA0 to 0xDF the valid ranges. -init leaves every field zero and requestParameters nil; the three-field initialiser sets what it names and leaves the base's retries at zero, which is what the header says it does; the five-field one sets all five. -copy is the class's own, carries all three of its fields, and its requestParameters is its own",
+      "facts": "facts/CoreNFC/TagConfiguration.md",
+      "source": "the host's CoreNFC through Mac Catalyst, compared field by field with the port's own in one process: tests/backports/host/corenfc-tagconfig/run.sh, 116 checks, 0 failing, and --fail-first shows 7 of 116 failing; tools/corpus/cache-census.lua NFC certifies the deployment caches carry no CoreNFC (0 of 11378 and 0 of 7187 classes begin with NFC, against 34 in 11.0's arm64 cache)"
+    },
+    {
+      "api": "NFCISO15693ReadMultipleBlocksConfiguration",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a configuration is a value, not a session: the block range and the chunk size are set by an application, read back and copied, and none of that needs an NFC radio, so the subclass of the carried NFCTagCommandConfiguration is carried with it",
+      "effect": "the class exists with the two properties the header declares, its superclass is the port's NFCTagCommandConfiguration, and both are kept exactly as they were given: a zero-length range stays zero length and a start index of 1000 stays 1000, although the header calls 0x00 to 0xFF valid and says the length shall not be 0. -init leaves the range empty and the chunk size zero; the two-field initialiser sets what it names and leaves the base's retries at zero, which is what the header says it does; the four-field one sets all four. -copy is the class's own, carries its range and chunk size, and is a value the original's later changes do not reach",
+      "facts": "facts/CoreNFC/TagConfiguration.md",
+      "source": "the host's CoreNFC through Mac Catalyst, compared field by field with the port's own in one process: tests/backports/host/corenfc-tagconfig/run.sh, 116 checks, 0 failing, and --fail-first shows 7 of 116 failing; tools/corpus/cache-census.lua NFC certifies the deployment caches carry no CoreNFC (0 of 11378 and 0 of 7187 classes begin with NFC, against 34 in 11.0's arm64 cache)"
+    },
+    {
+      "api": "NFCISO15693ReaderSession",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the session for ISO 15693 tags, made by its initializer for a delegate that can take the session becoming active",
+      "effect": "a subclass of NFCReaderSession (measured); initWithDelegate:queue: answers nil for a nil delegate or one without readerSessionDidBecomeActive: (measured)",
+      "source": "the SDK 16.4 header NFCISO15693ReaderSession.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NFCTagCommandConfiguration",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a configuration is a value, not a session: it is made from the fields an application sets, read back through its properties and copied, and none of that needs an NFC radio, which is the same line the NDEF payload is carried on",
+      "effect": "the class exists with the two properties the header declares, both kept exactly as they are given: maximumRetries of 1000 stays 1000 and a retryInterval of -5 stays -5, although the header calls 0 to 256 valid and does not say what happens outside it. -copyWithZone: is what answers, and a copy is a value of its own; -isEqual: is NSObject's, so two configurations of identical fields are not equal",
+      "facts": "facts/CoreNFC/TagConfiguration.md",
+      "source": "the host's CoreNFC through Mac Catalyst, which carries these three classes as it does not carry NFCNDEFPayload, compared field by field with the port's own in one process: tests/backports/host/corenfc-tagconfig/run.sh, 116 checks, 0 failing, and --fail-first shows 7 of 116 failing on the field it drops; tools/corpus/cache-census.lua NFC certifies the deployment caches carry no CoreNFC (0 of 11378 and 0 of 7187 classes begin with NFC, against 34 in 11.0's arm64 cache)"
+    },
+    {
+      "api": "NFCISO15693Tag",
+      "kind": "protocol",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the protocol object is declared by the generated header, with the SDK 16.4 members and its two bases; no port class is an ISO 15693 tag, so no class conforms to it yet",
+      "effect": "the required selectors of the host's protocol, the identifier, icManufacturerCode, icSerialNumber and the request methods (tests/backports/host/nfc-protocols)",
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 body), spec/protocol-headers.tsv (the CoreNFC rows, with replace rows for the three members the snapshot keeps API_AVAILABLE in); the header is CharonCoreNFCProtocols.h"
+    },
+    {
+      "api": "NFCTag",
+      "kind": "protocol",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the protocol object is declared by the generated header, with the SDK 16.4 members; no port class is a tag, so no class conforms to it yet",
+      "effect": "the required selectors type, session, isAvailable and the four asNFC accessors, as the host's protocol has them (tests/backports/host/nfc-protocols)",
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 body), spec/protocol-headers.tsv (the CoreNFC rows); the header is CharonCoreNFCProtocols.h"
+    },
+    {
+      "api": "NFCISO15693TagResponseErrorKey",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the key of the error user info that carries an ISO 15693 response code, with the string the host's constant holds",
+      "effect": "the string ISO15693TagResponseErrorCode (measured on the host)",
+      "source": "the SDK 16.4 header NFCError.h; the host's CoreNFC through Mac Catalyst, asked by tests/backports/host/nfc-session (28 lines, measured on the host and the port alike)"
+    },
+    {
+      "api": "NSUserActivity.ndefMessagePayload",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a category on NSUserActivity in the CoreNFC library, which answers the empty message of an activity no NFC tag launched: one record, of the empty type-name format",
+      "effect": "a read-only NFCNDEFMessage of one record with no type, identifier or payload, length 3, a new message on each read, on every activity type and with or without user info (tests/backports/host/nfc-activity)",
+      "source": "the SDK 16.4 header NSUserActivity+CoreNFC.h (readonly, ios 12.0); CoreNFC/NSUserActivity+CoreNFC.m; the host's NSUserActivity through Catalyst, measured by tests/backports/host/nfc-activity"
+    }
+  ]
+}

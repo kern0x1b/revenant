@@ -1,0 +1,4 @@
+# The two programs and their output, and the mutants' own copies of the port's source. Both are
+# written fresh on every run and both are build output: a run leaves nothing here that belongs in git.
+.build
+.mutants

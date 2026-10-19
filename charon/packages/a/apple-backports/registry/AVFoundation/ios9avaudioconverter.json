@@ -1,0 +1,212 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "AVAudioConverter",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "-[AVAudioConverter initFromFormat:toFormat:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real AudioConverterNew, returns nil (not a crash) when the release cannot build the requested conversion"
+    },
+    {
+      "api": "-[AVAudioConverter reset]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real AudioConverterReset"
+    },
+    {
+      "api": "AVAudioConverter.inputFormat",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioConverter.outputFormat",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioConverter.channelMap",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioConverterChannelMap"
+    },
+    {
+      "api": "AVAudioConverter.magicCookie",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; kept as real stored state, not yet wired to a compressed-format decoder/encoder this port does not build yet - see facts"
+    },
+    {
+      "api": "AVAudioConverter.downmix",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; kept as real stored state - AudioConverterServices carries no public C property for it on iOS, checked against the real header before writing this entry, see facts"
+    },
+    {
+      "api": "AVAudioConverter.dither",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; kept as real stored state - kAudioConverterPropertyDithering is declared macOS-only in the real header, never available on iOS, see facts"
+    },
+    {
+      "api": "AVAudioConverter.sampleRateConverterQuality",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioConverterSampleRateConverterQuality"
+    },
+    {
+      "api": "AVAudioConverter.sampleRateConverterAlgorithm",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioConverterSampleRateConverterAlgorithm, deprecated in favour of a property with different semantics that is not a drop-in replacement - see facts"
+    },
+    {
+      "api": "AVAudioConverter.primeMethod",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioConverterPrimeMethod"
+    },
+    {
+      "api": "AVAudioConverter.primeInfo",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioConverterPrimeInfo"
+    },
+    {
+      "api": "-[AVAudioConverter convertToBuffer:fromBuffer:error:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real AudioConverterConvertComplexBuffer, PCM-to-PCM without sample rate conversion, matching Apple's own documented restriction on this call"
+    },
+    {
+      "api": "-[AVAudioConverter convertToBuffer:error:withInputFromBlock:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real AudioConverterFillComplexBuffer, this port's own C input proc bridging it to the caller's block - see facts"
+    },
+    {
+      "api": "AVAudioConverter.bitRate",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioConverterEncodeBitRate"
+    },
+    {
+      "api": "AVAudioConverter.bitRateStrategy",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; kept as real stored state, no encoder this port builds yet reads it - see facts"
+    },
+    {
+      "api": "AVAudioConverter.maximumOutputPacketSize",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; 0, the header's own documented answer for a converter that is not encoding"
+    },
+    {
+      "api": "AVAudioConverter.availableEncodeBitRates",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; nil, the header's own documented answer for a converter that is not encoding"
+    },
+    {
+      "api": "AVAudioConverter.applicableEncodeBitRates",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; nil, the header's own documented answer for a converter that is not encoding"
+    },
+    {
+      "api": "AVAudioConverter.availableEncodeSampleRates",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; nil, the header's own documented answer for a converter that is not encoding"
+    },
+    {
+      "api": "AVAudioConverter.applicableEncodeSampleRates",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; nil, the header's own documented answer for a converter that is not encoding"
+    },
+    {
+      "api": "AVAudioConverter.availableEncodeChannelLayoutTags",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioConverter.md",
+      "source": "SDK 16.4, AVFAudio; nil, the header's own documented answer for a converter that is not encoding"
+    }
+  ]
+}

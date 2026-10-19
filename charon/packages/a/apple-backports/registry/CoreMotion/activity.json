@@ -1,0 +1,125 @@
+{
+  "framework": "CoreMotion",
+  "entries": [
+    {
+      "api": "CMMotionActivityManager",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "+[CMMotionActivityManager isActivityAvailable]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "+[CMMotionActivityManager authorizationStatus]",
+      "kind": "method",
+      "introduced": "11.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "-[CMMotionActivityManager startActivityUpdatesToQueue:withHandler:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "-[CMMotionActivityManager stopActivityUpdates]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "-[CMMotionActivityManager queryActivityStartingFromDate:toDate:toQueue:withHandler:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity",
+      "kind": "class",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.confidence",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.startDate",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.unknown",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.stationary",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.walking",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.running",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.automotive",
+      "kind": "property",
+      "introduced": "7.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    },
+    {
+      "api": "CMMotionActivity.cycling",
+      "kind": "property",
+      "introduced": "8.0",
+      "status": "implemented",
+      "facts": "facts/CoreMotion/CMMotionActivity.md",
+      "source": "CoreMotion headers of the macOS 27.0 SDK, measured on the Catalyst host"
+    }
+  ]
+}

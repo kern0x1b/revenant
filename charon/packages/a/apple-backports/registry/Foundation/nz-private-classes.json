@@ -1,0 +1,41 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSURLSessionStreamTaskState",
+      "kind": "class",
+      "introduced": "6.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSDecidedRows.md",
+      "source": "SDK 26.2 headers declare no such class; it is this port's own, and CharonStreamTaskState.m is where it is defined and used"
+    },
+    {
+      "api": "CharonPresentationIntentState",
+      "kind": "class",
+      "introduced": "6.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSDecidedRows.md",
+      "source": "SDK 26.2 headers declare no such class; it is this port's own, and NSPresentationIntent15.m is where it is defined and used"
+    },
+    {
+      "api": "CharonTermOfAddressState",
+      "kind": "class",
+      "introduced": "6.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSDecidedRows.md",
+      "source": "SDK 26.2 headers declare no such class; it is this port's own, and NSTermOfAddress17.m is where it is defined and used"
+    },
+    {
+      "api": "CharonPersonNameParts",
+      "kind": "class",
+      "introduced": "6.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSDecidedRows.md",
+      "source": "SDK 26.2 headers declare no such class; it is this port's own, and NSPersonNameComponentsFormatter9.m is where it is defined and used"
+    }
+  ]
+}

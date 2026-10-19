@@ -1,0 +1,7 @@
+Package: org.charon.metalchainprobe
+Name: Charon Metal 4 command chain probe
+Architecture: iphoneos-arm
+Description: The port's Metal 4 command chain against the answers Apple's own Metal gave on this host
+Maintainer: charon
+Author: charon
+Section: Development

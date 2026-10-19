@@ -1,0 +1,84 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)ABPeoplePickerNavigationController	-			-	-	-	ios=2.0/9.0/-/0	-	fba9972b26a320b5	-
+super	-	ABPeoplePickerNavigationController	UINavigationController		-	-	-	-	-	bbf73fd96423c167	-
+property	c:objc(cs)ABPeoplePickerNavigationController(py)peoplePickerDelegate	-			id<ABPeoplePickerNavigationControllerDelegate>	-	assign,nonatomic	ios=2.0/9.0/-/0	-	ec2cf2c7511c792d	-
+property	c:objc(cs)ABPeoplePickerNavigationController(py)displayedProperties	-			NSArray<NSNumber *> *	-	copy,nonatomic	ios=2.0/9.0/-/0	-	4bdf5b38ff9ca22d	-
+property	c:objc(cs)ABPeoplePickerNavigationController(py)addressBook	-			ABAddressBookRef	-	nonatomic	ios=2.0/9.0/-/0	-	f3a891865ee87836	-
+property	c:objc(cs)ABPeoplePickerNavigationController(py)predicateForEnablingPerson	-			NSPredicate *	-	copy,nonatomic	ios=8.0/-/-/0	-	b18cd8f1fd9c8f9a	-
+property	c:objc(cs)ABPeoplePickerNavigationController(py)predicateForSelectionOfPerson	-			NSPredicate *	-	copy,nonatomic	ios=8.0/-/-/0	-	f070c9bdffe28a00	-
+property	c:objc(cs)ABPeoplePickerNavigationController(py)predicateForSelectionOfProperty	-			NSPredicate *	-	copy,nonatomic	ios=8.0/-/-/0	-	2b8828dc7bc338d6	-
+var	c:@ABPersonNamePrefixProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	31ef81d952ce65bd	-
+var	c:@ABPersonGivenNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	5889c3d99e2b644b	-
+var	c:@ABPersonMiddleNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	85210393851ad1c8	-
+var	c:@ABPersonFamilyNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	a5c2901fdbfa4f14	-
+var	c:@ABPersonNameSuffixProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	3f6117be027867b0	-
+var	c:@ABPersonPreviousFamilyNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	3c4f3c58994ee611	-
+var	c:@ABPersonNicknameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	cf7667f6ea9e3b8d	-
+var	c:@ABPersonPhoneticGivenNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	7a7d35db496f9b79	-
+var	c:@ABPersonPhoneticMiddleNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	2bf44032bd98bcdb	-
+var	c:@ABPersonPhoneticFamilyNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	99b7d97c7b13a526	-
+var	c:@ABPersonOrganizationNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	333751eceea01bbe	-
+var	c:@ABPersonDepartmentNameProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	e16554958f8f7cb4	-
+var	c:@ABPersonJobTitleProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	7444af86cd47f265	-
+var	c:@ABPersonBirthdayProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	a48b58174c9b5c2b	-
+var	c:@ABPersonNoteProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	817f1d8253072171	-
+var	c:@ABPersonPhoneNumbersProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	dd18d191317ab972	-
+var	c:@ABPersonEmailAddressesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	1f53977219278745	-
+var	c:@ABPersonUrlAddressesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	ffd8fae7573b4b80	-
+var	c:@ABPersonDatesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	09da8d5828377e22	-
+var	c:@ABPersonInstantMessageAddressesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	e7e0edfe78be9a0a	-
+var	c:@ABPersonRelatedNamesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	d533db5b6b32856a	-
+var	c:@ABPersonSocialProfilesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	3e90fe2c5b74edc9	-
+var	c:@ABPersonPostalAddressesProperty	-			NSString *const	-	-	ios=8.0/-/-/0	-	53f229a20eacdf48	-
+protocol	c:objc(pl)ABPeoplePickerNavigationControllerDelegate	-			-	-	-	-	-	4df87d37e8d25a04	-
+conforms	c:objc(pl)ABPeoplePickerNavigationControllerDelegate	ABPeoplePickerNavigationControllerDelegate	NSObject		-	-	-	-	-	fa2234742073a3c9	-
+method	c:objc(pl)ABPeoplePickerNavigationControllerDelegate(im)peoplePickerNavigationController:didSelectPerson:	-			void	ABPeoplePickerNavigationController * peoplePicker | ABRecordRef person	optional	ios=8.0/-/-/0	-	ade80f60efe2dc16	-
+method	c:objc(pl)ABPeoplePickerNavigationControllerDelegate(im)peoplePickerNavigationController:didSelectPerson:property:identifier:	-			void	ABPeoplePickerNavigationController * peoplePicker | ABRecordRef person | ABPropertyID property | ABMultiValueIdentifier identifier	optional	ios=8.0/-/-/0	-	85d6ba509c27755f	-
+method	c:objc(pl)ABPeoplePickerNavigationControllerDelegate(im)peoplePickerNavigationControllerDidCancel:	-			void	ABPeoplePickerNavigationController * peoplePicker	optional	-	-	79eb519193d0c683	-
+method	c:objc(pl)ABPeoplePickerNavigationControllerDelegate(im)peoplePickerNavigationController:shouldContinueAfterSelectingPerson:	-			BOOL	ABPeoplePickerNavigationController * peoplePicker | ABRecordRef person	optional	ios=2.0/8.0/-/0	-	9d0f3a31099b4471	-
+method	c:objc(pl)ABPeoplePickerNavigationControllerDelegate(im)peoplePickerNavigationController:shouldContinueAfterSelectingPerson:property:identifier:	-			BOOL	ABPeoplePickerNavigationController * peoplePicker | ABRecordRef person | ABPropertyID property | ABMultiValueIdentifier identifier	optional	ios=2.0/8.0/-/0	-	1227b4d8a89a18c5	-
+interface	c:objc(cs)ABPersonViewController	-			-	-	-	ios=2.0/9.0/-/0	-	637b1407c8d83ad0	-
+super	-	ABPersonViewController	UIViewController		-	-	-	-	-	15187c1cae3c9139	-
+conforms	c:objc(cs)ABPersonViewController	ABPersonViewController	UIViewControllerRestoration		-	-	-	-	-	5f2a48e2505f8203	-
+property	c:objc(cs)ABPersonViewController(py)personViewDelegate	-			id<ABPersonViewControllerDelegate>	-	assign,nonatomic	ios=2.0/9.0/-/0	-	883497acace7fd77	-
+property	c:objc(cs)ABPersonViewController(py)addressBook	-			ABAddressBookRef	-	nonatomic	ios=2.0/9.0/-/0	-	8e8a535f5a4901ce	-
+property	c:objc(cs)ABPersonViewController(py)displayedPerson	-			ABRecordRef	-	nonatomic	ios=2.0/9.0/-/0	-	56c698031cf23f3c	-
+property	c:objc(cs)ABPersonViewController(py)displayedProperties	-			NSArray<NSNumber *> *	-	copy,nonatomic	ios=2.0/9.0/-/0	-	4cae05064a8a01a5	-
+property	c:objc(cs)ABPersonViewController(py)allowsEditing	-			BOOL	-	nonatomic	ios=2.0/9.0/-/0	-	7216ac948c1597da	-
+property	c:objc(cs)ABPersonViewController(py)allowsActions	-			BOOL	-	nonatomic	ios=4.0/-/-/0	-	55ba8c19e1f3e503	-
+property	c:objc(cs)ABPersonViewController(py)shouldShowLinkedPeople	-			BOOL	-	nonatomic	ios=4.0/-/-/0	-	cce0854947166f25	-
+method	c:objc(cs)ABPersonViewController(im)setHighlightedItemForProperty:withIdentifier:	-			void	ABPropertyID property | ABMultiValueIdentifier identifier	-	ios=2.0/9.0/-/0	-	be085164738cb80a	-
+protocol	c:objc(pl)ABPersonViewControllerDelegate	-			-	-	-	-	-	f645de4270356589	-
+conforms	c:objc(pl)ABPersonViewControllerDelegate	ABPersonViewControllerDelegate	NSObject		-	-	-	-	-	420433533149efaa	-
+method	c:objc(pl)ABPersonViewControllerDelegate(im)personViewController:shouldPerformDefaultActionForPerson:property:identifier:	-			BOOL	ABPersonViewController * personViewController | ABRecordRef person | ABPropertyID property | ABMultiValueIdentifier identifier	-	-	-	3d888a6346996532	-
+interface	c:objc(cs)ABNewPersonViewController	-			-	-	-	ios=2.0/9.0/-/0	-	0af1f78ce46f6b04	-
+super	-	ABNewPersonViewController	UIViewController		-	-	-	-	-	03e0aa99ede474aa	-
+property	c:objc(cs)ABNewPersonViewController(py)newPersonViewDelegate	-			id<ABNewPersonViewControllerDelegate>	-	assign,nonatomic	ios=2.0/9.0/-/0	-	273c00e99dc9c03f	-
+method	c:objc(cs)ABNewPersonViewController(im)newPersonViewDelegate	-			id<ABNewPersonViewControllerDelegate>	-	-	ios=2.0/9.0/-/0	-	dac6c8246fd71497	-
+property	c:objc(cs)ABNewPersonViewController(py)addressBook	-			ABAddressBookRef	-	nonatomic	ios=2.0/9.0/-/0	-	751a852920c0c79a	-
+property	c:objc(cs)ABNewPersonViewController(py)displayedPerson	-			ABRecordRef	-	nonatomic	ios=2.0/9.0/-/0	-	0685a3f357f20669	-
+property	c:objc(cs)ABNewPersonViewController(py)parentGroup	-			ABRecordRef	-	nonatomic	ios=2.0/9.0/-/0	-	566ec150c7b941f1	-
+protocol	c:objc(pl)ABNewPersonViewControllerDelegate	-			-	-	-	-	-	dfbb0ef4dedc4e74	-
+conforms	c:objc(pl)ABNewPersonViewControllerDelegate	ABNewPersonViewControllerDelegate	NSObject		-	-	-	-	-	b47e1c54d9e57d2f	-
+method	c:objc(pl)ABNewPersonViewControllerDelegate(im)newPersonViewController:didCompleteWithNewPerson:	-			void	ABNewPersonViewController * newPersonView | ABRecordRef person	-	-	-	b0b70bcb79d51bee	-
+interface	c:objc(cs)ABUnknownPersonViewController	-			-	-	-	ios=2.0/9.0/-/0	-	83243127839937f8	-
+super	-	ABUnknownPersonViewController	UIViewController		-	-	-	-	-	d18e772f2beb343b	-
+property	c:objc(cs)ABUnknownPersonViewController(py)unknownPersonViewDelegate	-			id<ABUnknownPersonViewControllerDelegate>	-	assign,nonatomic	ios=2.0/9.0/-/0	-	c787d073ce52d9e3	-
+property	c:objc(cs)ABUnknownPersonViewController(py)addressBook	-			ABAddressBookRef	-	nonatomic	ios=2.0/9.0/-/0	-	0755c2ab329ef3b6	-
+property	c:objc(cs)ABUnknownPersonViewController(py)displayedPerson	-			ABRecordRef	-	nonatomic	ios=2.0/9.0/-/0	-	a25f183ad646044c	-
+property	c:objc(cs)ABUnknownPersonViewController(py)alternateName	-			NSString *	-	copy,nonatomic	ios=2.0/9.0/-/0	-	b117252d7f8352c3	-
+property	c:objc(cs)ABUnknownPersonViewController(py)message	-			NSString *	-	copy,nonatomic	ios=2.0/9.0/-/0	-	9c6ac6e69dd81648	-
+property	c:objc(cs)ABUnknownPersonViewController(py)allowsActions	-			BOOL	-	nonatomic	ios=2.0/9.0/-/0	-	40f32790e518ba92	-
+property	c:objc(cs)ABUnknownPersonViewController(py)allowsAddingToAddressBook	-			BOOL	-	nonatomic	ios=2.0/9.0/-/0	-	b85a1a70ee2973ce	-
+protocol	c:objc(pl)ABUnknownPersonViewControllerDelegate	-			-	-	-	-	-	165958bf39f31f01	-
+conforms	c:objc(pl)ABUnknownPersonViewControllerDelegate	ABUnknownPersonViewControllerDelegate	NSObject		-	-	-	-	-	86ae6eb54b0694de	-
+method	c:objc(pl)ABUnknownPersonViewControllerDelegate(im)unknownPersonViewController:didResolveToPerson:	-			void	ABUnknownPersonViewController * unknownCardViewController | ABRecordRef person	-	-	-	c3dab032acc47cc9	-
+method	c:objc(pl)ABUnknownPersonViewControllerDelegate(im)unknownPersonViewController:shouldPerformDefaultActionForPerson:property:identifier:	-			BOOL	ABUnknownPersonViewController * personViewController | ABRecordRef person | ABPropertyID property | ABMultiValueIdentifier identifier	optional	ios=3.0/-/-/0	-	467ab225dde7bda8	-
+function	c:@F@ABCreateStringWithAddressDictionary	-			NSString * (NSDictionary *, BOOL)	NSDictionary * address | BOOL addCountryName	-	ios=2.0/9.0/-/0	-	1ea6449934b89a6f	-
+typedef	c:@T@ABAddressBookRef	-			CFTypeRef	-	-	ios=2.0/9.0/-/0	-	e3c5508ecd595536	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@ABRecordRef	-			CFTypeRef	-	-	ios=2.0/9.0/-/0	-	4aad0ec3b8eb5112	-
+typedef	c:@T@ABPropertyID	-			int32_t	-	-	ios=2.0/9.0/-/0	-	fd83e6bf924b0da9	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@ABMultiValueIdentifier	-			int32_t	-	-	ios=2.0/9.0/-/0	-	5400995cf6ca1fae	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

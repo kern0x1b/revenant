@@ -1,0 +1,35 @@
+[
+  {
+    "api": "ACAccountTypeIdentifierTencentWeibo",
+    "kind": "constant",
+    "introduced": "7.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 has no Tencent Weibo account type and exports no name for it, and an application that names it is killed by dyld before its main",
+    "effect": "the constant is the string com.apple.account.tencentweibo, the text Accounts of iOS 18.0 gives it; +[ACAccountStore accountTypeWithIdentifier:] answers nil for it here, as it does for every identifier the release has no type for",
+    "facts": "facts/Accounts/Names.md",
+    "source": "Accounts of the arm64e shared cache of iOS 18.0, read through the symbol with tools/corpus/cache-value.lua, with ACAccountTypeIdentifierSinaWeibo as the control beside it"
+  },
+  {
+    "api": "ACTencentWeiboAppIdKey",
+    "kind": "constant",
+    "introduced": "7.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 exports no name for it, and an application that names it is killed by dyld before its main",
+    "effect": "the constant is the string ACTencentWeiboAppIdKey, the key Accounts of iOS 18.0 stores the Tencent App ID under, so an options dictionary built with it is the shape accountsd of a later release reads",
+    "facts": "facts/Accounts/Names.md",
+    "source": "Accounts of the arm64e shared cache of iOS 18.0, read through the symbol with tools/corpus/cache-value.lua; the key of the account type above read in the same run"
+  },
+  {
+    "api": "ACAccount.userFullName",
+    "kind": "property",
+    "introduced": "7.0",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the release's account store holds one kind of account, Sina Weibo, whose record has a handle and a name and nothing that names the owner; the header says the property is there \"for accounts that support it (currently only Facebook accounts)\", and no account of the release does",
+    "effect": "nil, always; the accessor is there, so respondsToSelector: answers as it does where the system has the field",
+    "facts": "facts/Accounts/ACAccount.md",
+    "source": "the header of ACAccount in the SDK 16.4, which documents the property for the account types that support it and marks it unavailable on macOS, so the host cannot answer it; the armv7 shared cache of iOS 6.1.3, whose Accounts image exports _OBJC_CLASS_$_ACAccount, and the corpus row for ACAccount.userFullName, which is the measurement that the release's class has neither -userFullName nor -setUserFullName:"
+  }
+]

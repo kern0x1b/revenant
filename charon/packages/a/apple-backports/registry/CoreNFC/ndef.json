@@ -1,0 +1,225 @@
+{
+  "framework": "CoreNFC",
+  "entries": [
+    {
+      "api": "NFCNDEFPayload",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a payload is a value - a type, an identifier and bytes - and needs no radio, so it is carried whole on a device with none",
+      "effect": "the class exists, holds what it is given, copies and compares by the four fields, and archives under its own keys; the chunking is kept apart from the bytes so that a payload is never marked by the encoder",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4 (NFCNDEFPayload.h, NFCNDEFMessage.h); the record shape of the NFC Forum NDEF Technical Specification written out in packages/a/apple-backports/CoreNFC/CharonNDEF.h; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFMessage",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a message is a list of payloads and its own bytes, and needs no radio to be made, encoded or parsed",
+      "effect": "the class exists, its records are kept as given, -length is what the message encodes to (made once and kept), +ndefMessageWithData: reads the records of a message and refuses a record that does not add up instead of repairing it, and both classes survive secure coding",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape of the NFC Forum NDEF Technical Specification; tests/backports/host/corenfc, 39 checks against NDEF vectors, and the mutation of one byte of a vector shown failing"
+    },
+    {
+      "api": "-[NFCNDEFMessage init]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "NS_UNAVAILABLE in the header and unimplemented: a message is made with -initWithNDEFRecords: or +ndefMessageWithData:, and an object made with -init is not one of those",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "-[NFCNDEFPayload init]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "NS_UNAVAILABLE in the header and unimplemented: a payload is made with -initWithFormat:... , and an object made with -init carries no record",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "-[NFCNDEFPayload initWithFormat:type:identifier:payload:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "an NFCNDEFPayload with the four fields it was given, keeping them as given",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "-[NFCNDEFPayload initWithFormat:type:identifier:payload:chunkSize:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the same, and a chunk size above zero, which the encoder turns into one record per chunk with a marker as the first byte of each payload; a chunk size of zero, or none, means the payload is not chunked",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "+[NFCNDEFPayload wellKnownTypeURIPayloadWithString:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "a well-known URI payload: the type is the URI RTD's U and the payload the prefix byte of the URI RTD's table - the index of the longest entry the URI begins with - followed by the rest of it. nil for a nil string",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "+[NFCNDEFPayload wellKnownTypeURIPayloadWithURL:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "as the string form, over the URL's absolute string",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "-[NFCNDEFMessage initWithNDEFRecords:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "a message with the records it was given, in order",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "+[NFCNDEFMessage ndefMessageWithData:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the records of the message the bytes carry: the header byte, the type length, a one- or four-byte payload length, the ID length exactly when the header's IL says the field is there, then the type, the ID and the payload. A record that does not add up ends the message and nothing is repaired; a continuation out of order, or without a group, answers nil",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "+[NFCNDEFPayload wellKnownTypeTextPayloadWithString:locale:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "a well-known text payload: the type is the text RTD's T and the payload the status byte - its top bit the encoding, its low six the length of the language code - then the code and the text. The port writes UTF-8 for every language and its status byte says so; nil for a nil text or a language code the status byte cannot name",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "+[NFCNDEFPayload wellKnowTypeTextPayloadWithString:locale:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the spelling Apple deprecated in the release that replaced it, carried so code written against either name links, and both answer the same",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "-[NFCNDEFPayload wellKnownTypeURIPayload]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the URL the payload names, through the same prefix table; nil when the record is not a well-known URI, when the payload is empty, or when the prefix byte is not an index of the table",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "-[NFCNDEFPayload wellKnownTypeTextPayloadWithLocale:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the text the payload names and the language code out-parameter the status byte carries; nil when the record is not a well-known text record",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFMessage.records",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the payloads of the message, kept as given",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFMessage.length",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "what the message encodes to, made once and kept: the sum of its records, a chunked payload counting as one record per chunk",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFPayload.typeNameFormat",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the format the record is written with, kept as given",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFPayload.type",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the type the record is written with, kept as given",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFPayload.identifier",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the identifier the record is written with, kept as given, and nil where the header's IL says there is no such field at all",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    },
+    {
+      "api": "NFCNDEFPayload.payload",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 13.0 member of a class this package carries whole, and the value or the layout it needs is the specification's",
+      "effect": "the bytes the record is written with, kept as given and without any chunk marker: the marker is written by the encoder and read by the parser, so a payload is never marked twice",
+      "facts": "facts/CoreNFC/NDEF.md",
+      "source": "the headers of CoreNFC in the SDK 16.4; the record shape and the URI and text RTDs of the NFC Forum NDEF Technical Specification and its URI RTD's prefix table; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+    }
+  ]
+}

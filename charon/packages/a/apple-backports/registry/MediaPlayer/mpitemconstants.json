@@ -1,0 +1,80 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPMediaItemPropertyDateAdded",
+   "kind": "constant",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release does not carry it at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, MPMediaItemPropertyDateAdded is in none of the 236 classes' own instance lists and in none of the 41 categories. Its value is measured on this Mac's own MediaPlayer, which is where the key the getters read comes from.",
+   "effect": "a caller spells the key the way Apple spells it: [item valueForProperty:MPMediaItemPropertyDateAdded] reads the same value the getter does, which the constants check asserts.",
+   "source": "SDK 26.2, MPMediaItem.h, MP_API(ios(10.0))",
+   "key": "dateAdded",
+   "key_measured": "measured, not a convention: the value of the MPMediaItemProperty* constant of that name on this Mac's own MediaPlayer. The rule it gives is the property's own name except where the 26.2 header declares a getter=, where it is the getter's name - and the constants 6.1.3 already had show it, IsCompilation being isCompilation and IsCloudItem isCloudItem",
+   "key_measurement": "tests/backports/host/mediaplayeritem/constant-values.m, compiled with xcrun clang -fobjc-arc -framework Foundation -framework MediaPlayer and run: it reads the constants and nothing else, no library and no query, output committed at tests/backports/host/mediaplayeritem/evidence/constant-values.txt",
+   "key_unverified": "what is still unverified is that a **populated** item answers this getter with that value, which needs a media library: neither this Mac nor 6.1.3 can be given a populated MPMediaItem. See coordination/crutches.md",
+   "facts": "facts/MediaPlayer/MPMediaItem.md"
+  },
+  {
+   "api": "MPMediaItemPropertyPlaybackStoreID",
+   "kind": "constant",
+   "introduced": "10.3",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release does not carry it at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, MPMediaItemPropertyPlaybackStoreID is in none of the 236 classes' own instance lists and in none of the 41 categories. Its value is measured on this Mac's own MediaPlayer, which is where the key the getters read comes from.",
+   "effect": "a caller spells the key the way Apple spells it: [item valueForProperty:MPMediaItemPropertyPlaybackStoreID] reads the same value the getter does, which the constants check asserts.",
+   "source": "SDK 26.2, MPMediaItem.h, MP_API(ios(10.3))",
+   "key": "playbackStoreID",
+   "key_measured": "measured, not a convention: the value of the MPMediaItemProperty* constant of that name on this Mac's own MediaPlayer. The rule it gives is the property's own name except where the 26.2 header declares a getter=, where it is the getter's name - and the constants 6.1.3 already had show it, IsCompilation being isCompilation and IsCloudItem isCloudItem",
+   "key_measurement": "tests/backports/host/mediaplayeritem/constant-values.m, compiled with xcrun clang -fobjc-arc -framework Foundation -framework MediaPlayer and run: it reads the constants and nothing else, no library and no query, output committed at tests/backports/host/mediaplayeritem/evidence/constant-values.txt",
+   "key_unverified": "what is still unverified is that a **populated** item answers this getter with that value, which needs a media library: neither this Mac nor 6.1.3 can be given a populated MPMediaItem. See coordination/crutches.md",
+   "facts": "facts/MediaPlayer/MPMediaItem.md"
+  },
+  {
+   "api": "MPMediaItemPropertyIsPreorder",
+   "kind": "constant",
+   "introduced": "14.5",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release does not carry it at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, MPMediaItemPropertyIsPreorder is in none of the 236 classes' own instance lists and in none of the 41 categories. Its value is measured on this Mac's own MediaPlayer, which is where the key the getters read comes from.",
+   "effect": "a caller spells the key the way Apple spells it: [item valueForProperty:MPMediaItemPropertyIsPreorder] reads the same value the getter does, which the constants check asserts.",
+   "source": "SDK 26.2, MPMediaItem.h, MP_API(ios(14.5))",
+   "key": "isPreorder",
+   "key_measured": "measured, not a convention: the value of the MPMediaItemProperty* constant of that name on this Mac's own MediaPlayer. The rule it gives is the property's own name except where the 26.2 header declares a getter=, where it is the getter's name - and the constants 6.1.3 already had show it, IsCompilation being isCompilation and IsCloudItem isCloudItem",
+   "key_measurement": "tests/backports/host/mediaplayeritem/constant-values.m, compiled with xcrun clang -fobjc-arc -framework Foundation -framework MediaPlayer and run: it reads the constants and nothing else, no library and no query, output committed at tests/backports/host/mediaplayeritem/evidence/constant-values.txt",
+   "key_unverified": "what is still unverified is that a **populated** item answers this getter with that value, which needs a media library: neither this Mac nor 6.1.3 can be given a populated MPMediaItem. See coordination/crutches.md",
+   "facts": "facts/MediaPlayer/MPMediaItem.md"
+  },
+  {
+   "api": "MPMediaItemPropertyIsExplicit",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release does not carry it at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, MPMediaItemPropertyIsExplicit is in none of the 236 classes' own instance lists and in none of the 41 categories. Its value is measured on this Mac's own MediaPlayer, which is where the key the getters read comes from.",
+   "effect": "a caller spells the key the way Apple spells it: [item valueForProperty:MPMediaItemPropertyIsExplicit] reads the same value the getter does, which the constants check asserts.",
+   "source": "SDK 26.2, MPMediaItem.h, MP_API(ios(7.0))",
+   "key": "isExplicit",
+   "key_measured": "measured, not a convention: the value of the MPMediaItemProperty* constant of that name on this Mac's own MediaPlayer. The rule it gives is the property's own name except where the 26.2 header declares a getter=, where it is the getter's name - and the constants 6.1.3 already had show it, IsCompilation being isCompilation and IsCloudItem isCloudItem",
+   "key_measurement": "tests/backports/host/mediaplayeritem/constant-values.m, compiled with xcrun clang -fobjc-arc -framework Foundation -framework MediaPlayer and run: it reads the constants and nothing else, no library and no query, output committed at tests/backports/host/mediaplayeritem/evidence/constant-values.txt",
+   "key_unverified": "what is still unverified is that a **populated** item answers this getter with that value, which needs a media library: neither this Mac nor 6.1.3 can be given a populated MPMediaItem. See coordination/crutches.md",
+   "facts": "facts/MediaPlayer/MPMediaItem.md"
+  },
+  {
+   "api": "MPMediaItemPropertyHasProtectedAsset",
+   "kind": "constant",
+   "introduced": "9.2",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release does not carry it at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, MPMediaItemPropertyHasProtectedAsset is in none of the 236 classes' own instance lists and in none of the 41 categories. Its value is measured on this Mac's own MediaPlayer, which is where the key the getters read comes from.",
+   "effect": "a caller spells the key the way Apple spells it: [item valueForProperty:MPMediaItemPropertyHasProtectedAsset] reads the same value the getter does, which the constants check asserts.",
+   "source": "SDK 26.2, MPMediaItem.h, MP_API(ios(9.2))",
+   "key": "hasProtectedAsset",
+   "key_measured": "measured, not a convention: the value of the MPMediaItemProperty* constant of that name on this Mac's own MediaPlayer. The rule it gives is the property's own name except where the 26.2 header declares a getter=, where it is the getter's name - and the constants 6.1.3 already had show it, IsCompilation being isCompilation and IsCloudItem isCloudItem",
+   "key_measurement": "tests/backports/host/mediaplayeritem/constant-values.m, compiled with xcrun clang -fobjc-arc -framework Foundation -framework MediaPlayer and run: it reads the constants and nothing else, no library and no query, output committed at tests/backports/host/mediaplayeritem/evidence/constant-values.txt",
+   "key_unverified": "what is still unverified is that a **populated** item answers this getter with that value, which needs a media library: neither this Mac nor 6.1.3 can be given a populated MPMediaItem. See coordination/crutches.md",
+   "facts": "facts/MediaPlayer/MPMediaItem.md"
+  }
+ ]
+}

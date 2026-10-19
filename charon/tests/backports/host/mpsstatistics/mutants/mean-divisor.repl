@@ -1,0 +1,4 @@
+            sum += CharonMPSImageLoad(buffer, &from, CharonMPSImageIndex(&from, pixel, channel));
+        }
+    double mean = count > 0.0 ? sum / (double)(window.size.width * window.size.height) : 0.0;
+    double squared = 0.0;

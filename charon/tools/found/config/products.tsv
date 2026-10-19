@@ -1,0 +1,4 @@
+# The products of the sources that are not an SDK framework (ruling 3a): a source folder of the generator with no shard of its own.
+# Each row: name, members (the SDK frameworks whose shards declare the folder's identifiers), reason (TAB separated).
+# The members are measured, not authored: each source file's identifiers matched to the shard names (build/found, identifier count).
+Graphics	CoreGraphics,ImageIO,CoreImage,CoreVideo,CoreText,CoreFoundation,CoreServices	the Graphics folder of libGraphicsBackports is a product folder, not an SDK framework, so it has no shard; its 103 files match CoreGraphics (25 files), ImageIO (24), CoreImage (14), CoreVideo (12), CoreText (11), CoreFoundation (6), CoreServices (2), and one each MapKit, MacTypes, GSS, CoreMIDI; 4 CIFilterBuiltins files match vecLib by identifier and are CoreImage's; CIContextOptions10.m matches none

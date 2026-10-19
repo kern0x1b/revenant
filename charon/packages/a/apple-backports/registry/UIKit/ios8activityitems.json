@@ -1,0 +1,15 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIActivityViewController.completionWithItemsHandler",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the handler is called with the activity type and the outcome the release's own completion handler gives; the returned items and the error are nil, which the release does not report",
+      "facts": "facts/UIKit/UIActivityViewControllerCompletionItems.md",
+      "source": "the header of SDK 16.4 and tests/backports/device/smallapis.m on iOS 6"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "framework": "HealthKit",
+  "entries": [
+    {
+      "api": "HKCategoryTypeIdentifierHeadphoneAudioExposureEvent",
+      "kind": "constant",
+      "introduced": "14.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 14.2 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(14.2)) at HKTypeIdentifiers.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder holds no rung between 12.0 and 16.0 - its rungs after 12.0 are 16.0 and 18.0 - so dyld.first_releases() answers 16.0 for every constant of this release and for every release between, and the object that defines it is HKConstants160.m: the release check measures the release rather than reading it off a header, and an object carries the API of one release",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKCategoryTypeIdentifierHeadphoneAudioExposureEvent, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKTypeIdentifiers.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    },
+    {
+      "api": "HKMetadataKeyAudioExposureDuration",
+      "kind": "constant",
+      "introduced": "14.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 14.2 is what the SDK 26.2 header gives this constant, API_AVAILABLE(ios(14.2)) at HKMetadata.h of 26.2, and the corpus ledger's introduced agrees with that annotation for it. The held ladder holds no rung between 12.0 and 16.0 - its rungs after 12.0 are 16.0 and 18.0 - so dyld.first_releases() answers 16.0 for every constant of this release and for every release between, and the object that defines it is HKConstants160.m: the release check measures the release rather than reading it off a header, and an object carries the API of one release",
+      "effect": "the value Apple ships, measured: the symbol read out of the host's own HealthKit is the string HKMetadataKeyAudioExposureDuration, which is this constant's own name",
+      "facts": "facts/HealthKit/HealthKit.md",
+      "source": "the constant's value: dlsym of this symbol out of /System/Library/Frameworks/HealthKit.framework/HealthKit on macOS 26A428, decoded through CFStringGetCString as UTF-8, recorded per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv with that binary and that build on every row; the declaration and its availability are the SDK 26.2 header's own (HKMetadata.h); the release is measured with tools/symbol-first-release.lua over the held ladder, which is the release check's own question"
+    }
+  ]
+}

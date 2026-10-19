@@ -1,0 +1,16 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_SceneKit_SwiftUI	struct	SceneView	14.0				own
+_SceneKit_SwiftUI	struct	SceneView.Options	14.0				container
+_SceneKit_SwiftUI	property	SceneView.Options.rawValue	14.0				container
+_SceneKit_SwiftUI	method	SceneView.Options.init(rawValue:)	14.0				container
+_SceneKit_SwiftUI	property	SceneView.Options.allowsCameraControl	14.0				container
+_SceneKit_SwiftUI	property	SceneView.Options.rendersContinuously	14.0				container
+_SceneKit_SwiftUI	property	SceneView.Options.autoenablesDefaultLighting	14.0				container
+_SceneKit_SwiftUI	property	SceneView.Options.jitteringEnabled	14.0				container
+_SceneKit_SwiftUI	property	SceneView.Options.temporalAntialiasingEnabled	14.0				container
+_SceneKit_SwiftUI	typealias	SceneView.Options.ArrayLiteralElement	14.0				own
+_SceneKit_SwiftUI	typealias	SceneView.Options.Element	14.0				own
+_SceneKit_SwiftUI	typealias	SceneView.Options.RawValue	14.0				own
+_SceneKit_SwiftUI	method	SceneView.init(scene:pointOfView:options:preferredFramesPerSecond:antialiasingMode:delegate:technique:)	14.0				container
+_SceneKit_SwiftUI	property	SceneView.body	14.0				container
+_SceneKit_SwiftUI	typealias	SceneView.Body	14.0				own

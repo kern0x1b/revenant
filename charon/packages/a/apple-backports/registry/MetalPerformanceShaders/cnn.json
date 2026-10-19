@@ -1,0 +1,743 @@
+{
+  "framework": "MetalPerformanceShaders",
+  "entries": [
+    {
+      "api": "MPSCNNBatchNormalization",
+      "kind": "class",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionWeightsAndBiasesState",
+      "kind": "class",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNPooling",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNPoolingAverage",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNPoolingMax",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNBatchNormalization.dataSource",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNBatchNormalization.epsilon",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNBatchNormalization.numberOfFeatureChannels",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.accumulatorPrecisionOption",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.channelMultiplier",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.dataSource",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.fusedNeuronDescriptor",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.groups",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.inputFeatureChannels",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.neuron",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.neuronParameterA",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.neuronParameterB",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.neuronParameterC",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.neuronType",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.outputFeatureChannels",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolution.subPixelScaleFactor",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.dilationRateX",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.dilationRateY",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.fusedNeuronDescriptor",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.groups",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.inputFeatureChannels",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.kernelHeight",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.kernelWidth",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.neuron",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.outputFeatureChannels",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.strideInPixelsX",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.strideInPixelsY",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionDescriptor.supportsSecureCoding",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionWeightsAndBiasesState.biases",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionWeightsAndBiasesState.biasesOffset",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionWeightsAndBiasesState.weights",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNConvolutionWeightsAndBiasesState.weightsOffset",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.clipRect",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.destinationFeatureChannelOffset",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.destinationImageAllocator",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.dilationRateX",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.dilationRateY",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.edgeMode",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.isBackwards",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.isStateModified",
+      "kind": "property",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.kernelHeight",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.kernelWidth",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.offset",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.padding",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.sourceFeatureChannelMaxCount",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.sourceFeatureChannelOffset",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.strideInPixelsX",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNKernel.strideInPixelsY",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNPoolingAverage.zeroPadSizeX",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "MPSCNNPoolingAverage.zeroPadSizeY",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "+[MPSCNNConvolutionDescriptor cnnConvolutionDescriptorWithKernelWidth:kernelHeight:inputFeatureChannels:outputFeatureChannels:neuronFilter:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "+[MPSCNNConvolutionWeightsAndBiasesState temporaryCNNConvolutionWeightsAndBiasesStateWithCommandBuffer:cnnConvolutionDescriptor:]",
+      "kind": "method",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNBatchNormalization initWithCoder:device:]",
+      "kind": "method",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNBatchNormalization initWithDevice:]",
+      "kind": "method",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNBatchNormalization initWithDevice:dataSource:]",
+      "kind": "method",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNBatchNormalization initWithDevice:dataSource:fusedNeuronDescriptor:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor encodeWithCoder:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor initWithCoder:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor neuronParameterA]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor neuronParameterB]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor neuronType]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor setBatchNormalizationParametersForInferenceWithMean:variance:gamma:beta:epsilon:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor setNeuronToPReLUWithParametersA:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionDescriptor setNeuronType:parameterA:parameterB:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionWeightsAndBiasesState initWithDevice:cnnConvolutionDescriptor:]",
+      "kind": "method",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNConvolutionWeightsAndBiasesState initWithWeights:biases:]",
+      "kind": "method",
+      "introduced": "11.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNKernel initWithCoder:device:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNKernel initWithDevice:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNPooling initWithCoder:device:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNPooling initWithDevice:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNPooling initWithDevice:kernelWidth:kernelHeight:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNPooling initWithDevice:kernelWidth:kernelHeight:strideInPixelsX:strideInPixelsY:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNPoolingAverage initWithDevice:kernelWidth:kernelHeight:strideInPixelsX:strideInPixelsY:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    },
+    {
+      "api": "-[MPSCNNPoolingMax initWithDevice:kernelWidth:kernelHeight:strideInPixelsX:strideInPixelsY:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/MetalPerformanceShaders/Cnn.md",
+      "source": "the header of MPSCNNKernel.h in the SDK of iOS 16.4 for every signature and default, and the algebra read from ncnn c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause); the behaviour measured against the system's own MPS by tests/backports/host/mpscnn"
+    }
+  ]
+}

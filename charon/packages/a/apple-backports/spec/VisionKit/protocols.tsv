@@ -1,0 +1,5 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+VNDocumentCameraViewControllerDelegate	13.0	sdk16 body		NSObject	-	-	-	-	-	-
+VNDocumentCameraViewControllerDelegate	13.0	sdk16 body		NSObject	optional	method	yes	documentCameraViewController:didFinishWithScan:	- (void)documentCameraViewController:(VNDocumentCameraViewController * _Nonnull)controller didFinishWithScan:(VNDocumentCameraScan * _Nonnull)scan;	yes
+VNDocumentCameraViewControllerDelegate	13.0	sdk16 body		NSObject	optional	method	yes	documentCameraViewControllerDidCancel:	- (void)documentCameraViewControllerDidCancel:(VNDocumentCameraViewController * _Nonnull)controller;	yes
+VNDocumentCameraViewControllerDelegate	13.0	sdk16 body		NSObject	optional	method	yes	documentCameraViewController:didFailWithError:	- (void)documentCameraViewController:(VNDocumentCameraViewController * _Nonnull)controller didFailWithError:(NSError * _Nonnull)error;	yes

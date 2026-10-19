@@ -1,0 +1,115 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "CIFilterShape",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "a real rectangle, and every operation on it is the same operation on that rectangle",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "+[CIFilterShape shapeWithRect:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "a shape of that rectangle",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape initWithRect:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "a shape of that rectangle",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape intersectWith:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "the shape the two rectangles intersect in, which is empty where they do not overlap",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape intersectWithRect:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "the shape of the intersection with that rectangle",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape unionWith:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "the shape that bounds both",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape unionWithRect:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "the shape that bounds this shape and that rectangle",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape insetByX:Y:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "the shape with each edge moved in by the amount given, the header's own spelling and its own whole-number amounts",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "-[CIFilterShape transformBy:interior:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "with the interior asked for, the part of the transformed shape still inside the shape it started as; without it, the box the four transformed corners reach",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    },
+    {
+      "api": "CIFilterShape.extent",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has no CIFilterShape: the 6.1.3 armv7 cache's selector table has neither shapeWithRect: nor insetByX:Y:",
+      "effect": "the rectangle the shape is",
+      "facts": "facts/CoreImage/FilterShape.md",
+      "source": "the header of the iOS 16.4 SDK for the contract; the host's own CoreImage over the same calls, by tests/backports/host/ciimage/pixel, which builds the port's classes under names of their own and compares the extent of every shape and the rendered bytes of an image cropped to it; the 6.1.3 armv7 dyld cache for what the release does not export"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+@implementation FixtureThing
+@end

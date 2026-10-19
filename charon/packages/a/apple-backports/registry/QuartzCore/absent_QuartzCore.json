@@ -1,0 +1,65 @@
+{
+  "framework": "QuartzCore",
+  "entries": [
+    {
+      "api": "CAEAGLLayer.presentsWithTransaction",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property CAEAGLLayer.presentsWithTransaction",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, QuartzCore"
+    },
+    {
+      "api": "-[CALayerDelegate layerWillDraw:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[CALayerDelegate layerWillDraw:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, QuartzCore"
+    },
+    {
+      "api": "CALayer.contentsFormat",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property CALayer.contentsFormat",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, QuartzCore"
+    },
+    {
+      "api": "+[CARenderer rendererWithMTLTexture:options:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build +[CARenderer rendererWithMTLTexture:options:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, QuartzCore"
+    },
+    {
+      "api": "+[CALayer cornerCurveExpansionFactor:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build +[CALayer cornerCurveExpansionFactor:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "SDK 16.4, QuartzCore"
+    },
+    {
+      "api": "CAEDRMetadata",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CAEDRMetadata",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, QuartzCore"
+    }
+  ]
+}

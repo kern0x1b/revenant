@@ -1,0 +1,15 @@
+static const char uikitnames_expectations[] =
+    "{\"constant.automaticSize\":\"1 1\",\"constant.fetchInterval\":\"0 1\",\"constant.tabBarTrait\":\"32768\",\"constant.UIActivityTypeAddToReadingList\":\"com.apple.UIKit.activit"
+    "y.AddToReadingList\",\"constant.UIActivityTypeOpenInIBooks\":\"com.apple.UIKit.activity.OpenInIBooks\",\"constant.UIActivityTypePostToFlickr\":\"com.apple.UIKit.activit"
+    "y.PostToFlickr\",\"constant.UIActivityTypePostToTencentWeibo\":\"com.apple.UIKit.activity.TencentWeibo\",\"constant.UIActivityTypePostToVimeo\":\"com.apple.UIKit.activi"
+    "ty.PostToVimeo\",\"constant.UIApplicationBackgroundRefreshStatusDidChangeNotification\":\"UIApplicationBackgroundRefreshStatusDidChangeNotification\",\"constant.UIApp"
+    "licationOpenURLOptionsOpenInPlaceKey\":\"UIApplicationOpenURLOptionsOpenInPlaceKey\",\"constant.UIApplicationOpenURLOptionsSourceApplicationKey\":\"UIApplicationOpenU"
+    "RLOptionsSourceApplicationKey\",\"constant.UIApplicationUserDidTakeScreenshotNotification\":\"UIApplicationUserDidTakeScreenshotNotification\",\"constant.UIFontTextSt"
+    "yleCallout\":\"UICTFontTextStyleCallout\",\"constant.UIFontTextStyleTitle1\":\"UICTFontTextStyleTitle1\",\"constant.UIFontTextStyleTitle2\":\"UICTFontTextStyleTitle2\",\"co"
+    "nstant.UIFontTextStyleTitle3\":\"UICTFontTextStyleTitle3\",\"constant.UIKeyboardIsLocalUserInfoKey\":\"UIKeyboardIsLocalUserInfoKey\",\"constant.UITransitionContextFrom"
+    "ViewControllerKey\":\"UITransitionContextFromViewController\",\"constant.UITransitionContextFromViewKey\":\"UITransitionContextFromView\",\"constant.UITransitionContext"
+    "ToViewControllerKey\":\"UITransitionContextToViewController\",\"constant.UITransitionContextToViewKey\":\"UITransitionContextToView\",\"convert.loose\":\"1.0 2.0 3.0 4.0\""
+    ",\"edge.new\":\"UIPanGestureRecognizer edges=0 min=1 max=1\",\"edge.pan\":\"1 1\",\"edge.set\":\"10\",\"font.UICTFontTextStyleCallout\":\"16\",\"font.UICTFontTextStyleTitle1\":\"2"
+    "8\",\"font.UICTFontTextStyleTitle2\":\"22\",\"font.UICTFontTextStyleTitle3\":\"20\",\"transition.new\":\"NSObject duration=0.0 percent=0.0 speed=1.0 curve=7\",\"transition.ov"
+    "er\":\"0.0\",\"transition.protocol\":\"1\",\"transition.set\":\"2.0 1\",\"transition.under\":\"0.0\",\"transition.update\":\"0.0\"}"
+;

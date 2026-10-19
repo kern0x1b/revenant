@@ -1,0 +1,168 @@
+Lift upstream's 32-bit iOS refusal at its eight sites (v-int-swift10).
+
+Upstream guards each site with `#if os(iOS) && (arch(arm) || arch(i386))` and `fatalError("Unsupported
+architecture")` in the #if branch; its #else body is plain Swift. This port exists to run on 32-bit iOS, so the
+refusal branch is removed at each site and upstream's #else body is kept unchanged (the #if, the fatalError
+line, the #else line and the matching #endif are removed; nothing else changes).
+
+Sites (file, function, line in the tree after the lower-the-ios-availability patch):
+  Sources/Crypto/Message Authentication Codes/HMAC/HMAC.swift  HMAC.init(key:)                          :65
+  Sources/Crypto/Key Agreement/DH.swift                        SharedSecret hkdfDerivedSymmetricKey(using:...) :109
+  Sources/Crypto/Signatures/ECDSA.swift                        P256.Signing.ECDSASignature init(derRepresentation:)  :86
+  Sources/Crypto/Signatures/ECDSA.swift                        P256.Signing.ECDSASignature derRepresentation        :126
+  Sources/Crypto/Signatures/ECDSA.swift                        P384.Signing.ECDSASignature init(derRepresentation:)  :247
+  Sources/Crypto/Signatures/ECDSA.swift                        P384.Signing.ECDSASignature derRepresentation        :287
+  Sources/Crypto/Signatures/ECDSA.swift                        P521.Signing.ECDSASignature init(derRepresentation:)  :408
+  Sources/Crypto/Signatures/ECDSA.swift                        P521.Signing.ECDSASignature derRepresentation        :448
+
+Size dependence of the #else bodies (read before the patch): HMAC.init uses SecureBytes capacity, freeCapacity and
+byte loops, no pointer-size cast; SharedSecret uses HKDF over the shared secret, no size; the six ECDSA bodies use
+coordinateByteCount (32, 48, 66) as Int counts and the ASN1 parser and serializer. The ASN1 length code
+(ASN1.swift, a length shift on Int) is not in any refused body; the DER rows are measured on the 6.1.3 device.
+diff -ruN a/Sources/Crypto/Key Agreement/DH.swift x/Sources/Crypto/Key Agreement/DH.swift
+--- a/Sources/Crypto/Key Agreement/DH.swift	2026-10-14 18:18:59
++++ x/Sources/Crypto/Key Agreement/DH.swift	2026-10-14 18:18:59
+@@ -106,11 +106,7 @@
+     ///
+     /// - Returns: The derived symmetric key.
+     public func hkdfDerivedSymmetricKey<H: HashFunction, Salt: DataProtocol, SI: DataProtocol>(using hashFunction: H.Type, salt: Salt, sharedInfo: SI, outputByteCount: Int) -> SymmetricKey {
+-        #if os(iOS) && (arch(arm) || arch(i386))
+-        fatalError("Unsupported architecture")
+-        #else
+         return HKDF<H>.deriveKey(inputKeyMaterial: SymmetricKey(data: ss), salt: salt, info: sharedInfo, outputByteCount: outputByteCount)
+-        #endif
+     }
+ }
+ 
+diff -ruN a/Sources/Crypto/Message Authentication Codes/HMAC/HMAC.swift x/Sources/Crypto/Message Authentication Codes/HMAC/HMAC.swift
+--- a/Sources/Crypto/Message Authentication Codes/HMAC/HMAC.swift	2026-10-14 18:18:59
++++ x/Sources/Crypto/Message Authentication Codes/HMAC/HMAC.swift	2026-10-14 18:18:59
+@@ -62,9 +62,6 @@
+     /// - Parameters:
+     ///   - key: The symmetric key used to secure the computation.
+     public init(key: SymmetricKey) {
+-        #if os(iOS) && (arch(arm) || arch(i386))
+-        fatalError("Unsupported architecture")
+-        #else
+         var innerKey = SecureBytes(capacity: H.blockByteCount) { keyOutput in
+             if key.byteCount <= keyOutput.freeCapacity {
+                 keyOutput.append(contentsOf: key.bytes)
+@@ -93,7 +90,6 @@
+             }
+         }
+         outerHasher.update(data: outerKey)
+-        #endif
+     }
+     
+     /// Computes a message authentication code for the given data.
+diff -ruN a/Sources/Crypto/Signatures/ECDSA.swift x/Sources/Crypto/Signatures/ECDSA.swift
+--- a/Sources/Crypto/Signatures/ECDSA.swift	2026-10-14 18:18:59
++++ x/Sources/Crypto/Signatures/ECDSA.swift	2026-10-14 18:18:59
+@@ -83,9 +83,6 @@
+         ///   - derRepresentation: The DER-encoded representation of the
+         /// signature.
+         public init<D: DataProtocol>(derRepresentation: D) throws(CryptoKitMetaError) {
+-            #if os(iOS) && (arch(arm) || arch(i386))
+-            fatalError("Unsupported architecture")
+-            #else
+             let parsed = try ASN1.parse(Array(derRepresentation))
+             let signature = try ASN1.ECDSASignature<ArraySlice<UInt8>>(asn1Encoded: parsed)
+ 
+@@ -105,7 +102,6 @@
+             raw.append(contentsOf: signature.s)
+ 
+             self.rawRepresentation = raw
+-            #endif
+         }
+ 
+         /// Invokes the given closure with a buffer pointer covering the raw
+@@ -123,9 +119,6 @@
+         /// A Distinguished Encoding Rules (DER) encoded representation of a
+         /// P-256 digital signature.
+         public var derRepresentation: Data {
+-            #if os(iOS) && (arch(arm) || arch(i386))
+-            fatalError("Unsupported architecture")
+-            #else
+             let raw = rawRepresentation
+             let half = raw.count / 2
+             let r = Array(raw.prefix(half))[...]
+@@ -135,7 +128,6 @@
+             var serializer = ASN1.Serializer()
+             try! serializer.serialize(sig)
+             return Data(serializer.serializedBytes)
+-            #endif
+         }
+     }
+ }
+@@ -244,9 +236,6 @@
+         ///   - derRepresentation: The DER-encoded representation of the
+         /// signature.
+         public init<D: DataProtocol>(derRepresentation: D) throws(CryptoKitMetaError) {
+-            #if os(iOS) && (arch(arm) || arch(i386))
+-            fatalError("Unsupported architecture")
+-            #else
+             let parsed = try ASN1.parse(Array(derRepresentation))
+             let signature = try ASN1.ECDSASignature<ArraySlice<UInt8>>(asn1Encoded: parsed)
+ 
+@@ -266,7 +255,6 @@
+             raw.append(contentsOf: signature.s)
+ 
+             self.rawRepresentation = raw
+-            #endif
+         }
+ 
+         /// Invokes the given closure with a buffer pointer covering the raw
+@@ -284,9 +272,6 @@
+         /// A Distinguished Encoding Rules (DER) encoded representation of a
+         /// P-384 digital signature.
+         public var derRepresentation: Data {
+-            #if os(iOS) && (arch(arm) || arch(i386))
+-            fatalError("Unsupported architecture")
+-            #else
+             let raw = rawRepresentation
+             let half = raw.count / 2
+             let r = Array(raw.prefix(half))[...]
+@@ -296,7 +281,6 @@
+             var serializer = ASN1.Serializer()
+             try! serializer.serialize(sig)
+             return Data(serializer.serializedBytes)
+-            #endif
+         }
+     }
+ }
+@@ -405,9 +389,6 @@
+         ///   - derRepresentation: The DER-encoded representation of the
+         /// signature.
+         public init<D: DataProtocol>(derRepresentation: D) throws(CryptoKitMetaError) {
+-            #if os(iOS) && (arch(arm) || arch(i386))
+-            fatalError("Unsupported architecture")
+-            #else
+             let parsed = try ASN1.parse(Array(derRepresentation))
+             let signature = try ASN1.ECDSASignature<ArraySlice<UInt8>>(asn1Encoded: parsed)
+ 
+@@ -427,7 +408,6 @@
+             raw.append(contentsOf: signature.s)
+ 
+             self.rawRepresentation = raw
+-            #endif
+         }
+ 
+         /// Invokes the given closure with a buffer pointer covering the raw
+@@ -445,9 +425,6 @@
+         /// A Distinguished Encoding Rules (DER) encoded representation of a
+         /// P-521 digital signature.
+         public var derRepresentation: Data {
+-            #if os(iOS) && (arch(arm) || arch(i386))
+-            fatalError("Unsupported architecture")
+-            #else
+             let raw = rawRepresentation
+             let half = raw.count / 2
+             let r = Array(raw.prefix(half))[...]
+@@ -457,7 +434,6 @@
+             var serializer = ASN1.Serializer()
+             try! serializer.serialize(sig)
+             return Data(serializer.serializedBytes)
+-            #endif
+         }
+     }
+ }

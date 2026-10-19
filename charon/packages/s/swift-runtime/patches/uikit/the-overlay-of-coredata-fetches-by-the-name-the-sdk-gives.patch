@@ -1,0 +1,15 @@
+diff --git a/stdlib/public/Darwin/CoreData/NSManagedObjectContext.swift b/stdlib/public/Darwin/CoreData/NSManagedObjectContext.swift
+index e37c060..80ab072 100644
+--- a/stdlib/public/Darwin/CoreData/NSManagedObjectContext.swift
++++ b/stdlib/public/Darwin/CoreData/NSManagedObjectContext.swift
+@@ -15,7 +15,9 @@ import Foundation
+ 
+ extension NSManagedObjectContext {
+   public func fetch<T>(_ request: NSFetchRequest<T>) throws -> [T] {
+-    return try fetch(unsafeDowncast(request, to: NSFetchRequest<NSFetchRequestResult>.self)) as! [T]
++    // Today's SDK refines -executeFetchRequest:error: for Swift, so its name here is __execute; the fetch of the SDK the
++    // overlay was written against is this method itself, and calling it would call this one again, without end.
++    return try __execute(unsafeDowncast(request, to: NSFetchRequest<NSFetchRequestResult>.self)) as! [T]
+   }
+ 
+   public func count<T>(for request: NSFetchRequest<T>) throws -> Int {

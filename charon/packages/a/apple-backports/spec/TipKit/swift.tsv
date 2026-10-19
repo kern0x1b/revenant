@@ -1,0 +1,356 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+TipKit	swift-protocol	s:6TipKit24EventPredicateExpressionP	-	EventPredicateExpression	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	b185a40a8973c5b8
+TipKit	swift-struct	s:6TipKit04MiniA9ViewStyleV	-	MiniTipViewStyle	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2f6f0cbcb17a57d5
+TipKit	swift-method	s:6TipKit04MiniA9ViewStyleV8makeBody13configurationQrAA0adE13ConfigurationV_tF	MiniTipViewStyle	makeBody(configuration:)	-	some SwiftUI.View	TipKit.MiniTipViewStyle.Configuration	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	93a6420b5371e0cb
+TipKit	swift-typealias	s:6TipKit04MiniA9ViewStyleV4Bodya	MiniTipViewStyle	Body	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e68cbe0378ddc7e5
+TipKit	swift-protocol	s:6TipKit0A0P	-	Tip	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	7fa0b51f0e1a8b31
+TipKit	swift-property	s:6TipKit0A0P2idSSvp	Tip	id	-	Swift.String	-	-	-	9c9367963ba5b717
+TipKit	swift-property	s:6TipKit0A0P5title7SwiftUI4TextVvp	Tip	title	-	SwiftUI.Text	-	-	-	e57e40ef4253aa23
+TipKit	swift-property	s:6TipKit0A0P7message7SwiftUI4TextVSgvp	Tip	message	-	SwiftUI.Text?	-	-	-	cf95a0e4e52192ff
+TipKit	swift-property	s:6TipKit0A0P5image7SwiftUI5ImageVSgvp	Tip	image	-	SwiftUI.Image?	-	-	-	74e68b7932395998
+TipKit	swift-property	s:6TipKit0A0P7actionsSayAA4TipsO6ActionVGvp	Tip	actions	-	[Self.Action]	-	-	-	9baa86a70e31e90b
+TipKit	swift-property	s:6TipKit0A0P5rulesSayAA4TipsO4RuleVGvp	Tip	rules	-	[Self.Rule]	-	-	-	19e8547d67a9b366
+TipKit	swift-property	s:6TipKit0A0P7optionsSayAA0A6Option_pGvp	Tip	options	-	[any TipKit.TipOption]	-	-	-	0df876dfebbb1c5a
+TipKit	swift-property	s:6TipKit0A0PAAE6statusAA4TipsO6StatusOvp	Tip	status	-	Self.Status	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	8462c2f69777869a
+TipKit	swift-property	s:6TipKit0A0PAAE13shouldDisplaySbvp	Tip	shouldDisplay	-	Swift.Bool	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	78bc2ff3223a3323
+TipKit	swift-property	s:6TipKit0A0PAAE13statusUpdatesScSyAA4TipsO6StatusOGvp	Tip	statusUpdates	-	_Concurrency.AsyncStream<Self.Status>	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4942bc239d2299e8
+TipKit	swift-property	s:6TipKit0A0PAAE20shouldDisplayUpdates12_Concurrency16AsyncMapSequenceVyScSyAA4TipsO6StatusOGSbGvp	Tip	shouldDisplayUpdates	-	_Concurrency.AsyncMapSequence<_Concurrency.AsyncStream<Self.Status>, Swift.Bool>	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a81eb7961475ada2
+TipKit	swift-method	s:6TipKit0A0PAAE10invalidate6reasonyAA4TipsO18InvalidationReasonO_tF	Tip	invalidate(reason:)	-	()	Self.InvalidationReason	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1c2a81d938617d6d
+TipKit	swift-method	s:6TipKit0A0PAAE16resetEligibilityyyYaF	Tip	resetEligibility()	-	()	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	654a91b27d9f2f0c
+TipKit	swift-property	s:6TipKit0A0PAAE2idSSvp	Tip	id	-	Swift.String	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4857f956532aca0c
+TipKit	swift-property	s:6TipKit0A0PAAE7message7SwiftUI4TextVSgvp	Tip	message	-	SwiftUI.Text?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	821ffc05e90ad65d
+TipKit	swift-property	s:6TipKit0A0PAAE5image7SwiftUI5ImageVSgvp	Tip	image	-	SwiftUI.Image?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	95553497a0049258
+TipKit	swift-property	s:6TipKit0A0PAAE5rulesSayAA4TipsO4RuleVGvp	Tip	rules	-	[Self.Rule]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c51f6af72c938382
+TipKit	swift-property	s:6TipKit0A0PAAE7actionsSayAA4TipsO6ActionVGvp	Tip	actions	-	[Self.Action]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3227ae214c39945b
+TipKit	swift-property	s:6TipKit0A0PAAE7optionsSayAA0A6Option_pGvp	Tip	options	-	[any TipKit.TipOption]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5637b179776d309c
+TipKit	swift-typealias	s:6TipKit0A0PAAE6Statusa	Tip	Status	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	45850a3af059ea9f
+TipKit	swift-typealias	s:6TipKit0A0PAAE18InvalidationReasona	Tip	InvalidationReason	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	eb1e7146ab599eb6
+TipKit	swift-typealias	s:6TipKit0A0PAAE6Actiona	Tip	Action	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d13e1cbe1743a0ad
+TipKit	swift-typealias	s:6TipKit0A0PAAE4Rulea	Tip	Rule	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d08f185fc9458fe2
+TipKit	swift-typealias	s:6TipKit0A0PAAE5Eventa	Tip	Event	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a0418ee6842b5b50
+TipKit	swift-typealias	s:6TipKit0A0PAAE6Optiona	Tip	Option	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d8e4f208ca449577
+TipKit	swift-typealias	s:6TipKit0A0PAAE23IgnoresDisplayFrequencya	Tip	IgnoresDisplayFrequency	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c1248198e0abae62
+TipKit	swift-typealias	s:6TipKit0A0PAAE15MaxDisplayCounta	Tip	MaxDisplayCount	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2ca7d0040529fe34
+TipKit	swift-typealias	s:6TipKit0A0PAAE18MaxDisplayDurationa	Tip	MaxDisplayDuration	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	4000b4df5b0991a0
+TipKit	swift-struct	s:6TipKit03AnyA0V	-	AnyTip	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2590dd82a626d4ee
+TipKit	swift-property	s:6TipKit03AnyA0V2idSSvp	AnyTip	id	-	Swift.String	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	92551ebd72022db6
+TipKit	swift-property	s:6TipKit03AnyA0V5title7SwiftUI4TextVvp	AnyTip	title	-	SwiftUI.Text	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	ab53a066c475f6ef
+TipKit	swift-property	s:6TipKit03AnyA0V7message7SwiftUI4TextVSgvp	AnyTip	message	-	SwiftUI.Text?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	21e9e14b40416d2e
+TipKit	swift-property	s:6TipKit03AnyA0V5image7SwiftUI5ImageVSgvp	AnyTip	image	-	SwiftUI.Image?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d57c4adc55c83f87
+TipKit	swift-property	s:6TipKit03AnyA0V7actionsSayAA4TipsO6ActionVGvp	AnyTip	actions	-	[TipKit.AnyTip.Action]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	6a01330c618210b2
+TipKit	swift-property	s:6TipKit03AnyA0V5rulesSayAA4TipsO4RuleVGvp	AnyTip	rules	-	[TipKit.AnyTip.Rule]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	8f4ccc9d77f48e39
+TipKit	swift-property	s:6TipKit03AnyA0V7optionsSayAA0A6Option_pGvp	AnyTip	options	-	[any TipKit.TipOption]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	da2267b1a2b64255
+TipKit	swift-method	s:6TipKit03AnyA0VyACxcAA0A0Rzlufc	AnyTip	init(_:)	-	-	TipKit.AnyTip | some TipKit.Tip	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	efb56ddecc95316e
+TipKit	swift-method	s:6TipKit03AnyA0V7erasingACx_tcAA0A0Rzlufc	AnyTip	init(erasing:)	-	-	TipKit.AnyTip | some TipKit.Tip	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2ac212a39a46fe75
+TipKit	swift-typealias	s:6TipKit03AnyA0V2IDa	AnyTip	ID	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	59ba2889cd273b99
+TipKit	swift-protocol	s:6TipKit0A6OptionP	-	TipOption	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4aa51ae7aed977e1
+TipKit	swift-class	s:6TipKit0A5GroupC	-	TipGroup	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	bbdeb5c94b2f84f8
+TipKit	swift-property	s:6TipKit0A5GroupC07currentA0AA0A0_pSgvp	TipGroup	currentTip	-	(any TipKit.Tip)?	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	1fca6d2bf5033d0a
+TipKit	swift-property	s:6TipKit0A5GroupC07currentA7UpdatesQrvp	TipGroup	currentTipUpdates	-	some _Concurrency.AsyncSequence<any TipKit.Tip, Swift.Never>	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	0690d1c071f154e1
+TipKit	swift-method	s:6TipKit0A5GroupCyA2C8PriorityO_SayAA0A0_pGyXEtcfc	TipGroup	init(_:_:)	-	-	TipKit.TipGroup | TipKit.TipGroup.Priority | () -> [any TipKit.Tip]	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	115a64372bbfe004
+TipKit	swift-enum	s:6TipKit0A5GroupC8PriorityO	TipGroup	Priority	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8460561ac3b68242
+TipKit	swift-constant	s:6TipKit0A5GroupC8PriorityO14firstAvailableyA2EmF	TipGroup.Priority	firstAvailable	-	-	-	-	-	3686d688ecd53071
+TipKit	swift-constant	s:6TipKit0A5GroupC8PriorityO7orderedyA2EmF	TipGroup.Priority	ordered	-	-	-	-	-	b15e7e6cda33c665
+TipKit	swift-method	s:6TipKit0A5GroupC8PriorityO2eeoiySbAE_AEtFZ	TipGroup.Priority	==(_:_:)	+	Swift.Bool	TipKit.TipGroup.Priority | TipKit.TipGroup.Priority	-	-	51720370cb1055f5
+TipKit	swift-method	s:6TipKit0A5GroupC8PriorityO4hash4intoys6HasherVz_tF	TipGroup.Priority	hash(into:)	-	()	Swift.Hasher	-	-	c2acedb8807c4297
+TipKit	swift-property	s:6TipKit0A5GroupC8PriorityO9hashValueSivp	TipGroup.Priority	hashValue	-	Swift.Int	-	-	-	039b2bc647b8ff5d
+TipKit	swift-struct	s:6TipKit0aB5ErrorV	-	TipKitError	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	62eac12b44f71e27
+TipKit	swift-property	s:6TipKit0aB5ErrorV11descriptionSSvp	TipKitError	description	-	Swift.String	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	86e82440cb1f2115
+TipKit	swift-property	s:6TipKit0aB5ErrorV16errorDescriptionSSSgvp	TipKitError	errorDescription	-	Swift.String?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e671fc5f384cb65b
+TipKit	swift-method	s:6TipKit0aB5ErrorV2eeoiySbAC_ACtFZ	TipKitError	==(_:_:)	+	Swift.Bool	TipKit.TipKitError | TipKit.TipKitError	-	-	a24712560a95e14c
+TipKit	swift-method	s:6TipKit0aB5ErrorV4hash4intoys6HasherVz_tF	TipKitError	hash(into:)	-	()	Swift.Hasher	-	-	970292e92e8be933
+TipKit	swift-property	s:6TipKit0aB5ErrorV9hashValueSivp	TipKitError	hashValue	-	Swift.Int	-	-	-	ce33545cd898a523
+TipKit	swift-property	s:6TipKit0aB5ErrorV25invalidPredicateValueTypeACvpZ	TipKitError	invalidPredicateValueType	+	TipKit.TipKitError	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2af9b250049a3fbd
+TipKit	swift-property	s:6TipKit0aB5ErrorV33missingGroupContainerEntitlementsACvpZ	TipKitError	missingGroupContainerEntitlements	+	TipKit.TipKitError	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d7e9454f6f05d374
+TipKit	swift-property	s:6TipKit0aB5ErrorV30tipsDatastoreAlreadyConfiguredACvpZ	TipKitError	tipsDatastoreAlreadyConfigured	+	TipKit.TipKitError	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	53a30a3429440b10
+TipKit	swift-method	s:6TipKit0aB5ErrorV2teoiySbAC_s0C0_ptFZ	TipKitError	~=(_:_:)	+	Swift.Bool	TipKit.TipKitError | any Swift.Error	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	7a9105a525d7e61c
+TipKit	swift-struct	s:6TipKit0A4ViewV	-	TipView	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	7da9021ee2756eed
+TipKit	swift-property	s:6TipKit0A4ViewV4bodyQrvp	TipView	body	-	some SwiftUI.View	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f2db9ac15bba1b99
+TipKit	swift-typealias	s:6TipKit0A4ViewV4Bodya	TipView	Body	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a7089db87ce00893
+TipKit	swift-method	s:6TipKit0A4ViewV_11isPresented9arrowEdge6actionACyAA03AnyA0VGAA0A0_pSg_7SwiftUI7BindingVySbGSgAL0G0OSgyAA4TipsO6ActionVctcAHRszrlufc	TipView	init(_:isPresented:arrowEdge:action:)	-	-	TipKit.TipView<Content> | (any TipKit.Tip)? | SwiftUI.Binding<Swift.Bool>? | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	a575dc5b878e9f77
+TipKit	swift-method	s:6TipKit0A4ViewV_11isPresented9arrowEdge8anchorID6actionACyAA03AnyA0VGAA0A0_pSg_7SwiftUI7BindingVySbGSgAM0G0OSgqd__yAA4TipsO6ActionVctcAIRszSHRd__lufc	TipView	init(_:isPresented:arrowEdge:anchorID:action:)	-	-	TipKit.TipView<Content> | (any TipKit.Tip)? | SwiftUI.Binding<Swift.Bool>? | SwiftUI.Edge? | AnchorID | (TipKit.Tips.Action) -> Swift.Void	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	03ea9aacfee49ad3
+TipKit	swift-method	s:6TipKit0A4ViewV_9arrowEdge6actionACyAA03AnyA0VGAA0A0_pSg_7SwiftUI0E0OSgyAA4TipsO6ActionVctcAGRszrlufc	TipView	init(_:arrowEdge:action:)	-	-	TipKit.TipView<Content> | (any TipKit.Tip)? | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	efa64936630667e9
+TipKit	swift-protocol	s:6TipKit0A9ViewStyleP	-	TipViewStyle	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4ff19c853a218ff7
+TipKit	swift-typealias	s:6TipKit0A9ViewStyleP13Configurationa	TipViewStyle	Configuration	-	-	-	-	-	1c733d5bacd35984
+TipKit	swift-method	s:6TipKit0A9ViewStyleP8makeBody13configuration0F0QzAA0acD13ConfigurationV_tF	TipViewStyle	makeBody(configuration:)	-	Self.Body	Self.Configuration	-	-	d211bde9ae97c062
+TipKit	swift-property	s:6TipKit0A9ViewStylePA2A04MiniacD0VRszrlE04miniA0AEvpZ	TipViewStyle	miniTip	+	TipKit.MiniTipViewStyle	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	dbcad84ebfd85c47
+TipKit	swift-struct	s:6TipKit0A22ViewStyleConfigurationV	-	TipViewStyleConfiguration	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	b2c35817b1929b56
+TipKit	swift-property	s:6TipKit0A22ViewStyleConfigurationV3tipAA0A0_pvp	TipViewStyleConfiguration	tip	-	any TipKit.Tip	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	67498c4b272d9147
+TipKit	swift-property	s:6TipKit0A22ViewStyleConfigurationV5image7SwiftUI5ImageVSgvp	TipViewStyleConfiguration	image	-	SwiftUI.Image?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	bcb39a9d364b6c9e
+TipKit	swift-property	s:6TipKit0A22ViewStyleConfigurationV5title7SwiftUI4TextVSgvp	TipViewStyleConfiguration	title	-	SwiftUI.Text?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	12f306fb4cce62a1
+TipKit	swift-property	s:6TipKit0A22ViewStyleConfigurationV7message7SwiftUI4TextVSgvp	TipViewStyleConfiguration	message	-	SwiftUI.Text?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	89e4c77c5cc309ee
+TipKit	swift-property	s:6TipKit0A22ViewStyleConfigurationV7actionsSayAA4TipsO6ActionVGvp	TipViewStyleConfiguration	actions	-	[TipKit.Tips.Action]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	b130960ed1463a4e
+TipKit	swift-enum	s:6TipKit4TipsO	-	Tips	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	72d3cc2e2527c3a7
+TipKit	swift-struct	s:6TipKit4TipsO5EventV	Tips	Event	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	ffd6b5e63d4c8de5
+TipKit	swift-property	s:6TipKit4TipsO5EventV2idSSvp	Tips.Event	id	-	Swift.String	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3d3a8beea1c071fe
+TipKit	swift-property	s:6TipKit4TipsO5EventV9donationsSayAE8DonationVy_x_GGvp	Tips.Event	donations	-	[TipKit.Tips.Event<DonationInfo>.Donation]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	cff9c2a6deef6d3a
+TipKit	swift-method	s:6TipKit4TipsO5EventV2idAEy_AC13EmptyDonationVGSS_tcAHRszrlufc	Tips.Event	init(id:)	-	-	TipKit.Tips.Event<DonationInfo> | Swift.String	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	58c3ee5693a4bdd6
+TipKit	swift-method	s:6TipKit4TipsO5EventV2idAEy_xGSS_tcfc	Tips.Event	init(id:)	-	-	TipKit.Tips.Event<DonationInfo> | Swift.String	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f6f1d3b9af70b99a
+TipKit	swift-method	s:6TipKit4TipsO5EventV2id13donationLimitAEy_AC13EmptyDonationVGSS_AC0iG0VtcAIRszrlufc	Tips.Event	init(id:donationLimit:)	-	-	TipKit.Tips.Event<DonationInfo> | Swift.String | TipKit.Tips.DonationLimit	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	1c52ec322562db62
+TipKit	swift-method	s:6TipKit4TipsO5EventV2id13donationLimitAEy_xGSS_AC08DonationG0Vtcfc	Tips.Event	init(id:donationLimit:)	-	-	TipKit.Tips.Event<DonationInfo> | Swift.String | TipKit.Tips.DonationLimit	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	3ca2de5815fa8e1f
+TipKit	swift-typealias	s:6TipKit4TipsO5EventV2IDa	Tips.Event	ID	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1dd3897984fb98cb
+TipKit	swift-struct	s:6TipKit4TipsO5EventV8DonationV	Tips.Event	Donation	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3c99fdc4f5f82f34
+TipKit	swift-property	s:6TipKit4TipsO5EventV8DonationV4date10Foundation4DateVvp	Tips.Event.Donation	date	-	Foundation.Date	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f7662e7df4cb4e7b
+TipKit	swift-method	s:6TipKit4TipsO5EventV8DonationV13dynamicMemberqd__s7KeyPathCyxqd__G_tcluip	Tips.Event.Donation	subscript(dynamicMember:)	-	Value	Swift.KeyPath<DonationInfo, Value>	-	-	dea5c6cd2d68b544
+TipKit	swift-method	s:6TipKit4TipsO5EventV8DonationV6encode2toys7Encoder_p_tKF	Tips.Event.Donation	encode(to:)	-	()	any Swift.Encoder	-	-	a77e1a89f66f2c3d
+TipKit	swift-method	s:6TipKit4TipsO5EventV8DonationV4fromAGy_x_Gs7Decoder_p_tKcfc	Tips.Event.Donation	init(from:)	-	-	TipKit.Tips.Event<DonationInfo>.Donation | any Swift.Decoder	-	-	3396e73e7216cb0a
+TipKit	swift-method	s:6TipKit4TipsO5EventV6donateyyYaAC13EmptyDonationVRszrlF	Tips.Event	donate()	-	()	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4cd80d43aa3d4528
+TipKit	swift-method	s:6TipKit4TipsO5EventV6donateyyxYaF	Tips.Event	donate(_:)	-	()	DonationInfo	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	117a34e9b24f02e1
+TipKit	swift-method	s:6TipKit4TipsO5EventV12sendDonationyyyyYbcSgAC05EmptyF0VRszrlF	Tips.Event	sendDonation(_:)	-	()	(() -> Swift.Void)?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1c10b97770e07487
+TipKit	swift-method	s:6TipKit4TipsO5EventV12sendDonationyyx_yyYbcSgtF	Tips.Event	sendDonation(_:_:)	-	()	DonationInfo | (() -> Swift.Void)?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f093c6fb023c02d7
+TipKit	swift-method	s:6TipKit4TipsO5EventV15deleteDonationsyyYaKF	Tips.Event	deleteDonations()	-	()	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	cfe58868207668b7
+TipKit	swift-typealias	s:6TipKit4TipsO5EventV5Valuea	Tips.Event	Value	-	-	-	-	-	08a76d63eb61d400
+TipKit	swift-struct	s:6TipKit4TipsO13EmptyDonationV	Tips	EmptyDonation	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	db63ee080880bf15
+TipKit	swift-method	s:6TipKit4TipsO13EmptyDonationV6encode2toys7Encoder_p_tKF	Tips.EmptyDonation	encode(to:)	-	()	any Swift.Encoder	-	-	22eb5d3fb6fa88ff
+TipKit	swift-method	s:6TipKit4TipsO13EmptyDonationV4fromAEs7Decoder_p_tKcfc	Tips.EmptyDonation	init(from:)	-	-	TipKit.Tips.EmptyDonation | any Swift.Decoder	-	-	ec81a4965c5e1187
+TipKit	swift-struct	s:6TipKit4TipsO17DonationTimeRangeV	Tips	DonationTimeRange	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	13b2d669d7d5eac5
+TipKit	swift-property	s:6TipKit4TipsO17DonationTimeRangeV6minuteAEvpZ	Tips.DonationTimeRange	minute	+	TipKit.Tips.DonationTimeRange	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	b6a22b0f31891d17
+TipKit	swift-property	s:6TipKit4TipsO17DonationTimeRangeV4hourAEvpZ	Tips.DonationTimeRange	hour	+	TipKit.Tips.DonationTimeRange	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e2d79f95e5dea694
+TipKit	swift-property	s:6TipKit4TipsO17DonationTimeRangeV3dayAEvpZ	Tips.DonationTimeRange	day	+	TipKit.Tips.DonationTimeRange	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	ac4ba8c46d8e3349
+TipKit	swift-property	s:6TipKit4TipsO17DonationTimeRangeV4weekAEvpZ	Tips.DonationTimeRange	week	+	TipKit.Tips.DonationTimeRange	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	104db754d2210d96
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV7minutesyAESiFZ	Tips.DonationTimeRange	minutes(_:)	+	TipKit.Tips.DonationTimeRange	Swift.Int	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1d877acd5fb17267
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV5hoursyAESiFZ	Tips.DonationTimeRange	hours(_:)	+	TipKit.Tips.DonationTimeRange	Swift.Int	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	94996accc4bb267b
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV4daysyAESiFZ	Tips.DonationTimeRange	days(_:)	+	TipKit.Tips.DonationTimeRange	Swift.Int	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	41ad895ef4b9e6ba
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV5weeksyAESiFZ	Tips.DonationTimeRange	weeks(_:)	+	TipKit.Tips.DonationTimeRange	Swift.Int	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	75f24e45d49fa54c
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV2eeoiySbAE_AEtFZ	Tips.DonationTimeRange	==(_:_:)	+	Swift.Bool	TipKit.Tips.DonationTimeRange | TipKit.Tips.DonationTimeRange	-	-	3663692433e731f6
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV6encode2toys7Encoder_p_tKF	Tips.DonationTimeRange	encode(to:)	-	()	any Swift.Encoder	-	-	4031ef4e71007f0e
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV4hash4intoys6HasherVz_tF	Tips.DonationTimeRange	hash(into:)	-	()	Swift.Hasher	-	-	c81d0335bc8d9812
+TipKit	swift-property	s:6TipKit4TipsO17DonationTimeRangeV9hashValueSivp	Tips.DonationTimeRange	hashValue	-	Swift.Int	-	-	-	90c26bc80be06153
+TipKit	swift-method	s:6TipKit4TipsO17DonationTimeRangeV4fromAEs7Decoder_p_tKcfc	Tips.DonationTimeRange	init(from:)	-	-	TipKit.Tips.DonationTimeRange | any Swift.Decoder	-	-	87bb50e1ec9e52a5
+TipKit	swift-struct	s:6TipKit4TipsO13DonationLimitV	Tips	DonationLimit	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	c6aef28f6b37675e
+TipKit	swift-property	s:6TipKit4TipsO13DonationLimitV12maximumCountSivp	Tips.DonationLimit	maximumCount	-	Swift.Int	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	441e3b75b1c4db88
+TipKit	swift-property	s:6TipKit4TipsO13DonationLimitV10maximumAgeAC0D9TimeRangeVSgvp	Tips.DonationLimit	maximumAge	-	TipKit.Tips.DonationTimeRange?	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	57ab822e65e948b4
+TipKit	swift-method	s:6TipKit4TipsO13DonationLimitV12maximumCount0F3AgeAESi_AC0D9TimeRangeVSgtcfc	Tips.DonationLimit	init(maximumCount:maximumAge:)	-	-	TipKit.Tips.DonationLimit | Swift.Int | TipKit.Tips.DonationTimeRange?	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	ebfa7120d8b48a18
+TipKit	swift-struct	s:6TipKit4TipsO9ParameterV	Tips	Parameter	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	72a7454971f02501
+TipKit	swift-property	s:6TipKit4TipsO9ParameterV2idSSvp	Tips.Parameter	id	-	Swift.String	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	46bd6a14c8e2b639
+TipKit	swift-property	s:6TipKit4TipsO9ParameterV12wrappedValuexvp	Tips.Parameter	wrappedValue	-	Value	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5b8bbb059abcaaff
+TipKit	swift-method	s:6TipKit4TipsO9ParameterVyAEy_xGqd__m_SSxAC0D6OptionVdtclufc	Tips.Parameter	init(_:_:_:_:)	-	-	TipKit.Tips.Parameter<Value> | (some Any).Type | Swift.String | Value | TipKit.Tips.ParameterOption...	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	818f959fe10c9aef
+TipKit	swift-method	s:6TipKit4TipsO9ParameterVyAEy_xGs7KeyPathCyqd__xG_xAC0D6OptionVdtclufc	Tips.Parameter	init(_:_:_:)	-	-	TipKit.Tips.Parameter<Value> | Swift.KeyPath<T, Value> | Value | TipKit.Tips.ParameterOption...	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	56da2d7a7ead9186
+TipKit	swift-typealias	s:6TipKit4TipsO9ParameterV2IDa	Tips.Parameter	ID	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4d86b06316a9e8d7
+TipKit	swift-typealias	s:6TipKit4TipsO9ParameterV5Valuea	Tips.Parameter	Value	-	-	-	-	-	aa956de28db89a2b
+TipKit	swift-struct	s:6TipKit4TipsO15ParameterOptionV	Tips	ParameterOption	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	06e265294cb2348e
+TipKit	swift-property	s:6TipKit4TipsO15ParameterOptionV9transientAEvpZ	Tips.ParameterOption	transient	+	TipKit.Tips.ParameterOption	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	87ac7093eb48c37d
+TipKit	swift-struct	s:6TipKit4TipsO4RuleV	Tips	Rule	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3a20746784ba3140
+TipKit	swift-method	s:6TipKit4TipsO4RuleVyA2E17CompoundOperationO_SayAEGtcfc	Tips.Rule	init(_:_:)	-	-	TipKit.Tips.Rule | TipKit.Tips.Rule.CompoundOperation | [TipKit.Tips.Rule]	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	1a33cb1fad4c750d
+TipKit	swift-method	s:6TipKit4TipsO4RuleVyAeC5EventVy_xG_AA0E19PredicateExpression_pSb6Output10Foundation0fG0PRts_XPAK0F11ExpressionsO8VariableVy_AHGXEtcSeRzSERzs8SendableRzlufc	Tips.Rule	init(_:_:)	-	-	TipKit.Tips.Rule | TipKit.Tips.Event<Donation> | (Foundation.PredicateExpressions.Variable<TipKit.Tips.Event<Donation>>) -> any TipKit.EventPredicateExpression<Swift.Bool>	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a54bfb8fe17a73ef
+TipKit	swift-method	s:6TipKit4TipsO4RuleVyAeC9ParameterVy_xG_10Foundation27StandardPredicateExpression_pSb6OutputAI0hI0PRts_XPAI0H11ExpressionsO8VariableVy_xGXEtcSeRzSERzs8SendableRzlufc	Tips.Rule	init(_:_:)	-	-	TipKit.Tips.Rule | TipKit.Tips.Parameter<Value> | (Foundation.PredicateExpressions.Variable<Value>) -> any Foundation.StandardPredicateExpression<Swift.Bool>	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	42ab5d385cd20b78
+TipKit	swift-enum	s:6TipKit4TipsO4RuleV17CompoundOperationO	Tips.Rule	CompoundOperation	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	7eb7c631886fa742
+TipKit	swift-constant	s:6TipKit4TipsO4RuleV17CompoundOperationO11disjunctionyA2GmF	Tips.Rule.CompoundOperation	disjunction	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	39b7875e9f5be8eb
+TipKit	swift-constant	s:6TipKit4TipsO4RuleV17CompoundOperationO11conjunctionyA2GmF	Tips.Rule.CompoundOperation	conjunction	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	69aaac7169d0c1bb
+TipKit	swift-method	s:6TipKit4TipsO4RuleV17CompoundOperationO2eeoiySbAG_AGtFZ	Tips.Rule.CompoundOperation	==(_:_:)	+	Swift.Bool	TipKit.Tips.Rule.CompoundOperation | TipKit.Tips.Rule.CompoundOperation	-	-	b4527c6362556d34
+TipKit	swift-method	s:6TipKit4TipsO4RuleV17CompoundOperationO4hash4intoys6HasherVz_tF	Tips.Rule.CompoundOperation	hash(into:)	-	()	Swift.Hasher	-	-	7a248349a4660fb0
+TipKit	swift-property	s:6TipKit4TipsO4RuleV17CompoundOperationO9hashValueSivp	Tips.Rule.CompoundOperation	hashValue	-	Swift.Int	-	-	-	fcff6531594efd05
+TipKit	swift-protocol	s:6TipKit4TipsO9RuleInputP	Tips	RuleInput	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	70a18ec6c2871fd9
+TipKit	swift-struct	s:6TipKit4TipsO11RuleBuilderV	Tips	RuleBuilder	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e01c84315dcea0be
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV10buildBlockSayAC0D0VGyFZ	Tips.RuleBuilder	buildBlock()	+	[TipKit.Tips.Rule]	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0948e9e91282e03e
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV15buildExpressionySayAC0D0VGAHFZ	Tips.RuleBuilder	buildExpression(_:)	+	[TipKit.Tips.Rule]	TipKit.Tips.Rule	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5f6be86dacde6517
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV15buildExpressionySayAC0D0VGAHSgFZ	Tips.RuleBuilder	buildExpression(_:)	+	[TipKit.Tips.Rule]	TipKit.Tips.Rule?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1dddae32a5aaaf5c
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV15buildExpressionySayAC0D0VGAIFZ	Tips.RuleBuilder	buildExpression(_:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0d035f7d988eeed1
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV15buildExpressionySayAC0D0VGSayAHSgGFZ	Tips.RuleBuilder	buildExpression(_:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule?]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4f9d6ff8b5aaafed
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV11buildEither5firstSayAC0D0VGAJ_tFZ	Tips.RuleBuilder	buildEither(first:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	fdefea189822bbb7
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV11buildEither6secondSayAC0D0VGAJ_tFZ	Tips.RuleBuilder	buildEither(second:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	ed1c73611c5a825f
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV13buildOptionalySayAC0D0VGAHSgFZ	Tips.RuleBuilder	buildOptional(_:)	+	[TipKit.Tips.Rule]	TipKit.Tips.Rule?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	72c3a2574264e83c
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV13buildOptionalySayAC0D0VGSayAHSgGFZ	Tips.RuleBuilder	buildOptional(_:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule?]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0b247f98f4ccac10
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV17buildPartialBlock5firstSayAC0D0VGAJ_tFZ	Tips.RuleBuilder	buildPartialBlock(first:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	135bbbf2e3dcff7c
+TipKit	swift-method	s:6TipKit4TipsO11RuleBuilderV17buildPartialBlock11accumulated4nextSayAC0D0VGAK_AKtFZ	Tips.RuleBuilder	buildPartialBlock(accumulated:next:)	+	[TipKit.Tips.Rule]	[TipKit.Tips.Rule] | [TipKit.Tips.Rule]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	863ebc8852eb11c4
+TipKit	swift-struct	s:6TipKit4TipsO6ActionV	Tips	Action	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e88cc62f4de464f1
+TipKit	swift-property	s:6TipKit4TipsO6ActionV2idSSvp	Tips.Action	id	-	Swift.String	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	aeea571c5353bd0a
+TipKit	swift-property	s:6TipKit4TipsO6ActionV5indexSiSgvp	Tips.Action	index	-	Swift.Int?	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	20b0de618c5f604d
+TipKit	swift-property	s:6TipKit4TipsO6ActionV5label7SwiftUI4TextVyYbcvp	Tips.Action	label	-	() -> SwiftUI.Text	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	dd7bec73a5a534e9
+TipKit	swift-property	s:6TipKit4TipsO6ActionV7handleryycvp	Tips.Action	handler	-	() -> Swift.Void	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	20cee323245be04b
+TipKit	swift-method	s:6TipKit4TipsO6ActionV2id7perform_AESSSg_yyc7SwiftUI4TextVyctcfc	Tips.Action	init(id:perform:_:)	-	-	TipKit.Tips.Action | Swift.String? | () -> Swift.Void | () -> SwiftUI.Text	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e619d0517b9644c1
+TipKit	swift-method	s:6TipKit4TipsO6ActionV2id5title7performAESSSg_xyyctcSyRzlufc	Tips.Action	init(id:title:perform:)	-	-	TipKit.Tips.Action | Swift.String? | some Swift.StringProtocol | () -> Swift.Void	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	688668cf31eca63e
+TipKit	swift-typealias	s:6TipKit4TipsO6ActionV2IDa	Tips.Action	ID	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4cf417d4da3adef9
+TipKit	swift-struct	s:6TipKit4TipsO13ActionBuilderV	Tips	ActionBuilder	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	29870ee59940df0c
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV15buildExpressionySayAC0D0VGAHFZ	Tips.ActionBuilder	buildExpression(_:)	+	[TipKit.Tips.Action]	TipKit.Tips.Action	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a21461b85eae7992
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV15buildExpressionySayAC0D0VGAIFZ	Tips.ActionBuilder	buildExpression(_:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a0b68b7c313d4f54
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV17buildPartialBlock5firstSayAC0D0VGAJ_tFZ	Tips.ActionBuilder	buildPartialBlock(first:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	21c2101ced407759
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV17buildPartialBlock11accumulated4nextSayAC0D0VGAK_AKtFZ	Tips.ActionBuilder	buildPartialBlock(accumulated:next:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action] | [TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	6e2379ef4a950c9c
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV10buildArrayySayAC0D0VGSayAIGFZ	Tips.ActionBuilder	buildArray(_:)	+	[TipKit.Tips.Action]	[[TipKit.Tips.Action]]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f5a1223e7a793aaa
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV11buildEither5firstSayAC0D0VGAJ_tFZ	Tips.ActionBuilder	buildEither(first:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f0eed561c43983a6
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV11buildEither6secondSayAC0D0VGAJ_tFZ	Tips.ActionBuilder	buildEither(second:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	926be7f25c61f82a
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV24buildLimitedAvailabilityySayAC0D0VGAIFZ	Tips.ActionBuilder	buildLimitedAvailability(_:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	60f6cd5799dd19bb
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV13buildOptionalySayAC0D0VGAISgFZ	Tips.ActionBuilder	buildOptional(_:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	136d9c3bde5cc6bd
+TipKit	swift-method	s:6TipKit4TipsO13ActionBuilderV16buildFinalResultySayAC0D0VGAIFZ	Tips.ActionBuilder	buildFinalResult(_:)	+	[TipKit.Tips.Action]	[TipKit.Tips.Action]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	28ddd67b3cf51033
+TipKit	swift-struct	s:6TipKit4TipsO23IgnoresDisplayFrequencyV	Tips	IgnoresDisplayFrequency	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	6d81975472cdba6c
+TipKit	swift-method	s:6TipKit4TipsO23IgnoresDisplayFrequencyVyAESbcfc	Tips.IgnoresDisplayFrequency	init(_:)	-	-	TipKit.Tips.IgnoresDisplayFrequency | Swift.Bool	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	35bb86c6dbe0edee
+TipKit	swift-struct	s:6TipKit4TipsO15MaxDisplayCountV	Tips	MaxDisplayCount	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	49b22234993675a3
+TipKit	swift-method	s:6TipKit4TipsO15MaxDisplayCountVyAESicfc	Tips.MaxDisplayCount	init(_:)	-	-	TipKit.Tips.MaxDisplayCount | Swift.Int	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a08534ce639a626f
+TipKit	swift-struct	s:6TipKit4TipsO18MaxDisplayDurationV	Tips	MaxDisplayDuration	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	001d82b431333fb5
+TipKit	swift-method	s:6TipKit4TipsO18MaxDisplayDurationVyAESdcfc	Tips.MaxDisplayDuration	init(_:)	-	-	TipKit.Tips.MaxDisplayDuration | Foundation.TimeInterval	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	62777dc559cd52e6
+TipKit	swift-struct	s:6TipKit4TipsO14OptionsBuilderV	Tips	OptionsBuilder	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c0f0e1ca1e0a9fa0
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV15buildExpressionyQrxAA0A6OptionRzlFZ	Tips.OptionsBuilder	buildExpression(_:)	+	some TipKit.TipOption	some TipKit.TipOption	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	1f35ae74385bd776
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV15buildExpressionyQrAA0A6Option_pSgFZ	Tips.OptionsBuilder	buildExpression(_:)	+	some TipKit.TipOption	(any TipKit.TipOption)?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	fcb677a6e36d0436
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV15buildExpressionyQrSayxGAA0A6OptionRzlFZ	Tips.OptionsBuilder	buildExpression(_:)	+	some TipKit.TipOption	[some TipKit.TipOption]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0ecedccac5e947a2
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV15buildExpressionyQrSayAA0A6Option_pSgGFZ	Tips.OptionsBuilder	buildExpression(_:)	+	some TipKit.TipOption	[(any TipKit.TipOption)?]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d89ca8473b5d42b3
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV11buildEither5firstQrx_tAA0A6OptionRzlFZ	Tips.OptionsBuilder	buildEither(first:)	+	some TipKit.TipOption	some TipKit.TipOption	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	88b9e99488fd4a7d
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV11buildEither6secondQrx_tAA0A6OptionRzlFZ	Tips.OptionsBuilder	buildEither(second:)	+	some TipKit.TipOption	some TipKit.TipOption	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	cc81a2f370006523
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV13buildOptionalyQrAA0A6Option_pSgFZ	Tips.OptionsBuilder	buildOptional(_:)	+	some TipKit.TipOption	(any TipKit.TipOption)?	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f8749d12a2f024e3
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV13buildOptionalyQrSayAA0A6Option_pSgGFZ	Tips.OptionsBuilder	buildOptional(_:)	+	some TipKit.TipOption	[(any TipKit.TipOption)?]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c1928da5111156aa
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV10buildBlockQryFZ	Tips.OptionsBuilder	buildBlock()	+	some TipKit.TipOption	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	b29af5e2b3b9009f
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV17buildPartialBlock5firstQrx_tAA0A6OptionRzlFZ	Tips.OptionsBuilder	buildPartialBlock(first:)	+	some TipKit.TipOption	some TipKit.TipOption	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0b9f0b49892d03f8
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV17buildPartialBlock11accumulated4nextQrx_q_tAA0A6OptionRzAaIR_r0_lFZ	Tips.OptionsBuilder	buildPartialBlock(accumulated:next:)	+	some TipKit.TipOption	some TipKit.TipOption | some TipKit.TipOption	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	563513d10ebe79b1
+TipKit	swift-method	s:6TipKit4TipsO14OptionsBuilderV16buildFinalResultySayAA0A6Option_pGxAaGRzlFZ	Tips.OptionsBuilder	buildFinalResult(_:)	+	[any TipKit.TipOption]	some TipKit.TipOption	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	862867e1f928ccfe
+TipKit	swift-enum	s:6TipKit4TipsO6StatusO	Tips	Status	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	9bb63ee1b8b792e0
+TipKit	swift-constant	s:6TipKit4TipsO6StatusO7pendingyA2EmF	Tips.Status	pending	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f81be5d9fe203cd0
+TipKit	swift-constant	s:6TipKit4TipsO6StatusO9availableyA2EmF	Tips.Status	available	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	72a0afe09093c81c
+TipKit	swift-constant	s:6TipKit4TipsO6StatusO11invalidatedyAeC18InvalidationReasonOcAEmF	Tips.Status	invalidated	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a10ae11e7954a69a
+TipKit	swift-method	s:6TipKit4TipsO6StatusO2eeoiySbAE_AEtFZ	Tips.Status	==(_:_:)	+	Swift.Bool	TipKit.Tips.Status | TipKit.Tips.Status	-	-	f9b91ee0f9f068e9
+TipKit	swift-method	s:6TipKit4TipsO6StatusO4hash4intoys6HasherVz_tF	Tips.Status	hash(into:)	-	()	Swift.Hasher	-	-	7299ca53b119ebda
+TipKit	swift-property	s:6TipKit4TipsO6StatusO9hashValueSivp	Tips.Status	hashValue	-	Swift.Int	-	-	-	31ef6164fa98aaca
+TipKit	swift-enum	s:6TipKit4TipsO18InvalidationReasonO	Tips	InvalidationReason	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	9faad650ba45772a
+TipKit	swift-constant	s:6TipKit4TipsO18InvalidationReasonO15actionPerformedyA2EmF	Tips.InvalidationReason	actionPerformed	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5bdef64ea9df23cc
+TipKit	swift-constant	s:6TipKit4TipsO18InvalidationReasonO20displayCountExceededyA2EmF	Tips.InvalidationReason	displayCountExceeded	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	64d7a809df838a97
+TipKit	swift-constant	s:6TipKit4TipsO18InvalidationReasonO23displayDurationExceededyA2EmF	Tips.InvalidationReason	displayDurationExceeded	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	a3bb0bdd12195f38
+TipKit	swift-constant	s:6TipKit4TipsO18InvalidationReasonO9tipClosedyA2EmF	Tips.InvalidationReason	tipClosed	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	e399e38fa5d95775
+TipKit	swift-method	s:6TipKit4TipsO18InvalidationReasonO2eeoiySbAE_AEtFZ	Tips.InvalidationReason	==(_:_:)	+	Swift.Bool	TipKit.Tips.InvalidationReason | TipKit.Tips.InvalidationReason	-	-	828affed45e3acb8
+TipKit	swift-method	s:6TipKit4TipsO18InvalidationReasonO4hash4intoys6HasherVz_tF	Tips.InvalidationReason	hash(into:)	-	()	Swift.Hasher	-	-	8ea53147993ab438
+TipKit	swift-property	s:6TipKit4TipsO18InvalidationReasonO9hashValueSivp	Tips.InvalidationReason	hashValue	-	Swift.Int	-	-	-	85332b1e6d1e6443
+TipKit	swift-struct	s:6TipKit4TipsO12GroupBuilderV	Tips	GroupBuilder	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	d53fb0be7f5321dc
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV10buildBlockSayAA0A0_pGyFZ	Tips.GroupBuilder	buildBlock()	+	[any TipKit.Tip]	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	97b4a51ac804ab37
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV10buildBlockySayAA0A0_pGAaG_pd_tFZ	Tips.GroupBuilder	buildBlock(_:)	+	[any TipKit.Tip]	any TipKit.Tip...	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	b91719b46da66937
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV17buildPartialBlock5firstSayAA0A0_pGAaH_p_tFZ	Tips.GroupBuilder	buildPartialBlock(first:)	+	[any TipKit.Tip]	any TipKit.Tip	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	e427c422b6fa3485
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV17buildPartialBlock5firstSayAA0A0_pGAI_tFZ	Tips.GroupBuilder	buildPartialBlock(first:)	+	[any TipKit.Tip]	[any TipKit.Tip]	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	a869a74560d34378
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV17buildPartialBlock11accumulated4nextSayAA0A0_pGAJ_AaI_ptFZ	Tips.GroupBuilder	buildPartialBlock(accumulated:next:)	+	[any TipKit.Tip]	[any TipKit.Tip] | any TipKit.Tip	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	e0ca0704df654ef1
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV17buildPartialBlock11accumulated4nextSayAA0A0_pGAJ_AJtFZ	Tips.GroupBuilder	buildPartialBlock(accumulated:next:)	+	[any TipKit.Tip]	[any TipKit.Tip] | [any TipKit.Tip]	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8c7029fddbe1382e
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV17buildPartialBlock5firstSayAA0A0_pGyt_tFZ	Tips.GroupBuilder	buildPartialBlock(first:)	+	[any TipKit.Tip]	Swift.Void	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	d6d38b4a0794c700
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV17buildPartialBlock5firstSayAA0A0_pGs5NeverO_tFZ	Tips.GroupBuilder	buildPartialBlock(first:)	+	[any TipKit.Tip]	Swift.Never	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	84a571d87b35cf89
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV7buildIfySayAA0A0_pGAHSgFZ	Tips.GroupBuilder	buildIf(_:)	+	[any TipKit.Tip]	[any TipKit.Tip]?	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	a8843ae6471e16ff
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV11buildEither5firstSayAA0A0_pGAI_tFZ	Tips.GroupBuilder	buildEither(first:)	+	[any TipKit.Tip]	[any TipKit.Tip]	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	5e9ae6d682d45193
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV11buildEither6secondSayAA0A0_pGAI_tFZ	Tips.GroupBuilder	buildEither(second:)	+	[any TipKit.Tip]	[any TipKit.Tip]	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	78a9599fa1c66fe4
+TipKit	swift-method	s:6TipKit4TipsO12GroupBuilderV10buildArrayySayAA0A0_pGSayAHGFZ	Tips.GroupBuilder	buildArray(_:)	+	[any TipKit.Tip]	[[any TipKit.Tip]]	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	dc975bf93ad0e27d
+TipKit	swift-method	s:6TipKit4TipsO9configureyySayAC19ConfigurationOptionVGKFZ	Tips	configure(_:)	+	()	[TipKit.Tips.ConfigurationOption]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	515644022e6d4476
+TipKit	swift-struct	s:6TipKit4TipsO19ConfigurationOptionV	Tips	ConfigurationOption	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	f1a32650b10c82c5
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV05cloudB9ContaineryA2E05CloudbG0VSgFZ	Tips.ConfigurationOption	cloudKitContainer(_:)	+	TipKit.Tips.ConfigurationOption	TipKit.Tips.ConfigurationOption.CloudKitContainer?	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	2d52ebb80952dd35
+TipKit	swift-struct	s:6TipKit4TipsO19ConfigurationOptionV05CloudB9ContainerV	Tips.ConfigurationOption	CloudKitContainer	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	66e7cd0cfe9faf25
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV05CloudB9ContainerV9automaticAGvpZ	Tips.ConfigurationOption.CloudKitContainer	automatic	+	TipKit.Tips.ConfigurationOption.CloudKitContainer	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	a10d245abe908783
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV05CloudB9ContainerV5namedyAGSSFZ	Tips.ConfigurationOption.CloudKitContainer	named(_:)	+	TipKit.Tips.ConfigurationOption.CloudKitContainer	Swift.String	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	f5f09193c3841b2a
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV05CloudB9ContainerV2eeoiySbAG_AGtFZ	Tips.ConfigurationOption.CloudKitContainer	==(_:_:)	+	Swift.Bool	TipKit.Tips.ConfigurationOption.CloudKitContainer | TipKit.Tips.ConfigurationOption.CloudKitContainer	-	-	947c11a25b39b51e
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV17datastoreLocationyA2E09DatastoreG0VFZ	Tips.ConfigurationOption	datastoreLocation(_:)	+	TipKit.Tips.ConfigurationOption	TipKit.Tips.ConfigurationOption.DatastoreLocation	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	756c1fe5844ff58e
+TipKit	swift-struct	s:6TipKit4TipsO19ConfigurationOptionV17DatastoreLocationV	Tips.ConfigurationOption	DatastoreLocation	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d2410f4dd3c49576
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV17DatastoreLocationV18applicationDefaultAGvpZ	Tips.ConfigurationOption.DatastoreLocation	applicationDefault	+	TipKit.Tips.ConfigurationOption.DatastoreLocation	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a8f98b8984fe6b0b
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV17DatastoreLocationV14groupContainer10identifierAGSS_tKFZ	Tips.ConfigurationOption.DatastoreLocation	groupContainer(identifier:)	+	TipKit.Tips.ConfigurationOption.DatastoreLocation	Swift.String	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3052c5d62bca4292
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV17DatastoreLocationV3urlyAG10Foundation3URLVFZ	Tips.ConfigurationOption.DatastoreLocation	url(_:)	+	TipKit.Tips.ConfigurationOption.DatastoreLocation	Foundation.URL	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	91d7fff4a1916299
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV17DatastoreLocationV2eeoiySbAG_AGtFZ	Tips.ConfigurationOption.DatastoreLocation	==(_:_:)	+	Swift.Bool	TipKit.Tips.ConfigurationOption.DatastoreLocation | TipKit.Tips.ConfigurationOption.DatastoreLocation	-	-	3f5bf3b1abbeebc3
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV16displayFrequencyyA2E07DisplayG0VFZ	Tips.ConfigurationOption	displayFrequency(_:)	+	TipKit.Tips.ConfigurationOption	TipKit.Tips.ConfigurationOption.DisplayFrequency	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d573024db5eaa8d4
+TipKit	swift-struct	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV	Tips.ConfigurationOption	DisplayFrequency	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c8ef5c50f7fe7adb
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV9immediateAGvpZ	Tips.ConfigurationOption.DisplayFrequency	immediate	+	TipKit.Tips.ConfigurationOption.DisplayFrequency	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	7d39e5d4bfb180d9
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV6hourlyAGvpZ	Tips.ConfigurationOption.DisplayFrequency	hourly	+	TipKit.Tips.ConfigurationOption.DisplayFrequency	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	663379bdb6e378ae
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV5dailyAGvpZ	Tips.ConfigurationOption.DisplayFrequency	daily	+	TipKit.Tips.ConfigurationOption.DisplayFrequency	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	9e837a062342001b
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV6weeklyAGvpZ	Tips.ConfigurationOption.DisplayFrequency	weekly	+	TipKit.Tips.ConfigurationOption.DisplayFrequency	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	a85b167609b0877f
+TipKit	swift-property	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV7monthlyAGvpZ	Tips.ConfigurationOption.DisplayFrequency	monthly	+	TipKit.Tips.ConfigurationOption.DisplayFrequency	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	326b5540fbc24844
+TipKit	swift-method	s:6TipKit4TipsO19ConfigurationOptionV16DisplayFrequencyV2eeoiySbAG_AGtFZ	Tips.ConfigurationOption.DisplayFrequency	==(_:_:)	+	Swift.Bool	TipKit.Tips.ConfigurationOption.DisplayFrequency | TipKit.Tips.ConfigurationOption.DisplayFrequency	-	-	82470291e8e1efd1
+TipKit	swift-method	s:6TipKit4TipsO14resetDatastoreyyKFZ	Tips	resetDatastore()	+	()	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	125b073ed42a8393
+TipKit	swift-method	s:6TipKit4TipsO07showAllC10ForTestingyyFZ	Tips	showAllTipsForTesting()	+	()	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3c39a982d3f46ba0
+TipKit	swift-method	s:6TipKit4TipsO04showC10ForTestingyySayAA0A0_pXpGFZ	Tips	showTipsForTesting(_:)	+	()	[any TipKit.Tip.Type]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	34c6cc7978ad44b6
+TipKit	swift-method	s:6TipKit4TipsO07hideAllC10ForTestingyyFZ	Tips	hideAllTipsForTesting()	+	()	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	4559af668f1a40bf
+TipKit	swift-method	s:6TipKit4TipsO04hideC10ForTestingyySayAA0A0_pXpGFZ	Tips	hideTipsForTesting(_:)	+	()	[any TipKit.Tip.Type]	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5a710c3e802cd070
+TipKit	swift-class	c:@M@TipKit@objc(cs)TipUICollectionReusableView	-	TipUICollectionReusableView	-	-	-	ios=17.0	-	dbfef01779a5eff0
+TipKit	swift-property	s:6TipKit0A24UICollectionReusableViewC15backgroundStyle7SwiftUI05ShapeG0_pvp	TipUICollectionReusableView	backgroundStyle	-	any SwiftUI.ShapeStyle	-	ios=26.0	-	66a172f8080755c1
+TipKit	swift-property	s:6TipKit0A24UICollectionReusableViewC12cornerRadius14CoreFoundation7CGFloatVvp	TipUICollectionReusableView	cornerRadius	-	CoreGraphics.CGFloat	-	ios=17.0	-	f99424b96bbf8f03
+TipKit	swift-property	s:6TipKit0A24UICollectionReusableViewC9imageSizeSo6CGSizeVvp	TipUICollectionReusableView	imageSize	-	CoreFoundation.CGSize	-	ios=17.0	-	07043a1ded9e9d93
+TipKit	swift-property	s:6TipKit0A24UICollectionReusableViewC10imageStyle7SwiftUI05ShapeG0_pSgvp	TipUICollectionReusableView	imageStyle	-	(any SwiftUI.ShapeStyle)?	-	ios=18.0	-	e36a492a9d6e3f92
+TipKit	swift-property	s:6TipKit0A24UICollectionReusableViewC9viewStyleAA0aeG0_pvp	TipUICollectionReusableView	viewStyle	-	any TipKit.TipViewStyle	-	ios=17.0	-	85f673438c4d6b5f
+TipKit	swift-property	c:@M@TipKit@objc(cs)TipUICollectionReusableView(py)backgroundColor	TipUICollectionReusableView	backgroundColor	-	UIKit.UIColor?	-	ios=17.0	-	ba430646b93aa8fb
+TipKit	swift-property	c:@M@TipKit@objc(cs)TipUICollectionReusableView(py)intrinsicContentSize	TipUICollectionReusableView	intrinsicContentSize	-	CoreFoundation.CGSize	-	ios=17.0	-	95690fdc58367457
+TipKit	swift-method	s:6TipKit0A24UICollectionReusableViewC09configureA0_9arrowEdge13actionHandlerACXDAA0A0_p_7SwiftUI0H0OSgyAA4TipsO6ActionVctF	TipUICollectionReusableView	configureTip(_:arrowEdge:actionHandler:)	-	Self	any TipKit.Tip | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=18.0	-	2a8d84966bfa6f33
+TipKit	swift-method	s:6TipKit0A24UICollectionReusableViewC09configureA0_9arrowEdge13actionHandlerACXDx_7SwiftUI0H0OSgyAA4TipsO6ActionVctAA0A0RzlF	TipUICollectionReusableView	configureTip(_:arrowEdge:actionHandler:)	-	Self	some TipKit.Tip | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=17.0	-	d03f1b62269d80fe
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUICollectionReusableView(im)sizeThatFits:	TipUICollectionReusableView	sizeThatFits(_:)	-	CoreFoundation.CGSize	CoreFoundation.CGSize	ios=17.0	-	6ba1a8654bbec99d
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUICollectionReusableView(im)initWithFrame:	TipUICollectionReusableView	init(frame:)	-	-	TipKit.TipUICollectionReusableView | CoreFoundation.CGRect	-	-	2ee0372b9acfae9c
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUICollectionReusableView(im)initWithCoder:	TipUICollectionReusableView	init(coder:)	-	-	TipKit.TipUICollectionReusableView? | Foundation.NSCoder	-	-	34396bd5734f2f23
+TipKit	swift-class	c:@M@TipKit@objc(cs)TipUICollectionViewCell	-	TipUICollectionViewCell	-	-	-	ios=17.0	-	acbdfde0aedd5963
+TipKit	swift-property	s:6TipKit0A20UICollectionViewCellC15backgroundStyle7SwiftUI05ShapeG0_pvp	TipUICollectionViewCell	backgroundStyle	-	any SwiftUI.ShapeStyle	-	ios=26.0	-	cc4fa051df771753
+TipKit	swift-property	s:6TipKit0A20UICollectionViewCellC12cornerRadius14CoreFoundation7CGFloatVvp	TipUICollectionViewCell	cornerRadius	-	CoreGraphics.CGFloat	-	ios=17.0	-	20711fd350711fb7
+TipKit	swift-property	s:6TipKit0A20UICollectionViewCellC9imageSizeSo6CGSizeVvp	TipUICollectionViewCell	imageSize	-	CoreFoundation.CGSize	-	ios=17.0	-	8d5062535c7090c7
+TipKit	swift-property	s:6TipKit0A20UICollectionViewCellC10imageStyle7SwiftUI05ShapeG0_pSgvp	TipUICollectionViewCell	imageStyle	-	(any SwiftUI.ShapeStyle)?	-	ios=18.0	-	f75a2350a11585d7
+TipKit	swift-property	s:6TipKit0A20UICollectionViewCellC9viewStyleAA0adG0_pvp	TipUICollectionViewCell	viewStyle	-	any TipKit.TipViewStyle	-	ios=17.0	-	389228633b3e01b4
+TipKit	swift-property	c:@M@TipKit@objc(cs)TipUICollectionViewCell(py)backgroundColor	TipUICollectionViewCell	backgroundColor	-	UIKit.UIColor?	-	ios=17.0	-	d3b2de5f8effafd9
+TipKit	swift-method	s:6TipKit0A20UICollectionViewCellC09configureA0_9arrowEdge13actionHandlerACXDAA0A0_p_7SwiftUI0H0OSgyAA4TipsO6ActionVctF	TipUICollectionViewCell	configureTip(_:arrowEdge:actionHandler:)	-	Self	any TipKit.Tip | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=18.0	-	0d3817d8c88d2248
+TipKit	swift-method	s:6TipKit0A20UICollectionViewCellC09configureA0_9arrowEdge13actionHandlerACXDx_7SwiftUI0H0OSgyAA4TipsO6ActionVctAA0A0RzlF	TipUICollectionViewCell	configureTip(_:arrowEdge:actionHandler:)	-	Self	some TipKit.Tip | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=17.0	-	9f663fbc7f90ef5e
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUICollectionViewCell(im)initWithFrame:	TipUICollectionViewCell	init(frame:)	-	-	TipKit.TipUICollectionViewCell | CoreFoundation.CGRect	-	-	056be53d6b5fc8c6
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUICollectionViewCell(im)initWithCoder:	TipUICollectionViewCell	init(coder:)	-	-	TipKit.TipUICollectionViewCell? | Foundation.NSCoder	-	-	5158fa543f5fa2d4
+TipKit	swift-class	c:@M@TipKit@objc(cs)TipUIPopoverViewController	-	TipUIPopoverViewController	-	-	-	ios=17.0	-	2d85744051497cac
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC15backgroundColorSo7UIColorCSgvp	TipUIPopoverViewController	backgroundColor	-	UIKit.UIColor?	-	ios=17.0	-	f8d906ab24f3f923
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC15backgroundStyle7SwiftUI05ShapeG0_pvp	TipUIPopoverViewController	backgroundStyle	-	any SwiftUI.ShapeStyle	-	ios=26.0	-	e55e7abb8919fdb2
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC9imageSizeSo6CGSizeVvp	TipUIPopoverViewController	imageSize	-	CoreFoundation.CGSize	-	ios=17.0	-	c4b818fb93e5d2b1
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC10imageStyle7SwiftUI05ShapeG0_pSgvp	TipUIPopoverViewController	imageStyle	-	(any SwiftUI.ShapeStyle)?	-	ios=18.0	-	62635942ead776fd
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC9viewStyleAA0adG0_pvp	TipUIPopoverViewController	viewStyle	-	any TipKit.TipViewStyle	-	ios=17.0	-	2af929bdc5581561
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC20presentationDelegateSo0c12PresentationeG0_pSgvp	TipUIPopoverViewController	presentationDelegate	-	(any UIKit.UIPopoverPresentationControllerDelegate)?	-	ios=17.0	-	f04cc645d5fc2066
+TipKit	swift-property	s:6TipKit0A23UIPopoverViewControllerC10sourceItemSo0c12Presentatione6SourceG0_pSgvp	TipUIPopoverViewController	sourceItem	-	(any UIKit.UIPopoverPresentationControllerSourceItem)?	-	ios=17.0	-	8123b3e3b4d49e2d
+TipKit	swift-property	c:@M@TipKit@objc(cs)TipUIPopoverViewController(py)popoverPresentationController	TipUIPopoverViewController	popoverPresentationController	-	UIKit.UIPopoverPresentationController?	-	ios=17.0	-	ae47e754706e1a1d
+TipKit	swift-method	s:6TipKit0A23UIPopoverViewControllerC_10sourceItem13actionHandlerAcA0A0_p_So0c12Presentatione6SourceG0_pyAA4TipsO6ActionVctcfc	TipUIPopoverViewController	init(_:sourceItem:actionHandler:)	-	-	TipKit.TipUIPopoverViewController | any TipKit.Tip | any UIKit.UIPopoverPresentationControllerSourceItem | (TipKit.Tips.Action) -> Swift.Void	ios=18.0	-	28ebcf1ddc7013d1
+TipKit	swift-method	s:6TipKit0A23UIPopoverViewControllerC_10sourceItem13actionHandlerACx_So0c12Presentatione6SourceG0_pyAA4TipsO6ActionVctcAA0A0Rzlufc	TipUIPopoverViewController	init(_:sourceItem:actionHandler:)	-	-	TipKit.TipUIPopoverViewController | some TipKit.Tip | any UIKit.UIPopoverPresentationControllerSourceItem | (TipKit.Tips.Action) -> Swift.Void	ios=17.0	-	f3e259bab676c847
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)loadView	TipUIPopoverViewController	loadView()	-	()	-	ios=17.0	-	bc62bca14d09b470
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)viewDidLoad	TipUIPopoverViewController	viewDidLoad()	-	()	-	ios=17.0	-	48f432e628348fc5
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)viewDidLayoutSubviews	TipUIPopoverViewController	viewDidLayoutSubviews()	-	()	-	ios=17.0	-	a00ae01898f49d57
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)viewWillAppear:	TipUIPopoverViewController	viewWillAppear(_:)	-	()	Swift.Bool	ios=17.0	-	2f531d5efdd87d0f
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)viewDidDisappear:	TipUIPopoverViewController	viewDidDisappear(_:)	-	()	Swift.Bool	ios=17.0	-	d64d8a3709c36b2d
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)initWithNibName:bundle:	TipUIPopoverViewController	init(nibName:bundle:)	-	-	TipKit.TipUIPopoverViewController | Swift.String? | Foundation.Bundle?	-	-	a0185127804643c7
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIPopoverViewController(im)initWithCoder:	TipUIPopoverViewController	init(coder:)	-	-	TipKit.TipUIPopoverViewController? | Foundation.NSCoder	-	-	c57b66fcb86695d7
+TipKit	swift-class	c:@M@TipKit@objc(cs)TipUIView	-	TipUIView	-	-	-	ios=17.0	-	f6aeb9961ebec7fc
+TipKit	swift-property	s:6TipKit0A6UIViewC15backgroundStyle7SwiftUI05ShapeE0_pvp	TipUIView	backgroundStyle	-	any SwiftUI.ShapeStyle	-	ios=26.0	-	1485991ab5f784e6
+TipKit	swift-property	s:6TipKit0A6UIViewC12cornerRadius14CoreFoundation7CGFloatVvp	TipUIView	cornerRadius	-	CoreGraphics.CGFloat	-	ios=17.0	-	7dcf9dde58e491ef
+TipKit	swift-property	s:6TipKit0A6UIViewC9imageSizeSo6CGSizeVvp	TipUIView	imageSize	-	CoreFoundation.CGSize	-	ios=17.0	-	e413affd3d1f61a7
+TipKit	swift-property	s:6TipKit0A6UIViewC10imageStyle7SwiftUI05ShapeE0_pSgvp	TipUIView	imageStyle	-	(any SwiftUI.ShapeStyle)?	-	ios=18.0	-	040f16a6eed62520
+TipKit	swift-property	s:6TipKit0A6UIViewC9viewStyleAA0a4ViewE0_pvp	TipUIView	viewStyle	-	any TipKit.TipViewStyle	-	ios=17.0	-	96e20e3d052be64b
+TipKit	swift-property	c:@M@TipKit@objc(cs)TipUIView(py)backgroundColor	TipUIView	backgroundColor	-	UIKit.UIColor?	-	ios=17.0	-	b1208cc0725e2da7
+TipKit	swift-property	c:@M@TipKit@objc(cs)TipUIView(py)intrinsicContentSize	TipUIView	intrinsicContentSize	-	CoreFoundation.CGSize	-	ios=17.0	-	2df2f2c0a7140be4
+TipKit	swift-method	s:6TipKit0A6UIViewC_9arrowEdge13actionHandlerAcA0A0_p_7SwiftUI0E0OSgyAA4TipsO6ActionVctcfc	TipUIView	init(_:arrowEdge:actionHandler:)	-	-	TipKit.TipUIView | any TipKit.Tip | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=18.0	-	e857d182fa00c8c8
+TipKit	swift-method	s:6TipKit0A6UIViewC_9arrowEdge13actionHandlerACx_7SwiftUI0E0OSgyAA4TipsO6ActionVctcAA0A0Rzlufc	TipUIView	init(_:arrowEdge:actionHandler:)	-	-	TipKit.TipUIView | some TipKit.Tip | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=17.0	-	44aed710953e7406
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIView(im)didMoveToSuperview	TipUIView	didMoveToSuperview()	-	()	-	ios=17.0	-	79e741527fce9fab
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIView(im)layoutSubviews	TipUIView	layoutSubviews()	-	()	-	ios=17.0	-	b4f427265fead1c4
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIView(im)sizeThatFits:	TipUIView	sizeThatFits(_:)	-	CoreFoundation.CGSize	CoreFoundation.CGSize	ios=17.0	-	073f5b82a48d457c
+TipKit	swift-method	c:@M@TipKit@objc(cs)TipUIView(im)updateConstraints	TipUIView	updateConstraints()	-	()	-	ios=17.0	-	9b8611ff6775941e
+TipKit	swift-protocol	s:ST	-	Sequence	-	-	-	-	-	509023153b76efef
+TipKit	swift-method	s:ST6TipKitE13donatedWithinySayAA4TipsO5EventV8DonationVy_qd___GGAD0G9TimeRangeVSeRd__SERd__s8SendableRd__AI7ElementRtzlF	Sequence	donatedWithin(_:)	-	[Self.Element]	TipKit.Tips.DonationTimeRange	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c42b2acfcc92a94f
+TipKit	swift-method	s:ST6TipKitE13largestSubset9groupedBySayAA4TipsO5EventV8DonationVy_qd___GGs7KeyPathCyqd__qd_0_G_tSeRd__SERd__s8SendableRd__SHRd_0_AJ7ElementRtzr0_lF	Sequence	largestSubset(groupedBy:)	-	[Self.Element]	Swift.KeyPath<DonationInfo, Value>	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	3efbff98317a1f80
+TipKit	swift-method	s:ST6TipKitE14smallestSubset9groupedBySayAA4TipsO5EventV8DonationVy_qd___GGs7KeyPathCyqd__qd_0_G_tSeRd__SERd__s8SendableRd__SHRd_0_AJ7ElementRtzr0_lF	Sequence	smallestSubset(groupedBy:)	-	[Self.Element]	Swift.KeyPath<DonationInfo, Value>	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	6cbcac9495d6e29e
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO5EqualV	-	Equal	-	-	-	-	-	bcc9c205f9b41634
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO8NotEqualV	-	NotEqual	-	-	-	-	-	516547e929390b3c
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO10ComparisonV	-	Comparison	-	-	-	-	-	90d7d69a4087e386
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO7KeyPathV	-	KeyPath	-	-	-	-	-	4761fcfde381c823
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO5ValueV	-	Value	-	-	-	-	-	857ae5b0b6f55f05
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO8VariableV	-	Variable	-	-	-	-	-	b8e818decf2c03cc
+TipKit	swift-enum	s:10Foundation20PredicateExpressionsO	-	PredicateExpressions	-	-	-	ios=17,macos=14,tvos=17,watchos=10	-	626c30565d1b8fbb
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO6TipKitE14DonationFilterV	PredicateExpressions	DonationFilter	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	643cfb5f0e316a1d
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE14DonationFilterV8evaluateySayAD4TipsO5EventV0F0Vy_x_GGAA0B8BindingsVKF	PredicateExpressions.DonationFilter	evaluate(_:)	-	[TipKit.Tips.Event<DonationInfo>.Donation]	Foundation.PredicateBindings	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2aecf1a28ef39369
+TipKit	swift-typealias	s:10Foundation20PredicateExpressionsO6TipKitE14DonationFilterV6Outputa	PredicateExpressions.DonationFilter	Output	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	680425b23b46cf8d
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE20build_DonationFilter_7keyPath2op5valueAcDE0gH0Vy_xq0_q_Gq__s03KeyJ0Cyxq0_GAcDE0gH8OperatorOq0_tSeRzSERzs8SendableRzsAQR_AD05EventB10ExpressionR_SeR0_SER0_sAQR0_SayAD4TipsO0P0V0G0Vy_x_GG6OutputRt_r1_lFZ	PredicateExpressions	build_DonationFilter(_:keyPath:op:value:)	+	Foundation.PredicateExpressions.DonationFilter<DonationInfo, Value, Input>	Input | Swift.KeyPath<DonationInfo, Value> | Foundation.PredicateExpressions.DonationFilterOperator | Value	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	c3702f2bac48eee4
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO6TipKitE13DonatedWithinV	PredicateExpressions	DonatedWithin	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2a6d04af2cfa8d3f
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE13DonatedWithinV8evaluateySayAD4TipsO5EventV8DonationVy_x_GGAA0B8BindingsVKF	PredicateExpressions.DonatedWithin	evaluate(_:)	-	[TipKit.Tips.Event<DonationInfo>.Donation]	Foundation.PredicateBindings	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d5f7d8551f098668
+TipKit	swift-typealias	s:10Foundation20PredicateExpressionsO6TipKitE13DonatedWithinV6Outputa	PredicateExpressions.DonatedWithin	Output	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	6c1a3be58248965c
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE19build_donatedWithinyAcDE07DonatedH0Vy_xq_Gq__AD4TipsO17DonationTimeRangeVtSeRzSERzs8SendableRzsAMR_AD05EventB10ExpressionR_SayAJ0O0V0K0Vy_x_GG6OutputRt_r0_lFZ	PredicateExpressions	build_donatedWithin(_:_:)	+	Foundation.PredicateExpressions.DonatedWithin<DonationInfo, Input>	Input | TipKit.Tips.DonationTimeRange	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	bcab6f869b595c9e
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO6TipKitE13LargestSubsetV	PredicateExpressions	LargestSubset	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	0a6e421ef4d08afd
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE13LargestSubsetV8evaluateySayAD4TipsO5EventV8DonationVy_x_GGAA0B8BindingsVKF	PredicateExpressions.LargestSubset	evaluate(_:)	-	[TipKit.Tips.Event<DonationInfo>.Donation]	Foundation.PredicateBindings	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	fa82c53e965f8ea5
+TipKit	swift-typealias	s:10Foundation20PredicateExpressionsO6TipKitE13LargestSubsetV6Outputa	PredicateExpressions.LargestSubset	Output	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	d4afec935d2253d1
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE19build_largestSubset_9groupedByAcDE07LargestH0Vy_xq0_q_Gq__s7KeyPathCyxq0_GtSeRzSERzs8SendableRzsAMR_AD05EventB10ExpressionR_SeR0_SER0_SHR0_sAMR0_SayAD4TipsO0O0V8DonationVy_x_GG6OutputRt_r1_lFZ	PredicateExpressions	build_largestSubset(_:groupedBy:)	+	Foundation.PredicateExpressions.LargestSubset<DonationInfo, Value, Input>	Input | Swift.KeyPath<DonationInfo, Value>	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	198f0e336de3daac
+TipKit	swift-struct	s:10Foundation20PredicateExpressionsO6TipKitE14SmallestSubsetV	PredicateExpressions	SmallestSubset	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	9319a31ca06e8da6
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE14SmallestSubsetV8evaluateySayAD4TipsO5EventV8DonationVy_x_GGAA0B8BindingsVKF	PredicateExpressions.SmallestSubset	evaluate(_:)	-	[TipKit.Tips.Event<DonationInfo>.Donation]	Foundation.PredicateBindings	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5c40ae326a41f169
+TipKit	swift-typealias	s:10Foundation20PredicateExpressionsO6TipKitE14SmallestSubsetV6Outputa	PredicateExpressions.SmallestSubset	Output	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	154e6ae905fad800
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE20build_smallestSubset_9groupedByAcDE08SmallestH0Vy_xq0_q_Gq__s7KeyPathCyxq0_GtSeRzSERzs8SendableRzsAMR_AD05EventB10ExpressionR_SeR0_SER0_SHR0_sAMR0_SayAD4TipsO0O0V8DonationVy_x_GG6OutputRt_r1_lFZ	PredicateExpressions	build_smallestSubset(_:groupedBy:)	+	Foundation.PredicateExpressions.SmallestSubset<DonationInfo, Value, Input>	Input | Swift.KeyPath<DonationInfo, Value>	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	62fc4ae54a8b13ae
+TipKit	swift-enum	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO	PredicateExpressions	DonationFilterOperator	-	-	-	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	5e418174ee791324
+TipKit	swift-constant	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO5equalyA2FmF	PredicateExpressions.DonationFilterOperator	equal	-	-	-	-	-	50cbca90689a8ae8
+TipKit	swift-constant	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO8notEqualyA2FmF	PredicateExpressions.DonationFilterOperator	notEqual	-	-	-	-	-	1770f245c81460a7
+TipKit	swift-constant	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO8lessThanyA2FmF	PredicateExpressions.DonationFilterOperator	lessThan	-	-	-	-	-	f9143bc396467968
+TipKit	swift-constant	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO15lessThanOrEqualyA2FmF	PredicateExpressions.DonationFilterOperator	lessThanOrEqual	-	-	-	-	-	508c58ab6a212ed1
+TipKit	swift-constant	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO11greaterThanyA2FmF	PredicateExpressions.DonationFilterOperator	greaterThan	-	-	-	-	-	3f85f714f15b44c5
+TipKit	swift-constant	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO18greaterThanOrEqualyA2FmF	PredicateExpressions.DonationFilterOperator	greaterThanOrEqual	-	-	-	-	-	b476b4e130f8b267
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO2eeoiySbAF_AFtFZ	PredicateExpressions.DonationFilterOperator	==(_:_:)	+	Swift.Bool	Foundation.PredicateExpressions.DonationFilterOperator | Foundation.PredicateExpressions.DonationFilterOperator	-	-	70381057edc3aade
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO6encode2toys7Encoder_p_tKF	PredicateExpressions.DonationFilterOperator	encode(to:)	-	()	any Swift.Encoder	-	-	6632e8f40ed033c7
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO4hash4intoys6HasherVz_tF	PredicateExpressions.DonationFilterOperator	hash(into:)	-	()	Swift.Hasher	-	-	2d61fe55850c581c
+TipKit	swift-property	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO9hashValueSivp	PredicateExpressions.DonationFilterOperator	hashValue	-	Swift.Int	-	-	-	08c76e2a54978529
+TipKit	swift-method	s:10Foundation20PredicateExpressionsO6TipKitE22DonationFilterOperatorO4fromAFs7Decoder_p_tKcfc	PredicateExpressions.DonationFilterOperator	init(from:)	-	-	Foundation.PredicateExpressions.DonationFilterOperator | any Swift.Decoder	-	-	58219b8b48abee03
+TipKit	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE07popoverD0_11isPresented16attachmentAnchor9arrowEdge6actionQrAD0D0_pSg_AA7BindingVySbGSgAA017PopoverAttachmentJ0OAA0L0OSgyAD4TipsO6ActionVctF	View	popoverTip(_:isPresented:attachmentAnchor:arrowEdge:action:)	-	some SwiftUI.View	(any TipKit.Tip)? | SwiftUI.Binding<Swift.Bool>? | SwiftUI.PopoverAttachmentAnchor | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=26.0,macos=26.0,tvos=26.0	-	0b39060fa57a539d
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE07popoverD0_11isPresented16attachmentAnchor10arrowEdges6actionQrAD0D0_pSg_AA7BindingVySbGSgAA017PopoverAttachmentJ0OAA4EdgeO3SetVyAD4TipsO6ActionVctF	View	popoverTip(_:isPresented:attachmentAnchor:arrowEdges:action:)	-	some SwiftUI.View	(any TipKit.Tip)? | SwiftUI.Binding<Swift.Bool>? | SwiftUI.PopoverAttachmentAnchor | SwiftUI.Edge.Set | (TipKit.Tips.Action) -> Swift.Void	ios=26.0,tvos=26.0	-	6e4e029f7f7587e1
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE07popoverD0_9arrowEdge6actionQrAD0D0_pSg_AA0H0OSgyAD4TipsO6ActionVctF	View	popoverTip(_:arrowEdge:action:)	-	some SwiftUI.View	(any TipKit.Tip)? | SwiftUI.Edge? | (TipKit.Tips.Action) -> Swift.Void	ios=18.4,macos=15.4,tvos=18.4	-	acbfb3205a01ef8c
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE13tipBackgroundyQrqd__AA10ShapeStyleRd__lF	View	tipBackground(_:)	-	some SwiftUI.View	S	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	89617451922ea127
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE15tipCornerRadius_11antialiasedQr14CoreFoundation7CGFloatV_SbtF	View	tipCornerRadius(_:antialiased:)	-	some SwiftUI.View	CoreGraphics.CGFloat | Swift.Bool	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	33f2714fb69dad7d
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE9tipAnchoryQrqd__SHRd__s8SendableRd__lF	View	tipAnchor(_:)	-	some SwiftUI.View	AnchorID	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	4e4b3212c415f08d
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE24tipBackgroundInteractionyQrAA012PresentationgH0VF	View	tipBackgroundInteraction(_:)	-	some SwiftUI.View	SwiftUI.PresentationBackgroundInteraction	ios=26.0,macos=26.0,tvos=26.0	-	422b2c141eb6aa72
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE12tipImageSizeyQrSo6CGSizeVF	View	tipImageSize(_:)	-	some SwiftUI.View	CoreFoundation.CGSize	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	b4c2b69474081853
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE13tipImageStyleyQrqd__AA05ShapeH0Rd__lF	View	tipImageStyle(_:)	-	some SwiftUI.View	S	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	4f3e8a2df4b2a6a9
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE13tipImageStyleyQrqd___qd_0_tAA05ShapeH0Rd__AaFRd_0_r0_lF	View	tipImageStyle(_:_:)	-	some SwiftUI.View	S1 | S2	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	b3d3840032abbb46
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE13tipImageStyleyQrqd___qd_0_qd_1_tAA05ShapeH0Rd__AaFRd_0_AaFRd_1_r1_lF	View	tipImageStyle(_:_:_:)	-	some SwiftUI.View	S1 | S2 | S3	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	ef101869a5194a8e
+TipKit	swift-method	s:7SwiftUI4ViewP6TipKitE03tipC5StyleyQrqd__AD0dcG0Rd__lF	View	tipViewStyle(_:)	-	some SwiftUI.View	some TipKit.TipViewStyle	ios=17.0,macos=14.0,tvos=17.0,watchos=10.0	-	2baa4ad7099568c4
+TipKit	swift-method	s:6TipKit4TipsO6ActionV4with5indexAESi_tF	Tips.Action	with(index:)	-	TipKit.Tips.Action	Swift.Int	-	-	e23aa4605409f796

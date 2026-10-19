@@ -1,0 +1,170 @@
+{
+  "framework": "ModelIO",
+  "entries": [
+    {
+      "api": "MDLVertexAttributeAnisotropy",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string anisotropy",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeBinormal",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string binormal",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeBitangent",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string bitangent",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeColor",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string color",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeEdgeCrease",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string edgeCrease",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeJointIndices",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string jointIndices",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeJointWeights",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string jointWeights",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeNormal",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string normal",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeOcclusionValue",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string occlusionValue",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributePosition",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string position",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeShadingBasisU",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string shadingBasisU",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeShadingBasisV",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string shadingBasisV",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeSubdivisionStencil",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string subdivisionStencil",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeTangent",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string tangent",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    },
+    {
+      "api": "MDLVertexAttributeTextureCoordinate",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name, and a band at iOS 9 or later takes it from the release, so the symbol has to be in a library that is always linked: ModelIO's, where it is defined and which MetalKit's copy asks for",
+      "effect": "the string textureCoordinate",
+      "facts": "facts/ModelIO/VertexAttributes.md",
+      "source": "the host's own ModelIO, the value its exported symbol holds; the 16.4 header for the declaration; nm over both bands of a gate build for where the symbol places"
+    }
+  ]
+}

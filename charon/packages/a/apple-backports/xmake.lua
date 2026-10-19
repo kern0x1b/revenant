@@ -1,0 +1,352 @@
+package("apple-backports")
+    set_homepage("https://github.com/kern0x1b/charon")
+    set_description("Objective-C classes, methods and constants later iOS releases added, for a minimum release that lacks them, as libFoundationBackports.dylib and libUIKitBackports.dylib in /usr/lib/charon/org.charon.apple-backports, which re-export whatever the release already has")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_deps("charon@firmware-tools", {alias = "firmware-tools"})
+    add_deps("charon@charon-coding", {alias = "charon-coding"})
+
+    add_deps("charon@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
+    add_deps("charon@box2d 2.2.1", {alias = "box2d"})
+    -- AMD and COLAMD, the two sparse orderings, as a static archive. The Sparse* solve family needs an
+    -- ordering and this stack's own rows must not export one. The archive is not the proof of that: AMD
+    -- and COLAMD mark their entry points with their own AMD_EXPORT and COLAMD_EXPORT, which is
+    -- visibility("default") and overrides the -fvisibility=hidden the recipe compiles with - measured,
+    -- `nm -gU` on the built libSuiteSparseOrdering.a counts 28 global amd_* and colamd_* names. The proof
+    -- is on libAccelerateBackports.dylib and cannot be made until a caller exists. Only AMD, COLAMD and
+    -- SuiteSparse_config are in the recipe: the rest of the tarball is LGPL, GPL, or not this package.
+    add_deps("charon@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
+    add_deps("charon@ggml 0.25.3", {alias = "ggml"})
+    add_deps("charon@monocypher 4.0.2", {alias = "monocypher"})
+    -- micro-ecc is the P-256 arithmetic iOS 6 cannot do a signature with: SecKeyCreateRandomKey and
+    -- SecKeyCreateSignature are iOS 8, so Security/SecKeyElliptic10.m signs, verifies and exchanges a key
+    -- this package made itself over the archive, and every name it needs begins with Charon.
+    add_deps("charon@micro-ecc", {alias = "micro-ecc"})
+    -- The codecs of the Compression backport, each a pinned upstream built as one static archive with its symbols
+    -- hidden (the recipes name the commit they fetch): LZFSE and LZVN, zlib's raw deflate, LZ4's block codec, and the liblzma subset of xz for LZMA.
+    add_deps("charon@lzfse lzfse-1.0", {alias = "lzfse"})
+    add_deps("charon@zlib v1.3.2", {alias = "zlib"})
+    add_deps("charon@lz4 v1.9.2", {alias = "lz4"})
+    add_deps("charon@xz v5.8.4", {alias = "xz"})
+    -- apple-compat's __sincos_stret, the pair of sine and cosine iOS 7 adds: GraphicsBackports takes the pair of a singular
+    -- shear through it, and a build for an older release links the shim's copy, so the image imports nothing the release lacks.
+    add_deps("charon@apple-compat", {alias = "apple-compat"})
+
+    local add_configs = add_configs
+    local modules = path.join(os.scriptdir(), "..", "..", "..", "modules")
+    local inputs = table.join(os.files(path.join(os.scriptdir(), "*.c")), os.files(path.join(os.scriptdir(), "*.h")),
+                              os.files(path.join(os.scriptdir(), "*", "*.m")), os.files(path.join(os.scriptdir(), "*", "*.mm")), os.files(path.join(os.scriptdir(), "*", "*.h")),
+                              os.files(path.join(os.scriptdir(), "registry", "*.json")), os.files(path.join(os.scriptdir(), "registry", "*", "*.json")))
+    table.insert(inputs, path.join(modules, "apple", "backports.lua"))
+    -- The generated layer is written by tools/gen from this package's spec/ snapshot and the measured tables, and it reads the
+    -- modules and tools it imports (tools/atomic.lua, tools/found's Lua, modules/byteorder.lua, modules/apple/dyld.lua). A change to
+    -- any of them is a changed package: the generated sources are not in the tree, so nothing else would notice.
+    local repo = path.join(os.scriptdir(), "..", "..", "..")
+    inputs = table.join(inputs, os.files(path.join(repo, "tools", "gen", "**")), os.files(path.join(repo, "tools", "found", "**.lua")),
+                        os.files(path.join(os.scriptdir(), "spec", "**")))
+    table.insert(inputs, path.join(repo, "tools", "gen.lua"))
+    table.insert(inputs, path.join(repo, "tools", "atomic.lua"))
+    table.insert(inputs, path.join(repo, "modules", "byteorder.lua"))
+    table.insert(inputs, path.join(repo, "modules", "apple", "dyld.lua"))
+    -- The measured tables (tools/gen/measured.lua) and the text it reads: a changed value is a changed package.
+    table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-constants.tsv"))
+    table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-extras-13.4.txt"))
+    table.insert(inputs, path.join(os.scriptdir(), "..", "..", "..", "addons", "c", "charon", "xmake.lua"))
+    -- The shared coding helper's header, in **this** digest and not only in charon-coding's own.
+    -- Eleven files include it by its path in this checkout, so a changed declaration moved
+    -- charon-coding's digest and not the one the objects are cached under: they were not rebuilt,
+    -- and the library linked the new archive beside a stale object. No gate, no import check and no
+    -- check_registry looks at that; the `sources` digest is the thing they would be keyed on, so
+    -- the header belongs here.
+    for _, header in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "c", "charon-coding", "files", "*.h"))) do
+        table.insert(inputs, header)
+    end
+    table.sort(inputs)
+    local digests = {}
+    for _, file in ipairs(inputs) do
+        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
+    end
+    local digest = hash.strhash128(table.concat(digests, ";"))
+    add_configs("sources", {description = "The digest of the sources, their headers, the build module and the Charon releases, so a changed backport or a new release is a different package.", default = digest, type = "string", readonly = true})
+
+    add_configs("uikit", {description = "Build libUIKitBackports.dylib beside libFoundationBackports.dylib, for an application; a daemon or a tool leaves UIKit out of its process.", default = false, type = "boolean"})
+    add_configs("homekit", {description = "Build libHomeKitBackports.dylib, for an application that reads or writes a home graph with HomeKit: the accessory, service and characteristic types, the service and accessory category identifiers, the metadata formats and units and the key paths, each with the value a real HomeKit.framework gives it, re-measurable with tools/corpus/host-probe.c; and the home graph itself -- homes, rooms, zones, users, service groups, accessories, triggers, action sets, the events an event trigger fires on and the home hub states -- over a store in the application's own Application Support directory, with an accessory's own values answering the error the release documents for an accessory it cannot reach, since this port carries no HAP transport and pairs with no accessory. It builds the graph and reads and writes it across launches; it does not discover or pair.", default = false, type = "boolean"})
+
+    add_configs("corelocation", {description = "Build libCoreLocationBackports.dylib, for a port that asks for location authorization; it loads CoreLocation into the process.", default = false, type = "boolean"})
+    add_configs("avfoundation", {description = "Build libAVFoundationBackports.dylib, for a port that finds its cameras and microphones with a discovery session or builds an H.264 format description from parameter sets and encodes with the H.264 profile levels of iOS 7; it loads AVFoundation, and libGraphicsBackports with CoreVideo, into the process.", default = false, type = "boolean"})
+    add_configs("coredata", {description = "Build libCoreDataBackports.dylib, for a port that keeps its data with Core Data; it loads CoreData into the process.", default = false, type = "boolean"})
+    add_configs("security", {description = "Build libSecurityBackports.dylib, for a port that evaluates a trust with SecTrustEvaluateWithError; it loads Security into the process.", default = false, type = "boolean"})
+    add_configs("commoncrypto", {description = "Build libCommonCryptoBackports.dylib, for an application that draws random bytes through CCRandomGenerateBytes, which iOS 6.1.3 does not export; it is filled from SecRandomCopyBytes.", default = false, type = "boolean"})
+    add_configs("corebluetooth", {description = "Build libCoreBluetoothBackports.dylib, for a port that reads an advertisement for connectability: it carries CBAdvertisementDataIsConnectable, which iOS 6.1.3 CoreBluetooth does not export. The constant is the string the host CoreBluetooth gives it; the framework is not linked.", default = false, type = "boolean"})
+    add_configs("compression", {description = "Build libCompressionBackports.dylib, for an application that encodes and decodes buffers with compression_encode_buffer and compression_decode_buffer (LZFSE, zlib's raw deflate, LZ4, LZ4_RAW and LZMA, each as the codec the release's Compression framework uses); the codecs are pinned upstreams linked into it.", default = false, type = "boolean"})
+    add_configs("spritekit", {description = "Build libSpriteKitBackports.dylib, for an application that makes SpriteKit's shader uniforms: SKUniform of iOS 8, with its three factories, its three initialisers and its name, type, float and texture, read back as the type says. iOS 6 carries no SpriteKit at all, so the classes are the port's own, measured against the host's SpriteKit (facts/SpriteKit/SKUniform.md). Nothing draws with them, and the SpriteKit framework is not linked.", default = false, type = "boolean"})
+    add_configs("spatial", {description = "Build libSpatialBackports.dylib, for an application that calls the Spatial functions iOS 16 and later add. The port's own C code carries the functions it has so far, each held bit-for-bit to the host's Spatial (facts/Spatial/); the rest are not in the library yet. No framework is linked.", default = false, type = "boolean"})
+    add_configs("sqlite3", {description = "Build libSQLite3Backports.dylib, for an application that calls the sqlite3_str string builder and the sqlite3_keyword functions iOS 12 adds (facts/SQLite3/). The functions are C over the system's libsqlite3, which iOS 6 has; no framework is linked.", default = false, type = "boolean"})
+
+    add_configs("avfaudio", {description = "Build libAVFAudioBackports.dylib, for an application that looks for audio components, builds an AVAudioTime, an AVAudioChannelLayout, an AVParameterEvent or asks for the record permission through AVAudioApplication; the component discovery, the AudioComponent/AudioUnit C API and the clock it converts through are the release's own, so it builds on the carried AVAudioEngine, AVAudioFormat and AVAudioUnit and so brings libAVFoundationBackports.dylib with it, loading AVFAudio, AVFoundation, AudioToolbox and CoreAudio into the process.", default = false, type = "boolean"})
+
+    add_configs("webkit", {description = "Build libWebKitBackports.dylib, for an application that shows web content in a WKWebView; it draws it with the UIWebView of the release.", default = false, type = "boolean"})
+    add_configs("graphics", {description = "Build libGraphicsBackports.dylib, for a port that reads the name of a colour space, the code points of a video colour description or applies a block over a path or a PDF object; it loads CoreGraphics, CoreVideo and ImageIO into the process.", default = false, type = "boolean"})
+
+    add_configs("localauthentication", {description = "Build libLocalAuthenticationBackports.dylib, for an application that asks for the owner's authentication; the device answers as one without a biometric sensor and without a way to ask for the passcode.", default = false, type = "boolean"})
+
+    add_configs("opengles", {description = "Build libOpenGLESBackports.dylib, for an application that names the functions OpenGL ES 3.0 added; the release's driver is ES 2.0, so they answer through its extensions where it has one and with an error where it has none.", default = false, type = "boolean"})
+    add_configs("videotoolbox", {description = "Build libVideoToolboxBackports.dylib beside libFoundationBackports.dylib, for a port that asks the frame processor for a video frame, its configuration and its parameters - the seventeen classes iOS 26 added and no release this package covers has, since VideoToolbox itself arrived with iOS 3. The release's own VideoToolbox answers the C API; this is the Objective-C surface on top of it, and it brings libFoundationBackports with it, which is where its value objects keep their properties.", default = false, type = "boolean"})
+
+    add_configs("mapkit", {description = "Build libMapKitBackports.dylib, for an application that draws overlays with MapKit's own renderers, frames a map with a camera, or takes a map snapshot. iOS 6 has the MKMapView and the whole of the MKOverlayView drawing path but none of the iOS 7 renderer tree, so the renderers here are the release's own overlay view with the iOS 7 API on it, the camera and the snapshotter are built on the release's own map view and projection, and the tile overlays fetch for real over NSURLConnection.", default = false, type = "boolean"})
+
+    add_configs("passkit", {description = "Build libPassKitBackports.dylib, for an application that reads a pass with the iOS 7-and-later members of the SDK's PKPass and PKPassLibrary, which the release's own Passbook already carries, and that compares against the two PassKit notification names. Apple Pay is not carried: the device has no Secure Element, and +canMakePayments answers NO in Apple's own words.", default = false, type = "boolean"})
+    add_configs("coretext", {description = "Build libCoreTextBackports.dylib, for an application that asks the font files of its own bundle for their faces with CTFontManagerCreateFontDescriptorsFromURL: one descriptor per face of a TrueType or OpenType file, and per face of a TrueType collection, each carrying the face's PostScript name, read from the file's own name table. It loads CoreText and Foundation into the process; variable-font named instances are not yet listed (facts/CoreText/FontDescriptorsFromURL.md).", default = false, type = "boolean"})
+    add_configs("coremedia", {description = "Build libCoreMediaBackports.dylib, for an application that names the CoreMedia string constants that iOS 7 and later add: the values the release lacks, as the iOS 26.2 cache holds them.", default = false, type = "boolean"})
+    add_configs("corefoundation", {description = "Build libCoreFoundationBackports.dylib, for an application that names the CoreFoundation string constants that iOS 7 and later add: the values the release lacks, as the iOS 26.2 cache holds them.", default = false, type = "boolean"})
+    add_configs("storekit", {description = "Build libStoreKitBackports.dylib, for an application that names the StoreKit string constants that iOS 7 and later add: the values the release lacks, as the iOS 26.2 cache holds them.", default = false, type = "boolean"})
+    add_configs("coregraphics", {description = "Build libCoreGraphicsBackports.dylib, for an application that names the CoreGraphics string constants that iOS 7 and later add: the values the release lacks, as the iOS 26.2 cache holds them.", default = false, type = "boolean"})
+    add_configs("addressbookui", {description = "Build libAddressBookUIBackports.dylib, for an application that names the ABPerson property keys of iOS 8 and later: the values the release lacks, as the iOS 26.2 cache holds them.", default = false, type = "boolean"})
+    add_configs("corevideo", {description = "Build libCoreVideoBackports.dylib, for an application that names the CoreVideo string constants that iOS 8 and later add: the values the release lacks, as the iOS 26.2 cache holds them.", default = false, type = "boolean"})
+
+    add_configs("carplay", {description = "Build libCarPlayBackports.dylib, for an application that draws CarPlay's templates and the car home screen in-app. iOS 6 has no CarPlay at all and there is no car, so the list, grid and map templates, the interface controller, the window and the buttons are real view controllers over the release's own UIKit and MapKit, the home screen is the apps' own icons read at run time, the dock is the release's own clock, CoreTelephony radio technology and UIDevice battery, and the scene connection is the wall and is carried as such.", default = false, type = "boolean"})
+
+    add_configs("safariservices", {description = "Build libSafariServicesBackports.dylib, for an application that shows a web page in an SFSafariViewController; the page is drawn by the UIWebView of the release, in bars of the application's own.", default = false, type = "boolean"})
+
+    add_configs("authenticationservices", {description = "Build libAuthenticationServicesBackports.dylib, for an application that signs a user in through a web page with an ASWebAuthenticationSession; it brings libSafariServicesBackports.dylib, whose page it shows.", default = false, type = "boolean"})
+
+    add_configs("backgroundtasks", {description = "Build libBackgroundTasksBackports.dylib, for an application that registers and submits background tasks with the BGTaskScheduler; iOS 6 launches no application in the background for one, so a submission answers that the scheduling is unavailable.", default = false, type = "boolean"})
+
+    add_configs("photos", {description = "Build libPhotosBackports.dylib, for an application that asks for the authorization of the photo library through PHPhotoLibrary; it is answered from the ALAssetsLibrary of the release.", default = false, type = "boolean"})
+
+    add_configs("gamecontroller", {description = "Build libGameControllerBackports.dylib, for an application that looks for game controllers, mice and keyboards through the GameController framework; iOS 6 has no such device support, so the lists are empty, no controller is ever announced and discovery ends at once.", default = false, type = "boolean"})
+
+    add_configs("coreml", {description = "Build libCoreMLBackports.dylib, for an application that names the Core ML framework of iOS 11: the model format, read from Apple's own open protobuf specification, and a model run on the CPU. It carries the value types an application builds a request out of -- MLMultiArray, MLFeatureValue, MLSequence -- over a reader and an interpreter that agree with coremltools' own runtime to 1e-5 (facts/CoreML/CoreML.md).", default = false, type = "boolean"})
+
+    add_configs("vision", {description = "Build libVisionBackports.dylib, for an application that names the Vision framework of iOS 11 and 12: its constants, geometry functions and classes are there, and a request the port cannot run comes back from a request handler as an error, not as a crash.", default = false, type = "boolean"})
+
+    add_configs("metal", {description = "Build libMetalBackports.dylib, for an application that asks for the default Metal device before it draws; iOS 6 runs on graphics with no Metal driver, so MTLCreateSystemDefaultDevice gives a real device of the port's own that translates the calls it can onto OpenGL ES 2.0, and honestly refuses the ones it cannot, such as compiling Metal Shading Language source at runtime.", default = false, type = "boolean"})
+
+    add_configs("metalkit", {description = "Build libMetalKitBackports.dylib beside libMetalBackports.dylib, for an application that draws with an MTKView or loads a mesh or a texture through MetalKit; it draws over the same OpenGL ES 2.0 bridge Metal itself uses.", default = false, type = "boolean"})
+
+    add_configs("modelio", {description = "Build libModelIOBackports.dylib, for an application that loads, inspects or writes a 3D asset: MDLAsset and its resolvers, MDLMesh with its buffers, submeshes, vertex attributes and generators, MDLTexture, MDLMaterial, MDLTransform and its components, MDLAnimatedValue and the voxel array, over the release's own file readers. iOS 6 carries no ModelIO at all, so this is the framework's own work. It brings libMetalKitBackports.dylib and so libMetalBackports.dylib with it, because MDLVertexDescriptor, MDLVertexAttribute and MDLVertexBufferLayout - the three classes MDLAsset's own vertex descriptors are made of - are carried in MetalKit's library, next to the MTKMesh bridge that asks for them.", default = false, type = "boolean"})
+
+    add_configs("coretelephony", {description = "Build libCoreTelephonyBackports.dylib, for an application that reads the radio access technology of the phone and names the constants of it; iOS 6.0 has none of them and iOS 6.1 keeps the technology in a private class.", default = false, type = "boolean"})
+    add_configs("coremidi", {description = "Build libCoreMIDIBackports.dylib, for an application that makes a MIDI client or port with a block, or that speaks Universal MIDI Packets: the block forms of the client, input port and destination, the protocol-aware input port, destination and source, the event list builders and the sends of a list. The release's own CoreMIDI carries MIDI 1.0 bytes, so the packets are converted here, with the rules measured against macOS (facts/CoreMIDI/Translation.md).", default = false, type = "boolean"})
+
+    add_configs("contacts", {description = "Build libContactsBackports.dylib, for an application that reads or writes the address book through the Contacts framework of iOS 9; it answers out of the AddressBook the release already carries, whose store is the same one.", default = false, type = "boolean"})
+
+    add_configs("accelerate", {description = "Build libAccelerateBackports.dylib, for an application that fills a vImage_Buffer from a CGImage or makes a CGImage from one: vImageBuffer_Init, vImageBuffer_InitWithCGImage and vImageCreateCGImageFromBuffer of iOS 7, over CoreGraphics, for the 8-bit RGB and gray formats.", default = false, type = "boolean"})
+
+    add_configs("fileprovider", {description = "Build libFileProviderBackports.dylib, for a port that talks to file-provider domains, adds and removes them, and asks for the items under one; FileProvider.framework arrived in iOS 11.0 and does not exist on this release, and there is no extension host to load a provider, so the manager answers as a machine with no domains does. It loads FileProvider, and Foundation, into the process.", default = false, type = "boolean"})
+    add_configs("callkit", {description = "Build libCallKitBackports.dylib, for an application that places and takes VoIP calls through CallKit; iOS 6 runs no call services daemon, so the provider, the call controller and the call observer of the process meet in a broker of the port's own; it loads CoreTelephony, whose call centre gives the observer the cellular calls of the device, and AVFoundation, whose audio session a connected call activates.", default = false, type = "boolean"})
+
+    add_configs("corespotlight", {description = "Build libCoreSpotlightBackports.dylib, for an application that indexes what it shows with CSSearchableIndex; writes, deletes and the batch client state journal to a real per-index store under Application Support, and a best-effort bridge registers the store's category with the release's own private SPSpotlightManager so the pull it already runs for Messages and Calendar can reach it too.", default = false, type = "boolean"})
+
+    add_configs("pushkit", {description = "Build libPushKitBackports.dylib, for an application that places or takes VoIP calls through PKPushRegistry; the release's own apsd hands out a real device token, so a registry that shares a UIUserNotificationType already registered by the application receives one exactly as PushKit promises. apsd on this release ties every token to a user-facing Badge/Sound/Alert prompt, with no silent registration path, so a registry with no such prior registration never receives one - the one seam this port cannot reach, since only Apple's own service issues the token.", default = false, type = "boolean"})
+
+    add_configs("intents", {description = "Build libIntentsBackports.dylib, for an application that donates an interaction, offers a vocabulary or resolves and handles an intent in process; iOS 6 runs no assistant daemon and no intent extension host, so a donation and the phrases an application offers are kept in the application's own store and read back, and every value a resolution result carries is read through the accessors of CharonIntentsResolution.h; it loads UIKit, whose asset catalogue is where an Intents image comes from", default = false, type = "boolean"})
+
+    add_configs("intentsui", {description = "Build libIntentsUIBackports.dylib, for an application that shows the button and the two view controllers which add or edit a shortcut; iOS 6 runs no Siri, no Shortcuts database and no extension host, so a controller here shows the shortcut and asks the application's own delegate - and a voice shortcut is the system's own object, which this release cannot make, so the flow ends the way the header's own signature has for one that added nothing", default = false, type = "boolean"})
+
+    add_configs("accessibility", {description = "Build libAccessibilityBackports.dylib, for an application that names the Objective-C Accessibility classes the SDK of 26.2 declares on top of the C library iOS 6 already has: a request and its technology, the feature-override session, the braille tables, a piece of custom accessibility content, and the fifteen AXMathExpression classes - which are the object graph an application hands to the system to describe a piece of mathematics, and which carry no parser and no evaluator because the header declares none", default = false, type = "boolean"})
+
+    add_configs("javascriptcore", {description = "Build libJavaScriptCoreBackports.dylib, for an application that runs JavaScript through JSContext, JSValue, JSVirtualMachine, JSManagedValue or a class conforming to JSExport; the release already carries JavaScriptCore.framework's C API (JSGlobalContextRef, JSValueRef, JSObjectRef and their functions), confirmed by the release's own export table rather than a running process's memory, and this is a wrapper over exactly that.", default = false, type = "boolean"})
+
+    add_configs("arkit", {description = "Build libARKitBackports.dylib, for an application that places a world against the camera and a gyroscope. ARKit.framework carries nothing at all on this release, so this is the whole of the framework's own work: the session over AVCaptureVideoDataOutput and CMMotionManager, the configurations that ask what this device can track (world and image tracking yes, since those need only the camera; face tracking, object scanning, scene reconstruction and LiDAR no, and they say so), a visual-inertial tracker that places a pose from the frames and the gyroscope, the anchors and the geometry a caller reads the world back through, and ARSCNView over this tree's SceneKit (facts/ARKit/ARKit.md, facts/ARKit/TrackerDifferential.md). The tracker's pose is measured, not assumed: its rotation error is 0.004 degrees over a 30-frame synthetic sequence, and its translation is not integrated yet, which is recorded rather than claimed (facts/ARKit/TrackerDifferential.md).", default = false, type = "boolean"})
+
+    add_configs("scenekit", {description = "Build libSceneKitBackports.dylib, for an application that plays a compiled .scn scene archive through SCNScene/SCNView; SceneKit.framework carries no code at all on this release, so this is the archiver's own object graph -- SCNScene, SCNNode, SCNGeometry and its sources and elements, SCNMaterial and SCNMaterialProperty, SCNParticleSystem and its property controller, SCNLight, SCNCamera, SCNPlane, SCNPhysicsWorld and SCNPhysicsRadialGravityField -- decoded from the real keyed-archive keys of the release's own SCNKeyedArchiver format -- and SCNView, which draws the scene's meshes with SceneKit's lighting models, as measured against macOS SceneKit, over the OpenGL ES 2.0 this device already has; animations are evaluated as SceneKit's are; particles, subdivision, the clear coat and normal and ambient occlusion maps are not drawn yet (facts/SceneKit/SCNView.md).", default = false, type = "boolean"})
+
+    add_configs("mediaplayer", {description = "Build libMediaPlayerBackports.dylib, for an application that answers lock-screen and headset remote-control commands through MPRemoteCommandCenter; the release has no MediaPlayer.framework command surface, but it has the older mechanism the new one is documented to sit above - UIEventTypeRemoteControl, delivered to the responder chain with a UIEventSubtypeRemoteControl* subtype since iOS 4.0 - so play/pause/stop/toggle/next/previous/seek map to their old-style subtypes for real. changePlaybackPositionCommand and the feedback/rating/language-option commands have no old-style event to answer to, so they are real, addressable command objects that never fire, honestly, not fabricated ones. It loads AVFoundation into the process, for AVPlayerItem.nowPlayingInfo alone, whose owner class AVPlayerItem is that framework's; the release's own MediaPlayer already loads AVFoundation, so the declaration adds no image - facts/MediaPlayer/WholeCacheRead.md.", default = false, type = "boolean"})
+
+    add_configs("network", {description = "Build libNetworkBackports.dylib beside libFoundationBackports.dylib, for a port that asks Network for a connection, a listener or a browser; iOS 6 has no Network.framework, so these are the port's own objects over BSD sockets, the release's SecureTransport and Foundation's own reachability. The whole API is OS_OBJECT types, so nothing of it is built below iOS 6.0 (facts/Network/NWFloor.md). It is what the Matter framework's device browser needs.", default = false, type = "boolean"})
+    add_configs("avkit", {description = "Build libAVKitBackports.dylib, for an application that plays video in an AVPlayerViewController, an AVPlayerLayer with controls of the port's own that writes the now playing information through MediaPlayer, or floats a video mini-player through AVPictureInPictureController; AVKit.framework does not exist at all on this release, and neither does any cross-app window-compositing surface a third-party dylib could draw into, so this is an in-app floating window only - the real AVPlayerLayer is reparented into a draggable window above the host app's own view hierarchy, keeps playing for real, and is reparented back on -stopPictureInPicture. It does not persist once the host app leaves the foreground, the one dimension a real SpringBoard-side companion (the kind CallKitBackports' CharonCallScreen already models for its own call screen) would be needed for and this port does not build. It builds libUIKitBackports.dylib as well, whose transition coordinator the full screen presentation hands to the delegate.", default = false, type = "boolean"})
+    add_configs("healthkit", {description = "Build libHealthKitBackports.dylib, for an application that reads or writes the user's health data through HKHealthStore; the store is a real SQLite database under Application Support, over the device's own libsqlite3, so a sample an application saves is there for the next launch of it. It loads UIKit, because +[HKDevice localDevice] answers the host's own name and model and the release's own UIDevice is where those are. iOS 6 runs no healthd, so there is no health store of Apple's to read and no health application to put the authorization sheet up; the sheet is the one seam, and the store enforces the answer the request records.", default = false, type = "boolean"})
+
+    add_configs("messageui", {description = "Build libMessageUIBackports.dylib, for an application that composes a message or a mail through MessageUI; what the release's own compose controller can carry is read off its metadata, so +canSendSubject and +canSendAttachments answer for this release rather than for a constant, and the two collaboration factories answer NO because the release's composers have no row to insert one into.", default = false, type = "boolean"})
+    add_configs("securityui", {description = "Build libSecurityUIBackports.dylib, for an application that shows the certificate of a SecTrustRef in a sheet with SFCertificatePresentation; the sheet is the port's own, its lines read out of the trust with the Security calls this release already carries.", default = false, type = "boolean"})
+    add_configs("usernotificationsui", {description = "Build libUserNotificationsUIBackports.dylib, for an extension that reports its notification content and its media state through NSExtensionContext; iOS 6 runs no extension host at all, so what the extension states is kept and the messages to the host say once that there is none.", default = false, type = "boolean"})
+    add_configs("notificationcenter", {description = "Build libNotificationCenterBackports.dylib, for an application that records what its Today widgets have to show through NCWidgetController and draws them with the widget vibrancy effects; iOS 6 has no Notification Center, so the record is real and read back and nothing ever asks a widget to refresh.", default = false, type = "boolean"})
+    add_configs("messages", {description = "Build libMessagesBackports.dylib, for an application that names the message classes of iOS 10 - MSMessage, MSMessageLayout and its template subclass, MSSession - and for one that gives MFMessageComposeViewController a message to compose; every member of them is a value the sender set and the receiver reads, kept and answered back, and a message answers isPending YES throughout because this release has no iMessage service, no conversation and no Messages extension host to send one through.", default = false, type = "boolean"})
+    add_configs("metrickit", {description = "Build libMetricKitBackports.dylib, for an application that reads the metrics and diagnostics the system vends: every value class of the framework with its dictionary and JSON representations and its archiving, the manager with a real subscriber list and a real payload store under Application Support, and the two extended-launch measurements the port can really take. Nothing on this release samples an application, so every metric the port hands over is one the application itself wrote into the store or the port measured.", default = false, type = "boolean"})
+
+    add_configs("sensorkit", {description = "Build libSensorKitBackports.dylib, for an application that reads the metrics and sensors the system collects: every value class of SensorKit with the store it keeps its values in, the four time functions over the clocks this release actually has - mach_absolute_time, and NOT mach_continuous_time, which arrived in iOS 10, so the timestamp cannot tick across a sleep here - and SRSensorReader answering as the SDK documents for a device with no permission, which is denied, because this release collects nothing at all. Nothing here is measured by the port: every value is whatever an application put in the store, read back by the property whose own name is the key.", default = false, type = "boolean"})
+    add_configs("coremotion", {description = "Build libCoreMotionBackports.dylib, for an application that asks for the activity, the steps or the altitude of the user: the activity manager and its CMMotionActivity, the pedometer with its data and event, and the altimeter with its relative and absolute data. Each answers as a machine with no motion coprocessor or no barometer does (the availability NO, the authorization NotDetermined, and the updates and queries never delivered, as the host measures them as a bare tool; facts/CoreMotion/).", default = false, type = "boolean"})
+    add_configs("replaykit", {description = "Build libReplayKitBackports.dylib, for an application that runs a broadcast: the broadcast activity view controller and its controller, the configuration, the sample and clip handlers an extension subclasses, the system broadcast picker view, and the NSExtensionContext category an extension calls to finish its setup. Each answers as the host answers, measured on a windowed Catalyst host (facts/ReplayKit/); the broadcast itself is never started, because the release has no extension to run it. The screen recorder answers as a device that cannot record: its state, its stop answer and the preview class are carried, `available` answers NO, and nothing is recorded until the recording itself is carried.", default = false, type = "boolean"})
+    add_configs("speech", {description = "Build libSpeechBackports.dylib, for an application that recognizes speech: the iOS 10 request, result, transcription and segment classes with the defaults a fresh instance has on the host (facts/Speech/recognition-data.md). No recognizer runs on this device, and no audio is captured or sent anywhere.", default = false, type = "boolean"})
+    add_configs("mlcompute", {description = "Build libMLComputeBackports.dylib, for an application that builds, trains or runs a neural network with MLCompute: its tensors, its layers, its graphs and its optimizers are all carried, and the arithmetic runs on the CPU over the vecLib LinearAlgebra the accelerate config brings (facts/MLCompute). MLCDeviceTypeGPU and MLCDeviceTypeANE are carried and answer as a device with neither, and the device classes behind gpuDevices are Metal's, which this release has no framework for."})
+
+    add_configs("gamekit", {description = "Build libGameKitBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("corenfc", {description = "Build libCoreNFCBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("iokit", {description = "Build libIOKitBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("cfnetwork", {description = "Build libCFNetworkBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("accounts", {description = "Build libAccountsBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("appclip", {description = "Build libAppClipBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("adservices", {description = "Build libAdServicesBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+    add_configs("apptrackingtransparency", {description = "Build libAppTrackingTransparencyBackports.dylib; the facts file the sources cite says what it carries and what the release cannot answer.", default = false, type = "boolean"})
+
+    add_configs("browserkit", {description = "Build libBrowserKitBackports.dylib, for an application that asks with BEAvailability whether this device may run a browser engine of its own. The answer is the system's to give, from an entitlement and a release that support it; iOS 6 carries neither, so nothing is eligible and the call says so at once.", default = false, type = "boolean"})
+
+
+    add_configs("coreservices", {description = "Build libCoreServicesBackports.dylib, for an application that names the 54 uniform type identifiers CoreServices added from iOS 8.0 to 9.1. The names are carried with the texts CoreServices itself gives them, so a strong reference to one resolves; the classification of a file stays the release's own, which knows none of these types.", default = false, type = "boolean"})
+    add_configs("iosurface", {description = "Build libIOSurfaceBackports.dylib, for an application that makes a surface with the property keys iOS 11 added and the four later releases added. The keys are carried with the texts IOSurface itself gives them, so a strong reference to one resolves; the surface itself is still the release's own, which answers for the properties it has.", default = false, type = "boolean"})
+
+    add_configs("mps", {description = "Build libMPSBackports.dylib, and libMetalBackports.dylib beside it if metal was not asked for on its own, since every MPS kernel stands on Metal's, for an application that names Metal Performance Shaders: its kernels, its states and its matrix and vector containers, over the OpenGL ES 2.0 bridge Metal itself uses, with a matrix or vector kernel reading and writing the host memory behind an MTLBuffer and doing its arithmetic on the CPU, which is exact for the eight element data types an MPSMatrix holds.", default = false, type = "boolean"})
+
+    add_configs("mpsgraph", {description = "Build libMPSGraphBackports.dylib, and libMPSBackports.dylib and libMetalBackports.dylib beside it if mps or metal was not asked for on its own, since the graph dylib hard-links the first and both hard-link the second, for an application that names MetalPerformanceShadersGraph: the graph, its tensors, its operations and the executable that runs it, over the same OpenGL ES 2.0 bridge Metal itself uses, with a tensor's values in the host memory behind an MTLBuffer.", default = false, type = "boolean"})
+    add_configs("cloudkit", {description = "Build libCloudKitBackports.dylib, for an application that keeps its data with CloudKit: the records, zones, queries, subscriptions, shares, the constants, and the ES256 signature a CloudKit Web Services authentication key takes, which is made by charon@micro-ecc because iOS 6 has no Security framework key. It loads CoreLocation and CoreGraphics into the process, for a location field and a point."; default = false, type = "boolean"})
+
+    on_load("iphoneos", function (package)
+        -- The two MPS terms and the mps and mpsgraph arms of the Metal term are here because
+        -- modules/apple/backports.lua declares FoundationBackports, MetalBackports and - for the
+        -- graph dylib - MPSBackports for them: a build that asked for mpsgraph alone and got
+        -- MPSGraphBackports without MetalBackports would be the same shape as the pre-existing
+        -- metalkit-without-metal gap, so the arms are on the Metal term itself rather than on a
+        -- second one. That term also carries metalkit and modelio, and the coreml, vision and
+        -- accelerate terms around it are main's and were not replaced. The arms have been rebased
+        -- onto four versions of that term and each time it had grown; every one of main's arms is
+        -- still there and the MPS arms joined it.
+        package:add("links", table.join((package:config("uikit") or package:config("webkit") or package:config("avkit") or package:config("usernotificationsui") or package:config("notificationcenter") or package:config("intents") or package:config("intentsui")) and {"UIKitBackports"} or {}, (package:config("corelocation") or package:config("arkit")) and {"CoreLocationBackports"} or {}, package:config("coredata") and {"CoreDataBackports"} or {}, package:config("security") and {"SecurityBackports"} or {}, package:config("commoncrypto") and {"CommonCryptoBackports"} or {}, package:config("corebluetooth") and {"CoreBluetoothBackports"} or {}, package:config("compression") and {"CompressionBackports"} or {}, package:config("spatial") and {"SpatialBackports"} or {}, package:config("sqlite3") and {"SQLite3Backports"} or {}, package:config("spritekit") and {"SpriteKitBackports"} or {},(package:config("avfoundation") or package:config("arkit") or package:config("speech")) and {"AVFoundationBackports"} or {}, package:config("avfaudio") and {"AVFAudioBackports"} or {}, package:config("webkit") and {"WebKitBackports"} or {}, (package:config("graphics") or package:config("webkit") or package:config("avfoundation") or package:config("speech") or package:config("intents") or package:config("intentsui")) and {"GraphicsBackports"} or {}, package:config("localauthentication") and {"LocalAuthenticationBackports"} or {}, (package:config("safariservices") or package:config("authenticationservices")) and {"SafariServicesBackports"} or {}, package:config("authenticationservices") and {"AuthenticationServicesBackports"} or {}, package:config("backgroundtasks") and {"BackgroundTasksBackports"} or {}, package:config("photos") and {"PhotosBackports"} or {}, package:config("gamecontroller") and {"GameControllerBackports"} or {}, (package:config("coreml") or package:config("vision")) and {"CoreMLBackports"} or {}, package:config("vision") and {"VisionBackports"} or {}, package:config("cloudkit") and {"CloudKitBackports"} or {},
+                                        package:config("arkit") and {"ARKitBackports"} or {}, (package:config("metal") or package:config("metalkit") or package:config("modelio") or package:config("mps") or package:config("mpsgraph")) and {"MetalBackports"} or {}, (package:config("mps") or package:config("mpsgraph")) and {"MPSBackports"} or {}, package:config("mpsgraph") and {"MPSGraphBackports"} or {}, (package:config("metalkit") or package:config("modelio")) and {"MetalKitBackports"} or {}, package:config("coretelephony") and {"CoreTelephonyBackports"} or {}, (package:config("accelerate") or package:config("avfoundation") or package:config("speech") or package:config("arkit")) and {"AccelerateBackports"} or {}, package:config("callkit") and {"CallKitBackports"} or {}, package:config("contacts") and {"ContactsBackports"} or {}, package:config("corespotlight") and {"CoreSpotlightBackports"} or {}, package:config("homekit") and {"HomeKitBackports"} or {}, package:config("pushkit") and {"PushKitBackports"} or {}, (package:config("opengles") or package:config("scenekit") or package:config("arkit")) and {"OpenGLESBackports"} or {}, package:config("javascriptcore") and {"JavaScriptCoreBackports"} or {}, (package:config("scenekit") or package:config("arkit")) and {"SceneKitBackports"} or {}, package:config("mediaplayer") and {"MediaPlayerBackports"} or {}, package:config("healthkit") and {"HealthKitBackports"} or {}, package:config("messageui") and {"MessageUIBackports"} or {}, package:config("securityui") and {"SecurityUIBackports"} or {}, package:config("usernotificationsui") and {"UserNotificationsUIBackports"} or {}, package:config("notificationcenter") and {"NotificationCenterBackports"} or {}, package:config("messages") and {"MessagesBackports"} or {}, package:config("metrickit") and {"MetricKitBackports"} or {}, package:config("avkit") and {"AVKitBackports"} or {}, (package:config("intents") or package:config("intentsui")) and {"IntentsBackports"} or {}, package:config("mapkit") and {"MapKitBackports"} or {}, package:config("passkit") and {"PassKitBackports"} or {}, package:config("carplay") and {"CarPlayBackports"} or {}, package:config("videotoolbox") and {"VideoToolboxBackports"} or {}, package:config("fileprovider") and {"FileProviderBackports"} or {}, package:config("network") and {"NetworkBackports"} or {}, {"FoundationBackports"}, package:config("intentsui") and {"IntentsUIBackports"} or {}, package:config("accessibility") and {"AccessibilityBackports"} or {}, package:config("sensorkit") and {"SensorKitBackports"} or {}, package:config("mlcompute") and {"MLComputeBackports"} or {}, package:config("mlcompute") and {"AccelerateBackports"} or {}, package:config("modelio") and {"ModelIOBackports"} or {}, package:config("gamekit") and {"GameKitBackports"} or {}, package:config("corenfc") and {"CoreNFCBackports"} or {}, package:config("iosurface") and {"IOSurfaceBackports"} or {}, package:config("coreservices") and {"CoreServicesBackports"} or {}, package:config("browserkit") and {"BrowserKitBackports"} or {}, package:config("iokit") and {"IOKitBackports"} or {}, package:config("cfnetwork") and {"CFNetworkBackports"} or {}, package:config("accounts") and {"AccountsBackports"} or {}, package:config("appclip") and {"AppClipBackports"} or {}, package:config("adservices") and {"AdServicesBackports"} or {}, package:config("apptrackingtransparency") and {"AppTrackingTransparencyBackports"} or {}, package:config("pdfkit") and {"PDFKitBackports"} or {}, package:config("networkextension") and {"NetworkExtensionBackports"} or {}))
+    add_configs("pdfkit", {description = "Build libPDFKitBackports.dylib, for an application that opens a PDF with PDFKit's PDFDocument and PDFPage: the document over the release's own CGPDFDocument, its pages and their boxes, the page rotation and the document attributes, and the constants the framework names. iOS 6 carries no PDFKit at all, so this is the framework's own work over CoreGraphics.", default = false, type = "boolean"})
+    add_configs("networkextension", {description = "Build libNetworkExtensionBackports.dylib, for an application that configures a tunnel or a proxy with NetworkExtension: the value classes it is made of, NEDNSSettings first. iOS 6 carries no NetworkExtension at all, so this is the framework's own work over Foundation.", default = false, type = "boolean"})
+    add_configs("gameplaykit", {description = "Build libGameplayKitBackports.dylib, for an application that reasons with GameplayKit: its random sources, state machines, behaviours and goals, the entity-component system, the rule system, the pathfinding graphs and the noise sources. GameplayKit.framework carries no code at all before iOS 8 and iOS 6 has none of the logic it is, so every class of it that this port carries is built here; the noise evaluation (GKNoise and GKNoiseMap) and the members that wrap a SpriteKit or SceneKit node wait for those frameworks. It needs nothing of the device but Foundation.", default = false, type = "boolean"})
+        package:add("links", table.join((package:config("uikit") or package:config("webkit") or package:config("avkit") or package:config("usernotificationsui") or package:config("notificationcenter") or package:config("intents") or package:config("intentsui")) and {"UIKitBackports"} or {}, (package:config("corelocation") or package:config("arkit")) and {"CoreLocationBackports"} or {}, package:config("coredata") and {"CoreDataBackports"} or {}, package:config("security") and {"SecurityBackports"} or {}, package:config("commoncrypto") and {"CommonCryptoBackports"} or {}, package:config("corebluetooth") and {"CoreBluetoothBackports"} or {}, package:config("compression") and {"CompressionBackports"} or {}, package:config("spatial") and {"SpatialBackports"} or {}, package:config("sqlite3") and {"SQLite3Backports"} or {}, package:config("spritekit") and {"SpriteKitBackports"} or {},(package:config("avfoundation") or package:config("arkit") or package:config("speech")) and {"AVFoundationBackports"} or {}, package:config("avfaudio") and {"AVFAudioBackports"} or {}, package:config("webkit") and {"WebKitBackports"} or {}, (package:config("graphics") or package:config("webkit") or package:config("avfoundation") or package:config("speech") or package:config("intents") or package:config("intentsui")) and {"GraphicsBackports"} or {}, package:config("localauthentication") and {"LocalAuthenticationBackports"} or {}, (package:config("safariservices") or package:config("authenticationservices")) and {"SafariServicesBackports"} or {}, package:config("authenticationservices") and {"AuthenticationServicesBackports"} or {}, package:config("backgroundtasks") and {"BackgroundTasksBackports"} or {}, package:config("photos") and {"PhotosBackports"} or {}, package:config("gamecontroller") and {"GameControllerBackports"} or {}, package:config("vision") and {"VisionBackports"} or {}, package:config("metal") and {"MetalBackports"} or {}, package:config("metalkit") and {"MetalKitBackports"} or {}, package:config("coretelephony") and {"CoreTelephonyBackports"} or {}, (package:config("accelerate") or package:config("avfoundation") or package:config("speech") or package:config("arkit")) and {"AccelerateBackports"} or {}, package:config("callkit") and {"CallKitBackports"} or {}, package:config("contacts") and {"ContactsBackports"} or {}, package:config("corespotlight") and {"CoreSpotlightBackports"} or {}, package:config("pushkit") and {"PushKitBackports"} or {}, (package:config("opengles") or package:config("scenekit") or package:config("arkit")) and {"OpenGLESBackports"} or {}, package:config("javascriptcore") and {"JavaScriptCoreBackports"} or {}, package:config("scenekit") and {"SceneKitBackports"} or {}, package:config("mediaplayer") and {"MediaPlayerBackports"} or {}, package:config("messageui") and {"MessageUIBackports"} or {}, package:config("securityui") and {"SecurityUIBackports"} or {}, package:config("usernotificationsui") and {"UserNotificationsUIBackports"} or {}, package:config("notificationcenter") and {"NotificationCenterBackports"} or {}, package:config("messages") and {"MessagesBackports"} or {}, package:config("metrickit") and {"MetricKitBackports"} or {}, package:config("avkit") and {"AVKitBackports"} or {}, (package:config("intents") or package:config("intentsui")) and {"IntentsBackports"} or {}, package:config("mapkit") and {"MapKitBackports"} or {}, package:config("passkit") and {"PassKitBackports"} or {}, package:config("carplay") and {"CarPlayBackports"} or {}, package:config("network") and {"NetworkBackports"} or {}, {"FoundationBackports"}, package:config("intentsui") and {"IntentsUIBackports"} or {}, package:config("accessibility") and {"AccessibilityBackports"} or {}, package:config("gameplaykit") and {"GameplayKitBackports"} or {}, package:config("pdfkit") and {"PDFKitBackports"} or {}, package:config("networkextension") and {"NetworkExtensionBackports"} or {}))
+        package:add("links", package:config("coremidi") and {"CoreMIDIBackports"} or {})
+        package:add("links", (package:config("coremotion") or package:config("arkit")) and {"CoreMotionBackports"} or {})
+        package:add("links", package:config("replaykit") and {"ReplayKitBackports"} or {})
+        package:add("links", package:config("speech") and {"SpeechBackports"} or {})
+    end)
+
+    on_install("iphoneos", function (package)
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local backports = import("apple.backports", {rootdir = modules, anonymous = true})
+        local firmware = import("apple.firmware", {rootdir = modules, anonymous = true})
+        local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
+        local toolchain = assert(package:toolchains(), "apple-backports is built with the apple-ios toolchain")[1]
+        toolchain:load()
+        local linker
+        for _, flag in ipairs(table.wrap(toolchain:get("shflags"))) do
+            linker = flag:match("^%-fuse%-ld=(.+)$") or linker
+        end
+        local deployment = toolchain:config("deployment")
+        local tool = path.join(package:dep("firmware-tools"):installdir(), "bin", "charon-firmware")
+        local cache = firmware.ensure(package:arch(), deployment, {tool = tool})
+        local libraries = table.join((package:config("mps") or package:config("mpsgraph")) and {"MPSBackports"} or {}, package:config("mpsgraph") and {"MPSGraphBackports"} or {}, package:config("network") and {"NetworkBackports"} or {}, {"FoundationBackports"}, (package:config("uikit") or package:config("webkit") or package:config("avkit") or package:config("usernotificationsui") or package:config("notificationcenter") or package:config("intents") or package:config("intentsui")) and {"UIKitBackports"} or {},
+                                     package:config("sensorkit") and {"SensorKitBackports"} or {},
+                                     package:config("replaykit") and {"ReplayKitBackports"} or {},
+                                     (package:config("coremotion") or package:config("arkit")) and {"CoreMotionBackports"} or {}, package:config("speech") and {"SpeechBackports"} or {}, (package:config("avfoundation") or package:config("arkit") or package:config("speech")) and {"AVFoundationBackports"} or {}, (package:config("accelerate") or package:config("avfoundation") or package:config("speech") or package:config("arkit")) and {"AccelerateBackports"} or {}, (package:config("graphics") or package:config("webkit") or package:config("avfoundation") or package:config("speech") or package:config("intents") or package:config("intentsui")) and {"GraphicsBackports"} or {},
+                                     package:config("cloudkit") and {"CloudKitBackports"} or {},
+                                     (package:config("corelocation") or package:config("arkit")) and {"CoreLocationBackports"} or {},
+                                     package:config("coredata") and {"CoreDataBackports"} or {},
+                                     package:config("security") and {"SecurityBackports"} or {},
+                                     package:config("commoncrypto") and {"CommonCryptoBackports"} or {}, package:config("corebluetooth") and {"CoreBluetoothBackports"} or {}, package:config("compression") and {"CompressionBackports"} or {}, package:config("spatial") and {"SpatialBackports"} or {}, package:config("sqlite3") and {"SQLite3Backports"} or {}, package:config("spritekit") and {"SpriteKitBackports"} or {},
+                                     (package:config("avfoundation") or package:config("avfaudio") or package:config("arkit")) and {"AVFoundationBackports"} or {},
+                                     package:config("avfaudio") and {"AVFAudioBackports"} or {},
+                                     package:config("webkit") and {"WebKitBackports"} or {},
+                                     (package:config("graphics") or package:config("webkit") or package:config("avfoundation") or package:config("avfaudio") or package:config("uikit") or package:config("arkit") or package:config("scenekit")) and {"GraphicsBackports"} or {},
+                                     package:config("localauthentication") and {"LocalAuthenticationBackports"} or {},
+                                     (package:config("safariservices") or package:config("authenticationservices")) and {"SafariServicesBackports"} or {},
+                                     package:config("authenticationservices") and {"AuthenticationServicesBackports"} or {},
+                                     package:config("backgroundtasks") and {"BackgroundTasksBackports"} or {},
+                                     package:config("photos") and {"PhotosBackports"} or {},
+                                     package:config("gamecontroller") and {"GameControllerBackports"} or {},
+                                     (package:config("coreml") or package:config("vision")) and {"CoreMLBackports"} or {}, package:config("vision") and {"VisionBackports"} or {},
+                                     (package:config("metal") or package:config("metalkit") or package:config("modelio") or package:config("mps") or package:config("mpsgraph")) and {"MetalBackports"} or {},
+                                     (package:config("metalkit") or package:config("modelio")) and {"MetalKitBackports"} or {},
+                                     (package:config("opengles") or package:config("scenekit") or package:config("arkit")) and {"OpenGLESBackports"} or {},
+                                     package:config("coremidi") and {"CoreMIDIBackports"} or {},
+                                     package:config("coretelephony") and {"CoreTelephonyBackports"} or {},
+                                     (package:config("accelerate") or package:config("avfoundation") or package:config("avfaudio")) and {"AccelerateBackports"} or {},
+                                     package:config("callkit") and {"CallKitBackports"} or {},
+                                     package:config("contacts") and {"ContactsBackports"} or {},
+                                     package:config("coretext") and {"CoreTextBackports"} or {}, package:config("corespotlight") and {"CoreSpotlightBackports"} or {}, package:config("homekit") and {"HomeKitBackports"} or {}, package:config("homekit") and {"HomeKitBackports"} or {},
+                                     package:config("pushkit") and {"PushKitBackports"} or {},
+                                     package:config("fileprovider") and {"FileProviderBackports"} or {},                                     package:config("javascriptcore") and {"JavaScriptCoreBackports"} or {},
+                                     package:config("arkit") and {"ARKitBackports"} or {},
+                                     (package:config("scenekit") or package:config("arkit")) and {"SceneKitBackports"} or {},
+                                     package:config("mediaplayer") and {"MediaPlayerBackports"} or {},
+                                     package:config("healthkit") and {"HealthKitBackports"} or {},
+                                     package:config("messageui") and {"MessageUIBackports"} or {},
+                                     package:config("messages") and {"MessagesBackports"} or {},
+                                     package:config("metrickit") and {"MetricKitBackports"} or {},
+                                     package:config("securityui") and {"SecurityUIBackports"} or {},
+                                     package:config("usernotificationsui") and {"UserNotificationsUIBackports"} or {},
+                                     package:config("notificationcenter") and {"NotificationCenterBackports"} or {},
+
+                                     package:config("avkit") and {"AVKitBackports"} or {},
+                                     package:config("gamekit") and {"GameKitBackports"} or {},
+                                     package:config("corenfc") and {"CoreNFCBackports"} or {},
+                                     package:config("iosurface") and {"IOSurfaceBackports"} or {},
+                                     package:config("coreservices") and {"CoreServicesBackports"} or {},
+                                     package:config("browserkit") and {"BrowserKitBackports"} or {},
+                                     package:config("iokit") and {"IOKitBackports"} or {},
+                                     package:config("cfnetwork") and {"CFNetworkBackports"} or {},
+                                     package:config("accounts") and {"AccountsBackports"} or {},
+                                     package:config("appclip") and {"AppClipBackports"} or {},
+                                     package:config("adservices") and {"AdServicesBackports"} or {},
+                                     package:config("apptrackingtransparency") and {"AppTrackingTransparencyBackports"} or {},
+                                     package:config("accessibility") and {"AccessibilityBackports"} or {},
+                                     (package:config("intents") or package:config("intentsui")) and {"IntentsBackports"} or {},
+                                     package:config("intentsui") and {"IntentsUIBackports"} or {},
+                                     package:config("mapkit") and {"MapKitBackports"} or {},
+                                     package:config("passkit") and {"PassKitBackports"} or {},
+                                     package:config("coremedia") and {"CoreMediaBackports"} or {}, package:config("corefoundation") and {"CoreFoundationBackports"} or {}, package:config("storekit") and {"StoreKitBackports"} or {}, package:config("coregraphics") and {"CoreGraphicsBackports"} or {}, package:config("addressbookui") and {"AddressBookUIBackports"} or {}, package:config("corevideo") and {"CoreVideoBackports"} or {},
+                                     package:config("carplay") and {"CarPlayBackports"} or {},
+                                     package:config("videotoolbox") and {"VideoToolboxBackports"} or {},
+                                     package:config("mlcompute") and {"MLComputeBackports", "AccelerateBackports"} or {},
+                                     package:config("network") and {"NetworkBackports"} or {},
+                                     package:config("modelio") and {"ModelIOBackports"} or {},
+                                     package:config("gameplaykit") and {"GameplayKitBackports"} or {},
+                                     package:config("pdfkit") and {"PDFKitBackports"} or {},
+                                     package:config("networkextension") and {"NetworkExtensionBackports"} or {})
+        -- Every archive a library of this package declares, each with the directory and the static
+        -- library's own name taken from the dependency that carries it, and read out of the build
+        -- module rather than written out here: coordination/build-gate.lua derives its own from the
+        -- same declarations, so the two routes compile one object per source with one line of flags
+        -- and link the same archives.
+        --
+        -- This table used to name four of the six by hand. An install with every config at its
+        -- default died on HomeKit's CharonHapCrypto.m with "'monocypher/monocypher.h' file not
+        -- found", and an install with accelerate (or avfoundation, or avfaudio, or mlcompute) on
+        -- could not link at all: "AccelerateBackports links the static library of the package
+        -- suitesparse-ordering, and the build was given none". The gate route stayed green through
+        -- both, because it reads the module and this table did not.
+        local archives = {}
+        for _, library in ipairs(backports.libraries()) do
+            for _, name in ipairs(library.archives or {}) do
+                local dependency = package:dep(name)
+                assert(dependency, "the library " .. library.name .. " links the archive " .. name
+                                    .. " and this recipe declares no dependency with that alias")
+                local links = table.unique(table.wrap(dependency:get("links")))
+                assert(#links == 1, "the archive " .. name .. " of " .. library.name .. " is one static library, and "
+                                    .. name .. " links " .. #links .. " (" .. table.concat(links, ", ") ..
+                                    "); name the one this link needs")
+                archives[name] = {linkdir = path.join(dependency:installdir(), "lib"), link = links[1],
+                                  includedir = path.join(dependency:installdir(), "include")}
+            end
+        end
+        local common = {root = package:scriptdir(), architecture = package:arch(), deployment = deployment, sdkdir = toolchain:config("sdkdir"),
+                        cc = assert(toolchain:tool("cc"), "the apple-ios toolchain names no compiler for " .. package:arch()),
+                        ld = assert(linker, "the apple-ios toolchain names no ld64 for " .. package:arch()), libraries = libraries,
+                        archives = archives}
+        -- no width here on purpose: on_install runs inside a job of xmake's own, and
+        -- backports.lua's width() sees that and compiles one unit at a time, for this call and for
+        -- write_deb() below, without either of them having to remember
+        backports.build(table.join(common, {cache = cache, builddir = path.absolute("link"), outputdir = package:installdir("lib")}))
+        local released
+        for version in io.readfile(path.join(package:scriptdir(), "..", "..", "..", "addons", "c", "charon", "xmake.lua")):gmatch('add_versions%("v(%d[%d%.]*)"') do
+            if not released or dyld.compare_versions(version, released) > 0 then
+                released = version
+            end
+        end
+        backports.write_deb(table.join(common, {tool = tool, builddir = path.absolute("bands"),
+                                                ldid = path.join(package:dep("ldid"):installdir(), "bin", "ldid"),
+                                                version = assert(released, "the addon recipe names no Charon release") .. "+" .. package:config("sources"):sub(1, 8),
+                                                outputdir = package:installdir("share")}))
+        os.vcp(path.join(package:scriptdir(), "registry"), package:installdir("share"))
+        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
+    end)
+
+    on_test(function (package)
+        for _, name in ipairs(package:get("links")) do
+            assert(os.isfile(path.join(package:installdir("lib"), "lib" .. name .. ".dylib")), name)
+        end
+        assert(#os.files(path.join(package:installdir("share"), "org.charon.apple-backports_*.deb")) == 1)
+    end)

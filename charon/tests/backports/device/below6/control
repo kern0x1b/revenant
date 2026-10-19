@@ -1,0 +1,7 @@
+Package: org.charon.below6
+Name: below6
+Architecture: iphoneos-arm
+Description: The backports' classes below iOS 6, on an emulated release
+Maintainer: charon
+Author: charon
+Section: Development

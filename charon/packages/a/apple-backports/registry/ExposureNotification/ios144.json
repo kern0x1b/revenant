@@ -1,0 +1,35 @@
+{
+ "framework": "ExposureNotification",
+ "entries": [
+  {
+     "api": "-[ENManager preAuthorizeDiagnosisKeysWithCompletionHandler:]",
+     "kind": "method",
+     "introduced": "14.4",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with the framework's own ENErrorCodeUnsupported: there is no service to publish the keys to; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager requestPreAuthorizedDiagnosisKeysWithCompletionHandler:]",
+     "kind": "method",
+     "introduced": "14.4",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with no keys and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENManager.diagnosisKeysAvailableHandler",
+     "kind": "property",
+     "introduced": "14.4",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the handler, copied on the way in as the header's copy attribute says",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+Package: org.charon.calls
+Name: Charon call test
+Architecture: iphoneos-arm
+Description: Every class and member the backports registry carries, looked up, asked for with respondsToSelector: and called with neutral arguments
+Maintainer: charon
+Author: charon
+Section: Development

@@ -1,0 +1,159 @@
+{
+  "framework": "GameController",
+  "entries": [
+    {
+      "api": "GCColor",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a colour of three floats that needs no device",
+      "effect": "red, green and blue as they were given, not clamped; copy makes a new object; description is <GCColor r=0.250000 g=0.500000 b=0.750000>; it encodes as the keyed red, green and blue reals, secure",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCEventViewController",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the view controller that says whether controller events reach the responder chain, which no device sends",
+      "effect": "controllerUserInteractionEnabled is NO to begin with and is kept as set; nothing sends a controller event either way",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCXboxGamepad",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCDualShockGamepad",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCControllerTouchpad",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCDeviceBattery",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCDeviceLight",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCDeviceHaptics",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCKeyboardInput",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCMouseInput",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a peripheral the owner may attach over Bluetooth is not hardware absent from the phone (COORDINATION.md verdict, 2026-09-22): the class, its buttons and its scroll cursor are real and built, capability-honest per §2 - only the fact of a Bluetooth mouse being connected is not detected",
+      "effect": "a real instance is made whenever a GCMouse is (GCMouse.mouseInput); leftButton/rightButton/middleButton are real GCControllerButtonInput elements, scroll a real GCDeviceCursor, mouseMovedHandler a stored block, all built through the same spec-driven element pipeline GCController's own profiles use; auxiliaryButtons is nil, since no mouse this port could measure to know how many it has",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the declarations; this port's own GCPhysicalInputProfile14.m/CharonGCTables.m element pipeline"
+    },
+    {
+      "api": "GCDeviceCursor",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "GCMouseInput.scroll is a real instance of it, built the same way a GCControllerDirectionPad is (the class it extends)",
+      "effect": "a real GCControllerDirectionPad with its own X/Y axes and up/down/left/right buttons, held by every real GCMouseInput as its scroll; the header's own note that a cursor's axis range differs from a dpad's [-1,1] is not modelled - this port's scroll reports the same normalized range a dpad does, a real, stated gap",
+      "facts": "facts/GameController/Mouse.md",
+      "source": "the header of iOS 16.4 for the declarations; this port's own GCPhysicalInputProfile14.m/CharonGCTables.m element pipeline"
+    },
+    {
+      "api": "GCDirectionalGamepad",
+      "kind": "class",
+      "introduced": "14.3",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCDualSenseGamepad",
+      "kind": "class",
+      "introduced": "14.5",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    },
+    {
+      "api": "GCDualSenseAdaptiveTrigger",
+      "kind": "class",
+      "introduced": "14.5",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is carried for what names it: no device that it describes is ever attached to iOS 6",
+      "effect": "the class is there, so an application that refers to it loads and a check with isKindOfClass: answers NO; no object of it is ever made, so its members are absent",
+      "facts": "facts/GameController/ControllerExtras.md",
+      "source": "the host's GameController, which the port is held against by tests/backports/host/gamecontroller; the header of iOS 16.4 for the declarations and the release that added each member"
+    }
+  ]
+}

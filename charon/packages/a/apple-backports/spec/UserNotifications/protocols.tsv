@@ -1,0 +1,6 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+UNNotificationContentProviding	15.0	sdk16 body		NSObject	-	-	-	-	-	-
+UNUserNotificationCenterDelegate	10.0	sdk16 body		NSObject	-	-	-	-	-	-
+UNUserNotificationCenterDelegate	10.0	sdk16 body		NSObject	optional	method	yes	userNotificationCenter:willPresentNotification:withCompletionHandler:	- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center willPresentNotification:(UNNotification * _Nonnull)notification withCompletionHandler:(void (^ _Nonnull)(UNNotificationPresentationOptions))completionHandler API_AVAILABLE(ios(10.0));	yes
+UNUserNotificationCenterDelegate	10.0	sdk16 body		NSObject	optional	method	yes	userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:	- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center didReceiveNotificationResponse:(UNNotificationResponse * _Nonnull)response withCompletionHandler:(void (^ _Nonnull)(void))completionHandler API_AVAILABLE(ios(10.0));	yes
+UNUserNotificationCenterDelegate	10.0	sdk16 body		NSObject	optional	method	yes	userNotificationCenter:openSettingsForNotification:	- (void)userNotificationCenter:(UNUserNotificationCenter * _Nonnull)center openSettingsForNotification:(UNNotification * _Nullable)notification API_AVAILABLE(ios(12.0));	yes

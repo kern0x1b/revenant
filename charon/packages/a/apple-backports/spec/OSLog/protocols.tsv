@@ -1,0 +1,12 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+OSLogEntryFromProcess	15.0	sdk16 body			-	-	-	-	-	-
+OSLogEntryFromProcess	15.0	sdk16 body			required	property	no	activityIdentifier	@property (nonatomic, readonly) os_activity_id_t activityIdentifier API_AVAILABLE(ios(15.0));	yes
+OSLogEntryFromProcess	15.0	sdk16 body			required	property	no	process	@property (nonatomic, readonly) NSString * _Nonnull process API_AVAILABLE(ios(15.0));	yes
+OSLogEntryFromProcess	15.0	sdk16 body			required	property	no	processIdentifier	@property (nonatomic, readonly) pid_t processIdentifier API_AVAILABLE(ios(15.0));	yes
+OSLogEntryFromProcess	15.0	sdk16 body			required	property	no	sender	@property (nonatomic, readonly) NSString * _Nonnull sender API_AVAILABLE(ios(15.0));	yes
+OSLogEntryFromProcess	15.0	sdk16 body			required	property	no	threadIdentifier	@property (nonatomic, readonly) uint64_t threadIdentifier API_AVAILABLE(ios(15.0));	yes
+OSLogEntryWithPayload	15.0	sdk16 body			-	-	-	-	-	-
+OSLogEntryWithPayload	15.0	sdk16 body			required	property	no	category	@property (nonatomic, readonly) NSString * _Nonnull category API_AVAILABLE(ios(15.0));	yes
+OSLogEntryWithPayload	15.0	sdk16 body			required	property	no	components	@property (nonatomic, readonly) NSArray<OSLogMessageComponent *> * _Nonnull components API_AVAILABLE(ios(15.0));	yes
+OSLogEntryWithPayload	15.0	sdk16 body			required	property	no	formatString	@property (nonatomic, readonly) NSString * _Nonnull formatString API_AVAILABLE(ios(15.0));	yes
+OSLogEntryWithPayload	15.0	sdk16 body			required	property	no	subsystem	@property (nonatomic, readonly) NSString * _Nonnull subsystem API_AVAILABLE(ios(15.0));	yes

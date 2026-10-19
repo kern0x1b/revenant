@@ -1,0 +1,79 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+AppMigrationKit	swift-protocol	s:15AppMigrationKit29ResourcesExportingWithOptionsP	-	ResourcesExportingWithOptions	-	-	-	ios=26.0	-	31930aeab00e6b13
+AppMigrationKit	swift-method	s:15AppMigrationKit29ResourcesExportingWithOptionsP06exportD02to7requestyAA0D8ArchiverCn_AA0b7RequestfG0Vy0G4TypeQzGtYaKF	ResourcesExportingWithOptions	exportResources(to:request:)	-	()	AppMigrationKit.ResourcesArchiver | AppMigrationKit.MigrationRequestWithOptions<Self.OptionsType>	-	-	a7c73c2b4ffbb39a
+AppMigrationKit	swift-property	s:15AppMigrationKit29ResourcesExportingWithOptionsP21resourcesSizeEstimateSivp	ResourcesExportingWithOptions	resourcesSizeEstimate	-	Swift.Int	-	-	-	3352403457d8ffc4
+AppMigrationKit	swift-property	s:15AppMigrationKit29ResourcesExportingWithOptionsP16resourcesVersionSSvp	ResourcesExportingWithOptions	resourcesVersion	-	Swift.String	-	-	-	cb677c48e6e8ef30
+AppMigrationKit	swift-property	s:15AppMigrationKit29ResourcesExportingWithOptionsP21resourcesCompressibleSbvp	ResourcesExportingWithOptions	resourcesCompressible	-	Swift.Bool	-	-	-	c9fabf12d51155f2
+AppMigrationKit	swift-protocol	s:15AppMigrationKit18ResourcesExportingP	-	ResourcesExporting	-	-	-	ios=26.0	-	36701f7abb132dd7
+AppMigrationKit	swift-class	s:15AppMigrationKit17ResourcesArchiverC	-	ResourcesArchiver	-	-	-	ios=26.0	-	6500ea23802a2ad6
+AppMigrationKit	swift-method	s:15AppMigrationKit17ResourcesArchiverC10appendItem2at13pathInArchivey10Foundation3URLV_SSSgtYaKF	ResourcesArchiver	appendItem(at:pathInArchive:)	-	()	Foundation.URL | Swift.String?	-	-	98accda58f76fbfc
+AppMigrationKit	swift-protocol	s:15AppMigrationKit0aB9ExtensionP	-	AppMigrationExtension	-	-	-	ios=26.0	-	50889befef71948e
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB9ExtensionP12appContainerAA0b4DataF0Vvp	AppMigrationExtension	appContainer	-	AppMigrationKit.MigrationDataContainer	-	-	-	d44aba6a41ec566c
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB9ExtensionPAAE13configurationQrvp	AppMigrationExtension	configuration	-	some ExtensionFoundation.AppExtensionConfiguration	-	-	-	95ff16e273df3127
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB9ExtensionPAAE12appContainerAA0b4DataF0Vvp	AppMigrationExtension	appContainer	-	AppMigrationKit.MigrationDataContainer	-	-	-	dfb2d2b68b729519
+AppMigrationKit	swift-struct	s:15AppMigrationKit0B13DataContainerV	-	MigrationDataContainer	-	-	-	ios=26.0	-	aa858ad8a0d751e0
+AppMigrationKit	swift-property	s:15AppMigrationKit0B13DataContainerV16bundleIdentifierSSvp	MigrationDataContainer	bundleIdentifier	-	Swift.String	-	-	-	aa2727b0f0f9ac35
+AppMigrationKit	swift-property	s:15AppMigrationKit0B13DataContainerV22containerRootDirectory10Foundation3URLVvp	MigrationDataContainer	containerRootDirectory	-	Foundation.URL	-	-	-	cf811c1bdc23092b
+AppMigrationKit	swift-property	s:15AppMigrationKit0B13DataContainerV18documentsDirectory10Foundation3URLVvp	MigrationDataContainer	documentsDirectory	-	Foundation.URL	-	-	-	600dc8be0a394111
+AppMigrationKit	swift-property	s:15AppMigrationKit0B13DataContainerV27applicationSupportDirectory10Foundation3URLVvp	MigrationDataContainer	applicationSupportDirectory	-	Foundation.URL	-	-	-	8f1eef22c905d02a
+AppMigrationKit	swift-struct	s:15AppMigrationKit0B8PlatformV	-	MigrationPlatform	-	-	-	ios=26.0	-	273281901014df56
+AppMigrationKit	swift-property	s:15AppMigrationKit0B8PlatformV8rawValueSSvp	MigrationPlatform	rawValue	-	Swift.String	-	-	-	75d8fb9e188f9800
+AppMigrationKit	swift-method	s:15AppMigrationKit0B8PlatformV8rawValueACSS_tcfc	MigrationPlatform	init(rawValue:)	-	-	AppMigrationKit.MigrationPlatform | Swift.String	-	-	6f7b4429f3667af5
+AppMigrationKit	swift-method	s:15AppMigrationKit0B8PlatformVyACSScfc	MigrationPlatform	init(_:)	-	-	AppMigrationKit.MigrationPlatform | Swift.String	-	-	d06d53a2456ee30d
+AppMigrationKit	swift-typealias	s:15AppMigrationKit0B8PlatformV8RawValuea	MigrationPlatform	RawValue	-	-	-	ios=26.0	-	591f121e13dcf874
+AppMigrationKit	swift-property	s:15AppMigrationKit0B8PlatformV7androidACvpZ	MigrationPlatform	android	+	AppMigrationKit.MigrationPlatform	-	-	-	2c0b74cdcbf8cdcd
+AppMigrationKit	swift-struct	s:15AppMigrationKit22ResourcesImportRequestV	-	ResourcesImportRequest	-	-	-	ios=26.0	-	57272593cca032f1
+AppMigrationKit	swift-property	s:15AppMigrationKit22ResourcesImportRequestV06sourceA10IdentifierAA0baH0Vvp	ResourcesImportRequest	sourceAppIdentifier	-	AppMigrationKit.MigrationAppIdentifier	-	-	-	fd4c125976336a38
+AppMigrationKit	swift-property	s:15AppMigrationKit22ResourcesImportRequestV13sourceVersionSSvp	ResourcesImportRequest	sourceVersion	-	Swift.String	-	-	-	ff9b6aafce7f754e
+AppMigrationKit	swift-method	s:15AppMigrationKit22ResourcesImportRequestV06sourceA10Identifier0G7VersionAcA0baH0V_SStcfc	ResourcesImportRequest	init(sourceAppIdentifier:sourceVersion:)	-	-	AppMigrationKit.ResourcesImportRequest | AppMigrationKit.MigrationAppIdentifier | Swift.String	-	-	f39ce2fe977f2a6b
+AppMigrationKit	swift-protocol	s:15AppMigrationKit18ResourcesImportingP	-	ResourcesImporting	-	-	-	ios=26.0	-	31c50d0f2c659b86
+AppMigrationKit	swift-method	s:15AppMigrationKit18ResourcesImportingP06importD02at7requesty10Foundation3URLV_AA0D13ImportRequestVtYaKF	ResourcesImporting	importResources(at:request:)	-	()	Foundation.URL | AppMigrationKit.ResourcesImportRequest	-	-	7bfbf56ba22be709
+AppMigrationKit	swift-property	s:15AppMigrationKit18ResourcesImportingP23resourcesImportProgressSo10NSProgressCvp	ResourcesImporting	resourcesImportProgress	-	Foundation.Progress	-	-	-	1be35560ebfeade1
+AppMigrationKit	swift-enum	s:15AppMigrationKit0B23DefaultSupportedOptionsO	-	MigrationDefaultSupportedOptions	-	-	-	ios=26.0	-	44b941b48cb00ff8
+AppMigrationKit	swift-typealias	s:15AppMigrationKit0B23DefaultSupportedOptionsO8RawValuea	MigrationDefaultSupportedOptions	RawValue	-	-	-	-	-	2bf9f286aa1b329c
+AppMigrationKit	swift-property	s:15AppMigrationKit0B23DefaultSupportedOptionsO8allCasesSayACGvpZ	MigrationDefaultSupportedOptions	allCases	+	[AppMigrationKit.MigrationDefaultSupportedOptions]	-	-	-	0f3071a26d47d078
+AppMigrationKit	swift-method	s:15AppMigrationKit0B23DefaultSupportedOptionsO8rawValueACSgSS_tcfc	MigrationDefaultSupportedOptions	init(rawValue:)	-	-	AppMigrationKit.MigrationDefaultSupportedOptions? | Swift.String	-	-	6077a806cd893d09
+AppMigrationKit	swift-property	s:15AppMigrationKit0B23DefaultSupportedOptionsO8rawValueSSvp	MigrationDefaultSupportedOptions	rawValue	-	Swift.String	-	-	-	3b2240980cbf2299
+AppMigrationKit	swift-typealias	s:15AppMigrationKit0B23DefaultSupportedOptionsO8AllCasesa	MigrationDefaultSupportedOptions	AllCases	-	-	-	ios=26.0	-	394a4fd5f7e039bb
+AppMigrationKit	swift-struct	s:15AppMigrationKit0B18RequestWithOptionsV	-	MigrationRequestWithOptions	-	-	-	ios=26.0	-	af1bed2a0da5a62a
+AppMigrationKit	swift-property	s:15AppMigrationKit0B18RequestWithOptionsV19destinationPlatformAA0bH0Vvp	MigrationRequestWithOptions	destinationPlatform	-	AppMigrationKit.MigrationPlatform	-	-	-	3acae30ee14673ff
+AppMigrationKit	swift-property	s:15AppMigrationKit0B18RequestWithOptionsV7optionsSDyx10Foundation4DataVGvp	MigrationRequestWithOptions	options	-	[OptionsType : Foundation.Data]	-	-	-	916610bc5c69c0dc
+AppMigrationKit	swift-method	s:15AppMigrationKit0B18RequestWithOptionsV19destinationPlatform7optionsACyxGAA0bH0V_SDyx10Foundation4DataVGtcfc	MigrationRequestWithOptions	init(destinationPlatform:options:)	-	-	AppMigrationKit.MigrationRequestWithOptions<OptionsType> | AppMigrationKit.MigrationPlatform | [OptionsType : Foundation.Data]	-	-	87a5fbd18e3977cb
+AppMigrationKit	swift-typealias	s:15AppMigrationKit0B7Requesta	-	MigrationRequest	-	-	-	ios=26.0	-	8845cccabfe0ba03
+AppMigrationKit	swift-enum	s:15AppMigrationKit0B6StatusO	-	MigrationStatus	-	-	-	ios=26.0	-	a41e0ce159ef6dc8
+AppMigrationKit	swift-constant	s:15AppMigrationKit0B6StatusO7successyA2CmF	MigrationStatus	success	-	-	-	-	-	b4baed2d7831ab87
+AppMigrationKit	swift-constant	s:15AppMigrationKit0B6StatusO7failureyACs5Error_pcACmF	MigrationStatus	failure	-	-	-	-	-	298158d3d208173b
+AppMigrationKit	swift-property	s:15AppMigrationKit0B6StatusO06importD0ACSgvpZ	MigrationStatus	importStatus	+	AppMigrationKit.MigrationStatus?	-	-	-	4875bfec75ea0dcf
+AppMigrationKit	swift-method	s:15AppMigrationKit0B6StatusO011clearImportD0yyFZ	MigrationStatus	clearImportStatus()	+	()	-	-	-	605be3b84097627a
+AppMigrationKit	swift-struct	s:15AppMigrationKit0bA10IdentifierV	-	MigrationAppIdentifier	-	-	-	ios=26.0	-	a029dfc7ee508b3e
+AppMigrationKit	swift-property	s:15AppMigrationKit0bA10IdentifierV05storeD0AC05StoreD0Vvp	MigrationAppIdentifier	storeIdentifier	-	AppMigrationKit.MigrationAppIdentifier.StoreIdentifier	-	-	-	ce09fb2069a0d679
+AppMigrationKit	swift-property	s:15AppMigrationKit0bA10IdentifierV06bundleD0SSvp	MigrationAppIdentifier	bundleIdentifier	-	Swift.String	-	-	-	64ee4efd2730e751
+AppMigrationKit	swift-property	s:15AppMigrationKit0bA10IdentifierV8platformAA0B8PlatformVvp	MigrationAppIdentifier	platform	-	AppMigrationKit.MigrationPlatform	-	-	-	6b66ce3212981120
+AppMigrationKit	swift-method	s:15AppMigrationKit0bA10IdentifierV05storeD006bundleD08platformA2C05StoreD0V_SSAA0B8PlatformVtcfc	MigrationAppIdentifier	init(storeIdentifier:bundleIdentifier:platform:)	-	-	AppMigrationKit.MigrationAppIdentifier | AppMigrationKit.MigrationAppIdentifier.StoreIdentifier | Swift.String | AppMigrationKit.MigrationPlatform	-	-	d3933bb76051fc89
+AppMigrationKit	swift-struct	s:15AppMigrationKit0bA10IdentifierV05StoreD0V	MigrationAppIdentifier	StoreIdentifier	-	-	-	-	-	018965c2a99330fc
+AppMigrationKit	swift-property	s:15AppMigrationKit0bA10IdentifierV05StoreD0V8rawValueSSvp	MigrationAppIdentifier.StoreIdentifier	rawValue	-	Swift.String	-	-	-	930e28ae2d4d2847
+AppMigrationKit	swift-method	s:15AppMigrationKit0bA10IdentifierV05StoreD0V8rawValueAESS_tcfc	MigrationAppIdentifier.StoreIdentifier	init(rawValue:)	-	-	AppMigrationKit.MigrationAppIdentifier.StoreIdentifier | Swift.String	-	-	0b19806b8639d6ac
+AppMigrationKit	swift-method	s:15AppMigrationKit0bA10IdentifierV05StoreD0VyAESScfc	MigrationAppIdentifier.StoreIdentifier	init(_:)	-	-	AppMigrationKit.MigrationAppIdentifier.StoreIdentifier | Swift.String	-	-	31f8f7a521f3c8b1
+AppMigrationKit	swift-property	s:15AppMigrationKit0bA10IdentifierV05StoreD0V10googlePlayAEvpZ	MigrationAppIdentifier.StoreIdentifier	googlePlay	+	AppMigrationKit.MigrationAppIdentifier.StoreIdentifier	-	-	-	b14582e2eb279b3e
+AppMigrationKit	swift-typealias	s:15AppMigrationKit0bA10IdentifierV05StoreD0V8RawValuea	MigrationAppIdentifier.StoreIdentifier	RawValue	-	-	-	ios=26.0	-	c8c21030383b7bdd
+AppMigrationKit	swift-method	s:15AppMigrationKit0bA10IdentifierV6encode2toys7Encoder_p_tKF	MigrationAppIdentifier	encode(to:)	-	()	any Swift.Encoder	-	-	7470d838f0119455
+AppMigrationKit	swift-method	s:15AppMigrationKit0bA10IdentifierV4fromACs7Decoder_p_tKcfc	MigrationAppIdentifier	init(from:)	-	-	AppMigrationKit.MigrationAppIdentifier | any Swift.Decoder	-	-	485b848abd44e96e
+AppMigrationKit	swift-class	s:15AppMigrationKit0aB6TesterC	-	AppMigrationTester	-	-	-	ios=26.0	-	ecd6dda6170d6671
+AppMigrationKit	swift-method	s:15AppMigrationKit0aB6TesterC8platformAcA0B8PlatformV_tYaKcfc	AppMigrationTester	init(platform:)	-	-	AppMigrationKit.AppMigrationTester | AppMigrationKit.MigrationPlatform	-	-	1e31a02dbd14867e
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC15unownedExecutorScevp	AppMigrationTester	unownedExecutor	-	_Concurrency.UnownedSerialExecutor	-	ios=26.0,macos=10.15,tvos=13.0,watchos=6.0	-	38605c1d4097880a
+AppMigrationKit	swift-class	s:15AppMigrationKit0aB6TesterC0A16ImportControllerC	AppMigrationTester	AppImportController	-	-	-	-	-	996f30582e96317a
+AppMigrationKit	swift-method	s:15AppMigrationKit0aB6TesterC0A16ImportControllerC15importResources4from0G7Request8progressy10Foundation3URLV_AA0heJ0VSgSo10NSProgressCSgtYaKF	AppMigrationTester.AppImportController	importResources(from:importRequest:progress:)	-	()	Foundation.URL | AppMigrationKit.ResourcesImportRequest? | Foundation.Progress?	-	-	b4619fde1a3f55bb
+AppMigrationKit	swift-method	s:15AppMigrationKit0aB6TesterC0A16ImportControllerC08registerE10Completion4withyAA0B6StatusO_tYaKF	AppMigrationTester.AppImportController	registerImportCompletion(with:)	-	()	AppMigrationKit.MigrationStatus	-	-	cba0ff5e4bf5475e
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC16importControllerAC0a6ImportF0Cvp	AppMigrationTester	importController	-	AppMigrationKit.AppMigrationTester.AppImportController	-	-	-	5bd0fad7c6df2e0b
+AppMigrationKit	swift-struct	s:15AppMigrationKit0aB6TesterC08DeviceToE16ExportPropertiesV	AppMigrationTester	DeviceToDeviceExportProperties	-	-	-	-	-	d5b87826b975e669
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC08DeviceToE16ExportPropertiesV17uncompressedBytesSivp	AppMigrationTester.DeviceToDeviceExportProperties	uncompressedBytes	-	Swift.Int	-	-	-	f4794e9b301aded0
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC08DeviceToE16ExportPropertiesV15compressedBytesSiSgvp	AppMigrationTester.DeviceToDeviceExportProperties	compressedBytes	-	Swift.Int?	-	-	-	4383205539f1a9bb
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC08DeviceToE16ExportPropertiesV12sizeEstimateSivp	AppMigrationTester.DeviceToDeviceExportProperties	sizeEstimate	-	Swift.Int	-	-	-	643042ad585165e9
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC08DeviceToE16ExportPropertiesV7versionSSvp	AppMigrationTester.DeviceToDeviceExportProperties	version	-	Swift.String	-	-	-	f7843daafcaa45ea
+AppMigrationKit	swift-struct	s:15AppMigrationKit0aB6TesterC21ResourcesExportResultV	AppMigrationTester	ResourcesExportResult	-	-	-	-	-	73782b258fa01b5c
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC21ResourcesExportResultV09extractedE3URL10Foundation0I0Vvp	AppMigrationTester.ResourcesExportResult	extractedResourcesURL	-	Foundation.URL	-	-	-	f068e23443477cc1
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC21ResourcesExportResultV16exportPropertiesAC08DeviceTojfI0Vvp	AppMigrationTester.ResourcesExportResult	exportProperties	-	AppMigrationKit.AppMigrationTester.DeviceToDeviceExportProperties	-	-	-	f5f80a4d3996048f
+AppMigrationKit	swift-class	s:15AppMigrationKit0aB6TesterC0A16ExportControllerC	AppMigrationTester	AppExportController	-	-	-	-	-	41145ac197972f74
+AppMigrationKit	swift-method	s:15AppMigrationKit0aB6TesterC0A16ExportControllerC15exportResources7request8progressAC0hE6ResultVAA0B18RequestWithOptionsVyAA0b16DefaultSupportedN0OGSg_So10NSProgressCSgtYaKF	AppMigrationTester.AppExportController	exportResources(request:progress:)	-	AppMigrationKit.AppMigrationTester.ResourcesExportResult	AppMigrationKit.MigrationRequest? | Foundation.Progress?	-	-	85adff4002ac8961
+AppMigrationKit	swift-method	s:15AppMigrationKit0aB6TesterC0A16ExportControllerC15exportResources7request8progressAC0hE6ResultVAA0B18RequestWithOptionsVyxGSg_So10NSProgressCSgtYaKs12CaseIterableRzSHRzSYRzs8SendableRzSS8RawValueSYRtzlF	AppMigrationTester.AppExportController	exportResources(request:progress:)	-	AppMigrationKit.AppMigrationTester.ResourcesExportResult	AppMigrationKit.MigrationRequestWithOptions<SupportedOptions>? | Foundation.Progress?	-	-	8e1553f6a351daf7
+AppMigrationKit	swift-property	s:15AppMigrationKit0aB6TesterC16exportControllerAC0a6ExportF0Cvp	AppMigrationTester	exportController	-	AppMigrationKit.AppMigrationTester.AppExportController	-	-	-	55f3539ed7c99839

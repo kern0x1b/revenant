@@ -1,0 +1,36 @@
+The 33 IOSurface property keys the corpus lists missing, one per line, as the port's source
+spells them. The differential walks this list, so the test and the five generated files cannot drift
+apart: a name the source does not carry is a failure, not a skip.
+IOSurfacePropertyAllocSizeKey
+IOSurfacePropertyKeyAllocSize
+IOSurfacePropertyKeyBytesPerElement
+IOSurfacePropertyKeyBytesPerRow
+IOSurfacePropertyKeyCacheMode
+IOSurfacePropertyKeyElementHeight
+IOSurfacePropertyKeyElementWidth
+IOSurfacePropertyKeyHeight
+IOSurfacePropertyKeyName
+IOSurfacePropertyKeyOffset
+IOSurfacePropertyKeyPixelFormat
+IOSurfacePropertyKeyPixelSizeCastingAllowed
+IOSurfacePropertyKeyPlaneBase
+IOSurfacePropertyKeyPlaneBytesPerElement
+IOSurfacePropertyKeyPlaneBytesPerRow
+IOSurfacePropertyKeyPlaneElementHeight
+IOSurfacePropertyKeyPlaneElementWidth
+IOSurfacePropertyKeyPlaneHeight
+IOSurfacePropertyKeyPlaneInfo
+IOSurfacePropertyKeyPlaneOffset
+IOSurfacePropertyKeyPlaneSize
+IOSurfacePropertyKeyPlaneWidth
+IOSurfacePropertyKeyWidth
+kIOSurfaceContentHeadroom
+kIOSurfaceName
+kIOSurfacePixelSizeCastingAllowed
+kIOSurfacePlaneBitsPerElement
+kIOSurfacePlaneComponentBitDepths
+kIOSurfacePlaneComponentBitOffsets
+kIOSurfacePlaneComponentNames
+kIOSurfacePlaneComponentRanges
+kIOSurfacePlaneComponentTypes
+kIOSurfaceSubsampling

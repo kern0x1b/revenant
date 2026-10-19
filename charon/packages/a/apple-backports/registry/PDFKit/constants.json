@@ -1,0 +1,1265 @@
+{
+ "framework": "PDFKit",
+ "entries": [
+  {
+   "api": "PDFAnnotationHighlightingModeInvert",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/I\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationHighlightingModeNone",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/N\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationHighlightingModeOutline",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/O\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationHighlightingModePush",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/P\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyAction",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/A\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyAdditionalActions",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/AA\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyAppearanceDictionary",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/AP\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyAppearanceState",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/AS\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyBorder",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Border\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyBorderStyle",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/BS\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyColor",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/C\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyContents",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Contents\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyDate",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/M\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyDefaultAppearance",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/DA\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyDestination",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Dest\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyFlags",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/F\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyHighlightingMode",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/H\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyIconName",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Name\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyInklist",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/InkList\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyInteriorColor",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/IC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyLineEndingStyles",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/LE\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyLinePoints",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/L\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyName",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/NM\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyOpen",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Open\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyPage",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/P\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyParent",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Parent\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyPopup",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Popup\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyQuadPoints",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/QuadPoints\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyQuadding",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Q\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyRect",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Rect\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeySubtype",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Subtype\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyTextLabel",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/T\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetAppearanceDictionary",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/MK\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetBackgroundColor",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/BG\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetBorderColor",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/BC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetCaption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/CA\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetDefaultValue",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/DV\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetDownCaption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/AC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetFieldFlags",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Ff\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetFieldType",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/FT\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetMaxLen",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/MaxLen\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetOptions",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Opt\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetRolloverCaption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/RC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetRotation",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/R\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetTextLabelUI",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/TU\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationKeyWidgetValue",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/V\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationLineEndingStyleCircle",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Circle\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationLineEndingStyleClosedArrow",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/ClosedArrow\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationLineEndingStyleDiamond",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Diamond\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationLineEndingStyleNone",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/None\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationLineEndingStyleOpenArrow",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/OpenArrow\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationLineEndingStyleSquare",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Square\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeCircle",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Circle\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeFreeText",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/FreeText\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeHighlight",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Highlight\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeInk",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Ink\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeLine",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Line\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeLink",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Link\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypePopup",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Popup\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeSquare",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Square\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeStamp",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Stamp\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeStrikeOut",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/StrikeOut\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeText",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Text\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeUnderline",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Underline\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationSubtypeWidget",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Widget\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeComment",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Comment\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeHelp",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Help\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeInsert",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Insert\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeKey",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Key\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeNewParagraph",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/NewParagraph\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeNote",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Note\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationTextIconTypeParagraph",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Paragraph\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationWidgetSubtypeButton",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Btn\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationWidgetSubtypeChoice",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Ch\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationWidgetSubtypeSignature",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Sig\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAnnotationWidgetSubtypeText",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"/Tx\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAppearanceCharacteristicsKeyBackgroundColor",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"BG\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAppearanceCharacteristicsKeyBorderColor",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"BC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAppearanceCharacteristicsKeyCaption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"CA\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAppearanceCharacteristicsKeyDownCaption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"AC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAppearanceCharacteristicsKeyRolloverCaption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"RC\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFAppearanceCharacteristicsKeyRotation",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"R\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFBorderKeyDashPattern",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"D\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFBorderKeyLineWidth",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"W\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFBorderKeyStyle",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"S\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentAccessPermissionsOption",
+   "kind": "constant",
+   "introduced": "15.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentAccessPermissionsOption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentAuthorAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"Author\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentBurnInAnnotationsOption",
+   "kind": "constant",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentBurnInAnnotationsOption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentCreationDateAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"CreationDate\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentCreatorAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"Creator\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidBeginFindNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidBeginDocumentFind\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidBeginPageFindNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidBeginPageFind\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidBeginPageWriteNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidBeginPageWrite\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidBeginWriteNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidBeginDocumentWrite\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidEndFindNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidEndDocumentFind\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidEndPageFindNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidEndPageFind\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidEndPageWriteNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidEndPageWrite\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidEndWriteNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidEndDocumentWrite\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidFindMatchNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDidFindMatch\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentDidUnlockNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentDidUnlock\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentFoundSelectionKey",
+   "kind": "constant",
+   "introduced": "15.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentFoundSelection\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentKeywordsAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"Keywords\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentModificationDateAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"ModDate\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentOptimizeImagesForScreenOption",
+   "kind": "constant",
+   "introduced": "16.4",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentOptimizeImagesForScreenOption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentOwnerPasswordOption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentOwnerPasswordOption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentPageIndexKey",
+   "kind": "constant",
+   "introduced": "15.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentPageIndex\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentProducerAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"Producer\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentSaveImagesAsJPEGOption",
+   "kind": "constant",
+   "introduced": "16.4",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentSaveImagesAsJPEGOption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentSaveTextFromOCROption",
+   "kind": "constant",
+   "introduced": "16.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentSaveTextFromOCROption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentSubjectAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"Subject\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentTitleAttribute",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"Title\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFDocumentUserPasswordOption",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFDocumentUserPasswordOption\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFThumbnailViewDocumentEditedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFThumbnailViewDocumentEditedNotification\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewAnnotationHitNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewAnnotationHit\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewAnnotationWillHitNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewAnnotationWillHit\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewChangedHistoryNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewChangedHistory\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewCopyPermissionNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewCopyPermission\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewDisplayBoxChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewDisplayBoxChanged\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewDisplayModeChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewDisplayModeChanged\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewDocumentChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewChangedDocument\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewPageChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewChangedPage\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewPrintPermissionNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewPrintPermission\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewScaleChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewScaleChanged\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewSelectionChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewSelectionChanged\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "PDFViewVisiblePagesChangedNotification",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the string the host's own PDFKit holds for this name, which is '@\"PDFViewVisiblePagesChanged\"' - a literal the format fixes, compared name by name",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read with dladdr proving the image, compared name by name against the committed object by tests/backports/host/pdfkit-constants/run.sh: COMPARED 125 MISMATCHES 0"
+  },
+  {
+   "api": "kPDFDestinationUnspecifiedValue",
+   "kind": "constant",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the sentinel for an unspecified x or y in a point, which PDFKit's own header calls \"no position is specified\"; the value is the FLOAT maximum, FLT_MAX = 3.4028234663852886e+38, which is the host's own value for this symbol and NOT CGFLOAT_MAX",
+   "facts": "facts/PDFKit/Constants.md",
+   "source": "the host's own PDFKit under macOS, read through dlsym as a double with dladdr proving the image, compared name by name with the 125 strings by tests/backports/host/pdfkit-constants/run.sh: COMPARED 126 MISMATCHES 0. The header declares the symbol with NO initializer (PDFDestination.h:17), so the header gives no value and none is claimed from it"
+  }
+ ]
+}

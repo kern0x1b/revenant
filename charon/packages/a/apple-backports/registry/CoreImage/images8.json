@@ -1,0 +1,82 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "-[CIImage imageByCompositingOverImage:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 58 of the frameworks demand table, CRASH-ON-USE for delta and telegram; iOS 6 has the CISourceOverCompositing filter of iOS 5",
+      "effect": "the output of CISourceOverCompositing with this image over the given one; over nil, this image itself, as the host answers",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the host's CoreImage, which the port is held against by tests/backports/host/ciimage; an iPad 2 on 6.1.3"
+    },
+    {
+      "api": "+[CIFilter filterWithName:withInputParameters:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 50 of the frameworks demand table, CRASH-ON-USE for aidoku and delta; iOS 6's filterWithName: already gives a filter its default values",
+      "effect": "the filter of that name with its defaults and each parameter set by its key; nil for a filter that does not exist; a key the filter does not have raises NSUnknownKeyException",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the host's CoreImage, which the port is held against by tests/backports/host/ciimage; an iPad 2 on 6.1.3"
+    },
+    {
+      "api": "-[CIImage initWithCVImageBuffer:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 59 of the frameworks demand table, CRASH-ON-USE for aidoku and telegram; the image buffers a capture or a decoder hands out are pixel buffers, which iOS 6's CIImage takes",
+      "effect": "the image of the pixel buffer, as initWithCVPixelBuffer: makes it; nil for NULL or another kind of buffer, and, as the release's own initWithCVPixelBuffer: answers, for a pixel buffer with no IOSurface",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the host's CoreImage, which the port is held against by tests/backports/host/ciimage; an iPad 2 on 6.1.3"
+    },
+    {
+      "api": "-[CIImage initWithCVImageBuffer:options:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the same with options, which initWithCVPixelBuffer:options: of iOS 6 takes",
+      "effect": "as initWithCVImageBuffer:, with the options passed on",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the host's CoreImage, which the port is held against by tests/backports/host/ciimage; an iPad 2 on 6.1.3"
+    },
+    {
+      "api": "+[CIImage imageWithCVImageBuffer:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the same as a class method",
+      "effect": "as initWithCVImageBuffer:",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the host's CoreImage, which the port is held against by tests/backports/host/ciimage; an iPad 2 on 6.1.3"
+    },
+    {
+      "api": "+[CIImage imageWithCVImageBuffer:options:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the same as a class method with options",
+      "effect": "as initWithCVImageBuffer:options:",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the host's CoreImage, which the port is held against by tests/backports/host/ciimage; an iPad 2 on 6.1.3"
+    },
+    {
+      "api": "-[CIImage imageBySamplingLinear]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 43 of the frameworks demand table, CRASH-ON-USE for delta and telegram; iOS 6's CoreImage samples every image linearly and has no other sampling to leave",
+      "effect": "this image itself; see the facts for the edge of a render region, where the host's explicitly linear image differs",
+      "facts": "facts/CoreImage/Compositing.md",
+      "source": "the header, since the cache ladder ends at 10.3.4; the host's CoreImage by tests/backports/host/ciimage; an iPad 2 on 6.1.3, whose scaled edge half covered comes out half"
+    }
+  ]
+}

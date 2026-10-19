@@ -1,0 +1,142 @@
+diff --git a/llvm-project/compiler-rt/lib/builtins/emutls.c b/llvm-project/compiler-rt/lib/builtins/emutls.c
+index a8a5d7c0..40dcee17 100644
+--- a/llvm-project/compiler-rt/lib/builtins/emutls.c
++++ b/llvm-project/compiler-rt/lib/builtins/emutls.c
+@@ -12,8 +12,8 @@
+ 
+ #include "int_lib.h"
+ 
+-#ifdef __BIONIC__
+-// There are 4 pthread key cleanup rounds on Bionic. Delay emutls deallocation
++#if defined(__BIONIC__) || defined(__APPLE__)
++// There are 4 pthread key cleanup rounds on Bionic (PTHREAD_DESTRUCTOR_ITERATIONS on Darwin). Delay emutls deallocation
+ // to round 2. We need to delay deallocation because:
+ //  - Android versions older than M lack __cxa_thread_atexit_impl, so apps
+ //    use a pthread key destructor to call C++ destructors.
+@@ -391,8 +391,14 @@ emutls_get_address_array(uintptr_t index) {
+ // where the dynamic linker has no notion of coalescing weak symbols at runtime.
+ // A more robust solution would be to create a separate shared library for
+ // emulated TLS, to ensure a single copy of its state.
++#ifdef __APPLE__
++// dyld binds a two-level-namespace import to one image, and ld64 prefers an
++// archive's definition over a weak one from a dylib, so the export is strong.
++__attribute__((visibility("default")))
++#else
+ __attribute__((visibility("default"), weak))
+ #endif
++#endif
+ void *__emutls_get_address(__emutls_control *control) {
+   uintptr_t index = emutls_get_index(control);
+   emutls_address_array *array = emutls_get_address_array(index--);
+diff --git a/llvm-project/libcxxabi/CMakeLists.txt b/llvm-project/libcxxabi/CMakeLists.txt
+index bd804dd1..75b18ed1 100644
+--- a/llvm-project/libcxxabi/CMakeLists.txt
++++ b/llvm-project/libcxxabi/CMakeLists.txt
+@@ -87,6 +87,13 @@ option(LIBCXXABI_REEXPORT_FROM_LIBCXX
+    for a deployment target older than the linker accepts -reexported_symbols_list
+    for (iOS 4.2, macOS 10.7); clients then link libc++abi themselves." ON)
+ 
++option(LIBCXXABI_ENABLE_EMULATED_TLS
++  "Build compiler-rt's __emutls_get_address and __cxa_thread_atexit into the
++   shared library on Apple platforms, for code compiled with -femulated-tls for
++   a release whose dyld has no thread-local variables. Every image in a process
++   must bind to this one copy: a copy in each image hands out indices from its
++   own counter, and two images then read each other's variables." OFF)
++
+ option(LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS
+   "Build libc++abi with definitions for operator new/delete. These are normally
+    defined in libc++abi, but it is also possible to define them in libc++, in
+diff --git a/llvm-project/libcxxabi/lib/emulated-tls.exp b/llvm-project/libcxxabi/lib/emulated-tls.exp
+new file mode 100644
+index 00000000..7572e2b6
+--- /dev/null
++++ b/llvm-project/libcxxabi/lib/emulated-tls.exp
+@@ -0,0 +1,4 @@
++# What -femulated-tls code calls on a Darwin release whose dyld has no
++# thread-local variables. One process-wide copy, so every image binds here.
++___emutls_get_address
++___cxa_thread_atexit
+diff --git a/llvm-project/libcxxabi/src/CMakeLists.txt b/llvm-project/libcxxabi/src/CMakeLists.txt
+index 40bea8a6..c2f2dbb7 100644
+--- a/llvm-project/libcxxabi/src/CMakeLists.txt
++++ b/llvm-project/libcxxabi/src/CMakeLists.txt
+@@ -43,6 +43,16 @@ if (LIBCXXABI_ENABLE_THREADS AND (UNIX OR FUCHSIA) AND NOT (APPLE OR CYGWIN)
+   )
+ endif()
+ 
++if (APPLE AND LIBCXXABI_ENABLE_EMULATED_TLS)
++  if (NOT LIBCXXABI_ENABLE_THREADS)
++    message(FATAL_ERROR "LIBCXXABI_ENABLE_EMULATED_TLS keeps thread-local storage behind pthread keys and needs LIBCXXABI_ENABLE_THREADS")
++  endif()
++  list(APPEND LIBCXXABI_SOURCES
++    cxa_thread_atexit.cpp
++    ${CMAKE_CURRENT_SOURCE_DIR}/../../compiler-rt/lib/builtins/emutls.c
++  )
++endif()
++
+ set(LIBCXXABI_HEADERS
+   ../include/cxxabi.h
+ )
+@@ -252,6 +262,10 @@ if (LIBCXXABI_SUPPORTS_SHARED_LIBRARY)
+   reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/itanium-base.exp")
+   reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/std-misc.exp")
+ 
++  if (APPLE AND LIBCXXABI_ENABLE_EMULATED_TLS)
++    reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/emulated-tls.exp")
++  endif()
++
+   if (LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS)
+     reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/new-delete.exp")
+   endif()
+diff --git a/llvm-project/libcxxabi/src/cxa_thread_atexit.cpp b/llvm-project/libcxxabi/src/cxa_thread_atexit.cpp
+index 402a52c7..9bbb43c9 100644
+--- a/llvm-project/libcxxabi/src/cxa_thread_atexit.cpp
++++ b/llvm-project/libcxxabi/src/cxa_thread_atexit.cpp
+@@ -21,6 +21,7 @@ namespace __cxxabiv1 {
+ 
+   using Dtor = void(*)(void*);
+ 
++#ifndef __APPLE__
+   extern "C"
+ #ifndef HAVE___CXA_THREAD_ATEXIT_IMPL
+   // A weak symbol is used to detect this function's presence in the C library
+@@ -28,6 +29,7 @@ namespace __cxxabiv1 {
+   _LIBCXXABI_WEAK
+ #endif
+   int __cxa_thread_atexit_impl(Dtor, void*, void*);
++#endif
+ 
+ #ifndef HAVE___CXA_THREAD_ATEXIT_IMPL
+ 
+@@ -106,16 +108,23 @@ namespace {
+ 
+ #endif // HAVE___CXA_THREAD_ATEXIT_IMPL
+ 
+-#if defined(__linux__) || defined(__Fuchsia__)
++#if defined(__linux__) || defined(__Fuchsia__) || defined(__APPLE__)
+ extern "C" {
+ 
+   _LIBCXXABI_FUNC_VIS int __cxa_thread_atexit(Dtor dtor, void* obj, void* dso_symbol) throw() {
+ #ifdef HAVE___CXA_THREAD_ATEXIT_IMPL
+     return __cxa_thread_atexit_impl(dtor, obj, dso_symbol);
++#else
++#ifdef __APPLE__
++    // Darwin's C library has no __cxa_thread_atexit_impl; with native TLS the
++    // compiler calls dyld's _tlv_atexit and never reaches this function.
++    (void)dso_symbol;
++    {
+ #else
+     if (__cxa_thread_atexit_impl) {
+       return __cxa_thread_atexit_impl(dtor, obj, dso_symbol);
+     } else {
++#endif
+       // Initialize the dtors std::__libcpp_tls_key (uses __cxa_guard_*() for
+       // one-time initialization and __cxa_atexit() for destruction)
+       static DtorsManager manager;
+@@ -142,5 +151,5 @@ extern "C" {
+ #endif // HAVE___CXA_THREAD_ATEXIT_IMPL
+   }
+ } // extern "C"
+-#endif // defined(__linux__) || defined(__Fuchsia__)
++#endif // defined(__linux__) || defined(__Fuchsia__) || defined(__APPLE__)
+ } // namespace __cxxabiv1

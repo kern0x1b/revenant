@@ -1,0 +1,16 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPChangePlaybackPositionCommandEvent.positionTime",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPRemoteCommandEvent.h, MP_API(ios(8.0))",
+   "facts": "facts/MediaPlayer/MPMediaItem.md",
+   "reason": "the release carries no CommandEvent class at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, no class whose name holds CommandEvent exists in any of the 236 and none of the 41 categories, with a nonsense selector absent as the control. A class the release does not have is new code and cannot shadow anything, so there is nothing native for it to be - it is carried.",
+   "effect": "nil is not possible for a NSTimeInterval, so an event the port builds and does not set answers 0, which is the value the type's zero is; readwrite in the port so the event can carry the position it is about, where the header has it readonly"
+  }
+ ]
+}

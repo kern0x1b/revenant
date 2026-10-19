@@ -1,0 +1,4 @@
+Package: org.charon.textalias
+Name: textalias probe
+Architecture: iphoneos-arm
+Description: The textalias test of apple-backports, a process of its own, built by this project's own xmake target.

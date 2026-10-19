@@ -1,0 +1,71 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "+[CIFilter areaAverageMaximumRedFilter]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 answers no such selector and no held rung carries it either - the ladder ends at 10.3.4 - so this row's own availability, iOS 26.0, is the only thing that places it, and every band below iOS 26.0 is the one that needs it",
+      "effect": "the CIAreaAverageMaximumRed filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter areaAverageMaximumRedFilter] answers; nil when the running system has no filter of that name",
+      "facts": "facts/CoreImage/FilterBuiltins.md",
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
+    },
+    {
+      "api": "+[CIFilter blurredRoundedRectangleGeneratorFilter]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 answers no such selector and no held rung carries it either - the ladder ends at 10.3.4 - so this row's own availability, iOS 26.0, is the only thing that places it, and every band below iOS 26.0 is the one that needs it",
+      "effect": "the CIBlurredRoundedRectangleGenerator filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter blurredRoundedRectangleGeneratorFilter] answers; nil when the running system has no filter of that name",
+      "facts": "facts/CoreImage/FilterBuiltins.md",
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
+    },
+    {
+      "api": "+[CIFilter distanceGradientFromRedMaskFilter]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 answers no such selector and no held rung carries it either - the ladder ends at 10.3.4 - so this row's own availability, iOS 26.0, is the only thing that places it, and every band below iOS 26.0 is the one that needs it",
+      "effect": "the CIDistanceGradientFromRedMask filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter distanceGradientFromRedMaskFilter] answers; nil when the running system has no filter of that name",
+      "facts": "facts/CoreImage/FilterBuiltins.md",
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
+    },
+    {
+      "api": "+[CIFilter roundedQRCodeGeneratorFilter]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 answers no such selector and no held rung carries it either - the ladder ends at 10.3.4 - so this row's own availability, iOS 26.0, is the only thing that places it, and every band below iOS 26.0 is the one that needs it",
+      "effect": "the CIRoundedQRCodeGenerator filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter roundedQRCodeGeneratorFilter] answers; nil when the running system has no filter of that name",
+      "facts": "facts/CoreImage/FilterBuiltins.md",
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
+    },
+    {
+      "api": "+[CIFilter signedDistanceGradientFromRedMaskFilter]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 answers no such selector and no held rung carries it either - the ladder ends at 10.3.4 - so this row's own availability, iOS 26.0, is the only thing that places it, and every band below iOS 26.0 is the one that needs it",
+      "effect": "the CISignedDistanceGradientFromRedMask filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter signedDistanceGradientFromRedMaskFilter] answers; nil when the running system has no filter of that name",
+      "facts": "facts/CoreImage/FilterBuiltins.md",
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
+    },
+    {
+      "api": "+[CIFilter systemToneMapFilter]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 answers no such selector and no held rung carries it either - the ladder ends at 10.3.4 - so this row's own availability, iOS 26.0, is the only thing that places it, and every band below iOS 26.0 is the one that needs it",
+      "effect": "the CISystemToneMap filter with its default values, which is what +[CIFilter filterWithName:] gives and what the host's own +[CIFilter systemToneMapFilter] answers; nil when the running system has no filter of that name",
+      "facts": "facts/CoreImage/FilterBuiltins.md",
+      "source": "the host's own CoreImage over all 239 of the SDK's constructors, by tests/backports/host/ciimagefilter, which builds the port's objects with their selectors prefixed and asks both in one process, with every input set to the value a fresh filter of that name already answers: 'compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different'; the 50 held rungs by tools/cache-index/first-rung.lua for the release each selector first appears at"
+    }
+  ]
+}

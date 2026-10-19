@@ -1,0 +1,17 @@
+VTMotionBlurConfiguration	VideoToolboxValue26.m	+ (BOOL)isSupported	- (BOOL)isSupported
+VTSuperResolutionScalerConfiguration	VTSuperResolutionScalerConfiguration.m	+ (NSIndexSet *)supportedRevisions	- (NSIndexSet *)supportedRevisions
+VTFrameRateConversionConfiguration	VTFrameRateConversionConfiguration.m	+ (NSIndexSet *)supportedRevisions	- (NSIndexSet *)supportedRevisions
+VTTemporalNoiseFilterConfiguration	VTTemporalNoiseFilterConfiguration.m	+ (NSArray<NSNumber *> *)supportedSourcePixelFormats	- (NSArray<NSNumber *> *)supportedSourcePixelFormats
+VTMotionBlurParameters	VTMotionBlurParameters.m	- (VTFrameProcessorFrame *)nextFrame	+ (VTFrameProcessorFrame *)nextFrame
+VTOpticalFlowConfiguration	VTOpticalFlowConfiguration.m	+ (NSIndexSet *)supportedRevisions	- (NSIndexSet *)supportedRevisions
+VTSuperResolutionScalerParameters	VTSuperResolutionScalerParameters.m	- (VTFrameProcessorFrame *)previousFrame	+ (VTFrameProcessorFrame *)previousFrame
+VTFrameRateConversionParameters	VTFrameRateConversionParameters.m	- (VTFrameProcessorFrame *)nextFrame	+ (VTFrameProcessorFrame *)nextFrame
+VTTemporalNoiseFilterParameters	VTTemporalNoiseFilterParameters.m	- (NSArray<VTFrameProcessorFrame *> *)nextFrames	+ (NSArray<VTFrameProcessorFrame *> *)nextFrames
+VTLowLatencySuperResolutionScalerParameters	VTLowLatencySuperResolutionScalerParameters.m	- (VTFrameProcessorFrame *)sourceFrame	+ (VTFrameProcessorFrame *)sourceFrame
+VTOpticalFlowParameters	VTOpticalFlowParameters.m	- (VTFrameProcessorFrame *)nextFrame	+ (VTFrameProcessorFrame *)nextFrame
+VTFrameProcessorFrame	VTFrameProcessorFrame.m	- (CVPixelBufferRef)buffer	+ (CVPixelBufferRef)buffer
+VTLowLatencyFrameInterpolationConfiguration	VTLowLatencyFrameInterpolationConfiguration.m	+ (BOOL)isSupported	- (BOOL)isSupported
+VTLowLatencyFrameInterpolationParameters	VTLowLatencyFrameInterpolationParameters.m	- (VTFrameProcessorFrame *)previousFrame	+ (VTFrameProcessorFrame *)previousFrame
+VTFrameProcessorOpticalFlow	VTFrameProcessorOpticalFlow.m	- (CVPixelBufferRef)forwardFlow	+ (CVPixelBufferRef)forwardFlow
+VTLowLatencySuperResolutionScalerConfiguration	VTLowLatencySuperResolutionScalerConfiguration.m	+ (BOOL)isSupported	- (BOOL)isSupported
+VTMotionBlurConfiguration	VideoToolboxValue26.m	CharonValueSet(self, @(frameHeight), @"frameHeight");	CharonValueSet(self, @(frameWidth), @"frameHeight");

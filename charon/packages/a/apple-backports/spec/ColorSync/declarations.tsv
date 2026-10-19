@@ -1,0 +1,199 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+struct	c:@S@ColorSyncProfile	-			-	-	-	-	-	cbdd44a4e699fa07	-
+typedef	c:@T@ColorSyncProfileRef	-			const struct ColorSyncProfile *	-	-	-	-	e25fc57bb554f536	-
+typedef	c:@T@ColorSyncMutableProfileRef	-			struct ColorSyncProfile *	-	-	-	-	930ff6fc9552a7f2	-
+var	c:@kColorSyncGenericGrayProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	32dd8b911ca3eb5d	-
+var	c:@kColorSyncGenericGrayGamma22Profile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	462d6afbfc06adc9	-
+var	c:@kColorSyncGenericRGBProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	3af8ddc2766f336e	-
+var	c:@kColorSyncGenericCMYKProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	b97c4a7678cbb227	-
+var	c:@kColorSyncDisplayP3Profile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	49ab6ef7740064d0	-
+var	c:@kColorSyncSRGBProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	bda20eee158f77cf	-
+var	c:@kColorSyncAdobeRGB1998Profile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	dc212b097ed59e81	-
+var	c:@kColorSyncGenericLabProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	25378a0535563b7a	-
+var	c:@kColorSyncGenericXYZProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	256927b8a92e9bde	-
+var	c:@kColorSyncACESCGLinearProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	fb68759b5747ae0e	-
+var	c:@kColorSyncDCIP3Profile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	c86f19bf837129df	-
+var	c:@kColorSyncITUR709Profile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	337d20abd0c169f1	-
+var	c:@kColorSyncITUR2020Profile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	8427b54852d2298d	-
+var	c:@kColorSyncROMMRGBProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	86a4e536713ab0c1	-
+var	c:@kColorSyncWebSafeColorsProfile	-			CFStringRef	-	-	ios=16.1/-/-/0,macos=13.0/-/-/0	-	443bc25abb5b4ec7	-
+var	c:@kColorSyncProfileHeader	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	f2c3df88324e683f	-
+var	c:@kColorSyncProfileClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	8466d83825274409	-
+var	c:@kColorSyncProfileColorSpace	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	99c7e96624744d0c	-
+var	c:@kColorSyncProfilePCS	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	86d7c506a5fad9ca	-
+var	c:@kColorSyncProfileURL	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	be7387614f83e6de	-
+var	c:@kColorSyncProfileDescription	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	137cc2d1f7a02322	-
+var	c:@kColorSyncProfileMD5Digest	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	81e70fb7c77e9f7f	-
+var	c:@kColorSyncProfileIsValid	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=13.0/-/-/0	-	a0f47b2d135bee98	-
+var	c:@kColorSyncSigAToB0Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	df6a40939837a8c7	-
+var	c:@kColorSyncSigAToB1Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	cfa86b09d2b9155f	-
+var	c:@kColorSyncSigAToB2Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	f0ecfcd4bc37d929	-
+var	c:@kColorSyncSigBToA0Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	29ff9c43b0422d7b	-
+var	c:@kColorSyncSigBToA1Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	096771fbbc0e7303	-
+var	c:@kColorSyncSigBToA2Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	941edd738dabf91e	-
+var	c:@kColorSyncSigCmykData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d9a85b83fc12e351	-
+var	c:@kColorSyncSigGrayData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	572ad00051d4150d	-
+var	c:@kColorSyncSigLabData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d39f15a1da21b3a5	-
+var	c:@kColorSyncSigRgbData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	614a22ccb017b4fd	-
+var	c:@kColorSyncSigXYZData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	4bd7ca0f182367f0	-
+var	c:@kColorSyncSigAbstractClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	a603953dd3c02611	-
+var	c:@kColorSyncSigBlueTRCTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	1c37071582bf867c	-
+var	c:@kColorSyncSigBlueColorantTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	882bb7b073bee375	-
+var	c:@kColorSyncSigMediaBlackPointTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	0f448a0402cb868b	-
+var	c:@kColorSyncSigCopyrightTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	11a98c21942d7915	-
+var	c:@kColorSyncSigProfileDescriptionTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	7343388ed950bf85	-
+var	c:@kColorSyncSigDeviceModelDescTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	6da4628dbca8bce1	-
+var	c:@kColorSyncSigDeviceMfgDescTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	08ca8b57a2fe356c	-
+var	c:@kColorSyncSigGreenTRCTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	18878778443f3b1c	-
+var	c:@kColorSyncSigGreenColorantTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	b09e93d6d8e4c675	-
+var	c:@kColorSyncSigGamutTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	ae618d4d03c7f088	-
+var	c:@kColorSyncSigGrayTRCTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	4df6ec5863bc25e9	-
+var	c:@kColorSyncSigLinkClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	09beaf7d785029ab	-
+var	c:@kColorSyncSigDisplayClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	559895625b4e2eca	-
+var	c:@kColorSyncSigNamedColor2Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	070b74e35decefef	-
+var	c:@kColorSyncSigNamedColorClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	86a2a7a71925a6fa	-
+var	c:@kColorSyncSigPreview0Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	89bf89be0ccb8920	-
+var	c:@kColorSyncSigPreview1Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	14dcaf0b265d5aed	-
+var	c:@kColorSyncSigPreview2Tag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	5110b6601928eac6	-
+var	c:@kColorSyncSigOutputClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	2e0a1a86b18b14fa	-
+var	c:@kColorSyncSigProfileSequenceDescTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	bd77de6e00296901	-
+var	c:@kColorSyncSigRedTRCTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	3b13fb6a4a249f24	-
+var	c:@kColorSyncSigRedColorantTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	81e366221a640340	-
+var	c:@kColorSyncSigInputClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	37c6759a3e937400	-
+var	c:@kColorSyncSigColorSpaceClass	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	62fc31ae2294c4b1	-
+var	c:@kColorSyncSigTechnologyTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	9f0e86cef5dcf96b	-
+var	c:@kColorSyncSigViewingConditionsTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	de35b5062d151fa7	-
+var	c:@kColorSyncSigViewingCondDescTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	e89e9bb6765e6c19	-
+var	c:@kColorSyncSigMediaWhitePointTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d4130dd7bada5eda	-
+function	c:@F@ColorSyncProfileGetTypeID	-			CFTypeID (void)	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	92ea3b64c7d69d67	-
+function	c:@F@ColorSyncProfileCreate	-			ColorSyncProfileRef (CFDataRef, CFErrorRef  _Nullable *)	CFDataRef data | CFErrorRef  _Nullable * error	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	2712426a0a823961	-
+function	c:@F@ColorSyncProfileCreateWithURL	-			ColorSyncProfileRef (CFURLRef, CFErrorRef  _Nullable *)	CFURLRef url | CFErrorRef  _Nullable * error	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	1db42dacaa046a72	-
+var	c:@kColorSyncDoNotSubstituteProfiles	-			CFStringRef	-	-	ios=26.1/-/-/0,macos=26.1/-/-/0	-	367436b7c9844db1	-
+function	c:@F@ColorSyncProfileCreateWithURLAndOptions	-			ColorSyncProfileRef (CFURLRef, CFDictionaryRef, CFErrorRef  _Nullable *)	CFURLRef url | CFDictionaryRef options | CFErrorRef  _Nullable * error	-	ios=26.1/-/-/0,macos=26.1/-/-/0	-	5c59df35c1b3aca0	-
+function	c:@F@ColorSyncProfileCreateWithName	-			ColorSyncProfileRef (CFStringRef)	CFStringRef name	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	17cdee2524b16131	-
+function	c:@F@ColorSyncProfileCreateMutable	-			ColorSyncMutableProfileRef (void)	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	246680bbf7e5f8f9	-
+function	c:@F@ColorSyncProfileCreateMutableCopy	-			ColorSyncMutableProfileRef (ColorSyncProfileRef)	ColorSyncProfileRef prof	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	b6b90949b517fe71	-
+function	c:@F@ColorSyncProfileCreateLink	-			ColorSyncProfileRef (CFArrayRef, CFDictionaryRef)	CFArrayRef profileInfo | CFDictionaryRef options	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	0d9cae993b005ed5	-
+function	c:@F@ColorSyncProfileVerify	-			_Bool (ColorSyncProfileRef, CFErrorRef  _Nullable *, CFErrorRef  _Nullable *)	ColorSyncProfileRef prof | CFErrorRef  _Nullable * errors | CFErrorRef  _Nullable * warnings	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	3d2d1de6c262b98e	-
+function	c:@F@ColorSyncProfileIsWideGamut	-			_Bool (ColorSyncProfileRef)	ColorSyncProfileRef 	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	6d40dae0f75cb574	-
+function	c:@F@ColorSyncProfileIsMatrixBased	-			_Bool (ColorSyncProfileRef)	ColorSyncProfileRef 	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	3794c451519efb5a	-
+function	c:@F@ColorSyncProfileIsPQBased	-			_Bool (ColorSyncProfileRef)	ColorSyncProfileRef 	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	830ded525c519a90	-
+function	c:@F@ColorSyncProfileIsHLGBased	-			_Bool (ColorSyncProfileRef)	ColorSyncProfileRef 	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	0b196e78f7204ca9	-
+function	c:@F@ColorSyncProfileEstimateGamma	-			float (ColorSyncProfileRef, CFErrorRef  _Nullable *)	ColorSyncProfileRef prof | CFErrorRef  _Nullable * error	-	ios=26.1/-/-/0,macos=10.4/-/-/0	-	ab002179004c03d1	-
+struct	c:@SA@ColorSyncMD5	-			-	-	-	-	-	11ba0b0eea6552f0	-
+field	c:@SA@ColorSyncMD5@FI@digest	ColorSyncMD5			uint8_t[16]	-	-	-	-	133f53d0e7b26e8e	-
+typedef	c:@T@ColorSyncMD5	-			struct ColorSyncMD5	-	-	-	-	2fda7efd013e7fa6	-
+function	c:@F@ColorSyncProfileGetMD5	-			ColorSyncMD5 (ColorSyncProfileRef)	ColorSyncProfileRef prof	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	5ad0e497428e25b8	-
+function	c:@F@ColorSyncProfileCopyData	-			CFDataRef (ColorSyncProfileRef, CFErrorRef  _Nullable *)	ColorSyncProfileRef prof | CFErrorRef  _Nullable * error	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	bbd9ae1a01dabbda	-
+function	c:@F@ColorSyncProfileGetURL	-			CFURLRef (ColorSyncProfileRef, CFErrorRef  _Nullable *)	ColorSyncProfileRef prof | CFErrorRef  _Nullable * error	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	b245e3dc281c7696	-
+function	c:@F@ColorSyncProfileCopyHeader	-			CFDataRef (ColorSyncProfileRef)	ColorSyncProfileRef prof	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	9e5668bafa1f7eae	-
+function	c:@F@ColorSyncProfileSetHeader	-			void (ColorSyncMutableProfileRef, CFDataRef)	ColorSyncMutableProfileRef prof | CFDataRef header	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	21c0968231604f0a	-
+function	c:@F@ColorSyncProfileCopyDescriptionString	-			CFStringRef (ColorSyncProfileRef)	ColorSyncProfileRef prof	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d48e60d4a9fe18d6	-
+function	c:@F@ColorSyncProfileCopyTagSignatures	-			CFArrayRef (ColorSyncProfileRef)	ColorSyncProfileRef prof	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	8d5a4bf4c990dc0d	-
+function	c:@F@ColorSyncProfileContainsTag	-			_Bool (ColorSyncProfileRef, CFStringRef)	ColorSyncProfileRef prof | CFStringRef signature	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	22609d188cc08711	-
+function	c:@F@ColorSyncProfileCopyTag	-			CFDataRef (ColorSyncProfileRef, CFStringRef)	ColorSyncProfileRef prof | CFStringRef signature	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	66db98fbacb81867	-
+function	c:@F@ColorSyncProfileSetTag	-			void (ColorSyncMutableProfileRef, CFStringRef, CFDataRef)	ColorSyncMutableProfileRef prof | CFStringRef signature | CFDataRef data	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	144179d2546ea356	-
+function	c:@F@ColorSyncProfileRemoveTag	-			void (ColorSyncMutableProfileRef, CFStringRef)	ColorSyncMutableProfileRef prof | CFStringRef signature	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	27aa20693bfced31	-
+typedef	c:@T@ColorSyncProfileIterateCallback	-			_Bool (*)(CFDictionaryRef _Nonnull, void * _Nonnull)	-	-	-	-	21361eb544b8fc11	-
+var	c:@kColorSyncProfileCacheSeed	-			CFStringRef	-	-	-	-	6cd687a0fd63f3d3	-
+function	c:@F@ColorSyncIterateInstalledProfiles	-			void (ColorSyncProfileIterateCallback, uint32_t *, void *, CFErrorRef  _Nullable *)	ColorSyncProfileIterateCallback callBack | uint32_t * seed | void * userInfo | CFErrorRef  _Nullable * error	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	4d8eddfb27a10e4a	-
+struct	c:@S@ColorSyncTransform	-			-	-	-	-	-	ab30c00053a237d4	-
+typedef	c:@T@ColorSyncTransformRef	-			struct ColorSyncTransform *	-	-	-	-	8f9b2a59855e7ffd	-
+function	c:@F@ColorSyncTransformGetTypeID	-			CFTypeID (void)	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	a391995d7d3998b1	-
+function	c:@F@ColorSyncTransformCreate	-			ColorSyncTransformRef (CFArrayRef, CFDictionaryRef)	CFArrayRef profileSequence | CFDictionaryRef options	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	806a9ddc3c084427	-
+function	c:@F@ColorSyncTransformCopyProperty	-			CFTypeRef (ColorSyncTransformRef, CFTypeRef, CFDictionaryRef)	ColorSyncTransformRef transform | CFTypeRef key | CFDictionaryRef options	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	7ad1d7414360b8a1	-
+function	c:@F@ColorSyncTransformSetProperty	-			void (ColorSyncTransformRef, CFTypeRef, CFTypeRef)	ColorSyncTransformRef transform | CFTypeRef key | CFTypeRef property	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	2426b27f35cebd91	-
+function	c:@F@ColorSyncTransformGetProfileSequence	-			CFArrayRef (ColorSyncTransformRef)	ColorSyncTransformRef transform	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	8d689ff62fc85a41	-
+enum	c:@E@ColorSyncDataDepth	-			unsigned int	-	-	-	-	e97faee6b7e2cd86	-
+enumconst	c:@E@ColorSyncDataDepth@kColorSync1BitGamut	ColorSyncDataDepth			-	-	-	-	-	7cf9961379b3e46e	1
+enumconst	c:@E@ColorSyncDataDepth@kColorSync8BitInteger	ColorSyncDataDepth			-	-	-	-	-	f83f9d946a7f93fc	2
+enumconst	c:@E@ColorSyncDataDepth@kColorSync16BitInteger	ColorSyncDataDepth			-	-	-	-	-	c427489f6087d046	3
+enumconst	c:@E@ColorSyncDataDepth@kColorSync16BitFloat	ColorSyncDataDepth			-	-	-	-	-	fc9a26994967e3e2	4
+enumconst	c:@E@ColorSyncDataDepth@kColorSync32BitInteger	ColorSyncDataDepth			-	-	-	-	-	efe9209898407a58	5
+enumconst	c:@E@ColorSyncDataDepth@kColorSync32BitNamedColorIndex	ColorSyncDataDepth			-	-	-	-	-	ac30cd4eeac45f26	6
+enumconst	c:@E@ColorSyncDataDepth@kColorSync32BitFloat	ColorSyncDataDepth			-	-	-	-	-	5a015cddf930cdac	7
+enumconst	c:@E@ColorSyncDataDepth@kColorSync10BitInteger	ColorSyncDataDepth			-	-	-	-	-	6dde9a2fe7f3294f	8
+typedef	c:@T@ColorSyncDataDepth	-			enum ColorSyncDataDepth	-	-	-	-	f0eaa410eae0e12a	-
+enum	c:@E@ColorSyncAlphaInfo	-			unsigned int	-	-	-	-	c2cb0280371653bc	-
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaNone	ColorSyncAlphaInfo			-	-	-	-	-	78bbbf20d37ffb18	0
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaPremultipliedLast	ColorSyncAlphaInfo			-	-	-	-	-	1d16f60667945040	1
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaPremultipliedFirst	ColorSyncAlphaInfo			-	-	-	-	-	238d51cc1d7e829a	2
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaLast	ColorSyncAlphaInfo			-	-	-	-	-	cfd4741dd1833a3d	3
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaFirst	ColorSyncAlphaInfo			-	-	-	-	-	25534031f5c57230	4
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaNoneSkipLast	ColorSyncAlphaInfo			-	-	-	-	-	1800edfcbf8380dc	5
+enumconst	c:@E@ColorSyncAlphaInfo@kColorSyncAlphaNoneSkipFirst	ColorSyncAlphaInfo			-	-	-	-	-	b0109c826dcfa87c	6
+typedef	c:@T@ColorSyncAlphaInfo	-			enum ColorSyncAlphaInfo	-	-	-	-	73f31b682a96416c	-
+enum	c:@Ea@kColorSyncAlphaInfoMask	-	-		unsigned int	-	-	-	-	1466d51edf1a86b2	-
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncAlphaInfoMask	-			-	-	-	-	-	d746556d84cadf93	31
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncByteOrderMask	-			-	-	-	-	-	437488d2426caa7f	28672
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncByteOrderDefault	-			-	-	-	-	-	b1f1d3a457565736	0
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncByteOrder16Little	-			-	-	-	-	-	e587ffe2d46def04	4096
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncByteOrder32Little	-			-	-	-	-	-	0d24e3828aaec07d	8192
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncByteOrder16Big	-			-	-	-	-	-	cbbfd556e159c133	12288
+enumconst	c:@Ea@kColorSyncAlphaInfoMask@kColorSyncByteOrder32Big	-			-	-	-	-	-	6ab3811746749443	16384
+typedef	c:@T@ColorSyncDataLayout	-			uint32_t	-	-	-	-	f9e0982e4d420ea1	-
+function	c:@F@ColorSyncTransformConvert	-			_Bool (ColorSyncTransformRef, size_t, size_t, void *, ColorSyncDataDepth, ColorSyncDataLayout, size_t, const void *, ColorSyncDataDepth, ColorSyncDataLayout, size_t, CFDictionaryRef)	ColorSyncTransformRef transform | size_t width | size_t height | void * dst | ColorSyncDataDepth dstDepth | ColorSyncDataLayout dstLayout | size_t dstBytesPerRow | const void * src | ColorSyncDataDepth srcDepth | ColorSyncDataLayout srcLayout | size_t srcBytesPerRow | CFDictionaryRef options	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	33ffa97794aebeeb	-
+var	c:@kColorSyncProfile	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	96706fb68f0a63ad	-
+var	c:@kColorSyncRenderingIntent	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	83105d83e393d4c2	-
+var	c:@kColorSyncRenderingIntentPerceptual	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	446da954115aa222	-
+var	c:@kColorSyncRenderingIntentRelative	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	5b96d58d264a8e6f	-
+var	c:@kColorSyncRenderingIntentSaturation	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	e61499077deb68db	-
+var	c:@kColorSyncRenderingIntentAbsolute	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	0fa87430a4c1278c	-
+var	c:@kColorSyncRenderingIntentUseProfileHeader	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	a9cf5474bd435d50	-
+var	c:@kColorSyncTransformTag	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	51caa7531d9c39f9	-
+var	c:@kColorSyncTransformDeviceToPCS	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	3a0d50ccbdf33359	-
+var	c:@kColorSyncTransformPCSToPCS	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	3fc2eb1547d413fb	-
+var	c:@kColorSyncTransformPCSToDevice	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	c5f2aed48baf7cff	-
+var	c:@kColorSyncTransformDeviceToDevice	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	54d83368bdc83775	-
+var	c:@kColorSyncTransformGamutCheck	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	70eb538971b13af0	-
+var	c:@kColorSyncBlackPointCompensation	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	37cd76176bf58fdd	-
+var	c:@kColorSyncExtendedRange	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	e698c8513f689ff7	-
+var	c:@kColorSyncHDRDerivative	-			CFStringRef	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	d7f143b4a4915221	-
+var	c:@kColorSyncPQDerivative	-			CFStringRef	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	ca05d4a880183ae0	-
+var	c:@kColorSyncHLGDerivative	-			CFStringRef	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0	-	d38733b318a2d686	-
+var	c:@kColorSyncPreferredCMM	-			CFStringRef	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.4/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	2c071b10f92a325a	-
+var	c:@kColorSyncConvertQuality	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	e10752beb4c1defd	-
+var	c:@kColorSyncBestQuality	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	673473e2beb8baaa	-
+var	c:@kColorSyncNormalQuality	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	56a64cc705465572	-
+var	c:@kColorSyncDraftQuality	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	254344caec88b4f7	-
+var	c:@kColorSyncConvertUseExtendedRange	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	a31e3cb0e6ce1c13	-
+var	c:@kColorSyncTransformInfo	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d818d628aab9d8dd	-
+var	c:@kColorSyncTransformCreator	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	868ed8d453dcdd2a	-
+var	c:@kColorSyncTransformSrcSpace	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	8435852a6f00b25e	-
+var	c:@kColorSyncTransformDstSpace	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	955a3077466be649	-
+var	c:@kColorSyncTransformCodeFragmentType	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	a9348b24bcc88796	-
+var	c:@kColorSyncTransformCodeFragmentMD5	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	a05a0a2d96789dad	-
+var	c:@kColorSyncTransformFullConversionData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	088677ee875fd395	-
+var	c:@kColorSyncTransformSimplifiedConversionData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	29b2d77eaff1af80	-
+var	c:@kColorSyncTransformParametricConversionData	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	fbf440a6a391cdd2	-
+var	c:@kColorSyncTransformProfileSequnce	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=11.0/-/-/0	-	cea1e34ac9adfd78	-
+var	c:@kColorSyncTransformUseITU709OETF	-			CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	254ccbfb5212c64b	-
+var	c:@kColorSyncConversionMatrix	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d50be863781d09e7	-
+var	c:@kColorSyncConversionParamCurve0	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	25580b3c4eee4cb6	-
+var	c:@kColorSyncConversionParamCurve1	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	88aad8893cfc2810	-
+var	c:@kColorSyncConversionParamCurve2	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	feeee46f0820e873	-
+var	c:@kColorSyncConversionParamCurve3	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	6cb9300a4ec4ca36	-
+var	c:@kColorSyncConversionParamCurve4	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	ca4b686efb86919d	-
+var	c:@kColorSyncConversion1DLut	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	22f5eaf678486030	-
+var	c:@kColorSyncConversionGridPoints	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	a1dcc607b9828351	-
+var	c:@kColorSyncConversionChannelID	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	eeaab5f71fc68e63	-
+var	c:@kColorSyncConversion3DLut	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	d0f588b8196fcfba	-
+var	c:@kColorSyncConversionNDLut	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	666aef7867561b9f	-
+var	c:@kColorSyncConversionInpChan	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	ab82c42ddf701122	-
+var	c:@kColorSyncConversionOutChan	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	02f1c1970f45885f	-
+var	c:@kColorSyncConversionBPC	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	e40d1ab00b37eb87	-
+var	c:@kColorSyncFixedPointRange	-			CFStringRef	-	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	ee35a6394f6b3ba3	-
+function	c:@F@ColorSyncCreateCodeFragment	-			CFTypeRef (CFArrayRef, CFDictionaryRef)	CFArrayRef profileSequence | CFDictionaryRef options	-	ios=16.0/-/-/0,macos=10.4/-/-/0	-	6d981c96d4a55d48	-
+function	c:@F@ColorSyncAPIVersion	-			uint32_t (void)	-	-	-	-	39b5934f408e31c3	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@CFTypeID	-			unsigned long	-	-	-	-	1a1b10310e893e1f	-
+typedef	c:@T@CFDataRef	-			const struct __CFData *	-	-	-	-	d9fe21afe938f144	-
+typedef	c:@T@CFErrorRef	-			struct __CFError *	-	-	-	-	7e66b8cb53b22edb	-
+typedef	c:@T@CFURLRef	-			const struct __CFURL *	-	-	-	-	0ca832288ff2133f	-
+typedef	c:@T@CFDictionaryRef	-			const struct __CFDictionary *	-	-	-	-	95ab67be7d9fad28	-
+typedef	c:@T@CFArrayRef	-			const struct __CFArray *	-	-	-	-	d3655b482ae0664e	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@size_t	-			__darwin_size_t	-	-	-	-	8ce79a13e58a1844	-
+typedef	c:@T@__darwin_size_t	-			unsigned long	-	-	-	-	0cd38a3df2217524	-

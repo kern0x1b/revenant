@@ -1,0 +1,14 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIImage.traitCollection",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIImageTraitCollection.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/imagetraits, and tests/backports/device/imagetraits.m on iOS 6"
+    }
+  ]
+}

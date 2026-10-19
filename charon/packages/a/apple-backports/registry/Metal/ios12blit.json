@@ -1,0 +1,49 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLBlitCommandEncoder optimizeContentsForCPUAccess:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "with every resource of this port CPU-resident, there is no residency to move a resource between, so the hint has no observable effect and doing nothing is the real behaviour",
+      "effect": "the call returns and the resource is left as it is, with no log; the API asks for a performance and not for a value (facts/Metal/Blits.md)",
+      "source": "SDK 16.4, MTLBlitCommandEncoder.h; the host differential tests/backports/host/metalblit/differential.m, block 5, checks that Metal leaves a texture's bytes as they were and that the port takes the same texture and says nothing",
+      "facts": "facts/Metal/Blits.md"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder optimizeContentsForCPUAccess:slice:level:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "with every resource of this port CPU-resident, there is no residency to move a resource between, so the hint has no observable effect and doing nothing is the real behaviour",
+      "effect": "the call returns and the resource is left as it is, with no log; the API asks for a performance and not for a value (facts/Metal/Blits.md)",
+      "source": "SDK 16.4, MTLBlitCommandEncoder.h; the host differential tests/backports/host/metalblit/differential.m, block 5, checks that Metal leaves a texture's bytes as they were and that the port takes the same texture and says nothing",
+      "facts": "facts/Metal/Blits.md"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder optimizeContentsForGPUAccess:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "with every resource of this port CPU-resident, there is no residency to move a resource between, so the hint has no observable effect and doing nothing is the real behaviour",
+      "effect": "the call returns and the resource is left as it is, with no log; the API asks for a performance and not for a value (facts/Metal/Blits.md)",
+      "source": "SDK 16.4, MTLBlitCommandEncoder.h; the host differential tests/backports/host/metalblit/differential.m, block 5, checks that Metal leaves a texture's bytes as they were and that the port takes the same texture and says nothing",
+      "facts": "facts/Metal/Blits.md"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder optimizeContentsForGPUAccess:slice:level:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "with every resource of this port CPU-resident, there is no residency to move a resource between, so the hint has no observable effect and doing nothing is the real behaviour",
+      "effect": "the call returns and the resource is left as it is, with no log; the API asks for a performance and not for a value (facts/Metal/Blits.md)",
+      "source": "SDK 16.4, MTLBlitCommandEncoder.h; the host differential tests/backports/host/metalblit/differential.m, block 5, checks that Metal leaves a texture's bytes as they were and that the port takes the same texture and says nothing",
+      "facts": "facts/Metal/Blits.md"
+    }
+  ]
+}

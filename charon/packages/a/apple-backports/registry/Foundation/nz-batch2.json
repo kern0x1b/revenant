@@ -1,0 +1,710 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "+[NSObject setSharedObservers:]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "maximum": "18.0",
+      "status": "absent",
+      "reason": "the argument is an NSKeyValueSharedObservers, a Foundation class that no SDK header declares and that the release's libobjc knows nothing of, so carrying the method would mean inventing the type it takes",
+      "effect": "the method is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "+[NSProgress addSubscriberForFileURL:withPublishingHandler:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "absent",
+      "reason": "the SDK's own header marks the class method API_UNAVAILABLE on iOS, watchOS and tvOS, so no iOS application can name it",
+      "effect": "the method is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "+[NSTermOfAddress currentUser]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSTermOfAddress feminine]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSTermOfAddress localizedForLanguageIdentifier:withPronouns:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSTermOfAddress masculine]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSTermOfAddress neutral]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSTextCheckingResult correctionCheckingResultWithRange:replacementString:alternativeStrings:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "absent",
+      "reason": "the release has no public way to make a result whose type is a correction: its own spellings (initWithRange:, replacementCheckingResultWithRange:replacementString:) are in its binary (measured in the 6.1.3 cache's selector table) but in no header, and this port does not build on a private selector",
+      "effect": "the method is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "+[NSURL URLWithString:encodingInvalidCharacters:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSURLComponents componentsWithString:encodingInvalidCharacters:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSURLProtocol canInitWithTask:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "+[NSUserActivity deleteAllSavedUserActivitiesWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "maximum": "12.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUserActivity.md",
+      "reason": "the saved activities are the system's own Handoff store, and 6.1.3 has no entry point that lists or clears it; the port keeps no store of its own, so there is nothing it could delete without reporting a success it has not earned - so the handler is called and the log says there was no store",
+      "effect": "nothing is deleted and the handler is called: the log says on every call that there is no store, so a caller can tell that answer from one that found nothing to do (Foundation/NSUserActivity.m:243)",
+      "source": "SDK 16.4, NSUserActivity.h:109, for the signature; Foundation/NSUserActivity.m:243 for the answer"
+    },
+    {
+      "api": "+[NSXPCInterface XPCTypeForSelector:argumentIndex:ofReply:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "maximum": "13.0",
+      "status": "absent",
+      "reason": "the same table, read from the other end: the release's NSXPCInterface has no such map of its own to read",
+      "effect": "the method is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "+[NSXPCInterface setXPCType:forSelector:argumentIndex:ofReply:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "maximum": "13.0",
+      "status": "absent",
+      "reason": "xpc_type_t is the type the XPC framework introduced in iOS 8, and the release's NSXPCInterface keeps its own table where no 6.1.3 entry point reaches it",
+      "effect": "the method is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "-[NSPredicate allowEvaluation]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSAllowEvaluation.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSProgress resume]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProgressState.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSSortDescriptor allowEvaluation]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSAllowEvaluation.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURL checkPromisedItemIsReachableAndReturnError:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURL getPromisedItemResourceValue:forKey:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURL initWithString:encodingInvalidCharacters:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURL promisedItemResourceValuesForKeys:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCache getCachedResponseForDataTask:completionHandler:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCache removeCachedResponseForDataTask:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCache storeCachedResponse:forDataTask:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLComponents initWithString:encodingInvalidCharacters:]",
+      "kind": "method",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCredentialStorage getCredentialsForProtectionSpace:task:completionHandler:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCredentialStorage getDefaultCredentialForProtectionSpace:task:completionHandler:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCredentialStorage removeCredential:forProtectionSpace:options:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCredentialStorage removeCredential:forProtectionSpace:options:task:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCredentialStorage setCredential:forProtectionSpace:task:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLCredentialStorage setDefaultCredential:forProtectionSpace:task:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSURLProtocol initWithTask:cachedResponse:client:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSUndoManager redoActionUserInfoValueForKey:]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "maximum": "18.0",
+      "status": "implemented",
+      "effect": "nil while nothing is redoable, and the tag of the group that was undone once an action has registered its inverse while undoing",
+      "source": "the host's own Foundation, measured in tests/backports/host/nsundo/run.sh: after-undo.redoUserInfo(tag)=\"two\" after-undo.redoActionName=inverse-of-second, and plain.afterUndo.redoCount=0 with no value"
+    },
+    {
+      "api": "-[NSUndoManager undoActionUserInfoValueForKey:]",
+      "kind": "method",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "maximum": "18.0",
+      "status": "implemented",
+      "effect": "a fresh manager answers nil; a tag set on the open group reads back, and after the undo the redo stack reads the tag of the group just undone",
+      "source": "the host's own Foundation, measured in tests/backports/host/nsundo/run.sh: fresh.undoUserInfo(k)=(nil) two-groups.undoUserInfo(tag)=\"two\" after-undo.redoUserInfo(tag)=\"two\""
+    },
+    {
+      "api": "-[NSUserActivityDelegate userActivity:didReceiveInputStream:outputStream:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "absent",
+      "reason": "nothing in a program the port serves sends it: the selector appears 0 times in the package's own 2,350 .m, .h and .c sources, and the control in the same run (becomeCurrentWithPendingUnitCount:, 8 occurrences) comes back with hits, so the zero is the package's and not the search's. The caller is the system's continuation - Handoff handing this device an activity another device sent - and the releases this package carries have none: there is no continueUserActivity: to call from and no second device to continue to, and neither NSUserActivity nor NSUserActivityDelegate is in the 4.3 or the 6.1.3 rung's own name index - 0 of 317,453 names at 4.3 and 0 of 568,965 at 6.1.3, with UIView, NSObject and setObject:forKey: present in both",
+      "effect": "the method is not there, so respondsToSelector: answers NO and an unchecked call raises. Nothing answers it: not the port, which declares neither the protocol nor a caller for it, and not the release, whose 6.1.3 and 4.3 rungs carry neither NSUserActivity nor NSUserActivityDelegate. The 2026-09-28 review of this family already settled the status against an earlier ignored and this row keeps its ruling; what this row adds is the count behind it",
+      "facts": "facts/Foundation/NSUserActivity.md",
+      "source": "SDK 16.4 NSUserActivity.h:133 for the declaration, and the 26.2 SDK tools/intents/generate.sh calls SDK_262 declares the same selector at the same line :133; the 2,350 .m, .h and .c sources of the package read for the selector (0 occurrences, control becomeCurrentWithPendingUnitCount: with 8 occurrences); tools/cache-index/first-rung.lua's own _names_of() over ~/.charon/cache-index/4.3.names.gz and 6.1.3's, read for NSUserActivity and NSUserActivityDelegate (0 occurrences each of 317,453 and 568,965 names, controls UIView, NSObject and setObject:forKey: present in both)"
+    },
+    {
+      "api": "-[NSUserActivityDelegate userActivityWasContinued:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "maximum": "8.0",
+      "status": "absent",
+      "reason": "nothing in a program the port serves sends it: the selector appears 0 times in the package's own 2,350 .m, .h and .c sources, and the control in the same run (becomeCurrentWithPendingUnitCount:, 8 occurrences) comes back with hits, so the zero is the package's and not the search's. The caller is the system's continuation - Handoff handing this device an activity another device sent - and the releases this package carries have none: there is no continueUserActivity: to call from and no second device to continue to, and neither NSUserActivity nor NSUserActivityDelegate is in the 4.3 or the 6.1.3 rung's own name index - 0 of 317,453 names at 4.3 and 0 of 568,965 at 6.1.3, with UIView, NSObject and setObject:forKey: present in both",
+      "effect": "the method is not there, so respondsToSelector: answers NO and an unchecked call raises. Nothing answers it: not the port, which declares neither the protocol nor a caller for it, and not the release, whose 6.1.3 and 4.3 rungs carry neither NSUserActivity nor NSUserActivityDelegate. The 2026-09-28 review of this family already settled the status against an earlier ignored and this row keeps its ruling; what this row adds is the count behind it",
+      "facts": "facts/Foundation/NSUserActivity.md",
+      "source": "SDK 16.4 NSUserActivity.h:129 for the declaration, and the 26.2 SDK tools/intents/generate.sh calls SDK_262 declares the same selector at the same line :129; the 2,350 .m, .h and .c sources of the package read for the selector (0 occurrences, control becomeCurrentWithPendingUnitCount: with 8 occurrences); tools/cache-index/first-rung.lua's own _names_of() over ~/.charon/cache-index/4.3.names.gz and 6.1.3's, read for NSUserActivity and NSUserActivityDelegate (0 occurrences each of 317,453 and 568,965 names, controls UIView, NSObject and setObject:forKey: present in both)"
+    },
+    {
+      "api": "-[NSXPCConnection scheduleSendBarrierBlock:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSXPCConnectionBarrier.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "-[NSXPCConnection synchronousRemoteObjectProxyWithErrorHandler:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSXPCConnectionBarrier.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSNumberFormatter.formattingContext",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSNumberFormatterContext.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSNumberFormatter.minimumGroupingDigits",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSNumberFormatterContext.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSOperation.asynchronous",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOperationAsynchronous.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSOperation.name",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOperationAsynchronous.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentDelimiter",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentFamilyName",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentGivenName",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentKey",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentMiddleName",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentNickname",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentPrefix",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSPersonNameComponentSuffix",
+      "kind": "constant",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSProcessInfo.iOSAppOnMac",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProcessInfoPlatform.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSProcessInfo.iOSAppOnVision",
+      "kind": "property",
+      "introduced": "26.1",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProcessInfoPlatform.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSProcessInfo.lowPowerModeEnabled",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProcessInfoPlatform.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSProcessInfo.macCatalystApp",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProcessInfoPlatform.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSProgress.localizedAdditionalDescription",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProgressState.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSProgress.resumingHandler",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSProgressState.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSTermOfAddress",
+      "kind": "class",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSTermOfAddress.languageIdentifier",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSTermOfAddress.pronouns",
+      "kind": "property",
+      "introduced": "17.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSTermOfAddress.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSTextCheckingResult.alternativeStrings",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "maximum": "7.0",
+      "status": "absent",
+      "reason": "only a correction result carries alternatives and the release cannot make one, so there is nothing for the accessor to read",
+      "effect": "the accessor is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "NSURLComponents.encodedHost",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLEncodingAndPromised.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLProtocol.task",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLProtocolTask.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLRequest.allowsPersistentDNS",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLRequestAttributes.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLRequest.allowsUltraConstrainedNetworkAccess",
+      "kind": "property",
+      "introduced": "26.1",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLRequestAttributes.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLRequest.assumesHTTP3Capable",
+      "kind": "property",
+      "introduced": "14.5",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLRequestAttributes.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLRequest.attribution",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLRequestAttributes.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLRequest.cookiePartitionIdentifier",
+      "kind": "property",
+      "introduced": "18.2",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLRequestAttributes.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSURLRequest.requiresDNSSECValidation",
+      "kind": "property",
+      "introduced": "16.1",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSURLRequestAttributes.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSUndoManager.redoCount",
+      "kind": "property",
+      "introduced": "17.4",
+      "minimum": "6.0",
+      "maximum": "17.4",
+      "status": "implemented",
+      "effect": "0 until an action registers its inverse while undoing, then 1, and 2 after a second undo; it is 0 when the action registers nothing, and a registration outside an undo or a redo empties it",
+      "source": "the host's own Foundation, measured in tests/backports/host/nsundo/run.sh: after-undo.redoCount=1 after-undo2.redoCount=2 plain.afterUndo.redoCount=0 plain.afterUndo.canRedo=NO after-new-registration.redoCount=0"
+    },
+    {
+      "api": "NSUndoManager.undoCount",
+      "kind": "property",
+      "introduced": "17.4",
+      "minimum": "6.0",
+      "maximum": "17.4",
+      "status": "implemented",
+      "effect": "a fresh manager answers 0; two registered groups answer 2; each undo takes one off, down to 0 through two undos, and a redo puts one back",
+      "source": "the host's own Foundation, measured in tests/backports/host/nsundo/run.sh: fresh.undoCount=0 two-groups.undoCount=2 after-undo.undoCount=1 after-undo2.undoCount=0 after-redo.undoCount=1, dladdr naming Foundation.framework for the getter on both sides"
+    },
+    {
+      "api": "NSUserActivity.persistentIdentifier",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUserActivityIdentity.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSUserActivity.referrerURL",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUserActivityIdentity.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSXMLParser.allowedExternalEntityURLs",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSXMLParserExternalEntities.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSXMLParser.externalEntityResolvingPolicy",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSXMLParserExternalEntities.md",
+      "source": "SDK 26.2 headers; the host's own Foundation, through the differential and the readings named in the facts file"
+    },
+    {
+      "api": "NSXPCCoder.connection",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "maximum": "10.0",
+      "status": "absent",
+      "reason": "the connection belongs to the release's NSXPCCoder, which is created by the system's own XPC machinery and keeps it in an ivar no public API returns",
+      "effect": "the accessor is not there: respondsToSelector: answers honestly and an unchecked call raises"
+    },
+    {
+      "api": "+[NSOrthography defaultOrthographyForLanguage:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "maximum": "11.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSOrthographyDefault.md",
+      "source": "SDK 26.2 headers; the release's own libicucore, whose uloc_addLikelySubtags is exported in the 6.1.3 armv7 cache (tools/corpus/cache-value.lua)"
+    }
+  ]
+}

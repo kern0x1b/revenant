@@ -1,0 +1,7 @@
+Package: org.charon.uikitprinter-app
+Name: Charon printer picker application
+Architecture: iphoneos-arm
+Description: The Bonjour printer picker as an application, launched through SpringBoard
+Maintainer: charon
+Author: charon
+Section: Development

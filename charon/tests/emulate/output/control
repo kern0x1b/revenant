@@ -1,0 +1,6 @@
+Package: org.charon.emulateoutput
+Name: emulate output probe
+Architecture: iphoneos-arm
+Description: A program that prints a known line to stdout and a known line to stderr, and sleeps past
+ a deadline the first time it is asked to, so a run can tell the two apart: the output of a program
+ that ends, and the output of one the deadline kills.

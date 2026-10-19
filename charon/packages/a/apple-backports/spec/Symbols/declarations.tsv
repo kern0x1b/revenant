@@ -1,0 +1,141 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	1c0b0fb657bba619	-
+super	-	NSSymbolEffectOptionsRepeatBehavior	NSObject		-	-	-	-	-	78834acde3c7658c	-
+conforms	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior	NSSymbolEffectOptionsRepeatBehavior	NSCopying		-	-	-	-	-	fb2ecc317c4ef875	-
+conforms	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior	NSSymbolEffectOptionsRepeatBehavior	NSSecureCoding		-	-	-	-	-	f6c4a93c38a44162	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(cm)new	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	2468ec5022c44679	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(im)init	-			instancetype	-	-	*unavailable ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	bf26e370e8f9dd09	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(cm)behaviorPeriodic	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	9618c499bdc7f735	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(cm)behaviorPeriodicWithCount:	-			instancetype	NSInteger count	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	32f66d7fc992b14f	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(cm)behaviorPeriodicWithDelay:	-			instancetype	double delay	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	4c68e8e863cf0e86	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(cm)behaviorPeriodicWithCount:delay:	-			instancetype	NSInteger count | double delay	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	814daa4d6d9d5357	-
+method	c:objc(cs)NSSymbolEffectOptionsRepeatBehavior(cm)behaviorContinuous	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	8e4811d7a93105c2	-
+interface	c:objc(cs)NSSymbolEffectOptions	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	deprecated: Use [NSSymbolEffectOptionsRepeatBehavior behaviorPeriodic] instead	88659d6da8e110ca	-
+super	-	NSSymbolEffectOptions	NSObject		-	-	-	-	-	4d40adb4f8c7ebe2	-
+conforms	c:objc(cs)NSSymbolEffectOptions	NSSymbolEffectOptions	NSCopying		-	-	-	-	-	8fb056de8e41d9f7	-
+conforms	c:objc(cs)NSSymbolEffectOptions	NSSymbolEffectOptions	NSSecureCoding		-	-	-	-	-	b46c647dd141091a	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	83aa73850f0004d4	-
+method	c:objc(cs)NSSymbolEffectOptions(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	b56dc7ed4fcc0eb4	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)options	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	bd318e53303704b6	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)optionsWithRepeating	-			instancetype	-	-	ios=17.0/100000/-/0,macos=14.0/100000/-/0,tvos=17.0/100000/-/0,watchos=10.0/100000/-/0,xros=1.0/100000/-/0	deprecated: Use [NSSymbolEffectOptionsRepeatBehavior behaviorPeriodic] instead	cdab84fc2f87a6e2	-
+method	c:objc(cs)NSSymbolEffectOptions(im)optionsWithRepeating	-			instancetype	-	-	ios=17.0/100000/-/0,macos=14.0/100000/-/0,tvos=17.0/100000/-/0,watchos=10.0/100000/-/0,xros=1.0/100000/-/0	deprecated: Use [NSSymbolEffectOptionsRepeatBehavior behaviorPeriodic] instead	03e8ae6be6f0594d	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)optionsWithNonRepeating	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	4f50c9c26fee3b1b	-
+method	c:objc(cs)NSSymbolEffectOptions(im)optionsWithNonRepeating	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	c0b14f9825b344d1	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)optionsWithRepeatCount:	-			instancetype	NSInteger count	-	ios=17.0/100000/-/0,macos=14.0/100000/-/0,tvos=17.0/100000/-/0,watchos=10.0/100000/-/0,xros=1.0/100000/-/0	deprecated: Use [NSSymbolEffectOptionsRepeatBehavior behaviorPeriodicWithCount:] instead	0e1d4565dee89eca	-
+method	c:objc(cs)NSSymbolEffectOptions(im)optionsWithRepeatCount:	-			instancetype	NSInteger count	-	ios=17.0/100000/-/0,macos=14.0/100000/-/0,tvos=17.0/100000/-/0,watchos=10.0/100000/-/0,xros=1.0/100000/-/0	deprecated: Use [NSSymbolEffectOptionsRepeatBehavior behaviorPeriodicWithCount:] instead	04e629f6979683dd	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)optionsWithSpeed:	-			instancetype	double speed	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	1699e7b1d8ee6025	-
+method	c:objc(cs)NSSymbolEffectOptions(im)optionsWithSpeed:	-			instancetype	double speed	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	c551793d63b7243f	-
+method	c:objc(cs)NSSymbolEffectOptions(cm)optionsWithRepeatBehavior:	-			instancetype	NSSymbolEffectOptionsRepeatBehavior * behavior	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	b9f87b3f41512aac	-
+method	c:objc(cs)NSSymbolEffectOptions(im)optionsWithRepeatBehavior:	-			instancetype	NSSymbolEffectOptionsRepeatBehavior * behavior	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	14216e3863a40ea5	-
+interface	c:objc(cs)NSSymbolEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	ce70794b9b6e19cd	-
+super	-	NSSymbolEffect	NSObject		-	-	-	-	-	81a699e7a24bee6c	-
+conforms	c:objc(cs)NSSymbolEffect	NSSymbolEffect	NSCopying		-	-	-	-	-	460a2a885ec83171	-
+conforms	c:objc(cs)NSSymbolEffect	NSSymbolEffect	NSSecureCoding		-	-	-	-	-	6446fc208b1819fc	-
+method	c:objc(cs)NSSymbolEffect(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	44dec7a92b12d051	-
+method	c:objc(cs)NSSymbolEffect(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	957611ac46f5852b	-
+interface	c:objc(cs)NSSymbolPulseEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	daad12582fbb7b2b	-
+super	-	NSSymbolPulseEffect	NSSymbolEffect		-	-	-	-	-	1cd4ef7da8ba35b3	-
+method	c:objc(cs)NSSymbolPulseEffect(cm)effect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	3c9761c6aeeeca5d	-
+method	c:objc(cs)NSSymbolPulseEffect(im)effectWithByLayer	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	5dcb5a17a5d24485	-
+method	c:objc(cs)NSSymbolPulseEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	6a35588c14836809	-
+interface	c:objc(cs)NSSymbolBounceEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	282deb5a80a5673e	-
+super	-	NSSymbolBounceEffect	NSSymbolEffect		-	-	-	-	-	610e74ff4d92e645	-
+method	c:objc(cs)NSSymbolBounceEffect(cm)effect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	1143f900e668549f	-
+method	c:objc(cs)NSSymbolBounceEffect(cm)bounceUpEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	e283e169a90aba77	-
+method	c:objc(cs)NSSymbolBounceEffect(cm)bounceDownEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	681d4bff20279e00	-
+method	c:objc(cs)NSSymbolBounceEffect(im)effectWithByLayer	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	5d7afd3b1b1299de	-
+method	c:objc(cs)NSSymbolBounceEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	18150b53c9d04cd4	-
+interface	c:objc(cs)NSSymbolVariableColorEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	cedb84236ba1714d	-
+super	-	NSSymbolVariableColorEffect	NSSymbolEffect		-	-	-	-	-	50c062cee8e3e56e	-
+method	c:objc(cs)NSSymbolVariableColorEffect(cm)effect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	db4959527adff6bb	-
+method	c:objc(cs)NSSymbolVariableColorEffect(im)effectWithIterative	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	470820ac8550b693	-
+method	c:objc(cs)NSSymbolVariableColorEffect(im)effectWithCumulative	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	c930da1a47bf23aa	-
+method	c:objc(cs)NSSymbolVariableColorEffect(im)effectWithReversing	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	a95fec8215663891	-
+method	c:objc(cs)NSSymbolVariableColorEffect(im)effectWithNonReversing	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	d3da6fbfb7242d85	-
+method	c:objc(cs)NSSymbolVariableColorEffect(im)effectWithHideInactiveLayers	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	e7f2368c6c1a2776	-
+method	c:objc(cs)NSSymbolVariableColorEffect(im)effectWithDimInactiveLayers	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	4401a8d42e690841	-
+interface	c:objc(cs)NSSymbolScaleEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	a4a03d7f4cd2b402	-
+super	-	NSSymbolScaleEffect	NSSymbolEffect		-	-	-	-	-	a6e32af195451b84	-
+method	c:objc(cs)NSSymbolScaleEffect(cm)effect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	56aa795dc99adc36	-
+method	c:objc(cs)NSSymbolScaleEffect(cm)scaleUpEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	73300f20c4aab8c0	-
+method	c:objc(cs)NSSymbolScaleEffect(cm)scaleDownEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	4492222bb678472f	-
+method	c:objc(cs)NSSymbolScaleEffect(im)effectWithByLayer	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	a3d49ee705c5fc26	-
+method	c:objc(cs)NSSymbolScaleEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	455e06f1aa41ea21	-
+interface	c:objc(cs)NSSymbolAppearEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	955c918d8d287e5b	-
+super	-	NSSymbolAppearEffect	NSSymbolEffect		-	-	-	-	-	d5ae6b1566d84fd3	-
+method	c:objc(cs)NSSymbolAppearEffect(cm)effect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	368a34465e7b4fb8	-
+method	c:objc(cs)NSSymbolAppearEffect(cm)appearUpEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	8c071b7e00462bb4	-
+method	c:objc(cs)NSSymbolAppearEffect(cm)appearDownEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	cc0ea9b5554ac7d1	-
+method	c:objc(cs)NSSymbolAppearEffect(im)effectWithByLayer	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	f8c6d025aa4a2a6a	-
+method	c:objc(cs)NSSymbolAppearEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	e6d84d74a73da05b	-
+interface	c:objc(cs)NSSymbolDisappearEffect	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	fb92d3cb47e12201	-
+super	-	NSSymbolDisappearEffect	NSSymbolEffect		-	-	-	-	-	8925debb08d67522	-
+method	c:objc(cs)NSSymbolDisappearEffect(cm)effect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	d841e7286d393041	-
+method	c:objc(cs)NSSymbolDisappearEffect(cm)disappearUpEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	9bc1652f4c51b153	-
+method	c:objc(cs)NSSymbolDisappearEffect(cm)disappearDownEffect	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	8dd49c5c2ad78f90	-
+method	c:objc(cs)NSSymbolDisappearEffect(im)effectWithByLayer	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	95cb9237e5f7535b	-
+method	c:objc(cs)NSSymbolDisappearEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	c02b36fa79ad5ebc	-
+interface	c:objc(cs)NSSymbolWiggleEffect	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	a55740c4645bde53	-
+super	-	NSSymbolWiggleEffect	NSSymbolEffect		-	-	-	-	-	6779f4d31aa9dc7e	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)effect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	018478c223747baa	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleClockwiseEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	558a7063cb95d311	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleCounterClockwiseEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	1c426ca9878a2c58	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleLeftEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	ec77aee3707a0e20	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleRightEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	3fecc4cfae71cb34	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleUpEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	146f6d4d4bedd293	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleDownEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	f368e9eb7b947ff5	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleForwardEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	3ca445bf83b684eb	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleBackwardEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	d0c73bcf90b62a6c	-
+method	c:objc(cs)NSSymbolWiggleEffect(cm)wiggleCustomAngleEffect:	-			instancetype	double angle	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	a4be89d01d13c9fe	-
+method	c:objc(cs)NSSymbolWiggleEffect(im)effectWithByLayer	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	228ca78967491bfd	-
+method	c:objc(cs)NSSymbolWiggleEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	2e51fdc688c1e924	-
+interface	c:objc(cs)NSSymbolRotateEffect	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	7c557119879ecda2	-
+super	-	NSSymbolRotateEffect	NSSymbolEffect		-	-	-	-	-	80f621fbf21a0241	-
+method	c:objc(cs)NSSymbolRotateEffect(cm)effect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	270045afeb8ec4ed	-
+method	c:objc(cs)NSSymbolRotateEffect(cm)rotateClockwiseEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	b1ef4c6e360590dd	-
+method	c:objc(cs)NSSymbolRotateEffect(cm)rotateCounterClockwiseEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	1d75be157d1bac41	-
+method	c:objc(cs)NSSymbolRotateEffect(im)effectWithByLayer	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	6e5f93fd6df096c7	-
+method	c:objc(cs)NSSymbolRotateEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	1c66eaa13b30f9e3	-
+interface	c:objc(cs)NSSymbolBreatheEffect	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	94b7a357260e2211	-
+super	-	NSSymbolBreatheEffect	NSSymbolEffect		-	-	-	-	-	aeefbebea8b0a654	-
+method	c:objc(cs)NSSymbolBreatheEffect(cm)effect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	4fe26626e34f108b	-
+method	c:objc(cs)NSSymbolBreatheEffect(cm)breathePulseEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	81c49422f7f5a06a	-
+method	c:objc(cs)NSSymbolBreatheEffect(cm)breathePlainEffect	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	634494857efe193a	-
+method	c:objc(cs)NSSymbolBreatheEffect(im)effectWithByLayer	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	c9bfd65a5a0b8b22	-
+method	c:objc(cs)NSSymbolBreatheEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	8c9944ed21ea9d68	-
+interface	c:objc(cs)NSSymbolDrawOnEffect	-			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	717ac8b1cdbd5326	-
+super	-	NSSymbolDrawOnEffect	NSSymbolEffect		-	-	-	-	-	2a9db40b6e3e93bc	-
+method	c:objc(cs)NSSymbolDrawOnEffect(cm)effect	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	7e92453d6d6019fa	-
+method	c:objc(cs)NSSymbolDrawOnEffect(im)effectWithByLayer	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	322eaae3c0217b1f	-
+method	c:objc(cs)NSSymbolDrawOnEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	bcc929b521c6d0ad	-
+method	c:objc(cs)NSSymbolDrawOnEffect(im)effectWithIndividually	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	ae691d323680d765	-
+interface	c:objc(cs)NSSymbolDrawOffEffect	-			-	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	9f7a648d811a2567	-
+super	-	NSSymbolDrawOffEffect	NSSymbolEffect		-	-	-	-	-	ab689b43a18160bb	-
+method	c:objc(cs)NSSymbolDrawOffEffect(cm)effect	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	4d8d12e959f4864c	-
+method	c:objc(cs)NSSymbolDrawOffEffect(im)effectWithByLayer	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	2668ec4107dc9eb2	-
+method	c:objc(cs)NSSymbolDrawOffEffect(im)effectWithWholeSymbol	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	a79e52cebf74b0da	-
+method	c:objc(cs)NSSymbolDrawOffEffect(im)effectWithIndividually	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	256569196ad297fa	-
+method	c:objc(cs)NSSymbolDrawOffEffect(im)effectWithReversed	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	a147173fc0e4070b	-
+method	c:objc(cs)NSSymbolDrawOffEffect(im)effectWithNonReversed	-			instancetype	-	-	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,watchos=26.0/-/-/0,xros=26.0/-/-/0	-	1687c9bb5f0e9809	-
+interface	c:objc(cs)NSSymbolContentTransition	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	f5cc36d63c04949d	-
+super	-	NSSymbolContentTransition	NSObject		-	-	-	-	-	b618bc37e3a1bef2	-
+conforms	c:objc(cs)NSSymbolContentTransition	NSSymbolContentTransition	NSCopying		-	-	-	-	-	aeeaaa73a0781295	-
+conforms	c:objc(cs)NSSymbolContentTransition	NSSymbolContentTransition	NSSecureCoding		-	-	-	-	-	18297cd67e1fa428	-
+method	c:objc(cs)NSSymbolContentTransition(cm)new	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	8dfe784db19e1d71	-
+method	c:objc(cs)NSSymbolContentTransition(im)init	-			instancetype	-	-	*unavailable ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	3d1c91d9da6ab427	-
+interface	c:objc(cs)NSSymbolMagicReplaceContentTransition	-			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	24742d88bc9ff512	-
+super	-	NSSymbolMagicReplaceContentTransition	NSSymbolContentTransition		-	-	-	-	-	04d353f3267bb16b	-
+interface	c:objc(cs)NSSymbolReplaceContentTransition	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	e1fc088416aa423e	-
+super	-	NSSymbolReplaceContentTransition	NSSymbolContentTransition		-	-	-	-	-	f908943a0305b92a	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(cm)transition	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	41870be7672376e5	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(cm)replaceDownUpTransition	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	6e442cb3666ae3ed	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(cm)replaceUpUpTransition	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	66ed746b2a2b6d4d	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(cm)replaceOffUpTransition	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	53cc3ab63561ecbc	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(im)transitionWithByLayer	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	dbf6d54da2c5c02d	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(im)transitionWithWholeSymbol	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	f35b8e80fb620558	-
+method	c:objc(cs)NSSymbolReplaceContentTransition(cm)magicTransitionWithFallback:	-			NSSymbolMagicReplaceContentTransition *	NSSymbolReplaceContentTransition * fallback	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	401287ed9b44d3ee	-
+interface	c:objc(cs)NSSymbolAutomaticContentTransition	-			-	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	b04022becdd676e4	-
+super	-	NSSymbolAutomaticContentTransition	NSSymbolContentTransition		-	-	-	-	-	58e69e5d1fad3b76	-
+method	c:objc(cs)NSSymbolAutomaticContentTransition(cm)transition	-			instancetype	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0,xros=1.0/-/-/0	-	bfca4631d63d8a39	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-

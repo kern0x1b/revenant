@@ -1,0 +1,8 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+EventKit	struct	EKEventStore.EventStoreChanged	26				own
+EventKit	property	EKEventStore.EventStoreChanged.name	26				container
+EventKit	typealias	EKEventStore.EventStoreChanged.Subject	26				container
+EventKit	method	EKEventStore.EventStoreChanged.init()	26				container
+EventKit	method	EKEventStore.EventStoreChanged.makeMessage(_:)	26				container
+EventKit	method	EKEventStore.EventStoreChanged.makeNotification(_:)	26				container
+EventKit	property	NotificationCenter.MessageIdentifier.changed	26				container

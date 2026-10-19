@@ -1,0 +1,27 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "MPRatingCommandEvent",
+   "kind": "class",
+   "introduced": "7.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release carries no CommandEvent class at all (read from 6.1.3's own MediaPlayer with tools/mach32_methods.py: none in the 236 classes or the 41 categories), so the class is new code and is carried, a subclass of the port's MPRemoteCommandEvent",
+   "effect": "a port-created event answers -rating as its row says; the base's command and timestamp are MPRemoteCommandEvent's",
+   "facts": "facts/MediaPlayer/MPMediaItem.md",
+   "source": "SDK 26.2, MPRemoteCommandEvent.h, MP_API(ios(7.1))"
+  },
+  {
+   "api": "MPRatingCommandEvent.rating",
+   "kind": "property",
+   "introduced": "7.1",
+   "minimum": "6.0",
+   "status": "implemented",
+   "source": "SDK 26.2, MPRemoteCommandEvent.h, MP_API(ios(7.1))",
+   "facts": "facts/MediaPlayer/MPMediaItem.md",
+   "reason": "the release carries no CommandEvent class at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, no class whose name holds CommandEvent exists in any of the 236 and none of the 41 categories, with a nonsense selector absent as the control. A class the release does not have is new code and cannot shadow anything, so there is nothing native for it to be - it is carried.",
+   "effect": "0 is what an event nothing set answers, the type's zero, and readwrite in the port so the event can carry the value it is about, where the header has it readonly"
+  }
+ ]
+}

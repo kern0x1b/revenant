@@ -1,0 +1,59 @@
++photoSettings	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithFormat: 420f	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithFormat: BGRA	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithFormat: avc1	stabilization=0 thumbnails= rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithFormat: hvc1	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithFormat: jpeg+quality	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithFormat: nil	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType: 0	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType: 1650943796	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType: 1651519798	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType: 1734505012	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType: 1735549492	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType: 1815491698	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType: 1919379252	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:<null> processedFileType:<null>	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:<null> processedFileType:com.adobe.raw-image	stabilization=0 thumbnails= rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:<null> processedFileType:public.heic	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:<null> processedFileType:public.jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:<null> processedFileType:public.tiff	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:<null>	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:com.adobe.raw-image	stabilization=0 thumbnails= rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:public.heic	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:public.jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:public.tiff	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:<null>	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:com.adobe.raw-image	stabilization=0 thumbnails= rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:public.heic	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:public.jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:public.tiff	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 rawFileType:nil processedFormat: 420f	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 rawFileType:nil processedFormat: BGRA	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 rawFileType:nil processedFormat: avc1	stabilization=0 thumbnails= rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 rawFileType:nil processedFormat: hvc1	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=	stabilization=1 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 rawFileType:nil processedFormat: jpeg+quality	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:0 rawFileType:nil processedFormat: nil	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:<null> processedFileType:<null>	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:<null> processedFileType:com.adobe.raw-image	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:<null> processedFileType:public.heic	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:<null> processedFileType:public.jpeg	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:<null> processedFileType:public.tiff	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:<null>	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:com.adobe.raw-image	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:public.heic	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:public.jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    AVVideoCodecKey = jpeg;} processedFileType:public.tiff	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:<null>	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:com.adobe.raw-image	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:public.heic	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:public.jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:1919379252 processedFormat:{    PixelFormatType = 1111970369;} processedFileType:public.tiff	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:rgg4 processedFormat: 420f	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:rgg4 processedFormat: BGRA	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:rgg4 processedFormat: avc1	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:rgg4 processedFormat: hvc1	stabilization=0 thumbnails=hvc1,jpeg rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
++photoSettingsWithRawPixelFormatType:rgg4 processedFormat: jpeg+quality	stabilization=0 thumbnails=jpeg rawThumbnails=jpeg	stabilization=0 thumbnails=jpeg rawThumbnails=
++photoSettingsWithRawPixelFormatType:rgg4 processedFormat: nil	stabilization=0 thumbnails= rawThumbnails=jpeg	stabilization=0 thumbnails= rawThumbnails=
+-init	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
+its prepared settings	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=1 thumbnails=jpeg rawThumbnails=
+set autoStillImageStabilizationEnabled NO	stabilization=0 thumbnails=jpeg rawThumbnails=	stabilization=0 thumbnails=jpeg rawThumbnails=

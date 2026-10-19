@@ -1,0 +1,236 @@
+# The cells of this differential that the release and the port do not answer alike, one per line:
+#
+#     <case> <data type> <element index> <the release's bytes> <the port's bytes>
+#
+# The bytes are written as the case file writes them, in the order they sit in the buffer, so the two
+# halves of a half are the two the buffer holds.
+#
+# Every other cell of every case is compared and must agree byte for byte. A cell on this list is
+# compared too, and it fails if either side's bytes are not the two written here: a recorded divergence
+# that stops being one has to come off the list, and one that changes shape has to be looked at again.
+# This is a record of measurements, not an allowance - nothing here excuses a data type, an operation or
+# an element count, and a case of a data type that is absent from this file is compared like any other.
+#
+# Measured on macOS 27.0 build 26A428 (M4 Pro, Metal 4). What each group is, and the rule attempted and
+# The 2026-10-03 elementary family: the transcendentals, the rounding, the comparisons, the logical
+# family, the select, the clamp and the two activations, asked over the same sixteen classes in float32
+# and in float16. Each line below is the two runs' bytes for one cell, read out of the run's own
+# outputs. facts/MetalPerformanceShadersGraph/Core.md groups them and says what was measured about
+# each group and what was attempted for it.
+# rejected for it, is in packages/a/apple-backports/facts/MetalPerformanceShadersGraph/Core.md.
+atan float16 6 483e 007e
+atan float16 7 48be 00fe
+atan float16 13 fd13 0014
+atan float16 16 fd27 ff27
+atan float16 17 fda7 ffa7
+divide float16 1 00fc 007c
+divide float16 4 0000 007e
+divide float16 5 0000 007e
+divide float16 6 007c 007e
+divide float16 7 00fa 007e
+divisionNoNaN float16 4 0000 007e
+divisionNoNaN float16 5 0000 007e
+divisionNoNaN float16 6 007c 007e
+divisionNoNaN float16 7 00fa 007e
+erf float16 10 8104 8204
+erf float16 11 8204 8304
+erf float16 13 8214 8314
+erf float16 15 cc35 cd35
+erf float16 16 8228 8328
+erf float16 17 82a8 83a8
+erf float32 0 3cbb573f 3dbb573f
+erf float32 1 3cbb57bf 3dbb57bf
+erf float32 10 bc6e9000 bb6e9000
+erf float32 11 bc6e9000 bb6e9000
+erf float32 12 bc6e9035 bb6e9035
+erf float32 13 3bbb573f 3dbb573f
+erf float32 14 bc6e90b5 bb6e90b5
+erf float32 15 1325551e 1125551e
+erf float32 16 bc6e9037 bb6e9037
+erf float32 17 bc6e90b7 bb6e90b7
+erf float32 18 1aa6d837 18a6d837
+erf float32 19 1aa6d8b7 18a6d8b7
+erf float32 20 bc6e1038 bb6e1038
+erf float32 21 bc6e10b8 bb6e10b8
+erf float32 22 1aa65838 18a65838
+erf float32 23 1aa658b8 18a658b8
+erf float32 25 dcbb573f ddbb573f
+erf float32 26 10bc573f 12bc573f
+erf float32 27 7bbc573f 7cbc573f
+erf float32 29 dcbb57bf ddbb57bf
+erf float32 30 10bc57bf 12bc57bf
+erf float32 31 7bbc57bf 7cbc57bf
+expBase2 float16 6 007c 007e
+expBase2 float16 7 0000 007e
+floorModulo float16 0 003c 007e
+floorModulo float16 1 00bc 007e
+floorModulo float16 2 0000 007e
+floorModulo float16 3 0000 007e
+floorModulo float16 4 007c 007e
+floorModulo float16 5 00fc 007e
+floorModulo float16 6 007c 007e
+floorModulo float16 7 00f8 007e
+floorModulo float16 26 001c 401c
+floorModulo float16 28 01bc 007e
+floorModulo float16 29 02bc 007e
+floorModulo float16 30 04bc 007e
+floorModulo float16 31 08bc 007e
+floorModulo float32 9 00000000 00000080
+floorModulo float32 10 00008000 00000000
+floorModulo float32 11 00008000 00000000
+floorModulo float32 15 08e53c1e 00000000
+floorModulo float32 17 00000000 00000080
+floorModulo float32 19 00000000 00000080
+floorModulo float32 21 00000000 00000080
+floorModulo float32 23 00000000 00000080
+floorModulo float32 26 00000038 00c0ff37
+greaterThan bool-from-float16 5 01 00
+greaterThan bool-from-float16 6 01 00
+greaterThanOrEqualTo bool-from-float16 5 01 00
+greaterThanOrEqualTo bool-from-float16 6 01 00
+lessThan bool-from-float16 4 01 00
+lessThan bool-from-float16 7 01 00
+lessThanOrEqualTo bool-from-float16 4 01 00
+lessThanOrEqualTo bool-from-float16 7 01 00
+log float16 6 0000 007c
+log float16 7 0000 00fc
+log float16 10 dbc8 dac8
+log float16 11 dbc8 dac8
+log float16 13 efc6 eec6
+log float16 14 2914 ff13
+log float16 15 66bc 65bc
+log float16 16 efc2 eec2
+log float16 24 2914 ff13
+log float16 25 2918 fe17
+log float16 26 a11b fc1b
+log float16 27 f91f f81f
+logBase2 float16 1 0000 007e
+logBase2 float16 4 0000 007c
+logBase2 float16 5 0000 007e
+logBase2 float16 9 0000 007e
+logBase2 float16 14 0016 c515
+logBase2 float16 17 0000 007e
+logBase2 float16 19 0000 007e
+logBase2 float16 21 0000 007e
+logBase2 float16 23 0000 007e
+logBase2 float16 24 0016 c515
+logBase2 float16 25 001a c419
+logBase2 float16 26 801d c21d
+logBase2 float16 28 0000 007e
+logBase2 float16 29 0000 007e
+logBase2 float16 30 0000 007e
+logBase2 float16 31 0000 007e
+maximum float16 6 007c 0100
+minimum float16 7 00fc 0040
+modulo float16 3 0080 0000
+modulo float16 17 0080 0000
+modulo float16 19 0080 0000
+modulo float16 21 0080 0000
+modulo float16 23 0080 0000
+multiply float16 2 0000 007e
+multiply float16 3 0000 007e
+multiply float16 4 007c 007e
+multiply float16 5 007c 007e
+multiply float16 6 001e 007e
+multiply float16 7 00fc 007e
+power float16 9 003c 007e
+power float16 10 0d29 0b29
+power float16 17 003c 007e
+power float16 19 003c 007e
+power float16 21 003c 007e
+power float16 23 003c 007e
+reLU float16 7 0000 00fc
+reLUGradient float16 5 0000 00fc
+reciprocal float16 6 0000 007c
+reciprocal float16 7 0000 00fc
+reciprocal float16 27 f13b f03b
+reciprocal float16 31 f1bb f0bb
+rint float16 3 0080 0000
+rint float16 9 0080 0000
+rint float16 17 0080 0000
+rint float16 19 0080 0000
+rint float16 21 0080 0000
+rint float16 23 0080 0000
+rsqrt float16 6 0000 007c
+rsqrt float16 7 0000 00fc
+rsqrt float16 15 ef3e ee3e
+select float16 6 0100 007c
+select float16 7 0040 00fc
+sigmoidGradient float16 0 00b4 0034
+sigmoidGradient float16 1 0034 00b4
+sigmoidGradient float16 4 00fc 007e
+sigmoidGradient float16 5 0000 007e
+sigmoidGradient float16 6 00f6 007e
+sigmoidGradient float16 7 007c 007e
+sigmoidGradient float16 9 0000 0080
+sigmoidGradient float16 10 5b81 f900
+sigmoidGradient float16 11 dc83 1200
+sigmoidGradient float16 12 00b8 7e09
+sigmoidGradient float16 13 4393 e402
+sigmoidGradient float16 14 47b8 4c32
+sigmoidGradient float16 15 b2b1 322c
+sigmoidGradient float16 16 20a0 0020
+sigmoidGradient float16 17 c11f 00a0
+sigmoidGradient float16 18 41a4 fe23
+sigmoidGradient float16 19 8223 fea3
+sigmoidGradient float16 20 84a8 f827
+sigmoidGradient float16 21 0a27 f8a7
+sigmoidGradient float16 22 0ead e02b
+sigmoidGradient float16 23 222a e0ab
+sigmoidGradient float16 24 39ba b72e
+sigmoidGradient float16 25 32a3 b12e
+sigmoidGradient float16 26 71b5 d033
+sigmoidGradient float16 27 06bc 8413
+sigmoidGradient float16 28 0134 01b4
+sigmoidGradient float16 29 0234 02b4
+sigmoidGradient float16 30 0434 04b4
+sigmoidGradient float16 31 0834 08b4
+sigmoidGradient float32 12 feffff29 daaaf129
+sigmoidGradient float32 13 270b393d 290b393d
+sigmoidGradient float32 24 1207d73d 1407d73d
+sigmoidGradient float32 27 1a9b6e3a b59e6e3a
+signbit float16 3 0000 003c
+sqrt float16 14 013c 003c
+sqrt float16 24 013c 003c
+subtract float16 4 00f8 007c
+subtract float16 5 0078 00fc
+tanh float16 10 fa03 ff03
+tanh float16 11 fb03 0004
+tanh float16 13 f513 0014
+tanh float16 15 2135 2535
+tanh float16 16 f527 ff27
+tanh float16 17 f5a7 ffa7
+tanh float16 18 f52b fd2b
+tanh float16 19 f5ab fdab
+tanh float32 6 0000803f 0000c07f
+tanh float32 7 0000803f 0000c07f
+tanh float32 10 00000000 00008000
+tanh float32 11 00000000 00008000
+tanh float32 12 f0ff7f35 00008035
+tanh float32 14 080084b5 000080b5
+tanh float32 15 00000000 08e53c1e
+tanh float32 16 00ff7f37 00008037
+tanh float32 17 804080b7 000080b7
+tanh float32 18 e0febf37 0000c037
+tanh float32 19 2001c0b7 0000c0b7
+tanh float32 20 00feff37 00000038
+tanh float32 21 000100b8 000000b8
+tanh float32 22 c0fd3f38 00004038
+tanh float32 23 400240b8 000040b8
+
+# The 2026-10-04 non-zero family: four cells that the release writes and that are not this operation's
+# answer at all. Measured on macOS 27.0 build 26A428 (M4 Pro, Metal 4), over a [3, 4, 6] into a
+# seventy-two-row destination: with a count of two the release writes 3 at cell 197, with a count of three
+# it writes 2 there, and with a count of five it writes 3 at cell 203 and 2 at 206. Each of the four is
+# determinate - five runs of one process each print the same bytes - and none of the four is a coordinate
+# of any element of the operand, nor is any of them near the answer's rows. They appear only over a
+# seventy-two-row destination and only at a count of two, three or five: a count of one is written into
+# every row, a count of seventy-two fills every row with an index, and every destination of ten rows or
+# fewer, and of twelve, twenty-four and seventy-two with a smaller count, carries none of them. The port
+# writes the operation's own answer there, which is a zero, because that is the whole of what this
+# operation computes. facts/MetalPerformanceShadersGraph/Core.md carries the measurement and what was
+# tried against it.
+nonzero-two-ends int32-from-float32 197 03000000 00000000
+nonzero-three int32-from-float32 197 02000000 00000000
+nonzero-five int32-from-float32 203 03000000 00000000
+nonzero-five int32-from-float32 206 02000000 00000000

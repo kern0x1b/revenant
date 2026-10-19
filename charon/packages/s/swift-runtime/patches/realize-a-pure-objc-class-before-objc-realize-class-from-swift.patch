@@ -1,0 +1,26 @@
+diff --git a/stdlib/public/runtime/Metadata.cpp b/stdlib/public/runtime/Metadata.cpp
+--- a/stdlib/public/runtime/Metadata.cpp
++++ b/stdlib/public/runtime/Metadata.cpp
+@@ -4595,15 +4595,15 @@
+                                          ClassLayoutFlags flags,
+                                          size_t numFields,
+                                          const TypeLayout * const *fieldTypes) {
+-  bool hasRealizeClassFromSwift =
+-    SWIFT_RUNTIME_WEAK_CHECK(_objc_realizeClassFromSwift);
+-  assert(hasRealizeClassFromSwift);
+-  (void)hasRealizeClassFromSwift;
+-
+   SWIFT_DEFER {
+     // Realize the class. This causes the runtime to slide the field offsets
+-    // stored in the field offset globals.
+-    SWIFT_RUNTIME_WEAK_USE(_objc_realizeClassFromSwift(cls, cls));
++    // stored in the field offset globals. A release without
++    // _objc_realizeClassFromSwift (objc4 has it from 756.2, iOS 12.2; the held caches start at 16.0, the ladder's first rung)
++    // realizes the class as _swift_updateClassMetadataImpl does there.
++    if (SWIFT_RUNTIME_WEAK_CHECK(_objc_realizeClassFromSwift))
++      SWIFT_RUNTIME_WEAK_USE(_objc_realizeClassFromSwift(cls, cls));
++    else
++      swift_getInitializedObjCClass(cls);
+   };
+ 
+   // Update the field offset globals using runtime type information; the layout

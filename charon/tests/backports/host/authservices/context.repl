@@ -1,0 +1,4 @@
+    // MUTANT: a cancellation that DROPS the error, which makes a failed exchange look like one that
+    // simply stopped -- the exact thing the record exists to prevent.
+    (void)error;
+    _lastExchange = [ASPortCredentialExchange configurationExchange];

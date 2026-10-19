@@ -1,0 +1,5 @@
+            sum += CharonMPSImageLoad(buffer, &from, CharonMPSImageIndex(&from, pixel, channel));
+            count += 1.0;
+        }
+    double mean = count > 0.0 ? sum / count : 0.0;
+    double squared = 0.0;

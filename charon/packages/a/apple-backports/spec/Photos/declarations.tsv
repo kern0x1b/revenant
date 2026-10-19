@@ -1,0 +1,661 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@PHImageContentMode	-			enum PHImageContentMode	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	fe66375e7b787b87	-
+enum	c:@E@PHImageContentMode	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	db1eb90c5a0f925c	-
+enumconst	c:@E@PHImageContentMode@PHImageContentModeAspectFit	PHImageContentMode			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	cd2baf7e2cdfc495	0
+enumconst	c:@E@PHImageContentMode@PHImageContentModeAspectFill	PHImageContentMode			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	951e732a7e42069d	1
+enumconst	c:@E@PHImageContentMode@PHImageContentModeDefault	PHImageContentMode			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	b64676ad9c0e4e05	0
+typedef	c:@T@PHCollectionListType	-			enum PHCollectionListType	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	958d6cc67be6ff1b	-
+enum	c:@E@PHCollectionListType	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	f9566b41b34d95a1	-
+enumconst	c:@E@PHCollectionListType@PHCollectionListTypeMomentList	PHCollectionListType			-	-	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	6eb8f8582afb7f08	1
+enumconst	c:@E@PHCollectionListType@PHCollectionListTypeFolder	PHCollectionListType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	e2903221377e75e0	2
+enumconst	c:@E@PHCollectionListType@PHCollectionListTypeSmartFolder	PHCollectionListType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7063fdbb7b969890	3
+typedef	c:@T@PHCollectionListSubtype	-			enum PHCollectionListSubtype	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	81ff208502c33d04	-
+enum	c:@E@PHCollectionListSubtype	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	01539900a1a572d4	-
+enumconst	c:@E@PHCollectionListSubtype@PHCollectionListSubtypeMomentListCluster	PHCollectionListSubtype			-	-	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	60e13d49177f6780	1
+enumconst	c:@E@PHCollectionListSubtype@PHCollectionListSubtypeMomentListYear	PHCollectionListSubtype			-	-	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	ccff606750e70930	2
+enumconst	c:@E@PHCollectionListSubtype@PHCollectionListSubtypeRegularFolder	PHCollectionListSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4de9bb15b6aeb64f	100
+enumconst	c:@E@PHCollectionListSubtype@PHCollectionListSubtypeSmartFolderEvents	PHCollectionListSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	2438360ae3753d82	200
+enumconst	c:@E@PHCollectionListSubtype@PHCollectionListSubtypeSmartFolderFaces	PHCollectionListSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	af32139dc8f602e8	201
+enumconst	c:@E@PHCollectionListSubtype@PHCollectionListSubtypeAny	PHCollectionListSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4de76b5f8f250e2e	9223372036854775807
+typedef	c:@T@PHCollectionEditOperation	-			enum PHCollectionEditOperation	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	9d95194817073bba	-
+enum	c:@E@PHCollectionEditOperation	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	a3a52a9d2b6f4767	-
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationDeleteContent	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7d486fbbfc9e3a55	1
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationRemoveContent	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7fa80a910bf80804	2
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationAddContent	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	6cea4e48166210ad	3
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationCreateContent	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1851c14fae07d3ca	4
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationRearrangeContent	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4e654fabc0fb8c94	5
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationDelete	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1f4f44953cc93dba	6
+enumconst	c:@E@PHCollectionEditOperation@PHCollectionEditOperationRename	PHCollectionEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	10ae9c69c0e2d7e2	7
+typedef	c:@T@PHAssetCollectionType	-			enum PHAssetCollectionType	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1ef1fa748efa4fc3	-
+enum	c:@E@PHAssetCollectionType	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	5e09bce001ba806e	-
+enumconst	c:@E@PHAssetCollectionType@PHAssetCollectionTypeAlbum	PHAssetCollectionType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	33cabadd5204eeca	1
+enumconst	c:@E@PHAssetCollectionType@PHAssetCollectionTypeSmartAlbum	PHAssetCollectionType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	69fa7fbf1a930e77	2
+enumconst	c:@E@PHAssetCollectionType@PHAssetCollectionTypeMoment	PHAssetCollectionType			-	-	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	41ba45f42a0acae9	3
+typedef	c:@T@PHAssetCollectionSubtype	-			enum PHAssetCollectionSubtype	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	d47540b82f1ba71c	-
+enum	c:@E@PHAssetCollectionSubtype	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	d609eb027e2544c8	-
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumRegular	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	c373ea42af04d285	2
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumSyncedEvent	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4be798f411c82d8e	3
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumSyncedFaces	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	42868985ee95ada7	4
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumSyncedAlbum	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	a2e5d4c69e25c217	5
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumImported	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	2d7e131caf5eb0a9	6
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumMyPhotoStream	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	5ca4966e9b558b62	100
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAlbumCloudShared	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	d6351141b9006d2f	101
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumGeneric	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	0af57a811032bcb3	200
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumPanoramas	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	8adb1251c39ed9e5	201
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumVideos	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	462d8a8d5dd44c80	202
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumFavorites	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	16002e8e55da1a99	203
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumTimelapses	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	2bc365c11bd1dd7f	204
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumAllHidden	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	37ff57f4152e8d97	205
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumRecentlyAdded	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	5ab9c285935db1c6	206
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumBursts	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	def967f2a99507f0	207
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumSlomoVideos	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	54327dabe6cc1a50	208
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumUserLibrary	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	3836aa3272ab9196	209
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumSelfPortraits	PHAssetCollectionSubtype			-	-	-	ios=9/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	562d36c0bc14e004	210
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumScreenshots	PHAssetCollectionSubtype			-	-	-	ios=9/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	933362cbfdb24e62	211
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumDepthEffect	PHAssetCollectionSubtype			-	-	-	ios=10.2/-/-/0,macos=10.13/-/-/0,tvos=10.1/-/-/0	-	a9de224b48e83edf	212
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumLivePhotos	PHAssetCollectionSubtype			-	-	-	ios=10.3/-/-/0,macos=10.13/-/-/0,tvos=10.2/-/-/0	-	806b76a8cb511eff	213
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumAnimated	PHAssetCollectionSubtype			-	-	-	ios=11/-/-/0,macos=10.15/-/-/0,tvos=11/-/-/0	-	25206e874189f42a	214
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumLongExposures	PHAssetCollectionSubtype			-	-	-	ios=11/-/-/0,macos=10.15/-/-/0,tvos=11/-/-/0	-	98ebc82ab63ca3f9	215
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumUnableToUpload	PHAssetCollectionSubtype			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	0b1f96af1e77cefa	216
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumRAW	PHAssetCollectionSubtype			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	fe96fd8fb45fd187	217
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumCinematic	PHAssetCollectionSubtype			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	1437bb035e2a0beb	218
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumSpatial	PHAssetCollectionSubtype			-	-	-	ios=18/-/-/0,macos=15/-/-/0,tvos=18/-/-/0	-	bf3c8002b063bcbf	219
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeSmartAlbumScreenRecordings	PHAssetCollectionSubtype			-	-	-	ios=14/-/-/0,macos=11/-/-/0,tvos=14/-/-/0	-	b323aac4edc09122	220
+enumconst	c:@E@PHAssetCollectionSubtype@PHAssetCollectionSubtypeAny	PHAssetCollectionSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	a83d899ae527f7f2	9223372036854775807
+typedef	c:@T@PHAssetEditOperation	-			enum PHAssetEditOperation	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	ad9efe5056fbdeba	-
+enum	c:@E@PHAssetEditOperation	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	75cbb70d42cee0a3	-
+enumconst	c:@E@PHAssetEditOperation@PHAssetEditOperationDelete	PHAssetEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	bc7e1e754c7c1163	1
+enumconst	c:@E@PHAssetEditOperation@PHAssetEditOperationContent	PHAssetEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	bba5ecd0e8f48189	2
+enumconst	c:@E@PHAssetEditOperation@PHAssetEditOperationProperties	PHAssetEditOperation			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	39baa0e2df357c39	3
+typedef	c:@T@PHAssetPlaybackStyle	-			enum PHAssetPlaybackStyle	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	5b09c629ed3667e9	-
+enum	c:@E@PHAssetPlaybackStyle	-			NSInteger	-	-	ios=11/-/-/0,macos=10.13/-/-/0,tvos=11/-/-/0	-	538791a4ff80d46b	-
+enumconst	c:@E@PHAssetPlaybackStyle@PHAssetPlaybackStyleUnsupported	PHAssetPlaybackStyle			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	88f9afd73ff44c37	0
+enumconst	c:@E@PHAssetPlaybackStyle@PHAssetPlaybackStyleImage	PHAssetPlaybackStyle			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	26d208cb070cff30	1
+enumconst	c:@E@PHAssetPlaybackStyle@PHAssetPlaybackStyleImageAnimated	PHAssetPlaybackStyle			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	85af157bbdad7f27	2
+enumconst	c:@E@PHAssetPlaybackStyle@PHAssetPlaybackStyleLivePhoto	PHAssetPlaybackStyle			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	b41b7ae9639af81a	3
+enumconst	c:@E@PHAssetPlaybackStyle@PHAssetPlaybackStyleVideo	PHAssetPlaybackStyle			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	64d32e44d0930b90	4
+enumconst	c:@E@PHAssetPlaybackStyle@PHAssetPlaybackStyleVideoLooping	PHAssetPlaybackStyle			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	bb8d617d81b5104e	5
+typedef	c:@T@PHAssetMediaType	-			enum PHAssetMediaType	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	24adf665194e7a2e	-
+enum	c:@E@PHAssetMediaType	-			NSInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	625427b53f3a73e4	-
+enumconst	c:@E@PHAssetMediaType@PHAssetMediaTypeUnknown	PHAssetMediaType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	e5c8b63c02667cb7	0
+enumconst	c:@E@PHAssetMediaType@PHAssetMediaTypeImage	PHAssetMediaType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	546e357825bfa540	1
+enumconst	c:@E@PHAssetMediaType@PHAssetMediaTypeVideo	PHAssetMediaType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	49dd28d02ffd6186	2
+enumconst	c:@E@PHAssetMediaType@PHAssetMediaTypeAudio	PHAssetMediaType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	0876463455c270fd	3
+typedef	c:@T@PHAssetMediaSubtype	-			enum PHAssetMediaSubtype	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	73f0a222d3b49b01	-
+enum	c:@E@PHAssetMediaSubtype	-			NSUInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7649b0a30b63f277	-
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeNone	PHAssetMediaSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1e09ea6817970a40	0
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypePhotoPanorama	PHAssetMediaSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	b9cbf7c8cd5550f3	1
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypePhotoHDR	PHAssetMediaSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	91b487a021f16d7d	2
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypePhotoScreenshot	PHAssetMediaSubtype			-	-	-	ios=9/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	cd2e19075cb6b102	4
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypePhotoLive	PHAssetMediaSubtype			-	-	-	ios=9.1/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	8feabd416ac9766a	8
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypePhotoDepthEffect	PHAssetMediaSubtype			-	-	-	ios=10.2/-/-/0,macos=10.12.2/-/-/0,tvos=10.1/-/-/0	-	bd462fd4c068122a	16
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeSpatialMedia	PHAssetMediaSubtype			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	d2beafc2609f417c	1024
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeVideoStreamed	PHAssetMediaSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1cd78ea8d40129d9	65536
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeVideoHighFrameRate	PHAssetMediaSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	9a8c388f67705dc7	131072
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeVideoTimelapse	PHAssetMediaSubtype			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7199bfba3505fa80	262144
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeVideoScreenRecording	PHAssetMediaSubtype			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	7faf2c29a9219f20	524288
+enumconst	c:@E@PHAssetMediaSubtype@PHAssetMediaSubtypeVideoCinematic	PHAssetMediaSubtype			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	32c588e6f291b827	2097152
+typedef	c:@T@PHAssetBurstSelectionType	-			enum PHAssetBurstSelectionType	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4b1be8e4902208be	-
+enum	c:@E@PHAssetBurstSelectionType	-			NSUInteger	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7bdcfaf3f8ab10e7	-
+enumconst	c:@E@PHAssetBurstSelectionType@PHAssetBurstSelectionTypeNone	PHAssetBurstSelectionType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	f8985ce44ddda80c	0
+enumconst	c:@E@PHAssetBurstSelectionType@PHAssetBurstSelectionTypeAutoPick	PHAssetBurstSelectionType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	3f5f176436f0c5cd	1
+enumconst	c:@E@PHAssetBurstSelectionType@PHAssetBurstSelectionTypeUserPick	PHAssetBurstSelectionType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	f0bea237992893ae	2
+typedef	c:@T@PHAssetSourceType	-			enum PHAssetSourceType	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	034b98ba4a498645	-
+enum	c:@E@PHAssetSourceType	-			NSUInteger	-	-	ios=9/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	441008a13f4ccbf5	-
+enumconst	c:@E@PHAssetSourceType@PHAssetSourceTypeNone	PHAssetSourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	0c53c6d4215d07e4	0
+enumconst	c:@E@PHAssetSourceType@PHAssetSourceTypeUserLibrary	PHAssetSourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1b9cf0debbfa2bdf	1
+enumconst	c:@E@PHAssetSourceType@PHAssetSourceTypeCloudShared	PHAssetSourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	8b49b28f2d4822c7	2
+enumconst	c:@E@PHAssetSourceType@PHAssetSourceTypeiTunesSynced	PHAssetSourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	c17486e1d792e905	4
+typedef	c:@T@PHAssetResourceType	-			enum PHAssetResourceType	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	cb13d8f0ec87f636	-
+enum	c:@E@PHAssetResourceType	-			NSInteger	-	-	ios=9/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	c78b4239e3128816	-
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypePhoto	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	5040ef61119c14ff	1
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeVideo	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	3210f243b19890c9	2
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeAudio	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	f6b6b2cb9f9ebf4c	3
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeAlternatePhoto	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	ffc3fe3a37ef8b91	4
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeFullSizePhoto	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	3f27f1fd35e4aa05	5
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeFullSizeVideo	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	c91fa6089f92646e	6
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeAdjustmentData	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	44a72c44a430fbd6	7
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeAdjustmentBasePhoto	PHAssetResourceType			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	7db9fb33ec3bd453	8
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypePairedVideo	PHAssetResourceType			-	-	-	ios=9.1/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	9e636e2acc91befd	9
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeFullSizePairedVideo	PHAssetResourceType			-	-	-	ios=10/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	18ebc4d557162bc8	10
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeAdjustmentBasePairedVideo	PHAssetResourceType			-	-	-	ios=10/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	699225249be7c180	11
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypeAdjustmentBaseVideo	PHAssetResourceType			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	7de1d7421386bd51	12
+enumconst	c:@E@PHAssetResourceType@PHAssetResourceTypePhotoProxy	PHAssetResourceType			-	-	-	ios=17/-/-/0,macos=14/-/-/0,tvos=10/-/-/0	-	a142a3725a67b718	19
+typedef	c:@T@PHAssetResourceUploadJobState	-			enum PHAssetResourceUploadJobState	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	0b2e0b4dcc93d7c8	-
+enum	c:@E@PHAssetResourceUploadJobState	-			NSInteger	-	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,xros=-/-/-/1	-	2868d8098af5151b	-
+enumconst	c:@E@PHAssetResourceUploadJobState@PHAssetResourceUploadJobStateRegistered	PHAssetResourceUploadJobState			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	217ebc20d1f50988	1
+enumconst	c:@E@PHAssetResourceUploadJobState@PHAssetResourceUploadJobStatePending	PHAssetResourceUploadJobState			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	ac66cfae09e86f20	2
+enumconst	c:@E@PHAssetResourceUploadJobState@PHAssetResourceUploadJobStateFailed	PHAssetResourceUploadJobState			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	04c596517cfc61d4	3
+enumconst	c:@E@PHAssetResourceUploadJobState@PHAssetResourceUploadJobStateSucceeded	PHAssetResourceUploadJobState			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	875874c8d3ee212a	4
+typedef	c:@T@PHAssetResourceUploadJobAction	-			enum PHAssetResourceUploadJobAction	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	b57e68ed0a980dbc	-
+enum	c:@E@PHAssetResourceUploadJobAction	-			NSInteger	-	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,xros=-/-/-/1	-	4ba99d7855fd619b	-
+enumconst	c:@E@PHAssetResourceUploadJobAction@PHAssetResourceUploadJobActionAcknowledge	PHAssetResourceUploadJobAction			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	988e6431fb120b64	1
+enumconst	c:@E@PHAssetResourceUploadJobAction@PHAssetResourceUploadJobActionRetry	PHAssetResourceUploadJobAction			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	d12e36f8e1714b5c	2
+typedef	c:@T@PHObjectType	-			enum PHObjectType	-	-	-	-	fb530b20f361822c	-
+enum	c:@E@PHObjectType	-			NSInteger	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	043efd0f48910178	-
+enumconst	c:@E@PHObjectType@PHObjectTypeAsset	PHObjectType			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	3f014741eba3e279	1
+enumconst	c:@E@PHObjectType@PHObjectTypeAssetCollection	PHObjectType			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	ebe36dfa2b33b1ba	2
+enumconst	c:@E@PHObjectType@PHObjectTypeCollectionList	PHObjectType			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	98b8cfd4ff9631a5	3
+typedef	c:@T@PHAuthorizationStatus	-			enum PHAuthorizationStatus	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	34dc76cde182a4db	-
+enum	c:@E@PHAuthorizationStatus	-			NSInteger	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7f7fbbd7b994937c	-
+enumconst	c:@E@PHAuthorizationStatus@PHAuthorizationStatusNotDetermined	PHAuthorizationStatus			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	83fd4c8ab796998a	0
+enumconst	c:@E@PHAuthorizationStatus@PHAuthorizationStatusRestricted	PHAuthorizationStatus			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	8019551e570fbac3	1
+enumconst	c:@E@PHAuthorizationStatus@PHAuthorizationStatusDenied	PHAuthorizationStatus			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0433b15dec3e5cdb	2
+enumconst	c:@E@PHAuthorizationStatus@PHAuthorizationStatusAuthorized	PHAuthorizationStatus			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	c84d8b82cb77a495	3
+enumconst	c:@E@PHAuthorizationStatus@PHAuthorizationStatusLimited	PHAuthorizationStatus			-	-	-	ios=14/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	19bd64d6ede2415a	4
+typedef	c:@T@PHAccessLevel	-			enum PHAccessLevel	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	a0470315d378fdcc	-
+enum	c:@E@PHAccessLevel	-			NSInteger	-	-	ios=14/-/-/0,macos=11/-/-/0,tvos=14/-/-/0	-	9b0f901038e0b093	-
+enumconst	c:@E@PHAccessLevel@PHAccessLevelAddOnly	PHAccessLevel			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0cfe516ee1de2e11	1
+enumconst	c:@E@PHAccessLevel@PHAccessLevelReadWrite	PHAccessLevel			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	afe36b034f64f831	2
+protocol	c:objc(pl)PHPhotoLibraryChangeObserver	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	37d90fc148be36a0	-
+conforms	c:objc(pl)PHPhotoLibraryChangeObserver	PHPhotoLibraryChangeObserver	NSObject		-	-	-	-	-	fca076cc095d6348	-
+method	c:objc(pl)PHPhotoLibraryChangeObserver(im)photoLibraryDidChange:	-			void	PHChange * changeInstance	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	4b40448dfdfb1e6d	-
+protocol	c:objc(pl)PHPhotoLibraryAvailabilityObserver	-			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	724ac6d12dd59d8f	-
+conforms	c:objc(pl)PHPhotoLibraryAvailabilityObserver	PHPhotoLibraryAvailabilityObserver	NSObject		-	-	-	-	-	2bda12023619c31f	-
+method	c:objc(pl)PHPhotoLibraryAvailabilityObserver(im)photoLibraryDidBecomeUnavailable:	-			void	PHPhotoLibrary * photoLibrary	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	19ca77843bd096d8	-
+interface	c:objc(cs)PHPhotoLibrary	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	deprecated: Use +authorizationStatusForAccessLevel: instead	19232428cd72ffd6	-
+super	-	PHPhotoLibrary	NSObject		-	-	-	-	-	d24d150d15f586ce	-
+method	c:objc(cs)PHPhotoLibrary(cm)sharedPhotoLibrary	-			PHPhotoLibrary *	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7ba54ad52905a3f8	-
+method	c:objc(cs)PHPhotoLibrary(cm)authorizationStatusForAccessLevel:	-			PHAuthorizationStatus	PHAccessLevel accessLevel	-	ios=14/-/-/0,macos=11/-/-/0,tvos=14/-/-/0	-	c30a82b163fe6681	-
+method	c:objc(cs)PHPhotoLibrary(cm)requestAuthorizationForAccessLevel:handler:	-			void	PHAccessLevel accessLevel | void (^)(PHAuthorizationStatus) handler	-	ios=14/-/-/0,macos=11/-/-/0,tvos=14/-/-/0	-	9eb5956ea64a5102	-
+method	c:objc(cs)PHPhotoLibrary(cm)authorizationStatus	-			PHAuthorizationStatus	-	-	ios=8/100000/-/0,macos=10.13/100000/-/0,tvos=10/100000/-/0	deprecated: Use +authorizationStatusForAccessLevel: instead	229f4f46dce15ee5	-
+method	c:objc(cs)PHPhotoLibrary(cm)requestAuthorization:	-			void	void (^)(PHAuthorizationStatus) handler	-	ios=8/100000/-/0,macos=10.13/100000/-/0,tvos=10/100000/-/0	deprecated: Use +requestAuthorizationForAccessLevel:handler: instead	cc71ef3863a3d1de	-
+property	c:objc(cs)PHPhotoLibrary(py)uploadJobExtensionEnabled	-			BOOL	-	readonly,getter=isUploadJobExtensionEnabled	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,xros=-/-/-/1	-	126704a53ae98882	-
+method	c:objc(cs)PHPhotoLibrary(im)setUploadJobExtensionEnabled:error:	-			BOOL	BOOL enable | NSError * _Nullable * error	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,xros=-/-/-/1	-	ea913206fc848244	-
+property	c:objc(cs)PHPhotoLibrary(py)unavailabilityReason	-			NSError *	-	readonly,strong,atomic	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	4e6011d842b3d6c5	-
+method	c:objc(cs)PHPhotoLibrary(im)registerAvailabilityObserver:	-			void	id<PHPhotoLibraryAvailabilityObserver> observer	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	9342488f666a7d90	-
+method	c:objc(cs)PHPhotoLibrary(im)unregisterAvailabilityObserver:	-			void	id<PHPhotoLibraryAvailabilityObserver> observer	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	3fbc97aa84d1a402	-
+method	c:objc(cs)PHPhotoLibrary(im)performChanges:completionHandler:	-			void	dispatch_block_t changeBlock | void (^)(BOOL, NSError * _Nullable) completionHandler	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	93e502103ec1077f	-
+method	c:objc(cs)PHPhotoLibrary(im)performChangesAndWait:error:	-			BOOL	dispatch_block_t changeBlock | NSError * _Nullable * error	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	f4522405bb0ffd69	-
+method	c:objc(cs)PHPhotoLibrary(im)registerChangeObserver:	-			void	id<PHPhotoLibraryChangeObserver> observer	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7d2584a6d1ad1738	-
+method	c:objc(cs)PHPhotoLibrary(im)unregisterChangeObserver:	-			void	id<PHPhotoLibraryChangeObserver> observer	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	81b72ebdde5dea84	-
+method	c:objc(cs)PHPhotoLibrary(im)fetchPersistentChangesSinceToken:error:	-			PHPersistentChangeFetchResult *	PHPersistentChangeToken * token | NSError * _Nullable * error	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	dfcee8143019027b	-
+property	c:objc(cs)PHPhotoLibrary(py)currentChangeToken	-			PHPersistentChangeToken *	-	readonly,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	67c0478174924eed	-
+var	c:@PHPhotosErrorDomain	-			const NSErrorDomain	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	37d56177cf3e6741	-
+var	c:@PHLocalIdentifiersErrorKey	-			const NSErrorUserInfoKey	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	c9732113dc3d3e9e	-
+typedef	c:@T@PHPhotosError	-			enum PHPhotosError	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	056015ceaa5cb553	-
+enum	c:@E@PHPhotosError	-			NSInteger	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	5c2cc59659f482f4	-
+enumconst	c:@E@PHPhotosError@PHPhotosErrorInternalError	PHPhotosError			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	b5b0e55f45ec1ab9	-1
+enumconst	c:@E@PHPhotosError@PHPhotosErrorUserCancelled	PHPhotosError			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	1e16c0afb205d456	3072
+enumconst	c:@E@PHPhotosError@PHPhotosErrorLibraryVolumeOffline	PHPhotosError			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	4e78a1be19f252e9	3114
+enumconst	c:@E@PHPhotosError@PHPhotosErrorRelinquishingLibraryBundleToWriter	PHPhotosError			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	722c1bce17577453	3142
+enumconst	c:@E@PHPhotosError@PHPhotosErrorSwitchingSystemPhotoLibrary	PHPhotosError			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	2bdcc961dcbaf46f	3143
+enumconst	c:@E@PHPhotosError@PHPhotosErrorNetworkAccessRequired	PHPhotosError			-	-	-	ios=14/-/-/0,macos=11/-/-/0,tvos=14/-/-/0	-	db65460e69695ed1	3164
+enumconst	c:@E@PHPhotosError@PHPhotosErrorNetworkError	PHPhotosError			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	e61a308ec19a4800	3169
+enumconst	c:@E@PHPhotosError@PHPhotosErrorIdentifierNotFound	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	5691a45dac99e292	3201
+enumconst	c:@E@PHPhotosError@PHPhotosErrorMultipleIdentifiersFound	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	73dd3ae60514f26d	3202
+enumconst	c:@E@PHPhotosError@PHPhotosErrorChangeNotSupported	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	8cbceb5b02bcd35d	3300
+enumconst	c:@E@PHPhotosError@PHPhotosErrorOperationInterrupted	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	0d0b217411794595	3301
+enumconst	c:@E@PHPhotosError@PHPhotosErrorInvalidResource	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	a0d7ab943a1ced30	3302
+enumconst	c:@E@PHPhotosError@PHPhotosErrorMissingResource	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	5adee60679904a77	3303
+enumconst	c:@E@PHPhotosError@PHPhotosErrorNotEnoughSpace	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	7f85f3dcf0c0ccde	3305
+enumconst	c:@E@PHPhotosError@PHPhotosErrorRequestNotSupportedForAsset	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	982944621ad961af	3306
+enumconst	c:@E@PHPhotosError@PHPhotosErrorLimitExceeded	PHPhotosError			-	-	-	ios=26.1/-/-/0,macos=26.1/-/-/0,tvos=26.1/-/-/0	-	6d4c53312b6d69d3	3307
+enumconst	c:@E@PHPhotosError@PHPhotosErrorAccessRestricted	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	022a5657085c5f92	3310
+enumconst	c:@E@PHPhotosError@PHPhotosErrorAccessUserDenied	PHPhotosError			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	a4930d80975ea1c9	3311
+enumconst	c:@E@PHPhotosError@PHPhotosErrorLibraryInFileProviderSyncRoot	PHPhotosError			-	-	-	ios=15.4/-/-/0,macos=12.3/-/-/0,tvos=15.4/-/-/0	-	c3fe35e3ca08d71f	5423
+enumconst	c:@E@PHPhotosError@PHPhotosErrorPersistentChangeTokenExpired	PHPhotosError			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	78dc007bde42861e	3105
+enumconst	c:@E@PHPhotosError@PHPhotosErrorPersistentChangeDetailsUnavailable	PHPhotosError			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	1f5d5839174b0211	3210
+enumconst	c:@E@PHPhotosError@PHPhotosErrorInvalid	PHPhotosError			-	-	-	ios=13/15/-/0,macos=10.15/12/-/0,tvos=13/15/-/0	deprecated: Use PHPhotosErrorInternalError instead	96e4364621add055	-1
+interface	c:objc(cs)PHObject	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	3ad17eb1176524d9	-
+super	-	PHObject	NSObject		-	-	-	-	-	0caff51861b0459e	-
+conforms	c:objc(cs)PHObject	PHObject	NSCopying		-	-	-	-	-	1f0ee3f82009661b	-
+property	c:objc(cs)PHObject(py)localIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	2f0328d9bba72253	-
+interface	c:objc(cs)PHObjectPlaceholder	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	aeea707943fd29dd	-
+super	-	PHObjectPlaceholder	PHObject		-	-	-	-	-	338d072800fac774	-
+interface	c:objc(cs)PHFetchResult	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7e0ff0e3701543a0	-
+super	-	PHFetchResult	NSObject		-	-	-	-	-	aca569087ab9c2b7	-
+conforms	c:objc(cs)PHFetchResult	PHFetchResult	NSCopying		-	-	-	-	-	3884ec329793ffd5	-
+conforms	c:objc(cs)PHFetchResult	PHFetchResult	NSFastEnumeration		-	-	-	-	-	3867ad5de6e4ef36	-
+property	c:objc(cs)PHFetchResult(py)count	-			NSUInteger	-	readonly	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7edf2c51c3a542ca	-
+method	c:objc(cs)PHFetchResult(im)objectAtIndex:	-			ObjectType	NSUInteger index	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7894f4eaf7181fc3	-
+method	c:objc(cs)PHFetchResult(im)objectAtIndexedSubscript:	-			ObjectType	NSUInteger idx	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	b2e69d1b169d48b1	-
+method	c:objc(cs)PHFetchResult(im)containsObject:	-			BOOL	ObjectType anObject	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	8bdea7c31817cdc0	-
+method	c:objc(cs)PHFetchResult(im)indexOfObject:	-			NSUInteger	ObjectType anObject	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	e8921981e900ed58	-
+method	c:objc(cs)PHFetchResult(im)indexOfObject:inRange:	-			NSUInteger	ObjectType anObject | NSRange range	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	e4977f6757d6be2b	-
+property	c:objc(cs)PHFetchResult(py)firstObject	-			ObjectType	-	readonly,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	56eab774532bfd18	-
+property	c:objc(cs)PHFetchResult(py)lastObject	-			ObjectType	-	readonly,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	22db7330c65b068d	-
+method	c:objc(cs)PHFetchResult(im)objectsAtIndexes:	-			NSArray<ObjectType> *	NSIndexSet * indexes	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	bf132e309bcfcc43	-
+method	c:objc(cs)PHFetchResult(im)enumerateObjectsUsingBlock:	-			void	void (^)(ObjectType _Nonnull, NSUInteger, BOOL * _Nonnull) block	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	e59ee562f3967aa3	-
+method	c:objc(cs)PHFetchResult(im)enumerateObjectsWithOptions:usingBlock:	-			void	NSEnumerationOptions opts | void (^)(ObjectType _Nonnull, NSUInteger, BOOL * _Nonnull) block	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	27ca3c557aa9ff30	-
+method	c:objc(cs)PHFetchResult(im)enumerateObjectsAtIndexes:options:usingBlock:	-			void	NSIndexSet * s | NSEnumerationOptions opts | void (^)(ObjectType _Nonnull, NSUInteger, BOOL * _Nonnull) block	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	795f6ede98f727aa	-
+method	c:objc(cs)PHFetchResult(im)countOfAssetsWithMediaType:	-			NSUInteger	PHAssetMediaType mediaType	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	424e8fc8ec1953bf	-
+interface	c:objc(cs)PHAsset	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	deprecated: No longer supported	35b976887cefbad7	-
+super	-	PHAsset	PHObject		-	-	-	-	-	a3236a5f21277047	-
+property	c:objc(cs)PHAsset(py)playbackStyle	-			PHAssetPlaybackStyle	-	readonly,assign,nonatomic	ios=11/-/-/0,macos=10.15/-/-/0,tvos=11/-/-/0	-	fb2c219105049920	-
+property	c:objc(cs)PHAsset(py)mediaType	-			PHAssetMediaType	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	14b66f305b0b0f59	-
+property	c:objc(cs)PHAsset(py)mediaSubtypes	-			PHAssetMediaSubtype	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	1a24323abb6b1196	-
+property	c:objc(cs)PHAsset(py)contentType	-			UTType *	-	readonly,copy,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,xros=26.0/-/-/0	-	af729285f74fcc18	-
+property	c:objc(cs)PHAsset(py)pixelWidth	-			NSUInteger	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	273c75bb85340d43	-
+property	c:objc(cs)PHAsset(py)pixelHeight	-			NSUInteger	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	6fc0581a0eb82393	-
+property	c:objc(cs)PHAsset(py)creationDate	-			NSDate *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	9a727e63f46b2715	-
+property	c:objc(cs)PHAsset(py)modificationDate	-			NSDate *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	21ac1bcbf1a6b561	-
+property	c:objc(cs)PHAsset(py)addedDate	-			NSDate *	-	readonly,strong,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,xros=26.0/-/-/0	-	ba5d4ebd2d7afd9b	-
+property	c:objc(cs)PHAsset(py)location	-			CLLocation *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0b3357e95a4d1a8a	-
+property	c:objc(cs)PHAsset(py)duration	-			NSTimeInterval	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	908352f3d7d37d8e	-
+property	c:objc(cs)PHAsset(py)hidden	-			BOOL	-	readonly,assign,nonatomic,getter=isHidden	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	a8c17b0b7dc16d84	-
+property	c:objc(cs)PHAsset(py)favorite	-			BOOL	-	readonly,assign,nonatomic,getter=isFavorite	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	04f87fff9d6e4280	-
+property	c:objc(cs)PHAsset(py)syncFailureHidden	-			BOOL	-	readonly,assign,nonatomic,getter=isSyncFailureHidden	ios=-/-/-/1,macos=10.14/10.15/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	631579096c103480	-
+property	c:objc(cs)PHAsset(py)burstIdentifier	-			NSString *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f9c85fa9b9def875	-
+property	c:objc(cs)PHAsset(py)burstSelectionTypes	-			PHAssetBurstSelectionType	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	8bbfa8db1e06ce1f	-
+property	c:objc(cs)PHAsset(py)representsBurst	-			BOOL	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	21bc1cee1da7ac2b	-
+property	c:objc(cs)PHAsset(py)sourceType	-			PHAssetSourceType	-	readonly,assign,nonatomic	ios=9/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	88aa312aecb01db0	-
+property	c:objc(cs)PHAsset(py)hasAdjustments	-			BOOL	-	readonly,assign,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	04f278ab3f17f847	-
+property	c:objc(cs)PHAsset(py)adjustmentFormatIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	86422151f25bfdc2	-
+method	c:objc(cs)PHAsset(im)canPerformEditOperation:	-			BOOL	PHAssetEditOperation editOperation	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	7c147562953514f3	-
+method	c:objc(cs)PHAsset(cm)fetchAssetsInAssetCollection:options:	-			PHFetchResult<PHAsset *> *	PHAssetCollection * assetCollection | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	2ad223c352eca4ea	-
+method	c:objc(cs)PHAsset(cm)fetchAssetsWithLocalIdentifiers:options:	-			PHFetchResult<PHAsset *> *	NSArray<NSString *> * identifiers | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	26139ae0916546fa	-
+method	c:objc(cs)PHAsset(cm)fetchKeyAssetsInAssetCollection:options:	-			PHFetchResult<PHAsset *> *	PHAssetCollection * assetCollection | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	bd493eb8a6dcea21	-
+method	c:objc(cs)PHAsset(cm)fetchAssetsWithBurstIdentifier:options:	-			PHFetchResult<PHAsset *> *	NSString * burstIdentifier | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	056e8b01a83c6020	-
+method	c:objc(cs)PHAsset(cm)fetchAssetsWithOptions:	-			PHFetchResult<PHAsset *> *	PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	fe26239efefe38fe	-
+method	c:objc(cs)PHAsset(cm)fetchAssetsWithMediaType:options:	-			PHFetchResult<PHAsset *> *	PHAssetMediaType mediaType | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	24ca4f7487500249	-
+method	c:objc(cs)PHAsset(cm)fetchAssetsWithALAssetURLs:options:	-			PHFetchResult<PHAsset *> *	NSArray<NSURL *> * assetURLs | PHFetchOptions * options	-	ios=8/11/-/0,macos=-/-/-/1,tvos=8/11/-/0	deprecated: Will be removed in a future release	6429eecd91134301	-
+typedef	c:@T@PHLivePhotoRequestID	-			int32_t	-	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	246c42d3d36b945e	-
+var	c:@PHLivePhotoInfoErrorKey	-			NSString *const	-	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	9657472514cb178b	-
+var	c:@PHLivePhotoInfoIsDegradedKey	-			NSString *const	-	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	6595421e085188d1	-
+var	c:@PHLivePhotoInfoCancelledKey	-			NSString *const	-	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	9f4ac70560ed4744	-
+interface	c:objc(cs)PHLivePhoto	-			-	-	-	ios=9.1/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	046004ce884cc2ff	-
+super	-	PHLivePhoto	NSObject		-	-	-	-	-	4f25a0b5e7107603	-
+conforms	c:objc(cs)PHLivePhoto	PHLivePhoto	NSCopying		-	-	-	-	-	5bf52f6597432bba	-
+conforms	c:objc(cs)PHLivePhoto	PHLivePhoto	NSSecureCoding		-	-	-	-	-	7c9122a9361f74e6	-
+method	c:objc(cs)PHLivePhoto(im)init	-			instancetype	-	-	*unavailable ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	baf5486b7a8c0c3c	-
+property	c:objc(cs)PHLivePhoto(py)size	-			CGSize	-	readonly,nonatomic	ios=9.1/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	3fea9876eb9895c2	-
+method	c:objc(cs)PHLivePhoto(cm)requestLivePhotoWithResourceFileURLs:placeholderImage:targetSize:contentMode:resultHandler:	-			PHLivePhotoRequestID	NSArray<NSURL *> * fileURLs | UIImage * image | CGSize targetSize | PHImageContentMode contentMode | void (^)(PHLivePhoto * _Nullable, NSDictionary * _Nonnull) resultHandler	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	bc384e9b3a7c3b3b	-
+method	c:objc(cs)PHLivePhoto(cm)cancelLivePhotoRequestWithRequestID:	-			void	PHLivePhotoRequestID requestID	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3cd422da4c8a2e70	-
+category	c:objc(cy)PHLivePhoto@NSItemProvider	-			-	-	-	ios=14/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0e72f0f58eb89a5f	-
+conforms	c:objc(cy)PHLivePhoto@NSItemProvider	PHLivePhoto	NSItemProviderReading		-	-	-	-	-	fdec328b3e6689f2	-
+interface	c:objc(cs)PHCollection	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	398006a36e5de9d6	-
+super	-	PHCollection	PHObject		-	-	-	-	-	599cc50c2926c0d3	-
+property	c:objc(cs)PHCollection(py)canContainAssets	-			BOOL	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	93028b5f7bbb5bf5	-
+property	c:objc(cs)PHCollection(py)canContainCollections	-			BOOL	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	b190341c7bccced8	-
+property	c:objc(cs)PHCollection(py)localizedTitle	-			NSString *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	a40aef518bc79ea0	-
+method	c:objc(cs)PHCollection(im)canPerformEditOperation:	-			BOOL	PHCollectionEditOperation anOperation	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	d535ca4193da0556	-
+method	c:objc(cs)PHCollection(cm)fetchCollectionsInCollectionList:options:	-			PHFetchResult<PHCollection *> *	PHCollectionList * collectionList | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	2d65057b0c959c98	-
+method	c:objc(cs)PHCollection(cm)fetchTopLevelUserCollectionsWithOptions:	-			PHFetchResult<PHCollection *> *	PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e4362453f9097eae	-
+interface	c:objc(cs)PHAssetCollection	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	deprecated: Will be removed in a future release	783a7837de35d3db	-
+super	-	PHAssetCollection	PHCollection		-	-	-	-	-	cd1b0ba346e20e28	-
+property	c:objc(cs)PHAssetCollection(py)assetCollectionType	-			PHAssetCollectionType	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	7a79280d6ff77881	-
+property	c:objc(cs)PHAssetCollection(py)assetCollectionSubtype	-			PHAssetCollectionSubtype	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	6ba8b5f996669ca0	-
+property	c:objc(cs)PHAssetCollection(py)estimatedAssetCount	-			NSUInteger	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e35a9894b72f9074	-
+property	c:objc(cs)PHAssetCollection(py)startDate	-			NSDate *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	d2e4acd0eb19a949	-
+property	c:objc(cs)PHAssetCollection(py)endDate	-			NSDate *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	a9e6a63d44ba931f	-
+property	c:objc(cs)PHAssetCollection(py)approximateLocation	-			CLLocation *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	914c263864238d90	-
+property	c:objc(cs)PHAssetCollection(py)localizedLocationNames	-			NSArray<NSString *> *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	97bf1f914e262c94	-
+method	c:objc(cs)PHAssetCollection(cm)fetchAssetCollectionsWithLocalIdentifiers:options:	-			PHFetchResult<PHAssetCollection *> *	NSArray<NSString *> * identifiers | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	9fb929b9be58d1d8	-
+method	c:objc(cs)PHAssetCollection(cm)fetchAssetCollectionsWithType:subtype:options:	-			PHFetchResult<PHAssetCollection *> *	PHAssetCollectionType type | PHAssetCollectionSubtype subtype | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	448b40a2e81e8e7b	-
+method	c:objc(cs)PHAssetCollection(cm)fetchAssetCollectionsContainingAsset:withType:options:	-			PHFetchResult<PHAssetCollection *> *	PHAsset * asset | PHAssetCollectionType type | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	cefc5112d151c5a7	-
+method	c:objc(cs)PHAssetCollection(cm)fetchAssetCollectionsWithALAssetGroupURLs:options:	-			PHFetchResult<PHAssetCollection *> *	NSArray<NSURL *> * assetGroupURLs | PHFetchOptions * options	-	ios=8/16/-/0,macos=10.15/13/-/0,tvos=10/16/-/0	deprecated: Will be removed in a future release	19f4397a6beb8567	-
+method	c:objc(cs)PHAssetCollection(cm)fetchMomentsInMomentList:options:	-			PHFetchResult<PHAssetCollection *> *	PHCollectionList * momentList | PHFetchOptions * options	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	d921f7dfaaeb7246	-
+method	c:objc(cs)PHAssetCollection(cm)fetchMomentsWithOptions:	-			PHFetchResult<PHAssetCollection *> *	PHFetchOptions * options	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	3b2f56b5869e54c2	-
+method	c:objc(cs)PHAssetCollection(cm)transientAssetCollectionWithAssets:title:	-			PHAssetCollection *	NSArray<PHAsset *> * assets | NSString * title	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c67e9994cb1aa992	-
+method	c:objc(cs)PHAssetCollection(cm)transientAssetCollectionWithAssetFetchResult:title:	-			PHAssetCollection *	PHFetchResult<PHAsset *> * fetchResult | NSString * title	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	77ed4d8e0eb2c330	-
+interface	c:objc(cs)PHCollectionList	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	deprecated: Will be removed in a future release	17ff0e4410264f27	-
+super	-	PHCollectionList	PHCollection		-	-	-	-	-	e2c430bb60efcd57	-
+property	c:objc(cs)PHCollectionList(py)collectionListType	-			PHCollectionListType	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3151d44f376ff53a	-
+property	c:objc(cs)PHCollectionList(py)collectionListSubtype	-			PHCollectionListSubtype	-	readonly,assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f8c16274fdc7a743	-
+property	c:objc(cs)PHCollectionList(py)startDate	-			NSDate *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	8fa89a5289fb86ca	-
+property	c:objc(cs)PHCollectionList(py)endDate	-			NSDate *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	b70eef3c62132daa	-
+property	c:objc(cs)PHCollectionList(py)localizedLocationNames	-			NSArray<NSString *> *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	2b77a6df923abc4a	-
+method	c:objc(cs)PHCollectionList(cm)fetchCollectionListsContainingCollection:options:	-			PHFetchResult<PHCollectionList *> *	PHCollection * collection | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	a66756d71e58e79c	-
+method	c:objc(cs)PHCollectionList(cm)fetchCollectionListsWithLocalIdentifiers:options:	-			PHFetchResult<PHCollectionList *> *	NSArray<NSString *> * identifiers | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	dc30e14640252b53	-
+method	c:objc(cs)PHCollectionList(cm)fetchCollectionListsWithType:subtype:options:	-			PHFetchResult<PHCollectionList *> *	PHCollectionListType collectionListType | PHCollectionListSubtype subtype | PHFetchOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	df19fd4d90eaad84	-
+method	c:objc(cs)PHCollectionList(cm)fetchMomentListsWithSubtype:containingMoment:options:	-			PHFetchResult<PHCollectionList *> *	PHCollectionListSubtype momentListSubtype | PHAssetCollection * moment | PHFetchOptions * options	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	b60cb43d93385fa5	-
+method	c:objc(cs)PHCollectionList(cm)fetchMomentListsWithSubtype:options:	-			PHFetchResult<PHCollectionList *> *	PHCollectionListSubtype momentListSubtype | PHFetchOptions * options	-	ios=8/13/-/0,macos=-/-/-/1,tvos=10/13/-/0	deprecated: Will be removed in a future release	75d07485fd478e64	-
+method	c:objc(cs)PHCollectionList(cm)transientCollectionListWithCollections:title:	-			PHCollectionList *	NSArray<PHCollection *> * collections | NSString * title	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	08aeddff0f64c8a3	-
+method	c:objc(cs)PHCollectionList(cm)transientCollectionListWithCollectionsFetchResult:title:	-			PHCollectionList *	PHFetchResult<PHCollection *> * fetchResult | NSString * title	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	7129103929c42d36	-
+interface	c:objc(cs)PHFetchOptions	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	113b653576a59537	-
+super	-	PHFetchOptions	NSObject		-	-	-	-	-	1aa67dc543c2c0c3	-
+conforms	c:objc(cs)PHFetchOptions	PHFetchOptions	NSCopying		-	-	-	-	-	b051d62070c8e3e0	-
+property	c:objc(cs)PHFetchOptions(py)predicate	-			NSPredicate *	-	strong,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	caeaedb0c50fcaa4	-
+property	c:objc(cs)PHFetchOptions(py)sortDescriptors	-			NSArray<NSSortDescriptor *> *	-	strong,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	bad34f73d66b776c	-
+property	c:objc(cs)PHFetchOptions(py)includeHiddenAssets	-			BOOL	-	assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	ea582824063f87d2	-
+property	c:objc(cs)PHFetchOptions(py)includeAllBurstAssets	-			BOOL	-	assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3efc863f64e58d47	-
+property	c:objc(cs)PHFetchOptions(py)includeAssetSourceTypes	-			PHAssetSourceType	-	assign,nonatomic	ios=9/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	9064f324b568415e	-
+property	c:objc(cs)PHFetchOptions(py)fetchLimit	-			NSUInteger	-	assign,nonatomic	ios=9/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	ab51f0f517d981dd	-
+property	c:objc(cs)PHFetchOptions(py)wantsIncrementalChangeDetails	-			BOOL	-	assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	2729a5d5de9c995f	-
+interface	c:objc(cs)PHChange	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	95fc8f587715c8fb	-
+super	-	PHChange	NSObject		-	-	-	-	-	afc92ad288e9e87f	-
+method	c:objc(cs)PHChange(im)changeDetailsForObject:	-			PHObjectChangeDetails *	PHObject * object	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	4ee2474b2dc6c63e	-
+method	c:objc(cs)PHChange(im)changeDetailsForFetchResult:	-			PHFetchResultChangeDetails *	PHFetchResult * object	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	03b44f227ad38ba0	-
+interface	c:objc(cs)PHObjectChangeDetails	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0172fa2f06b5ad15	-
+super	-	PHObjectChangeDetails	NSObject		-	-	-	-	-	d8ddd3e1dceb7ebc	-
+property	c:objc(cs)PHObjectChangeDetails(py)objectBeforeChanges	-			ObjectType	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	711a048af86b0c72	-
+property	c:objc(cs)PHObjectChangeDetails(py)objectAfterChanges	-			ObjectType	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	e3f6be751d4d1732	-
+property	c:objc(cs)PHObjectChangeDetails(py)assetContentChanged	-			BOOL	-	readonly,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7b594b9f4a312d81	-
+property	c:objc(cs)PHObjectChangeDetails(py)objectWasDeleted	-			BOOL	-	readonly,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	254c435311d91f12	-
+interface	c:objc(cs)PHFetchResultChangeDetails	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	05593f53ab28a627	-
+super	-	PHFetchResultChangeDetails	NSObject		-	-	-	-	-	5dbefdb8506564ea	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)fetchResultBeforeChanges	-			PHFetchResult<ObjectType> *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	6740a4c68c2117c6	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)fetchResultAfterChanges	-			PHFetchResult<ObjectType> *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	ffd9e2ccf0f7fbf2	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)hasIncrementalChanges	-			BOOL	-	readonly,assign,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	541b86a5c34f471d	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)removedIndexes	-			NSIndexSet *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	a490c4e7a7c60dc1	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)removedObjects	-			NSArray<ObjectType> *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	e1efb83bc7f551a5	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)insertedIndexes	-			NSIndexSet *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	53554d79c7f16808	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)insertedObjects	-			NSArray<ObjectType> *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	606beae9225b6016	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)changedIndexes	-			NSIndexSet *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	8b25bbd0b7c74d1a	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)changedObjects	-			NSArray<ObjectType> *	-	readonly,strong,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	6a60e51418d68cee	-
+method	c:objc(cs)PHFetchResultChangeDetails(im)enumerateMovesWithBlock:	-			void	void (^)(NSUInteger, NSUInteger) handler	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	d338b77edae3dc8a	-
+property	c:objc(cs)PHFetchResultChangeDetails(py)hasMoves	-			BOOL	-	readonly,assign,atomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	996ae108fde05b57	-
+method	c:objc(cs)PHFetchResultChangeDetails(cm)changeDetailsFromFetchResult:toFetchResult:changedObjects:	-			instancetype	PHFetchResult<ObjectType> * fromResult | PHFetchResult<ObjectType> * toResult | NSArray<ObjectType> * changedObjects	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	72db7aa6be565668	-
+interface	c:objc(cs)PHPersistentChange	-			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	f036fcdae174fb87	-
+super	-	PHPersistentChange	NSObject		-	-	-	-	-	e936f2292c447c78	-
+method	c:objc(cs)PHPersistentChange(cm)new	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	6459d5e7e5e389c6	-
+method	c:objc(cs)PHPersistentChange(im)init	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	5ba13ce48fbf401a	-
+property	c:objc(cs)PHPersistentChange(py)changeToken	-			PHPersistentChangeToken *	-	readonly,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	6b68ead4e8ce9671	-
+method	c:objc(cs)PHPersistentChange(im)changeDetailsForObjectType:error:	-			PHPersistentObjectChangeDetails *	PHObjectType objectType | NSError * _Nullable * error	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	d26641f2776b481f	-
+interface	c:objc(cs)PHPersistentChangeToken	-			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	86f3e265d9a16de1	-
+super	-	PHPersistentChangeToken	NSObject		-	-	-	-	-	fbf1f4b51e19ee99	-
+conforms	c:objc(cs)PHPersistentChangeToken	PHPersistentChangeToken	NSCopying		-	-	-	-	-	66de586b9e7bda6d	-
+conforms	c:objc(cs)PHPersistentChangeToken	PHPersistentChangeToken	NSSecureCoding		-	-	-	-	-	4c2ee6413d4680ab	-
+method	c:objc(cs)PHPersistentChangeToken(cm)new	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	aff5887801dd08da	-
+method	c:objc(cs)PHPersistentChangeToken(im)init	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	3dc97ffc45a54dba	-
+interface	c:objc(cs)PHPersistentChangeFetchResult	-			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	8b1ef6839edac184	-
+super	-	PHPersistentChangeFetchResult	NSObject		-	-	-	-	-	2c5868ab4ff0ed6e	-
+method	c:objc(cs)PHPersistentChangeFetchResult(cm)new	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	8b187df539725f32	-
+method	c:objc(cs)PHPersistentChangeFetchResult(im)init	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	4a8e9b4f3ff6ba90	-
+method	c:objc(cs)PHPersistentChangeFetchResult(im)enumerateChangesWithBlock:	-			void	void (^)(PHPersistentChange * _Nonnull, BOOL * _Nonnull) block	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	9e5b1df0938556c1	-
+interface	c:objc(cs)PHPersistentObjectChangeDetails	-			-	-	-	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	1c128d30df9c05d5	-
+super	-	PHPersistentObjectChangeDetails	NSObject		-	-	-	-	-	40f7597cc2588ee2	-
+property	c:objc(cs)PHPersistentObjectChangeDetails(py)objectType	-			PHObjectType	-	readonly,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	632d2f464e437de5	-
+property	c:objc(cs)PHPersistentObjectChangeDetails(py)insertedLocalIdentifiers	-			NSSet<NSString *> *	-	readonly,strong,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	5b391ec48ef16b7e	-
+property	c:objc(cs)PHPersistentObjectChangeDetails(py)updatedLocalIdentifiers	-			NSSet<NSString *> *	-	readonly,strong,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	d717136b2fb24b1a	-
+property	c:objc(cs)PHPersistentObjectChangeDetails(py)deletedLocalIdentifiers	-			NSSet<NSString *> *	-	readonly,strong,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	ec719c9e58b58016	-
+method	c:objc(cs)PHPersistentObjectChangeDetails(cm)new	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	65b71903564106cd	-
+method	c:objc(cs)PHPersistentObjectChangeDetails(im)init	-			instancetype	-	-	*unavailable ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	1298002c4d5d467d	-
+interface	c:objc(cs)PHChangeRequest	-			-	-	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	ee16f079d5821650	-
+super	-	PHChangeRequest	NSObject		-	-	-	-	-	a3d4eb8ec2267691	-
+interface	c:objc(cs)PHContentEditingOutput	-			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4bfed0eed398c6dc	-
+super	-	PHContentEditingOutput	NSObject		-	-	-	-	-	5f376a568ff30b8d	-
+method	c:objc(cs)PHContentEditingOutput(im)initWithContentEditingInput:	-			instancetype	PHContentEditingInput * contentEditingInput	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	403d4f1725d9d815	-
+property	c:objc(cs)PHContentEditingOutput(py)adjustmentData	-			PHAdjustmentData *	-	strong	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	777a01f7cd9dac9c	-
+property	c:objc(cs)PHContentEditingOutput(py)renderedContentURL	-			NSURL *	-	readonly,copy	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	c451ac91f42e6389	-
+property	c:objc(cs)PHContentEditingOutput(py)defaultRenderedContentType	-			UTType *	-	readonly,copy	ios=17/-/-/0,macos=14/-/-/0,tvos=17/-/-/0	-	5b0b2752767f4d01	-
+property	c:objc(cs)PHContentEditingOutput(py)supportedRenderedContentTypes	-			NSArray<UTType *> *	-	readonly,copy	ios=17/-/-/0,macos=14/-/-/0,tvos=17/-/-/0	-	8566065e1cf725c4	-
+method	c:objc(cs)PHContentEditingOutput(im)renderedContentURLForType:error:	-			NSURL *	UTType * type | NSError * _Nullable * error	-	ios=17/-/-/0,macos=14/-/-/0,tvos=17/-/-/0	-	bf037798e915bdae	-
+interface	c:objc(cs)PHAssetChangeRequest	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	795a5876c176f100	-
+super	-	PHAssetChangeRequest	PHChangeRequest		-	-	-	-	-	6dd6837790126499	-
+method	c:objc(cs)PHAssetChangeRequest(cm)creationRequestForAssetFromImage:	-			instancetype	UIImage * image	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	690ae30b80971e52	-
+method	c:objc(cs)PHAssetChangeRequest(cm)creationRequestForAssetFromImageAtFileURL:	-			instancetype	NSURL * fileURL	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	324e31176155cde7	-
+method	c:objc(cs)PHAssetChangeRequest(cm)creationRequestForAssetFromVideoAtFileURL:	-			instancetype	NSURL * fileURL	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	ec761d7ef34ce8c5	-
+property	c:objc(cs)PHAssetChangeRequest(py)placeholderForCreatedAsset	-			PHObjectPlaceholder *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	01dce3586d6c089c	-
+method	c:objc(cs)PHAssetChangeRequest(cm)deleteAssets:	-			void	id<NSFastEnumeration> assets	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3bbbf713e81cc94e	-
+method	c:objc(cs)PHAssetChangeRequest(cm)changeRequestForAsset:	-			instancetype	PHAsset * asset	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	9cd549f87607e98c	-
+property	c:objc(cs)PHAssetChangeRequest(py)creationDate	-			NSDate *	-	strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	68402cafa2f4e8e5	-
+property	c:objc(cs)PHAssetChangeRequest(py)location	-			CLLocation *	-	strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	447f0fd5c37900a7	-
+property	c:objc(cs)PHAssetChangeRequest(py)favorite	-			BOOL	-	assign,nonatomic,getter=isFavorite	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	09173796ca77af3a	-
+property	c:objc(cs)PHAssetChangeRequest(py)hidden	-			BOOL	-	assign,nonatomic,getter=isHidden	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e325300068e681f8	-
+property	c:objc(cs)PHAssetChangeRequest(py)contentEditingOutput	-			PHContentEditingOutput *	-	strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f831bdf15fc34283	-
+method	c:objc(cs)PHAssetChangeRequest(im)revertAssetContentToOriginal	-			void	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	d9d0de05565fa331	-
+typedef	c:@T@PHContentEditingInputRequestID	-			NSUInteger	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5bfd24cb5b1016a0	-
+interface	c:objc(cs)PHContentEditingInputRequestOptions	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f73bc0ea01d5712b	-
+super	-	PHContentEditingInputRequestOptions	NSObject		-	-	-	-	-	287b025ff7015fd9	-
+property	c:objc(cs)PHContentEditingInputRequestOptions(py)canHandleAdjustmentData	-			BOOL (^)(PHAdjustmentData * _Nonnull)	-	copy,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	2b2e4e1127c7aabe	-
+property	c:objc(cs)PHContentEditingInputRequestOptions(py)networkAccessAllowed	-			BOOL	-	assign,nonatomic,getter=isNetworkAccessAllowed	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	907e534837a15c31	-
+property	c:objc(cs)PHContentEditingInputRequestOptions(py)progressHandler	-			void (^)(double, BOOL * _Nonnull)	-	copy,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	27b49c9096c4ae36	-
+category	c:objc(cy)PHAsset@PHContentEditingInput	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5d52b756fceacfbc	-
+method	c:objc(cs)PHAsset(im)requestContentEditingInputWithOptions:completionHandler:	PHContentEditingInput			PHContentEditingInputRequestID	PHContentEditingInputRequestOptions * options | void (^)(PHContentEditingInput * _Nullable, NSDictionary * _Nonnull) completionHandler	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	16014b0affb421c6	-
+method	c:objc(cs)PHAsset(im)cancelContentEditingInputRequest:	PHContentEditingInput			void	PHContentEditingInputRequestID requestID	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	371a38b5bf273466	-
+var	c:@PHContentEditingInputResultIsInCloudKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5c2ab9b9a7b47af9	-
+var	c:@PHContentEditingInputCancelledKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	102a51bfc30fe592	-
+var	c:@PHContentEditingInputErrorKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f88e7ec1e9170d86	-
+category	c:objc(cy)PHContentEditingOutput@PHAssetChangeRequest	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c798fcd570bceefe	-
+method	c:objc(cs)PHContentEditingOutput(im)initWithPlaceholderForCreatedAsset:	PHAssetChangeRequest			instancetype	PHObjectPlaceholder * placeholderForCreatedAsset	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c1278c1263929483	-
+interface	c:objc(cs)PHAssetResourceCreationOptions	-			-	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	deprecated: Use contentType instead	4a64e51ef2a68da9	-
+super	-	PHAssetResourceCreationOptions	NSObject		-	-	-	-	-	6bec2351284cb932	-
+conforms	c:objc(cs)PHAssetResourceCreationOptions	PHAssetResourceCreationOptions	NSCopying		-	-	-	-	-	6f7865289ba2f908	-
+property	c:objc(cs)PHAssetResourceCreationOptions(py)originalFilename	-			NSString *	-	copy,nonatomic	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	dbd9987dfd53c135	-
+property	c:objc(cs)PHAssetResourceCreationOptions(py)contentType	-			UTType *	-	copy,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,xros=26.0/-/-/0	-	dd15883283a33d7e	-
+property	c:objc(cs)PHAssetResourceCreationOptions(py)uniformTypeIdentifier	-			NSString *	-	copy,nonatomic	ios=9/100000/-/0,macos=10.15/100000/-/0,tvos=10/100000/-/0,xros=1/100000/-/0	-	814afa762c7c9537	-
+property	c:objc(cs)PHAssetResourceCreationOptions(py)shouldMoveFile	-			BOOL	-	assign,nonatomic	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	69284dd2679cf359	-
+interface	c:objc(cs)PHAssetCreationRequest	-			-	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	82677fca8098f2ac	-
+super	-	PHAssetCreationRequest	PHAssetChangeRequest		-	-	-	-	-	393a2b43691e3315	-
+method	c:objc(cs)PHAssetCreationRequest(cm)creationRequestForAsset	-			instancetype	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e90960c7f9679c76	-
+method	c:objc(cs)PHAssetCreationRequest(cm)supportsAssetResourceTypes:	-			BOOL	NSArray<NSNumber *> * types	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	51417c9e3d8ce0fe	-
+method	c:objc(cs)PHAssetCreationRequest(im)addResourceWithType:fileURL:options:	-			void	PHAssetResourceType type | NSURL * fileURL | PHAssetResourceCreationOptions * options	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	d2eb9a7be70c8b87	-
+method	c:objc(cs)PHAssetCreationRequest(im)addResourceWithType:data:options:	-			void	PHAssetResourceType type | NSData * data | PHAssetResourceCreationOptions * options	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5da50080561da784	-
+interface	c:objc(cs)PHAssetCollectionChangeRequest	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	372103e02b0e5d09	-
+super	-	PHAssetCollectionChangeRequest	PHChangeRequest		-	-	-	-	-	ce9bd02b94f77445	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(cm)creationRequestForAssetCollectionWithTitle:	-			instancetype	NSString * title	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	cd43553cac5aa3e0	-
+property	c:objc(cs)PHAssetCollectionChangeRequest(py)placeholderForCreatedAssetCollection	-			PHObjectPlaceholder *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	63933078672416af	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(cm)deleteAssetCollections:	-			void	id<NSFastEnumeration> assetCollections	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	0002b4dff47bb753	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(cm)changeRequestForAssetCollection:	-			instancetype	PHAssetCollection * assetCollection	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	4680da52eec93392	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(cm)changeRequestForAssetCollection:assets:	-			instancetype	PHAssetCollection * assetCollection | PHFetchResult<PHAsset *> * assets	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	de1d9b09fd838698	-
+property	c:objc(cs)PHAssetCollectionChangeRequest(py)title	-			NSString *	-	strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3b8d41f86c2623d5	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(im)addAssets:	-			void	id<NSFastEnumeration> assets	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5ac7cdb7d03478d4	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(im)insertAssets:atIndexes:	-			void	id<NSFastEnumeration> assets | NSIndexSet * indexes	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	381107295aa4f73e	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(im)removeAssets:	-			void	id<NSFastEnumeration> assets	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f007c5182a07d873	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(im)removeAssetsAtIndexes:	-			void	NSIndexSet * indexes	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	69e104199e5308db	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(im)replaceAssetsAtIndexes:withAssets:	-			void	NSIndexSet * indexes | id<NSFastEnumeration> assets	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e18087fe8042ba33	-
+method	c:objc(cs)PHAssetCollectionChangeRequest(im)moveAssetsAtIndexes:toIndex:	-			void	NSIndexSet * fromIndexes | NSUInteger toIndex	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e2a2f0d6b3c3b868	-
+interface	c:objc(cs)PHAssetResourceUploadJob	-			-	-	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	440a596a9f599b29	-
+super	-	PHAssetResourceUploadJob	PHObject		-	-	-	-	-	5ff9e86e9e897755	-
+property	c:objc(cs)PHAssetResourceUploadJob(cpy)jobLimit	-			NSInteger	-	readonly,class	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d2e9f37b44a47f7e	-
+property	c:objc(cs)PHAssetResourceUploadJob(py)resource	-			PHAssetResource *	-	readonly,strong	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f3f0307b4afcbd92	-
+property	c:objc(cs)PHAssetResourceUploadJob(py)destination	-			NSURLRequest *	-	readonly,strong	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	ff5fe985c35e6634	-
+property	c:objc(cs)PHAssetResourceUploadJob(py)state	-			PHAssetResourceUploadJobState	-	readonly	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	d59f5fede75d7349	-
+method	c:objc(cs)PHAssetResourceUploadJob(cm)fetchJobsWithAction:options:	-			PHFetchResult<PHAssetResourceUploadJob *> *	PHAssetResourceUploadJobAction action | PHFetchOptions * options	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	f40c0ba64d8697e1	-
+interface	c:objc(cs)PHAssetResourceUploadJobChangeRequest	-			-	-	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	06d681050e3666ee	-
+super	-	PHAssetResourceUploadJobChangeRequest	PHChangeRequest		-	-	-	-	-	bd6a8b5fb8e3d416	-
+method	c:objc(cs)PHAssetResourceUploadJobChangeRequest(cm)createJobWithDestination:resource:	-			void	NSURLRequest * destination | PHAssetResource * resource	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	44fedcb01aefe5cf	-
+method	c:objc(cs)PHAssetResourceUploadJobChangeRequest(cm)changeRequestForUploadJob:	-			instancetype	PHAssetResourceUploadJob * job	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	fe6eb63582265cb3	-
+method	c:objc(cs)PHAssetResourceUploadJobChangeRequest(im)acknowledge	-			void	-	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	cecd58132f5f939c	-
+method	c:objc(cs)PHAssetResourceUploadJobChangeRequest(im)retryWithDestination:	-			void	NSURLRequest * destination	-	ios=26.1/-/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1,xros=-/-/-/1	-	bd971aa5e3efb632	-
+interface	c:objc(cs)PHCollectionListChangeRequest	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	a9d0bb2ac789022d	-
+super	-	PHCollectionListChangeRequest	PHChangeRequest		-	-	-	-	-	b2937439c913bdda	-
+method	c:objc(cs)PHCollectionListChangeRequest(cm)creationRequestForCollectionListWithTitle:	-			instancetype	NSString * title	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3c9acd78b6a6487b	-
+property	c:objc(cs)PHCollectionListChangeRequest(py)placeholderForCreatedCollectionList	-			PHObjectPlaceholder *	-	readonly,strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3d11efb94f2ca9c4	-
+method	c:objc(cs)PHCollectionListChangeRequest(cm)deleteCollectionLists:	-			void	id<NSFastEnumeration> collectionLists	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5b41aafb5a56b07c	-
+method	c:objc(cs)PHCollectionListChangeRequest(cm)changeRequestForCollectionList:	-			instancetype	PHCollectionList * collectionList	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	8a96be215a431462	-
+method	c:objc(cs)PHCollectionListChangeRequest(cm)changeRequestForCollectionList:childCollections:	-			instancetype	PHCollectionList * collectionList | PHFetchResult<__kindof PHCollection *> * childCollections	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	341850c1588f040b	-
+method	c:objc(cs)PHCollectionListChangeRequest(cm)changeRequestForTopLevelCollectionListUserCollections:	-			instancetype	PHFetchResult<__kindof PHCollection *> * childCollections	-	ios=14.2/-/-/0,macos=11/-/-/0,tvos=14/-/-/0	-	4eebce3bb66aea0f	-
+property	c:objc(cs)PHCollectionListChangeRequest(py)title	-			NSString *	-	strong,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	411a801193012edf	-
+method	c:objc(cs)PHCollectionListChangeRequest(im)addChildCollections:	-			void	id<NSFastEnumeration> collections	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	492e2309a58d0ec1	-
+method	c:objc(cs)PHCollectionListChangeRequest(im)insertChildCollections:atIndexes:	-			void	id<NSFastEnumeration> collections | NSIndexSet * indexes	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3d941aa7c59a716e	-
+method	c:objc(cs)PHCollectionListChangeRequest(im)removeChildCollections:	-			void	id<NSFastEnumeration> collections	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	8d941a21cca11e59	-
+method	c:objc(cs)PHCollectionListChangeRequest(im)removeChildCollectionsAtIndexes:	-			void	NSIndexSet * indexes	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c280078fa7fe67bc	-
+method	c:objc(cs)PHCollectionListChangeRequest(im)replaceChildCollectionsAtIndexes:withChildCollections:	-			void	NSIndexSet * indexes | id<NSFastEnumeration> collections	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3b424030b771603f	-
+method	c:objc(cs)PHCollectionListChangeRequest(im)moveChildCollectionsAtIndexes:toIndex:	-			void	NSIndexSet * indexes | NSUInteger toIndex	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	b5637454f24e43df	-
+typedef	c:@T@PHLivePhotoFrameProcessingBlock	-			CIImage * ((^))(id<PHLivePhotoFrame>, NSError * _Nullable *)	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	d26d8d09fb5c8e50	-
+typedef	c:@T@PHLivePhotoEditingOption	-			NSString *const	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	c005efc2fc2a14c1	-
+interface	c:objc(cs)PHLivePhotoEditingContext	-			-	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	3b0989a95ec6ea9e	-
+super	-	PHLivePhotoEditingContext	NSObject		-	-	-	-	-	591f9883515fafb5	-
+method	c:objc(cs)PHLivePhotoEditingContext(im)initWithLivePhotoEditingInput:	-			instancetype	PHContentEditingInput * livePhotoInput	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	49240f5cc7bd0e61	-
+method	c:objc(cs)PHLivePhotoEditingContext(im)init	-			instancetype	-	-	*unavailable ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	4213912a75bb05da	-
+property	c:objc(cs)PHLivePhotoEditingContext(py)fullSizeImage	-			CIImage *	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	2cbac597b3d57995	-
+property	c:objc(cs)PHLivePhotoEditingContext(py)duration	-			CMTime	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	08648b43804aad29	-
+property	c:objc(cs)PHLivePhotoEditingContext(py)photoTime	-			CMTime	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	4526c5bb7f9f9dcc	-
+property	c:objc(cs)PHLivePhotoEditingContext(py)frameProcessor	-			PHLivePhotoFrameProcessingBlock	-	copy	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	ebd7adc89e71433a	-
+property	c:objc(cs)PHLivePhotoEditingContext(py)audioVolume	-			float	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	89e4086c07d281e5	-
+property	c:objc(cs)PHLivePhotoEditingContext(py)orientation	-			CGImagePropertyOrientation	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	f0c61863d2ca81d6	-
+method	c:objc(cs)PHLivePhotoEditingContext(im)prepareLivePhotoForPlaybackWithTargetSize:options:completionHandler:	-			void	CGSize targetSize | NSDictionary<NSString *,id> * options | void (^)(PHLivePhoto * _Nullable, NSError * _Nullable) handler	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	0734db266f0050a0	-
+method	c:objc(cs)PHLivePhotoEditingContext(im)saveLivePhotoToOutput:options:completionHandler:	-			void	PHContentEditingOutput * output | NSDictionary<NSString *,id> * options | void (^)(BOOL, NSError * _Nullable) handler	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	222f3030560e673b	-
+method	c:objc(cs)PHLivePhotoEditingContext(im)cancel	-			void	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	847652947c024444	-
+typedef	c:@T@PHLivePhotoFrameType	-			enum PHLivePhotoFrameType	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	18dda0b4c90a311f	-
+enum	c:@E@PHLivePhotoFrameType	-			NSInteger	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	d4fa2b5ace96570b	-
+enumconst	c:@E@PHLivePhotoFrameType@PHLivePhotoFrameTypePhoto	PHLivePhotoFrameType			-	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	da36cce08ab1328c	0
+enumconst	c:@E@PHLivePhotoFrameType@PHLivePhotoFrameTypeVideo	PHLivePhotoFrameType			-	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	fb767eaa95216cf8	1
+protocol	c:objc(pl)PHLivePhotoFrame	-			-	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	04b1c1b7787a05f2	-
+property	c:objc(pl)PHLivePhotoFrame(py)image	-			CIImage *	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	77f053a06db45301	-
+property	c:objc(pl)PHLivePhotoFrame(py)time	-			CMTime	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	62a5c6f47f24856e	-
+property	c:objc(pl)PHLivePhotoFrame(py)type	-			PHLivePhotoFrameType	-	readonly,nonatomic	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	67eb4a9c2f072dd9	-
+property	c:objc(pl)PHLivePhotoFrame(py)renderScale	-			CGFloat	-	readonly	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	fa4956c1ccf240d9	-
+var	c:@PHLivePhotoShouldRenderAtPlaybackTime	-			const PHLivePhotoEditingOption	-	-	ios=11/-/-/0,macos=10.12/-/-/0,tvos=11/-/-/0	-	651e85ebdb8e2b84	-
+var	c:@PHLivePhotoEditingErrorDomain	-			NSString *const	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.12/10.15/-/0,tvos=-/-/-/1	-	2d90a00b299b92d6	-
+typedef	c:@T@PHLivePhotoEditingErrorCode	-			enum PHLivePhotoEditingErrorCode	-	-	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	86fb3993bc629528	-
+enum	c:@E@PHLivePhotoEditingErrorCode	-			NSInteger	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.12/-/-/0,tvos=-/-/-/1	-	6dc9e316f7a153f1	-
+enumconst	c:@E@PHLivePhotoEditingErrorCode@PHLivePhotoEditingErrorCodeUnknown	PHLivePhotoEditingErrorCode			-	-	-	ios=10/-/-/0,macos=10.12/10.15/-/0,tvos=10/-/-/0	-	8c8159e325edf85f	0
+enumconst	c:@E@PHLivePhotoEditingErrorCode@PHLivePhotoEditingErrorCodeAborted	PHLivePhotoEditingErrorCode			-	-	-	ios=10/-/-/0,macos=10.12/10.15/-/0,tvos=10/-/-/0	-	199f0ae8471bee98	1
+enum	c:@E@UIImageOrientation	-			NSInteger	-	-	-	-	ef3fd37ab3296339	-
+typedef	c:@T@UIImageOrientation	-			enum UIImageOrientation	-	-	-	-	8951933c4524e01a	-
+typedef	c:@T@PHImageRequestOptionsVersion	-			enum PHImageRequestOptionsVersion	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	6a0c928dd9279864	-
+enum	c:@E@PHImageRequestOptionsVersion	-			NSInteger	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	bbeee6ec52535e9f	-
+enumconst	c:@E@PHImageRequestOptionsVersion@PHImageRequestOptionsVersionCurrent	PHImageRequestOptionsVersion			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	d4678903b5f29d74	0
+enumconst	c:@E@PHImageRequestOptionsVersion@PHImageRequestOptionsVersionUnadjusted	PHImageRequestOptionsVersion			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	03adf3527b1657c4	1
+enumconst	c:@E@PHImageRequestOptionsVersion@PHImageRequestOptionsVersionOriginal	PHImageRequestOptionsVersion			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	6b5b0f8fd25d1a8c	2
+typedef	c:@T@PHImageRequestOptionsDeliveryMode	-			enum PHImageRequestOptionsDeliveryMode	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0ed52e988c6650df	-
+enum	c:@E@PHImageRequestOptionsDeliveryMode	-			NSInteger	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	01a3961e439276c4	-
+enumconst	c:@E@PHImageRequestOptionsDeliveryMode@PHImageRequestOptionsDeliveryModeOpportunistic	PHImageRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	ff59f15b65cba4c6	0
+enumconst	c:@E@PHImageRequestOptionsDeliveryMode@PHImageRequestOptionsDeliveryModeHighQualityFormat	PHImageRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	c963fb3c4facf6c0	1
+enumconst	c:@E@PHImageRequestOptionsDeliveryMode@PHImageRequestOptionsDeliveryModeFastFormat	PHImageRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	cdf7b99b974757fd	2
+typedef	c:@T@PHImageRequestOptionsResizeMode	-			enum PHImageRequestOptionsResizeMode	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	88f1aab0f22f8af8	-
+enum	c:@E@PHImageRequestOptionsResizeMode	-			NSInteger	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	c4427e40ab87d1f9	-
+enumconst	c:@E@PHImageRequestOptionsResizeMode@PHImageRequestOptionsResizeModeNone	PHImageRequestOptionsResizeMode			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	adb0920c4f017101	0
+enumconst	c:@E@PHImageRequestOptionsResizeMode@PHImageRequestOptionsResizeModeFast	PHImageRequestOptionsResizeMode			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	4d75f4f0adceff4e	1
+enumconst	c:@E@PHImageRequestOptionsResizeMode@PHImageRequestOptionsResizeModeExact	PHImageRequestOptionsResizeMode			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0e66348679c79b79	2
+typedef	c:@T@PHAssetImageProgressHandler	-			void ((^))(double, NSError *, BOOL *, NSDictionary *)	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	08f9ce3174bf2aa5	-
+interface	c:objc(cs)PHImageRequestOptions	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	163b387e50621c97	-
+super	-	PHImageRequestOptions	NSObject		-	-	-	-	-	6a3e7c1db3225dc7	-
+conforms	c:objc(cs)PHImageRequestOptions	PHImageRequestOptions	NSCopying		-	-	-	-	-	90623c0f514d4259	-
+property	c:objc(cs)PHImageRequestOptions(py)version	-			PHImageRequestOptionsVersion	-	assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	066301d01df3e733	-
+property	c:objc(cs)PHImageRequestOptions(py)deliveryMode	-			PHImageRequestOptionsDeliveryMode	-	assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	514cf0cd336c64cf	-
+property	c:objc(cs)PHImageRequestOptions(py)resizeMode	-			PHImageRequestOptionsResizeMode	-	assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	de9b99136ff4bbe5	-
+property	c:objc(cs)PHImageRequestOptions(py)normalizedCropRect	-			CGRect	-	assign,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	b44f09dcc83ce859	-
+property	c:objc(cs)PHImageRequestOptions(py)networkAccessAllowed	-			BOOL	-	assign,nonatomic,getter=isNetworkAccessAllowed	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	8f6efce3bab0a34e	-
+property	c:objc(cs)PHImageRequestOptions(py)synchronous	-			BOOL	-	assign,nonatomic,getter=isSynchronous	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	9cd8ce17401064fc	-
+property	c:objc(cs)PHImageRequestOptions(py)progressHandler	-			PHAssetImageProgressHandler	-	copy,nonatomic	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	5b6def25015cc0ab	-
+property	c:objc(cs)PHImageRequestOptions(py)allowSecondaryDegradedImage	-			BOOL	-	nonatomic	ios=17/-/-/0,macos=14/-/-/0,tvos=17/-/-/0	-	414506c073992166	-
+interface	c:objc(cs)PHLivePhotoRequestOptions	-			-	-	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	fe9c22818d9556ef	-
+super	-	PHLivePhotoRequestOptions	NSObject		-	-	-	-	-	3f0165f5195a6973	-
+conforms	c:objc(cs)PHLivePhotoRequestOptions	PHLivePhotoRequestOptions	NSCopying		-	-	-	-	-	5509f9d67a9dd6d8	-
+property	c:objc(cs)PHLivePhotoRequestOptions(py)version	-			PHImageRequestOptionsVersion	-	assign,nonatomic	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	3debae02feaaff4e	-
+property	c:objc(cs)PHLivePhotoRequestOptions(py)deliveryMode	-			PHImageRequestOptionsDeliveryMode	-	assign,nonatomic	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f7c82d9a1b6a16d5	-
+property	c:objc(cs)PHLivePhotoRequestOptions(py)networkAccessAllowed	-			BOOL	-	assign,nonatomic,getter=isNetworkAccessAllowed	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	fc68368ed151d356	-
+property	c:objc(cs)PHLivePhotoRequestOptions(py)progressHandler	-			PHAssetImageProgressHandler	-	copy,nonatomic	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	eef57650b06047fa	-
+typedef	c:@T@PHVideoRequestOptionsVersion	-			enum PHVideoRequestOptionsVersion	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	2d07b28cdc962d0d	-
+enum	c:@E@PHVideoRequestOptionsVersion	-			NSInteger	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	d13e9d89e738474a	-
+enumconst	c:@E@PHVideoRequestOptionsVersion@PHVideoRequestOptionsVersionCurrent	PHVideoRequestOptionsVersion			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	2ba6612ffc3bf428	0
+enumconst	c:@E@PHVideoRequestOptionsVersion@PHVideoRequestOptionsVersionOriginal	PHVideoRequestOptionsVersion			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	35c8f192dba34ffb	1
+typedef	c:@T@PHVideoRequestOptionsDeliveryMode	-			enum PHVideoRequestOptionsDeliveryMode	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	cbc673d99cffa991	-
+enum	c:@E@PHVideoRequestOptionsDeliveryMode	-			NSInteger	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	7d280abe544e468a	-
+enumconst	c:@E@PHVideoRequestOptionsDeliveryMode@PHVideoRequestOptionsDeliveryModeAutomatic	PHVideoRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	80507a0f91bcaba5	0
+enumconst	c:@E@PHVideoRequestOptionsDeliveryMode@PHVideoRequestOptionsDeliveryModeHighQualityFormat	PHVideoRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	2af993d2107c5ff9	1
+enumconst	c:@E@PHVideoRequestOptionsDeliveryMode@PHVideoRequestOptionsDeliveryModeMediumQualityFormat	PHVideoRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	1a7b02e05a1e76dc	2
+enumconst	c:@E@PHVideoRequestOptionsDeliveryMode@PHVideoRequestOptionsDeliveryModeFastFormat	PHVideoRequestOptionsDeliveryMode			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e4b959e76fcc312d	3
+typedef	c:@T@PHAssetVideoProgressHandler	-			void ((^))(double, NSError *, BOOL *, NSDictionary *)	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e5650dd673d2b47f	-
+interface	c:objc(cs)PHVideoRequestOptions	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	27062e2f9bc2ca4b	-
+super	-	PHVideoRequestOptions	NSObject		-	-	-	-	-	24666bd37b12c32c	-
+conforms	c:objc(cs)PHVideoRequestOptions	PHVideoRequestOptions	NSCopying		-	-	-	-	-	52cccdb3fa51270f	-
+property	c:objc(cs)PHVideoRequestOptions(py)networkAccessAllowed	-			BOOL	-	assign,nonatomic,getter=isNetworkAccessAllowed	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	24f0060dd390d6bf	-
+property	c:objc(cs)PHVideoRequestOptions(py)version	-			PHVideoRequestOptionsVersion	-	assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	24f8550431a9da5c	-
+property	c:objc(cs)PHVideoRequestOptions(py)deliveryMode	-			PHVideoRequestOptionsDeliveryMode	-	assign,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	5d7f07b797530c37	-
+property	c:objc(cs)PHVideoRequestOptions(py)progressHandler	-			PHAssetVideoProgressHandler	-	copy,nonatomic	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	329d2d439ff36a9f	-
+typedef	c:@T@PHImageRequestID	-			int32_t	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	d0f73607a4b21aef	-
+var	c:@PHImageManagerMaximumSize	-			const CGSize	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	0c59049a6f40902b	-
+var	c:@PHImageResultIsInCloudKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	8ef09355247ee82c	-
+var	c:@PHImageResultIsDegradedKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	6d584a2e99ad2f5e	-
+var	c:@PHImageResultRequestIDKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	06bde169a2ffb951	-
+var	c:@PHImageCancelledKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	7890b689c88acd24	-
+var	c:@PHImageErrorKey	-			NSString *const	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	270ad715046bce24	-
+interface	c:objc(cs)PHImageManager	-			-	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	deprecated: Use -requestImageDataAndOrientationForAsset:options:resultHandler: instead	0b7ff79e6ecc0667	-
+super	-	PHImageManager	NSObject		-	-	-	-	-	765ea4bfb6c8f1a3	-
+method	c:objc(cs)PHImageManager(cm)defaultManager	-			PHImageManager *	-	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	b2c90b2057065d3b	-
+method	c:objc(cs)PHImageManager(im)requestImageForAsset:targetSize:contentMode:options:resultHandler:	-			PHImageRequestID	PHAsset * asset | CGSize targetSize | PHImageContentMode contentMode | PHImageRequestOptions * options | void (^)(UIImage * _Nullable, NSDictionary * _Nullable) resultHandler	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	c0e9c1149b9c9b21	-
+method	c:objc(cs)PHImageManager(im)requestImageDataForAsset:options:resultHandler:	-			PHImageRequestID	PHAsset * asset | PHImageRequestOptions * options | void (^)(NSData * _Nullable, NSString * _Nullable, UIImageOrientation, NSDictionary * _Nullable) resultHandler	-	ios=8/13/-/0,macos=-/-/-/1,tvos=8/13/-/0	deprecated: Use -requestImageDataAndOrientationForAsset:options:resultHandler: instead	a0312a895f0b17b3	-
+method	c:objc(cs)PHImageManager(im)requestImageDataAndOrientationForAsset:options:resultHandler:	-			PHImageRequestID	PHAsset * asset | PHImageRequestOptions * options | void (^)(NSData * _Nullable, NSString * _Nullable, CGImagePropertyOrientation, NSDictionary * _Nullable) resultHandler	-	ios=13/-/-/0,macos=10.15/-/-/0,tvos=13/-/-/0	-	25f340ef885e1996	-
+method	c:objc(cs)PHImageManager(im)cancelImageRequest:	-			void	PHImageRequestID requestID	-	ios=8/-/-/0,macos=10.13/-/-/0,tvos=10/-/-/0	-	22c13c4cc3936dac	-
+method	c:objc(cs)PHImageManager(im)requestLivePhotoForAsset:targetSize:contentMode:options:resultHandler:	-			PHImageRequestID	PHAsset * asset | CGSize targetSize | PHImageContentMode contentMode | PHLivePhotoRequestOptions * options | void (^)(PHLivePhoto * _Nullable, NSDictionary * _Nullable) resultHandler	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c59abaf482ace95a	-
+method	c:objc(cs)PHImageManager(im)requestPlayerItemForVideo:options:resultHandler:	-			PHImageRequestID	PHAsset * asset | PHVideoRequestOptions * options | void (^)(AVPlayerItem * _Nullable, NSDictionary * _Nullable) resultHandler	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	16055590aa6ad266	-
+method	c:objc(cs)PHImageManager(im)requestExportSessionForVideo:options:exportPreset:resultHandler:	-			PHImageRequestID	PHAsset * asset | PHVideoRequestOptions * options | NSString * exportPreset | void (^)(AVAssetExportSession * _Nullable, NSDictionary * _Nullable) resultHandler	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	912677ae5f3a312c	-
+method	c:objc(cs)PHImageManager(im)requestAVAssetForVideo:options:resultHandler:	-			PHImageRequestID	PHAsset * asset | PHVideoRequestOptions * options | void (^)(AVAsset * _Nullable, AVAudioMix * _Nullable, NSDictionary * _Nullable) resultHandler	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c333d6044d200363	-
+interface	c:objc(cs)PHCachingImageManager	-			-	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	deprecated: This property is unused and will be removed in a future release	95aff61af1f34e90	-
+super	-	PHCachingImageManager	PHImageManager		-	-	-	-	-	bb8850cd60847508	-
+property	c:objc(cs)PHCachingImageManager(py)allowsCachingHighQualityImages	-			BOOL	-	assign,nonatomic	ios=8/26.0/-/0,macos=10.15/26.0/-/0,tvos=10/26.0/-/0,xros=1/26.0/-/0	-	67d8f45b9fc3389b	-
+method	c:objc(cs)PHCachingImageManager(im)startCachingImagesForAssets:targetSize:contentMode:options:	-			void	NSArray<PHAsset *> * assets | CGSize targetSize | PHImageContentMode contentMode | PHImageRequestOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	02cb7c74f645a5e9	-
+method	c:objc(cs)PHCachingImageManager(im)stopCachingImagesForAssets:targetSize:contentMode:options:	-			void	NSArray<PHAsset *> * assets | CGSize targetSize | PHImageContentMode contentMode | PHImageRequestOptions * options	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f793101efba43c98	-
+method	c:objc(cs)PHCachingImageManager(im)stopCachingImagesForAllAssets	-			void	-	-	ios=8/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	72f6997b06944ba8	-
+typedef	c:@T@PHAssetResourceDataRequestID	-			int32_t	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	8ca76e2965f0b2f9	-
+typedef	c:@T@PHAssetResourceProgressHandler	-			void ((^))(double)	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	6e181d9006b47d44	-
+interface	c:objc(cs)PHAssetResourceRequestOptions	-			-	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	deaaf692f9f114f1	-
+super	-	PHAssetResourceRequestOptions	NSObject		-	-	-	-	-	e5a40f2c3a00dc56	-
+conforms	c:objc(cs)PHAssetResourceRequestOptions	PHAssetResourceRequestOptions	NSCopying		-	-	-	-	-	e23bff99bf90b955	-
+property	c:objc(cs)PHAssetResourceRequestOptions(py)networkAccessAllowed	-			BOOL	-	assign,nonatomic,getter=isNetworkAccessAllowed	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e9c11b12ff1011f1	-
+property	c:objc(cs)PHAssetResourceRequestOptions(py)progressHandler	-			PHAssetResourceProgressHandler	-	copy,nonatomic	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	238aeebde013a21f	-
+interface	c:objc(cs)PHAssetResourceManager	-			-	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	d1c0dae6dd97bcf9	-
+super	-	PHAssetResourceManager	NSObject		-	-	-	-	-	8dd3fbbe08e6c64b	-
+method	c:objc(cs)PHAssetResourceManager(cm)defaultManager	-			PHAssetResourceManager *	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	9e9f9c53e9327d25	-
+method	c:objc(cs)PHAssetResourceManager(im)requestDataForAssetResource:options:dataReceivedHandler:completionHandler:	-			PHAssetResourceDataRequestID	PHAssetResource * resource | PHAssetResourceRequestOptions * options | void (^)(NSData * _Nonnull) handler | void (^)(NSError * _Nullable) completionHandler	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	f193b6a47e551a0f	-
+method	c:objc(cs)PHAssetResourceManager(im)writeDataForAssetResource:toFile:options:completionHandler:	-			void	PHAssetResource * resource | NSURL * fileURL | PHAssetResourceRequestOptions * options | void (^)(NSError * _Nullable) completionHandler	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	44d54f167563864d	-
+method	c:objc(cs)PHAssetResourceManager(im)cancelDataRequest:	-			void	PHAssetResourceDataRequestID requestID	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	c368d0623679fb88	-
+interface	c:objc(cs)PHAssetResource	-			-	-	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	deprecated: Use contentType instead	e59cfe13786fc7c2	-
+super	-	PHAssetResource	NSObject		-	-	-	-	-	706fe81cdeefda38	-
+property	c:objc(cs)PHAssetResource(py)type	-			PHAssetResourceType	-	readonly,assign,nonatomic	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	ab8a33e3cde1593c	-
+property	c:objc(cs)PHAssetResource(py)assetLocalIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	ffba761fd26ff4c9	-
+property	c:objc(cs)PHAssetResource(py)originalFilename	-			NSString *	-	readonly,copy,nonatomic	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	8a38fec102c7f92a	-
+property	c:objc(cs)PHAssetResource(py)contentType	-			UTType *	-	readonly,copy,nonatomic	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,xros=26.0/-/-/0	-	406630545382946b	-
+property	c:objc(cs)PHAssetResource(py)uniformTypeIdentifier	-			NSString *	-	readonly,copy,nonatomic	ios=9/100000/-/0,macos=10.15/100000/-/0,tvos=10/100000/-/0,xros=1/100000/-/0	-	89e66ed66decbec6	-
+property	c:objc(cs)PHAssetResource(py)pixelWidth	-			NSInteger	-	readonly,assign,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	1f20877c4efa422a	-
+property	c:objc(cs)PHAssetResource(py)pixelHeight	-			NSInteger	-	readonly,assign,nonatomic	ios=16/-/-/0,macos=13/-/-/0,tvos=16/-/-/0	-	a475b6fe4943994f	-
+method	c:objc(cs)PHAssetResource(cm)assetResourcesForAsset:	-			NSArray<PHAssetResource *> *	PHAsset * asset	-	ios=9/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	e3920e1f2c9e902e	-
+method	c:objc(cs)PHAssetResource(cm)assetResourcesForLivePhoto:	-			NSArray<PHAssetResource *> *	PHLivePhoto * livePhoto	-	ios=9.1/-/-/0,macos=10.15/-/-/0,tvos=10/-/-/0	-	be5c626764b125f6	-
+interface	c:objc(cs)PHAdjustmentData	-			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	8cc9dc27af075c03	-
+super	-	PHAdjustmentData	NSObject		-	-	-	-	-	b7e28672c8d31749	-
+method	c:objc(cs)PHAdjustmentData(im)initWithFormatIdentifier:formatVersion:data:	-			instancetype	NSString * formatIdentifier | NSString * formatVersion | NSData * data	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	308df61c86aa473b	-
+property	c:objc(cs)PHAdjustmentData(py)formatIdentifier	-			NSString *	-	readonly,copy	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	66efd116e78926bf	-
+property	c:objc(cs)PHAdjustmentData(py)formatVersion	-			NSString *	-	readonly,copy	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	94dfd59b364b0fc7	-
+property	c:objc(cs)PHAdjustmentData(py)data	-			NSData *	-	readonly,strong	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4439efabc0b5c2a7	-
+interface	c:objc(cs)PHContentEditingInput	-			-	-	-	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	deprecated: Use contentType instead	8d35c36609be23c9	-
+super	-	PHContentEditingInput	NSObject		-	-	-	-	-	529648dad89afd57	-
+property	c:objc(cs)PHContentEditingInput(py)mediaType	-			PHAssetMediaType	-	readonly,assign	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	0deb648646d90af4	-
+property	c:objc(cs)PHContentEditingInput(py)mediaSubtypes	-			PHAssetMediaSubtype	-	readonly,assign	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	1668d61723269337	-
+property	c:objc(cs)PHContentEditingInput(py)creationDate	-			NSDate *	-	readonly,copy	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	2f74bd2deb47f6d2	-
+property	c:objc(cs)PHContentEditingInput(py)location	-			CLLocation *	-	readonly,copy	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	0f4febda7f4d6e0d	-
+property	c:objc(cs)PHContentEditingInput(py)contentType	-			UTType *	-	readonly,copy	ios=26.0/-/-/0,macos=26.0/-/-/0,tvos=26.0/-/-/0,xros=26.0/-/-/0	-	e50ea632eb64673d	-
+property	c:objc(cs)PHContentEditingInput(py)uniformTypeIdentifier	-			NSString *	-	readonly,copy	ios=8/100000/-/0,macos=10.11/100000/-/0,tvos=10/100000/-/0,xros=1/100000/-/0	-	4129635cd1ebc690	-
+property	c:objc(cs)PHContentEditingInput(py)playbackStyle	-			PHAssetPlaybackStyle	-	readonly,assign,nonatomic	ios=11/-/-/0,macos=10.13/-/-/0,tvos=11/-/-/0	-	bbe1072a1d5563e6	-
+property	c:objc(cs)PHContentEditingInput(py)adjustmentData	-			PHAdjustmentData *	-	readonly,strong	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	4731cb4ddb8559f2	-
+property	c:objc(cs)PHContentEditingInput(py)displaySizeImage	-			UIImage *	-	readonly,strong	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	32cff39049a333e7	-
+property	c:objc(cs)PHContentEditingInput(py)fullSizeImageURL	-			NSURL *	-	readonly,copy	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	d1fd814e8c1d2a2e	-
+property	c:objc(cs)PHContentEditingInput(py)fullSizeImageOrientation	-			int	-	readonly,assign	ios=8/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	c221480f1a0fa801	-
+property	c:objc(cs)PHContentEditingInput(py)avAsset	-			AVAsset *	-	readonly,strong	ios=8/9/-/0,macos=-/-/-/1,tvos=10/-/-/0	-	7af5780d02cce47e	-
+property	c:objc(cs)PHContentEditingInput(py)audiovisualAsset	-			AVAsset *	-	readonly,strong	ios=9/-/-/0,macos=10.11/-/-/0,tvos=10/-/-/0	-	9e2a7d4c1bd07f1d	-
+property	c:objc(cs)PHContentEditingInput(py)livePhoto	-			PHLivePhoto *	-	readonly,strong	ios=10/-/-/0,macos=10.12/-/-/0,tvos=10/-/-/0	-	cadccc43aec019b0	-
+interface	c:objc(cs)PHProject	-			-	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	48a535228bdcd0b4	-
+super	-	PHProject	PHAssetCollection		-	-	-	-	-	3cd72428479192f6	-
+property	c:objc(cs)PHProject(py)projectExtensionData	-			NSData *	-	readonly,nonatomic	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	8128ef0485db8348	-
+property	c:objc(cs)PHProject(py)hasProjectPreview	-			BOOL	-	readonly,nonatomic	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	b6ba2dd8faf62a39	-
+interface	c:objc(cs)PHProjectChangeRequest	-			-	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	deprecated: Use -setProjectPreviewImage: instead	34eb882fc4a7b9d9	-
+super	-	PHProjectChangeRequest	PHChangeRequest		-	-	-	-	-	21abc75681fe9048	-
+method	c:objc(cs)PHProjectChangeRequest(im)initWithProject:	-			instancetype	PHProject * project	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	487a02203981825d	-
+property	c:objc(cs)PHProjectChangeRequest(py)title	-			NSString *	-	copy,nonatomic	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	d796169a062d4862	-
+property	c:objc(cs)PHProjectChangeRequest(py)projectExtensionData	-			NSData *	-	copy,nonatomic	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	b495ca745ee72f5d	-
+method	c:objc(cs)PHProjectChangeRequest(im)setKeyAsset:	-			void	PHAsset * keyAsset	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/10.14/-/0,tvos=-/-/-/1	deprecated: Use -setProjectPreviewImage: instead	91493b8973e8a568	-
+method	c:objc(cs)PHProjectChangeRequest(im)setProjectPreviewImage:	-			void	UIImage * previewImage	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/-/-/0,tvos=-/-/-/1	-	273d718ecb3bbe9f	-
+method	c:objc(cs)PHProjectChangeRequest(im)removeAssets:	-			void	id<NSFastEnumeration> assets	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.14/-/-/0,tvos=-/-/-/1	-	7ef27335dde18904	-
+interface	c:objc(cs)PHCloudIdentifier	-			-	-	-	ios=15/-/-/0,macos=10.13/-/-/0,tvos=15/-/-/0	deprecated: Use Check for PHPhotosErrorIdentifierNotFound in PHCloudIdentifierMapping.error instead	724bc1be059783e0	-
+super	-	PHCloudIdentifier	NSObject		-	-	-	-	-	973cadae3cd17a5f	-
+conforms	c:objc(cs)PHCloudIdentifier	PHCloudIdentifier	NSSecureCoding		-	-	-	-	-	4ae5cf3847ed0336	-
+property	c:objc(cs)PHCloudIdentifier(cpy)notFoundIdentifier	-			PHCloudIdentifier *	-	readonly,nonatomic,class	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/12/-/0,tvos=-/-/-/1	-	e2e488b66e808dd2	-
+property	c:objc(cs)PHCloudIdentifier(py)stringValue	-			NSString *	-	readonly,nonatomic	ios=15/-/-/0,macos=10.13/-/-/0,tvos=15/-/-/0	-	3261074b964b061d	-
+method	c:objc(cs)PHCloudIdentifier(im)initWithStringValue:	-			instancetype	NSString * stringValue	-	ios=15/-/-/0,macos=10.13/-/-/0,tvos=15/-/-/0	-	6ae7b21677f64348	-
+interface	c:objc(cs)PHCloudIdentifierMapping	-			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	daab102aa2bd70dd	-
+super	-	PHCloudIdentifierMapping	NSObject		-	-	-	-	-	620c6a22fe645856	-
+property	c:objc(cs)PHCloudIdentifierMapping(py)cloudIdentifier	-			PHCloudIdentifier *	-	readonly,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	c41f6452c93e01c7	-
+property	c:objc(cs)PHCloudIdentifierMapping(py)error	-			NSError *	-	readonly,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	4d44bffd5f2f1dad	-
+interface	c:objc(cs)PHLocalIdentifierMapping	-			-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	b5aa863bcab1d197	-
+super	-	PHLocalIdentifierMapping	NSObject		-	-	-	-	-	75cab38ca55d68bf	-
+property	c:objc(cs)PHLocalIdentifierMapping(py)localIdentifier	-			NSString *	-	readonly,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	d8ce5049616191f5	-
+property	c:objc(cs)PHLocalIdentifierMapping(py)error	-			NSError *	-	readonly,nonatomic	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	a4b8d4b8bc1e6848	-
+category	c:objc(ext)PHCloudIdentifier	-	-		-	-	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	1e542cd8508ac71a	-
+conforms	c:objc(ext)PHCloudIdentifier@PHCloudIdentifier.h@2583	PHCloudIdentifier	NSCopying		-	-	-	-	-	52c9609024377839	-
+category	c:objc(cy)PHPhotoLibrary@CloudIdentifiers	-			-	-	-	ios=15/-/-/0,macos=10.13/-/-/0,tvos=15/-/-/0	deprecated: Use -localIdentifierMappingsForCloudIdentifiers: instead	0af77b566e240692	-
+method	c:objc(cs)PHPhotoLibrary(im)localIdentifierMappingsForCloudIdentifiers:	CloudIdentifiers			NSDictionary<PHCloudIdentifier *,PHLocalIdentifierMapping *> *	NSArray<PHCloudIdentifier *> * cloudIdentifiers	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	d4173b6a324ef823	-
+method	c:objc(cs)PHPhotoLibrary(im)cloudIdentifierMappingsForLocalIdentifiers:	CloudIdentifiers			NSDictionary<NSString *,PHCloudIdentifierMapping *> *	NSArray<NSString *> * localIdentifiers	-	ios=15/-/-/0,macos=12/-/-/0,tvos=15/-/-/0	-	aa76e672c9d88ae7	-
+method	c:objc(cs)PHPhotoLibrary(im)localIdentifiersForCloudIdentifiers:	CloudIdentifiers			NSArray<NSString *> *	NSArray<PHCloudIdentifier *> * cloudIdentifiers	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/12/-/0,tvos=-/-/-/1	deprecated: Use -localIdentifierMappingsForCloudIdentifiers: instead	edf6b9f1b13e0f89	-
+method	c:objc(cs)PHPhotoLibrary(im)cloudIdentifiersForLocalIdentifiers:	CloudIdentifiers			NSArray<PHCloudIdentifier *> *	NSArray<NSString *> * localIdentifiers	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/12/-/0,tvos=-/-/-/1	deprecated: Use -cloudIdentifierMappingsForLocalIdentifiers: instead	378ac5f49ed836bd	-
+var	c:@PHLocalIdentifierNotFound	-			NSString *const	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.13/12/-/0,tvos=-/-/-/1	-	1dcbe3d677a7f0e7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@dispatch_block_t	-			void ((^))(void)	-	-	swift=-/-/-/1	-	802eb6965171e2dc	-
+typedef	c:@T@NSErrorDomain	-			NSString *	-	-	-	-	a2ef9b8d14cb4ca2	-
+typedef	c:@T@NSErrorUserInfoKey	-			NSString *	-	-	-	-	9ecf47ef2fc2387a	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@NSRange	-			struct _NSRange	-	-	-	-	d109726d1ae61321	-
+typedef	c:@T@NSEnumerationOptions	-			enum NSEnumerationOptions	-	-	-	-	3949db790379ffe3	-
+typedef	c:@T@NSTimeInterval	-			double	-	-	-	-	a5d833a7f102ded1	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@CMTime	-			struct CMTime	-	-	ios=4.0/-/-/0,macos=10.7/-/-/0,tvos=9.0/-/-/0,watchos=6.0/-/-/0,xros=1.0/-/-/0	-	8a8b73c9a6144fc8	-
+typedef	c:@T@CGImagePropertyOrientation	-			enum CGImagePropertyOrientation	-	-	-	-	7ec899c12b8313d6	-
+typedef	c:@T@CGFloat	-			double	-	-	-	-	29e11a71cfda882e	-
+typedef	c:@T@CGRect	-			struct CGRect	-	-	-	-	57cc4af4879304a9	-

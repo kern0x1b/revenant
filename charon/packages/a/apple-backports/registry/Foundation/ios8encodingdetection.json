@@ -1,0 +1,77 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "+[NSString stringEncodingForData:encodingOptions:convertedString:usedLossyConversion:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the host's own Foundation, probed by hand over ten cases; tests/backports/host/foundation2 does not yet cover this method"
+    },
+    {
+      "api": "NSStringEncodingDetectionSuggestedEncodingsKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    },
+    {
+      "api": "NSStringEncodingDetectionDisallowedEncodingsKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    },
+    {
+      "api": "NSStringEncodingDetectionUseOnlySuggestedEncodingsKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    },
+    {
+      "api": "NSStringEncodingDetectionAllowLossyKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    },
+    {
+      "api": "NSStringEncodingDetectionFromWindowsKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    },
+    {
+      "api": "NSStringEncodingDetectionLossySubstitutionKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    },
+    {
+      "api": "NSStringEncodingDetectionLikelyLanguageKey",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSStringEncodingDetection.md",
+      "source": "the header of SDK 9.3"
+    }
+  ]
+}

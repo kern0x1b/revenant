@@ -1,0 +1,29 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@os_function_t	-			void (*)(void * _Nullable)	-	-	-	-	f51984428741919d	-
+typedef	c:@T@os_block_t	-			void ((^))(void)	-	-	-	-	e40bd475d3141bb6	-
+enum	c:@EA@os_clockid_t	-			uint32_t	-	-	-	-	d5a0e2047a1f413a	-
+enumconst	c:@EA@os_clockid_t@OS_CLOCK_MACH_ABSOLUTE_TIME	os_clockid_t			-	-	-	-	-	13fbbb7f49263a32	32
+typedef	c:@T@os_clockid_t	-			enum os_clockid_t	-	-	-	-	f68d0accf7de6c82	-
+struct	c:@S@os_unfair_lock_s	-			-	-	-	-	-	4edbf5e270dba3e1	-
+field	c:@S@os_unfair_lock_s@FI@_os_unfair_lock_opaque	os_unfair_lock_s			uint32_t	-	-	-	-	57ffb91da2c9de78	-
+typedef	c:@T@os_unfair_lock	-			struct os_unfair_lock_s	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	18013bd2a27d5e69	-
+typedef	c:@T@os_unfair_lock_t	-			struct os_unfair_lock_s *	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	07f14c728b52515f	-
+function	c:@F@os_unfair_lock_lock	-			void (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b9db125bda5758a6	-
+function	c:@F@os_unfair_lock_trylock	-			_Bool (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1bff8c92d9d6d8d2	-
+function	c:@F@os_unfair_lock_unlock	-			void (os_unfair_lock_t)	os_unfair_lock_t lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	2cfbbf3f09475bc4	-
+function	c:@F@os_unfair_lock_assert_owner	-			void (const os_unfair_lock *)	const os_unfair_lock * lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c5c83a5d87e9e027	-
+function	c:@F@os_unfair_lock_assert_not_owner	-			void (const os_unfair_lock *)	const os_unfair_lock * lock	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a2a2dd9176b75ed4	-
+enum	c:@EA@os_unfair_lock_flags_t	-			uint32_t	-	-	-	-	367d0f7c1f6032a2	-
+enumconst	c:@EA@os_unfair_lock_flags_t@OS_UNFAIR_LOCK_FLAG_NONE	os_unfair_lock_flags_t			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,swift=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	e70ee85e80733c29	0
+enumconst	c:@EA@os_unfair_lock_flags_t@OS_UNFAIR_LOCK_FLAG_ADAPTIVE_SPIN	os_unfair_lock_flags_t			-	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0,swift=-/-/-/1,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	24247e9726837880	262144
+typedef	c:@T@os_unfair_lock_flags_t	-			enum os_unfair_lock_flags_t	-	-	-	-	4f3bc6a04c3559ee	-
+function	c:@F@os_unfair_lock_lock_with_flags	-			void (os_unfair_lock_t, os_unfair_lock_flags_t)	os_unfair_lock_t lock | os_unfair_lock_flags_t flags	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0,xros=2.0/-/-/0	-	3b6d7f180a322936	-
+function	c:@F@os_proc_available_memory	-			size_t (void)	-	-	ios=13.0/-/-/0,macos=-/-/-/1,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	37f1bc3bc9ce15f7	-
+interface	c:objc(cs)OS_object	-			-	-	-	-	-	88c111defa440c82	-
+super	-	OS_object	NSObject		-	-	-	-	-	a02681f4cb2df454	-
+method	c:objc(cs)OS_object(im)init	-			instancetype	-	-	swift=-/-/-/1	-	d702d56755a6c7ef	-
+function	c:@F@os_retain	-			void * (void *)	void * object	-	ios=8.0/-/-/0,macos=10.10/-/-/0,swift=-/-/-/1	-	22d7960c2f596dac	-
+function	c:@F@os_release	-			void (void *)	void * object	-	ios=8.0/-/-/0,macos=10.10/-/-/0,swift=-/-/-/1	-	1daaa58bd7324547	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-

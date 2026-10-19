@@ -1,0 +1,75 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+CoreAudio	method	UnsafeBufferPointer.init(_:)					none
+CoreAudio	method	UnsafeMutableBufferPointer.init(_:)					none
+CoreAudio	method	CoreAudioTypes.AudioBuffer.init(_:numberOfChannels:)					none
+CoreAudio	method	CoreAudioTypes.AudioBufferList.sizeInBytes(maximumBuffers:)					none
+CoreAudio	method	CoreAudioTypes.AudioBufferList.allocate(maximumBuffers:)					none
+CoreAudio	struct	UnsafeMutableAudioBufferListPointer					none
+CoreAudio	method	UnsafeMutableAudioBufferListPointer.init(_:)					none
+CoreAudio	method	UnsafeMutableAudioBufferListPointer.init?(_:)					none
+CoreAudio	property	UnsafeMutableAudioBufferListPointer.count					none
+CoreAudio	property	UnsafeMutableAudioBufferListPointer.unsafePointer					none
+CoreAudio	property	UnsafeMutableAudioBufferListPointer.unsafeMutablePointer					none
+CoreAudio	typealias	UnsafeMutableAudioBufferListPointer.Element					none
+CoreAudio	typealias	UnsafeMutableAudioBufferListPointer.Index					none
+CoreAudio	typealias	UnsafeMutableAudioBufferListPointer.Indices					none
+CoreAudio	property	UnsafeMutableAudioBufferListPointer.startIndex					none
+CoreAudio	property	UnsafeMutableAudioBufferListPointer.endIndex					none
+CoreAudio	method	UnsafeMutableAudioBufferListPointer.subscript(index:)					none
+CoreAudio	typealias	UnsafeMutableAudioBufferListPointer.Iterator					none
+CoreAudio	typealias	UnsafeMutableAudioBufferListPointer.SubSequence					none
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.sizeInBytes(maximumDescriptions:)	13.0				own
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.allocate(maximumDescriptions:)	13.0				own
+CoreAudio	struct	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer	13.0				own
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.init(_:)	13.0				container
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.init?(_:)	13.0				container
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.count	13.0				container
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.unsafePointer	13.0				container
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.unsafeMutablePointer	13.0				container
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.Element	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.Index	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.Indices	13.0				own
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.startIndex	13.0				own
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.endIndex	13.0				own
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.subscript(index:)	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.Iterator	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafeMutablePointer.SubSequence	13.0				own
+CoreAudio	struct	CoreAudioTypes.AudioChannelLayout.UnsafePointer	13.0				own
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.UnsafePointer.init(_:)	13.0				container
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.UnsafePointer.init?(_:)	13.0				container
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafePointer.count	13.0				container
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafePointer.unsafePointer	13.0				container
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafePointer.Element	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafePointer.Index	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafePointer.Indices	13.0				own
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafePointer.startIndex	13.0				own
+CoreAudio	property	CoreAudioTypes.AudioChannelLayout.UnsafePointer.endIndex	13.0				own
+CoreAudio	method	CoreAudioTypes.AudioChannelLayout.UnsafePointer.subscript(index:)	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafePointer.Iterator	13.0				own
+CoreAudio	typealias	CoreAudioTypes.AudioChannelLayout.UnsafePointer.SubSequence	13.0				own
+CoreAudio	struct	ManagedAudioChannelLayout	13.0				own
+CoreAudio	method	ManagedAudioChannelLayout.init(audioChannelLayoutPointer:deallocator:)	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.init(tag:)	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.init(maximumDescriptions:)	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.init(channelDescriptions:)	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.tag	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.bitmap	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.setAllToUnknown()	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.channelDescriptions	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.sizeInBytes	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.numberOfChannels	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.withUnsafePointer(_:)	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.withUnsafeMutablePointer(_:)	13.0				container
+CoreAudio	struct	ManagedAudioChannelLayout.ChannelDescriptions	13.0				container
+CoreAudio	typealias	ManagedAudioChannelLayout.ChannelDescriptions.Element	13.0				container
+CoreAudio	typealias	ManagedAudioChannelLayout.ChannelDescriptions.Index	13.0				container
+CoreAudio	typealias	ManagedAudioChannelLayout.ChannelDescriptions.Indices	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.ChannelDescriptions.startIndex	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.ChannelDescriptions.endIndex	13.0				container
+CoreAudio	property	ManagedAudioChannelLayout.ChannelDescriptions.count	13.0				container
+CoreAudio	method	ManagedAudioChannelLayout.ChannelDescriptions.subscript(index:)	13.0				container
+CoreAudio	typealias	ManagedAudioChannelLayout.ChannelDescriptions.Iterator	13.0				own
+CoreAudio	typealias	ManagedAudioChannelLayout.ChannelDescriptions.SubSequence	13.0				own
+CoreAudio	method	CoreAudioTypes.AudioChannelDescription.==(lhs:rhs:)	13.0				own
+CoreAudio	method	ManagedAudioChannelLayout.ChannelDescriptions.==(lhs:rhs:)	13.0				own
+CoreAudio	method	ManagedAudioChannelLayout.==(lhs:rhs:)	13.0				own

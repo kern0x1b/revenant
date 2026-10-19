@@ -1,0 +1,31 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+MediaPlayer	swift-struct	c:@E@MPErrorCode	-	MPError	-	-	-	ios=9.3	-	72eeae6408352f6c
+MediaPlayer	swift-property	s:SC11MPErrorCodeLeV8_nsErrorSo7NSErrorCvp	MPError	_nsError	-	Foundation.NSError	-	-	-	399005c2ce72ad19
+MediaPlayer	swift-method	s:SC11MPErrorCodeLeV8_nsErrorABSo7NSErrorC_tcfc	MPError	init(_nsError:)	-	-	MediaPlayer.MPError | Foundation.NSError	-	-	c14c25c6fd4e2254
+MediaPlayer	swift-property	s:SC11MPErrorCodeLeV11errorDomainSSvpZ	MPError	errorDomain	+	Swift.String	-	-	-	bf1767a1c74236c8
+MediaPlayer	swift-enum	c:@E@MPErrorCode	MPError	Code	-	-	-	ios=9.3	-	3e92e4c20637f576
+MediaPlayer	swift-method	s:So11MPErrorCodeV8rawValueABSgSi_tcfc	MPError.Code	init(rawValue:)	-	-	MediaPlayer.MPError.Code? | Swift.Int	-	-	ba69569c59613bcf
+MediaPlayer	swift-property	s:So11MPErrorCodeV8rawValueSivp	MPError.Code	rawValue	-	Swift.Int	-	-	-	4d6dcc456926b0a6
+MediaPlayer	swift-typealias	s:So11MPErrorCodeV8RawValuea	MPError.Code	RawValue	-	-	-	-	-	e7c5ee9c34537812
+MediaPlayer	swift-typealias	c:@E@MPErrorCode	MPError.Code	_ErrorType	-	-	-	-	-	3e7c97555cd03e2c
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorUnknown	MPError.Code	unknown	-	-	-	-	-	a438863e840d687e
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorPermissionDenied	MPError.Code	permissionDenied	-	-	-	-	-	37903fdd56be0a88
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorCloudServiceCapabilityMissing	MPError.Code	cloudServiceCapabilityMissing	-	-	-	-	-	da95757084c68919
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorNetworkConnectionFailed	MPError.Code	networkConnectionFailed	-	-	-	-	-	8e4ef9bf8b52cadb
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorNotFound	MPError.Code	notFound	-	-	-	-	-	bfcf8c3b2687bed3
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorNotSupported	MPError.Code	notSupported	-	-	-	-	-	94d0f3cfbb1b1256
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorCancelled	MPError.Code	cancelled	-	-	-	ios=10.1	-	239c76803e5af6a5
+MediaPlayer	swift-constant	c:@E@MPErrorCode@MPErrorRequestTimedOut	MPError.Code	requestTimedOut	-	-	-	ios=10.3	-	3fc9c28b995ef0c4
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorUnknown	MPError	unknown	+	MediaPlayer.MPError.Code	-	-	-	efab493d0d9eb24e
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorPermissionDenied	MPError	permissionDenied	+	MediaPlayer.MPError.Code	-	-	-	9cf081e61675a66c
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorCloudServiceCapabilityMissing	MPError	cloudServiceCapabilityMissing	+	MediaPlayer.MPError.Code	-	-	-	af137a14df973f3c
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorNetworkConnectionFailed	MPError	networkConnectionFailed	+	MediaPlayer.MPError.Code	-	-	-	1d0653b3d96b014e
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorNotFound	MPError	notFound	+	MediaPlayer.MPError.Code	-	-	-	418a31ef3d495276
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorNotSupported	MPError	notSupported	+	MediaPlayer.MPError.Code	-	-	-	e5f16d68596a0276
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorCancelled	MPError	cancelled	+	MediaPlayer.MPError.Code	-	ios=10.1	-	b35a5fe563659446
+MediaPlayer	swift-property	c:@E@MPErrorCode@MPErrorRequestTimedOut	MPError	requestTimedOut	+	MediaPlayer.MPError.Code	-	ios=10.3	-	ccef392ecbe15204
+MediaPlayer	swift-class	c:objc(cs)MPMediaItemAnimatedArtwork	-	MPMediaItemAnimatedArtwork	-	-	-	ios=26.0	-	fa60d4d732fe03e6
+MediaPlayer	swift-method	s:So26MPMediaItemAnimatedArtworkC11MediaPlayerE9artworkID26previewImageRequestHandler024videoAssetFileURLRequestL0ABSS_So7UIImageCSgSo6CGSizeVYac10Foundation3URLVSgAKYactcfc	MPMediaItemAnimatedArtwork	init(artworkID:previewImageRequestHandler:videoAssetFileURLRequestHandler:)	-	-	MediaPlayer.MPMediaItemAnimatedArtwork | Swift.String | (CoreFoundation.CGSize) async -> UIKit.UIImage? | (CoreFoundation.CGSize) async -> Foundation.URL?	ios=26.0,tvos=26.0,watchos=26.0	-	e2f34d2efb1f25c2
+MediaPlayer	swift-class	c:objc(cs)MPMusicPlayerPlayParameters	-	MPMusicPlayerPlayParameters	-	-	-	ios=11.0	-	aca20770f1fb8e85
+MediaPlayer	swift-method	s:So27MPMusicPlayerPlayParametersC05MediaB0E4fromABs7Decoder_p_tKcfc	MPMusicPlayerPlayParameters	init(from:)	-	-	MediaPlayer.MPMusicPlayerPlayParameters | any Swift.Decoder	-	-	e82ac6610b64c7db
+MediaPlayer	swift-method	s:So27MPMusicPlayerPlayParametersC05MediaB0E6encode2toys7Encoder_p_tKF	MPMusicPlayerPlayParameters	encode(to:)	-	()	any Swift.Encoder	-	-	5f2500b4e18cd8ac

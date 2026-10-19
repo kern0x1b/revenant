@@ -1,0 +1,247 @@
+{
+  "framework": "Messages",
+  "entries": [
+    {
+      "api": "MSMessage",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the message is the data an application hands to the system to be transferred, and every member of it is a value the sender sets and the receiver reads; on a release that cannot transfer it the values are still real, kept, copied and archived, and the one member that is a fact rather than a value answers from the release's own capability",
+      "effect": "made with -init or -initWithSession:, copied with the session, URL, layout, captions, expiry, error and the device's participant identifier all travelling with the copy, archived and unarchived through NSSecureCoding, equal to another message with the same values; -isPending answers YES throughout and -error answers nil, and both are the truth: nothing in this port ever sends a message, because a message would leave through -[MSConversation insertMessage:completionHandler:] and this release has no conversation, no iMessage service and no Messages extension host",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageLayout",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the bare layout class carries nothing, so what is implemented is exactly what the header promises: an object that a subclass extends, that copies to an object of its own class, and that a message holds",
+      "effect": "made, copied (a copy is of the same class, which is what a layout subclass needs), equal to any object of the same class and not to a different one, and described with its class name",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the layout the header documents as the one with captions, an image and a media file, and every one of those is a value the sender set",
+      "effect": "made, copied property by property so the captions, the image and the media URL travel with the copy, equal to another template layout with the same values and hashing on them",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSSession",
+      "kind": "class",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a session is the identity two messages share, with no properties and no methods in the header, so the whole of the contract is the identity: made, held, archived, and the same session when compared",
+      "effect": "-copyWithZone: answers the receiver itself rather than a new object, because a new object would be a different session and a session is nothing but its identity; equal only to itself, hashed by address, archived and unarchived through NSSecureCoding",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.session",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the promise the header makes for it is that the value given is the value read back, which is the whole contract of a property on a message",
+      "effect": "the session the message was made with, and nil for -init, as the header says; a copy keeps the same session object rather than a copy of it",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.layout",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the promise the header makes for it is that the value given is the value read back, which is the whole contract of a property on a message",
+      "effect": "copied in and copied out; a copy of the message takes a copy of the layout, so mutating neither affects the other",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.URL",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the promise the header makes for it is that the value given is the value read back, which is the whole contract of a property on a message",
+      "effect": "copied in and copied out, and a copy of the message takes a copy of it; this is the URL the header says carries the data to the recipient, and on this release nothing fetches it",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.shouldExpire",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the promise the header makes for it is that the value given is the value read back, which is the whole contract of a property on a message",
+      "effect": "kept and read back, NO until it is set, as the header says it defaults; a copy takes the value",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.accessibilityLabel",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the promise the header makes for it is that the value given is the value read back, which is the whole contract of a property on a message",
+      "effect": "copied in and copied out, and a copy takes a copy of it",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.summaryText",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the promise the header makes for it is that the value given is the value read back, which is the whole contract of a property on a message",
+      "effect": "copied in and copied out, and a copy takes a copy of it; this is the text the transcript shows, and the release's transcript is the Messages app's own text-message sheet, which shows the body instead",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.error",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header promises the error that occurred while sending, and no send was ever attempted: a message cannot fail to be sent when nothing tried to send it",
+      "effect": "nil, and stays nil for as long as the port holds the message, which is why -isPending answers YES throughout; an application that reads error to find out whether a send failed is reading the truth, and the truth is that there was none",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.senderParticipantIdentifier",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header says the identifier is scoped to the current device and differs on every device in the conversation, so it is this device's own identifier and not a value the caller sets",
+      "effect": "one NSUUID, generated the first time it is asked for and kept in NSUserDefaults: the same on every launch of this device, a different one on every other. It is an identifier of the port, as the header says the value is scoped to the device, not an identity Apple assigned",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessage.pending",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header's own definition is a message that has not been sent, and nothing in the port can send one: a message leaves through -[MSConversation insertMessage:completionHandler:], and this release has no conversation, no iMessage service and no Messages extension host to insert it into",
+      "effect": "YES, always, for a message the port holds - which is what pending means, and not a flag kept for a reader that never comes. It is the one answer in this class that comes from the release's capability rather than from a value the caller gave",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "-[MSMessage isPending]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the getter of a property whose getter is named isPending needs an entry of its own, the arrangement the port already has for the sixteen getter=is properties from -[NSProgress isFinished] to -[UICollectionView isEditing]",
+      "effect": "YES, for the reason the property entry gives",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.caption",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: what the header promises is that the caption given is the caption read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. The transcript these captions are drawn in is the Messages app's own, and on this release that app has no iMessage transcript, so nothing draws them here",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.subcaption",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: what the header promises is that the caption given is the caption read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. The transcript these captions are drawn in is the Messages app's own, and on this release that app has no iMessage transcript, so nothing draws them here",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.trailingCaption",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: what the header promises is that the caption given is the caption read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. The transcript these captions are drawn in is the Messages app's own, and on this release that app has no iMessage transcript, so nothing draws them here",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.trailingSubcaption",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: what the header promises is that the caption given is the caption read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. The transcript these captions are drawn in is the Messages app's own, and on this release that app has no iMessage transcript, so nothing draws them here",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.imageTitle",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: what the header promises is that the caption given is the caption read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. The transcript these captions are drawn in is the Messages app's own, and on this release that app has no iMessage transcript, so nothing draws them here",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.imageSubtitle",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: what the header promises is that the caption given is the caption read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. The transcript these captions are drawn in is the Messages app's own, and on this release that app has no iMessage transcript, so nothing draws them here",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.image",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a strong property of a value object, so the image is held for as long as the layout is and a copy holds the same one",
+      "effect": "held and answered back, and a copy of the layout holds the same image object rather than a copy of it, as the header's strong says",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    },
+    {
+      "api": "MSMessageTemplateLayout.mediaFileURL",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a value of a value object: the URL given is the URL read back, and a copy of the layout carries it",
+      "effect": "copied in and copied out, and a copy takes a copy of it. Nothing fetches the file on this release, because there is no receiver to fetch it for",
+      "facts": "facts/Messages/MSMessage.md",
+      "source": "the headers of MSMessage.h, MSMessageLayout.h, MSMessageTemplateLayout.h, MSSession.h and MFMessageComposeViewController.h in SDK 26.2 for the contract; the release's own armv7 6.1.3 ObjC metadata, whose MFMessageComposeViewController has no notion of a message and no iMessage surface, read by objc.binary_inventory; the export of NSUUID by the same cache, measured"
+    }
+  ]
+}

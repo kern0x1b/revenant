@@ -1,0 +1,27 @@
+{
+  "framework": "QuartzCore",
+  "entries": [
+    {
+      "api": "CADisplayLink.targetTimestamp",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 10 computes it from three values iOS 6 already has, and the port computes the same expression",
+      "effect": "the timestamp plus the duration of a display frame times the frame interval, which is zero before the link has fired, as it is on the newer release",
+      "facts": "facts/QuartzCore/CADisplayLink.md",
+      "source": "the arm64 shared cache of iOS 12.0, disassembled, where the accessor ends in one fmadd of timestamp, duration and frameInterval; the armv7 caches of iOS 6.0 to 9.0, which have no such method, and the armv7s cache of 10.3.4, which has it"
+    },
+    {
+      "api": "CADisplayLink.preferredFramesPerSecond",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 10 keeps the rate beside the frame interval and works the interval out from it; iOS 6 has only the interval, so the port keeps the rate beside the link and sets the release's interval by the same arithmetic",
+      "effect": "starts at zero, the documented default; setting a rate sets the release's frame interval to max(1, round(1 / (frame duration * rate))) and reads the rate back; where the application moves the frame interval itself, the rate reads back as the newer release converts it, 60 divided by the interval and truncated",
+      "facts": "facts/QuartzCore/CADisplayLink.md",
+      "source": "the arm64 shared cache of iOS 12.0, disassembled, for both setters, the shared helper and the literals 60.0 and 1/60; the header of iOS 16.4 for the default of zero"
+    }
+  ]
+}

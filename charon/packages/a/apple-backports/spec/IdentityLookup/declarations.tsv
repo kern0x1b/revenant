@@ -1,0 +1,116 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@ILMessageFilterAction	-			enum ILMessageFilterAction	-	-	-	-	08fc18613def98f2	-
+enum	c:@E@ILMessageFilterAction	-			NSInteger	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b2a16e008486c4d5	-
+enumconst	c:@E@ILMessageFilterAction@ILMessageFilterActionNone	ILMessageFilterAction			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b96a7f91b21d8d4e	0
+enumconst	c:@E@ILMessageFilterAction@ILMessageFilterActionAllow	ILMessageFilterAction			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	58a47435eb7c7fbc	1
+enumconst	c:@E@ILMessageFilterAction@ILMessageFilterActionJunk	ILMessageFilterAction			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3ca7453277c7fda9	2
+enumconst	c:@E@ILMessageFilterAction@ILMessageFilterActionFilter	ILMessageFilterAction			-	-	-	ios=11.0/14.0/-/0,maccatalyst=13.0/14.0/-/0,macos=-/-/-/1,watchos=-/-/-/1	deprecated: Use ILMessageFilterActionJunk instead	cfb4eab7faeb1dfb	2
+enumconst	c:@E@ILMessageFilterAction@ILMessageFilterActionPromotion	ILMessageFilterAction			-	-	-	ios=14.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0605f5302c067700	3
+enumconst	c:@E@ILMessageFilterAction@ILMessageFilterActionTransaction	ILMessageFilterAction			-	-	-	ios=14.0/-/-/0,maccatalyst=14.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	da6ce6192df0a4a7	4
+typedef	c:@T@ILMessageFilterSubAction	-			enum ILMessageFilterSubAction	-	-	-	-	09e2d38a9b5cd230	-
+enum	c:@E@ILMessageFilterSubAction	-			NSInteger	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7d649bbc511d36df	-
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionNone	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2b7c732214831ab6	0
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalOthers	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	bc267f0474a8a634	10000
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalFinance	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	27d7fd85d7bcf956	10001
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalOrders	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2b8490ae8613cdf3	10002
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalReminders	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	71b97473490fcb84	10003
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalHealth	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	98040f8cfd4cbeb4	10004
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalWeather	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	14e71f01b7665c18	10005
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalCarrier	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	973d80259afcfc54	10006
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalRewards	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	eeb1d0840167b3b9	10007
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionTransactionalPublicServices	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6b11326614fdf794	10008
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionPromotionalOthers	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	154d2ea3d253c3ee	20000
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionPromotionalOffers	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3717ebdcdd401a80	20001
+enumconst	c:@E@ILMessageFilterSubAction@ILMessageFilterSubActionPromotionalCoupons	ILMessageFilterSubAction			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b8470fe2c1e07a61	20002
+var	c:@ILMessageFilterErrorDomain	-			const NSErrorDomain	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	370f63dafab16f78	-
+typedef	c:@T@ILMessageFilterError	-			enum ILMessageFilterError	-	-	-	-	78d170c4ccaea417	-
+enum	c:@E@ILMessageFilterError	-			NSInteger	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	af47178830733337	-
+enumconst	c:@E@ILMessageFilterError@ILMessageFilterErrorSystem	ILMessageFilterError			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8df585856c62e9a1	1
+enumconst	c:@E@ILMessageFilterError@ILMessageFilterErrorInvalidNetworkURL	ILMessageFilterError			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	75f7f219cbb143c5	2
+enumconst	c:@E@ILMessageFilterError@ILMessageFilterErrorNetworkURLUnauthorized	ILMessageFilterError			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f24aaf6ac00d4904	3
+enumconst	c:@E@ILMessageFilterError@ILMessageFilterErrorNetworkRequestFailed	ILMessageFilterError			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	58cc6f4a9ce07abc	4
+enumconst	c:@E@ILMessageFilterError@ILMessageFilterErrorRedundantNetworkDeferral	ILMessageFilterError			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5e5858deef07ba87	5
+interface	c:objc(cs)ILNetworkResponse	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b18d7eac13be4190	-
+super	-	ILNetworkResponse	NSObject		-	-	-	-	-	a3b3e019febd89be	-
+conforms	c:objc(cs)ILNetworkResponse	ILNetworkResponse	NSSecureCoding		-	-	-	-	-	fc4ee46b716523d0	-
+property	c:objc(cs)ILNetworkResponse(py)urlResponse	-			NSHTTPURLResponse *	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e910a0d9989fe5b1	-
+property	c:objc(cs)ILNetworkResponse(py)data	-			NSData *	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1058a3b23237d253	-
+method	c:objc(cs)ILNetworkResponse(im)init	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	75dcc388c8364fed	-
+interface	c:objc(cs)ILMessageFilterExtension	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ee23385b8d4e14a9	-
+super	-	ILMessageFilterExtension	NSObject		-	-	-	-	-	0764b848b16fa834	-
+interface	c:objc(cs)ILMessageFilterExtensionContext	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1145210cf034f881	-
+super	-	ILMessageFilterExtensionContext	NSExtensionContext		-	-	-	-	-	02a346572e0926a5	-
+method	c:objc(cs)ILMessageFilterExtensionContext(im)deferQueryRequestToNetworkWithCompletion:	-			void	void (^)(ILNetworkResponse * _Nullable, NSError * _Nullable) completion	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	19b5340049b20ab0	-
+protocol	c:objc(pl)ILMessageFilterQueryHandling	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	56536e04811a9c6e	-
+conforms	c:objc(pl)ILMessageFilterQueryHandling	ILMessageFilterQueryHandling	NSObject		-	-	-	-	-	8ead2fe8b520075c	-
+method	c:objc(pl)ILMessageFilterQueryHandling(im)handleQueryRequest:context:completion:	-			void	ILMessageFilterQueryRequest * queryRequest | ILMessageFilterExtensionContext * context | void (^)(ILMessageFilterQueryResponse * _Nonnull) completion	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	978b60d2e7fd131f	-
+interface	c:objc(cs)ILMessageFilterQueryRequest	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fa8fd6f8d04f941e	-
+super	-	ILMessageFilterQueryRequest	NSObject		-	-	-	-	-	854c542461be0a31	-
+conforms	c:objc(cs)ILMessageFilterQueryRequest	ILMessageFilterQueryRequest	NSSecureCoding		-	-	-	-	-	bb9a055f9f931bfc	-
+property	c:objc(cs)ILMessageFilterQueryRequest(py)sender	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	742a349dd3c9276a	-
+property	c:objc(cs)ILMessageFilterQueryRequest(py)messageBody	-			NSString *	-	readonly,nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	288c3577534b7593	-
+property	c:objc(cs)ILMessageFilterQueryRequest(py)receiverISOCountryCode	-			NSString *	-	readonly,nonatomic	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	26fa02af81eab4ac	-
+method	c:objc(cs)ILMessageFilterQueryRequest(im)init	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6a4b90b86a85cd2e	-
+method	c:objc(cs)ILMessageFilterQueryRequest(cm)new	-			instancetype	-	-	*unavailable ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c034acffd4b09b26	-
+interface	c:objc(cs)ILMessageFilterQueryResponse	-			-	-	-	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d06d59e3f777be4a	-
+super	-	ILMessageFilterQueryResponse	NSObject		-	-	-	-	-	cc3013db8751285a	-
+conforms	c:objc(cs)ILMessageFilterQueryResponse	ILMessageFilterQueryResponse	NSSecureCoding		-	-	-	-	-	4e7d9523cc24d68f	-
+property	c:objc(cs)ILMessageFilterQueryResponse(py)action	-			ILMessageFilterAction	-	nonatomic	ios=11.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	596fab19d8f2bf88	-
+property	c:objc(cs)ILMessageFilterQueryResponse(py)subAction	-			ILMessageFilterSubAction	-	nonatomic	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	10f608ac23bdc71d	-
+protocol	c:objc(pl)ILMessageFilterCapabilitiesQueryHandling	-			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f0f8b7886a705f84	-
+conforms	c:objc(pl)ILMessageFilterCapabilitiesQueryHandling	ILMessageFilterCapabilitiesQueryHandling	NSObject		-	-	-	-	-	ee32d113e18ffefa	-
+method	c:objc(pl)ILMessageFilterCapabilitiesQueryHandling(im)handleCapabilitiesQueryRequest:context:completion:	-			void	ILMessageFilterCapabilitiesQueryRequest * capabilitiesQueryRequest | ILMessageFilterExtensionContext * context | void (^)(ILMessageFilterCapabilitiesQueryResponse * _Nonnull) completion	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5fb870ab0980fccf	-
+interface	c:objc(cs)ILMessageFilterCapabilitiesQueryRequest	-			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	a85c8df813f0584c	-
+super	-	ILMessageFilterCapabilitiesQueryRequest	NSObject		-	-	-	-	-	bb3f2747a58b6278	-
+conforms	c:objc(cs)ILMessageFilterCapabilitiesQueryRequest	ILMessageFilterCapabilitiesQueryRequest	NSSecureCoding		-	-	-	-	-	0be4a941895c774e	-
+method	c:objc(cs)ILMessageFilterCapabilitiesQueryRequest(im)init	-			instancetype	-	-	*unavailable ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b2c230303e0f9594	-
+interface	c:objc(cs)ILMessageFilterCapabilitiesQueryResponse	-			-	-	-	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	479fb2edfea14452	-
+super	-	ILMessageFilterCapabilitiesQueryResponse	NSObject		-	-	-	-	-	1c7ffca621af41b1	-
+conforms	c:objc(cs)ILMessageFilterCapabilitiesQueryResponse	ILMessageFilterCapabilitiesQueryResponse	NSSecureCoding		-	-	-	-	-	a2c468b946bcb963	-
+property	c:objc(cs)ILMessageFilterCapabilitiesQueryResponse(py)transactionalSubActions	-			NSArray<NSNumber *> *	-	copy,nonatomic	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	15a4d0692c58af59	-
+property	c:objc(cs)ILMessageFilterCapabilitiesQueryResponse(py)promotionalSubActions	-			NSArray<NSNumber *> *	-	copy,nonatomic	ios=16.0/-/-/0,maccatalyst=16.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	53be9420b66829bc	-
+interface	c:objc(cs)ILCommunication	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	19fc19342436126c	-
+super	-	ILCommunication	NSObject		-	-	-	-	-	387b92273d168228	-
+conforms	c:objc(cs)ILCommunication	ILCommunication	NSSecureCoding		-	-	-	-	-	dc8be8385bf6c7c4	-
+property	c:objc(cs)ILCommunication(py)sender	-			NSString *	-	readonly,copy,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c2effe28c59580f2	-
+property	c:objc(cs)ILCommunication(py)dateReceived	-			NSDate *	-	readonly,copy,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ec1bb2e49b6bd6e1	-
+method	c:objc(cs)ILCommunication(im)isEqualToCommunication:	-			BOOL	ILCommunication * communication	-	swift=-/-/-/1	-	33ffe05ab25ce855	-
+method	c:objc(cs)ILCommunication(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3621e896d78c598f	-
+interface	c:objc(cs)ILCallCommunication	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4c34e101ed410fe7	-
+super	-	ILCallCommunication	ILCommunication		-	-	-	-	-	723b2e993d4e2cd6	-
+method	c:objc(cs)ILCallCommunication(im)isEqualToCallCommunication:	-			BOOL	ILCallCommunication * communication	-	swift=-/-/-/1	-	f86c77ac7491c55a	-
+method	c:objc(cs)ILCallCommunication(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	626beacd15fcfb9f	-
+interface	c:objc(cs)ILMessageCommunication	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	41c84d3b665a9e87	-
+super	-	ILMessageCommunication	ILCommunication		-	-	-	-	-	fc58a9b44fa767ad	-
+property	c:objc(cs)ILMessageCommunication(py)messageBody	-			NSString *	-	readonly,copy,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7313703553fd60aa	-
+method	c:objc(cs)ILMessageCommunication(im)isEqualToMessageCommunication:	-			BOOL	ILMessageCommunication * communication	-	swift=-/-/-/1	-	9e35f2e2f60d2db0	-
+method	c:objc(cs)ILMessageCommunication(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d0fb45d803c4669f	-
+interface	c:objc(cs)ILClassificationRequest	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8ce743c84ad411b3	-
+super	-	ILClassificationRequest	NSObject		-	-	-	-	-	878ae8f61c407813	-
+conforms	c:objc(cs)ILClassificationRequest	ILClassificationRequest	NSSecureCoding		-	-	-	-	-	1bd187531a6556c6	-
+typedef	c:@T@ILClassificationAction	-			enum ILClassificationAction	-	-	-	-	5f1ed9d811260ccb	-
+enum	c:@E@ILClassificationAction	-			NSInteger	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	f32e380b828cd7ab	-
+enumconst	c:@E@ILClassificationAction@ILClassificationActionNone	ILClassificationAction			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	feba34feb7b408d8	0
+enumconst	c:@E@ILClassificationAction@ILClassificationActionReportNotJunk	ILClassificationAction			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6def5f1419dc1795	1
+enumconst	c:@E@ILClassificationAction@ILClassificationActionReportJunk	ILClassificationAction			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	54fc3a4797a2d69d	2
+enumconst	c:@E@ILClassificationAction@ILClassificationActionReportJunkAndBlockSender	ILClassificationAction			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	2eeeaaff720b2251	3
+interface	c:objc(cs)ILClassificationResponse	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	111a1a4e529c73ae	-
+super	-	ILClassificationResponse	NSObject		-	-	-	-	-	b26ff9b07a87e4db	-
+conforms	c:objc(cs)ILClassificationResponse	ILClassificationResponse	NSSecureCoding		-	-	-	-	-	6fa8c98fd85211ad	-
+property	c:objc(cs)ILClassificationResponse(py)action	-			ILClassificationAction	-	readonly,assign,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fe2ccbeab2839d46	-
+property	c:objc(cs)ILClassificationResponse(py)userString	-			NSString *	-	copy,nonatomic	ios=12.1/-/-/0	-	d8d78a52d43b4efd	-
+property	c:objc(cs)ILClassificationResponse(py)userInfo	-			NSDictionary<NSString *,id> *	-	copy,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c86106e7374070ca	-
+method	c:objc(cs)ILClassificationResponse(im)initWithClassificationAction:	-			instancetype	ILClassificationAction action	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3720b2c0e13dbe48	-
+method	c:objc(cs)ILClassificationResponse(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e560e72e7c689866	-
+interface	c:objc(cs)ILMessageClassificationRequest	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	4557384a70899947	-
+super	-	ILMessageClassificationRequest	ILClassificationRequest		-	-	-	-	-	b1ff284a383f6af9	-
+conforms	c:objc(cs)ILMessageClassificationRequest	ILMessageClassificationRequest	NSSecureCoding		-	-	-	-	-	dff39c12ccebe370	-
+property	c:objc(cs)ILMessageClassificationRequest(py)messageCommunications	-			NSArray<ILMessageCommunication *> *	-	readonly,copy,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6d2a50a39220a26d	-
+method	c:objc(cs)ILMessageClassificationRequest(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b9c6c9e362fc8694	-
+interface	c:objc(cs)ILCallClassificationRequest	-			-	-	-	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ffd817b24c98bc30	-
+super	-	ILCallClassificationRequest	ILClassificationRequest		-	-	-	-	-	ef9bf61e17a5fabf	-
+conforms	c:objc(cs)ILCallClassificationRequest	ILCallClassificationRequest	NSSecureCoding		-	-	-	-	-	0590b0fa73f98412	-
+property	c:objc(cs)ILCallClassificationRequest(py)callCommunications	-			NSArray<ILCallCommunication *> *	-	readonly,copy,nonatomic	ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	12deb0f4396b1acc	-
+method	c:objc(cs)ILCallClassificationRequest(im)init	-			instancetype	-	-	*unavailable ios=12.0/-/-/0,maccatalyst=13.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	1c72554ab3122802	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

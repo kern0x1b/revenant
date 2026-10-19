@@ -1,0 +1,6 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+MIDICIProfileResponderDelegate	14.0	sdk16 body		NSObject	-	-	-	-	-	-
+MIDICIProfileResponderDelegate	14.0	sdk16 body		NSObject	required	method	yes	connectInitiator:withDeviceInfo:	- (BOOL)connectInitiator:(MIDICIInitiatiorMUID  _Nonnull)initiatorMUID withDeviceInfo:(MIDICIDeviceInfo * _Nonnull)deviceInfo;	yes
+MIDICIProfileResponderDelegate	14.0	sdk16 body		NSObject	required	method	yes	initiatorDisconnected:	- (void)initiatorDisconnected:(MIDICIInitiatiorMUID  _Nonnull)initiatorMUID;	yes
+MIDICIProfileResponderDelegate	14.0	sdk16 body		NSObject	optional	method	yes	willSetProfile:onChannel:enabled:	- (BOOL)willSetProfile:(MIDICIProfile * _Nonnull)aProfile onChannel:(MIDIChannelNumber)channel enabled:(BOOL)shouldEnable;	yes
+MIDICIProfileResponderDelegate	14.0	sdk16 body		NSObject	optional	method	yes	handleDataForProfile:onChannel:data:	- (void)handleDataForProfile:(MIDICIProfile * _Nonnull)aProfile onChannel:(MIDIChannelNumber)channel data:(NSData * _Nonnull)inData;	yes

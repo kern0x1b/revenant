@@ -1,0 +1,16 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIViewController.extensionContext",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UIViewController.extensionContext",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/Foundation/NSExtensionContext.md",
+      "source": "the host's own Foundation under Mac Catalyst through tests/backports/host/tail2, and tests/backports/device/tail2.m on iOS 6"
+    }
+  ]
+}

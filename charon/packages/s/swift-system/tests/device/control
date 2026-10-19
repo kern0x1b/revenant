@@ -1,0 +1,5 @@
+Package: org.charon.systemprobe
+Name: systemprobe
+Architecture: iphoneos-arm
+Maintainer: charon band v-int-swift12
+Description: swift-system probe for the armv7 iOS 6.1.3 emulator (v-int-swift12)

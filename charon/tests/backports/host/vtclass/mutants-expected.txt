@@ -1,0 +1,17 @@
+# The classes this differential can NOT give a mutant to, and the reason for each.
+#
+# A class here is a LISTED SKIP, not a pass. run.sh prints it by name, and fails if this list ever GROWS -
+# so a new class that cannot be mutated has to be argued for here, in writing, rather than slipping into
+# the run as silence. Deleting a line is allowed: that is how a class stops being a skip.
+#
+# Every one of these takes arguments that are all OBJECTS or CFTypeRefs - frames, flows, a pixel buffer -
+# so there is no scalar store line to drop, no second scalar to move a value onto, and no class property
+# to move. The round-trip reads WORDS, and an object property is not one, so a mutant that dropped an
+# object's store line would change nothing it can see. Closing these means comparing OBJECT IDENTITY - read
+# the property back and check it is the object that was passed - which is a new check, not a new anchor.
+
+VTFrameProcessor
+VTFrameProcessorFrame
+VTFrameProcessorOpticalFlow
+VTLowLatencyFrameInterpolationParameters
+VTLowLatencySuperResolutionScalerParameters

@@ -1,0 +1,75 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+DeveloperToolsSupport	struct	LibraryItem	14.0				own
+DeveloperToolsSupport	struct	LibraryItem.Category	14.0				own
+DeveloperToolsSupport	property	LibraryItem.Category.effect	14.0				container
+DeveloperToolsSupport	property	LibraryItem.Category.layout	14.0				container
+DeveloperToolsSupport	property	LibraryItem.Category.control	14.0				container
+DeveloperToolsSupport	property	LibraryItem.Category.other	14.0				container
+DeveloperToolsSupport	method	LibraryItem.init(_:visible:title:category:matchingSignature:)	14.0				container
+DeveloperToolsSupport	struct	LibraryContentBuilder	14.0				own
+DeveloperToolsSupport	method	LibraryContentBuilder.buildBlock(_:)	14.0				container
+DeveloperToolsSupport	method	LibraryContentBuilder.buildExpression(_:)	14.0				container
+DeveloperToolsSupport	method	LibraryContentBuilder.buildExpression(_:)	14.0				container
+DeveloperToolsSupport	protocol	LibraryContentProvider	14.0				own
+DeveloperToolsSupport	property	LibraryContentProvider.views	14.0				container
+DeveloperToolsSupport	method	LibraryContentProvider.modifiers(base:)	14.0				container
+DeveloperToolsSupport	property	LibraryContentProvider.views	14.0				container
+DeveloperToolsSupport	method	LibraryContentProvider.modifiers(base:)	14.0				container
+DeveloperToolsSupport	struct	Preview	17.0				own
+DeveloperToolsSupport	struct	PreviewBodyBuilder	18.0				own
+DeveloperToolsSupport	method	PreviewBodyBuilder.buildBlock(_:)	18.0				container
+DeveloperToolsSupport	method	PreviewBodyBuilder.buildBlock(_:)	18.0			yes	container
+DeveloperToolsSupport	method	PreviewBodyBuilder.buildOptional(_:)	18.0			yes	container
+DeveloperToolsSupport	method	PreviewBodyBuilder.buildEither(first:)	18.0			yes	container
+DeveloperToolsSupport	method	PreviewBodyBuilder.buildEither(second:)	18.0			yes	container
+DeveloperToolsSupport	method	PreviewBodyBuilder.buildLimitedAvailability(_:)	18.0			yes	container
+DeveloperToolsSupport	struct	PreviewMacroBodyBuilder	17.0				own
+DeveloperToolsSupport	method	PreviewMacroBodyBuilder.buildBlock(_:)	17.0				container
+DeveloperToolsSupport	method	PreviewMacroBodyBuilder.buildBlock(_:)	17.0			yes	container
+DeveloperToolsSupport	method	PreviewMacroBodyBuilder.buildOptional(_:)	17.0			yes	container
+DeveloperToolsSupport	method	PreviewMacroBodyBuilder.buildEither(first:)	17.0			yes	container
+DeveloperToolsSupport	method	PreviewMacroBodyBuilder.buildEither(second:)	17.0			yes	container
+DeveloperToolsSupport	method	PreviewMacroBodyBuilder.buildLimitedAvailability(_:)	17.0			yes	container
+DeveloperToolsSupport	protocol	PreviewRegistry	17.0				own
+DeveloperToolsSupport	property	PreviewRegistry.fileID	17.0				container
+DeveloperToolsSupport	property	PreviewRegistry.line	17.0				container
+DeveloperToolsSupport	property	PreviewRegistry.column	17.0				container
+DeveloperToolsSupport	method	PreviewRegistry.makePreview()	17.0				container
+DeveloperToolsSupport	property	PreviewRegistry.preview	17.0	yes			container
+DeveloperToolsSupport	property	PreviewRegistry.preview	17.0				container
+DeveloperToolsSupport	struct	PreviewUnavailable	17.0				own
+DeveloperToolsSupport	method	PreviewUnavailable.init()	17.0				container
+DeveloperToolsSupport	struct	PreviewTrait	17.0				own
+DeveloperToolsSupport	method	PreviewTrait.init(_:)	18.0				own
+DeveloperToolsSupport	struct	PreviewCamera				yes	none
+DeveloperToolsSupport	struct	PreviewCameraBuilder				yes	none
+DeveloperToolsSupport	method	PreviewCameraBuilder.buildExpression(_:)				yes	none
+DeveloperToolsSupport	method	PreviewCameraBuilder.buildExpression(_:)				yes	none
+DeveloperToolsSupport	method	PreviewCameraBuilder.buildPartialBlock(first:)				yes	none
+DeveloperToolsSupport	method	PreviewCameraBuilder.buildPartialBlock(accumulated:next:)				yes	none
+DeveloperToolsSupport	method	PreviewCameraBuilder.buildArray(_:)				yes	none
+DeveloperToolsSupport	property	PreviewTrait.assistiveAccess	26.0				own
+DeveloperToolsSupport	enum	Preview.ViewTraits	17.0				own
+DeveloperToolsSupport	property	PreviewTrait.defaultLayout	17.0				container
+DeveloperToolsSupport	property	PreviewTrait.sizeThatFitsLayout	17.0				container
+DeveloperToolsSupport	method	PreviewTrait.fixedLayout(width:height:)	17.0				container
+DeveloperToolsSupport	method	PreviewTrait.fixedLayout(width:height:depth:)	17.0			yes	container
+DeveloperToolsSupport	property	PreviewTrait.portrait	17.0				container
+DeveloperToolsSupport	property	PreviewTrait.landscapeLeft	17.0				container
+DeveloperToolsSupport	property	PreviewTrait.landscapeRight	17.0				container
+DeveloperToolsSupport	property	PreviewTrait.portraitUpsideDown	17.0				container
+DeveloperToolsSupport	enum	PreviewLayout	13.0				own
+DeveloperToolsSupport	constant	PreviewLayout.device	13.0				container
+DeveloperToolsSupport	constant	PreviewLayout.sizeThatFits	13.0				container
+DeveloperToolsSupport	constant	PreviewLayout.fixed	13.0				container
+DeveloperToolsSupport	constant	PreviewLayout.fixed3D	13.0			yes	container
+DeveloperToolsSupport	struct	ColorResource	17.0				own
+DeveloperToolsSupport	method	ColorResource.init(name:bundle:)	17.0				container
+DeveloperToolsSupport	method	ColorResource.==(a:b:)	17.0				container
+DeveloperToolsSupport	method	ColorResource.hash(into:)	17.0				container
+DeveloperToolsSupport	property	ColorResource.hashValue	17.0				container
+DeveloperToolsSupport	struct	ImageResource	17.0				own
+DeveloperToolsSupport	method	ImageResource.init(name:bundle:)	17.0				container
+DeveloperToolsSupport	method	ImageResource.==(a:b:)	17.0				container
+DeveloperToolsSupport	method	ImageResource.hash(into:)	17.0				container
+DeveloperToolsSupport	property	ImageResource.hashValue	17.0				container

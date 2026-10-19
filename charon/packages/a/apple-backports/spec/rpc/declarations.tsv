@@ -1,0 +1,314 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@rpc_int	-			int	-	-	-	-	827b5d862356b11e	-
+typedef	c:@T@rpc_uint	-			unsigned int	-	-	-	-	c2f24226ffa805e2	-
+enum	c:@E@xdr_op	-			unsigned int	-	-	-	-	62c27a8016d5044e	-
+enumconst	c:@E@xdr_op@XDR_ENCODE	xdr_op			-	-	-	-	-	58a249ba9c78d511	0
+enumconst	c:@E@xdr_op@XDR_DECODE	xdr_op			-	-	-	-	-	7be5477c6dce1a47	1
+enumconst	c:@E@xdr_op@XDR_FREE	xdr_op			-	-	-	-	-	57969785204555bc	2
+struct	c:@S@__rpc_xdr	-			-	-	-	-	-	4e932b10822b0bf6	-
+field	c:@S@__rpc_xdr@FI@x_op	__rpc_xdr			enum xdr_op	-	-	-	-	a07855ce71388843	-
+struct	c:@S@xdr_ops	-			-	-	-	-	-	9d2ca962363a0d1f	-
+field	c:@S@xdr_ops@FI@x_getlong	xdr_ops			int (*)(struct __rpc_xdr *, int *)	-	-	-	-	fcc285031b089c3a	-
+field	c:@S@xdr_ops@FI@x_putlong	xdr_ops			int (*)(struct __rpc_xdr *, const int *)	-	-	-	-	e0746129d5dc7852	-
+field	c:@S@xdr_ops@FI@x_getbytes	xdr_ops			int (*)(struct __rpc_xdr *, char *, unsigned int)	-	-	-	-	64ad2691e3fc5128	-
+field	c:@S@xdr_ops@FI@x_putbytes	xdr_ops			int (*)(struct __rpc_xdr *, const char *, unsigned int)	-	-	-	-	36cb2e53beee7904	-
+field	c:@S@xdr_ops@FI@x_getpostn	xdr_ops			unsigned int (*)(struct __rpc_xdr *)	-	-	-	-	5e63837b33d2a342	-
+field	c:@S@xdr_ops@FI@x_setpostn	xdr_ops			int (*)(struct __rpc_xdr *, unsigned int)	-	-	-	-	1e70c473c2bc140c	-
+field	c:@S@xdr_ops@FI@x_inline	xdr_ops			int32_t *(*)(struct __rpc_xdr *, unsigned int)	-	-	-	-	e356c2909d8b3785	-
+field	c:@S@xdr_ops@FI@x_destroy	xdr_ops			void (*)(struct __rpc_xdr *)	-	-	-	-	bc56addb2b8c898e	-
+field	c:@S@xdr_ops@FI@x_control	xdr_ops			int (*)(struct __rpc_xdr *, int, void *)	-	-	-	-	b08c2bf54a11af99	-
+field	c:@S@__rpc_xdr@FI@x_ops	__rpc_xdr			const struct xdr_ops *	-	-	-	-	cf4921dbbb93c4d9	-
+field	c:@S@__rpc_xdr@FI@x_public	__rpc_xdr			char *	-	-	-	-	9f6dfcf7b1cccc8d	-
+field	c:@S@__rpc_xdr@FI@x_private	__rpc_xdr			void *	-	-	-	-	eb6f65668253d323	-
+field	c:@S@__rpc_xdr@FI@x_base	__rpc_xdr			char *	-	-	-	-	b530805911e979af	-
+field	c:@S@__rpc_xdr@FI@x_handy	__rpc_xdr			unsigned int	-	-	-	-	3d4ed166b7582958	-
+typedef	c:@T@XDR	-			struct __rpc_xdr	-	-	-	-	3b5d4c76c0a1b257	-
+typedef	c:@T@xdrproc_t	-			int (*)(XDR *, void *, unsigned int)	-	-	-	-	8def9b2e4b29ce31	-
+function	c:@F@xdr_getint32	-			int (XDR *, int32_t *)	XDR * xdrs | int32_t * ip	-	-	-	e3aec6d50bcd4c4a	-
+function	c:@F@xdr_putint32	-			int (XDR *, int32_t *)	XDR * xdrs | int32_t * ip	-	-	-	4f0f8b87a519576c	-
+struct	c:@S@xdr_discrim	-			-	-	-	-	-	ebc8d8cb7c15e378	-
+field	c:@S@xdr_discrim@FI@value	xdr_discrim			int	-	-	-	-	57f6ff4e67a2c209	-
+field	c:@S@xdr_discrim@FI@proc	xdr_discrim			xdrproc_t	-	-	-	-	a9871a3cfd3a09d3	-
+function	c:@F@xdr_void	-			int (void)	-	-	-	-	466e769cdad9bd4e	-
+function	c:@F@xdr_int	-			int (XDR *, int *)	XDR *  | int * 	-	-	-	bf13c295f716fccd	-
+function	c:@F@xdr_u_int	-			int (XDR *, unsigned int *)	XDR *  | unsigned int * 	-	-	-	dfb4c53f3465f6ad	-
+function	c:@F@xdr_long	-			int (XDR *, int *)	XDR *  | int * 	-	-	-	22261139c13487a1	-
+function	c:@F@xdr_u_long	-			int (XDR *, unsigned int *)	XDR *  | unsigned int * 	-	-	-	d4ed657e05edddf3	-
+function	c:@F@xdr_short	-			int (XDR *, short *)	XDR *  | short * 	-	-	-	e7da1c30b867a705	-
+function	c:@F@xdr_u_short	-			int (XDR *, unsigned short *)	XDR *  | unsigned short * 	-	-	-	bc1da17245af7771	-
+function	c:@F@xdr_int16_t	-			int (XDR *, int16_t *)	XDR *  | int16_t * 	-	-	-	17c728b0d825d5d7	-
+function	c:@F@xdr_u_int16_t	-			int (XDR *, u_int16_t *)	XDR *  | u_int16_t * 	-	-	-	9aeafe9025a95206	-
+function	c:@F@xdr_int32_t	-			int (XDR *, int32_t *)	XDR *  | int32_t * 	-	-	-	9164b93957094ad5	-
+function	c:@F@xdr_u_int32_t	-			int (XDR *, u_int32_t *)	XDR *  | u_int32_t * 	-	-	-	0ea18514c878ed3d	-
+function	c:@F@xdr_int64_t	-			int (XDR *, int64_t *)	XDR *  | int64_t * 	-	-	-	36af22d7d9fd25d3	-
+function	c:@F@xdr_u_int64_t	-			int (XDR *, u_int64_t *)	XDR *  | u_int64_t * 	-	-	-	2c0fe67490efa249	-
+function	c:@F@xdr_bool	-			int (XDR *, int *)	XDR *  | int * 	-	-	-	ab964d8aff70ebc5	-
+function	c:@F@xdr_enum	-			int (XDR *, int *)	XDR *  | int * 	-	-	-	104714a268289b13	-
+function	c:@F@xdr_array	-			int (XDR *, char **, unsigned int *, unsigned int, unsigned int, xdrproc_t)	XDR *  | char **  | unsigned int *  | unsigned int  | unsigned int  | xdrproc_t 	-	-	-	a7e132b5568dcfc8	-
+function	c:@F@xdr_bytes	-			int (XDR *, char **, unsigned int *, unsigned int)	XDR *  | char **  | unsigned int *  | unsigned int 	-	-	-	7ede25dd1ed230b7	-
+function	c:@F@xdr_opaque	-			int (XDR *, char *, unsigned int)	XDR *  | char *  | unsigned int 	-	-	-	6840df112fa494d9	-
+function	c:@F@xdr_string	-			int (XDR *, char **, unsigned int)	XDR *  | char **  | unsigned int 	-	-	-	5fa68c63908bf6d7	-
+function	c:@F@xdr_union	-			int (XDR *, int *, char *, const struct xdr_discrim *, xdrproc_t)	XDR *  | int *  | char *  | const struct xdr_discrim *  | xdrproc_t 	-	-	-	c65c50dda8780a20	-
+function	c:@F@xdr_char	-			int (XDR *, char *)	XDR *  | char * 	-	-	-	feb4d54a9ce80b1b	-
+function	c:@F@xdr_u_char	-			int (XDR *, unsigned char *)	XDR *  | unsigned char * 	-	-	-	030dd82e28d1c79e	-
+function	c:@F@xdr_vector	-			int (XDR *, char *, unsigned int, unsigned int, xdrproc_t)	XDR *  | char *  | unsigned int  | unsigned int  | xdrproc_t 	-	-	-	b428f54a8e750372	-
+function	c:@F@xdr_float	-			int (XDR *, float *)	XDR *  | float * 	-	-	-	d66d4fb0db1f694f	-
+function	c:@F@xdr_double	-			int (XDR *, double *)	XDR *  | double * 	-	-	-	9755f9f4d9ac7a2a	-
+function	c:@F@xdr_quadruple	-			int (XDR *, long double *)	XDR *  | long double * 	-	-	-	0f7971832c7ce196	-
+function	c:@F@xdr_reference	-			int (XDR *, char **, unsigned int, xdrproc_t)	XDR *  | char **  | unsigned int  | xdrproc_t 	-	-	-	0fec34ca43a93138	-
+function	c:@F@xdr_pointer	-			int (XDR *, char **, unsigned int, xdrproc_t)	XDR *  | char **  | unsigned int  | xdrproc_t 	-	-	-	94835a66325202e0	-
+function	c:@F@xdr_wrapstring	-			int (XDR *, char **)	XDR *  | char ** 	-	-	-	fbf7712bd0be1ba8	-
+function	c:@F@xdr_free	-			void (xdrproc_t, void *)	xdrproc_t  | void * 	-	-	-	c61da58172cc6f55	-
+function	c:@F@xdr_hyper	-			int (XDR *, quad_t *)	XDR *  | quad_t * 	-	-	-	c80cdf433198817b	-
+function	c:@F@xdr_u_hyper	-			int (XDR *, u_quad_t *)	XDR *  | u_quad_t * 	-	-	-	7cba4045b1ac7867	-
+function	c:@F@xdr_longlong_t	-			int (XDR *, quad_t *)	XDR *  | quad_t * 	-	-	-	f1f4060b8e91399c	-
+function	c:@F@xdr_u_longlong_t	-			int (XDR *, u_quad_t *)	XDR *  | u_quad_t * 	-	-	-	5e7c5b3d59bf2427	-
+struct	c:@S@netobj	-			-	-	-	-	-	2af9a42c0abdf863	-
+field	c:@S@netobj@FI@n_len	netobj			unsigned int	-	-	-	-	7f0945c7c510ba08	-
+field	c:@S@netobj@FI@n_bytes	netobj			char *	-	-	-	-	50765a0e8dff938f	-
+typedef	c:@T@netobj	-			struct netobj	-	-	-	-	213db7a5126c11f1	-
+function	c:@F@xdr_netobj	-			int (XDR *, struct netobj *)	XDR *  | struct netobj * 	-	-	-	95f49a72b813e2a3	-
+function	c:@F@xdrmem_create	-			void (XDR *, char *, unsigned int, enum xdr_op)	XDR *  | char *  | unsigned int  | enum xdr_op 	-	-	-	7c3d4b61164c23fa	-
+function	c:@F@xdrrec_create	-			void (XDR *, unsigned int, unsigned int, void *, int (*)(void *, void *, int), int (*)(void *, void *, int))	XDR *  | unsigned int  | unsigned int  | void *  | int (*)(void *, void *, int)  | int (*)(void *, void *, int) 	-	-	-	dfd18c1678b4a777	-
+function	c:@F@xdrrec_endofrecord	-			int (XDR *, int)	XDR *  | int 	-	-	-	921c7dc343bc8f06	-
+function	c:@F@xdrrec_skiprecord	-			int (XDR *)	XDR * 	-	-	-	ab2e2ed3c130505b	-
+function	c:@F@xdrrec_eof	-			int (XDR *)	XDR * 	-	-	-	fe53dbca5bf703d3	-
+function	c:@F@xdrrec_readbytes	-			unsigned int (XDR *, caddr_t, unsigned int)	XDR *  | caddr_t  | unsigned int 	-	-	-	eb6ed232ab77fe11	-
+enum	c:@E@auth_stat	-			unsigned int	-	-	-	-	eb255cb082fe94da	-
+enumconst	c:@E@auth_stat@AUTH_OK	auth_stat			-	-	-	-	-	09a72aea85f9fe2a	0
+enumconst	c:@E@auth_stat@AUTH_BADCRED	auth_stat			-	-	-	-	-	49835dc2988cb682	1
+enumconst	c:@E@auth_stat@AUTH_REJECTEDCRED	auth_stat			-	-	-	-	-	52579a7c5d11d58f	2
+enumconst	c:@E@auth_stat@AUTH_BADVERF	auth_stat			-	-	-	-	-	eb5ed5b59a7f626f	3
+enumconst	c:@E@auth_stat@AUTH_REJECTEDVERF	auth_stat			-	-	-	-	-	ee7bb338dba8bac9	4
+enumconst	c:@E@auth_stat@AUTH_TOOWEAK	auth_stat			-	-	-	-	-	05576db9ce3f1624	5
+enumconst	c:@E@auth_stat@AUTH_INVALIDRESP	auth_stat			-	-	-	-	-	7cab94f18847c728	6
+enumconst	c:@E@auth_stat@AUTH_FAILED	auth_stat			-	-	-	-	-	7eb39a6cc6b84a35	7
+typedef	c:@T@u_int32	-			unsigned int	-	-	-	-	04bf8dc4561ccc01	-
+union	c:@U@des_block	-			-	-	-	-	-	57b746bbc376a32f	-
+struct	c:@U@des_block@S@auth.h@3563	-	-		-	-	-	-	-	1e263c7c5fef3ca2	-
+field	c:@U@des_block@S@auth.h@3563@FI@high	-			u_int32	-	-	-	-	fe3c74aa18ded99c	-
+field	c:@U@des_block@S@auth.h@3563@FI@low	-			u_int32	-	-	-	-	1769dfd7d371e4d4	-
+field	c:@U@des_block@FI@key	des_block			struct (unnamed)	-	-	-	-	2277a8e4088cdb58	-
+field	c:@U@des_block@FI@c	des_block			char[8]	-	-	-	-	1f07c6be4826583b	-
+typedef	c:@T@des_block	-			union des_block	-	-	-	-	a2618f10b8db5561	-
+function	c:@F@xdr_des_block	-			int (XDR *, des_block *)	XDR *  | des_block * 	-	-	-	2a5215ebe5c7e542	-
+struct	c:@S@opaque_auth	-			-	-	-	-	-	6b8c913653f6b676	-
+field	c:@S@opaque_auth@FI@oa_flavor	opaque_auth			int	-	-	-	-	96008e64fc2107a5	-
+field	c:@S@opaque_auth@FI@oa_base	opaque_auth			caddr_t	-	-	-	-	b0fabfb949f05662	-
+field	c:@S@opaque_auth@FI@oa_length	opaque_auth			unsigned int	-	-	-	-	2f2cf6a189beaba2	-
+struct	c:@SA@AUTH	-			-	-	-	-	-	9dd1242f0262d78c	-
+field	c:@SA@AUTH@FI@ah_cred	AUTH			struct opaque_auth	-	-	-	-	64c5a28af199d7e2	-
+field	c:@SA@AUTH@FI@ah_verf	AUTH			struct opaque_auth	-	-	-	-	81b0f4d930eb927e	-
+field	c:@SA@AUTH@FI@ah_key	AUTH			union des_block	-	-	-	-	3b4c55bc4787e8a0	-
+struct	c:@S@auth_ops	-			-	-	-	-	-	1fce030c3c970f19	-
+field	c:@S@auth_ops@FI@ah_nextverf	auth_ops			void (*)()	-	-	-	-	332d92b1b36752a3	-
+field	c:@S@auth_ops@FI@ah_marshal	auth_ops			int (*)()	-	-	-	-	50516fae02e6b66f	-
+field	c:@S@auth_ops@FI@ah_validate	auth_ops			int (*)()	-	-	-	-	44df40fa6382f308	-
+field	c:@S@auth_ops@FI@ah_refresh	auth_ops			int (*)()	-	-	-	-	34e2a12a53306260	-
+field	c:@S@auth_ops@FI@ah_destroy	auth_ops			void (*)()	-	-	-	-	974efa05c0ad651d	-
+field	c:@SA@AUTH@FI@ah_ops	AUTH			struct auth_ops *	-	-	-	-	3547061b0e3cc130	-
+field	c:@SA@AUTH@FI@ah_private	AUTH			caddr_t	-	-	-	-	8d741bf33d587ba2	-
+typedef	c:@T@AUTH	-			struct AUTH	-	-	-	-	1181c3a0e3618e75	-
+var	c:@_null_auth	-			struct opaque_auth	-	-	-	-	b5f8601fd88c769b	-
+function	c:@F@authunix_create	-			AUTH * (char *, int, int, int, int *)	char *  | int  | int  | int  | int * 	-	-	-	03129a899f4e68c5	-
+function	c:@F@authunix_create_default	-			AUTH * (void)	-	-	-	-	9dae8189ec4ac17b	-
+function	c:@F@authnone_create	-			AUTH * (void)	-	-	-	-	74f4a4356842dbaf	-
+function	c:@F@authdes_create	-			AUTH * (char *, unsigned int, struct sockaddr_in *, des_block *)	char *  | unsigned int  | struct sockaddr_in *  | des_block * 	-	-	-	10a73b794bd48264	-
+struct	c:@S@authunix_parms	-			-	-	-	-	-	3971df0cb3b0e5dc	-
+field	c:@S@authunix_parms@FI@aup_time	authunix_parms			unsigned int	-	-	-	-	b64f58997fa210ae	-
+field	c:@S@authunix_parms@FI@aup_machname	authunix_parms			char *	-	-	-	-	9cbbb6a9a203035a	-
+field	c:@S@authunix_parms@FI@aup_uid	authunix_parms			int	-	-	-	-	5eb7f3f85b7bee0d	-
+field	c:@S@authunix_parms@FI@aup_gid	authunix_parms			int	-	-	-	-	8df8f6cadd8cb1c4	-
+field	c:@S@authunix_parms@FI@aup_len	authunix_parms			unsigned int	-	-	-	-	05861ef8ded5b26d	-
+field	c:@S@authunix_parms@FI@aup_gids	authunix_parms			int *	-	-	-	-	a24dedce85c2f950	-
+function	c:@F@xdr_authunix_parms	-			int (XDR *, struct authunix_parms *)	XDR *  | struct authunix_parms * 	-	-	-	5490420cbfa8dcd6	-
+struct	c:@S@short_hand_verf	-			-	-	-	-	-	dd919d6a98717854	-
+field	c:@S@short_hand_verf@FI@new_cred	short_hand_verf			struct opaque_auth	-	-	-	-	b35016056c36e054	-
+enum	c:@E@clnt_stat	-			unsigned int	-	-	-	-	2a1727e172e6e93d	-
+enumconst	c:@E@clnt_stat@RPC_SUCCESS	clnt_stat			-	-	-	-	-	5e747bfe15665de2	0
+enumconst	c:@E@clnt_stat@RPC_CANTENCODEARGS	clnt_stat			-	-	-	-	-	09f785badeec0b34	1
+enumconst	c:@E@clnt_stat@RPC_CANTDECODERES	clnt_stat			-	-	-	-	-	32e2e2b92c1cbeaf	2
+enumconst	c:@E@clnt_stat@RPC_CANTSEND	clnt_stat			-	-	-	-	-	fcb2ad55ffb176ba	3
+enumconst	c:@E@clnt_stat@RPC_CANTRECV	clnt_stat			-	-	-	-	-	f720e5a1f05e0db7	4
+enumconst	c:@E@clnt_stat@RPC_TIMEDOUT	clnt_stat			-	-	-	-	-	a2a4a2cc0bf0cba9	5
+enumconst	c:@E@clnt_stat@RPC_VERSMISMATCH	clnt_stat			-	-	-	-	-	dbe7cc2d40032bb0	6
+enumconst	c:@E@clnt_stat@RPC_AUTHERROR	clnt_stat			-	-	-	-	-	bc83917ca6ca0413	7
+enumconst	c:@E@clnt_stat@RPC_PROGUNAVAIL	clnt_stat			-	-	-	-	-	40e2103e57304837	8
+enumconst	c:@E@clnt_stat@RPC_PROGVERSMISMATCH	clnt_stat			-	-	-	-	-	61d7704f2251ba15	9
+enumconst	c:@E@clnt_stat@RPC_PROCUNAVAIL	clnt_stat			-	-	-	-	-	ac653590f0476680	10
+enumconst	c:@E@clnt_stat@RPC_CANTDECODEARGS	clnt_stat			-	-	-	-	-	0756f62904d11f61	11
+enumconst	c:@E@clnt_stat@RPC_SYSTEMERROR	clnt_stat			-	-	-	-	-	bad6c20a50b1b72a	12
+enumconst	c:@E@clnt_stat@RPC_UNKNOWNHOST	clnt_stat			-	-	-	-	-	cb6981c8673c7204	13
+enumconst	c:@E@clnt_stat@RPC_UNKNOWNPROTO	clnt_stat			-	-	-	-	-	70df39e1f42b6c64	17
+enumconst	c:@E@clnt_stat@RPC_PMAPFAILURE	clnt_stat			-	-	-	-	-	3ac9c7d36d410a8f	14
+enumconst	c:@E@clnt_stat@RPC_PROGNOTREGISTERED	clnt_stat			-	-	-	-	-	a7802aa7a886f65a	15
+enumconst	c:@E@clnt_stat@RPC_FAILED	clnt_stat			-	-	-	-	-	8f00a33c0b528f3a	16
+struct	c:@S@rpc_err	-			-	-	-	-	-	7d36ca5f29d5d76a	-
+field	c:@S@rpc_err@FI@re_status	rpc_err			enum clnt_stat	-	-	-	-	65625c67139aa624	-
+union	c:@S@rpc_err@U@clnt.h@4049	-	-		-	-	-	-	-	fa561d967f23064e	-
+field	c:@S@rpc_err@U@clnt.h@4049@FI@RE_errno	-			int	-	-	-	-	cbc4d82222710812	-
+field	c:@S@rpc_err@U@clnt.h@4049@FI@RE_why	-			enum auth_stat	-	-	-	-	7be82d8fec9f2ae0	-
+struct	c:@S@rpc_err@U@clnt.h@4049@S@clnt.h@4163	-	-		-	-	-	-	-	be038a050fc91486	-
+field	c:@S@rpc_err@U@clnt.h@4049@S@clnt.h@4163@FI@low	-			unsigned int	-	-	-	-	0038e4909881d4d5	-
+field	c:@S@rpc_err@U@clnt.h@4049@S@clnt.h@4163@FI@high	-			unsigned int	-	-	-	-	e2952bade2095b30	-
+field	c:@S@rpc_err@U@clnt.h@4049@FI@RE_vers	-			struct (unnamed)	-	-	-	-	44eb2162b156a10c	-
+struct	c:@S@rpc_err@U@clnt.h@4049@S@clnt.h@4426	-	-		-	-	-	-	-	fd564cf680cfb9dc	-
+field	c:@S@rpc_err@U@clnt.h@4049@S@clnt.h@4426@FI@s1	-			int	-	-	-	-	b2c5d16885289c16	-
+field	c:@S@rpc_err@U@clnt.h@4049@S@clnt.h@4426@FI@s2	-			int	-	-	-	-	00a80c11124f6b98	-
+field	c:@S@rpc_err@U@clnt.h@4049@FI@RE_lb	-			struct (unnamed)	-	-	-	-	9dca8d51c3544a78	-
+field	c:@S@rpc_err@FI@ru	rpc_err			union (unnamed)	-	-	-	-	0e3abce0844a8b27	-
+typedef	c:@T@CLIENT	-			struct CLIENT	-	-	-	-	adf282890bf14d60	-
+struct	c:@S@CLIENT	-			-	-	-	-	-	c6dc0ce1adefb7eb	-
+field	c:@S@CLIENT@FI@cl_auth	CLIENT			AUTH *	-	-	-	-	23905e0ec406bd18	-
+struct	c:@S@clnt_ops	-			-	-	-	-	-	5fcece41b2b8cd59	-
+struct	c:@S@timeval	-			-	-	-	-	-	acb2d004b1642ae1	-
+field	c:@S@clnt_ops@FI@cl_call	clnt_ops			enum clnt_stat (*)(CLIENT *, unsigned int, xdrproc_t, void *, xdrproc_t, void *, struct timeval)	-	-	-	-	ca42544727430b67	-
+field	c:@S@clnt_ops@FI@cl_abort	clnt_ops			void (*)(void)	-	-	-	-	7254730337d2138b	-
+field	c:@S@clnt_ops@FI@cl_geterr	clnt_ops			void (*)(CLIENT *, struct rpc_err *)	-	-	-	-	aa3d656fcbc4c3df	-
+field	c:@S@clnt_ops@FI@cl_freeres	clnt_ops			int (*)(CLIENT *, xdrproc_t, void *)	-	-	-	-	dad373dbc80dafc2	-
+field	c:@S@clnt_ops@FI@cl_destroy	clnt_ops			void (*)(CLIENT *)	-	-	-	-	58dc6e92a56f1c70	-
+field	c:@S@clnt_ops@FI@cl_control	clnt_ops			int (*)(CLIENT *, int, char *)	-	-	-	-	8d755f2b6d6ec433	-
+field	c:@S@CLIENT@FI@cl_ops	CLIENT			struct clnt_ops *	-	-	-	-	eb0b27a1645e4144	-
+field	c:@S@CLIENT@FI@cl_private	CLIENT			caddr_t	-	-	-	-	3454421f6d2642a3	-
+function	c:@F@clntraw_create	-			CLIENT * (unsigned int, unsigned int)	unsigned int  | unsigned int 	-	-	-	26e69f1c51873cab	-
+function	c:@F@clnt_create	-			CLIENT * (char *, unsigned int, unsigned int, char *)	char *  | unsigned int  | unsigned int  | char * 	-	-	-	e600427b593171d0	-
+function	c:@F@clnttcp_create	-			CLIENT * (struct sockaddr_in *, unsigned int, unsigned int, int *, unsigned int, unsigned int)	struct sockaddr_in *  | unsigned int  | unsigned int  | int *  | unsigned int  | unsigned int 	-	-	-	eab93fe19bd96ba9	-
+function	c:@F@clntudp_create	-			CLIENT * (struct sockaddr_in *, unsigned int, unsigned int, struct timeval, int *)	struct sockaddr_in *  | unsigned int  | unsigned int  | struct timeval  | int * 	-	-	-	a5dcfa2b53875a44	-
+function	c:@F@clntudp_bufcreate	-			CLIENT * (struct sockaddr_in *, unsigned int, unsigned int, struct timeval, int *, unsigned int, unsigned int)	struct sockaddr_in *  | unsigned int  | unsigned int  | struct timeval  | int *  | unsigned int  | unsigned int 	-	-	-	ce458bbfc380b51b	-
+function	c:@F@clnt_pcreateerror	-			void (char *)	char * 	-	-	-	2dc85dc38f15cbd0	-
+function	c:@F@clnt_spcreateerror	-			char * (char *)	char * 	-	-	-	a3a6d82d841212c9	-
+function	c:@F@clnt_perrno	-			void (enum clnt_stat)	enum clnt_stat 	-	-	-	b21a785676010fb4	-
+function	c:@F@clnt_sperrno	-			char * (enum clnt_stat)	enum clnt_stat 	-	-	-	32de24fdc608ad24	-
+function	c:@F@clnt_perror	-			void (CLIENT *, char *)	CLIENT *  | char * 	-	-	-	674f96da4417e661	-
+function	c:@F@clnt_sperror	-			char * (CLIENT *, char *)	CLIENT *  | char * 	-	-	-	045ee819ed2bf4f7	-
+struct	c:@S@rpc_createerr	-			-	-	-	-	-	d85cc11476b14877	-
+field	c:@S@rpc_createerr@FI@cf_stat	rpc_createerr			enum clnt_stat	-	-	-	-	4c06b993bee38854	-
+field	c:@S@rpc_createerr@FI@cf_error	rpc_createerr			struct rpc_err	-	-	-	-	4a70ba4afb39ff95	-
+var	c:@rpc_createerr	-			struct rpc_createerr	-	-	-	-	55531ad9c8f5d62d	-
+enum	c:@E@msg_type	-			unsigned int	-	-	-	-	f8b3a50cad56271b	-
+enumconst	c:@E@msg_type@CALL	msg_type			-	-	-	-	-	075fd76679639858	0
+enumconst	c:@E@msg_type@REPLY	msg_type			-	-	-	-	-	65e302ff3702c6a7	1
+enum	c:@E@reply_stat	-			unsigned int	-	-	-	-	9b27ae89b14be0c2	-
+enumconst	c:@E@reply_stat@MSG_ACCEPTED	reply_stat			-	-	-	-	-	a4c6569847f9de39	0
+enumconst	c:@E@reply_stat@MSG_DENIED	reply_stat			-	-	-	-	-	f4590850cbd214b4	1
+enum	c:@E@accept_stat	-			unsigned int	-	-	-	-	573da35dd814ab9e	-
+enumconst	c:@E@accept_stat@SUCCESS	accept_stat			-	-	-	-	-	7097be2ae1ad0189	0
+enumconst	c:@E@accept_stat@PROG_UNAVAIL	accept_stat			-	-	-	-	-	99c16056372f38cb	1
+enumconst	c:@E@accept_stat@PROG_MISMATCH	accept_stat			-	-	-	-	-	6b3af2553939029a	2
+enumconst	c:@E@accept_stat@PROC_UNAVAIL	accept_stat			-	-	-	-	-	4c210f56a56227b1	3
+enumconst	c:@E@accept_stat@GARBAGE_ARGS	accept_stat			-	-	-	-	-	90aef98c7cf340d8	4
+enumconst	c:@E@accept_stat@SYSTEM_ERR	accept_stat			-	-	-	-	-	d0a28ccdeed65cf1	5
+enum	c:@E@reject_stat	-			unsigned int	-	-	-	-	a92094178b83a92c	-
+enumconst	c:@E@reject_stat@RPC_MISMATCH	reject_stat			-	-	-	-	-	76d0304b7f4dc442	0
+enumconst	c:@E@reject_stat@AUTH_ERROR	reject_stat			-	-	-	-	-	dc716df2acd5b0bf	1
+struct	c:@S@accepted_reply	-			-	-	-	-	-	c6775d161e70e6e0	-
+field	c:@S@accepted_reply@FI@ar_verf	accepted_reply			struct opaque_auth	-	-	-	-	b0cf858a40a58e79	-
+field	c:@S@accepted_reply@FI@ar_stat	accepted_reply			enum accept_stat	-	-	-	-	533953bf181f8368	-
+union	c:@S@accepted_reply@U@rpc_msg.h@3456	-	-		-	-	-	-	-	4f3f87e64572ef20	-
+struct	c:@S@accepted_reply@U@rpc_msg.h@3456@S@rpc_msg.h@3466	-	-		-	-	-	-	-	291a655fc9613382	-
+field	c:@S@accepted_reply@U@rpc_msg.h@3456@S@rpc_msg.h@3466@FI@low	-			unsigned int	-	-	-	-	48847d459c0a6a8b	-
+field	c:@S@accepted_reply@U@rpc_msg.h@3456@S@rpc_msg.h@3466@FI@high	-			unsigned int	-	-	-	-	333343fecb6a0b6b	-
+field	c:@S@accepted_reply@U@rpc_msg.h@3456@FI@AR_versions	-			struct (unnamed)	-	-	-	-	b044c8706eb5efab	-
+struct	c:@S@accepted_reply@U@rpc_msg.h@3456@S@rpc_msg.h@3611	-	-		-	-	-	-	-	36e6197c9162f7f5	-
+field	c:@S@accepted_reply@U@rpc_msg.h@3456@S@rpc_msg.h@3611@FI@where	-			caddr_t	-	-	-	-	a2c5052f4b9d68de	-
+field	c:@S@accepted_reply@U@rpc_msg.h@3456@S@rpc_msg.h@3611@FI@proc	-			xdrproc_t	-	-	-	-	1cd82bb345f9a325	-
+field	c:@S@accepted_reply@U@rpc_msg.h@3456@FI@AR_results	-			struct (unnamed)	-	-	-	-	eb2e5307e11d99aa	-
+field	c:@S@accepted_reply@FI@ru	accepted_reply			union (unnamed)	-	-	-	-	51e8bdc8933ab148	-
+struct	c:@S@rejected_reply	-			-	-	-	-	-	2e92cd0ddf6ba9aa	-
+field	c:@S@rejected_reply@FI@rj_stat	rejected_reply			enum reject_stat	-	-	-	-	5a5e9949413d0edf	-
+union	c:@S@rejected_reply@U@rpc_msg.h@3902	-	-		-	-	-	-	-	2911aac20838eb44	-
+struct	c:@S@rejected_reply@U@rpc_msg.h@3902@S@rpc_msg.h@3912	-	-		-	-	-	-	-	d9bff8d826f48c86	-
+field	c:@S@rejected_reply@U@rpc_msg.h@3902@S@rpc_msg.h@3912@FI@low	-			unsigned int	-	-	-	-	2c867cdf87905dc9	-
+field	c:@S@rejected_reply@U@rpc_msg.h@3902@S@rpc_msg.h@3912@FI@high	-			unsigned int	-	-	-	-	2085c3aa6ebb9b5d	-
+field	c:@S@rejected_reply@U@rpc_msg.h@3902@FI@RJ_versions	-			struct (unnamed)	-	-	-	-	f90aa3bb670f1361	-
+field	c:@S@rejected_reply@U@rpc_msg.h@3902@FI@RJ_why	-			enum auth_stat	-	-	-	-	def58bc2ef2beddc	-
+field	c:@S@rejected_reply@FI@ru	rejected_reply			union (unnamed)	-	-	-	-	4f25bd9280309bc9	-
+struct	c:@S@reply_body	-			-	-	-	-	-	39b8850012d82bea	-
+field	c:@S@reply_body@FI@rp_stat	reply_body			enum reply_stat	-	-	-	-	974ec24316304512	-
+union	c:@S@reply_body@U@rpc_msg.h@4278	-	-		-	-	-	-	-	f4c809a718def430	-
+field	c:@S@reply_body@U@rpc_msg.h@4278@FI@RP_ar	-			struct accepted_reply	-	-	-	-	467f312991116873	-
+field	c:@S@reply_body@U@rpc_msg.h@4278@FI@RP_dr	-			struct rejected_reply	-	-	-	-	a23a6c12a4bf5989	-
+field	c:@S@reply_body@FI@ru	reply_body			union (unnamed)	-	-	-	-	0a09fe5888d21f15	-
+struct	c:@S@call_body	-			-	-	-	-	-	00738df8b1929dc1	-
+field	c:@S@call_body@FI@cb_rpcvers	call_body			unsigned int	-	-	-	-	36db0b33991773e5	-
+field	c:@S@call_body@FI@cb_prog	call_body			unsigned int	-	-	-	-	0c6f302f84d22285	-
+field	c:@S@call_body@FI@cb_vers	call_body			unsigned int	-	-	-	-	cafa0f9a811ee417	-
+field	c:@S@call_body@FI@cb_proc	call_body			unsigned int	-	-	-	-	45c411d5d8617d16	-
+field	c:@S@call_body@FI@cb_cred	call_body			struct opaque_auth	-	-	-	-	72d8f638ab6d6add	-
+field	c:@S@call_body@FI@cb_verf	call_body			struct opaque_auth	-	-	-	-	a41e710478cb5166	-
+struct	c:@S@rpc_msg	-			-	-	-	-	-	849ff106018ec8c3	-
+field	c:@S@rpc_msg@FI@rm_xid	rpc_msg			unsigned int	-	-	-	-	13b3379f94dc10ff	-
+field	c:@S@rpc_msg@FI@rm_direction	rpc_msg			enum msg_type	-	-	-	-	9cb99d273b6faf4c	-
+union	c:@S@rpc_msg@U@rpc_msg.h@5003	-	-		-	-	-	-	-	a2c300204cf1bd42	-
+field	c:@S@rpc_msg@U@rpc_msg.h@5003@FI@RM_cmb	-			struct call_body	-	-	-	-	f6cd19dcc57b317e	-
+field	c:@S@rpc_msg@U@rpc_msg.h@5003@FI@RM_rmb	-			struct reply_body	-	-	-	-	888cad8bf42ccaa3	-
+field	c:@S@rpc_msg@FI@ru	rpc_msg			union (unnamed)	-	-	-	-	04de893f0c698240	-
+function	c:@F@xdr_callmsg	-			int (XDR *, struct rpc_msg *)	XDR *  | struct rpc_msg * 	-	-	-	3fb1c2d8dbe0066a	-
+function	c:@F@xdr_callhdr	-			int (XDR *, struct rpc_msg *)	XDR *  | struct rpc_msg * 	-	-	-	4308db3368d08301	-
+function	c:@F@xdr_replymsg	-			int (XDR *, struct rpc_msg *)	XDR *  | struct rpc_msg * 	-	-	-	00430a84e27f0acc	-
+function	c:@F@_seterr_reply	-			void (struct rpc_msg *, struct rpc_err *)	struct rpc_msg *  | struct rpc_err * 	-	-	-	bdeb618a2a216431	-
+enum	c:@E@xprt_stat	-			unsigned int	-	-	-	-	b6a84c8ef8555411	-
+enumconst	c:@E@xprt_stat@XPRT_DIED	xprt_stat			-	-	-	-	-	24b5e5a6b3a2a7d7	0
+enumconst	c:@E@xprt_stat@XPRT_MOREREQS	xprt_stat			-	-	-	-	-	0d43f9410e6359df	1
+enumconst	c:@E@xprt_stat@XPRT_IDLE	xprt_stat			-	-	-	-	-	01229ae3dd00d656	2
+struct	c:@SA@SVCXPRT	-			-	-	-	-	-	6b2c41fa7fac2bc7	-
+field	c:@SA@SVCXPRT@FI@xp_sock	SVCXPRT			int	-	-	-	-	deb5ba48ad66bf9d	-
+field	c:@SA@SVCXPRT@FI@xp_port	SVCXPRT			unsigned short	-	-	-	-	10bbf21edaae4209	-
+struct	c:@S@xp_ops	-			-	-	-	-	-	3312203499d930cd	-
+field	c:@S@xp_ops@FI@xp_recv	xp_ops			int (*)()	-	-	-	-	127cf41c2798fa62	-
+field	c:@S@xp_ops@FI@xp_stat	xp_ops			enum xprt_stat (*)()	-	-	-	-	fae4d20b2c9b7b47	-
+field	c:@S@xp_ops@FI@xp_getargs	xp_ops			int (*)()	-	-	-	-	f913c9e2155b59d4	-
+field	c:@S@xp_ops@FI@xp_reply	xp_ops			int (*)()	-	-	-	-	d002bef9679dff82	-
+field	c:@S@xp_ops@FI@xp_freeargs	xp_ops			int (*)()	-	-	-	-	cc85a594f69dade7	-
+field	c:@S@xp_ops@FI@xp_destroy	xp_ops			void (*)()	-	-	-	-	23c4184204f688b3	-
+field	c:@SA@SVCXPRT@FI@xp_ops	SVCXPRT			struct xp_ops *	-	-	-	-	68d34af413e0eb7e	-
+field	c:@SA@SVCXPRT@FI@xp_addrlen	SVCXPRT			int	-	-	-	-	46938220c5b57d93	-
+struct	c:@S@sockaddr_in	-			-	-	-	-	-	e5dd6673bf868753	-
+field	c:@SA@SVCXPRT@FI@xp_raddr	SVCXPRT			struct sockaddr_in	-	-	-	-	038a84d9d9fef9a5	-
+field	c:@SA@SVCXPRT@FI@xp_verf	SVCXPRT			struct opaque_auth	-	-	-	-	ed19f51eeee1b2af	-
+field	c:@SA@SVCXPRT@FI@xp_p1	SVCXPRT			caddr_t	-	-	-	-	b03775d8e3430977	-
+field	c:@SA@SVCXPRT@FI@xp_p2	SVCXPRT			caddr_t	-	-	-	-	c6497a503cbf6d33	-
+typedef	c:@T@SVCXPRT	-			struct SVCXPRT	-	-	-	-	cd717766ef92edf2	-
+struct	c:@S@svc_req	-			-	-	-	-	-	8963d634d5d084eb	-
+field	c:@S@svc_req@FI@rq_prog	svc_req			unsigned int	-	-	-	-	21a99bc0debf3cc9	-
+field	c:@S@svc_req@FI@rq_vers	svc_req			unsigned int	-	-	-	-	6cc69c8440eb5d83	-
+field	c:@S@svc_req@FI@rq_proc	svc_req			unsigned int	-	-	-	-	bcf7a6391e80da72	-
+field	c:@S@svc_req@FI@rq_cred	svc_req			struct opaque_auth	-	-	-	-	31dee13779e8db4c	-
+field	c:@S@svc_req@FI@rq_clntcred	svc_req			caddr_t	-	-	-	-	f5d400d3562ef025	-
+field	c:@S@svc_req@FI@rq_xprt	svc_req			SVCXPRT *	-	-	-	-	ce8163d60f16adbc	-
+function	c:@F@svc_register	-			int (SVCXPRT *, unsigned int, unsigned int, void (*)(), int)	SVCXPRT *  | unsigned int  | unsigned int  | void (*)()  | int 	-	-	-	2539f5ac31b9077e	-
+function	c:@F@svc_unregister	-			void (unsigned int, unsigned int)	unsigned int  | unsigned int 	-	-	-	4169e0c70137b540	-
+function	c:@F@xprt_register	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	684876c8b1fb654a	-
+function	c:@F@xprt_unregister	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	ad58bea578c5c0a3	-
+function	c:@F@svc_sendreply	-			int (SVCXPRT *, xdrproc_t, char *)	SVCXPRT *  | xdrproc_t  | char * 	-	-	-	8106b3b04d3cb051	-
+function	c:@F@svcerr_decode	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	d4d17247a55c19b3	-
+function	c:@F@svcerr_weakauth	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	aa25f87c8f26f2c9	-
+function	c:@F@svcerr_noproc	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	2fbe27e69beff028	-
+function	c:@F@svcerr_progvers	-			void (SVCXPRT *, unsigned int, unsigned int)	SVCXPRT *  | unsigned int  | unsigned int 	-	-	-	1e9a63e57e898ca1	-
+function	c:@F@svcerr_auth	-			void (SVCXPRT *, enum auth_stat)	SVCXPRT *  | enum auth_stat 	-	-	-	45b2dce6216dc4d7	-
+function	c:@F@svcerr_noprog	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	c282849614d1d999	-
+function	c:@F@svcerr_systemerr	-			void (SVCXPRT *)	SVCXPRT * 	-	-	-	c17f4f39f761c3f0	-
+var	c:@svc_fdset	-			fd_set	-	-	-	-	b720b06fee615100	-
+function	c:@F@rpctest_service	-			void (...)	-	-	-	-	baafd3d7800f6b0d	-
+function	c:@F@svc_getreq	-			void (int)	int 	-	-	-	f1eb50cfb4f17ec9	-
+function	c:@F@svc_getreqset	-			void (fd_set *)	fd_set * 	-	-	-	c4c7c17606d481ff	-
+function	c:@F@svc_run	-			void (void)	-	-	-	-	1d09305c42c9109c	-
+function	c:@F@svcraw_create	-			SVCXPRT * (void)	-	-	-	-	cffe7a0f47c67fdd	-
+function	c:@F@svcudp_create	-			SVCXPRT * (int)	int 	-	-	-	a00007e5b92c4283	-
+function	c:@F@svcudp_bufcreate	-			SVCXPRT * (int, unsigned int, unsigned int)	int  | unsigned int  | unsigned int 	-	-	-	e33e362663f89f3b	-
+function	c:@F@svctcp_create	-			SVCXPRT * (int, unsigned int, unsigned int)	int  | unsigned int  | unsigned int 	-	-	-	8534baa8f80a336c	-
+function	c:@F@svcfd_create	-			SVCXPRT * (int, u_int, u_int)	int  | u_int  | u_int 	-	-	-	d2531ca2de5650ce	-
+function	c:@F@_authenticate	-			enum auth_stat (struct svc_req *, struct rpc_msg *)	struct svc_req *  | struct rpc_msg * 	-	-	-	1dc081ff53a7fecc	-
+function	c:@F@bindresvport	-			int (int, struct sockaddr_in *)	int  | struct sockaddr_in * 	-	-	-	0cc2d131c04ab8ec	-
+function	c:@F@bindresvport_sa	-			int (int, struct sockaddr *)	int  | struct sockaddr * 	-	-	-	ee767483ba20efce	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@int16_t	-			short	-	-	-	-	a957af8a2c7c6b0a	-
+typedef	c:@T@u_int16_t	-			unsigned short	-	-	-	-	f001648696c65924	-
+typedef	c:@T@u_int32_t	-			unsigned int	-	-	-	-	c124ba0ccea6e1e3	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@u_int64_t	-			unsigned long long	-	-	-	-	d21b4e932f7e4bcd	-
+typedef	c:@T@quad_t	-			int64_t	-	-	-	-	b96bc74dd5c312a6	-
+typedef	c:@T@u_quad_t	-			u_int64_t	-	-	-	-	ad22fb866bf2c0c2	-
+typedef	c:@T@caddr_t	-			char *	-	-	-	-	f39cc983612fe6ba	-
+typedef	c:@T@fd_set	-			struct fd_set	-	-	-	-	4bfff9e3729eda3c	-
+typedef	c:@T@u_int	-			unsigned int	-	-	-	-	50a69dc8154190c5	-

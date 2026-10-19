@@ -1,0 +1,89 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+ContactProvider	swift-constant	c:@ContactProviderVersionNumber	-	ContactProviderVersionNumber	-	Swift.Double	-	-	-	c2b61c5980391cf3
+ContactProvider	swift-constant	c:@ContactProviderVersionString	-	ContactProviderVersionString	-	_	-	-	-	615de1a956e4bed0
+ContactProvider	swift-protocol	s:15ContactProvider0aB9ExtensionP	-	ContactProviderExtension	-	-	-	ios=18	-	a67c16fd3bdd2672
+ContactProvider	swift-method	s:15ContactProvider0aB9ExtensionP9configure3foryAA0aB6Domain_p_tF	ContactProviderExtension	configure(for:)	-	()	any ContactProvider.ContactProviderDomain	-	-	abb3f53ee51ae812
+ContactProvider	swift-method	s:15ContactProvider0aB9ExtensionP10invalidateyyYaKF	ContactProviderExtension	invalidate()	-	()	-	-	-	a5b7f4f92482fe76
+ContactProvider	swift-property	s:15ContactProvider0aB9ExtensionPAAE13configurationQrvp	ContactProviderExtension	configuration	-	some ExtensionFoundation.AppExtensionConfiguration	-	-	-	bd51b00814a6ee9c
+ContactProvider	swift-protocol	s:15ContactProvider0A15ItemEnumeratingP	-	ContactItemEnumerating	-	-	-	ios=18	-	e8d2db1428406a92
+ContactProvider	swift-method	s:15ContactProvider0A15ItemEnumeratingP10enumerator3forAA0aC10Enumerator_pAA0aC0O10IdentifierV_tF	ContactItemEnumerating	enumerator(for:)	-	any ContactProvider.ContactItemEnumerator	ContactProvider.ContactItem.Identifier	-	-	8fb91d801122bd0d
+ContactProvider	swift-protocol	s:15ContactProvider0A14ItemEnumeratorP	-	ContactItemEnumerator	-	-	-	ios=18	-	97f7c8a56b4333ef
+ContactProvider	swift-method	s:15ContactProvider0A14ItemEnumeratorP16enumerateContent2in3foryAA0aC4PageV_AA0acF8Observer_ptYaF	ContactItemEnumerator	enumerateContent(in:for:)	-	()	ContactProvider.ContactItemPage | any ContactProvider.ContactItemContentObserver	-	-	0d26175821ab42fd
+ContactProvider	swift-method	s:15ContactProvider0A14ItemEnumeratorP16enumerateChanges10startingAt3foryAA0aC10SyncAnchorV_AA0aC14ChangeObserver_ptYaF	ContactItemEnumerator	enumerateChanges(startingAt:for:)	-	()	ContactProvider.ContactItemSyncAnchor | any ContactProvider.ContactItemChangeObserver	-	-	b317769d29c512a0
+ContactProvider	swift-method	s:15ContactProvider0A14ItemEnumeratorP10invalidateyyYaF	ContactItemEnumerator	invalidate()	-	()	-	-	-	28b39bd6090713a5
+ContactProvider	swift-protocol	s:15ContactProvider0A19ItemContentObserverP	-	ContactItemContentObserver	-	-	-	ios=18	-	c4171c32594e4c2b
+ContactProvider	swift-method	s:15ContactProvider0A19ItemContentObserverP12didEnumerateyySayAA0aC0OGF	ContactItemContentObserver	didEnumerate(_:)	-	()	[ContactProvider.ContactItem]	-	-	9f27b95c1ec37f97
+ContactProvider	swift-method	s:15ContactProvider0A19ItemContentObserverP24didFinishEnumeratingPage4upToyAA0acI0V_tF	ContactItemContentObserver	didFinishEnumeratingPage(upTo:)	-	()	ContactProvider.ContactItemPage	-	-	cc388c00b882ef62
+ContactProvider	swift-method	s:15ContactProvider0A19ItemContentObserverP020didFinishEnumeratingD04upToy10Foundation4DataV_tF	ContactItemContentObserver	didFinishEnumeratingContent(upTo:)	-	()	Foundation.Data	-	-	31a770b9b3732c50
+ContactProvider	swift-method	s:15ContactProvider0A19ItemContentObserverP020didFinishEnumeratingD9WithErroryys0J0_pF	ContactItemContentObserver	didFinishEnumeratingContentWithError(_:)	-	()	any Swift.Error	-	-	b953f139ec64cd0d
+ContactProvider	swift-property	s:15ContactProvider0A19ItemContentObserverP17suggestedPageSizeSivp	ContactItemContentObserver	suggestedPageSize	-	Swift.Int	-	-	-	a5a513ef92f5b6e7
+ContactProvider	swift-protocol	s:15ContactProvider0A18ItemChangeObserverP	-	ContactItemChangeObserver	-	-	-	ios=18	-	42e5dfa24794226d
+ContactProvider	swift-method	s:15ContactProvider0A18ItemChangeObserverP9didUpdateyySayAA0aC0OGF	ContactItemChangeObserver	didUpdate(_:)	-	()	[ContactProvider.ContactItem]	-	-	0599fbb0062d10af
+ContactProvider	swift-method	s:15ContactProvider0A18ItemChangeObserverP9didDeleteyySayAA0aC0O10IdentifierVGF	ContactItemChangeObserver	didDelete(_:)	-	()	[ContactProvider.ContactItem.Identifier]	-	-	557e6b4029cc8da3
+ContactProvider	swift-method	s:15ContactProvider0A18ItemChangeObserverP27didFinishEnumeratingChanges4upTo10moreComingyAA0aC10SyncAnchorV_SbtF	ContactItemChangeObserver	didFinishEnumeratingChanges(upTo:moreComing:)	-	()	ContactProvider.ContactItemSyncAnchor | Swift.Bool	-	-	0113eea913861ccd
+ContactProvider	swift-method	s:15ContactProvider0A18ItemChangeObserverP36didFinishEnumeratingChangesWithErroryys0K0_pF	ContactItemChangeObserver	didFinishEnumeratingChangesWithError(_:)	-	()	any Swift.Error	-	-	7b91c95da72fa8c0
+ContactProvider	swift-property	s:15ContactProvider0A18ItemChangeObserverP18suggestedBatchSizeSivp	ContactItemChangeObserver	suggestedBatchSize	-	Swift.Int	-	-	-	c9b1ce797c480e58
+ContactProvider	swift-class	s:15ContactProvider0aB7ManagerC	-	ContactProviderManager	-	-	-	ios=18	-	15a9f040569c1e3e
+ContactProvider	swift-method	s:15ContactProvider0aB7ManagerC16domainIdentifierACSS_tKcfc	ContactProviderManager	init(domainIdentifier:)	-	-	ContactProvider.ContactProviderManager | Swift.String	-	-	65abc371d39ed7a4
+ContactProvider	swift-property	s:15ContactProvider0aB7ManagerC6domainAA0aB6Domain_pvp	ContactProviderManager	domain	-	any ContactProvider.ContactProviderDomain	-	-	-	797abfc82e817443
+ContactProvider	swift-property	s:15ContactProvider0aB7ManagerC9isEnabledSbvp	ContactProviderManager	isEnabled	-	Swift.Bool	-	-	-	35e517431a11d13b
+ContactProvider	swift-method	s:15ContactProvider0aB7ManagerC6enableyyYaKF	ContactProviderManager	enable()	-	()	-	-	-	50b6a438f9137944
+ContactProvider	swift-method	s:15ContactProvider0aB7ManagerC7disableyyYaKF	ContactProviderManager	disable()	-	()	-	-	-	533d4cdd83f70e07
+ContactProvider	swift-method	s:15ContactProvider0aB7ManagerC16signalEnumerator3foryAA0A4ItemO10IdentifierV_tYaKF	ContactProviderManager	signalEnumerator(for:)	-	()	ContactProvider.ContactItem.Identifier	-	-	94a00f1d97129812
+ContactProvider	swift-method	s:15ContactProvider0aB7ManagerC10invalidateyyYaKF	ContactProviderManager	invalidate()	-	()	-	-	-	973b7c3edaca311b
+ContactProvider	swift-method	s:15ContactProvider0aB7ManagerC5resetyyYaKF	ContactProviderManager	reset()	-	()	-	-	-	66ec7ee9e95c64df
+ContactProvider	swift-struct	s:15ContactProvider0A8ItemPageV	-	ContactItemPage	-	-	-	ios=18	-	a895165d28f6c417
+ContactProvider	swift-method	s:15ContactProvider0A8ItemPageV16generationMarker6offsetAC10Foundation4DataV_Sitcfc	ContactItemPage	init(generationMarker:offset:)	-	-	ContactProvider.ContactItemPage | Foundation.Data | Swift.Int	-	-	6778f9b6472e356d
+ContactProvider	swift-property	s:15ContactProvider0A8ItemPageV16generationMarker10Foundation4DataVvp	ContactItemPage	generationMarker	-	Foundation.Data	-	-	-	270baa3f848dcc4a
+ContactProvider	swift-property	s:15ContactProvider0A8ItemPageV6offsetSivp	ContactItemPage	offset	-	Swift.Int	-	-	-	3bffa7be5b315af1
+ContactProvider	swift-method	s:15ContactProvider0A8ItemPageV2eeoiySbAC_ACtFZ	ContactItemPage	==(_:_:)	+	Swift.Bool	ContactProvider.ContactItemPage | ContactProvider.ContactItemPage	-	-	d6b5d5870d6bf830
+ContactProvider	swift-method	s:15ContactProvider0A8ItemPageV6encode2toys7Encoder_p_tKF	ContactItemPage	encode(to:)	-	()	any Swift.Encoder	-	-	ab908f281dcf32a2
+ContactProvider	swift-method	s:15ContactProvider0A8ItemPageV4fromACs7Decoder_p_tKcfc	ContactItemPage	init(from:)	-	-	ContactProvider.ContactItemPage | any Swift.Decoder	-	-	5e6f719867661854
+ContactProvider	swift-property	s:15ContactProvider0A8ItemPageV07initialD0ACvpZ	ContactItemPage	initialPage	+	ContactProvider.ContactItemPage	-	-	-	e75d765b60b45b8f
+ContactProvider	swift-enum	s:15ContactProvider0A4ItemO	-	ContactItem	-	-	-	ios=18	-	548861afd394bcd4
+ContactProvider	swift-constant	s:15ContactProvider0A4ItemO7contactyACSo09CNMutableA0C_AC10IdentifierVtcACmF	ContactItem	contact	-	-	-	-	-	5952d45f4de1beaf
+ContactProvider	swift-method	s:15ContactProvider0A4ItemO2eeoiySbAC_ACtFZ	ContactItem	==(_:_:)	+	Swift.Bool	ContactProvider.ContactItem | ContactProvider.ContactItem	-	-	1b41b1fce0e9524e
+ContactProvider	swift-method	s:15ContactProvider0A4ItemO4hash4intoys6HasherVz_tF	ContactItem	hash(into:)	-	()	Swift.Hasher	-	-	2d75c555d3393fab
+ContactProvider	swift-property	s:15ContactProvider0A4ItemO9hashValueSivp	ContactItem	hashValue	-	Swift.Int	-	-	-	37fe418599c7b52e
+ContactProvider	swift-struct	s:15ContactProvider0A4ItemO10IdentifierV	ContactItem	Identifier	-	-	-	ios=18	-	23665264c5f457e4
+ContactProvider	swift-property	s:15ContactProvider0A4ItemO10IdentifierV5valueSSvp	ContactItem.Identifier	value	-	Swift.String	-	-	-	5fe34ad29ebe5d7a
+ContactProvider	swift-method	s:15ContactProvider0A4ItemO10IdentifierVyAESScfc	ContactItem.Identifier	init(_:)	-	-	ContactProvider.ContactItem.Identifier | Swift.String	-	-	781f2aa457b217ff
+ContactProvider	swift-method	s:15ContactProvider0A4ItemO10IdentifierV2eeoiySbAE_AEtFZ	ContactItem.Identifier	==(_:_:)	+	Swift.Bool	ContactProvider.ContactItem.Identifier | ContactProvider.ContactItem.Identifier	-	-	788e459f25e9a9f1
+ContactProvider	swift-method	s:15ContactProvider0A4ItemO10IdentifierV4hash4intoys6HasherVz_tF	ContactItem.Identifier	hash(into:)	-	()	Swift.Hasher	-	-	675321971c05ba35
+ContactProvider	swift-property	s:15ContactProvider0A4ItemO10IdentifierV9hashValueSivp	ContactItem.Identifier	hashValue	-	Swift.Int	-	-	-	8c3cf076254b5efd
+ContactProvider	swift-property	s:15ContactProvider0A4ItemO10IdentifierV13rootContainerAEvpZ	ContactItem.Identifier	rootContainer	+	ContactProvider.ContactItem.Identifier	-	-	-	d938bf8dfb1946a3
+ContactProvider	swift-struct	s:15ContactProvider0A14ItemSyncAnchorV	-	ContactItemSyncAnchor	-	-	-	ios=18	-	ac026dccab856eaf
+ContactProvider	swift-method	s:15ContactProvider0A14ItemSyncAnchorV16generationMarker6offsetAC10Foundation4DataV_Sitcfc	ContactItemSyncAnchor	init(generationMarker:offset:)	-	-	ContactProvider.ContactItemSyncAnchor | Foundation.Data | Swift.Int	-	-	ec27eea5cf42cd21
+ContactProvider	swift-property	s:15ContactProvider0A14ItemSyncAnchorV16generationMarker10Foundation4DataVvp	ContactItemSyncAnchor	generationMarker	-	Foundation.Data	-	-	-	e7d983995a8bb018
+ContactProvider	swift-property	s:15ContactProvider0A14ItemSyncAnchorV6offsetSivp	ContactItemSyncAnchor	offset	-	Swift.Int	-	-	-	546d411a81deecbb
+ContactProvider	swift-method	s:15ContactProvider0A14ItemSyncAnchorV2eeoiySbAC_ACtFZ	ContactItemSyncAnchor	==(_:_:)	+	Swift.Bool	ContactProvider.ContactItemSyncAnchor | ContactProvider.ContactItemSyncAnchor	-	-	b6fba8cc9487107f
+ContactProvider	swift-method	s:15ContactProvider0A14ItemSyncAnchorV6encode2toys7Encoder_p_tKF	ContactItemSyncAnchor	encode(to:)	-	()	any Swift.Encoder	-	-	a58aaf768dc6415a
+ContactProvider	swift-method	s:15ContactProvider0A14ItemSyncAnchorV4fromACs7Decoder_p_tKcfc	ContactItemSyncAnchor	init(from:)	-	-	ContactProvider.ContactItemSyncAnchor | any Swift.Decoder	-	-	a270e7c1002723eb
+ContactProvider	swift-enum	s:15ContactProvider0aB5ErrorO	-	ContactProviderError	-	-	-	ios=18	-	b5d57fb1a77cef44
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO17extensionNotFoundyA2CmF	ContactProviderError	extensionNotFound	-	-	-	-	-	223f276a511bc233
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO17itemsLimitReachedyA2CmF	ContactProviderError	itemsLimitReached	-	-	-	-	-	2760ff23c5b50229
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO15cannotEnumerateyA2CmF	ContactProviderError	cannotEnumerate	-	-	-	-	-	a0673dc90911641c
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO11pageExpiredyA2CmF	ContactProviderError	pageExpired	-	-	-	-	-	8a8df996ac1dbf6d
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO19changeAnchorExpiredyA2CmF	ContactProviderError	changeAnchorExpired	-	-	-	-	-	c387ba83486d8230
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO19featureNotAvailableyA2CmF	ContactProviderError	featureNotAvailable	-	-	-	-	-	c6f7b4a8a6399310
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO12deniedByUseryA2CmF	ContactProviderError	deniedByUser	-	-	-	-	-	595a3f424ecdf432
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO18enumerationTimeoutyA2CmF	ContactProviderError	enumerationTimeout	-	-	-	-	-	1c4d7bc38cf729cc
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO20extensionInvalidatedyA2CmF	ContactProviderError	extensionInvalidated	-	-	-	-	-	cbfe05b85550ff3b
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO26extensionInvalidateTimeoutyA2CmF	ContactProviderError	extensionInvalidateTimeout	-	-	-	-	-	919dec7cad94bca9
+ContactProvider	swift-constant	s:15ContactProvider0aB5ErrorO19domainNotRegisteredyA2CmF	ContactProviderError	domainNotRegistered	-	-	-	-	-	0c10e0ffe4afe717
+ContactProvider	swift-method	s:15ContactProvider0aB5ErrorO4hash4intoys6HasherVz_tF	ContactProviderError	hash(into:)	-	()	Swift.Hasher	-	-	25659a5f8e5fe2bd
+ContactProvider	swift-property	s:15ContactProvider0aB5ErrorO9hashValueSivp	ContactProviderError	hashValue	-	Swift.Int	-	-	-	f7a54df899699156
+ContactProvider	swift-property	s:15ContactProvider0aB5ErrorO16errorDescriptionSSSgvp	ContactProviderError	errorDescription	-	Swift.String?	-	-	-	e110737f39b0735d
+ContactProvider	swift-property	s:15ContactProvider0aB5ErrorO13failureReasonSSSgvp	ContactProviderError	failureReason	-	Swift.String?	-	-	-	7ba04db4f3af5801
+ContactProvider	swift-property	s:15ContactProvider0aB5ErrorO13errorUserInfoSDySSypGvp	ContactProviderError	errorUserInfo	-	[Swift.String : Any]	-	-	-	05becbeae39eeb61
+ContactProvider	swift-property	s:15ContactProvider0aB5ErrorO9errorCodeSivp	ContactProviderError	errorCode	-	Swift.Int	-	-	-	fb43a689d8a618b7
+ContactProvider	swift-protocol	s:15ContactProvider0aB6DomainP	-	ContactProviderDomain	-	-	-	ios=18	-	529dc863ce1bb971
+ContactProvider	swift-property	s:15ContactProvider0aB6DomainP10identifierSSvp	ContactProviderDomain	identifier	-	Swift.String	-	-	-	226d369a23a99881
+ContactProvider	swift-property	s:15ContactProvider0aB6DomainP11displayNameSSvp	ContactProviderDomain	displayName	-	Swift.String	-	-	-	d788a11826d504f7
+ContactProvider	swift-property	s:15ContactProvider0aB6DomainP8userInfoSDySSypGvp	ContactProviderDomain	userInfo	-	[Swift.String : Any]	-	-	-	e4bfd6ca720a7941
+ContactProvider	swift-struct	s:15ContactProvider07DefaultaB6DomainV	-	DefaultContactProviderDomain	-	-	-	ios=18	-	7087262c89107aa5
+ContactProvider	swift-method	s:15ContactProvider07DefaultaB6DomainVACycfc	DefaultContactProviderDomain	init()	-	-	ContactProvider.DefaultContactProviderDomain	-	-	aae755aa7329f3e2
+ContactProvider	swift-property	s:15ContactProvider07DefaultaB6DomainV10identifierSSvpZ	DefaultContactProviderDomain	identifier	+	Swift.String	-	-	-	42823e0cdaab0a32
+ContactProvider	swift-property	s:15ContactProvider07DefaultaB6DomainV10identifierSSvp	DefaultContactProviderDomain	identifier	-	Swift.String	-	-	-	732e47d7bbac5a90
+ContactProvider	swift-property	s:15ContactProvider07DefaultaB6DomainV11displayNameSSvp	DefaultContactProviderDomain	displayName	-	Swift.String	-	-	-	89648c3c7aa0b76c
+ContactProvider	swift-property	s:15ContactProvider07DefaultaB6DomainV8userInfoSDySSypGvp	DefaultContactProviderDomain	userInfo	-	[Swift.String : Any]	-	-	-	20b2468e3eb100b1

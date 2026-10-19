@@ -1,0 +1,7 @@
+# The known differences of the whole-SDK verify (tools/gen/verify.lua, tools/gen/known.lua): one row per difference the verify measures
+# and does not remove, as key, count and cause, tab-separated. A row explains a difference only at its own count; a row the run does
+# not measure at that count fails the verify. Keys: "headers <framework> <cause>" (the compare's causes, cmd_headers.lua) and
+# "swift <module> <item>" (cmd_roundtrip.lua). Add a row only with the measurement behind it: the verify run that measured it.
+headers ARKit extra from decls, typedef	3	ARKit's translation unit reaches three typedefs another SDK header declares (AVCaptureDeviceType in AVCaptureDevice.h, int16_t and uint64_t in usr/include); the IR does not attribute them to ARKit, and the renderer skips an absolute-path typedef, so they are not rendered
+headers SpriteKit declhash differs, typedef: type	1	size_t: the IR spells it unsigned long (the compiler's stddef, reached first by the IR's own translation unit); decls over the generated header, which imports <stddef.h>, spells it __darwin_size_t, the same type
+headers SpriteKit extra from decls, typedef	1	decls reads __darwin_size_t from usr/include, which the IR does not give to SpriteKit; the renderer skips an absolute-path typedef, so it is not rendered

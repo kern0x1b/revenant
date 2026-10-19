@@ -1,0 +1,85 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+     "api": "-[NSItemProvider initWithContentsOfURL:contentType:openInPlace:coordinated:visibility:]",
+     "kind": "method",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "a provider for the file under the content type's own identifier -- the header's rule for a nil contentType is to deduce it from the extension -- with the visibility and the openInPlace file option registered on it and the file's name in suggestedName, which is what the header documents the initialiser to do",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "-[NSItemProvider registerDataRepresentationForContentType:visibility:loadHandler:]",
+     "kind": "method",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the same registration under the content type's own identifier",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "-[NSItemProvider registerFileRepresentationForContentType:visibility:openInPlace:loadHandler:]",
+     "kind": "method",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the same registration under the content type's own identifier, with openInPlace: as the one bit of the older API's file options mask",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "-[NSItemProvider registeredContentTypesConformingToContentType:]",
+     "kind": "method",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the registered content types that conform to the given one, in the order they were registered, each conformance tested by the release's own UTTypeConformsTo",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "-[NSItemProvider loadDataRepresentationForContentType:completionHandler:]",
+     "kind": "method",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the data of the representation registered for the content type",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "-[NSItemProvider loadFileRepresentationForContentType:openInPlace:completionHandler:]",
+     "kind": "method",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the file of the representation registered for the content type, opened in place when openInPlace is YES and copied out of it when it is not, which is what the completion block's openInPlace parameter reports",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "NSItemProvider.registeredContentTypes",
+     "kind": "property",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "every registered type, as UTTypes, in the order they were registered",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  },
+  {
+     "api": "NSItemProvider.registeredContentTypesForOpenInPlace",
+     "kind": "property",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "every registered type that can be loaded as a file opened in place, as UTTypes",
+     "facts": "facts/UIKit/NSItemProviderUTType.md",
+     "source": "SDK 26.2's UniformTypeIdentifiers/NSItemProvider+UTType.h for the surface and the rules, over the port's own NSItemProvider (UIKit/NSItemProviderUTType16.m onto the class UIKit/NSItemProvider.m implements) and the release's UTI functions underneath it"
+  }
+ ]
+}

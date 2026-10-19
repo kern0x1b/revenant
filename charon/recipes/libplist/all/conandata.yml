@@ -1,0 +1,4 @@
+sources:
+  2.7.0:
+    sha256: 7ac42301e896b1ebe3c654634780c82baa7cb70df8554e683ff89f7c2643eb8b
+    url: https://github.com/libimobiledevice/libplist/releases/download/2.7.0/libplist-2.7.0.tar.bz2

@@ -1,0 +1,125 @@
+{
+ "entries": [
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureDigestRFC4754",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureDigestRFC4754",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA1",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA1",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA224",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA224",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA256",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA256",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA384",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA384",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA512",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA512",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA1",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA1",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA224",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA224",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA256",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA256",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA384",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA384",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  },
+  {
+   "api": "kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA512",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/Security/RFC4754Constants.md",
+   "introduced": "17.0",
+   "kind": "constant",
+   "minimum": "6.0",
+   "reason": "build the constant kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA512",
+   "source": "the host's Security.framework by dlsym in tests/backports/host/commoncrypto/differential-constants.c; the 6.1.3 Security image exports no name containing RFC4754 (tools/image-exports.lua, 660 exports); the SDK 26.2 declaration of the name, SecKey.h",
+   "status": "owed"
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+interface	c:objc(cs)DDMatch	-			-	-	-	ios=15.0/-/-/0	-	87f4813c3ed0bb1a	-
+super	-	DDMatch	NSObject		-	-	-	-	-	a3877c745732ccba	-
+property	c:objc(cs)DDMatch(py)matchedString	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	8c48206eba2cadf4	-
+method	c:objc(cs)DDMatch(im)init	-			instancetype	-	-	*unavailable ios=15.0/-/-/0	-	dd9f8569be4632e1	-
+interface	c:objc(cs)DDMatchLink	-			-	-	-	ios=15.0/-/-/0	-	939e5219111edcbe	-
+super	-	DDMatchLink	DDMatch		-	-	-	-	-	d7511d870d4b52f4	-
+property	c:objc(cs)DDMatchLink(py)URL	-			NSURL *	-	readonly,nonatomic	ios=15.0/-/-/0	-	3c40c4cf98648b76	-
+interface	c:objc(cs)DDMatchPhoneNumber	-			-	-	-	ios=15.0/-/-/0	-	300aabb7df28faaa	-
+super	-	DDMatchPhoneNumber	DDMatch		-	-	-	-	-	843f02b19dae0c9b	-
+property	c:objc(cs)DDMatchPhoneNumber(py)phoneNumber	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	eb2fee6df362f695	-
+property	c:objc(cs)DDMatchPhoneNumber(py)label	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	11cb517a4d9e14b9	-
+interface	c:objc(cs)DDMatchEmailAddress	-			-	-	-	ios=15.0/-/-/0	-	7402762a350fe83a	-
+super	-	DDMatchEmailAddress	DDMatch		-	-	-	-	-	7459a3a917a5d718	-
+property	c:objc(cs)DDMatchEmailAddress(py)emailAddress	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	6d4de3544d57fb71	-
+property	c:objc(cs)DDMatchEmailAddress(py)label	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	c1f6e94fadf25f97	-
+interface	c:objc(cs)DDMatchPostalAddress	-			-	-	-	ios=15.0/-/-/0	-	ac3ad71d602a61f4	-
+super	-	DDMatchPostalAddress	DDMatch		-	-	-	-	-	518db1bb81244631	-
+property	c:objc(cs)DDMatchPostalAddress(py)street	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	4adc3457fc8c39f7	-
+property	c:objc(cs)DDMatchPostalAddress(py)city	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	a78b86d6e3eb6766	-
+property	c:objc(cs)DDMatchPostalAddress(py)state	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	af16baa2c548df72	-
+property	c:objc(cs)DDMatchPostalAddress(py)postalCode	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	2473a02086dbfd62	-
+property	c:objc(cs)DDMatchPostalAddress(py)country	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	03874e2f65118ca8	-
+interface	c:objc(cs)DDMatchCalendarEvent	-			-	-	-	ios=15.0/-/-/0	-	114de4a8a940a73a	-
+super	-	DDMatchCalendarEvent	DDMatch		-	-	-	-	-	a93636b58e4d73b0	-
+property	c:objc(cs)DDMatchCalendarEvent(py)allDay	-			BOOL	-	readonly,nonatomic,getter=isAllDay	ios=15.0/-/-/0	-	1a1e51d404b476f3	-
+property	c:objc(cs)DDMatchCalendarEvent(py)startDate	-			NSDate *	-	readonly,nonatomic	ios=15.0/-/-/0	-	00910497f787eb4c	-
+property	c:objc(cs)DDMatchCalendarEvent(py)startTimeZone	-			NSTimeZone *	-	readonly,nonatomic	ios=15.0/-/-/0	-	06a00d0610002a95	-
+property	c:objc(cs)DDMatchCalendarEvent(py)endDate	-			NSDate *	-	readonly,nonatomic	ios=15.0/-/-/0	-	356699cbec37c4fa	-
+property	c:objc(cs)DDMatchCalendarEvent(py)endTimeZone	-			NSTimeZone *	-	readonly,nonatomic	ios=15.0/-/-/0	-	f83ed7046197df9d	-
+interface	c:objc(cs)DDMatchShipmentTrackingNumber	-			-	-	-	ios=15.0/-/-/0	-	27af318832c456c0	-
+super	-	DDMatchShipmentTrackingNumber	DDMatch		-	-	-	-	-	b81f6828940ee8a1	-
+property	c:objc(cs)DDMatchShipmentTrackingNumber(py)carrier	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	8e452df507b0fbd2	-
+property	c:objc(cs)DDMatchShipmentTrackingNumber(py)trackingNumber	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	f970096002231f74	-
+interface	c:objc(cs)DDMatchFlightNumber	-			-	-	-	ios=15.0/-/-/0	-	593d4b2ab0b2676a	-
+super	-	DDMatchFlightNumber	DDMatch		-	-	-	-	-	c9f0319057a52b5b	-
+property	c:objc(cs)DDMatchFlightNumber(py)airline	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	3f1eb9fb6ac295a6	-
+property	c:objc(cs)DDMatchFlightNumber(py)flightNumber	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	e60686056a935304	-
+interface	c:objc(cs)DDMatchMoneyAmount	-			-	-	-	ios=15.0/-/-/0	-	b0b3136be7058900	-
+super	-	DDMatchMoneyAmount	DDMatch		-	-	-	-	-	5c1a314ce75c1262	-
+property	c:objc(cs)DDMatchMoneyAmount(py)currency	-			NSString *	-	readonly,nonatomic	ios=15.0/-/-/0	-	49718a327499d348	-
+property	c:objc(cs)DDMatchMoneyAmount(py)amount	-			double	-	readonly,nonatomic	ios=15.0/-/-/0	-	2ba6fd6ee99513a7	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

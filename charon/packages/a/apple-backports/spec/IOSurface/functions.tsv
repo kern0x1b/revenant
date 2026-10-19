@@ -1,0 +1,10 @@
+api	introduced	status	reasons	returns	params	decl
+IOSurfaceAllowsPixelSizeCasting	11.0	generable		Boolean	IOSurfaceRef buffer	Boolean IOSurfaceAllowsPixelSizeCasting(IOSurfaceRef buffer)
+IOSurfaceGetBitDepthOfComponentOfPlane	11.0	generable		size_t	IOSurfaceRef buffer; size_t planeIndex; size_t componentIndex	size_t IOSurfaceGetBitDepthOfComponentOfPlane(IOSurfaceRef buffer, size_t planeIndex, size_t componentIndex)
+IOSurfaceGetBitOffsetOfComponentOfPlane	11.0	generable		size_t	IOSurfaceRef buffer; size_t planeIndex; size_t componentIndex	size_t IOSurfaceGetBitOffsetOfComponentOfPlane(IOSurfaceRef buffer, size_t planeIndex, size_t componentIndex)
+IOSurfaceGetNameOfComponentOfPlane	11.0	generable		IOSurfaceComponentName	IOSurfaceRef buffer; size_t planeIndex; size_t componentIndex	IOSurfaceComponentName IOSurfaceGetNameOfComponentOfPlane(IOSurfaceRef buffer, size_t planeIndex, size_t componentIndex)
+IOSurfaceGetNumberOfComponentsOfPlane	11.0	generable		size_t	IOSurfaceRef buffer; size_t planeIndex	size_t IOSurfaceGetNumberOfComponentsOfPlane(IOSurfaceRef buffer, size_t planeIndex)
+IOSurfaceGetRangeOfComponentOfPlane	11.0	generable		IOSurfaceComponentRange	IOSurfaceRef buffer; size_t planeIndex; size_t componentIndex	IOSurfaceComponentRange IOSurfaceGetRangeOfComponentOfPlane(IOSurfaceRef buffer, size_t planeIndex, size_t componentIndex)
+IOSurfaceGetSubsampling	11.0	generable		IOSurfaceSubsampling	IOSurfaceRef buffer	IOSurfaceSubsampling IOSurfaceGetSubsampling(IOSurfaceRef buffer)
+IOSurfaceGetTypeOfComponentOfPlane	11.0	generable		IOSurfaceComponentType	IOSurfaceRef buffer; size_t planeIndex; size_t componentIndex	IOSurfaceComponentType IOSurfaceGetTypeOfComponentOfPlane(IOSurfaceRef buffer, size_t planeIndex, size_t componentIndex)
+IOSurfaceSetOwnershipIdentity	17.4	generable		kern_return_t	IOSurfaceRef buffer; task_id_token_t task_id_token; int newLedgerTag; uint32_t newLedgerOptions	kern_return_t IOSurfaceSetOwnershipIdentity(IOSurfaceRef buffer, task_id_token_t task_id_token, int newLedgerTag, uint32_t newLedgerOptions)

@@ -1,0 +1,60 @@
+{
+  "assertion" : "these cases mention no network operation selector, so every answer below is an in-memory one",
+  "cases" : {
+    "archiveRoundTrip" : {
+      "decoded" : "yes",
+      "equal" : false,
+      "raised" : "no",
+      "zoneName" : "probe"
+    },
+    "defaultRecordZone" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1054a8eb0; zoneID=_defaultZone:__defaultOwner__, capabilities=(none), encryptionScope=per-record, share=<null>>",
+      "encryptionScope" : 0,
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "share" : "(nil)",
+      "zoneID.ownerName" : "__defaultOwner__",
+      "zoneID.zoneName" : "_defaultZone"
+    },
+    "init" : {
+      "raised" : "no",
+      "value" : "(nil)"
+    },
+    "initWithZoneID" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1054a7fe0; zoneID=probe:__defaultOwner__, capabilities=(none), encryptionScope=per-record, share=<null>>",
+      "encryptionScope" : 0,
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "share" : "(nil)",
+      "zoneID.ownerName" : "__defaultOwner__",
+      "zoneID.zoneName" : "probe"
+    },
+    "initWithZoneName" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1054a5ee0; zoneID=probe:__defaultOwner__, capabilities=(none), encryptionScope=per-record, share=<null>>",
+      "encryptionScope" : 0,
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "share" : "(nil)",
+      "zoneID.ownerName" : "__defaultOwner__",
+      "zoneID.zoneName" : "probe"
+    },
+    "new" : {
+      "capabilities" : 0,
+      "copyIsEqual" : false,
+      "description" : "<CKRecordZone: 0x1054a8b50; zoneID=<null>, capabilities=(none), encryptionScope=per-record, share=<null>>",
+      "encryptionScope" : 0,
+      "equalToSelf" : true,
+      "hashIsStable" : 1,
+      "share" : "(nil)",
+      "zoneID.ownerName" : "(nil)",
+      "zoneID.zoneName" : "(nil)"
+    }
+  },
+  "conditions" : "in memory only: no CKDatabase operation method is called, no network, no account read and no state changed"
+}

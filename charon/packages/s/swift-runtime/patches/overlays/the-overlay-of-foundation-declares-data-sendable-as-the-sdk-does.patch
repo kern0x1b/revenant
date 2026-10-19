@@ -1,0 +1,12 @@
+diff --git a/stdlib/public/Darwin/Foundation/Data.swift b/stdlib/public/Darwin/Foundation/Data.swift
+--- a/stdlib/public/Darwin/Foundation/Data.swift
++++ b/stdlib/public/Darwin/Foundation/Data.swift
+@@ -636,7 +636,7 @@ internal class __NSSwiftData : NSData {
+ }
+ 
+ @frozen
+-public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessCollection, MutableCollection, RangeReplaceableCollection, MutableDataProtocol, ContiguousBytes {
++public struct Data : ReferenceConvertible, Equatable, Hashable, RandomAccessCollection, MutableCollection, RangeReplaceableCollection, MutableDataProtocol, ContiguousBytes, Sendable {
+     public typealias ReferenceType = NSData
+ 
+     public typealias ReadingOptions = NSData.ReadingOptions

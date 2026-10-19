@@ -1,0 +1,27 @@
+{
+  "framework": "CoreText",
+  "entries": [
+    {
+      "api": "kCTLanguageAttributeName",
+      "kind": "constant",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string NSLanguage",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kCTRubyAnnotationAttributeName",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string CTRubyAnnotation",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    }
+  ]
+}

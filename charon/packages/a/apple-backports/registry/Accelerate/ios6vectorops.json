@@ -1,0 +1,14 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vDSP_vsmsma()",
+      "kind": "function",
+      "status": "implemented",
+      "introduced": "6.0",
+      "minimum": "4.3",
+      "facts": "facts/Accelerate/vDSPPlacement.md",
+      "source": "the header of iOS 16.4, which declares it at 6.0 with the Maps line; measured on the host so far, and the 6.1.3 armv7 guest is the oracle and has not run"
+    }
+  ]
+}

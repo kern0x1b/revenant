@@ -1,0 +1,15 @@
+{
+ "framework": "NaturalLanguage",
+ "entries": [
+  {
+     "api": "NLLanguageKazakh",
+     "kind": "constant",
+     "introduced": "16.0",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the language kk, the code NLLanguageRecognizer answers -languageOfString: with and the one -[NLTagger setLanguage:] compares",
+     "facts": "facts/NaturalLanguage/Constants.md",
+     "source": "the host's own NaturalLanguage, read one dlsym per constant by tests/backports/host/naturaltags, which wrote values.tsv from it and re-runs against that table on every run (142 checks, 0 different); no SDK header states a value for any of these names, which is why the system's own framework is the source and a header would be an invention"
+  }
+ ]
+}

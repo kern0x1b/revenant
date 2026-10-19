@@ -1,0 +1,25 @@
+--- a/llvm-project/libcxxabi/CMakeLists.txt
++++ b/llvm-project/libcxxabi/CMakeLists.txt
+@@ -82,6 +82,11 @@
+ library to try comparing the type_info names to see if they are equal \
+ instead." OFF)
+ 
++option(LIBCXXABI_REEXPORT_FROM_LIBCXX
++  "Have libc++ re-export the libc++abi symbols on Apple platforms. Turn this off
++   for a deployment target older than the linker accepts -reexported_symbols_list
++   for (iOS 4.2, macOS 10.7); clients then link libc++abi themselves." ON)
++
+ option(LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS
+   "Build libc++abi with definitions for operator new/delete. These are normally
+    defined in libc++abi, but it is also possible to define them in libc++, in
+--- a/llvm-project/libcxxabi/src/CMakeLists.txt
++++ b/llvm-project/libcxxabi/src/CMakeLists.txt
+@@ -241,7 +241,7 @@
+   function(reexport_symbols file)
+     export_symbols("${file}")
+     # -reexported_symbols_list is only available on Apple platforms
+-    if (APPLE)
++    if (APPLE AND LIBCXXABI_REEXPORT_FROM_LIBCXX)
+       target_link_libraries(cxxabi-reexports INTERFACE "-Wl,-reexported_symbols_list,${file}")
+     endif()
+   endfunction()

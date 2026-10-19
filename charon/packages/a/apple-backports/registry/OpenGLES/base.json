@@ -1,0 +1,952 @@
+{"framework": "OpenGLES", "entries": [
+  {
+    "api": "glReadBuffer()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glReadBuffer()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glTexImage3D()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glTexImage3D()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glTexSubImage3D()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glTexSubImage3D()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glCopyTexSubImage3D()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glCopyTexSubImage3D()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGenQueries()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glDeleteQueries()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glIsQuery()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glBeginQuery()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glEndQuery()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGetQueryiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGetQueryObjectuiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glDrawBuffers()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glDrawBuffers()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformMatrix2x3fv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformMatrix2x3fv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformMatrix3x2fv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformMatrix3x2fv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformMatrix2x4fv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformMatrix2x4fv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformMatrix4x2fv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformMatrix4x2fv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformMatrix3x4fv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformMatrix3x4fv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformMatrix4x3fv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformMatrix4x3fv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glBlitFramebuffer()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glBlitFramebuffer()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glRenderbufferStorageMultisample()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glFramebufferTextureLayer()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glFramebufferTextureLayer()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glMapBufferRange()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glFlushMappedBufferRange()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glBindVertexArray()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glDeleteVertexArrays()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGenVertexArrays()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glIsVertexArray()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGetIntegeri_v()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetIntegeri_v()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glBeginTransformFeedback()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glBeginTransformFeedback()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glEndTransformFeedback()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glEndTransformFeedback()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glBindBufferRange()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glBindBufferRange()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glBindBufferBase()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glBindBufferBase()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glTransformFeedbackVaryings()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glTransformFeedbackVaryings()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetTransformFeedbackVarying()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetTransformFeedbackVarying()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glVertexAttribIPointer()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glVertexAttribIPointer()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetVertexAttribIiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetVertexAttribIiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetVertexAttribIuiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetVertexAttribIuiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glVertexAttribI4i()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glVertexAttribI4i()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glVertexAttribI4ui()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glVertexAttribI4ui()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glVertexAttribI4iv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glVertexAttribI4iv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glVertexAttribI4uiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glVertexAttribI4uiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetUniformuiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetUniformuiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetFragDataLocation()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetFragDataLocation()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform1ui()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform1ui()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform2ui()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform2ui()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform3ui()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform3ui()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform4ui()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform4ui()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform1uiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform1uiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform2uiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform2uiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform3uiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform3uiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniform4uiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniform4uiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glClearBufferiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glClearBufferiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glClearBufferuiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glClearBufferuiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glClearBufferfv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glClearBufferfv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glClearBufferfi()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glClearBufferfi()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetStringi()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glCopyBufferSubData()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glCopyBufferSubData()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetUniformIndices()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetUniformIndices()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetActiveUniformsiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetActiveUniformsiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetUniformBlockIndex()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetUniformBlockIndex()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetActiveUniformBlockiv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetActiveUniformBlockiv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetActiveUniformBlockName()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetActiveUniformBlockName()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glUniformBlockBinding()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glUniformBlockBinding()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glDrawArraysInstanced()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glDrawArraysInstanced()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glDrawElementsInstanced()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glDrawElementsInstanced()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glFenceSync()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glIsSync()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glDeleteSync()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glClientWaitSync()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glWaitSync()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGetInteger64v()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGetSynciv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glGetInteger64i_v()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetInteger64i_v()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetBufferParameteri64v()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetBufferParameteri64v()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGenSamplers()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGenSamplers()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glDeleteSamplers()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glDeleteSamplers()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glIsSampler()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glIsSampler()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glBindSampler()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glBindSampler()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glSamplerParameteri()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glSamplerParameteri()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glSamplerParameteriv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glSamplerParameteriv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glSamplerParameterf()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glSamplerParameterf()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glSamplerParameterfv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glSamplerParameterfv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetSamplerParameteriv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetSamplerParameteriv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetSamplerParameterfv()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetSamplerParameterfv()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glVertexAttribDivisor()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glVertexAttribDivisor()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glBindTransformFeedback()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glBindTransformFeedback()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glDeleteTransformFeedbacks()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glDeleteTransformFeedbacks()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGenTransformFeedbacks()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGenTransformFeedbacks()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glIsTransformFeedback()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glIsTransformFeedback()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glPauseTransformFeedback()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glPauseTransformFeedback()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glResumeTransformFeedback()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glResumeTransformFeedback()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetProgramBinary()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetProgramBinary()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glProgramBinary()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glProgramBinary()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glProgramParameteri()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glInvalidateFramebuffer()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glInvalidateSubFramebuffer()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glInvalidateSubFramebuffer()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glTexStorage2D()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "implemented",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has"
+  },
+  {
+    "api": "glTexStorage3D()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glTexStorage3D()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "glGetInternalformativ()",
+    "kind": "function",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "source": "the ES 3.0 header of the SDK against its ES 2.0 header for the names, and the shared caches of iOS 6.0 to 7.0.1 for the extensions the release has",
+    "reason": "build the function glGetInternalformativ()",
+    "effect": "a stand-in is built and answers; the real behaviour is owed"
+  },
+  {
+    "api": "kEAGLColorFormatSRGBA8",
+    "kind": "constant",
+    "introduced": "7.0",
+    "status": "owed",
+    "facts": "facts/OpenGLES/ES3Functions.md",
+    "reason": "build the constant kEAGLColorFormatSRGBA8",
+    "effect": "a stand-in is built and answers; the real behaviour is owed",
+    "source": "the SDK header for the name; the release's EAGL for the drawable"
+  }
+]}

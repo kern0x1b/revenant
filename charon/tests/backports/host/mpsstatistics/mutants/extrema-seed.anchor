@@ -1,0 +1,1 @@
+    double smallest = INFINITY, largest = -INFINITY;

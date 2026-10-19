@@ -1,0 +1,129 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@ALAssetOrientation	-			enum ALAssetOrientation	-	-	-	-	4c4dc08831c288af	-
+enum	c:@E@ALAssetOrientation	-			NSInteger	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	583fd0beb0e8d6f0	-
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationUp	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	878f7897679c4949	0
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationDown	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	51ce15f88ddb7b2d	1
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationLeft	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	317400cc5b3d06b4	2
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationRight	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	8636ed012fa9a406	3
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationUpMirrored	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	7dbbec88ab82a2fa	4
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationDownMirrored	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	8b6981e4902c0e36	5
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationLeftMirrored	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	1987f1ec3ade49ae	6
+enumconst	c:@E@ALAssetOrientation@ALAssetOrientationRightMirrored	ALAssetOrientation			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	2dea29ea01112c9c	7
+enum	c:@Ea@ALAssetsGroupLibrary	-	-		unsigned int	-	-	-	-	a19f2c1b890f0899	-
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupLibrary	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a406120f0d9c732c	1
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupAlbum	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	b2e55ab56bd65dd6	2
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupEvent	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	ae242b32bc945aa6	4
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupFaces	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	c4f26f8d22f9e466	8
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupSavedPhotos	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	faa5a75c591487bf	16
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupPhotoStream	-			-	-	-	ios=5/9/26.0/0,macos=-/-/-/1	-	5bbde727c7c22ffc	32
+enumconst	c:@Ea@ALAssetsGroupLibrary@ALAssetsGroupAll	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	c9d4b9354aa008c9	4294967295
+typedef	c:@T@ALAssetsGroupType	-			NSUInteger	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	d02509d477ce1492	-
+typedef	c:@T@ALAuthorizationStatus	-			enum ALAuthorizationStatus	-	-	-	-	fe9848fd38c90bda	-
+enum	c:@E@ALAuthorizationStatus	-			NSInteger	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	c291c6a0183b0812	-
+enumconst	c:@E@ALAuthorizationStatus@ALAuthorizationStatusNotDetermined	ALAuthorizationStatus			-	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	7ae89769a78d865c	0
+enumconst	c:@E@ALAuthorizationStatus@ALAuthorizationStatusRestricted	ALAuthorizationStatus			-	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	d24c764e8310d3c9	1
+enumconst	c:@E@ALAuthorizationStatus@ALAuthorizationStatusDenied	ALAuthorizationStatus			-	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	9c0ca2b0fa95e055	2
+enumconst	c:@E@ALAuthorizationStatus@ALAuthorizationStatusAuthorized	ALAuthorizationStatus			-	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	b19c8eabac67022f	3
+typedef	c:@T@ALAssetsLibraryGroupsEnumerationResultsBlock	-			void ((^))(ALAssetsGroup *, BOOL *)	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	2a1d65919fff6cfa	-
+typedef	c:@T@ALAssetsLibraryAssetForURLResultBlock	-			void ((^))(ALAsset *)	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	73f377c294c14301	-
+typedef	c:@T@ALAssetsLibraryGroupResultBlock	-			void ((^))(ALAssetsGroup *)	-	-	ios=5/9/26.0/0,macos=-/-/-/1	-	d9d605b414f7743a	-
+typedef	c:@T@ALAssetsLibraryAccessFailureBlock	-			void ((^))(NSError *)	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	3d14d601c63523ab	-
+typedef	c:@T@ALAssetsLibraryWriteImageCompletionBlock	-			void ((^))(NSURL *, NSError *)	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	4c52ab54c748728d	-
+typedef	c:@T@ALAssetsLibraryWriteVideoCompletionBlock	-			void ((^))(NSURL *, NSError *)	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	92af47735f4c9a05	-
+interface	c:objc(cs)ALAssetsLibrary	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a5ae4256318ebc48	-
+super	-	ALAssetsLibrary	NSObject		-	-	-	-	-	d4c08b159d058a21	-
+method	c:objc(cs)ALAssetsLibrary(im)enumerateGroupsWithTypes:usingBlock:failureBlock:	-			void	ALAssetsGroupType types | ALAssetsLibraryGroupsEnumerationResultsBlock enumerationBlock | ALAssetsLibraryAccessFailureBlock failureBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a7fc0e3f63c71f15	-
+method	c:objc(cs)ALAssetsLibrary(im)assetForURL:resultBlock:failureBlock:	-			void	NSURL * assetURL | ALAssetsLibraryAssetForURLResultBlock resultBlock | ALAssetsLibraryAccessFailureBlock failureBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	8d78ef82c66a1325	-
+method	c:objc(cs)ALAssetsLibrary(im)groupForURL:resultBlock:failureBlock:	-			void	NSURL * groupURL | ALAssetsLibraryGroupResultBlock resultBlock | ALAssetsLibraryAccessFailureBlock failureBlock	-	ios=5/9/26.0/0,macos=-/-/-/1	-	afcd59042273ae76	-
+method	c:objc(cs)ALAssetsLibrary(im)addAssetsGroupAlbumWithName:resultBlock:failureBlock:	-			void	NSString * name | ALAssetsLibraryGroupResultBlock resultBlock | ALAssetsLibraryAccessFailureBlock failureBlock	-	ios=5/9/26.0/0,macos=-/-/-/1	-	495690ca82bce3f6	-
+method	c:objc(cs)ALAssetsLibrary(im)writeImageToSavedPhotosAlbum:orientation:completionBlock:	-			void	CGImageRef imageRef | ALAssetOrientation orientation | ALAssetsLibraryWriteImageCompletionBlock completionBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	858bca6034095bd0	-
+method	c:objc(cs)ALAssetsLibrary(im)writeImageToSavedPhotosAlbum:metadata:completionBlock:	-			void	CGImageRef imageRef | NSDictionary * metadata | ALAssetsLibraryWriteImageCompletionBlock completionBlock	-	ios=4.1/9/26.0/0,macos=-/-/-/1	-	104fcd26c8a7fd1b	-
+method	c:objc(cs)ALAssetsLibrary(im)writeImageDataToSavedPhotosAlbum:metadata:completionBlock:	-			void	NSData * imageData | NSDictionary * metadata | ALAssetsLibraryWriteImageCompletionBlock completionBlock	-	ios=4.1/9/26.0/0,macos=-/-/-/1	-	c74d5b3dc51c0342	-
+method	c:objc(cs)ALAssetsLibrary(im)writeVideoAtPathToSavedPhotosAlbum:completionBlock:	-			void	NSURL * videoPathURL | ALAssetsLibraryWriteVideoCompletionBlock completionBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	008186c0b58d8a94	-
+method	c:objc(cs)ALAssetsLibrary(im)videoAtPathIsCompatibleWithSavedPhotosAlbum:	-			BOOL	NSURL * videoPathURL	-	ios=5/9/26.0/0,macos=-/-/-/1	-	c24fb0dd853e8ed6	-
+method	c:objc(cs)ALAssetsLibrary(cm)authorizationStatus	-			ALAuthorizationStatus	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	72ceada2728c7f44	-
+method	c:objc(cs)ALAssetsLibrary(cm)disableSharedPhotoStreamsSupport	-			void	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	3bed955c68ce7c94	-
+var	c:@ALAssetsLibraryChangedNotification	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	7a6cfc88abaf122b	-
+var	c:@ALAssetLibraryUpdatedAssetsKey	-			NSString *const	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	ccd4cc76b74674a3	-
+var	c:@ALAssetLibraryInsertedAssetGroupsKey	-			NSString *const	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	76a3fbe4e9a34cf7	-
+var	c:@ALAssetLibraryUpdatedAssetGroupsKey	-			NSString *const	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	a23e6af12fd2408e	-
+var	c:@ALAssetLibraryDeletedAssetGroupsKey	-			NSString *const	-	-	ios=6/9/26.0/0,macos=-/-/-/1	-	660c81d1a9d43a21	-
+var	c:@ALAssetsLibraryErrorDomain	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	98d11f956437d0c8	-
+enum	c:@Ea@ALAssetsLibraryUnknownError	-	-		int	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	cda5ab2c2cf50f59	-
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryUnknownError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	266770bdac28c4ae	-1
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryWriteFailedError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	0542432e2fafaa4d	-3300
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryWriteBusyError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	94f9c5a167e911ac	-3301
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryWriteInvalidDataError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	bcb5a2f8e1da425c	-3302
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryWriteIncompatibleDataError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	93c53e50cc88fc1c	-3303
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryWriteDataEncodingError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	bfdd37057c44ec0b	-3304
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryWriteDiskSpaceError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	1c84ffe418219b8f	-3305
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryDataUnavailableError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	6e1322ba6af0c66a	-3310
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryAccessUserDeniedError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	d4c00d4fda53a1cc	-3311
+enumconst	c:@Ea@ALAssetsLibraryUnknownError@ALAssetsLibraryAccessGloballyDeniedError	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	d81d03f0638d5ab1	-3312
+var	c:@ALErrorInvalidProperty	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	5dff82b05ce6a851	-
+var	c:@ALAssetPropertyType	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	5510e9155aaa58de	-
+var	c:@ALAssetPropertyLocation	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	37484a156fd34d3a	-
+var	c:@ALAssetPropertyDuration	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	4200ae391a928f66	-
+var	c:@ALAssetPropertyOrientation	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	3b489827922f9414	-
+var	c:@ALAssetPropertyDate	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	10c6c296b1ba5ad9	-
+var	c:@ALAssetPropertyRepresentations	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	35a9c95dd64c6c30	-
+var	c:@ALAssetPropertyURLs	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	e5112a61f0f9a314	-
+var	c:@ALAssetPropertyAssetURL	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	1fd7f8a62b2d7b9f	-
+var	c:@ALAssetTypePhoto	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	6b61fba71ac203f1	-
+var	c:@ALAssetTypeVideo	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	1270f103dad9c61c	-
+var	c:@ALAssetTypeUnknown	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	8deaa20da439dd35	-
+interface	c:objc(cs)ALAsset	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	558499e911b25bab	-
+super	-	ALAsset	NSObject		-	-	-	-	-	6dcf019a01a82804	-
+method	c:objc(cs)ALAsset(im)valueForProperty:	-			id	NSString * property	-	ios=4/9/26.0/0,macos=-/-/-/1	-	d8124c92dc4fe684	-
+method	c:objc(cs)ALAsset(im)defaultRepresentation	-			ALAssetRepresentation *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a058c78fc452ecd0	-
+method	c:objc(cs)ALAsset(im)representationForUTI:	-			ALAssetRepresentation *	NSString * representationUTI	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a9a9bda1d70ce7cc	-
+method	c:objc(cs)ALAsset(im)thumbnail	-			CGImageRef	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	b076dfd0ecd1800f	-
+method	c:objc(cs)ALAsset(im)aspectRatioThumbnail	-			CGImageRef	-	-	ios=5/9/26.0/0,macos=-/-/-/1	-	2bd0c6fc16c34661	-
+method	c:objc(cs)ALAsset(im)writeModifiedImageDataToSavedPhotosAlbum:metadata:completionBlock:	-			void	NSData * imageData | NSDictionary * metadata | ALAssetsLibraryWriteImageCompletionBlock completionBlock	-	ios=5/9/26.0/0,macos=-/-/-/1	-	fd2cea9dc6b0fee2	-
+method	c:objc(cs)ALAsset(im)writeModifiedVideoAtPathToSavedPhotosAlbum:completionBlock:	-			void	NSURL * videoPathURL | ALAssetsLibraryWriteVideoCompletionBlock completionBlock	-	ios=5/9/26.0/0,macos=-/-/-/1	-	d36b1a0b19b143e1	-
+property	c:objc(cs)ALAsset(py)originalAsset	-			ALAsset *	-	readonly,nonatomic	ios=5/9/26.0/0,macos=-/-/-/1	-	06858925f82c2782	-
+property	c:objc(cs)ALAsset(py)editable	-			BOOL	-	readonly,nonatomic,getter=isEditable	ios=5/9/26.0/0,macos=-/-/-/1	-	ee83fb7be8eed681	-
+method	c:objc(cs)ALAsset(im)setImageData:metadata:completionBlock:	-			void	NSData * imageData | NSDictionary * metadata | ALAssetsLibraryWriteImageCompletionBlock completionBlock	-	ios=5/9/26.0/0,macos=-/-/-/1	-	841c28567a80a66b	-
+method	c:objc(cs)ALAsset(im)setVideoAtPath:completionBlock:	-			void	NSURL * videoPathURL | ALAssetsLibraryWriteVideoCompletionBlock completionBlock	-	ios=5/9/26.0/0,macos=-/-/-/1	-	c24d5e24d4cb079c	-
+interface	c:objc(cs)ALAssetsFilter	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a99325c2aa2050e4	-
+super	-	ALAssetsFilter	NSObject		-	-	-	-	-	659dd4592838abd4	-
+method	c:objc(cs)ALAssetsFilter(cm)allPhotos	-			ALAssetsFilter *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	fea2f543d7e98f58	-
+method	c:objc(cs)ALAssetsFilter(cm)allVideos	-			ALAssetsFilter *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	270919fcfbaae078	-
+method	c:objc(cs)ALAssetsFilter(cm)allAssets	-			ALAssetsFilter *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	e6e5de55ec1b27e4	-
+typedef	c:@T@ALAssetsGroupEnumerationResultsBlock	-			void ((^))(ALAsset *, NSUInteger, BOOL *)	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	71c0e1e59cb5d78a	-
+var	c:@ALAssetsGroupPropertyName	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	afc293301ff10432	-
+var	c:@ALAssetsGroupPropertyType	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	b97c698ab8f41320	-
+var	c:@ALAssetsGroupPropertyPersistentID	-			NSString *const	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	1ebe8a7a17182d7e	-
+var	c:@ALAssetsGroupPropertyURL	-			NSString *const	-	-	ios=5/9/26.0/0,macos=-/-/-/1	-	4cc97bfdcc0b1e1f	-
+interface	c:objc(cs)ALAssetsGroup	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	570e2c2837dfce37	-
+super	-	ALAssetsGroup	NSObject		-	-	-	-	-	9275cff502dff619	-
+method	c:objc(cs)ALAssetsGroup(im)valueForProperty:	-			id	NSString * property	-	ios=4/9/26.0/0,macos=-/-/-/1	-	164d5f011172b43b	-
+method	c:objc(cs)ALAssetsGroup(im)posterImage	-			CGImageRef	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	fd2ba841e6581f9e	-
+method	c:objc(cs)ALAssetsGroup(im)setAssetsFilter:	-			void	ALAssetsFilter * filter	-	ios=4/9/26.0/0,macos=-/-/-/1	-	360112a1e6606bde	-
+method	c:objc(cs)ALAssetsGroup(im)numberOfAssets	-			NSInteger	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	dd5583fd55fe166d	-
+method	c:objc(cs)ALAssetsGroup(im)enumerateAssetsUsingBlock:	-			void	ALAssetsGroupEnumerationResultsBlock enumerationBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	810963832c9e1d97	-
+method	c:objc(cs)ALAssetsGroup(im)enumerateAssetsWithOptions:usingBlock:	-			void	NSEnumerationOptions options | ALAssetsGroupEnumerationResultsBlock enumerationBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	855e7ea9a4af8d80	-
+method	c:objc(cs)ALAssetsGroup(im)enumerateAssetsAtIndexes:options:usingBlock:	-			void	NSIndexSet * indexSet | NSEnumerationOptions options | ALAssetsGroupEnumerationResultsBlock enumerationBlock	-	ios=4/9/26.0/0,macos=-/-/-/1	-	b67ea8b1fc53b30b	-
+property	c:objc(cs)ALAssetsGroup(py)editable	-			BOOL	-	readonly,nonatomic,getter=isEditable	ios=5/9/26.0/0,macos=-/-/-/1	-	afa7143908ba3ca0	-
+method	c:objc(cs)ALAssetsGroup(im)addAsset:	-			BOOL	ALAsset * asset	-	ios=5/9/26.0/0,macos=-/-/-/1	-	47101d2dbb30e06a	-
+interface	c:objc(cs)ALAssetRepresentation	-			-	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	4cdda0d2988bd0d0	-
+super	-	ALAssetRepresentation	NSObject		-	-	-	-	-	237c57473d83cdbb	-
+method	c:objc(cs)ALAssetRepresentation(im)UTI	-			NSString *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	ab438cb81d3886ee	-
+method	c:objc(cs)ALAssetRepresentation(im)dimensions	-			CGSize	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	653f8a38a5a86560	-
+method	c:objc(cs)ALAssetRepresentation(im)size	-			long long	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	11934448ee4afa3e	-
+method	c:objc(cs)ALAssetRepresentation(im)getBytes:fromOffset:length:error:	-			NSUInteger	uint8_t * buffer | long long offset | NSUInteger length | NSError ** error	-	ios=4/9/26.0/0,macos=-/-/-/1	-	d04490fd5f21b395	-
+method	c:objc(cs)ALAssetRepresentation(im)fullResolutionImage	-			CGImageRef	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	e8c47add3406a201	-
+method	c:objc(cs)ALAssetRepresentation(im)CGImageWithOptions:	-			CGImageRef	NSDictionary * options	-	ios=4/9/26.0/0,macos=-/-/-/1	-	686ee46daf3bd404	-
+method	c:objc(cs)ALAssetRepresentation(im)fullScreenImage	-			CGImageRef	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	e8b857f11415c58c	-
+method	c:objc(cs)ALAssetRepresentation(im)url	-			NSURL *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	4fbda4a702fff064	-
+method	c:objc(cs)ALAssetRepresentation(im)metadata	-			NSDictionary *	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	f7b6e628bd828cd7	-
+method	c:objc(cs)ALAssetRepresentation(im)orientation	-			ALAssetOrientation	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	a85043fc5addf482	-
+method	c:objc(cs)ALAssetRepresentation(im)scale	-			float	-	-	ios=4/9/26.0/0,macos=-/-/-/1	-	608123e3f3814f62	-
+method	c:objc(cs)ALAssetRepresentation(im)filename	-			NSString *	-	-	ios=5/9/26.0/0,macos=-/-/-/1	-	1b8ffcebc2621274	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@CGImageRef	-			struct CGImage *	-	-	-	-	61e7c30be1f5f379	-
+typedef	c:@T@NSInteger	-			long	-	-	-	-	6ffe0f1acecdb97b	-
+typedef	c:@T@NSEnumerationOptions	-			enum NSEnumerationOptions	-	-	-	-	3949db790379ffe3	-
+typedef	c:@T@CGSize	-			struct CGSize	-	-	-	-	288bede4212325f3	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-

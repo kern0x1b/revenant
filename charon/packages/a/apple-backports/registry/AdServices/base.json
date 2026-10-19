@@ -1,0 +1,35 @@
+[
+  {
+    "api": "AAAttributionErrorDomain",
+    "kind": "constant",
+    "introduced": "14.3",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "iOS 6.1.3 exports no such symbol, and an application that names it is killed by dyld before its main; the name is carried with the text AdServices itself gives it",
+    "effect": "the constant is the string com.apple.ap.adservices.attributionError",
+    "facts": "facts/AdServices/AAAttribution.md",
+    "source": "AdServices of the arm64e shared cache of iOS 18.0, read through the symbol with tools/corpus/cache-value.lua; the same call answers a token of nil in the com.apple.ap.adservices.attributionError domain on the host, as the control"
+  },
+  {
+    "api": "AAAttribution",
+    "kind": "class",
+    "introduced": "14.3",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "an application that asks for an attribution token names this class, and a strong reference to a class that is not there stops it at launch",
+    "effect": "the class exists and +attributionTokenWithError: answers nil with the error the framework documents for a platform its service does not support",
+    "facts": "facts/AdServices/AAAttribution.md",
+    "source": "the host's own AdServices under MacOSX.sdk, which answers nil with code 3 of that domain for a platform the service does not support"
+  },
+  {
+    "api": "+[AAAttribution attributionTokenWithError:]",
+    "kind": "method",
+    "introduced": "14.3",
+    "minimum": "6.0",
+    "status": "implemented",
+    "reason": "the token is minted by Apple's attribution service, which reaches only a release that carries AdServices and is registered with it; this is the seam where the port cannot reach it",
+    "effect": "nil, and the error out-parameter is AAAttributionErrorDomain with code AAAttributionErrorCodePlatformNotSupported (3) and the description \"Attribution is not available on this version of iOS.\"; a nil error pointer is allowed and nothing is written",
+    "facts": "facts/AdServices/AAAttribution.md",
+    "source": "the host's own AdServices under MacOSX.sdk: nil, domain com.apple.ap.adservices.attributionError, code 3"
+  }
+]

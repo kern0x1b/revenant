@@ -1,0 +1,60 @@
+{
+    "framework": "CoreML",
+    "entries": [
+        {
+            "api": "MLShapedArray",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "a shape, strides in elements, and the scalars: the multi-dimensional array a trained model's features and weights are, and the input every CreateMLComponents linear model takes",
+            "effect": "the scalars, by position, by a set of indices, in a range, or the whole buffer with its shape and strides",
+            "facts": "facts/CoreML/ShapedArray.md",
+            "source": "the SDK 26.2 CoreML.swiftinterface for the declarations; the arithmetic behind a model is this package's, the bytes are the device's own BLAS; the layout is checked by tests/backports/host/createml/linearmodels, 34 checks"
+        },
+        {
+            "api": "MLShapedArraySlice",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "a slice of a shaped array: the same scalars with a shape and strides of their own. Its values are a copy, because a slice has no base offset and a reshaped model that claimed to be a view would go wrong silently",
+            "effect": "the scalars, read",
+            "facts": "facts/CoreML/ShapedArray.md",
+            "source": "the SDK 26.2 CoreML.swiftinterface, and the copy is this port's and the reason is in the facts"
+        },
+        {
+            "api": "MLShapedArrayScalar",
+            "kind": "protocol",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the one requirement a scalar a shaped array can hold has: the CoreML element type it is stored as. Conformed by Double, Float and Int32, with the header's own values for each",
+            "effect": "the element type of the scalar",
+            "facts": "facts/CoreML/ShapedArray.md",
+            "source": "the SDK 26.2 CoreML.swiftinterface; the values are MLMultiArray.h's, carried by registry/CoreML/createml-shapedarray.json"
+        },
+        {
+            "api": "MLShapedArray.strides",
+            "kind": "property",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the distance in ELEMENTS between two neighbours along each dimension, and the outermost is the product of the ones inside it. The first implementation stopped its walk before zero and never wrote the outermost, so every two-dimensional array had strides [1,1] and a row read returned the wrong element",
+            "effect": "the strides, in elements",
+            "facts": "facts/CoreML/ShapedArray.md",
+            "source": "the SDK 26.2 CoreML.swiftinterface; the bug was found by a 2x3 array in tests/backports/host/createml/linearmodels"
+        },
+        {
+            "api": "MLShapedArray.withUnsafeShapedBufferPointer",
+            "kind": "method",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the scalars as a buffer with the shape and the strides beside it, which is the form every kernel wants and the reason a fitted model's weights are handed on without a copy. The shape is passed as well as the strides, unlike Apple's own signature, because a caller that has to recompute it from the strides is doing arithmetic to learn something it already knew",
+            "effect": "whatever the caller's closure returns, run over the buffer",
+            "facts": "facts/CoreML/ShapedArray.md",
+            "source": "the SDK 26.2 CoreML.swiftinterface for the declaration; passing the shape too is this port's and the reason is in the facts"
+        }
+    ]
+}

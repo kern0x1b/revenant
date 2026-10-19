@@ -1,0 +1,113 @@
+{
+  "framework": "NetworkExtension",
+  "entries": [
+    {
+      "api": "NEDNSSettings",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a settings object: the DNS settings a configuration carries, which the system reads when it applies one",
+      "effect": "the object is created, filled, copied and archived: a fresh one answers nil collections, -copy returns a NEDNSSettings that is not the original, and an NSKeyedArchiver round trip returns data with no error and decodes back to a NEDNSSettings (Foundation/NetworkExtension/NEDNSSettings.m:26)",
+      "source": "SDK 26.2, NEDNSSettings.h:19-21, for the class and its <NSSecureCoding,NSCopying>; the host's own NEDNSSettings measured name by name in tests/backports/host/netext-settings/, with the dladdr line showing NetworkExtension.framework answered"
+    },
+    {
+      "api": "-[NEDNSSettings initWithServers:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a class method of the settings object: build one over the servers a caller names",
+      "effect": "-initWithServers: copies the array it is given into the object, so the object does not alias the caller's array (Foundation/NetworkExtension/NEDNSSettings.m:34)",
+      "source": "SDK 26.2, NEDNSSettings.h:31; tests/backports/host/netext-settings/run.sh compares the answers of a fresh object against the host's own, and a mutation that makes -initWithServers: plant a value goes red naming fresh.servers"
+    },
+    {
+      "api": "NEDNSSettings.servers",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a readonly property of the settings object: the servers the object was built over, nil when it was not built with any",
+      "effect": "a fresh object answers nil, which is what the host answers (Foundation/NetworkExtension/NEDNSSettings.m:42)",
+      "source": "the host's own NetworkExtension, measured in tests/backports/host/netext-settings/run.sh (fresh.servers), with dladdr proving NetworkExtension.framework answered"
+    },
+    {
+      "api": "NEDNSSettings.searchDomains",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a property of the settings object: the search list, nil until a caller sets one",
+      "effect": "a fresh object answers nil, which is what the host answers (Foundation/NetworkExtension/NEDNSSettings.m:49)",
+      "source": "the host's own NetworkExtension, measured in tests/backports/host/netext-settings/run.sh (fresh.searchDomains)"
+    },
+    {
+      "api": "NEDNSSettings.matchDomains",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a property of the settings object: the domains a match is made against, nil until a caller sets one",
+      "effect": "a fresh object answers nil, which is what the host answers (Foundation/NetworkExtension/NEDNSSettings.m:74)",
+      "source": "the host's own NetworkExtension, measured in tests/backports/host/netext-settings/run.sh (fresh.matchDomains)"
+    },
+    {
+      "api": "NEDNSSettings.matchDomainsNoSearch",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a property of the settings object: whether the match list skips the search domains",
+      "effect": "a fresh object answers YES, which is what the host answers - and not the zero a fresh BOOL would give, which is what the port answered until the differential caught it (Foundation/NetworkExtension/NEDNSSettings.m:31)",
+      "source": "the host's own NetworkExtension, measured in tests/backports/host/netext-settings/run.sh (fresh.matchDomainsNoSearch)"
+    },
+    {
+      "api": "NEDNSSettings.domainName",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "maximum": "9.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a property of the settings object: the single domain a configuration matches, nil until set",
+      "effect": "a fresh object answers nil; the property is declared by the 26.2 header as (copy, nullable) NSString *, and the host's class does not carry this name at all, so the header is the oracle (Foundation/NetworkExtension/NEDNSSettings.m:63)",
+      "source": "SDK 26.2, NEDNSSettings.h, for the declaration; run.sh greps that header and fails if the property is not there, and names it as the oracle rather than a host comparison; the host's class does not carry this name at all, so the oracle is the 26.2 header for the declaration plus the port-only assertions in tests/backports/host/netext-settings/ (the declared default, the setter round trip and the keyed-archive round trip), all three named in the facts file"
+    },
+    {
+      "api": "NEDNSSettings.dnsProtocol",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "maximum": "14.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a readonly property of the settings object: which DNS protocol the servers are spoken over, the enumeration's own zero until a caller sets one",
+      "effect": "a fresh object answers 0, the value before NEDNSProtocolCleartext; the host's class does not carry this name, so the 26.2 header is the oracle for the declaration and the zero is the enumeration's own (Foundation/NetworkExtension/NEDNSSettings.m:30)",
+      "source": "SDK 26.2, NEDNSSettings.h, for the declaration and for NEDNSProtocolCleartext = 1; run.sh greps the header and fails if either is missing; the host's class does not carry this name at all, so the oracle is the 26.2 header for the declaration plus the port-only assertions in tests/backports/host/netext-settings/ (the declared default, the setter round trip and the keyed-archive round trip), all three named in the facts file"
+    },
+    {
+      "api": "NEDNSSettings.allowFailover",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "maximum": "26.0",
+      "status": "implemented",
+      "facts": "facts/NetworkExtension/Settings.md",
+      "reason": "a property of the settings object: whether another server may be tried when this one fails, NO until set",
+      "effect": "a fresh object answers NO; the host's class does not carry this name, so the 26.2 header is the oracle (Foundation/NetworkExtension/NEDNSSettings.m:83)",
+      "source": "SDK 26.2, NEDNSSettings.h, for the declaration; run.sh greps the header and fails if the property is not there; the host's class does not carry this name at all, so the oracle is the 26.2 header for the declaration plus the port-only assertions in tests/backports/host/netext-settings/ (the declared default, the setter round trip and the keyed-archive round trip), all three named in the facts file"
+    }
+  ]
+}

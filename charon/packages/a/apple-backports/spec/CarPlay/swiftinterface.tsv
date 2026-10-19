@@ -1,0 +1,5 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+CarPlay	method	CPListSection.init(items:)	12				own
+CarPlay	method	CPListSection.init(items:)	14				own
+CarPlay	method	CPListSection.init(items:header:sectionIndexTitle:)	12				own
+CarPlay	method	CPListSection.init(items:header:sectionIndexTitle:)	14				own

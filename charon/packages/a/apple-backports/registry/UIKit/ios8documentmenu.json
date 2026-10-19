@@ -1,0 +1,77 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UIDocumentMenuViewController",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "-[UIDocumentMenuViewController initWithDocumentTypes:inMode:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "-[UIDocumentMenuViewController initWithURL:inMode:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "-[UIDocumentMenuViewController addOptionWithTitle:image:order:handler:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "UIDocumentMenuViewController.delegate",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "UIDocumentMenuDelegate",
+      "kind": "protocol",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "-[UIDocumentMenuDelegate documentMenu:didPickDocumentPicker:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    },
+    {
+      "api": "-[UIDocumentMenuDelegate documentMenuWasCancelled:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIDocumentMenuViewController.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/documentmenu (the defaults, the refusals of a wrong mode and of a plain init), and tests/backports/device/documentmenu.m with the menu shown on iOS 6"
+    }
+  ]
+}

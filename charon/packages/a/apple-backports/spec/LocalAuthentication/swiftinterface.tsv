@@ -1,0 +1,3 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+LocalAuthentication	property	LADomainStateCompanion.availableCompanionTypes	18.0				container
+LocalAuthentication	typealias	LAContext.ObjectWillChangePublisher	18.0				own

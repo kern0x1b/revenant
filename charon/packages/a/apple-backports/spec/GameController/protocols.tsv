@@ -1,0 +1,117 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+GCAxis2DInput	17.4	transcribed		NSObject	-	-	-	-	-	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	valueDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullablevalueDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCAxis2DInput>  _Nonnull, GCPoint2);	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	value	@property (atomic, readonly) GCPoint2 value;	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	analog	@property (atomic, readonly, getter=isAnalog) BOOL analog;	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	canWrap	@property (atomic, readonly) BOOL canWrap;	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	lastValueTimestamp	@property (atomic, readonly) NSTimeInterval lastValueTimestamp;	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	lastValueLatency	@property (atomic, readonly) NSTimeInterval lastValueLatency;	-
+GCAxis2DInput	17.4	transcribed		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources;	-
+GCAxisElement	16.0	sdk16 body		GCPhysicalInputElement	-	-	-	-	-	-
+GCAxisElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	absoluteInput	@property (atomic, readonly) id<GCAxisInput> _Nullable absoluteInput;	yes
+GCAxisElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	relativeInput	@property (atomic, readonly) id<GCRelativeInput> _Nonnull relativeInput;	yes
+GCAxisElementName	14.0	sdk16 body		GCPhysicalInputElementName	-	-	-	-	-	-
+GCAxisInput	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	valueDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullablevalueDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCAxisInput>  _Nonnull, float);	yes
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	value	@property (atomic, readonly) float value;	yes
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	analog	@property (atomic, readonly, getter=isAnalog) BOOL analog;	yes
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	canWrap	@property (atomic, readonly) BOOL canWrap;	yes
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	lastValueTimestamp	@property (atomic, readonly) NSTimeInterval lastValueTimestamp;	yes
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	lastValueLatency	@property (atomic, readonly) NSTimeInterval lastValueLatency;	yes
+GCAxisInput	16.0	sdk16 body		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources API_AVAILABLE(ios(17.0));	no
+GCButtonElement	16.0	sdk16 body		GCPhysicalInputElement	-	-	-	-	-	-
+GCButtonElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	pressedInput	@property (atomic, readonly) id<GCPressedStateInput,GCLinearInput> _Nonnull pressedInput;	yes
+GCButtonElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	touchedInput	@property (atomic, readonly) id<GCTouchedStateInput> _Nullable touchedInput;	yes
+GCButtonElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	forceInput	@property (atomic, readonly) id<GCLinearInput> _Nullable forceInput API_AVAILABLE(ios(26.0));	no
+GCButtonElementName	14.0	sdk16 body		GCPhysicalInputElementName	-	-	-	-	-	-
+GCDevice	14.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCDevice	14.0	sdk16 body		NSObject	required	property	no	handlerQueue	@property (nonatomic, readwrite, strong) dispatch_queue_t _Nonnull handlerQueue API_AVAILABLE(ios(9.0));	yes
+GCDevice	14.0	sdk16 body		NSObject	required	property	no	vendorName	@property (nonatomic, readonly, copy) NSString * _Nullable vendorName API_AVAILABLE(ios(7.0));	yes
+GCDevice	14.0	sdk16 body		NSObject	required	property	no	productCategory	@property (nonatomic, readonly) NSString * _Nonnull productCategory API_AVAILABLE(ios(13.0));	yes
+GCDevice	14.0	sdk16 body		NSObject	required	property	no	physicalInputProfile	@property (nonatomic, readonly, strong) GCPhysicalInputProfile * _Nonnull physicalInputProfile API_AVAILABLE(ios(14.0));	yes
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	-	-	-	-	-	-
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	property	no	device	@property (atomic, readonly, weak) id<GCDevice> _Nullable device;	yes
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	property	no	queue	@property (atomic, readwrite, strong) dispatch_queue_t _Nullable queue API_AVAILABLE(ios(17.0));	no
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	property	no	elementValueDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullableelementValueDidChangeHandler)(__kindof id<GCDevicePhysicalInput>  _Nonnull, __kindof id<GCPhysicalInputElement>  _Nonnull);	yes
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	method	yes	capture	- (__kindof id<GCDevicePhysicalInputState> _Nonnull)capture;	yes
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	property	no	inputStateAvailableHandler	@property (atomic, readwrite, copy) void (^ _NullableinputStateAvailableHandler)(__kindof id<GCDevicePhysicalInput>  _Nonnull);	yes
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	property	no	inputStateQueueDepth	@property (atomic, readwrite, assign, unsafe_unretained) NSInteger inputStateQueueDepth;	yes
+GCDevicePhysicalInput	16.0	sdk16 body		GCDevicePhysicalInputState	required	method	yes	nextInputState	- (__kindof id<GCDevicePhysicalInputState,GCDevicePhysicalInputStateDiff> _Nullable)nextInputState;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	device	@property (atomic, readonly, weak) id<GCDevice> _Nullable device;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	lastEventTimestamp	@property (atomic, readonly) NSTimeInterval lastEventTimestamp;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	lastEventLatency	@property (atomic, readonly) NSTimeInterval lastEventLatency;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	elements	@property (atomic, readonly) NS_REFINED_FOR_SWIFT GCPhysicalInputElementCollection<NSString<GCPhysicalInputElementName> *,id<GCPhysicalInputElement>> *elements;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	buttons	@property (atomic, readonly) NS_REFINED_FOR_SWIFT GCPhysicalInputElementCollection<NSString<GCButtonElementName> *,id<GCButtonElement>> *buttons;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	axes	@property (atomic, readonly) NS_REFINED_FOR_SWIFT GCPhysicalInputElementCollection<NSString<GCAxisElementName> *,id<GCAxisElement>> *axes;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	switches	@property (atomic, readonly) NS_REFINED_FOR_SWIFT GCPhysicalInputElementCollection<NSString<GCSwitchElementName> *,id<GCSwitchElement>> *switches;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	property	no	dpads	@property (atomic, readonly) NS_REFINED_FOR_SWIFT GCPhysicalInputElementCollection<NSString<GCDirectionPadElementName> *,id<GCDirectionPadElement>> *dpads;	yes
+GCDevicePhysicalInputState	16.0	sdk16 body		NSObject	required	method	yes	objectForKeyedSubscript:	- (__kindof id<GCPhysicalInputElement> _Nullable)objectForKeyedSubscript:(NSString * _Nonnull)key;	yes
+GCDevicePhysicalInputStateDiff	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCDevicePhysicalInputStateDiff	16.0	sdk16 body		NSObject	required	method	yes	changeForElement:	- (GCDevicePhysicalInputElementChange)changeForElement:(id<GCPhysicalInputElement>  _Nonnull)element;	yes
+GCDevicePhysicalInputStateDiff	16.0	sdk16 body		NSObject	required	method	yes	changedElements	- (NSEnumerator<id<GCPhysicalInputElement>> * _Nullable)changedElements;	yes
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	-	-	-	-	-	-
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	xyAxes	@property (atomic, readonly) id<GCAxis2DInput> _Nonnull xyAxes API_AVAILABLE(ios(17.4));	no
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	xAxis	@property (atomic, readonly) id<GCAxisInput> _Nonnull xAxis;	yes
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	yAxis	@property (atomic, readonly) id<GCAxisInput> _Nonnull yAxis;	yes
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	up	@property (atomic, readonly) id<GCLinearInput,GCPressedStateInput> _Nonnull up;	yes
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	down	@property (atomic, readonly) id<GCLinearInput,GCPressedStateInput> _Nonnull down;	yes
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	left	@property (atomic, readonly) id<GCLinearInput,GCPressedStateInput> _Nonnull left;	yes
+GCDirectionPadElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	right	@property (atomic, readonly) id<GCLinearInput,GCPressedStateInput> _Nonnull right;	yes
+GCDirectionPadElementName	14.0	sdk16 body		GCPhysicalInputElementName	-	-	-	-	-	-
+GCGameControllerSceneDelegate	18.0	transcribed		NSObject	-	-	-	-	-	-
+GCGameControllerSceneDelegate	18.0	transcribed		NSObject	required	method	yes	scene:didActivateGameControllerWithContext:	- (void)scene:(UIScene * _Nonnull)scene didActivateGameControllerWithContext:(GCGameControllerActivationContext * _Nonnull)context;	-
+GCLinearInput	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	valueDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullablevalueDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCLinearInput>  _Nonnull, float);	yes
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	value	@property (atomic, readonly) float value;	yes
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	analog	@property (atomic, readonly, getter=isAnalog) BOOL analog;	yes
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	canWrap	@property (atomic, readonly) BOOL canWrap;	yes
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	lastValueTimestamp	@property (atomic, readonly) NSTimeInterval lastValueTimestamp;	yes
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	lastValueLatency	@property (atomic, readonly) NSTimeInterval lastValueLatency;	yes
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	physicalExtents	@property (atomic, readonly) id<GCPhysicalInputExtents> _Nullable physicalExtents API_AVAILABLE(ios(26.2));	no
+GCLinearInput	16.0	sdk16 body		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources API_AVAILABLE(ios(17.0));	no
+GCPhysicalInputElement	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCPhysicalInputElement	16.0	sdk16 body		NSObject	required	property	no	aliases	@property (atomic, readonly, copy) NSSet<NSString *> * _Nonnull aliases;	yes
+GCPhysicalInputElement	16.0	sdk16 body		NSObject	required	property	no	localizedName	@property (atomic, readonly, copy) NSString * _Nullable localizedName;	yes
+GCPhysicalInputElement	16.0	sdk16 body		NSObject	required	property	no	sfSymbolsName	@property (atomic, readonly, copy) NSString * _Nullable sfSymbolsName;	yes
+GCPhysicalInputElementName	14.0	sdk16 body			-	-	-	-	-	-
+GCPhysicalInputExtents	26.2	transcribed		NSObject	-	-	-	-	-	-
+GCPhysicalInputExtents	26.2	transcribed		NSObject	required	property	no	scaledValue	@property (atomic, readonly) double scaledValue;	-
+GCPhysicalInputExtents	26.2	transcribed		NSObject	required	property	no	minimumValue	@property (atomic, readonly) double minimumValue;	-
+GCPhysicalInputExtents	26.2	transcribed		NSObject	required	property	no	maximumValue	@property (atomic, readonly) double maximumValue;	-
+GCPhysicalInputSource	17.0	refused	GCPhysicalInputSource.elementAliases needs GCPhysicalInputElementName, which iPhoneOS16.4.sdk does not declare	NSObject	-	-	-	-	-	-
+GCPhysicalInputSource	17.0	refused		NSObject	required	property	no	elementAliases	@property (atomic, readonly, copy) NSSet<NSString<GCPhysicalInputElementName> *> * _Nonnull elementAliases;	-
+GCPhysicalInputSource	17.0	refused		NSObject	required	property	no	elementLocalizedName	@property (atomic, readonly, copy) NSString * _Nullable elementLocalizedName;	-
+GCPhysicalInputSource	17.0	refused		NSObject	required	property	no	sfSymbolsName	@property (atomic, readonly, copy) NSString * _Nullable sfSymbolsName;	-
+GCPhysicalInputSource	17.0	refused		NSObject	required	property	no	direction	@property (atomic, readonly) GCPhysicalInputSourceDirection direction;	-
+GCPressedStateInput	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCPressedStateInput	16.0	sdk16 body		NSObject	required	property	no	pressedDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullablepressedDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCPressedStateInput>  _Nonnull, BOOL);	yes
+GCPressedStateInput	16.0	sdk16 body		NSObject	required	property	no	pressed	@property (atomic, readonly, getter=isPressed) BOOL pressed;	yes
+GCPressedStateInput	16.0	sdk16 body		NSObject	required	property	no	lastPressedStateTimestamp	@property (atomic, readonly) NSTimeInterval lastPressedStateTimestamp;	yes
+GCPressedStateInput	16.0	sdk16 body		NSObject	required	property	no	lastPressedStateLatency	@property (atomic, readonly) NSTimeInterval lastPressedStateLatency;	yes
+GCPressedStateInput	16.0	sdk16 body		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources API_AVAILABLE(ios(17.0));	no
+GCRelativeInput	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCRelativeInput	16.0	sdk16 body		NSObject	required	property	no	deltaDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullabledeltaDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCRelativeInput>  _Nonnull, float);	yes
+GCRelativeInput	16.0	sdk16 body		NSObject	required	property	no	delta	@property (atomic, readonly) float delta;	yes
+GCRelativeInput	16.0	sdk16 body		NSObject	required	property	no	analog	@property (atomic, readonly, getter=isAnalog) BOOL analog;	yes
+GCRelativeInput	16.0	sdk16 body		NSObject	required	property	no	lastDeltaTimestamp	@property (atomic, readonly) NSTimeInterval lastDeltaTimestamp;	yes
+GCRelativeInput	16.0	sdk16 body		NSObject	required	property	no	lastDeltaLatency	@property (atomic, readonly) NSTimeInterval lastDeltaLatency;	yes
+GCRelativeInput	16.0	sdk16 body		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources API_AVAILABLE(ios(17.0));	no
+GCSwitchElement	16.0	sdk16 body		GCPhysicalInputElement	-	-	-	-	-	-
+GCSwitchElement	16.0	sdk16 body		GCPhysicalInputElement	required	property	no	positionInput	@property (atomic, readonly) id<GCSwitchPositionInput> _Nonnull positionInput;	yes
+GCSwitchElementName	14.0	sdk16 body		GCPhysicalInputElementName	-	-	-	-	-	-
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	positionDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullablepositionDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCSwitchPositionInput>  _Nonnull, NSInteger);	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	position	@property (atomic, readonly) NSInteger position;	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	positionRange	@property (atomic, readonly) NSRange positionRange;	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	sequential	@property (atomic, readonly, getter=isSequential) BOOL sequential;	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	canWrap	@property (atomic, readonly) BOOL canWrap;	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	lastPositionTimestamp	@property (atomic, readonly) NSTimeInterval lastPositionTimestamp;	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	lastPositionLatency	@property (atomic, readonly) NSTimeInterval lastPositionLatency;	yes
+GCSwitchPositionInput	16.0	sdk16 body		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources API_AVAILABLE(ios(17.0));	no
+GCTouchedStateInput	16.0	sdk16 body		NSObject	-	-	-	-	-	-
+GCTouchedStateInput	16.0	sdk16 body		NSObject	required	property	no	touchedDidChangeHandler	@property (atomic, readwrite, copy) void (^ _NullabletouchedDidChangeHandler)(__kindof id<GCPhysicalInputElement>  _Nonnull, id<GCTouchedStateInput>  _Nonnull, BOOL);	yes
+GCTouchedStateInput	16.0	sdk16 body		NSObject	required	property	no	touched	@property (atomic, readonly, getter=isTouched) BOOL touched;	yes
+GCTouchedStateInput	16.0	sdk16 body		NSObject	required	property	no	lastTouchedStateTimestamp	@property (atomic, readonly) NSTimeInterval lastTouchedStateTimestamp;	yes
+GCTouchedStateInput	16.0	sdk16 body		NSObject	required	property	no	lastTouchedStateLatency	@property (atomic, readonly) NSTimeInterval lastTouchedStateLatency;	yes
+GCTouchedStateInput	16.0	sdk16 body		NSObject	required	property	no	sources	@property (atomic, readonly, copy) NSSet<id<GCPhysicalInputSource>> * _Nonnull sources API_AVAILABLE(ios(17.0));	no

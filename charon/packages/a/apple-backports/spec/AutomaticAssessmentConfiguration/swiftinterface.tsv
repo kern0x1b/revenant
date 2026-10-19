@@ -1,0 +1,3 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+AutomaticAssessmentConfiguration	property	AEAssessmentError.notInstalledParticipants	26.0				container
+AutomaticAssessmentConfiguration	property	AEAssessmentError.restrictedSystemParticipants	26.0				container

@@ -1,0 +1,7 @@
+Package: org.charon.metalprobes.commandbuffer
+Name: Charon command queue and command buffer probe
+Architecture: iphoneos-arm
+Description: The port's command queue and command buffer members against the answers Apple's own Metal gave on this host
+Maintainer: charon
+Author: charon
+Section: Development

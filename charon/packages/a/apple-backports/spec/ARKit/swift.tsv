@@ -1,0 +1,121 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+ARKit	swift-struct	c:@E@ARErrorCode	-	ARError	-	-	-	ios=11.0	-	112182721a6c9510
+ARKit	swift-property	s:SC11ARErrorCodeLeV8_nsErrorSo7NSErrorCvp	ARError	_nsError	-	Foundation.NSError	-	-	-	d6c96cd5789eda9e
+ARKit	swift-method	s:SC11ARErrorCodeLeV8_nsErrorABSo7NSErrorC_tcfc	ARError	init(_nsError:)	-	-	ARKit.ARError | Foundation.NSError	-	-	9425b69136ba4c90
+ARKit	swift-property	s:SC11ARErrorCodeLeV11errorDomainSSvpZ	ARError	errorDomain	+	Swift.String	-	-	-	393ca23d3e4685b7
+ARKit	swift-enum	c:@E@ARErrorCode	ARError	Code	-	-	-	ios=11.0	-	fbb609343c55883a
+ARKit	swift-method	s:So11ARErrorCodeV8rawValueABSgSi_tcfc	ARError.Code	init(rawValue:)	-	-	ARKit.ARError.Code? | Swift.Int	-	-	987c7f242c5a4108
+ARKit	swift-property	s:So11ARErrorCodeV8rawValueSivp	ARError.Code	rawValue	-	Swift.Int	-	-	-	1aeb6a339c76809d
+ARKit	swift-typealias	s:So11ARErrorCodeV8RawValuea	ARError.Code	RawValue	-	-	-	-	-	da7938f85bd44007
+ARKit	swift-typealias	c:@E@ARErrorCode	ARError.Code	_ErrorType	-	-	-	-	-	a3da5b3a6a631014
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeUnsupportedConfiguration	ARError.Code	unsupportedConfiguration	-	-	-	-	-	4904b82246db0731
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeSensorUnavailable	ARError.Code	sensorUnavailable	-	-	-	-	-	64c962ad231f65a6
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeSensorFailed	ARError.Code	sensorFailed	-	-	-	-	-	39a5fdf7ff913147
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeCameraUnauthorized	ARError.Code	cameraUnauthorized	-	-	-	-	-	092cbf39034dfa18
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeMicrophoneUnauthorized	ARError.Code	microphoneUnauthorized	-	-	-	-	-	7197ece1e76daab1
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeLocationUnauthorized	ARError.Code	locationUnauthorized	-	-	-	ios=14.0	-	586b0be7d7b39148
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeHighResolutionFrameCaptureInProgress	ARError.Code	highResolutionFrameCaptureInProgress	-	-	-	ios=16.0	-	2854019964e2a26d
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeHighResolutionFrameCaptureFailed	ARError.Code	highResolutionFrameCaptureFailed	-	-	-	ios=16.0	-	8bbd9f9fdb213318
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeWorldTrackingFailed	ARError.Code	worldTrackingFailed	-	-	-	-	-	13f4fd6b88ecb447
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeGeoTrackingNotAvailableAtLocation	ARError.Code	geoTrackingNotAvailableAtLocation	-	-	-	ios=14.0	-	c888917e2981213b
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeGeoTrackingFailed	ARError.Code	geoTrackingFailed	-	-	-	ios=14.0	-	45424f66ec667cd3
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeInvalidReferenceImage	ARError.Code	invalidReferenceImage	-	-	-	ios=11.3	-	badae9775689d764
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeInvalidReferenceObject	ARError.Code	invalidReferenceObject	-	-	-	ios=12.0	-	4fa66d1d89f87a21
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeInvalidWorldMap	ARError.Code	invalidWorldMap	-	-	-	ios=12.0	-	2d568ffbc4bc0a9a
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeInvalidConfiguration	ARError.Code	invalidConfiguration	-	-	-	ios=12.0	-	a02d0e3948283c97
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeInvalidCollaborationData	ARError.Code	invalidCollaborationData	-	-	-	ios=13.2	-	0618022ff025621f
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeInsufficientFeatures	ARError.Code	insufficientFeatures	-	-	-	ios=12.0	-	459a972359e2405d
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeObjectMergeFailed	ARError.Code	objectMergeFailed	-	-	-	ios=12.0	-	332d0a0ee8445f50
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeFileIOFailed	ARError.Code	fileIOFailed	-	-	-	ios=12.0	-	f425055543a3fa68
+ARKit	swift-constant	c:@E@ARErrorCode@ARErrorCodeRequestFailed	ARError.Code	requestFailed	-	-	-	ios=14.0	-	e84b6f7b54c78f03
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeUnsupportedConfiguration	ARError	unsupportedConfiguration	+	ARKit.ARError.Code	-	-	-	c4a70eaecca282fd
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeSensorUnavailable	ARError	sensorUnavailable	+	ARKit.ARError.Code	-	-	-	c1e47a248e20d961
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeSensorFailed	ARError	sensorFailed	+	ARKit.ARError.Code	-	-	-	906e7e12d5a4efeb
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeCameraUnauthorized	ARError	cameraUnauthorized	+	ARKit.ARError.Code	-	-	-	83e930b539e7269f
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeMicrophoneUnauthorized	ARError	microphoneUnauthorized	+	ARKit.ARError.Code	-	-	-	b64a30ff314f6f06
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeLocationUnauthorized	ARError	locationUnauthorized	+	ARKit.ARError.Code	-	ios=14.0	-	0c31257165654cd7
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeHighResolutionFrameCaptureInProgress	ARError	highResolutionFrameCaptureInProgress	+	ARKit.ARError.Code	-	ios=16.0	-	4663e00af969b2ab
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeHighResolutionFrameCaptureFailed	ARError	highResolutionFrameCaptureFailed	+	ARKit.ARError.Code	-	ios=16.0	-	170c08f5538d173b
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeWorldTrackingFailed	ARError	worldTrackingFailed	+	ARKit.ARError.Code	-	-	-	bec6bbd089c11127
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeGeoTrackingNotAvailableAtLocation	ARError	geoTrackingNotAvailableAtLocation	+	ARKit.ARError.Code	-	ios=14.0	-	e4f043dce1ffb032
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeGeoTrackingFailed	ARError	geoTrackingFailed	+	ARKit.ARError.Code	-	ios=14.0	-	28d9278232f5244c
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeInvalidReferenceImage	ARError	invalidReferenceImage	+	ARKit.ARError.Code	-	ios=11.3	-	afb9e9d034c791f9
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeInvalidReferenceObject	ARError	invalidReferenceObject	+	ARKit.ARError.Code	-	ios=12.0	-	b28e4e19d9b1412c
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeInvalidWorldMap	ARError	invalidWorldMap	+	ARKit.ARError.Code	-	ios=12.0	-	ff646eb0a0f57a43
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeInvalidConfiguration	ARError	invalidConfiguration	+	ARKit.ARError.Code	-	ios=12.0	-	56a93c7dae7c7806
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeInvalidCollaborationData	ARError	invalidCollaborationData	+	ARKit.ARError.Code	-	ios=13.2	-	8807adb11604b6d6
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeInsufficientFeatures	ARError	insufficientFeatures	+	ARKit.ARError.Code	-	ios=12.0	-	de4702a40c39c47e
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeObjectMergeFailed	ARError	objectMergeFailed	+	ARKit.ARError.Code	-	ios=12.0	-	a2623bf30e5447b0
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeFileIOFailed	ARError	fileIOFailed	+	ARKit.ARError.Code	-	ios=12.0	-	fdb682edd9fdad3e
+ARKit	swift-property	c:@E@ARErrorCode@ARErrorCodeRequestFailed	ARError	requestFailed	+	ARKit.ARError.Code	-	ios=14.0	-	d7d9f0d5dcaf7f6b
+ARKit	swift-class	c:objc(cs)ARPlaneAnchor	-	ARPlaneAnchor	-	-	-	ios=11.0	-	7e064fe1dccc66a2
+ARKit	swift-enum	s:So13ARPlaneAnchorC5ARKitE14ClassificationO	ARPlaneAnchor	Classification	-	-	-	-	-	a003e045f68005a6
+ARKit	swift-enum	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO	ARPlaneAnchor.Classification	Status	-	-	-	-	-	9d8121892db666f6
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO12notAvailableyA2GmF	ARPlaneAnchor.Classification.Status	notAvailable	-	-	-	-	-	ed9ba242f3709a41
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO12undeterminedyA2GmF	ARPlaneAnchor.Classification.Status	undetermined	-	-	-	-	-	38adbb3d1796b34b
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO7unknownyA2GmF	ARPlaneAnchor.Classification.Status	unknown	-	-	-	-	-	e01bef06e1a9bc0c
+ARKit	swift-method	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO2eeoiySbAG_AGtFZ	ARPlaneAnchor.Classification.Status	==(_:_:)	+	Swift.Bool	ARKit.ARPlaneAnchor.Classification.Status | ARKit.ARPlaneAnchor.Classification.Status	-	-	7de77998074b42ce
+ARKit	swift-method	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO4hash4intoys6HasherVz_tF	ARPlaneAnchor.Classification.Status	hash(into:)	-	()	Swift.Hasher	-	-	7ba11cb0fa21bc13
+ARKit	swift-property	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6StatusO9hashValueSivp	ARPlaneAnchor.Classification.Status	hashValue	-	Swift.Int	-	-	-	597e8ecea6ce5829
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO4noneyA2E6StatusOcAEmF	ARPlaneAnchor.Classification	none	-	-	-	-	-	75a203535c361450
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO4wallyA2EmF	ARPlaneAnchor.Classification	wall	-	-	-	-	-	62a9ea8fc73d9508
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO5flooryA2EmF	ARPlaneAnchor.Classification	floor	-	-	-	-	-	07f971d987f4efae
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO7ceilingyA2EmF	ARPlaneAnchor.Classification	ceiling	-	-	-	-	-	fb8e9868d533b39d
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO5tableyA2EmF	ARPlaneAnchor.Classification	table	-	-	-	-	-	2706b05bc71188d8
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO4seatyA2EmF	ARPlaneAnchor.Classification	seat	-	-	-	-	-	b3e1f5f224a2f2c8
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO6windowyA2EmF	ARPlaneAnchor.Classification	window	-	-	-	-	-	2e99786af00d7289
+ARKit	swift-constant	s:So13ARPlaneAnchorC5ARKitE14ClassificationO4dooryA2EmF	ARPlaneAnchor.Classification	door	-	-	-	-	-	4797e6f5527e0ec5
+ARKit	swift-method	s:So13ARPlaneAnchorC5ARKitE14ClassificationO2eeoiySbAE_AEtFZ	ARPlaneAnchor.Classification	==(_:_:)	+	Swift.Bool	ARKit.ARPlaneAnchor.Classification | ARKit.ARPlaneAnchor.Classification	-	-	4bcfeecb3d117b29
+ARKit	swift-property	s:So13ARPlaneAnchorC5ARKitE14classificationAbCE14ClassificationOvp	ARPlaneAnchor	classification	-	ARKit.ARPlaneAnchor.Classification	-	-	-	cf95f7aee79cdf1f
+ARKit	swift-class	c:objc(cs)ARPointCloud	-	ARPointCloud	-	-	-	ios=11.0	-	2174c537ee15b8ad
+ARKit	swift-property	s:So12ARPointCloudC5ARKitE6pointsSays5SIMD3VySfGGvp	ARPointCloud	points	-	[simd.simd_float3]	-	-	-	b54eb54a8198cf29
+ARKit	swift-property	s:So12ARPointCloudC5ARKitE11identifiersSays6UInt64VGvp	ARPointCloud	identifiers	-	[Swift.UInt64]	-	-	-	16eedc9d055d7b1c
+ARKit	swift-enum	c:@E@ARConfidenceLevel	-	ARConfidenceLevel	-	-	-	ios=14.0	-	1a99f382b86c0a50
+ARKit	swift-method	s:So17ARConfidenceLevelV5ARKitE1loiySbAB_ABtFZ	ARConfidenceLevel	<(_:_:)	+	Swift.Bool	ARKit.ARConfidenceLevel | ARKit.ARConfidenceLevel	-	-	6faa9316c840686e
+ARKit	swift-class	c:objc(cs)ARGeometrySource	-	ARGeometrySource	-	-	-	ios=13.4	-	d1744eecd0fa9988
+ARKit	swift-method	s:So16ARGeometrySourceC5ARKitEySf_S2fts5Int32Vcip	ARGeometrySource	subscript(_:)	-	(Swift.Float, Swift.Float, Swift.Float)	Swift.Int32	ios=14.0	-	07fb7fee1c911a63
+ARKit	swift-method	s:So16ARGeometrySourceC5ARKitEys5UInt8Vs5Int32Vcip	ARGeometrySource	subscript(_:)	-	Swift.CUnsignedChar	Swift.Int32	ios=14.0	-	40a5d35e87a44a1c
+ARKit	swift-class	c:objc(cs)ARGeometryElement	-	ARGeometryElement	-	-	-	ios=13.4	-	62d661cb118c46d0
+ARKit	swift-method	s:So17ARGeometryElementC5ARKitEySays5Int32VGSicip	ARGeometryElement	subscript(_:)	-	[Swift.Int32]	Swift.Int	ios=14.0	-	54cc40208dff1158
+ARKit	swift-class	c:objc(cs)ARPlaneGeometry	-	ARPlaneGeometry	-	-	-	ios=11.3	-	2acee72bfe2164ae
+ARKit	swift-property	s:So15ARPlaneGeometryC5ARKitE8verticesSays5SIMD3VySfGGvp	ARPlaneGeometry	vertices	-	[simd.simd_float3]	-	-	-	0f1ec9fcac7c4b0d
+ARKit	swift-property	s:So15ARPlaneGeometryC5ARKitE18textureCoordinatesSays5SIMD2VySfGGvp	ARPlaneGeometry	textureCoordinates	-	[simd.vector_float2]	-	-	-	09df470662bc9b88
+ARKit	swift-property	s:So15ARPlaneGeometryC5ARKitE15triangleIndicesSays5Int16VGvp	ARPlaneGeometry	triangleIndices	-	[Swift.Int16]	-	-	-	aa03e08d751a9230
+ARKit	swift-property	s:So15ARPlaneGeometryC5ARKitE16boundaryVerticesSays5SIMD3VySfGGvp	ARPlaneGeometry	boundaryVertices	-	[simd.simd_float3]	-	-	-	3a3bd970c11a7ef8
+ARKit	swift-class	c:objc(cs)ARSCNView	-	ARSCNView	-	-	-	ios=11.0	-	c55087a8029e9bec
+ARKit	swift-method	s:So9ARSCNViewC5ARKitE14unprojectPoint_9ontoPlanes5SIMD3VySfGSgSo7CGPointV_So13simd_float4x4atF	ARSCNView	unprojectPoint(_:ontoPlane:)	-	simd.simd_float3?	CoreFoundation.CGPoint | simd.simd_float4x4	-	-	09be8626bcbab559
+ARKit	swift-class	c:objc(cs)ARGeoAnchor	-	ARGeoAnchor	-	-	-	ios=14.0	-	905016cb0d16951e
+ARKit	swift-method	s:So11ARGeoAnchorC5ARKitE10coordinate8altitudeABSo22CLLocationCoordinate2DV_SdSgtcfc	ARGeoAnchor	init(coordinate:altitude:)	-	-	ARKit.ARGeoAnchor | _LocationEssentials.CLLocationCoordinate2D | _LocationEssentials.CLLocationDistance?	-	-	17b1091a3e101819
+ARKit	swift-method	s:So11ARGeoAnchorC5ARKitE4name10coordinate8altitudeABSS_So22CLLocationCoordinate2DVSdSgtcfc	ARGeoAnchor	init(name:coordinate:altitude:)	-	-	ARKit.ARGeoAnchor | Swift.String | _LocationEssentials.CLLocationCoordinate2D | _LocationEssentials.CLLocationDistance?	-	-	3121f08cacedaad8
+ARKit	swift-property	s:So11ARGeoAnchorC5ARKitE8altitudeSdSgvp	ARGeoAnchor	altitude	-	_LocationEssentials.CLLocationDistance?	-	-	-	92b4b5dbdb4ca3e6
+ARKit	swift-class	c:objc(cs)ARSkeletonDefinition	-	ARSkeletonDefinition	-	-	-	ios=13.0	-	816975d885a21f97
+ARKit	swift-property	s:So20ARSkeletonDefinitionC5ARKitE13parentIndicesSaySiGvp	ARSkeletonDefinition	parentIndices	-	[Swift.Int]	-	-	-	408d6865f46c45fa
+ARKit	swift-method	s:So20ARSkeletonDefinitionC5ARKitE5index3forSiSo0A9JointNamea_tF	ARSkeletonDefinition	index(for:)	-	Swift.Int	ARKit.ARSkeleton.JointName	-	-	41bf9fa37b621626
+ARKit	swift-class	c:objc(cs)ARSkeleton3D	-	ARSkeleton3D	-	-	-	ios=13.0	-	f0ffd5e483c6e70a
+ARKit	swift-property	s:So12ARSkeleton3DC5ARKitE20jointModelTransformsSaySo13simd_float4x4aGvp	ARSkeleton3D	jointModelTransforms	-	[simd.simd_float4x4]	-	-	-	210592f8212841c0
+ARKit	swift-property	s:So12ARSkeleton3DC5ARKitE20jointLocalTransformsSaySo13simd_float4x4aGvp	ARSkeleton3D	jointLocalTransforms	-	[simd.simd_float4x4]	-	-	-	647cf0f564f279e0
+ARKit	swift-method	s:So12ARSkeleton3DC5ARKitE14modelTransform3forSo13simd_float4x4aSgSo19ARSkeletonJointNamea_tF	ARSkeleton3D	modelTransform(for:)	-	simd.simd_float4x4?	ARKit.ARSkeleton.JointName	-	-	df530955e660856c
+ARKit	swift-method	s:So12ARSkeleton3DC5ARKitE14localTransform3forSo13simd_float4x4aSgSo19ARSkeletonJointNamea_tF	ARSkeleton3D	localTransform(for:)	-	simd.simd_float4x4?	ARKit.ARSkeleton.JointName	-	-	5dd91495c3c0347a
+ARKit	swift-class	c:objc(cs)ARSkeleton2D	-	ARSkeleton2D	-	-	-	ios=13.0	-	22e33a00c6d625d8
+ARKit	swift-property	s:So12ARSkeleton2DC5ARKitE14jointLandmarksSays5SIMD2VySfGGvp	ARSkeleton2D	jointLandmarks	-	[simd.simd_float2]	-	-	-	dc9f6e39559fc638
+ARKit	swift-method	s:So12ARSkeleton2DC5ARKitE8landmark3fors5SIMD2VySfGSgSo19ARSkeletonJointNamea_tF	ARSkeleton2D	landmark(for:)	-	simd.simd_float2?	ARKit.ARSkeleton.JointName	-	-	dc6c073c241c029f
+ARKit	swift-class	c:objc(cs)ARFaceGeometry	-	ARFaceGeometry	-	-	-	ios=11.0	-	66a0d73de1ea75fe
+ARKit	swift-property	s:So14ARFaceGeometryC5ARKitE8verticesSays5SIMD3VySfGGvp	ARFaceGeometry	vertices	-	[simd.simd_float3]	-	-	-	44f4cda0a1a5ac34
+ARKit	swift-property	s:So14ARFaceGeometryC5ARKitE18textureCoordinatesSays5SIMD2VySfGGvp	ARFaceGeometry	textureCoordinates	-	[simd.vector_float2]	-	-	-	6f701842a1a622ca
+ARKit	swift-property	s:So14ARFaceGeometryC5ARKitE15triangleIndicesSays5Int16VGvp	ARFaceGeometry	triangleIndices	-	[Swift.Int16]	-	-	-	0545081087caf638
+ARKit	swift-class	c:objc(cs)ARCamera	-	ARCamera	-	-	-	ios=11.0	-	7c73bf99ce00aa5a
+ARKit	swift-enum	s:So8ARCameraC5ARKitE13TrackingStateO	ARCamera	TrackingState	-	-	-	-	-	d8de51236f23dfb9
+ARKit	swift-enum	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO	ARCamera.TrackingState	Reason	-	-	-	-	-	b271a18eb734399c
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO12initializingyA2GmF	ARCamera.TrackingState.Reason	initializing	-	-	-	-	-	61a419b63ea77462
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO15excessiveMotionyA2GmF	ARCamera.TrackingState.Reason	excessiveMotion	-	-	-	-	-	ecfcfedc864dc63c
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO20insufficientFeaturesyA2GmF	ARCamera.TrackingState.Reason	insufficientFeatures	-	-	-	-	-	70b7d7ba01da4c1a
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO12relocalizingyA2GmF	ARCamera.TrackingState.Reason	relocalizing	-	-	-	ios=11.3	-	069592986d19206b
+ARKit	swift-method	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO2eeoiySbAG_AGtFZ	ARCamera.TrackingState.Reason	==(_:_:)	+	Swift.Bool	ARKit.ARCamera.TrackingState.Reason | ARKit.ARCamera.TrackingState.Reason	-	-	3974eebb19bd98e3
+ARKit	swift-method	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO4hash4intoys6HasherVz_tF	ARCamera.TrackingState.Reason	hash(into:)	-	()	Swift.Hasher	-	-	b3091d405d7e399a
+ARKit	swift-property	s:So8ARCameraC5ARKitE13TrackingStateO6ReasonO9hashValueSivp	ARCamera.TrackingState.Reason	hashValue	-	Swift.Int	-	-	-	a917ec212662f951
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO12notAvailableyA2EmF	ARCamera.TrackingState	notAvailable	-	-	-	-	-	24d9e9f0289182f2
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO7limitedyA2E6ReasonOcAEmF	ARCamera.TrackingState	limited	-	-	-	-	-	cee928c713fc8830
+ARKit	swift-constant	s:So8ARCameraC5ARKitE13TrackingStateO6normalyA2EmF	ARCamera.TrackingState	normal	-	-	-	-	-	abf2b13a0bf3ebd4
+ARKit	swift-method	s:So8ARCameraC5ARKitE13TrackingStateO2eeoiySbAE_AEtFZ	ARCamera.TrackingState	==(_:_:)	+	Swift.Bool	ARKit.ARCamera.TrackingState | ARKit.ARCamera.TrackingState	-	-	514ec939a0282256
+ARKit	swift-property	s:So8ARCameraC5ARKitE13trackingStateAbCE08TrackingD0Ovp	ARCamera	trackingState	-	ARKit.ARCamera.TrackingState	-	-	-	ac70482233986884
+ARKit	swift-method	s:So8ARCameraC5ARKitE14unprojectPoint_9ontoPlane11orientation12viewportSizes5SIMD3VySfGSgSo7CGPointV_So13simd_float4x4aSo22UIInterfaceOrientationVSo6CGSizeVtF	ARCamera	unprojectPoint(_:ontoPlane:orientation:viewportSize:)	-	simd.simd_float3?	CoreFoundation.CGPoint | simd.simd_float4x4 | UIKit.UIInterfaceOrientation | CoreFoundation.CGSize	ios=12.0	-	e6086ef22072d1b7

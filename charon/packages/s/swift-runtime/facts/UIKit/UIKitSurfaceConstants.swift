@@ -1,0 +1,203 @@
+// The UIKit types and cases of the SDK 26.2 Swift surface that the port's UIKit overlay does
+// not carry, from the surface's own checklist (`coordination/corpus/ledger/UIKit.tsv`).
+//
+// Two shapes, and which one a type takes is not a judgement: it is what the typecheck says. Where
+// the port's headers declare the enclosing Objective-C class, the overlay carries a namespace type
+// of its own and a `typealias` on the class, so `UIButton.Configuration.CornerStyle.capsule`
+// resolves as the SDK's own overlay makes it resolve. Where the headers declare no such class at
+// all - the enumeration is native Swift in UIKitCore and has no Objective-C spelling - the
+// namespace is declared outright.
+//
+// The case names and their payloads are the SDK's own, read from
+// `UIKit.framework/Modules/UIKit.swiftmodule/arm64e-apple-ios.swiftinterface`. Only the cases this
+// checklist names are declared: a type's `==`, its `hash(into:)`, its `init(rawValue:)` and the
+// types its payloads point at are other rows of the surface.
+
+import CoreGraphics
+import Foundation
+import UIKit
+
+public enum CharonUIButton {
+    public enum Configuration {
+        public enum CornerStyle {
+            case capsule
+            case dynamic
+            case fixed
+            case large
+            case medium
+            case small
+        }
+        public enum Indicator {
+            case automatic
+            case none
+            case popup
+        }
+        public enum MacIdiomStyle {
+            case automatic
+            case bordered
+            case borderless
+            case borderlessTinted
+        }
+        public enum Size {
+            case large
+            case medium
+            case mini
+            case small
+        }
+        public enum TitleAlignment {
+            case automatic
+            case center
+            case leading
+            case trailing
+        }
+    }
+}
+
+public enum UICellAccessory {
+    public enum AccessoryType {
+        case checkmark
+        case customView(CharonUIView)
+        case delete
+        case detail
+        case disclosureIndicator
+        case insert
+        case label
+        case multiselect
+        case outlineDisclosure
+        case popUpMenu
+        case reorder
+    }
+    public enum DisplayedState {
+        case always
+        case whenEditing
+        case whenNotEditing
+    }
+    public enum LayoutDimension {
+        case actual
+        case custom(CGFloat)
+        case standard
+    }
+    public enum OutlineDisclosureOptions {
+        public enum Style {
+            case automatic
+            case cell
+            case header
+        }
+    }
+    public enum Placement {
+        public typealias Position = ([UICellAccessory]) -> Int
+        case leading(displayed: UICellAccessory.DisplayedState = .always, at: UICellAccessory.Placement.Position)
+        case trailing(displayed: UICellAccessory.DisplayedState = .always, at: UICellAccessory.Placement.Position)
+    }
+}
+
+public enum UICellConfigurationState {
+    public enum DragState {
+        case dragging
+        case lifting
+        case none
+    }
+    public enum DropState {
+        case none
+        case notTargeted
+        case targeted
+    }
+}
+
+public enum UICollectionLayoutListConfiguration {
+    public enum Appearance {
+        case grouped
+        case insetGrouped
+        case plain
+        case sidebar
+        case sidebarPlain
+    }
+    public enum FooterMode {
+        case none
+        case supplementary
+    }
+    public enum HeaderMode {
+        case firstItemInSection
+        case none
+        case supplementary
+    }
+}
+
+public enum UIContentUnavailableConfiguration {
+    public enum Alignment {
+        case center
+        case natural
+    }
+}
+
+public enum UIListContentConfiguration {
+    public enum TextProperties {
+        public enum TextAlignment {
+            case center
+            case justified
+            case natural
+        }
+        public enum TextTransform {
+            case capitalized
+            case lowercase
+            case none
+            case uppercase
+        }
+    }
+}
+
+public enum UIListSeparatorConfiguration {
+    public enum Visibility {
+        case automatic
+        case hidden
+        case visible
+    }
+}
+
+public enum UIPointerEffect {
+    case automatic(_: UITargetedPreview)
+    case highlight(_: UITargetedPreview)
+    case hover(_: UITargetedPreview, preferredTintMode: UIPointerEffect.TintMode = .overlay, prefersShadow: Bool = false, prefersScaledContent: Bool)
+    case lift(_: UITargetedPreview)
+    public enum TintMode {
+        case none
+        case overlay
+        case underlay
+    }
+}
+
+public enum UIPointerShape {
+    case horizontalBeam(length: CGFloat)
+    case path(_: UIBezierPath)
+    case roundedRect(_: CGRect, radius: CGFloat)
+    case verticalBeam(length: CGFloat)
+}
+
+public enum CharonUITabBarController {
+    public enum Sidebar {
+        public enum ScrollTarget {
+            case footer
+            case header
+        }
+    }
+}
+
+public enum CharonUIView {
+    public enum LayoutRegion {
+        public enum AdaptivityAxis {
+            case horizontal
+            case vertical
+        }
+    }
+}
+
+
+extension UIButton {
+    public typealias Configuration = CharonUIButton.Configuration
+}
+extension UITabBarController {
+    public typealias Sidebar = CharonUITabBarController.Sidebar
+}
+extension UIView {
+    public typealias LayoutRegion = CharonUIView.LayoutRegion
+}

@@ -1,0 +1,6 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+SensitiveContentAnalysis	class	SCSensitivityAnalyzer.VideoAnalysisHandler	17.0				container
+SensitiveContentAnalysis	property	SCSensitivityAnalyzer.VideoAnalysisHandler.progress	17.0				container
+SensitiveContentAnalysis	method	SCSensitivityAnalyzer.VideoAnalysisHandler.hasSensitiveContent()	17.0				container
+SensitiveContentAnalysis	method	SCSensitivityAnalyzer.videoAnalysis(forFileAt:)	17.0				container
+SensitiveContentAnalysis	property	SCVideoStreamAnalyzer.analysisChanges	26.0				container

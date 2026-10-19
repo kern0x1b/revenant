@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLCommandBuffer pushDebugGroup:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a debug group names a span of a buffer's commands for a capture, and a buffer keeps its groups in the order they were pushed",
+      "effect": "the group is recorded on the buffer; a nil name is recorded as an empty name",
+      "facts": "facts/Metal/CommandBuffer.md",
+      "source": "SDK 16.4, Metal; the introduction 11.0 from the corpus surface of the 26.2 SDK"
+    },
+    {
+      "api": "-[MTLCommandBuffer popDebugGroup]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the pair of pushDebugGroup:, closing the innermost group of the buffer",
+      "effect": "removes the innermost group; a pop with no group open is refused with a log and changes nothing",
+      "facts": "facts/Metal/CommandBuffer.md",
+      "source": "SDK 16.4, Metal; the introduction 11.0 from the corpus surface of the 26.2 SDK"
+    }
+  ]
+}

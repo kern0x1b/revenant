@@ -1,0 +1,6 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+var	c:@_c_locale	-			const locale_t	-	-	-	-	6f555cfbfea60539	-
+struct	c:@S@lconv	-			-	-	-	-	-	72d9c86f80ab22f2	-
+function	c:@F@localeconv_l	-			struct lconv * (locale_t)	locale_t 	-	-	-	18431ae0c197d0ca	-
+function	c:@F@querylocale	-			const char * (int, locale_t)	int  | locale_t 	-	-	-	91cc80a1e9efd683	-
+typedef	c:@T@locale_t	-			struct _xlocale *	-	-	-	-	4d3b7099a57d493e	-

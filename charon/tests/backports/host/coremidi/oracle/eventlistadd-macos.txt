@@ -1,0 +1,20 @@
+== what an add returns (list of 256 bytes)
+init: offset 8
+first add, time 5, 1 word: result offset 8, numPackets 1
+second add, time 6, 2 words: result offset 24, numPackets 2
+third add, time 6, 1 word (merged): result offset 24, numPackets 2
+last packet wordCount 3
+zero words after packets, curPacket the last: result offset 24, numPackets 2
+== curPacket is the last packet, not the end
+add with the first packet as curPacket (it was not the last): result offset 24, numPackets 3
+offset 24 timeStamp 7 wordCount 1
+== an empty list with a curPacket that is not the first packet's place
+empty list, curPacket at offset 40: result offset 40, numPackets 1
+offset 8 timeStamp 12297829382473034410, offset 40 timeStamp 5
+== what a refused add leaves
+one packet into 24 bytes (8 + 16): result offset 8, numPackets 1
+merge of 1 word into 24 bytes, full: result offset -1, numPackets 1
+packet wordCount 1
+new packet into 24 bytes, full: result offset -1, numPackets 1
+merge into 27 bytes: result offset -1, numPackets 1
+merge into 28 bytes (8 + 12 + 8): result offset 8, numPackets 1

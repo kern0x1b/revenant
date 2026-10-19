@@ -1,0 +1,28 @@
+{
+  "framework": "GameplayKit",
+  "note": "The two methods NSArray carries for GameplayKit. The corpus does not name them -- it attributes NSArray's members to Foundation -- but they are API this port carries, and a category on a class the release already has needs a row of its own.",
+  "entries": [
+    {
+      "api": "-[NSArray shuffledArrayWithRandomSource:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a shuffle of an array is logic over the array and the source it is handed, and needs nothing of the device",
+      "facts": "facts/GameplayKit/Distribution.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "both methods hand the array to the source and return what the source answers, which is what the host does: -shuffledArrayWithRandomSource: sends -arrayByShufflingObjectsInArray: to the source it was given, and -shuffledArray is that over +[GKRandomSource sharedRandom]"
+    },
+    {
+      "api": "-[NSArray shuffledArray]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a shuffle of an array is logic over the array and the source it is handed, and needs nothing of the device",
+      "facts": "facts/GameplayKit/Distribution.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "both methods hand the array to the source and return what the source answers, which is what the host does: -shuffledArrayWithRandomSource: sends -arrayByShufflingObjectsInArray: to the source it was given, and -shuffledArray is that over +[GKRandomSource sharedRandom]"
+    }
+  ]
+}

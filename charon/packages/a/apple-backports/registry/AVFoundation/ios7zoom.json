@@ -1,0 +1,93 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptureDevice.videoZoomFactor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3 scales and crops a still image connection itself (up to min(width, height) * 0.0625 of what it captures), masks the preview layer's video in a sublayer, and hands the video data output's buffers to the application, so the centre crop the header describes is made there; rank 47/48 of the frameworks demand table, CRASH-ON-USE for session and telegram",
+      "effect": "kept on the device and applied to every session of it: the still connection's videoScaleAndCropFactor, the preview layers' sublayerTransform and point conversions, and a centre crop of the video data output's buffers scaled back to their size; setting it checks the range and then the lock as 7.0 does, with its exception texts, cancels a ramp, and is key-value observable. A movie file output of 6.1.3 cannot crop and records the whole frame",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "the armv7 caches of 6.1.3 and 7.0, the methods read and disassembled; an iPad 2 running 6.1.3 (tests/backports/device/zoom7.m)"
+    },
+    {
+      "api": "-[AVCaptureDevice rampToVideoZoomFactor:withRate:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3 scales and crops a still image connection itself (up to min(width, height) * 0.0625 of what it captures), masks the preview layer's video in a sublayer, and hands the video data output's buffers to the application, so the centre crop the header describes is made there; rank 47/48 of the frameworks demand table, CRASH-ON-USE for session and telegram",
+      "effect": "checks as the setter does, then moves the factor by pow(2, |rate| * time) towards the target sixty times a second on the main queue and stops there; a rate of 0 ends a ramp",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "the armv7 caches of 6.1.3 and 7.0, the methods read and disassembled; an iPad 2 running 6.1.3 (tests/backports/device/zoom7.m)"
+    },
+    {
+      "api": "-[AVCaptureDevice isRampingVideoZoom]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3 scales and crops a still image connection itself (up to min(width, height) * 0.0625 of what it captures), masks the preview layer's video in a sublayer, and hands the video data output's buffers to the application, so the centre crop the header describes is made there; rank 47/48 of the frameworks demand table, CRASH-ON-USE for session and telegram",
+      "effect": "YES while a ramp runs, key-value observable",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "the armv7 caches of 6.1.3 and 7.0, the methods read and disassembled; an iPad 2 running 6.1.3 (tests/backports/device/zoom7.m)"
+    },
+    {
+      "api": "-[AVCaptureDevice cancelVideoZoomRamp]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3 scales and crops a still image connection itself (up to min(width, height) * 0.0625 of what it captures), masks the preview layer's video in a sublayer, and hands the video data output's buffers to the application, so the centre crop the header describes is made there; rank 47/48 of the frameworks demand table, CRASH-ON-USE for session and telegram",
+      "effect": "needs the lock (NSGenericException otherwise, as the header says) and stops a ramp where it is",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "the armv7 caches of 6.1.3 and 7.0, the methods read and disassembled; an iPad 2 running 6.1.3 (tests/backports/device/zoom7.m)"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.videoMaxZoomFactor",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3 scales and crops a still image connection itself (up to min(width, height) * 0.0625 of what it captures), masks the preview layer's video in a sublayer, and hands the video data output's buffers to the application, so the centre crop the header describes is made there; rank 47/48 of the frameworks demand table, CRASH-ON-USE for session and telegram",
+      "effect": "min(width, height) * 0.0625 of the format, at least 1: the release's own limit for its scale and crop",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "the armv7 caches of 6.1.3 and 7.0, the methods read and disassembled; an iPad 2 running 6.1.3 (tests/backports/device/zoom7.m)"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.videoZoomFactorUpscaleThreshold",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3 scales and crops a still image connection itself (up to min(width, height) * 0.0625 of what it captures), masks the preview layer's video in a sublayer, and hands the video data output's buffers to the application, so the centre crop the header describes is made there; rank 47/48 of the frameworks demand table, CRASH-ON-USE for session and telegram",
+      "effect": "1: the crop is of the format's own frames, so any factor above 1 scales up",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "the armv7 caches of 6.1.3 and 7.0, the methods read and disassembled; an iPad 2 running 6.1.3 (tests/backports/device/zoom7.m)"
+    },
+    {
+      "api": "AVCaptureSession.usesApplicationAudioSession",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "rank 49 of the frameworks demand table, CRASH-ON-USE for session and telegram; 6.1.3's capture session records through an audio session of its own (measured)",
+      "effect": "NO, what 6.1.3 does; setting YES cannot be honoured, the property keeps answering NO and the log says so once",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "an iPad 2 on 6.1.3 (connections, microphone capture); the armv7 cache ladder, which first carries it at 7.0"
+    },
+    {
+      "api": "AVCaptureSession.automaticallyConfiguresApplicationAudioSession",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "its pair; 6.1.3's capture session leaves the application's audio session as it is (measured)",
+      "effect": "NO, what 6.1.3 does; setting YES cannot be honoured, the property keeps answering NO and the log says so once",
+      "facts": "facts/AVFoundation/CaptureZoomAudioSession.md",
+      "source": "an iPad 2 on 6.1.3 (connections, microphone capture); the armv7 cache ladder, which first carries it at 7.0"
+    }
+  ]
+}

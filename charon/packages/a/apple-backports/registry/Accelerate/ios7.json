@@ -1,0 +1,38 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageBuffer_Init()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a departure from 7.0 in the padding of a row: the host pads it by a rule tuned to its processor, and this release pads to 16 bytes, which is a valid answer that always holds a row",
+      "effect": "allocates a buffer of the size asked for, its data aligned to 64 bytes and released with free(), its rowBytes the row rounded up to 16; NoAllocate sets the size and rowBytes and answers 16; flags other than none, NoAllocate and PrintDiagnostics answer kvImageUnknownFlagsBit; an impossible size answers kvImageMemoryAllocationError",
+      "facts": "facts/Accelerate/vImageBuffer.md",
+      "source": "the host's own vImage (macOS Accelerate), which the port is held against, case by case, by tests/backports/host/accelerate7 and the answers it records for tests/backports/device/accelerate7.m; the header of iOS 16.4 for the documented contract; an iPad 2 and the iOS 6.0 emulator, asked with dlsym, for what iOS 6 exports"
+    },
+    {
+      "api": "vImageBuffer_InitWithCGImage()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a departure from 7.0 in the formats: the 8-bit RGB formats of 32 bits with alpha first or last, premultiplied, not premultiplied or skipped, in the default, big and little 32-bit byte orders, RGB of 24 bits are made; the others, 16-bit and float components, gray, CMYK, answer kvImageInvalidImageFormat; and a colour space of NULL is the device RGB space, since the release makes no sRGB space",
+      "effect": "the buffer holds the pixels of the image converted to the format; an alpha the format has not is flattened against the background colour; a format with alpha that is not premultiplied is unpremultiplied with rounding; NoAllocate uses the data and rowBytes it is given; the answers to a wrong format, flag or NULL are the host's",
+      "facts": "facts/Accelerate/vImageBuffer.md",
+      "source": "the host's own vImage (macOS Accelerate), which the port is held against, case by case, by tests/backports/host/accelerate7 and the answers it records for tests/backports/device/accelerate7.m; the header of iOS 16.4 for the documented contract; an iPad 2 and the iOS 6.0 emulator, asked with dlsym, for what iOS 6 exports"
+    },
+    {
+      "api": "vImageCreateCGImageFromBuffer()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a departure from 7.0 in a detail of the image: the host makes an image in a layout of its own, and this release makes one in the layout of the format, which draws the same",
+      "effect": "a CGImage of the buffer in the format, the pixels copied unless NoAllocate is given, in which case the image owns them and the callback, or free(), releases them; NULL with the error when the format or the flags are wrong or a row is shorter than the pixels it holds",
+      "facts": "facts/Accelerate/vImageBuffer.md",
+      "source": "the host's own vImage (macOS Accelerate), which the port is held against, case by case, by tests/backports/host/accelerate7 and the answers it records for tests/backports/device/accelerate7.m; the header of iOS 16.4 for the documented contract; an iPad 2 and the iOS 6.0 emulator, asked with dlsym, for what iOS 6 exports"
+    }
+  ]
+}

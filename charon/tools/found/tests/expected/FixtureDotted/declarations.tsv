@@ -1,0 +1,2 @@
+#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+function	c:@F@dotted_value	-			int (void)	-	-	-	-	581811b93e68dfa7	-

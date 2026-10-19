@@ -1,0 +1,27 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "-[CIImage imageByApplyingFilter:withInputParameters:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 makes the same image with a CIFilter, its input image and the values of its keys",
+      "effect": "makes the filter of that name with its default values, sets this image as its input image, sets each parameter by its key (so a key the filter does not have raises NSUnknownKeyException, and one that names the input image replaces this image) and gives the output image; nil for a filter that does not exist",
+      "facts": "facts/CoreImage/ImageApplyingFilter.md",
+      "source": "the host's CoreImage, over the filter name that is unknown, an unknown key, defaults and an input image given in the parameters; an iPad 2 running 6.1.3 for the filters of the release"
+    },
+    {
+      "api": "-[CIImage imageByApplyingFilter:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the same, with no parameters",
+      "effect": "the output image of the filter of that name with its default values and this image as its input",
+      "facts": "facts/CoreImage/ImageApplyingFilter.md",
+      "source": "the host's CoreImage, over the filter name that is unknown, an unknown key, defaults and an input image given in the parameters; an iPad 2 running 6.1.3 for the filters of the release"
+    }
+  ]
+}

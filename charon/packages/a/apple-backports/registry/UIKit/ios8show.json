@@ -1,0 +1,50 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UIViewController showViewController:sender:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerShow.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/show, and tests/backports/device/show.m on iOS 6"
+    },
+    {
+      "api": "-[UIViewController showDetailViewController:sender:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerShow.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/show, and tests/backports/device/show.m on iOS 6"
+    },
+    {
+      "api": "-[UIViewController targetViewControllerForAction:sender:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerShow.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/show, and tests/backports/device/show.m on iOS 6"
+    },
+    {
+      "api": "-[UINavigationController showViewController:sender:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerShow.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/show, and tests/backports/device/show.m on iOS 6"
+    },
+    {
+      "api": "-[UIResponder targetForAction:withSender:]",
+      "kind": "method",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIResponderTargetForAction.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/show, and tests/backports/device/show.m on iOS 6"
+    }
+  ]
+}

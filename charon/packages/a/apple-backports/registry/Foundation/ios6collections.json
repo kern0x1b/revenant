@@ -1,0 +1,37 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "+[NSMapTable strongToStrongObjectsMapTable]",
+      "kind": "method",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSMapTable.md",
+      "source": "the armv7 caches of 4.3 to 7.0 (NSMapTable's class methods), the release's own table measured under xmake emulate on 4.3 and 5.1.1, the host's own held against the backport by tests/backports/host/maptable6"
+    },
+    {
+      "api": "+[NSMapTable weakToStrongObjectsMapTable]",
+      "kind": "method",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSMapTable.md",
+      "source": "the armv7 caches of 4.3 to 7.0 (NSMapTable's class methods), the release's own table measured under xmake emulate on 4.3 and 5.1.1, the host's own held against the backport by tests/backports/host/maptable6"
+    },
+    {
+      "api": "+[NSMapTable strongToWeakObjectsMapTable]",
+      "kind": "method",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSMapTable.md",
+      "source": "the armv7 caches of 4.3 to 7.0 (NSMapTable's class methods), the release's own table measured under xmake emulate on 4.3 and 5.1.1 (and on 6.0 for the weak sides), the host's own held against the backport by tests/backports/host/maptable6"
+    },
+    {
+      "api": "+[NSMapTable weakToWeakObjectsMapTable]",
+      "kind": "method",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSMapTable.md",
+      "source": "the armv7 caches of 4.3 to 7.0 (NSMapTable's class methods), the release's own table measured under xmake emulate on 4.3 and 5.1.1 (and on 6.0 for the weak sides), the host's own held against the backport by tests/backports/host/maptable6"
+    }
+  ]
+}

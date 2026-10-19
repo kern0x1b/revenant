@@ -1,0 +1,93 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "-[AVCaptureDevice defaultRectForExposurePointOfInterest:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3's AVCaptureDevice owns -exposurePointOfInterest and none of the rectangle members, so this method is code to write over the release's own point",
+      "effect": "CGRectNull, by the header's own sentence for the same case (:1429) and by the same measurement on the host for four points",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1420-1429), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h"
+    },
+    {
+      "api": "-[AVCaptureDevice defaultRectForFocusPointOfInterest:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "6.1.3's AVCaptureDevice owns -focusPointOfInterest and none of the rectangle members, so this method is code to write over the release's own point",
+      "effect": "CGRectNull, which is what the header says this method returns where the device does not support the rectangle - 'This method returns CGRectNull if focusRectOfInterestSupported returns false' (:1184) - and what the host's own class answers, measured for four points ((0.5, 0.5), (0, 0), (0.75, 0.75) and (1, 1)), CGRectIsNull 1 every time. There is no default rectangle here to be any size: the release has no focus area to size one with",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1176-1187), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h"
+    },
+    {
+      "api": "AVCaptureDevice.exposureRectOfInterest",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "neither -exposureRectOfInterest nor its setter is a selector of any release this port's bands are measured against; the header declares the property at AVCaptureDevice.h:1418",
+      "effect": "CGRectNull, always, for the reason AVCaptureDevice.focusRectOfInterest gives and measured on the host for the exposure rectangle as well. -setExposureRectOfInterest: refuses in the same two steps, with Apple's own text for the exposure names measured on the host",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1412-1418), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h"
+    },
+    {
+      "api": "AVCaptureDevice.exposureRectOfInterestSupported",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 6.1.3 armv7 cache's AVCaptureDevice owns the exposure point-of-interest pair and no metering area of any size, so it cannot weigh an exposure rectangle; the header declares the property getter=isExposureRectOfInterestSupported (AVCaptureDevice.h:1406)",
+      "effect": "NO, always, for the reason AVCaptureDevice.focusRectOfInterestSupported gives: the exposure rectangle is weighed as an area and this release has no metering area. Measured on the host: 0",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1403-1406), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h, getter=isExposureRectOfInterestSupported"
+    },
+    {
+      "api": "AVCaptureDevice.focusRectOfInterest",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "neither -focusRectOfInterest nor its setter is a selector of any release this port's bands are measured against; the header declares the property at AVCaptureDevice.h:1174",
+      "effect": "CGRectNull, always. A device that does not support the rectangle has none to report, and CGRectNull is what the host's own camera answers here (measured) and what the header's own default-rectangle methods return in the same case (:1184). Nothing is kept per device: a setter that refuses every value cannot have a last accepted one, so there is no rectangle to store and no way to read one back. -setFocusRectOfInterest: refuses in the order Apple's own refuses, measured on this host - NSGenericException while the configuration lock is not held ('May not be called without first successfully gaining exclusive ownership of the device using -lockForConfiguration:', and the lock is read through the release's own -isLockedForConfiguration), then NSInvalidArgumentException '*** -[AVCaptureDevice setFocusRectOfInterest:] Not supported - use -isFocusRectOfInterestSupported'",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1169-1174), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h"
+    },
+    {
+      "api": "AVCaptureDevice.focusRectOfInterestSupported",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the 6.1.3 armv7 cache's AVCaptureDevice owns the point-of-interest pair (-isFocusPointOfInterestSupported, -focusPointOfInterest, -setFocusPointOfInterest:) and NO focus area, no metering area and no sensor size anywhere, so there is nothing on this release that could weigh a rectangle whatever a device says about a point; the header declares the property getter=isFocusRectOfInterestSupported (AVCaptureDevice.h:1162)",
+      "effect": "NO, always, and that is the hardware rather than a shrug: a rectangle of interest is weighed as an AREA, and this release cannot weigh one. Measured on the host, whose camera answers 0 here and 0 for the point as well - and whose answer for every other row of this family is the header's own answer for a device without the machinery, which is what this port answers too",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1159-1162), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h, getter=isFocusRectOfInterestSupported"
+    },
+    {
+      "api": "AVCaptureDevice.minExposureRectOfInterestSize",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property is 26.0's (AVCaptureDevice.h:1411) and no release this port's bands are measured against carries the selector",
+      "effect": "{ 0, 0 }, for the reason AVCaptureDevice.minFocusRectOfInterestSize gives (:1411). Measured on the host: { 0, 0 }",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1407-1411), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h"
+    },
+    {
+      "api": "AVCaptureDevice.minFocusRectOfInterestSize",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property is 26.0's (AVCaptureDevice.h:1167) and no release this port's bands are measured against carries the selector",
+      "effect": "{ 0, 0 }, and now for the header's own reason rather than beside it: 'If focusRectOfInterestSupported returns false, this property returns { 0, 0 }' (:1167), and the support flag is NO on every device of this port. Apple's value on a device that has the machinery is the smallest area the sensor can weigh, in the active format's sensor pixels normalized, and this release has no such quantity - which is why the port answers the documented case instead of a derivation of its own. Measured on the host, whose camera is in the same case: { 0, 0 }",
+      "facts": "facts/AVFoundation/CaptureDeviceRectsOfInterest26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1164-1167), transcribed into CharonAVCaptureDeviceRectsOfInterest26.h"
+    }
+  ]
+}

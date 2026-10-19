@@ -1,0 +1,38 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSLengthFormatter",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has neither the class nor the CLDR table its unit names come from, so the names are carried and everything else is asked of the release",
+      "effect": "a length written in the unit the locale's system of units and the value choose, in one of the three unit styles and with the number the formatter's own NSNumberFormatter writes; a person's height in feet and inches in the U.S. and in centimetres in the U.K. and the metric, a stone of mass in stones and pounds, the unit each is written in, and no parse, which the header documents never to answer anything",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40467 comparisons each and six others at 7059 each, none differing: the unit chosen, the number, the plural, the spacing, the two composite forms and every threshold to the last bit)"
+    },
+    {
+      "api": "NSMassFormatter",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has neither the class nor the CLDR table its unit names come from, so the names are carried and everything else is asked of the release",
+      "effect": "a mass written in the unit the locale's system of units and the value choose, in one of the three unit styles and with the number the formatter's own NSNumberFormatter writes; a stone written in stones and pounds whatever the system of units, the unit it is written in, and no parse, which the header documents never to answer anything",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40467 comparisons each and six others at 7059 each, none differing)"
+    },
+    {
+      "api": "NSEnergyFormatter",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has neither the class nor the CLDR table its unit names come from, so the names are carried and everything else is asked of the release",
+      "effect": "an energy written in the unit the locale's system of units and the value choose, in one of the three unit styles and with the number the formatter's own NSNumberFormatter writes; a kilocalorie of food energy written C, Cal or Calories where it is kcal otherwise and in no other way different, the unit it is written in, and no parse, which the header documents never to answer anything",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40467 comparisons each and six others at 7059 each, none differing)"
+    }
+  ]
+}

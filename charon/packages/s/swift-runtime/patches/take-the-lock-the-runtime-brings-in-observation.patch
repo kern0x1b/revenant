@@ -1,0 +1,69 @@
+diff --git a/Runtimes/Supplemental/Observation/CMakeLists.txt b/Runtimes/Supplemental/Observation/CMakeLists.txt
+index 563e744..fdaad71 100644
+--- a/Runtimes/Supplemental/Observation/CMakeLists.txt
++++ b/Runtimes/Supplemental/Observation/CMakeLists.txt
+@@ -37,7 +37,9 @@ set(${PROJECT_NAME}_VENDOR_MODULE_DIR "${CMAKE_SOURCE_DIR}/../cmake/modules/vend
+   CACHE FILEPATH "Location for private build system extension")
+ 
+ find_package(SwiftCore REQUIRED)
+-find_package(SwiftOverlay REQUIRED)
++# The C library's Swift overlay ships in the SDK only from iOS 13 on, and this library needs nothing from it: the lock it
++# takes is named by its symbol, not imported from os/lock.h.
++find_package(SwiftOverlay)
+ 
+ include(GNUInstallDirs)
+ 
+diff --git a/stdlib/public/Observation/Sources/Observation/Locking.swift b/stdlib/public/Observation/Sources/Observation/Locking.swift
+index 6171465..8284163 100644
+--- a/stdlib/public/Observation/Sources/Observation/Locking.swift
++++ b/stdlib/public/Observation/Sources/Observation/Locking.swift
+@@ -30,9 +30,21 @@ import Android
+ #error("Unsupported platform")
+ #endif
+ 
++// os_unfair_lock arrived in iOS 10, macOS 10.12, tvOS 10 and watchOS 3, and the SDK's declaration carries those releases,
++// so importing it holds this library to them. A runtime that ships with the program runs on older releases, where Charon's
++// libc++abi exports the same calls, one copy for the process; they are named here instead, and the lock is the single
++// 32-bit word os_unfair_lock is (OS_UNFAIR_LOCK_INIT is a zero word).
++#if canImport(Darwin.os.lock)
++@_silgen_name("os_unfair_lock_lock")
++internal func _os_unfair_lock_lock(_ lock: UnsafeMutablePointer<UInt32>)
++
++@_silgen_name("os_unfair_lock_unlock")
++internal func _os_unfair_lock_unlock(_ lock: UnsafeMutablePointer<UInt32>)
++#endif
++
+ internal struct Lock {
+   #if canImport(Darwin.os.lock)
+-  typealias Primitive = os_unfair_lock
++  typealias Primitive = UInt32
+   #elseif canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+   #if os(FreeBSD) || os(OpenBSD)
+   // BSD libc does not annotate the nullability of pthread APIs.
+@@ -60,7 +72,7 @@ internal struct Lock {
+ 
+   fileprivate static func initialize(_ platformLock: PlatformLock) {
+     #if canImport(Darwin.os.lock)
+-    platformLock.initialize(to: os_unfair_lock())
++    platformLock.initialize(to: 0)
+     #elseif canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+     let result = pthread_mutex_init(platformLock, nil)
+     precondition(result == 0, "pthread_mutex_init failed")
+@@ -83,7 +95,7 @@ internal struct Lock {
+ 
+   fileprivate static func lock(_ platformLock: PlatformLock) {
+     #if canImport(Darwin.os.lock)
+-    os_unfair_lock_lock(platformLock)
++    _os_unfair_lock_lock(platformLock)
+     #elseif canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+     pthread_mutex_lock(platformLock)
+     #elseif canImport(WinSDK)
+@@ -96,7 +108,7 @@ internal struct Lock {
+ 
+   fileprivate static func unlock(_ platformLock: PlatformLock) {
+     #if canImport(Darwin.os.lock)
+-    os_unfair_lock_unlock(platformLock)
++    _os_unfair_lock_unlock(platformLock)
+     #elseif canImport(Glibc) || canImport(Musl) || canImport(Bionic)
+     let result = pthread_mutex_unlock(platformLock)
+     precondition(result == 0, "pthread_mutex_unlock failed")

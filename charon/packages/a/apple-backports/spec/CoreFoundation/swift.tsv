@@ -1,0 +1,108 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CoreFoundation	swift-struct	s:14CoreFoundation7CGFloatV	-	CGFloat	-	-	-	ios=2.0,macos=10.0,tvos=9.0,watchos=1.0	-	53713a1588368c63
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV10NativeTypea	CGFloat	NativeType	-	-	-	-	-	611269971ac89e55
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatVACycfc	CGFloat	init()	-	-	CoreGraphics.CGFloat	-	-	fed37c4c7aa798cc
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatVyACSfcfc	CGFloat	init(_:)	-	-	CoreGraphics.CGFloat | Swift.Float	-	-	463246d6eb6eca81
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatVyACSdcfc	CGFloat	init(_:)	-	-	CoreGraphics.CGFloat | Swift.Double	-	-	829527a0e1bd8ac4
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatVyA2Ccfc	CGFloat	init(_:)	-	-	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	b2919463b99e1ebb
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV6nativeSdvp	CGFloat	native	-	CoreGraphics.CGFloat.NativeType	-	-	-	5f62062f452df032
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatVyACxcSzRzlufc	CGFloat	init(_:)	-	-	CoreGraphics.CGFloat | T	-	-	04cb9e376906a1b5
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV7exactlyACSgx_tcSzRzlufc	CGFloat	init(exactly:)	-	-	CoreGraphics.CGFloat? | T	-	-	0598b56f77722b96
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV9magnitudeACvp	CGFloat	magnitude	-	CoreGraphics.CGFloat	-	-	-	7d1b7e3a1421fc07
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV18IntegerLiteralTypea	CGFloat	IntegerLiteralType	-	-	-	ios=2.0,macos=10.0,tvos=9.0,watchos=1.0	-	83d238f1f2adee0c
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV9Magnitudea	CGFloat	Magnitude	-	-	-	ios=2.0,macos=10.0,tvos=9.0,watchos=1.0	-	8ed880a36da53198
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV14RawSignificanda	CGFloat	RawSignificand	-	-	-	-	-	0cf2f5035701f1be
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV8Exponenta	CGFloat	Exponent	-	-	-	-	-	c23b2fb679c0fee3
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV16exponentBitCountSivpZ	CGFloat	exponentBitCount	+	Swift.Int	-	-	-	957ac07e03e251b0
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV19significandBitCountSivpZ	CGFloat	significandBitCount	+	Swift.Int	-	-	-	4067487c6baa5f45
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV10bitPatternSuvp	CGFloat	bitPattern	-	Swift.UInt	-	-	-	63f8b157f2648cc4
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV10bitPatternACSu_tcfc	CGFloat	init(bitPattern:)	-	-	CoreGraphics.CGFloat | Swift.UInt	-	-	a09424ccda939329
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV4signs17FloatingPointSignOvp	CGFloat	sign	-	Swift.FloatingPointSign	-	-	-	e2e51320ed98a918
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV18exponentBitPatternSuvp	CGFloat	exponentBitPattern	-	Swift.UInt	-	-	-	9a43b8bb1392e326
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV21significandBitPatternSuvp	CGFloat	significandBitPattern	-	Swift.UInt	-	-	-	1a8b2184b4d73b8d
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV4sign18exponentBitPattern011significandfG0ACs17FloatingPointSignO_S2utcfc	CGFloat	init(sign:exponentBitPattern:significandBitPattern:)	-	-	CoreGraphics.CGFloat | Swift.FloatingPointSign | Swift.UInt | Swift.UInt	-	-	4ce8287eb15a6bdf
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV3nan9signalingACSu_Sbtcfc	CGFloat	init(nan:signaling:)	-	-	CoreGraphics.CGFloat | CoreGraphics.CGFloat.RawSignificand | Swift.Bool	-	-	387f1c48a34af3ee
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV8infinityACvpZ	CGFloat	infinity	+	CoreGraphics.CGFloat	-	-	-	60fefaabf8da79df
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV3nanACvpZ	CGFloat	nan	+	CoreGraphics.CGFloat	-	-	-	49c8a07f37999d5c
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV12signalingNaNACvpZ	CGFloat	signalingNaN	+	CoreGraphics.CGFloat	-	-	-	18f51a6ed0703622
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV23greatestFiniteMagnitudeACvpZ	CGFloat	greatestFiniteMagnitude	+	CoreGraphics.CGFloat	-	-	-	996bceafb9a75d52
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV2piACvpZ	CGFloat	pi	+	CoreGraphics.CGFloat	-	-	-	18cc6a0b1b7e8bec
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV3ulpACvp	CGFloat	ulp	-	CoreGraphics.CGFloat	-	-	-	ca995a1756d8224b
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV20leastNormalMagnitudeACvpZ	CGFloat	leastNormalMagnitude	+	CoreGraphics.CGFloat	-	-	-	834c09a0735d9dc8
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV21leastNonzeroMagnitudeACvpZ	CGFloat	leastNonzeroMagnitude	+	CoreGraphics.CGFloat	-	-	-	479925faca042ebb
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV8exponentSivp	CGFloat	exponent	-	Swift.Int	-	-	-	aff003d771e75e06
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV11significandACvp	CGFloat	significand	-	CoreGraphics.CGFloat	-	-	-	7749ae3faaebfd64
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV4sign8exponent11significandACs17FloatingPointSignO_SiACtcfc	CGFloat	init(sign:exponent:significand:)	-	-	CoreGraphics.CGFloat | Swift.FloatingPointSign | Swift.Int | CoreGraphics.CGFloat	-	-	475c90ea2da1e1e7
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV5roundyys25FloatingPointRoundingRuleOF	CGFloat	round(_:)	-	()	Swift.FloatingPointRoundingRule	-	-	b7fc97e3127c8e81
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV6nextUpACvp	CGFloat	nextUp	-	CoreGraphics.CGFloat	-	-	-	8af7e4d060ad2400
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV6negateyyF	CGFloat	negate()	-	()	-	-	-	bbe964403969b7bd
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV2peoiyyACz_ACtFZ	CGFloat	+=(_:_:)	+	()	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	d58b8e38f72a7215
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV2seoiyyACz_ACtFZ	CGFloat	-=(_:_:)	+	()	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	cc6b357f0095f35c
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV2meoiyyACz_ACtFZ	CGFloat	*=(_:_:)	+	()	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	bb1ce8b99f6df1c9
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV2deoiyyACz_ACtFZ	CGFloat	/=(_:_:)	+	()	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	e46f77f99084d1eb
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV23formTruncatingRemainder10dividingByyAC_tF	CGFloat	formTruncatingRemainder(dividingBy:)	-	()	CoreGraphics.CGFloat	-	-	0d961e0d916b596e
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV13formRemainder10dividingByyAC_tF	CGFloat	formRemainder(dividingBy:)	-	()	CoreGraphics.CGFloat	-	-	0bd1debfd0601d70
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV14formSquareRootyyF	CGFloat	formSquareRoot()	-	()	-	-	-	03e557000b4a0d06
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV10addProductyyAC_ACtF	CGFloat	addProduct(_:_:)	-	()	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	7bac29f29007a23e
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV7isEqual2toSbAC_tF	CGFloat	isEqual(to:)	-	Swift.Bool	CoreGraphics.CGFloat	-	-	37ad3308358d1362
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV6isLess4thanSbAC_tF	CGFloat	isLess(than:)	-	Swift.Bool	CoreGraphics.CGFloat	-	-	4501e4cdcce5f20c
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV19isLessThanOrEqualToySbACF	CGFloat	isLessThanOrEqualTo(_:)	-	Swift.Bool	CoreGraphics.CGFloat	-	-	5319987961088c62
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV8isNormalSbvp	CGFloat	isNormal	-	Swift.Bool	-	-	-	80a3e748f58dab0e
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV8isFiniteSbvp	CGFloat	isFinite	-	Swift.Bool	-	-	-	a135100a98727937
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV6isZeroSbvp	CGFloat	isZero	-	Swift.Bool	-	-	-	6ccafdc51c51a3a6
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV11isSubnormalSbvp	CGFloat	isSubnormal	-	Swift.Bool	-	-	-	1f9d52a8829befdc
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV10isInfiniteSbvp	CGFloat	isInfinite	-	Swift.Bool	-	-	-	8aaf3ae5317fd98f
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV5isNaNSbvp	CGFloat	isNaN	-	Swift.Bool	-	-	-	2ea3b6333a530913
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV14isSignalingNaNSbvp	CGFloat	isSignalingNaN	-	Swift.Bool	-	-	-	815f1ab203e2ca07
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV11isCanonicalSbvp	CGFloat	isCanonical	-	Swift.Bool	-	-	-	569a0f5293010dcd
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV18floatingPointClasss08FloatingE14ClassificationOvp	CGFloat	floatingPointClass	-	Swift.FloatingPointClassification	-	-	-	f273ca50f596cc4c
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV6binadeACvp	CGFloat	binade	-	CoreGraphics.CGFloat	-	-	-	fc2598e915676eb6
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV16significandWidthSivp	CGFloat	significandWidth	-	Swift.Int	-	-	-	9dc4826839e08aa0
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV12floatLiteralACSd_tcfc	CGFloat	init(floatLiteral:)	-	-	CoreGraphics.CGFloat | CoreGraphics.CGFloat.NativeType	-	-	1fea13e3fe9fd703
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV14integerLiteralACSi_tcfc	CGFloat	init(integerLiteral:)	-	-	CoreGraphics.CGFloat | Swift.Int	-	-	dfdbd365cbc1f04c
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV16FloatLiteralTypea	CGFloat	FloatLiteralType	-	-	-	ios=2.0,macos=10.0,tvos=9.0,watchos=1.0	-	01c235b381d1bf12
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV11RawExponenta	CGFloat	RawExponent	-	-	-	ios=2.0,macos=10.0,tvos=9.0,watchos=1.0	-	d6c14b4e7b81674d
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV12customMirrors0E0Vvp	CGFloat	customMirror	-	Swift.Mirror	-	-	-	15a2bf153ab0f642
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV11descriptionSSvp	CGFloat	description	-	Swift.String	-	-	-	578cfbd5b96b29c3
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV9hashValueSivp	CGFloat	hashValue	-	Swift.Int	-	-	-	d9189b7345d897b6
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV4hash4intoys6HasherVz_tF	CGFloat	hash(into:)	-	()	Swift.Hasher	-	-	42e12db543c56dbe
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV1poiyA2C_ACtFZ	CGFloat	+(_:_:)	+	CoreGraphics.CGFloat	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	46f4d427543869b6
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV1soiyA2C_ACtFZ	CGFloat	-(_:_:)	+	CoreGraphics.CGFloat	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	d16c7abdb581fb45
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV1moiyA2C_ACtFZ	CGFloat	*(_:_:)	+	CoreGraphics.CGFloat	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	36031fdab0b6ba3f
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV1doiyA2C_ACtFZ	CGFloat	/(_:_:)	+	CoreGraphics.CGFloat	CoreGraphics.CGFloat | CoreGraphics.CGFloat	-	-	c770ce55abf330df
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV8distance2toA2C_tF	CGFloat	distance(to:)	-	CoreGraphics.CGFloat	CoreGraphics.CGFloat	-	-	7eab4d614978831b
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV8advanced2byA2C_tF	CGFloat	advanced(by:)	-	CoreGraphics.CGFloat	CoreGraphics.CGFloat	-	-	32632cd4c87b779a
+CoreFoundation	swift-typealias	s:14CoreFoundation7CGFloatV6Stridea	CGFloat	Stride	-	-	-	ios=2.0,macos=10.0,tvos=9.0,watchos=1.0	-	a2bf46d681e4a9fc
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV4fromACs7Decoder_p_tKcfc	CGFloat	init(from:)	-	-	CoreGraphics.CGFloat | any Swift.Decoder	-	-	4a30c09972cb0897
+CoreFoundation	swift-method	s:14CoreFoundation7CGFloatV6encode2toys7Encoder_p_tKF	CGFloat	encode(to:)	-	()	any Swift.Encoder	-	-	bdd4c209e2dfeb38
+CoreFoundation	swift-constant	c:@macro@__COREFOUNDATION__	-	__COREFOUNDATION__	-	Swift.Int32	-	-	-	d55f4ef3ef1f9413
+CoreFoundation	swift-struct	s:s5UInt8V	-	UInt8	-	-	-	-	-	ec96929d0b059b01
+CoreFoundation	swift-method	s:s5UInt8V14CoreFoundationEyAbC7CGFloatVcfc	UInt8	init(_:)	-	-	Swift.UInt8 | CoreGraphics.CGFloat	-	-	f3e49ccb0a9f08e7
+CoreFoundation	swift-struct	s:s4Int8V	-	Int8	-	-	-	-	-	f55bf7b9d80a675b
+CoreFoundation	swift-method	s:s4Int8V14CoreFoundationEyAbC7CGFloatVcfc	Int8	init(_:)	-	-	Swift.Int8 | CoreGraphics.CGFloat	-	-	c9438d0f319f69de
+CoreFoundation	swift-struct	s:s6UInt16V	-	UInt16	-	-	-	-	-	c88839e4c8101d29
+CoreFoundation	swift-method	s:s6UInt16V14CoreFoundationEyAbC7CGFloatVcfc	UInt16	init(_:)	-	-	Swift.UInt16 | CoreGraphics.CGFloat	-	-	b46ecafd13fec1cf
+CoreFoundation	swift-struct	s:s5Int16V	-	Int16	-	-	-	-	-	afd7a72e437b789d
+CoreFoundation	swift-method	s:s5Int16V14CoreFoundationEyAbC7CGFloatVcfc	Int16	init(_:)	-	-	Swift.Int16 | CoreGraphics.CGFloat	-	-	45993da8c8f51d86
+CoreFoundation	swift-struct	s:s6UInt32V	-	UInt32	-	-	-	-	-	d21c36963f285bb0
+CoreFoundation	swift-method	s:s6UInt32V14CoreFoundationEyAbC7CGFloatVcfc	UInt32	init(_:)	-	-	Swift.UInt32 | CoreGraphics.CGFloat	-	-	881f2acae2c24ce0
+CoreFoundation	swift-struct	s:s5Int32V	-	Int32	-	-	-	-	-	249ded7ac092a292
+CoreFoundation	swift-method	s:s5Int32V14CoreFoundationEyAbC7CGFloatVcfc	Int32	init(_:)	-	-	Swift.Int32 | CoreGraphics.CGFloat	-	-	062458648c2422f7
+CoreFoundation	swift-struct	s:s6UInt64V	-	UInt64	-	-	-	-	-	1c64b26904f1e33d
+CoreFoundation	swift-method	s:s6UInt64V14CoreFoundationEyAbC7CGFloatVcfc	UInt64	init(_:)	-	-	Swift.UInt64 | CoreGraphics.CGFloat	-	-	482941a2571648c8
+CoreFoundation	swift-struct	s:s5Int64V	-	Int64	-	-	-	-	-	d0f8806a101b5c13
+CoreFoundation	swift-method	s:s5Int64V14CoreFoundationEyAbC7CGFloatVcfc	Int64	init(_:)	-	-	Swift.Int64 | CoreGraphics.CGFloat	-	-	f1ad9567eb36e442
+CoreFoundation	swift-struct	s:Su	-	UInt	-	-	-	-	-	c8e976b85666c29f
+CoreFoundation	swift-method	s:Su14CoreFoundationEySuAA7CGFloatVcfc	UInt	init(_:)	-	-	Swift.UInt | CoreGraphics.CGFloat	-	-	186b994217ba571d
+CoreFoundation	swift-struct	s:Si	-	Int	-	-	-	-	-	6ce0fd5458cd07a9
+CoreFoundation	swift-method	s:Si14CoreFoundationEySiAA7CGFloatVcfc	Int	init(_:)	-	-	Swift.Int | CoreGraphics.CGFloat	-	-	0159da6fb5fa76d1
+CoreFoundation	swift-struct	s:Sd	-	Double	-	-	-	-	-	32361a25b3f00c77
+CoreFoundation	swift-method	s:Sd14CoreFoundationEySdAA7CGFloatVcfc	Double	init(_:)	-	-	Swift.Double | CoreGraphics.CGFloat	-	-	37a48b7427addf3a
+CoreFoundation	swift-struct	s:Sf	-	Float	-	-	-	-	-	516ae29ef375d226
+CoreFoundation	swift-method	s:Sf14CoreFoundationEySfAA7CGFloatVcfc	Float	init(_:)	-	-	Swift.Float | CoreGraphics.CGFloat	-	-	65fca52994b935b6
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV16_cVarArgEncodingSaySiGvp	CGFloat	_cVarArgEncoding	-	[Swift.Int]	-	-	-	9361634532831d73
+CoreFoundation	swift-property	s:14CoreFoundation7CGFloatV17_cVarArgAlignmentSivp	CGFloat	_cVarArgAlignment	-	Swift.Int	-	-	-	5c3dd87b1b9e5c75
+CoreFoundation	swift-protocol	s:14CoreFoundation9_CFObjectP	-	_CFObject	-	-	-	-	-	6dd3cc170ed899bd
+CoreFoundation	swift-property	s:14CoreFoundation9_CFObjectPAAE9hashValueSivp	_CFObject	hashValue	-	Swift.Int	-	-	-	cb09ed835d5d79ec
+CoreFoundation	swift-method	s:14CoreFoundation9_CFObjectPAAE4hash4intoys6HasherVz_tF	_CFObject	hash(into:)	-	()	Swift.Hasher	-	-	bdd55511bf3e2a33
+CoreFoundation	swift-method	s:14CoreFoundation9_CFObjectPAAE2eeoiySbx_xtFZ	_CFObject	==(_:_:)	+	Swift.Bool	\u03c4_0_0 | \u03c4_0_0	-	-	255d664297024505

@@ -1,0 +1,71 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_Planar1toPlanar8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an expansion out of a narrow format, whose rule Conversion.h prints: the pixel is multiplied by 255, and the pixels of a sub-byte row are big endian within the byte",
+      "effect": "each pixel of the row, read big endian - the low-indexed pixel in the high-order bits of the byte - times 255; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer. A sub-byte source row is read packed, which is what the release does and what the header means by sub-byte scanlines being unsupported",
+      "facts": "facts/Accelerate/vImageIndexed.md",
+      "source": "the header of iOS 16.4, which writes the bit order and the multiplication out; the host's own vImage, compared byte for byte in tests/backports/host/vimageindexed; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Planar2toPlanar8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a sub-byte expansion, whose operation the header prints as a multiply: the pixel is the two-bit value times 255 over the widest value the width can hold",
+      "effect": "each pixel of the row, read big endian - the low-indexed pixel in the high-order bits of the byte - times 255; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer. A sub-byte source row is read packed, which is what the release does and what the header means by sub-byte scanlines being unsupported",
+      "facts": "facts/Accelerate/vImageIndexed.md",
+      "source": "the header of iOS 16.4, which writes the bit order and the multiplication out; the host's own vImage, compared byte for byte in tests/backports/host/vimageindexed; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Planar4toPlanar8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "a sub-byte expansion, whose operation the header prints as a multiply: the pixel is the four-bit value times 255 over the widest value the width can hold",
+      "effect": "each pixel of the row, read big endian - the low-indexed pixel in the high-order bits of the byte - times 255; the refusals are the release's own: a flag outside the set the header lists is kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is kvImageNullPointerArgument and a destination larger than the source is kvImageRoiLargerThanInputBuffer. A sub-byte source row is read packed, which is what the release does and what the header means by sub-byte scanlines being unsupported",
+      "facts": "facts/Accelerate/vImageIndexed.md",
+      "source": "the header of iOS 16.4, which writes the bit order and the multiplication out; the host's own vImage, compared byte for byte in tests/backports/host/vimageindexed; the release's own armv7 caches, which say which release first exports each name"
+    },
+    {
+      "api": "vImageConvert_Indexed1toPlanar8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an indexed expansion, whose operation the header prints as a lookup: the pixel is the index of the caller's colour table entry",
+      "effect": "colors[index] for each pixel, the index read big endian from a one-bit row that is read packed; a NULL colour table is kvImageNullPointerArgument, and the other refusals are the release's own as for vImageConvert_Planar1toPlanar8",
+      "facts": "facts/Accelerate/vImageIndexed.md",
+      "source": "the header of iOS 16.4, which writes the bit order and the lookup out; the host's own vImage, compared byte for byte in tests/backports/host/vimageindexed; the release's own armv7 caches"
+    },
+    {
+      "api": "vImageConvert_Indexed2toPlanar8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "an indexed expansion, whose operation the header prints as a lookup: the pixel is the index of the caller's colour table entry",
+      "effect": "colors[index] for each pixel, the index read big endian from a two-bit row; a NULL colour table is kvImageNullPointerArgument, and the other refusals are the release's own as for vImageConvert_Planar1toPlanar8",
+      "facts": "facts/Accelerate/vImageIndexed.md",
+      "source": "the header of iOS 16.4, which writes the bit order and the multiplication out; the host's own vImage, compared byte for byte in tests/backports/host/vimageindexed over four packed patterns; the release's own armv7 caches"
+    },
+    {
+      "api": "vImageConvert_Indexed4toPlanar8()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "as the one-bit indexed form, with four bits of index",
+      "effect": "colors[index] for each pixel, the index read big endian from a four-bit row; a NULL colour table is kvImageNullPointerArgument, and the other refusals are the release's own as for vImageConvert_Planar1toPlanar8",
+      "facts": "facts/Accelerate/vImageIndexed.md",
+      "source": "the header of iOS 16.4, which writes the bit order and the multiplication out; the host's own vImage, compared byte for byte in tests/backports/host/vimageindexed over four packed patterns; the release's own armv7 caches"
+    }
+  ]
+}

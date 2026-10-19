@@ -1,0 +1,2 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+AutomatedDeviceEnrollment	method	SwiftUICore.View.automatedDeviceEnrollmentAddition(isPresented:)	16.0				container

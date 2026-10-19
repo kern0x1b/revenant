@@ -1,0 +1,16 @@
+{
+  "framework": "CoreVideo",
+  "entries": [
+    {
+      "api": "CVImageBufferCreateColorSpaceFromAttachments()",
+      "kind": "function",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the function arrived in iOS 10 and the release carries the ICC profile key and the CoreGraphics that answer it",
+      "effect": "the colour space an ICC profile attachment describes, and NULL for everything else: measured against the host over eleven dictionaries, a bare code-point triple answers NULL there too, and NULL is the header's own stated answer for a dictionary without the information required",
+      "facts": "facts/CoreVideo/Buffer15.md",
+      "source": "the host through tests/backports/host/corevideo, which answers a colour space only for the ICC profile case; the header of iOS 16.4 for the contract; kCVImageBufferICCProfileKey in the export trie of CoreVideo of the armv7 shared caches of iOS 6.1.3 and iOS 4.3"
+    }
+  ]
+}

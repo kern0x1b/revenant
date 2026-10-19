@@ -1,0 +1,165 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+Cinematic	swift-struct	c:@E@CNCinematicErrorCode	-	CNCinematicError	-	-	-	ios=17.0	-	125b5c2fa39b7212
+Cinematic	swift-property	s:SC20CNCinematicErrorCodeLeV03_nsB0So7NSErrorCvp	CNCinematicError	_nsError	-	Foundation.NSError	-	-	-	a70e3e021ed03d6d
+Cinematic	swift-method	s:SC20CNCinematicErrorCodeLeV03_nsB0ABSo7NSErrorC_tcfc	CNCinematicError	init(_nsError:)	-	-	Cinematic.CNCinematicError | Foundation.NSError	-	-	8b67928a25c742fc
+Cinematic	swift-property	s:SC20CNCinematicErrorCodeLeV11errorDomainSSvpZ	CNCinematicError	errorDomain	+	Swift.String	-	-	-	5b37dc3f60e6022b
+Cinematic	swift-enum	c:@E@CNCinematicErrorCode	CNCinematicError	Code	-	-	-	ios=17.0	-	3646c9db137e7141
+Cinematic	swift-method	s:So20CNCinematicErrorCodeV8rawValueABSgSi_tcfc	CNCinematicError.Code	init(rawValue:)	-	-	Cinematic.CNCinematicError.Code? | Swift.Int	-	-	76879c283efe2325
+Cinematic	swift-property	s:So20CNCinematicErrorCodeV8rawValueSivp	CNCinematicError.Code	rawValue	-	Swift.Int	-	-	-	202f7916714616ce
+Cinematic	swift-typealias	s:So20CNCinematicErrorCodeV8RawValuea	CNCinematicError.Code	RawValue	-	-	-	-	-	2ccdb49db08905b1
+Cinematic	swift-typealias	c:@E@CNCinematicErrorCode	CNCinematicError.Code	_ErrorType	-	-	-	-	-	7e5326735cd1d2c8
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeUnknown	CNCinematicError.Code	unknown	-	-	-	-	-	4704a844e33944d8
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeUnreadable	CNCinematicError.Code	unreadable	-	-	-	-	-	6792108d64f861a5
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeIncomplete	CNCinematicError.Code	incomplete	-	-	-	-	-	9ef6b625dc90f5ee
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeMalformed	CNCinematicError.Code	malformed	-	-	-	-	-	0fae5d816cd95b13
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeUnsupported	CNCinematicError.Code	unsupported	-	-	-	-	-	1cdce44d926c06dd
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeIncompatible	CNCinematicError.Code	incompatible	-	-	-	-	-	8640c0b0bcd86670
+Cinematic	swift-constant	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeCancelled	CNCinematicError.Code	cancelled	-	-	-	-	-	9d54e79b69e8f81a
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeUnknown	CNCinematicError	unknown	+	Cinematic.CNCinematicError.Code	-	-	-	aaf6f32ff6e99bdf
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeUnreadable	CNCinematicError	unreadable	+	Cinematic.CNCinematicError.Code	-	-	-	c27c8e1673832d65
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeIncomplete	CNCinematicError	incomplete	+	Cinematic.CNCinematicError.Code	-	-	-	a5d8e368b2d85573
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeMalformed	CNCinematicError	malformed	+	Cinematic.CNCinematicError.Code	-	-	-	8c62e30bd3038d15
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeUnsupported	CNCinematicError	unsupported	+	Cinematic.CNCinematicError.Code	-	-	-	f6bef92b3505dbd6
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeIncompatible	CNCinematicError	incompatible	+	Cinematic.CNCinematicError.Code	-	-	-	280bd5b2287df23e
+Cinematic	swift-property	c:@E@CNCinematicErrorCode@CNCinematicErrorCodeCancelled	CNCinematicError	cancelled	+	Cinematic.CNCinematicError.Code	-	-	-	255dd14174b1acab
+Cinematic	swift-class	s:9Cinematic16CNDetectionTrackC	-	CNDetectionTrack	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	8a480cfc781bfaae
+Cinematic	swift-property	s:9Cinematic16CNDetectionTrackC13detectionTypeSo0bE0Vvp	CNDetectionTrack	detectionType	-	Cinematic.CNDetectionType	-	-	-	2602638541223498
+Cinematic	swift-property	s:9Cinematic16CNDetectionTrackC11detectionIDSo0bE0avp	CNDetectionTrack	detectionID	-	Cinematic.CNDetectionID	-	-	-	ed4eeefe0667b58d
+Cinematic	swift-property	s:9Cinematic16CNDetectionTrackC16detectionGroupIDSo0beF0avp	CNDetectionTrack	detectionGroupID	-	Cinematic.CNDetectionGroupID	-	-	-	b517ebd5e613221e
+Cinematic	swift-property	s:9Cinematic16CNDetectionTrackC13isUserCreatedSbvp	CNDetectionTrack	isUserCreated	-	Swift.Bool	-	-	-	63b639711767777b
+Cinematic	swift-property	s:9Cinematic16CNDetectionTrackC10isDiscreteSbvp	CNDetectionTrack	isDiscrete	-	Swift.Bool	-	-	-	fae380fe17b1c10a
+Cinematic	swift-method	s:9Cinematic16CNDetectionTrackC9detection10atOrBeforeAA0B0VSgSo6CMTimea_tF	CNDetectionTrack	detection(atOrBefore:)	-	Cinematic.CNDetection?	CoreMedia.CMTime	-	-	f110cb3ea63b55be
+Cinematic	swift-method	s:9Cinematic16CNDetectionTrackC9detection7nearestAA0B0VSgSo6CMTimea_tF	CNDetectionTrack	detection(nearest:)	-	Cinematic.CNDetection?	CoreMedia.CMTime	-	-	45ac6d1fb75a7809
+Cinematic	swift-method	s:9Cinematic16CNDetectionTrackC10detections2inSayAA0B0VGSo11CMTimeRangea_tF	CNDetectionTrack	detections(in:)	-	[Cinematic.CNDetection]	CoreMedia.CMTimeRange	-	-	95662f3e94f5c18c
+Cinematic	swift-class	s:9Cinematic21CNFixedDetectionTrackC	-	CNFixedDetectionTrack	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	f7ccb411f68ab316
+Cinematic	swift-method	s:9Cinematic21CNFixedDetectionTrackC14focusDisparityACSf_tcfc	CNFixedDetectionTrack	init(focusDisparity:)	-	-	Cinematic.CNFixedDetectionTrack | Swift.Float	-	-	97c397981ad5076c
+Cinematic	swift-method	s:9Cinematic21CNFixedDetectionTrackC08originalC0AcA11CNDetectionV_tcfc	CNFixedDetectionTrack	init(originalDetection:)	-	-	Cinematic.CNFixedDetectionTrack | Cinematic.CNDetection	-	-	efab35f46c782bd8
+Cinematic	swift-property	s:9Cinematic21CNFixedDetectionTrackC14focusDisparitySfvp	CNFixedDetectionTrack	focusDisparity	-	Swift.Float	-	-	-	e5abf1a19651372d
+Cinematic	swift-property	s:9Cinematic21CNFixedDetectionTrackC08originalC0AA11CNDetectionVSgvp	CNFixedDetectionTrack	originalDetection	-	Cinematic.CNDetection?	-	-	-	08c51a674b2b5c93
+Cinematic	swift-class	s:9Cinematic22CNCustomDetectionTrackC	-	CNCustomDetectionTrack	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	b017c1b566120e9b
+Cinematic	swift-method	s:9Cinematic22CNCustomDetectionTrackC10detections6smoothACSayAA11CNDetectionVG_Sbtcfc	CNCustomDetectionTrack	init(detections:smooth:)	-	-	Cinematic.CNCustomDetectionTrack | [Cinematic.CNDetection] | Swift.Bool	-	-	eeb7cfd38515cff1
+Cinematic	swift-property	s:9Cinematic22CNCustomDetectionTrackC13allDetectionsSayAA11CNDetectionVGvp	CNCustomDetectionTrack	allDetections	-	[Cinematic.CNDetection]	-	-	-	e8021aac0f389399
+Cinematic	swift-class	s:9Cinematic18CNRenderingSessionC	-	CNRenderingSession	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	889a93d19ff34eec
+Cinematic	swift-struct	s:9Cinematic18CNRenderingSessionC10AttributesV	CNRenderingSession	Attributes	-	-	-	-	-	f7c3d6f362ad8905
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC10AttributesV5assetAESo7AVAssetC_tYaKcfc	CNRenderingSession.Attributes	init(asset:)	-	-	Cinematic.CNRenderingSession.Attributes | AVFoundation.AVAsset	-	-	b994e551017d22f5
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC10AttributesV16renderingVersionSivp	CNRenderingSession.Attributes	renderingVersion	-	Swift.Int	-	-	-	b8c2175134540dff
+Cinematic	swift-struct	s:9Cinematic18CNRenderingSessionC15FrameAttributesV	CNRenderingSession	FrameAttributes	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	b5d2d019b013ddf5
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC15FrameAttributesV12sampleBuffer07sessionE0AESgSo08CMSampleG3Refa_AC0E0Vtcfc	CNRenderingSession.FrameAttributes	init(sampleBuffer:sessionAttributes:)	-	-	Cinematic.CNRenderingSession.FrameAttributes? | CoreMedia.CMSampleBuffer | Cinematic.CNRenderingSession.Attributes	-	-	5bd4e1c274cb8a02
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC15FrameAttributesV18timedMetadataGroup07sessionE0AESgSo07AVTimedgH0C_AC0E0Vtcfc	CNRenderingSession.FrameAttributes	init(timedMetadataGroup:sessionAttributes:)	-	-	Cinematic.CNRenderingSession.FrameAttributes? | AVFoundation.AVTimedMetadataGroup | Cinematic.CNRenderingSession.Attributes	-	-	f5d0fb7b33429bef
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC15FrameAttributesV14focusDisparitySfvp	CNRenderingSession.FrameAttributes	focusDisparity	-	Swift.Float	-	-	-	3a88f9c1a4252548
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC15FrameAttributesV7fNumberSfvp	CNRenderingSession.FrameAttributes	fNumber	-	Swift.Float	-	-	-	0d85271b37753a07
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC12commandQueue17sessionAttributes18preferredTransform7qualityACSo010MTLCommandE0_p_AC0G0VSo08CGAffineI0VSo0B7QualityVtcfc	CNRenderingSession	init(commandQueue:sessionAttributes:preferredTransform:quality:)	-	-	Cinematic.CNRenderingSession | any Metal.MTLCommandQueue | Cinematic.CNRenderingSession.Attributes | CoreFoundation.CGAffineTransform | Cinematic.CNRenderingQuality	-	-	14540afba5c8a09b
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC12commandQueueSo010MTLCommandE0_pvp	CNRenderingSession	commandQueue	-	any Metal.MTLCommandQueue	-	-	-	001c9a0bf7e8ee4d
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC17sessionAttributesAC0E0Vvp	CNRenderingSession	sessionAttributes	-	Cinematic.CNRenderingSession.Attributes	-	-	-	57cf0eea7048fdc1
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC18preferredTransformSo08CGAffineE0Vvp	CNRenderingSession	preferredTransform	-	CoreFoundation.CGAffineTransform	-	-	-	2537696b58c38241
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC7qualitySo0B7QualityVvp	CNRenderingSession	quality	-	Cinematic.CNRenderingQuality	-	-	-	70ee6c1789878b46
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC12encodeRender2to15frameAttributes11sourceImage0I9Disparity011destinationJ0SbSo16MTLCommandBuffer_p_AC05FrameH0VSo11CVBufferRefaA2NtF	CNRenderingSession	encodeRender(to:frameAttributes:sourceImage:sourceDisparity:destinationImage:)	-	Swift.Bool	any Metal.MTLCommandBuffer | Cinematic.CNRenderingSession.FrameAttributes | CoreVideo.CVPixelBuffer | CoreVideo.CVPixelBuffer | CoreVideo.CVPixelBuffer	-	-	09185bced2ac95d7
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC12encodeRender2to15frameAttributes11sourceImage0I9Disparity15destinationRGBASbSo16MTLCommandBuffer_p_AC05FrameH0VSo11CVBufferRefaANSo10MTLTexture_ptF	CNRenderingSession	encodeRender(to:frameAttributes:sourceImage:sourceDisparity:destinationRGBA:)	-	Swift.Bool	any Metal.MTLCommandBuffer | Cinematic.CNRenderingSession.FrameAttributes | CoreVideo.CVPixelBuffer | CoreVideo.CVPixelBuffer | any Metal.MTLTexture	-	-	f575064473499caa
+Cinematic	swift-method	s:9Cinematic18CNRenderingSessionC12encodeRender2to15frameAttributes11sourceImage0I9Disparity15destinationLuma0L6ChromaSbSo16MTLCommandBuffer_p_AC05FrameH0VSo11CVBufferRefaAOSo10MTLTexture_pSoAP_ptF	CNRenderingSession	encodeRender(to:frameAttributes:sourceImage:sourceDisparity:destinationLuma:destinationChroma:)	-	Swift.Bool	any Metal.MTLCommandBuffer | Cinematic.CNRenderingSession.FrameAttributes | CoreVideo.CVPixelBuffer | CoreVideo.CVPixelBuffer | any Metal.MTLTexture | any Metal.MTLTexture	-	-	fee557958616e2e0
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC22sourcePixelFormatTypesSays6UInt32VGvpZ	CNRenderingSession	sourcePixelFormatTypes	+	[Darwin.OSType]	-	-	-	6d7ab5d0423934e1
+Cinematic	swift-property	s:9Cinematic18CNRenderingSessionC27destinationPixelFormatTypesSays6UInt32VGvpZ	CNRenderingSession	destinationPixelFormatTypes	+	[Darwin.OSType]	-	-	-	82f8baeca5f21b75
+Cinematic	swift-struct	s:9Cinematic11CNDetectionV	-	CNDetection	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	fed669113c87f701
+Cinematic	swift-method	s:9Cinematic11CNDetectionV4time13detectionType14normalizedRect14focusDisparityACSo6CMTimea_So0bE0VSo6CGRectVSftcfc	CNDetection	init(time:detectionType:normalizedRect:focusDisparity:)	-	-	Cinematic.CNDetection | CoreMedia.CMTime | Cinematic.CNDetectionType | CoreFoundation.CGRect | Swift.Float	-	-	32348d6d7ba6b166
+Cinematic	swift-property	s:9Cinematic11CNDetectionV4timeSo6CMTimeavp	CNDetection	time	-	CoreMedia.CMTime	-	-	-	b59b0ddfe44b58a9
+Cinematic	swift-property	s:9Cinematic11CNDetectionV13detectionTypeSo0bD0Vvp	CNDetection	detectionType	-	Cinematic.CNDetectionType	-	-	-	1477df909795765a
+Cinematic	swift-property	s:9Cinematic11CNDetectionV14normalizedRectSo6CGRectVvp	CNDetection	normalizedRect	-	CoreFoundation.CGRect	-	-	-	6e0653d2d7af6101
+Cinematic	swift-property	s:9Cinematic11CNDetectionV14focusDisparitySfvp	CNDetection	focusDisparity	-	Swift.Float	-	-	-	aa862ff4772793da
+Cinematic	swift-property	s:9Cinematic11CNDetectionV11detectionIDSo0bD0aSgvp	CNDetection	detectionID	-	Cinematic.CNDetectionID?	-	-	-	c84b5ef37d680c86
+Cinematic	swift-property	s:9Cinematic11CNDetectionV16detectionGroupIDSo0bdE0aSgvp	CNDetection	detectionGroupID	-	Cinematic.CNDetectionGroupID?	-	-	-	2f6f44ad9abd71b0
+Cinematic	swift-method	s:9Cinematic11CNDetectionV18accessibilityLabel3forSSSo0B4TypeV_tFZ	CNDetection	accessibilityLabel(for:)	+	Swift.String	Cinematic.CNDetectionType	-	-	7250d10fba5791ac
+Cinematic	swift-method	s:9Cinematic11CNDetectionV9disparity2in15sourceDisparity13detectionType05priorF0SfSo6CGRectV_So11CVBufferRefaSo0bH0VSfSgtFZ	CNDetection	disparity(in:sourceDisparity:detectionType:priorDisparity:)	+	Swift.Float	CoreFoundation.CGRect | CoreVideo.CVPixelBuffer | Cinematic.CNDetectionType | Swift.Float?	-	-	52a931b5977037d6
+Cinematic	swift-class	s:9Cinematic11CNAssetInfoC	-	CNAssetInfo	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	90f42773fbae24d2
+Cinematic	swift-method	s:9Cinematic11CNAssetInfoC02isA05assetSbSo7AVAssetC_tYaFZ	CNAssetInfo	isCinematic(asset:)	+	Swift.Bool	AVFoundation.AVAsset	-	-	37ef55c71d2980e6
+Cinematic	swift-method	s:9Cinematic11CNAssetInfoC5assetACSo7AVAssetC_tYaKcfc	CNAssetInfo	init(asset:)	-	-	Cinematic.CNAssetInfo | AVFoundation.AVAsset	-	-	240be15014fee831
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC5assetSo7AVAssetCvp	CNAssetInfo	asset	-	AVFoundation.AVAsset	-	-	-	eff966b341403320
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC03allA6TracksSaySo12AVAssetTrackCGvp	CNAssetInfo	allCinematicTracks	-	[AVFoundation.AVAssetTrack]	-	-	-	7e3f715ddf33c79f
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC19cinematicVideoTrackSo07AVAssetF0Cvp	CNAssetInfo	cinematicVideoTrack	-	AVFoundation.AVAssetTrack	-	-	-	5ca5215812919a13
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC23cinematicDisparityTrackSo07AVAssetF0Cvp	CNAssetInfo	cinematicDisparityTrack	-	AVFoundation.AVAssetTrack	-	-	-	302dc170509b6f27
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC22cinematicMetadataTrackSo07AVAssetF0Cvp	CNAssetInfo	cinematicMetadataTrack	-	AVFoundation.AVAssetTrack	-	-	-	5270348fc4368be0
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC9timeRangeSo06CMTimeE0avp	CNAssetInfo	timeRange	-	CoreMedia.CMTimeRange	-	-	-	3911987081ee883c
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC11naturalSizeSo6CGSizeVvp	CNAssetInfo	naturalSize	-	CoreFoundation.CGSize	-	-	-	b50979fc5ffae66a
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC13preferredSizeSo6CGSizeVvp	CNAssetInfo	preferredSize	-	CoreFoundation.CGSize	-	-	-	415e950b1bf1587f
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC18preferredTransformSo08CGAffineE0Vvp	CNAssetInfo	preferredTransform	-	CoreFoundation.CGAffineTransform	-	-	-	0f3c488753b64023
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC16frameTimingTrackSo07AVAssetF0Cvp	CNAssetInfo	frameTimingTrack	-	AVFoundation.AVAssetTrack	-	-	-	88a56990d1f4daef
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC22videoCompositionTracksSaySo12AVAssetTrackCGvp	CNAssetInfo	videoCompositionTracks	-	[AVFoundation.AVAssetTrack]	-	-	-	f1158330594cb9cc
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC24videoCompositionTrackIDsSays5Int32VGvp	CNAssetInfo	videoCompositionTrackIDs	-	[CoreMedia.CMPersistentTrackID]	-	-	-	74595e3567e6bb3f
+Cinematic	swift-property	s:9Cinematic11CNAssetInfoC18sampleDataTrackIDsSays5Int32VGvp	CNAssetInfo	sampleDataTrackIDs	-	[CoreMedia.CMPersistentTrackID]	-	-	-	66efaf259ad33add
+Cinematic	swift-class	s:9Cinematic17CNCompositionInfoC	-	CNCompositionInfo	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	ad8aebfaff1d670a
+Cinematic	swift-method	s:9Cinematic17CNCompositionInfoC15insertTimeRange_2of2atySo06CMTimeF0a_AA07CNAssetC0CSo0I0atKF	CNCompositionInfo	insertTimeRange(_:of:at:)	-	()	CoreMedia.CMTimeRange | Cinematic.CNAssetInfo | CoreMedia.CMTime	-	-	507ff5d69933f141
+Cinematic	swift-struct	s:9Cinematic10CNDecisionV	-	CNDecision	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	ffeed2ab9871d24c
+Cinematic	swift-enum	s:9Cinematic10CNDecisionV16FocusDetectionIDO	CNDecision	FocusDetectionID	-	-	-	-	-	b3a573ccdaee4600
+Cinematic	swift-constant	s:9Cinematic10CNDecisionV16FocusDetectionIDO6singleyAESo011CNDetectionE0acAEmF	CNDecision.FocusDetectionID	single	-	-	-	-	-	2b86acaad8830dc8
+Cinematic	swift-constant	s:9Cinematic10CNDecisionV16FocusDetectionIDO5groupyAESo016CNDetectionGroupE0acAEmF	CNDecision.FocusDetectionID	group	-	-	-	-	-	12f936fc377be750
+Cinematic	swift-method	s:9Cinematic10CNDecisionV16FocusDetectionIDO2eeoiySbAE_AEtFZ	CNDecision.FocusDetectionID	==(_:_:)	+	Swift.Bool	Cinematic.CNDecision.FocusDetectionID | Cinematic.CNDecision.FocusDetectionID	-	-	f46a4830814d4412
+Cinematic	swift-method	s:9Cinematic10CNDecisionV4time11detectionID6strongACSo6CMTimea_So011CNDetectionE0aSbtcfc	CNDecision	init(time:detectionID:strong:)	-	-	Cinematic.CNDecision | CoreMedia.CMTime | Cinematic.CNDetectionID | Swift.Bool	-	-	5e4962954d67549c
+Cinematic	swift-method	s:9Cinematic10CNDecisionV4time16detectionGroupID6strongACSo6CMTimea_So011CNDetectioneF0aSbtcfc	CNDecision	init(time:detectionGroupID:strong:)	-	-	Cinematic.CNDecision | CoreMedia.CMTime | Cinematic.CNDetectionGroupID | Swift.Bool	-	-	1414b55de7667f8c
+Cinematic	swift-property	s:9Cinematic10CNDecisionV4timeSo6CMTimeavp	CNDecision	time	-	CoreMedia.CMTime	-	-	-	683c5c9fc267e352
+Cinematic	swift-property	s:9Cinematic10CNDecisionV16focusDetectionIDAC05FocusdE0Ovp	CNDecision	focusDetectionID	-	Cinematic.CNDecision.FocusDetectionID	-	-	-	0bec9ec6b67d0d7f
+Cinematic	swift-property	s:9Cinematic10CNDecisionV14isUserDecisionSbvp	CNDecision	isUserDecision	-	Swift.Bool	-	-	-	4aaf3bf50a26463f
+Cinematic	swift-property	s:9Cinematic10CNDecisionV16isStrongDecisionSbvp	CNDecision	isStrongDecision	-	Swift.Bool	-	-	-	423b2fdead8e164c
+Cinematic	swift-method	s:9Cinematic10CNDecisionV2eeoiySbAC_ACtFZ	CNDecision	==(_:_:)	+	Swift.Bool	Cinematic.CNDecision | Cinematic.CNDecision	-	-	5fac69b6deed76a1
+Cinematic	swift-struct	s:9Cinematic18CNBoundsPredictionV	-	CNBoundsPrediction	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	ec7ccc35a5ad579a
+Cinematic	swift-property	s:9Cinematic18CNBoundsPredictionV16normalizedBoundsSo6CGRectVvp	CNBoundsPrediction	normalizedBounds	-	CoreFoundation.CGRect	-	-	-	de82ea9e6cb91251
+Cinematic	swift-property	s:9Cinematic18CNBoundsPredictionV10confidenceSfvp	CNBoundsPrediction	confidence	-	Swift.Float	-	-	-	e9cd3c13b4fe98e2
+Cinematic	swift-class	s:9Cinematic15CNObjectTrackerC	-	CNObjectTracker	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	35bed53e84c2e504
+Cinematic	swift-property	s:9Cinematic15CNObjectTrackerC11isSupportedSbvpZ	CNObjectTracker	isSupported	+	Swift.Bool	-	-	-	1d142d7635fde291
+Cinematic	swift-method	s:9Cinematic15CNObjectTrackerC12commandQueueACSo010MTLCommandE0_p_tcfc	CNObjectTracker	init(commandQueue:)	-	-	Cinematic.CNObjectTracker | any Metal.MTLCommandQueue	-	-	ca6a0f996755b494
+Cinematic	swift-method	s:9Cinematic15CNObjectTrackerC10findObject2at11sourceImageAA18CNBoundsPredictionVSgSo7CGPointV_So11CVBufferRefatF	CNObjectTracker	findObject(at:sourceImage:)	-	Cinematic.CNBoundsPrediction?	CoreFoundation.CGPoint | CoreVideo.CVPixelBuffer	-	-	b8ba1a51bddc04a8
+Cinematic	swift-method	s:9Cinematic15CNObjectTrackerC13startTracking2at6within11sourceImage0H9DisparitySbSo6CMTimea_So6CGRectVSo11CVBufferRefaANtF	CNObjectTracker	startTracking(at:within:sourceImage:sourceDisparity:)	-	Swift.Bool	CoreMedia.CMTime | CoreFoundation.CGRect | CoreVideo.CVPixelBuffer | CoreVideo.CVPixelBuffer	-	-	ce42f4d297536975
+Cinematic	swift-method	s:9Cinematic15CNObjectTrackerC16continueTracking2at11sourceImage0G9DisparityAA18CNBoundsPredictionVSgSo6CMTimea_So11CVBufferRefaANtF	CNObjectTracker	continueTracking(at:sourceImage:sourceDisparity:)	-	Cinematic.CNBoundsPrediction?	CoreMedia.CMTime | CoreVideo.CVPixelBuffer | CoreVideo.CVPixelBuffer	-	-	eb8365aca96578a7
+Cinematic	swift-method	s:9Cinematic15CNObjectTrackerC20finishDetectionTrackAA011CNDetectionF0CyF	CNObjectTracker	finishDetectionTrack()	-	Cinematic.CNDetectionTrack	-	-	-	d09a57ce913faecd
+Cinematic	swift-method	s:9Cinematic15CNObjectTrackerC19resetDetectionTrackyyF	CNObjectTracker	resetDetectionTrack()	-	()	-	-	-	8edcc29fbfd163d7
+Cinematic	swift-class	s:9Cinematic23CNAssetSpatialAudioInfoC	-	CNAssetSpatialAudioInfo	-	-	-	ios=26.0,macos=26.0,tvos=26.0	-	7252fafda7ad9c34
+Cinematic	swift-property	s:9Cinematic23CNAssetSpatialAudioInfoC11isSupportedSbvpZ	CNAssetSpatialAudioInfo	isSupported	+	Swift.Bool	-	-	-	6f61289f6960e3dc
+Cinematic	swift-method	s:9Cinematic23CNAssetSpatialAudioInfoC013assetContainscD00F0SbSo7AVAssetC_tYaFZ	CNAssetSpatialAudioInfo	assetContainsSpatialAudio(asset:)	+	Swift.Bool	AVFoundation.AVAsset	-	-	f908245f87395b64
+Cinematic	swift-method	s:9Cinematic23CNAssetSpatialAudioInfoC015checkIfContainscD05asset17completionHandlerySo7AVAssetC_ySbctFZ	CNAssetSpatialAudioInfo	checkIfContainsSpatialAudio(asset:completionHandler:)	+	()	AVFoundation.AVAsset | (Swift.Bool) -> Swift.Void	-	-	1426b8e26256e639
+Cinematic	swift-method	s:9Cinematic23CNAssetSpatialAudioInfoC5assetACSo7AVAssetC_tYaKcfc	CNAssetSpatialAudioInfo	init(asset:)	-	-	Cinematic.CNAssetSpatialAudioInfo | AVFoundation.AVAsset	-	-	9ed3c167e67b2a3a
+Cinematic	swift-property	s:9Cinematic23CNAssetSpatialAudioInfoC07defaultcD5TrackSo07AVAssetG0Cvp	CNAssetSpatialAudioInfo	defaultSpatialAudioTrack	-	AVFoundation.AVAssetTrack	-	-	-	8d24409a951f8d40
+Cinematic	swift-property	s:9Cinematic23CNAssetSpatialAudioInfoC21defaultRenderingStyleSo09CNSpatialdgH0Vvp	CNAssetSpatialAudioInfo	defaultRenderingStyle	-	Cinematic.CNSpatialAudioRenderingStyle	-	-	-	7cea797a7d2f4dbb
+Cinematic	swift-property	s:9Cinematic23CNAssetSpatialAudioInfoC22defaultEffectIntensitySfvp	CNAssetSpatialAudioInfo	defaultEffectIntensity	-	Swift.Float32	-	-	-	f60c34fc8a9f55ba
+Cinematic	swift-property	s:9Cinematic23CNAssetSpatialAudioInfoC07spatialD11MixMetadata10Foundation4DataVvp	CNAssetSpatialAudioInfo	spatialAudioMixMetadata	-	Foundation.Data	-	-	-	850f86a31dc1dd6b
+Cinematic	swift-method	s:9Cinematic23CNAssetSpatialAudioInfoC8audioMix15effectIntensity14renderingStyleSo07AVAudioG0CSf_So09CNSpatiald9RenderingK0VtF	CNAssetSpatialAudioInfo	audioMix(effectIntensity:renderingStyle:)	-	AVFoundation.AVAudioMix	Swift.Float32 | Cinematic.CNSpatialAudioRenderingStyle	-	-	20b0d3954bac555f
+Cinematic	swift-method	s:9Cinematic23CNAssetSpatialAudioInfoC25assetReaderOutputSettings3forSDySSypGSo09CNSpatialD11ContentTypeV_tF	CNAssetSpatialAudioInfo	assetReaderOutputSettings(for:)	-	[Swift.String : Any]	Cinematic.CNSpatialAudioContentType	-	-	8d9bc0d3662669b4
+Cinematic	swift-method	s:9Cinematic23CNAssetSpatialAudioInfoC24assetWriterInputSettings3forSDySSypGSo09CNSpatialD11ContentTypeV_tF	CNAssetSpatialAudioInfo	assetWriterInputSettings(for:)	-	[Swift.String : Any]	Cinematic.CNSpatialAudioContentType	-	-	e092739a2e84524c
+Cinematic	swift-class	s:9Cinematic8CNScriptC	-	CNScript	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	58545510d2bd2723
+Cinematic	swift-struct	s:9Cinematic8CNScriptC5FrameV	CNScript	Frame	-	-	-	ios=17.0,macos=14.0,tvos=17.0	-	ae600626dd861c6e
+Cinematic	swift-property	s:9Cinematic8CNScriptC5FrameV4timeSo6CMTimeavp	CNScript.Frame	time	-	CoreMedia.CMTime	-	-	-	68a9f0d7a599806a
+Cinematic	swift-property	s:9Cinematic8CNScriptC5FrameV14focusDisparitySfvp	CNScript.Frame	focusDisparity	-	Swift.Float	-	-	-	455fd7e5e877fd12
+Cinematic	swift-property	s:9Cinematic8CNScriptC5FrameV14focusDetectionAA11CNDetectionVvp	CNScript.Frame	focusDetection	-	Cinematic.CNDetection	-	-	-	66a6cf4289a1d84e
+Cinematic	swift-property	s:9Cinematic8CNScriptC5FrameV13allDetectionsSayAA11CNDetectionVGvp	CNScript.Frame	allDetections	-	[Cinematic.CNDetection]	-	-	-	543db8fd748a9501
+Cinematic	swift-method	s:9Cinematic8CNScriptC5FrameV9detection3forAA11CNDetectionVSgSo0F2IDa_tF	CNScript.Frame	detection(for:)	-	Cinematic.CNDetection?	Cinematic.CNDetectionID	-	-	3787bcca0c1b3e22
+Cinematic	swift-method	s:9Cinematic8CNScriptC5FrameV13bestDetection3forAA11CNDetectionVSgSo0G7GroupIDa_tF	CNScript.Frame	bestDetection(for:)	-	Cinematic.CNDetection?	Cinematic.CNDetectionGroupID	-	-	f96e25e357bc9b02
+Cinematic	swift-method	s:9Cinematic8CNScriptC5asset7changes8progressACSo7AVAssetC_AC7ChangesVSgSo10NSProgressCSgtYaKcfc	CNScript	init(asset:changes:progress:)	-	-	Cinematic.CNScript | AVFoundation.AVAsset | Cinematic.CNScript.Changes? | Foundation.Progress?	-	-	a2772d6cd010e467
+Cinematic	swift-method	s:9Cinematic8CNScriptC6reload7changesyAC7ChangesVSg_tF	CNScript	reload(changes:)	-	()	Cinematic.CNScript.Changes?	-	-	4c4a417a1a3b0b09
+Cinematic	swift-method	s:9Cinematic8CNScriptC7changesAC7ChangesVyF	CNScript	changes()	-	Cinematic.CNScript.Changes	-	-	-	d92461e425b632a7
+Cinematic	swift-method	s:9Cinematic8CNScriptC7changes9trimmedByAC7ChangesVSo11CMTimeRangea_tF	CNScript	changes(trimmedBy:)	-	Cinematic.CNScript.Changes	CoreMedia.CMTimeRange	-	-	926005515d5c2d0b
+Cinematic	swift-property	s:9Cinematic8CNScriptC9timeRangeSo06CMTimeD0avp	CNScript	timeRange	-	CoreMedia.CMTimeRange	-	-	-	1f75f8bcd830891d
+Cinematic	swift-method	s:9Cinematic8CNScriptC5frame2at9toleranceAC5FrameVSgSo6CMTimea_AKtF	CNScript	frame(at:tolerance:)	-	Cinematic.CNScript.Frame?	CoreMedia.CMTime | CoreMedia.CMTime	-	-	c50ea479113804d7
+Cinematic	swift-method	s:9Cinematic8CNScriptC6frames2inSayAC5FrameVGSo11CMTimeRangea_tF	CNScript	frames(in:)	-	[Cinematic.CNScript.Frame]	CoreMedia.CMTimeRange	-	-	01ddf86ca129d695
+Cinematic	swift-method	s:9Cinematic8CNScriptC8decision2at9toleranceAA10CNDecisionVSgSo6CMTimea_AKtF	CNScript	decision(at:tolerance:)	-	Cinematic.CNDecision?	CoreMedia.CMTime | CoreMedia.CMTime	-	-	50b6c111dfdbdaaf
+Cinematic	swift-method	s:9Cinematic8CNScriptC9decisions2inSayAA10CNDecisionVGSo11CMTimeRangea_tF	CNScript	decisions(in:)	-	[Cinematic.CNDecision]	CoreMedia.CMTimeRange	-	-	2f404a4bf7bb9a58
+Cinematic	swift-method	s:9Cinematic8CNScriptC8decision5afterAA10CNDecisionVSgSo6CMTimea_tF	CNScript	decision(after:)	-	Cinematic.CNDecision?	CoreMedia.CMTime	-	-	e968322f69fd98c1
+Cinematic	swift-method	s:9Cinematic8CNScriptC8decision6beforeAA10CNDecisionVSgSo6CMTimea_tF	CNScript	decision(before:)	-	Cinematic.CNDecision?	CoreMedia.CMTime	-	-	e8dd5c66f67cf047
+Cinematic	swift-method	s:9Cinematic8CNScriptC15primaryDecision2atAA10CNDecisionVSgSo6CMTimea_tF	CNScript	primaryDecision(at:)	-	Cinematic.CNDecision?	CoreMedia.CMTime	-	-	cb29484e5c1d4846
+Cinematic	swift-method	s:9Cinematic8CNScriptC17secondaryDecision2atAA10CNDecisionVSgSo6CMTimea_tF	CNScript	secondaryDecision(at:)	-	Cinematic.CNDecision?	CoreMedia.CMTime	-	-	c50ac91add69a39e
+Cinematic	swift-method	s:9Cinematic8CNScriptC21timeRangeOfTransition5afterSo06CMTimeD0aAA10CNDecisionV_tF	CNScript	timeRangeOfTransition(after:)	-	CoreMedia.CMTimeRange	Cinematic.CNDecision	-	-	a4502265544694db
+Cinematic	swift-method	s:9Cinematic8CNScriptC21timeRangeOfTransition6beforeSo06CMTimeD0aAA10CNDecisionV_tF	CNScript	timeRangeOfTransition(before:)	-	CoreMedia.CMTimeRange	Cinematic.CNDecision	-	-	145bd53185943eb0
+Cinematic	swift-method	s:9Cinematic8CNScriptC13userDecisions2inSayAA10CNDecisionVGSo11CMTimeRangea_tF	CNScript	userDecisions(in:)	-	[Cinematic.CNDecision]	CoreMedia.CMTimeRange	-	-	0fb091a0ea76cbf4
+Cinematic	swift-method	s:9Cinematic8CNScriptC13baseDecisions2inSayAA10CNDecisionVGSo11CMTimeRangea_tF	CNScript	baseDecisions(in:)	-	[Cinematic.CNDecision]	CoreMedia.CMTimeRange	-	-	62263d61d82a1f7d
+Cinematic	swift-method	s:9Cinematic8CNScriptC14detectionTrack3forAA011CNDetectionD0CSgSo0F2IDa_tF	CNScript	detectionTrack(for:)	-	Cinematic.CNDetectionTrack?	Cinematic.CNDetectionID	-	-	d664d8dd5c01407a
+Cinematic	swift-method	s:9Cinematic8CNScriptC14detectionTrack3forAA011CNDetectionD0CSgAA10CNDecisionV_tF	CNScript	detectionTrack(for:)	-	Cinematic.CNDetectionTrack?	Cinematic.CNDecision	-	-	058fe68e494f5fe1
+Cinematic	swift-property	s:9Cinematic8CNScriptC7fNumberSfvp	CNScript	fNumber	-	Swift.Float	-	-	-	dc68ff430398ec0b
+Cinematic	swift-method	s:9Cinematic8CNScriptC15addUserDecisionySbAA10CNDecisionVF	CNScript	addUserDecision(_:)	-	Swift.Bool	Cinematic.CNDecision	-	-	c343cbda2fa71cae
+Cinematic	swift-method	s:9Cinematic8CNScriptC18removeUserDecisionySbAA10CNDecisionVF	CNScript	removeUserDecision(_:)	-	Swift.Bool	Cinematic.CNDecision	-	-	f05010d740682e39
+Cinematic	swift-method	s:9Cinematic8CNScriptC22removeAllUserDecisionsyyF	CNScript	removeAllUserDecisions()	-	()	-	-	-	b729b8430da545b1
+Cinematic	swift-method	s:9Cinematic8CNScriptC17addDetectionTrackySo13CNDetectionIDaAA0fE0CF	CNScript	addDetectionTrack(_:)	-	Cinematic.CNDetectionID	Cinematic.CNDetectionTrack	-	-	b16cc8304b29f79d
+Cinematic	swift-method	s:9Cinematic8CNScriptC20removeDetectionTrackySbAA011CNDetectionE0CF	CNScript	removeDetectionTrack(_:)	-	Swift.Bool	Cinematic.CNDetectionTrack	-	-	b01d72502fc528f4
+Cinematic	swift-property	s:9Cinematic8CNScriptC20addedDetectionTracksSayAA16CNDetectionTrackCGvp	CNScript	addedDetectionTracks	-	[Cinematic.CNDetectionTrack]	-	-	-	6d68eb8a48ac759b
+Cinematic	swift-struct	s:9Cinematic8CNScriptC7ChangesV	CNScript	Changes	-	-	-	-	-	8077589bbef0914b
+Cinematic	swift-method	s:9Cinematic8CNScriptC7ChangesV18dataRepresentationAESg10Foundation4DataV_tcfc	CNScript.Changes	init(dataRepresentation:)	-	-	Cinematic.CNScript.Changes? | Foundation.Data	-	-	a18036b8f47163bd
+Cinematic	swift-property	s:9Cinematic8CNScriptC7ChangesV18dataRepresentation10Foundation4DataVvp	CNScript.Changes	dataRepresentation	-	Foundation.Data	-	-	-	629b683e381f4d0a
+Cinematic	swift-property	s:9Cinematic8CNScriptC7ChangesV7fNumberSfvp	CNScript.Changes	fNumber	-	Swift.Float	-	-	-	ffd7eaba7e438600
+Cinematic	swift-property	s:9Cinematic8CNScriptC7ChangesV13userDecisionsSayAA10CNDecisionVGvp	CNScript.Changes	userDecisions	-	[Cinematic.CNDecision]	-	-	-	53204158ce57ba61
+Cinematic	swift-property	s:9Cinematic8CNScriptC7ChangesV20addedDetectionTracksSayAA16CNDetectionTrackCGvp	CNScript.Changes	addedDetectionTracks	-	[Cinematic.CNDetectionTrack]	-	-	-	e9ac674cbaae7f87
+Cinematic	swift-class	c:objc(cs)AVMutableComposition	-	AVMutableComposition	-	-	-	ios=4.0	-	6c113c8c89332d60
+Cinematic	swift-method	s:So20AVMutableCompositionC9CinematicE9addTracks3for24preferredStartingTrackIDAC17CNCompositionInfoCAC07CNAssetL0C_s5Int32VtF	AVMutableComposition	addTracks(for:preferredStartingTrackID:)	-	Cinematic.CNCompositionInfo	Cinematic.CNAssetInfo | CoreMedia.CMPersistentTrackID	-	-	5cb8fcb6c7b9711e

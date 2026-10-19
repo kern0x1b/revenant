@@ -1,0 +1,21 @@
+set_project("charonedgeprobe")
+set_version("0.0.1")
+-- The edge-gesture probe as an installed application (xmake emulate launch): one white window, nothing else.
+-- Built like the CoreMIDI round trip's application, against the release's own UIKit (no backports).
+local root = os.getenv("CHAREDGE_ROOT") or path.join(os.scriptdir(), "../../../../..")
+add_repositories("charon " .. root)
+add_addons("charon v0.8.17")
+set_config("apple_minimum", os.getenv("CHAREDGE_MINIMUM") or "6.1.3")
+includes("@addon/charon/apple-ios")
+includes("@addon/charon/emulate")
+set_defaultplat("iphoneos")
+set_defaultarchs("iphoneos|armv7")
+
+target("charonedgeprobe")
+    add_rules("@addon/charon/app")
+    add_files(path.join(root, "tests/backports/emulate/edgegesture/app/main.m"))
+    add_mflags("-fobjc-arc")
+    add_ldflags("-fobjc-arc", {force = true})
+    add_frameworks("Foundation", "UIKit")
+    set_values("app.plist-file", "Info.plist")
+    set_values("charon.control", "control")

@@ -1,0 +1,7 @@
+Package: org.charon.shearprobe
+Name: Charon vImage shear probe
+Architecture: iphoneos-arm
+Description: The port's integer shear engine against this release's own ARGB8888 shear, one filter made by the release
+Maintainer: charon
+Author: charon
+Section: Development

@@ -1,0 +1,52 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "-[UIViewController setNeedsUpdateOfSupportedInterfaceOrientations]",
+      "kind": "method",
+      "introduced": "16.0",
+      "status": "implemented",
+      "facts": "facts/UIKit/UIViewControllerOrientationUpdate.md",
+      "source": "UIKit 16.0 arm64e, -[UIViewController setNeedsUpdateOfSupportedInterfaceOrientations] at 0x189671fa0, and the SDK 16.4 header of UIViewController"
+    },
+    {
+      "api": "UITableView.sectionHeaderTopPadding",
+      "kind": "property",
+      "introduced": "15.0",
+      "status": "owed",
+      "reason": "build the property UITableView.sectionHeaderTopPadding",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UITableViewSectionHeaderTopPadding.md"
+    },
+    {
+      "api": "UIKeyCommand.wantsPriorityOverSystemBehavior",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UIKeyCommand.wantsPriorityOverSystemBehavior",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UIKeyCommandPriority.md"
+    },
+    {
+      "api": "UIKeyCommand.allowsAutomaticLocalization",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UIKeyCommand.allowsAutomaticLocalization",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UIKeyCommandPriority.md"
+    },
+    {
+      "api": "UIKeyCommand.allowsAutomaticMirroring",
+      "kind": "property",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UIKeyCommand.allowsAutomaticMirroring",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UIKeyCommandPriority.md"
+    }
+  ]
+}

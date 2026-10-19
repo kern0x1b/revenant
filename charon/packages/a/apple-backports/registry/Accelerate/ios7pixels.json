@@ -1,0 +1,93 @@
+{
+  "framework": "Accelerate",
+  "entries": [
+    {
+      "api": "vImageConvert_RGB565toBGRA8888()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the header writes the arithmetic of the five and six bit channels out, and it is exact integer arithmetic with no room for a difference",
+      "effect": "byte for byte the system's answer: blue, green, red from (channel * 255 + half) / max, then the alpha the caller gives, in that order; the refusals are the system's own, kvImageRoiLargerThanInputBuffer for a destination larger than the source, which is what the release answers although the header's comment names another code, kvImageUnknownFlagsBit for a flag outside DoNotTile, GetTempBufferSize and PrintDiagnostics, and 0 for GetTempBufferSize",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own Accelerate, compared byte for byte and refusal for refusal in tests/backports/host/ypcbcr"
+    },
+    {
+      "api": "vImageConvert_BGRA8888toRGB565()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the mirror of the other, again exact integer arithmetic the header writes out",
+      "effect": "byte for byte the system's answer: (channel * 31 or 63 + 127) / 255 packed as red, green, blue into a native 16-bit word; kvImageRoiLargerThanInputBuffer for a destination larger than the source, and the same flag answers",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4; the host's own Accelerate, compared byte for byte in tests/backports/host/ypcbcr"
+    },
+    {
+      "api": "vImageConvert_ARGB16UtoRGB16U()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the alpha is the first channel and the function drops it, which is a move of six bytes per pixel and nothing else",
+      "effect": "byte for byte the system's answer, and it works in place as the header says it does",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4; the host's own Accelerate, compared byte for byte in tests/backports/host/ypcbcr"
+    },
+    {
+      "api": "vImageConvert_ARGBFFFFtoRGBFFF()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same drop of the first channel, twelve bytes per pixel",
+      "effect": "byte for byte the system's answer, and it works in place as the header says it does",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4; the host's own Accelerate, compared byte for byte in tests/backports/host/ypcbcr"
+    },
+    {
+      "api": "vImageConvert_RGB565toRGBA8888()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the same expansion as the BGRA pair beside it, with the alpha the caller passes in the red position instead of the blue one",
+      "effect": "blue, green, red from (channel * 255 + half) / max and the alpha the caller gives, in that order; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_RGBA5551toRGBA8888()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "Conversion.h writes the arithmetic of a 1/5/5/5 word out: three five-bit channels and a one-bit alpha",
+      "effect": "red, green and blue each (5 * 255 + 15) / 31 and the alpha the one bit times 255; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_RGBA8888toRGB565()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the narrowing of an 8/8/8/8 word to 5/6/5, which Conversion.h writes out",
+      "effect": "red and blue (8 * 31 + 127) / 255 and green (8 * 63 + 127) / 255, packed as (red << 11) | (green << 5) | blue into a word of the machine's own order; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    },
+    {
+      "api": "vImageConvert_RGBA8888toRGBA5551()",
+      "kind": "function",
+      "introduced": "7.0",
+      "minimum": "4.3",
+      "status": "implemented",
+      "reason": "the narrowing of an 8/8/8/8 word to 5/5/5/1, which Conversion.h writes out, alpha included",
+      "effect": "red, green and blue each (8 * 31 + 127) / 255 and the alpha (8 + 127) / 255, packed as (red << 11) | (green << 6) | (blue << 1) | alpha; the refusals are the release's own as below",
+      "facts": "facts/Accelerate/vImagePixels.md",
+      "source": "the header of iOS 16.4, which writes the per-channel arithmetic out; the host's own vImage, compared byte for byte in tests/backports/host/vimagepixels, over the corners of each word; the release's own armv7 caches, which say which release first exports the name"
+    }
+  ]
+}

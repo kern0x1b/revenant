@@ -1,0 +1,90 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+MLCompute	swift-enum	s:9MLCompute16MLCPaddingPolicyO	-	MLCPaddingPolicy	-	-	-	ios=14.0,macos=11.0,tvos=14.0	-	e4ca99a9f9a4c637
+MLCompute	swift-constant	s:9MLCompute16MLCPaddingPolicyO4sameyA2CmF	MLCPaddingPolicy	same	-	-	-	-	-	ce447cddccfb0049
+MLCompute	swift-constant	s:9MLCompute16MLCPaddingPolicyO5validyA2CmF	MLCPaddingPolicy	valid	-	-	-	-	-	fc084825898d7aeb
+MLCompute	swift-constant	s:9MLCompute16MLCPaddingPolicyO5sizedyACSi_SitcACmF	MLCPaddingPolicy	sized	-	-	-	-	-	cad5e1ba2e18ce82
+MLCompute	swift-property	s:9MLCompute16MLCPaddingPolicyO16debugDescriptionSSvp	MLCPaddingPolicy	debugDescription	-	Swift.String	-	-	-	7e43116c3510cca0
+MLCompute	swift-enum	s:9MLCompute14MLCPoolingTypeO	-	MLCPoolingType	-	-	-	ios=14.0,macos=11.0,tvos=14.0	-	bbc651dca1c2b264
+MLCompute	swift-constant	s:9MLCompute14MLCPoolingTypeO3maxyA2CmF	MLCPoolingType	max	-	-	-	-	-	c3b4da89d1357c1c
+MLCompute	swift-constant	s:9MLCompute14MLCPoolingTypeO7averageyACSb_tcACmF	MLCPoolingType	average	-	-	-	-	-	960469ef59997f98
+MLCompute	swift-constant	s:9MLCompute14MLCPoolingTypeO6l2NormyA2CmF	MLCPoolingType	l2Norm	-	-	-	-	-	30af01df9940dc7f
+MLCompute	swift-property	s:9MLCompute14MLCPoolingTypeO16debugDescriptionSSvp	MLCPoolingType	debugDescription	-	Swift.String	-	-	-	7914a49325336ad0
+MLCompute	swift-class	c:objc(cs)MLCEmbeddingDescriptor	-	MLCEmbeddingDescriptor	-	-	-	ios=14.0	-	d55893863221fd66
+MLCompute	swift-property	s:So22MLCEmbeddingDescriptorC9MLComputeE14embeddingCountSivp	MLCEmbeddingDescriptor	embeddingCount	-	Swift.Int	-	-	-	5c5a2c83aa8a578f
+MLCompute	swift-property	s:So22MLCEmbeddingDescriptorC9MLComputeE18embeddingDimensionSivp	MLCEmbeddingDescriptor	embeddingDimension	-	Swift.Int	-	-	-	16fd392531350c58
+MLCompute	swift-property	s:So22MLCEmbeddingDescriptorC9MLComputeE12paddingIndexSiSgvp	MLCEmbeddingDescriptor	paddingIndex	-	Swift.Int?	-	-	-	1e2e25562f0ff17d
+MLCompute	swift-property	s:So22MLCEmbeddingDescriptorC9MLComputeE11maximumNormSfSgvp	MLCEmbeddingDescriptor	maximumNorm	-	Swift.Float?	-	-	-	3a87d1e44ac470c7
+MLCompute	swift-property	s:So22MLCEmbeddingDescriptorC9MLComputeE5pNormSfSgvp	MLCEmbeddingDescriptor	pNorm	-	Swift.Float?	-	-	-	c38906919cfbdf4a
+MLCompute	swift-method	s:So22MLCEmbeddingDescriptorC9MLComputeE14embeddingCount0D9DimensionABSgSi_Sitcfc	MLCEmbeddingDescriptor	init(embeddingCount:embeddingDimension:)	-	-	MLCompute.MLCEmbeddingDescriptor? | Swift.Int | Swift.Int	-	-	8c094d64b569b707
+MLCompute	swift-method	s:So22MLCEmbeddingDescriptorC9MLComputeE14embeddingCount0D9Dimension12paddingIndex11maximumNorm01pJ025scalesGradientByFrequencyABSgSi_S2iSgSfSgALSbtcfc	MLCEmbeddingDescriptor	init(embeddingCount:embeddingDimension:paddingIndex:maximumNorm:pNorm:scalesGradientByFrequency:)	-	-	MLCompute.MLCEmbeddingDescriptor? | Swift.Int | Swift.Int | Swift.Int? | Swift.Float? | Swift.Float? | Swift.Bool	-	-	f25dcf848dad31c4
+MLCompute	swift-class	c:objc(cs)MLCPaddingLayer	-	MLCPaddingLayer	-	-	-	ios=14.0	-	f1af9db24d3b11b7
+MLCompute	swift-method	s:So15MLCPaddingLayerC9MLComputeE17reflectionPaddingABSaySiG_tcfc	MLCPaddingLayer	init(reflectionPadding:)	-	-	MLCompute.MLCPaddingLayer | [Swift.Int]	-	-	51c5b152a252fb3c
+MLCompute	swift-method	s:So15MLCPaddingLayerC9MLComputeE16symmetricPaddingABSaySiG_tcfc	MLCPaddingLayer	init(symmetricPadding:)	-	-	MLCompute.MLCPaddingLayer | [Swift.Int]	-	-	b6cf2b9ec03c0be9
+MLCompute	swift-method	s:So15MLCPaddingLayerC9MLComputeE11zeroPaddingABSaySiG_tcfc	MLCPaddingLayer	init(zeroPadding:)	-	-	MLCompute.MLCPaddingLayer | [Swift.Int]	-	-	72de6ec6758a4092
+MLCompute	swift-method	s:So15MLCPaddingLayerC9MLComputeE15constantPadding0D5ValueABSaySiG_Sftcfc	MLCPaddingLayer	init(constantPadding:constantValue:)	-	-	MLCompute.MLCPaddingLayer | [Swift.Int] | Swift.Float	-	-	e6278cd721bdc18b
+MLCompute	swift-class	c:objc(cs)MLCLayerNormalizationLayer	-	MLCLayerNormalizationLayer	-	-	-	ios=14.0	-	a0fd4589886f0623
+MLCompute	swift-property	s:So26MLCLayerNormalizationLayerC9MLComputeE15normalizedShapeSaySiGvp	MLCLayerNormalizationLayer	normalizedShape	-	[Swift.Int]	-	-	-	5359641216c50d6a
+MLCompute	swift-method	s:So26MLCLayerNormalizationLayerC9MLComputeE15normalizedShape4beta5gamma15varianceEpsilonABSgSaySiG_So9MLCTensorCAKSftcfc	MLCLayerNormalizationLayer	init(normalizedShape:beta:gamma:varianceEpsilon:)	-	-	MLCompute.MLCLayerNormalizationLayer? | [Swift.Int] | MLCompute.MLCTensor | MLCompute.MLCTensor | Swift.Float	-	-	478f377e36b17774
+MLCompute	swift-method	s:So26MLCLayerNormalizationLayerC9MLComputeE15normalizedShape4beta5gamma15varianceEpsilonABSgSaySiG_So9MLCTensorCSgALSftcfc	MLCLayerNormalizationLayer	init(normalizedShape:beta:gamma:varianceEpsilon:)	-	-	MLCompute.MLCLayerNormalizationLayer? | [Swift.Int] | MLCompute.MLCTensor? | MLCompute.MLCTensor? | Swift.Float	ios=14.5,macos=11.3,tvos=14.5	-	65ee82f7c3e962cb
+MLCompute	swift-class	c:objc(cs)MLCInferenceGraph	-	MLCInferenceGraph	-	-	-	ios=14.0	-	43e2fe53c7f5724c
+MLCompute	swift-method	s:So17MLCInferenceGraphC9MLComputeE7execute10inputsData010lossLabelsF00g12LabelWeightsF007outputsF09batchSize7optionsSo9MLCTensorCSg6result_Sd13executionTimetSDySSSo0oF0CG_ARSgA2SSiSo19MLCExecutionOptionsVtYaKF	MLCInferenceGraph	execute(inputsData:lossLabelsData:lossLabelWeightsData:outputsData:batchSize:options:)	-	(result: MLCompute.MLCTensor?, executionTime: Foundation.TimeInterval)	[Swift.String : MLCompute.MLCTensorData] | [Swift.String : MLCompute.MLCTensorData]? | [Swift.String : MLCompute.MLCTensorData]? | [Swift.String : MLCompute.MLCTensorData]? | Swift.Int | MLCompute.MLCExecutionOptions	-	-	f0e8a697fba262dc
+MLCompute	swift-class	c:objc(cs)MLCTrainingGraph	-	MLCTrainingGraph	-	-	-	ios=14.0	-	9d215fbbd6a97b99
+MLCompute	swift-method	s:So16MLCTrainingGraphC9MLComputeE14executeForward9batchSize7options11outputsDataSo9MLCTensorCSg6result_Sd13executionTimetSi_So19MLCExecutionOptionsVSDySSSo0kJ0CGSgtYaKF	MLCTrainingGraph	executeForward(batchSize:options:outputsData:)	-	(result: MLCompute.MLCTensor?, executionTime: Foundation.TimeInterval)	Swift.Int | MLCompute.MLCExecutionOptions | [Swift.String : MLCompute.MLCTensorData]?	-	-	a42db0119e4d681c
+MLCompute	swift-method	s:So16MLCTrainingGraphC9MLComputeE15executeGradient9batchSize7options11outputsDataSdSi_So19MLCExecutionOptionsVSDySSSo09MLCTensorJ0CGSgtYaKF	MLCTrainingGraph	executeGradient(batchSize:options:outputsData:)	-	Foundation.TimeInterval	Swift.Int | MLCompute.MLCExecutionOptions | [Swift.String : MLCompute.MLCTensorData]?	-	-	d9e49949e82cf233
+MLCompute	swift-method	s:So16MLCTrainingGraphC9MLComputeE22executeOptimizerUpdate7optionsSdSo19MLCExecutionOptionsV_tYaKF	MLCTrainingGraph	executeOptimizerUpdate(options:)	-	Foundation.TimeInterval	MLCompute.MLCExecutionOptions	-	-	d42eaabe628ccab0
+MLCompute	swift-class	c:objc(cs)MLCSplitLayer	-	MLCSplitLayer	-	-	-	ios=14.0	-	fb9b4eeef4f331f5
+MLCompute	swift-property	s:So13MLCSplitLayerC9MLComputeE19splitSectionLengthsSaySiGSgvp	MLCSplitLayer	splitSectionLengths	-	[Swift.Int]?	-	-	-	b2f16cb80eaeb0c2
+MLCompute	swift-method	s:So13MLCSplitLayerC9MLComputeE19splitSectionLengths9dimensionABSaySiG_Sitcfc	MLCSplitLayer	init(splitSectionLengths:dimension:)	-	-	MLCompute.MLCSplitLayer | [Swift.Int] | Swift.Int	-	-	10ba6f503d382056
+MLCompute	swift-class	c:objc(cs)MLCUpsampleLayer	-	MLCUpsampleLayer	-	-	-	ios=14.0	-	3c59760fe0de7a85
+MLCompute	swift-property	s:So16MLCUpsampleLayerC9MLComputeE5shapeSaySiGvp	MLCUpsampleLayer	shape	-	[Swift.Int]	-	-	-	3949c92e25c12957
+MLCompute	swift-method	s:So16MLCUpsampleLayerC9MLComputeE5shapeABSgSaySiG_tcfc	MLCUpsampleLayer	init(shape:)	-	-	MLCompute.MLCUpsampleLayer? | [Swift.Int]	-	-	9599fc6cee7421a6
+MLCompute	swift-method	s:So16MLCUpsampleLayerC9MLComputeE5shape10sampleMode13alignsCornersABSgSaySiG_So09MLCSampleF0VSbtcfc	MLCUpsampleLayer	init(shape:sampleMode:alignsCorners:)	-	-	MLCompute.MLCUpsampleLayer? | [Swift.Int] | MLCompute.MLCSampleMode | Swift.Bool	-	-	763a0106811715a5
+MLCompute	swift-class	c:objc(cs)MLCSliceLayer	-	MLCSliceLayer	-	-	-	ios=14.0	-	952e095fdc320963
+MLCompute	swift-property	s:So13MLCSliceLayerC9MLComputeE5startSaySiGvp	MLCSliceLayer	start	-	[Swift.Int]	-	-	-	12a79c8cc25b6e64
+MLCompute	swift-property	s:So13MLCSliceLayerC9MLComputeE3endSaySiGvp	MLCSliceLayer	end	-	[Swift.Int]	-	-	-	8181160d8d7bac47
+MLCompute	swift-property	s:So13MLCSliceLayerC9MLComputeE6strideSaySiGSgvp	MLCSliceLayer	stride	-	[Swift.Int]?	-	-	-	69f217047f936fad
+MLCompute	swift-method	s:So13MLCSliceLayerC9MLComputeE5start3end6strideABSgSaySiG_A2HSgtcfc	MLCSliceLayer	init(start:end:stride:)	-	-	MLCompute.MLCSliceLayer? | [Swift.Int] | [Swift.Int] | [Swift.Int]?	-	-	60a78ab0885ce93f
+MLCompute	swift-class	c:objc(cs)MLCConvolutionDescriptor	-	MLCConvolutionDescriptor	-	-	-	ios=14.0	-	dedc24e38476c5b3
+MLCompute	swift-property	s:So24MLCConvolutionDescriptorC9MLComputeE11kernelSizesSi6height_Si5widthtvp	MLCConvolutionDescriptor	kernelSizes	-	(height: Swift.Int, width: Swift.Int)	-	-	-	674993091df9f440
+MLCompute	swift-property	s:So24MLCConvolutionDescriptorC9MLComputeE7stridesSi1y_Si1xtvp	MLCConvolutionDescriptor	strides	-	(y: Swift.Int, x: Swift.Int)	-	-	-	f48e6a29bd9c4f32
+MLCompute	swift-property	s:So24MLCConvolutionDescriptorC9MLComputeE13dilationRatesSi1y_Si1xtvp	MLCConvolutionDescriptor	dilationRates	-	(y: Swift.Int, x: Swift.Int)	-	-	-	413275ae1e85ac09
+MLCompute	swift-property	s:So24MLCConvolutionDescriptorC9MLComputeE13paddingPolicyAC010MLCPaddingE0Ovp	MLCConvolutionDescriptor	paddingPolicy	-	MLCompute.MLCPaddingPolicy	-	-	-	33e0218eb832a6db
+MLCompute	swift-method	s:So24MLCConvolutionDescriptorC9MLComputeE4type11kernelSizes24inputFeatureChannelCount06outputhiJ005groupJ07strides13dilationRates13paddingPolicyABSo0A4TypeV_Si6height_Si5widthtS4i1y_Si1xtSiAP_SiAQtAC010MLCPaddingQ0Otcfc	MLCConvolutionDescriptor	init(type:kernelSizes:inputFeatureChannelCount:outputFeatureChannelCount:groupCount:strides:dilationRates:paddingPolicy:)	-	-	MLCompute.MLCConvolutionDescriptor | MLCompute.MLCConvolutionType | (height: Swift.Int, width: Swift.Int) | Swift.Int | Swift.Int | Swift.Int | (y: Swift.Int, x: Swift.Int) | (y: Swift.Int, x: Swift.Int) | MLCompute.MLCPaddingPolicy	-	-	5d79c4254b61ea36
+MLCompute	swift-class	c:objc(cs)MLCReductionLayer	-	MLCReductionLayer	-	-	-	ios=14.0	-	5ad1338756904e05
+MLCompute	swift-property	s:So17MLCReductionLayerC9MLComputeE10dimensionsSaySiGvp	MLCReductionLayer	dimensions	-	[Swift.Int]	-	-	-	25ce830395f35e20
+MLCompute	swift-method	s:So17MLCReductionLayerC9MLComputeE13reductionType10dimensionsABSgSo0aE0V_SaySiGtcfc	MLCReductionLayer	init(reductionType:dimensions:)	-	-	MLCompute.MLCReductionLayer? | MLCompute.MLCReductionType | [Swift.Int]	-	-	5f2c6e9db93a401f
+MLCompute	swift-class	c:objc(cs)MLCTransposeLayer	-	MLCTransposeLayer	-	-	-	ios=14.0	-	92680765cca4d6af
+MLCompute	swift-property	s:So17MLCTransposeLayerC9MLComputeE10dimensionsSaySiGvp	MLCTransposeLayer	dimensions	-	[Swift.Int]	-	-	-	687ee459e3513e6a
+MLCompute	swift-method	s:So17MLCTransposeLayerC9MLComputeE10dimensionsABSgSaySiG_tcfc	MLCTransposeLayer	init(dimensions:)	-	-	MLCompute.MLCTransposeLayer? | [Swift.Int]	-	-	6e7f48f21afb1033
+MLCompute	swift-class	c:objc(cs)MLCTensor	-	MLCTensor	-	-	-	ios=14.0	-	b2d9e5fa6949bd83
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE5shapeABSaySiG_tcfc	MLCTensor	init(shape:)	-	-	MLCompute.MLCTensor | [Swift.Int]	-	-	1ca76121204ad375
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE5shape21randomInitializerTypeABSaySiG_So09MLCRandomeF0Vtcfc	MLCTensor	init(shape:randomInitializerType:)	-	-	MLCompute.MLCTensor | [Swift.Int] | MLCompute.MLCRandomInitializerType	-	-	df1630bf7fa0e0b6
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE5shape8dataTypeABSaySiG_So07MLCDataE0Vtcfc	MLCTensor	init(shape:dataType:)	-	-	MLCompute.MLCTensor | [Swift.Int] | MLCompute.MLCDataType	-	-	7ee3bf49d90a35d1
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE5shape4data0D4TypeABSaySiG_So0A4DataCSo07MLCDataE0Vtcfc	MLCTensor	init(shape:data:dataType:)	-	-	MLCompute.MLCTensor | [Swift.Int] | MLCompute.MLCTensorData | MLCompute.MLCDataType	-	-	f9babb2e08796e95
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE5shape12fillWithData8dataTypeABSaySiG_So8NSNumberCSo07MLCDataH0Vtcfc	MLCTensor	init(shape:fillWithData:dataType:)	-	-	MLCompute.MLCTensor | [Swift.Int] | Foundation.NSNumber | MLCompute.MLCDataType	-	-	94609875c3082ab9
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE15sequenceLengths15sortedSequences19featureChannelCount9batchSize21randomInitializerTypeABSgSaySiG_SbS2iSo09MLCRandommN0Vtcfc	MLCTensor	init(sequenceLengths:sortedSequences:featureChannelCount:batchSize:randomInitializerType:)	-	-	MLCompute.MLCTensor? | [Swift.Int] | Swift.Bool | Swift.Int | Swift.Int | MLCompute.MLCRandomInitializerType	-	-	d7e95be9613525e3
+MLCompute	swift-method	s:So9MLCTensorC9MLComputeE15sequenceLengths15sortedSequences19featureChannelCount9batchSize4dataABSgSaySiG_SbS2iSo0A4DataCSgtcfc	MLCTensor	init(sequenceLengths:sortedSequences:featureChannelCount:batchSize:data:)	-	-	MLCompute.MLCTensor? | [Swift.Int] | Swift.Bool | Swift.Int | Swift.Int | MLCompute.MLCTensorData?	-	-	fe62630606677c74
+MLCompute	swift-class	c:objc(cs)MLCGraph	-	MLCGraph	-	-	-	ios=14.0	-	a454795b52291e49
+MLCompute	swift-method	s:So8MLCGraphC9MLComputeE5split6source0C14SectionLengths9dimensionSaySo9MLCTensorCGSgAI_SaySiGSitF	MLCGraph	split(source:splitSectionLengths:dimension:)	-	[MLCompute.MLCTensor]?	MLCompute.MLCTensor | [Swift.Int] | Swift.Int	-	-	9094ddac1dc79754
+MLCompute	swift-method	s:So8MLCGraphC9MLComputeE7reshape5shape6sourceSo9MLCTensorCSgSaySiG_AHtF	MLCGraph	reshape(shape:source:)	-	MLCompute.MLCTensor?	[Swift.Int] | MLCompute.MLCTensor	-	-	4393fbe45b64162f
+MLCompute	swift-method	s:So8MLCGraphC9MLComputeE9transpose10dimensions6sourceSo9MLCTensorCSgSaySiG_AHtF	MLCGraph	transpose(dimensions:source:)	-	MLCompute.MLCTensor?	[Swift.Int] | MLCompute.MLCTensor	-	-	d1db0f213f7cfc2d
+MLCompute	swift-class	c:objc(cs)MLCReshapeLayer	-	MLCReshapeLayer	-	-	-	ios=14.0	-	6854191e8a018fd3
+MLCompute	swift-method	s:So15MLCReshapeLayerC9MLComputeE5shapeABSgSaySiG_tcfc	MLCReshapeLayer	init(shape:)	-	-	MLCompute.MLCReshapeLayer? | [Swift.Int]	-	-	6a0cba7716b7e49c
+MLCompute	swift-property	s:So15MLCReshapeLayerC9MLComputeE5shapeSaySiGvp	MLCReshapeLayer	shape	-	[Swift.Int]	-	-	-	fb56092588df0248
+MLCompute	swift-class	c:objc(cs)MLCTensorDescriptor	-	MLCTensorDescriptor	-	-	-	ios=14.0	-	9d4ee648827b8313
+MLCompute	swift-property	s:So19MLCTensorDescriptorC9MLComputeE5shapeSaySiGvp	MLCTensorDescriptor	shape	-	[Swift.Int]	-	-	-	c824ecde81ed1c71
+MLCompute	swift-property	s:So19MLCTensorDescriptorC9MLComputeE6strideSaySiGvp	MLCTensorDescriptor	stride	-	[Swift.Int]	-	-	-	a886bf9db3d7e415
+MLCompute	swift-property	s:So19MLCTensorDescriptorC9MLComputeE15sequenceLengthsSaySiGSgvp	MLCTensorDescriptor	sequenceLengths	-	[Swift.Int]?	-	-	-	5e0686482e227246
+MLCompute	swift-property	s:So19MLCTensorDescriptorC9MLComputeE24batchSizePerSequenceStepSaySiGSgvp	MLCTensorDescriptor	batchSizePerSequenceStep	-	[Swift.Int]?	-	-	-	82823043bbd13384
+MLCompute	swift-method	s:So19MLCTensorDescriptorC9MLComputeE5shape8dataTypeABSgSaySiG_So07MLCDataF0Vtcfc	MLCTensorDescriptor	init(shape:dataType:)	-	-	MLCompute.MLCTensorDescriptor? | [Swift.Int] | MLCompute.MLCDataType	-	-	7c634f1469d8395f
+MLCompute	swift-method	s:So19MLCTensorDescriptorC9MLComputeE5shape15sequenceLengths15sortedSequences8dataTypeABSgSaySiG_AISbSo07MLCDataJ0Vtcfc	MLCTensorDescriptor	init(shape:sequenceLengths:sortedSequences:dataType:)	-	-	MLCompute.MLCTensorDescriptor? | [Swift.Int] | [Swift.Int] | Swift.Bool | MLCompute.MLCDataType	-	-	d6550ee65f04d16c
+MLCompute	swift-class	c:objc(cs)MLCPoolingDescriptor	-	MLCPoolingDescriptor	-	-	-	ios=14.0	-	3c8747b46d5e5cd6
+MLCompute	swift-property	s:So20MLCPoolingDescriptorC9MLComputeE11poolingTypeAC0aE0Ovp	MLCPoolingDescriptor	poolingType	-	MLCompute.MLCPoolingType	-	-	-	ab1d668137b70130
+MLCompute	swift-property	s:So20MLCPoolingDescriptorC9MLComputeE11kernelSizesSi6height_Si5widthtvp	MLCPoolingDescriptor	kernelSizes	-	(height: Swift.Int, width: Swift.Int)	-	-	-	72bee86b0aea72a7
+MLCompute	swift-property	s:So20MLCPoolingDescriptorC9MLComputeE7stridesSi1y_Si1xtvp	MLCPoolingDescriptor	strides	-	(y: Swift.Int, x: Swift.Int)	-	-	-	7b4b3542e628d3f7
+MLCompute	swift-property	s:So20MLCPoolingDescriptorC9MLComputeE13dilationRatesSi1y_Si1xtvp	MLCPoolingDescriptor	dilationRates	-	(y: Swift.Int, x: Swift.Int)	-	-	-	36110c51ea5d64fc
+MLCompute	swift-property	s:So20MLCPoolingDescriptorC9MLComputeE13paddingPolicyAC010MLCPaddingE0Ovp	MLCPoolingDescriptor	paddingPolicy	-	MLCompute.MLCPaddingPolicy	-	-	-	746796be27b2e3df
+MLCompute	swift-method	s:So20MLCPoolingDescriptorC9MLComputeE4type11kernelSizes7strides13dilationRates13paddingPolicyAbC0A4TypeO_Si6height_Si5widthtSi1y_Si1xtSiAM_SiANtAC010MLCPaddingK0Otcfc	MLCPoolingDescriptor	init(type:kernelSizes:strides:dilationRates:paddingPolicy:)	-	-	MLCompute.MLCPoolingDescriptor | MLCompute.MLCPoolingType | (height: Swift.Int, width: Swift.Int) | (y: Swift.Int, x: Swift.Int) | (y: Swift.Int, x: Swift.Int) | MLCompute.MLCPaddingPolicy	-	-	bc0e957dec8d95fd
+MLCompute	swift-property	s:9MLCompute16MLCPaddingPolicyO04objcC0SoABVvp	MLCPaddingPolicy	objcPolicy	-	MLCompute.__MLCPaddingPolicy	-	-	-	19c3602b92a51694
+MLCompute	swift-property	s:9MLCompute16MLCPaddingPolicyO9objcSizesSaySo8NSNumberCGSgvp	MLCPaddingPolicy	objcSizes	-	[Foundation.NSNumber]?	-	-	-	f93a2f2047a4202a
+MLCompute	swift-property	s:9MLCompute14MLCPoolingTypeO011objcPoolingC0SoABVvp	MLCPoolingType	objcPoolingType	-	MLCompute.__MLCPoolingType	-	-	-	a8666dcb30cbe377

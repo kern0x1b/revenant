@@ -1,0 +1,8 @@
+Package: org.charon.callkit-screen
+Name: Charon CallKit Screen
+Architecture: iphoneos-arm
+Description: the SpringBoard side of the CallKit incoming-call screen bridge, presenting the call libCallKitBackports.dylib reports through CharonCallScreen and answering back through the same file-and-notification protocol
+Maintainer: kern0x1b
+Author: kern0x1b
+Section: Tweaks
+Depends: mobilesubstrate

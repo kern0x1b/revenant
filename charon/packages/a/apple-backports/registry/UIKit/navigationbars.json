@@ -1,0 +1,85 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+   "api": "UINavigationController.hidesBarsOnSwipe",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the bar goes when the edge swipe runs, NO in a stack made by hand as the host answers, and remembered when set",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.* cases, including the defaults, and the two divergence cases named .diverges)"
+  },
+  {
+   "api": "UINavigationController.hidesBarsOnTap",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the bar goes when the bar is tapped, NO in a stack made by hand as the host answers, and remembered when set",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.* cases, including the defaults, and the two divergence cases named .diverges)"
+  },
+  {
+   "api": "UINavigationController.hidesBarsWhenKeyboardAppears",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the bar goes when the keyboard arrives and comes back when it leaves, observed and unobserved as UISheetPresentationController.m does it so the flag really stops it; NO in a stack made by hand as the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.* cases, including the defaults, and the two divergence cases named .diverges)"
+  },
+  {
+   "api": "UINavigationController.hidesBarsWhenVerticallyCompact",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the bar is hidden in a vertically compact environment, read from the trait collection the release maintains and followed through the release's own -traitCollectionDidChange: rather than through a notification standing in for a trait change; NO in a stack made by hand as the host answers",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.* cases, including the defaults, and the two divergence cases named .diverges)"
+  },
+  {
+   "api": "UINavigationController.barHideOnSwipeGestureRecognizer",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the edge pan that hides the bar, made once per controller; it is not the interactive pop, which is a separate recogniser, as the host also has it",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.* cases, including the defaults, and the two divergence cases named .diverges); the recogniser is a public UIScreenEdgePanGestureRecognizer where the host's is the private _UIBarPanGestureRecognizer, which this port may not name: the case nav.swipeGestureKind.diverges records that and fails if the host ever stops diverging"
+  },
+  {
+   "api": "UINavigationController.barHideOnTapGestureRecognizer",
+   "kind": "property",
+   "introduced": "8.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the tap that hides the bar, made once per controller, where the host's is the private _UIBarTapGestureRecognizer: the case nav.tapGestureKind.diverges records that divergence",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.* cases, including the defaults, and the two divergence cases named .diverges); the recogniser is a public UITapGestureRecognizer where the host's is private, which this port may not name"
+  },
+  {
+   "api": "-[UINavigationControllerDelegate navigationControllerPreferredInterfaceOrientationForPresentation:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked before the navigation controller answers which orientation to present in, and the delegate's answer is used; a delegate that answers neither leaves the release's own answer, which is what a stack with no delegate has always done. With no delegate the host answers neither portrait nor any particular mask, and that is recorded rather than assumed",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.delegatePreferredOrientationDefault and nav.delegateSupportedOrientationsDefault cases); the header of SDK 26.2 for the two questions"
+  },
+  {
+   "api": "-[UINavigationControllerDelegate navigationControllerSupportedInterfaceOrientations:]",
+   "kind": "method",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked before the navigation controller answers which orientations it may rotate to, and the delegate's answer is used, with the release's own answer left for a delegate that answers neither",
+   "facts": "facts/UIKit/ScrollViewsAndNavigation.md",
+   "source": "the host's own UIKit under Mac Catalyst (macOS 27.0), held against the backport by tests/backports/host/uikitscroll (the nav.delegatePreferredOrientationDefault and nav.delegateSupportedOrientationsDefault cases); the header of SDK 26.2 for the two questions"
+  }
+ ]
+}

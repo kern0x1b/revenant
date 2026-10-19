@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLBuffer addDebugMarker:range:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a marker names a range of a buffer for a capture, and no capture runs on this device, so the port has nothing to put it in",
+      "effect": "the call returns and changes no byte of the buffer, and the marker is not kept; measured on the host, the bytes and the GPU address are the same after a marker over a window and over the whole buffer",
+      "facts": "facts/Metal/Buffers.md",
+      "source": "SDK 16.4, Metal; the introduction 10.0 from the corpus surface of the 26.2 SDK; the host measurement in tests/backports/device/buffer-probe/host-expectations.txt"
+    },
+    {
+      "api": "-[MTLBuffer removeAllDebugMarkers]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the pair of addDebugMarker:range:, which keeps no marker, so there is none to remove",
+      "effect": "the call returns and changes no byte of the buffer, once and twice alike; measured on the host",
+      "facts": "facts/Metal/Buffers.md",
+      "source": "SDK 16.4, Metal; the introduction 10.0 from the corpus surface of the 26.2 SDK; the host measurement in tests/backports/device/buffer-probe/host-expectations.txt"
+    }
+  ]
+}

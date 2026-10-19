@@ -1,0 +1,16 @@
+{
+  "framework": "QuartzCore",
+  "entries": [
+    {
+      "api": "CALayer.maskedCorners",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 rounds all four corners of a layer together, so a selection short of all four is a mask of the layer laid over the two corners it clips",
+      "effect": "a layer that clips to its bounds with a corner radius, and is masked to fewer than all four corners, gets a CAShapeLayer mask of a rect rounded on exactly the selected corners (UIBezierPath's own byRoundingCorners:cornerRadii:, since CACornerMask and UIRectCorner share the same four bit positions), kept in step with its bounds, radius and mask; a layer masked to all four corners (the default) or one that does not clip, or already has a mask of its own, is untouched. Not coordinated with cornerCurve: both features hold layer.mask on the same terms, so whichever of setCornerCurve: or setMaskedCorners: was called more recently keeps it, and the other stays inert until set again - the rare combination of both is not specially handled",
+      "facts": "facts/QuartzCore/CALayerMaskedCorners.md",
+      "source": "the host's own QuartzCore"
+    }
+  ]
+}

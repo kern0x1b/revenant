@@ -1,0 +1,77 @@
+--- a/Sources/CryptoExtras/EC/Curve25519+PEM.swift
++++ b/Sources/CryptoExtras/EC/Curve25519+PEM.swift
+@@ -13,7 +13,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ import Crypto
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ #if canImport(FoundationEssentials)
+ import FoundationEssentials
+--- a/Sources/CryptoExtras/EC/ObjectIdentifier.swift
++++ b/Sources/CryptoExtras/EC/ObjectIdentifier.swift
+@@ -12,7 +12,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ extension ASN1ObjectIdentifier.AlgorithmIdentifier {
+     // Identifies the key agreement algorithm X25519.
+--- a/Sources/CryptoExtras/EC/PKCS8DERRepresentation.swift
++++ b/Sources/CryptoExtras/EC/PKCS8DERRepresentation.swift
+@@ -13,7 +13,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ import Crypto
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ #if canImport(FoundationEssentials)
+ import FoundationEssentials
+--- a/Sources/CryptoExtras/EC/PKCS8PrivateKey.swift
++++ b/Sources/CryptoExtras/EC/PKCS8PrivateKey.swift
+@@ -13,7 +13,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ import Crypto
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ASN1 {
+--- a/Sources/CryptoExtras/EC/RFC8410AlgorithmIdentifier.swift
++++ b/Sources/CryptoExtras/EC/RFC8410AlgorithmIdentifier.swift
+@@ -12,7 +12,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ extension ASN1 {
+--- a/Sources/CryptoExtras/RSA/RSA.swift
++++ b/Sources/CryptoExtras/RSA/RSA.swift
+@@ -18,7 +18,7 @@
+ #endif
+ import Crypto
+ import CryptoBoringWrapper
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ fileprivate typealias BackingPublicKey = BoringSSLRSAPublicKey
+--- a/Sources/CryptoExtras/Util/SubjectPublicKeyInfo.swift
++++ b/Sources/CryptoExtras/Util/SubjectPublicKeyInfo.swift
+@@ -12,7 +12,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-import SwiftASN1
++@_implementationOnly import SwiftASN1
+ 
+ @available(macOS 10.15, iOS 6.1.3, watchOS 6, tvOS 13, macCatalyst 13, visionOS 1.0, *)
+ struct SubjectPublicKeyInfo: DERImplicitlyTaggable, Hashable {

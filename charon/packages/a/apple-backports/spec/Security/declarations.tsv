@@ -1,0 +1,1401 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:CipherSuite.h@T@SSLCipherSuite	-			uint16_t	-	-	-	-	ebb96a94a0b3347b	-
+enum	c:@Ea@SSL_NULL_WITH_NULL_NULL	-	-		SSLCipherSuite	-	-	-	-	067e6e191a793ec8	-
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_NULL_WITH_NULL_NULL	-			-	-	-	-	-	67fac23cca280640	0
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_NULL_MD5	-			-	-	-	-	-	36781c29a1db61fc	1
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_NULL_SHA	-			-	-	-	-	-	abe23b34f1ce34c3	2
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_EXPORT_WITH_RC4_40_MD5	-			-	-	-	-	-	401ae6aec017940c	3
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_RC4_128_MD5	-			-	-	-	-	-	0d21faca0d14cc3c	4
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_RC4_128_SHA	-			-	-	-	-	-	2370f7a3d277aa4b	5
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5	-			-	-	-	-	-	8947818f333e7904	6
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_IDEA_CBC_SHA	-			-	-	-	-	-	77763328ed354c29	7
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_EXPORT_WITH_DES40_CBC_SHA	-			-	-	-	-	-	3c5681c913f45fd7	8
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_DES_CBC_SHA	-			-	-	-	-	-	330f85113f3df774	9
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	d4438f428968ff3c	10
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA	-			-	-	-	-	-	0f181bb5f27c155c	11
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_DSS_WITH_DES_CBC_SHA	-			-	-	-	-	-	0f7721d2789cacf7	12
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_DSS_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	91c64578b69d2517	13
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA	-			-	-	-	-	-	47ed6058e7ad7169	14
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_RSA_WITH_DES_CBC_SHA	-			-	-	-	-	-	395478e0b5ea794e	15
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	4217be09738687a7	16
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA	-			-	-	-	-	-	4808b7c3d6cedd48	17
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DHE_DSS_WITH_DES_CBC_SHA	-			-	-	-	-	-	5b66d366bdb3d569	18
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	d1de3d469791604e	19
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA	-			-	-	-	-	-	b74494f707d52e0a	20
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DHE_RSA_WITH_DES_CBC_SHA	-			-	-	-	-	-	c1ea8464abfaf267	21
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	919003b9b987470d	22
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_anon_EXPORT_WITH_RC4_40_MD5	-			-	-	-	-	-	44eb004a6de45e43	23
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_anon_WITH_RC4_128_MD5	-			-	-	-	-	-	bd889524b124ef72	24
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	-			-	-	-	-	-	29c989a85364a893	25
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_anon_WITH_DES_CBC_SHA	-			-	-	-	-	-	df9a256a6e44ded9	26
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_DH_anon_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	86f1cf357059015e	27
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_FORTEZZA_DMS_WITH_NULL_SHA	-			-	-	-	-	-	c8f1db4ba40ceb8c	28
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA	-			-	-	-	-	-	ae59e711d991bc1a	29
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	566f0eb1f984444c	47
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	11be451f07be2e58	48
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	f00dc07401f65961	49
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	620e2cc18d2635d8	50
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	f90bb518c0c0b58f	51
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	e35891097a8e2f6d	52
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	4743c818b38f2ca1	53
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	24b098909b7b9845	54
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	e8bea6ee25994fe9	55
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	fdc82e6054d24d3c	56
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	a060f30cbc719887	57
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	999e4a5c005e22e3	58
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_NULL_SHA	-			-	-	-	-	-	b16d090617183abd	49153
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_RC4_128_SHA	-			-	-	-	-	-	3f6d3bed7bed0a64	49154
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	c519fa5b7487195f	49155
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	5a083a65d2040882	49156
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	c1ddec3709699df6	49157
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_NULL_SHA	-			-	-	-	-	-	ae0d2a0eb44f2b33	49158
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_RC4_128_SHA	-			-	-	-	-	-	8bdd83a50b1b788b	49159
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	196074e3bcca8072	49160
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	ba184e850d1e6014	49161
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	184da76c56bb47eb	49162
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_NULL_SHA	-			-	-	-	-	-	0521b84aef4b6aca	49163
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_RC4_128_SHA	-			-	-	-	-	-	eba2c0d1c989a66a	49164
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	41a1c8e8258eba4a	49165
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	ea3886ee1a35a6b7	49166
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	7793c81ef825d539	49167
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_NULL_SHA	-			-	-	-	-	-	be8aba01def5a574	49168
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_RC4_128_SHA	-			-	-	-	-	-	2cd232711fbeb34c	49169
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	6613c23240032fdc	49170
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	9a72672ae4a29867	49171
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	54f1ae50681619d5	49172
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_anon_WITH_NULL_SHA	-			-	-	-	-	-	380ec3f0a59534e9	49173
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_anon_WITH_RC4_128_SHA	-			-	-	-	-	-	6729e3d961a8bbbf	49174
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	a04d25af32af1970	49175
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_anon_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	b1b7a914ab8c1627	49176
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_anon_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	1c93bc4a56167b95	49177
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	e9164f693a888f6b	49205
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	9a9648a605c6736a	49206
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_CHACHA20_POLY1305_SHA256	-			-	-	-	-	-	3648d1a391f794b7	52395
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256	-			-	-	-	-	-	99729aed10b1ded7	52396
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_NULL_WITH_NULL_NULL	-			-	-	-	-	-	c34c8e36c911f406	0
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_NULL_MD5	-			-	-	-	-	-	7a08b826366ea19b	1
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_NULL_SHA	-			-	-	-	-	-	d0635ec93536954a	2
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_RC4_128_MD5	-			-	-	-	-	-	1d36d3e4879a5090	4
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_RC4_128_SHA	-			-	-	-	-	-	63a4715177880d68	5
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	13d5c166cd8f2080	10
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_NULL_SHA256	-			-	-	-	-	-	5a8776a50c075076	59
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	a7b87703657ba0a4	60
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_AES_256_CBC_SHA256	-			-	-	-	-	-	93dc59952521027c	61
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	ed24c836d1196828	13
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	56ffbc2fd4a20767	16
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	edbddee27a6a3349	19
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	d6197af51b9985b9	22
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	1c86f9f63a379367	62
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	80afa0c976192251	63
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	7f1b1ef9692dde26	64
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	adce547c4f557b49	103
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_AES_256_CBC_SHA256	-			-	-	-	-	-	9143d86ece5710f2	104
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_AES_256_CBC_SHA256	-			-	-	-	-	-	6b01c9e2853455f8	105
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_AES_256_CBC_SHA256	-			-	-	-	-	-	f1eaaf3792a4246b	106
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_AES_256_CBC_SHA256	-			-	-	-	-	-	1fbe6e47352b3b2c	107
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_RC4_128_MD5	-			-	-	-	-	-	79120661b2af0186	24
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	fac0c13b5fe6011f	27
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	b4083cb225d6131a	108
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_AES_256_CBC_SHA256	-			-	-	-	-	-	e71dd38ed324653a	109
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_RC4_128_SHA	-			-	-	-	-	-	74311f05a38614d8	138
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	44a742326cfd5917	139
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	6bf35594c476a1c1	140
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	4a2f7b59d317f4b8	141
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_RC4_128_SHA	-			-	-	-	-	-	71b915f7f321683b	142
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	27619c6f13ed869f	143
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	6d62ee050957b3aa	144
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	69cda8fdca05e6be	145
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_RC4_128_SHA	-			-	-	-	-	-	7d4e4fe01927e78b	146
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_3DES_EDE_CBC_SHA	-			-	-	-	-	-	65b8f82de452eb8d	147
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_AES_128_CBC_SHA	-			-	-	-	-	-	4a79b17dca6b7bf3	148
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_AES_256_CBC_SHA	-			-	-	-	-	-	b214e7e46779eba4	149
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_NULL_SHA	-			-	-	-	-	-	8e6975628b004cce	44
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_NULL_SHA	-			-	-	-	-	-	f965085b39371042	45
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_NULL_SHA	-			-	-	-	-	-	ab59cef0578755f2	46
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	9e759f46ab0b1506	156
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	8b4eeb076a32fe79	157
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	00c917cb0aeeac02	158
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_RSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	c5eee2d23055b7c9	159
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	173214ba5bd264b0	160
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_RSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	daf2e7b9c27b848d	161
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	585014535e23f57c	162
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_DSS_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	88a4f7e09c726399	163
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	d91cc0b691fc6ea4	164
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_DSS_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	9c9a98644b73a3ab	165
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	a3cfe0db8253fba4	166
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DH_anon_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	53f009123d2d0366	167
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	263cd840de3145eb	168
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	f9e8b08a789668f6	169
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	e4171466dfa3f046	170
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	131efe19d8d8782e	171
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	61848a3b815dde5b	172
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	829d8706801ff8e2	173
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	ba42b395d50f914d	174
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	de405088002dba59	175
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_NULL_SHA256	-			-	-	-	-	-	4d489700c06c3edd	176
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_PSK_WITH_NULL_SHA384	-			-	-	-	-	-	ef288d6118178cfa	177
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	baf2d3871b12fc70	178
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	2d64b5b310250f1c	179
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_NULL_SHA256	-			-	-	-	-	-	abb32de1289b2b91	180
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_DHE_PSK_WITH_NULL_SHA384	-			-	-	-	-	-	293382c28319b83f	181
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	598b82210ecb08b3	182
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	78a2a33f8df59ac7	183
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_NULL_SHA256	-			-	-	-	-	-	a8dfd85c5cb52ea4	184
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_RSA_PSK_WITH_NULL_SHA384	-			-	-	-	-	-	928ae136b70f77b2	185
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_AES_128_GCM_SHA256	-			-	-	-	-	-	e380e769e28e5aaa	4865
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_AES_256_GCM_SHA384	-			-	-	-	-	-	e1db577f8e5b1278	4866
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_CHACHA20_POLY1305_SHA256	-			-	-	-	-	-	5d88070d2208eb25	4867
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_AES_128_CCM_SHA256	-			-	-	-	-	-	b9cd5213dcf81794	4868
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_AES_128_CCM_8_SHA256	-			-	-	-	-	-	553041fd050bc938	4869
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	741a8e81df64ed2b	49187
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	2a961443a61c6b8b	49188
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	3e7fd8ab895af77f	49189
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	2f27ea9ae22e397e	49190
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	9970e798fc3a7b6e	49191
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	dbab953e5683f0b3	49192
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256	-			-	-	-	-	-	e796cd251054fce1	49193
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384	-			-	-	-	-	-	2223216101aca317	49194
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	5cec0f60e0a75682	49195
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	7f33fa46cfe4c099	49196
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	19f0aba23f17d2d4	49197
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	7ea286cb3d4fa2cd	49198
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	6e6c6006ed94261f	49199
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	37b43130e2ad6e17	49200
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256	-			-	-	-	-	-	a41ba2e6eed6f4c9	49201
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384	-			-	-	-	-	-	06e84c51e3adf42d	49202
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256	-			-	-	-	-	-	9c0e7b1016dd2c1f	52392
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256	-			-	-	-	-	-	97abe886c39b9013	52393
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@TLS_EMPTY_RENEGOTIATION_INFO_SCSV	-			-	-	-	-	-	9e810589f3a8573e	255
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_RC2_CBC_MD5	-			-	-	-	-	-	bf1f90fcf488fba2	65408
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_IDEA_CBC_MD5	-			-	-	-	-	-	0f79b24d6585b6a7	65409
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_DES_CBC_MD5	-			-	-	-	-	-	0ed1ccb499e731cb	65410
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_RSA_WITH_3DES_EDE_CBC_MD5	-			-	-	-	-	-	09ddde1b62bed2d7	65411
+enumconst	c:@Ea@SSL_NULL_WITH_NULL_NULL@SSL_NO_SUCH_CIPHERSUITE	-			-	-	-	-	-	396937d53f765bcd	65535
+typedef	c:CipherSuite.h@T@SSLCiphersuiteGroup	-			enum SSLCiphersuiteGroup	-	-	-	-	c9d5c9dbcabf9189	-
+enum	c:@E@SSLCiphersuiteGroup	-			int	-	-	-	-	89bafc7735612895	-
+enumconst	c:@E@SSLCiphersuiteGroup@kSSLCiphersuiteGroupDefault	SSLCiphersuiteGroup			-	-	-	-	-	22d65c1d589fda52	0
+enumconst	c:@E@SSLCiphersuiteGroup@kSSLCiphersuiteGroupCompatibility	SSLCiphersuiteGroup			-	-	-	-	-	ec40026bad3b96a7	1
+enumconst	c:@E@SSLCiphersuiteGroup@kSSLCiphersuiteGroupLegacy	SSLCiphersuiteGroup			-	-	-	-	-	b2e939b62683d232	2
+enumconst	c:@E@SSLCiphersuiteGroup@kSSLCiphersuiteGroupATS	SSLCiphersuiteGroup			-	-	-	-	-	6b1bee4ea6d90f88	3
+enumconst	c:@E@SSLCiphersuiteGroup@kSSLCiphersuiteGroupATSCompatibility	SSLCiphersuiteGroup			-	-	-	-	-	8a2127987a8ece21	4
+function	c:@F@sec_retain	-			void * (void *)	void * obj	-	-	-	5410f0abd4b5bf29	-
+function	c:@F@sec_release	-			void (void *)	void * obj	-	-	-	162ac0858a0e66c3	-
+protocol	c:objc(pl)OS_sec_object	-			-	-	-	-	-	c83664629d735610	-
+conforms	c:objc(pl)OS_sec_object	OS_sec_object	NSObject		-	-	-	-	-	a71dfcae0cb99c72	-
+typedef	c:@T@sec_object_t	-			NSObject<OS_sec_object> *	-	-	-	-	58fb1fe13f8eaaf8	-
+struct	c:@S@__SecCertificate	-			-	-	-	-	-	d669a0f65da48422	-
+typedef	c:@T@SecCertificateRef	-			struct __SecCertificate *	-	-	-	-	8cee4190d5517141	-
+struct	c:@S@__SecIdentity	-			-	-	-	-	-	e6225146d8ecbc07	-
+typedef	c:@T@SecIdentityRef	-			struct __SecIdentity *	-	-	-	-	67e0fd928ac99a30	-
+struct	c:@S@__SecKey	-			-	-	-	-	-	823139bef9980754	-
+typedef	c:@T@SecKeyRef	-			struct __SecKey *	-	-	-	-	565e2f6b334adb53	-
+struct	c:@S@__SecPolicy	-			-	-	-	-	-	8d31bd158f56aefb	-
+typedef	c:@T@SecPolicyRef	-			struct __SecPolicy *	-	-	-	-	f402a487e4f7f5f8	-
+struct	c:@S@__SecAccessControl	-			-	-	-	-	-	bec8b9eb04fbab7e	-
+typedef	c:@T@SecAccessControlRef	-			struct __SecAccessControl *	-	-	-	-	1d34a9b23bf60510	-
+struct	c:@S@__SecKeychain	-			-	-	-	-	-	ccf71c3b76910faf	-
+typedef	c:@T@SecKeychainRef	-			struct __SecKeychain *	-	-	ios=-/-/-/1,macos=10.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	90966e87c17e9a50	-
+struct	c:@S@__SecKeychainItem	-			-	-	-	-	-	ab4b2e099147e819	-
+typedef	c:@T@SecKeychainItemRef	-			struct __SecKeychainItem *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	38ec544bbba704b3	-
+struct	c:@S@__SecKeychainSearch	-			-	-	-	-	-	a41d07ee2485e4c1	-
+typedef	c:@T@SecKeychainSearchRef	-			struct __SecKeychainSearch *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	3e12b1a78eac97df	-
+typedef	c:@T@SecKeychainAttrType	-			OSType	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	5df78d0e7540caf2	-
+struct	c:@S@SecKeychainAttribute	-			-	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ab4b999e1a7d78f0	-
+field	c:@S@SecKeychainAttribute@FI@tag	SecKeychainAttribute			SecKeychainAttrType	-	-	-	-	902219e255907ff8	-
+field	c:@S@SecKeychainAttribute@FI@length	SecKeychainAttribute			UInt32	-	-	-	-	4f3b1d05df4f2b42	-
+field	c:@S@SecKeychainAttribute@FI@data	SecKeychainAttribute			void *	-	-	-	-	175fc71465907974	-
+typedef	c:@T@SecKeychainAttribute	-			struct SecKeychainAttribute	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c7bdb36d3eb1919f	-
+typedef	c:@T@SecKeychainAttributePtr	-			SecKeychainAttribute *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	26183b9e0ad94ce3	-
+struct	c:@S@SecKeychainAttributeList	-			-	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e7aa0f9696996586	-
+field	c:@S@SecKeychainAttributeList@FI@count	SecKeychainAttributeList			UInt32	-	-	-	-	e3e3a9dc86d35682	-
+field	c:@S@SecKeychainAttributeList@FI@attr	SecKeychainAttributeList			SecKeychainAttribute *	-	-	-	-	dead5e4fcc0983bc	-
+typedef	c:@T@SecKeychainAttributeList	-			struct SecKeychainAttributeList	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	af7300ca35e2322e	-
+typedef	c:@T@SecKeychainStatus	-			UInt32	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	423ff81541d84855	-
+struct	c:@S@__SecTrustedApplication	-			-	-	-	-	-	dd7244a7bb098189	-
+typedef	c:@T@SecTrustedApplicationRef	-			struct __SecTrustedApplication *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	6fa15f9f6466e2ee	-
+struct	c:@S@__SecAccess	-			-	-	-	-	-	f97a09e02647f3f3	-
+typedef	c:@T@SecAccessRef	-			struct __SecAccess *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d67a8164d89bac4a	-
+struct	c:@S@__SecACL	-			-	-	-	-	-	ec0ba09df6e9a4ce	-
+typedef	c:@T@SecACLRef	-			struct __SecACL *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	ea9b029cd9f27f3a	-
+struct	c:@S@__SecPassword	-			-	-	-	-	-	47d90bf1a1579e1e	-
+typedef	c:@T@SecPasswordRef	-			struct __SecPassword *	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	01f01ad14e0c15fb	-
+struct	c:@S@SecKeychainAttributeInfo	-			-	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	9f638ce558f0c865	-
+field	c:@S@SecKeychainAttributeInfo@FI@count	SecKeychainAttributeInfo			UInt32	-	-	-	-	8020cd281886e0c2	-
+field	c:@S@SecKeychainAttributeInfo@FI@tag	SecKeychainAttributeInfo			UInt32 *	-	-	-	-	b797af549aadbec7	-
+field	c:@S@SecKeychainAttributeInfo@FI@format	SecKeychainAttributeInfo			UInt32 *	-	-	-	-	f42c28325736da0d	-
+typedef	c:@T@SecKeychainAttributeInfo	-			struct SecKeychainAttributeInfo	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	8175633efa3e39a9	-
+function	c:@F@SecCopyErrorMessageString	-			CFStringRef (OSStatus, void *)	OSStatus status | void * reserved	-	ios=11.3/-/-/0	-	f69e71a15cad3fc1	-
+enum	c:@Ea@errSecSuccess	-	-		OSStatus	-	-	-	-	d18219f9339fb408	-
+enumconst	c:@Ea@errSecSuccess@errSecSuccess	-			-	-	-	-	-	c5d834f8332e012f	0
+enumconst	c:@Ea@errSecSuccess@errSecUnimplemented	-			-	-	-	-	-	396f22e7b4858571	-4
+enumconst	c:@Ea@errSecSuccess@errSecDiskFull	-			-	-	-	-	-	623aeee5902fd552	-34
+enumconst	c:@Ea@errSecSuccess@errSecDskFull	-			-	-	-	*deprecated	deprecated: use errSecDiskFull	11e183af1a6ce875	-34
+enumconst	c:@Ea@errSecSuccess@errSecIO	-			-	-	-	-	-	3fa98b6ea9204192	-36
+enumconst	c:@Ea@errSecSuccess@errSecOpWr	-			-	-	-	-	-	6cfd5690609892fa	-49
+enumconst	c:@Ea@errSecSuccess@errSecParam	-			-	-	-	-	-	5ae9dd58b0927ec0	-50
+enumconst	c:@Ea@errSecSuccess@errSecWrPerm	-			-	-	-	-	-	f6270139f5a1acfe	-61
+enumconst	c:@Ea@errSecSuccess@errSecAllocate	-			-	-	-	-	-	fe7ac0fa1aa4b4af	-108
+enumconst	c:@Ea@errSecSuccess@errSecUserCanceled	-			-	-	-	-	-	ac35d9a6e9158c23	-128
+enumconst	c:@Ea@errSecSuccess@errSecBadReq	-			-	-	-	-	-	932c38e5b5738730	-909
+enumconst	c:@Ea@errSecSuccess@errSecInternalComponent	-			-	-	-	-	-	82ac6ce1ba45ec4a	-2070
+enumconst	c:@Ea@errSecSuccess@errSecCoreFoundationUnknown	-			-	-	-	-	-	f307e0802c6946df	-4960
+enumconst	c:@Ea@errSecSuccess@errSecMissingEntitlement	-			-	-	-	-	-	55be76f04bd0366d	-34018
+enumconst	c:@Ea@errSecSuccess@errSecRestrictedAPI	-			-	-	-	-	-	49ca0f2e5d4108fa	-34020
+enumconst	c:@Ea@errSecSuccess@errSecNotAvailable	-			-	-	-	-	-	c69200932b48ab6e	-25291
+enumconst	c:@Ea@errSecSuccess@errSecReadOnly	-			-	-	-	-	-	8805f73f17ad4a47	-25292
+enumconst	c:@Ea@errSecSuccess@errSecAuthFailed	-			-	-	-	-	-	4022614dc067cfa4	-25293
+enumconst	c:@Ea@errSecSuccess@errSecNoSuchKeychain	-			-	-	-	-	-	3e7362ee270ddf36	-25294
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeychain	-			-	-	-	-	-	91e05d27f4d2601d	-25295
+enumconst	c:@Ea@errSecSuccess@errSecDuplicateKeychain	-			-	-	-	-	-	10fc659b64d5802a	-25296
+enumconst	c:@Ea@errSecSuccess@errSecDuplicateCallback	-			-	-	-	-	-	ac2a618408880e7b	-25297
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCallback	-			-	-	-	-	-	325f9618130b3b6c	-25298
+enumconst	c:@Ea@errSecSuccess@errSecDuplicateItem	-			-	-	-	-	-	35af988373276457	-25299
+enumconst	c:@Ea@errSecSuccess@errSecItemNotFound	-			-	-	-	-	-	78ba65e9496d7366	-25300
+enumconst	c:@Ea@errSecSuccess@errSecBufferTooSmall	-			-	-	-	-	-	54dbfa08811c2a90	-25301
+enumconst	c:@Ea@errSecSuccess@errSecDataTooLarge	-			-	-	-	-	-	caaced2a79a5ab84	-25302
+enumconst	c:@Ea@errSecSuccess@errSecNoSuchAttr	-			-	-	-	-	-	06f29312d97b2ebc	-25303
+enumconst	c:@Ea@errSecSuccess@errSecInvalidItemRef	-			-	-	-	-	-	4d436a75e39966a8	-25304
+enumconst	c:@Ea@errSecSuccess@errSecInvalidSearchRef	-			-	-	-	-	-	470f4badbd4f7079	-25305
+enumconst	c:@Ea@errSecSuccess@errSecNoSuchClass	-			-	-	-	-	-	fb26475058500fbc	-25306
+enumconst	c:@Ea@errSecSuccess@errSecNoDefaultKeychain	-			-	-	-	-	-	89a0354992bcdf69	-25307
+enumconst	c:@Ea@errSecSuccess@errSecInteractionNotAllowed	-			-	-	-	-	-	ade43745f97c68e5	-25308
+enumconst	c:@Ea@errSecSuccess@errSecReadOnlyAttr	-			-	-	-	-	-	9b1dde6738496262	-25309
+enumconst	c:@Ea@errSecSuccess@errSecWrongSecVersion	-			-	-	-	-	-	345dc29dc64014be	-25310
+enumconst	c:@Ea@errSecSuccess@errSecKeySizeNotAllowed	-			-	-	-	-	-	eecf6d98e744c6b7	-25311
+enumconst	c:@Ea@errSecSuccess@errSecNoStorageModule	-			-	-	-	-	-	2dbb0d6c7a7c6736	-25312
+enumconst	c:@Ea@errSecSuccess@errSecNoCertificateModule	-			-	-	-	-	-	b26b4a821fc5c1c4	-25313
+enumconst	c:@Ea@errSecSuccess@errSecNoPolicyModule	-			-	-	-	-	-	5283d98c1e97887e	-25314
+enumconst	c:@Ea@errSecSuccess@errSecInteractionRequired	-			-	-	-	-	-	500991401e8e7406	-25315
+enumconst	c:@Ea@errSecSuccess@errSecDataNotAvailable	-			-	-	-	-	-	5af77f0453719527	-25316
+enumconst	c:@Ea@errSecSuccess@errSecDataNotModifiable	-			-	-	-	-	-	5186a240b19b61f0	-25317
+enumconst	c:@Ea@errSecSuccess@errSecCreateChainFailed	-			-	-	-	-	-	266b5f10752c69be	-25318
+enumconst	c:@Ea@errSecSuccess@errSecInvalidPrefsDomain	-			-	-	-	-	-	f3d722b27e845be9	-25319
+enumconst	c:@Ea@errSecSuccess@errSecInDarkWake	-			-	-	-	-	-	4da629bb4db9706d	-25320
+enumconst	c:@Ea@errSecSuccess@errSecACLNotSimple	-			-	-	-	-	-	ea34e60c529867a8	-25240
+enumconst	c:@Ea@errSecSuccess@errSecPolicyNotFound	-			-	-	-	-	-	7ca7ef8167b7bc50	-25241
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTrustSetting	-			-	-	-	-	-	a6b3d1440adf6d42	-25242
+enumconst	c:@Ea@errSecSuccess@errSecNoAccessForItem	-			-	-	-	-	-	781ead180294311f	-25243
+enumconst	c:@Ea@errSecSuccess@errSecInvalidOwnerEdit	-			-	-	-	-	-	981c2bbdf6c1645a	-25244
+enumconst	c:@Ea@errSecSuccess@errSecTrustNotAvailable	-			-	-	-	-	-	3ff36ca56b00d10e	-25245
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedFormat	-			-	-	-	-	-	e1c960cf3ba9c0a8	-25256
+enumconst	c:@Ea@errSecSuccess@errSecUnknownFormat	-			-	-	-	-	-	894477e7c0a2413d	-25257
+enumconst	c:@Ea@errSecSuccess@errSecKeyIsSensitive	-			-	-	-	-	-	9c79803f896edac6	-25258
+enumconst	c:@Ea@errSecSuccess@errSecMultiplePrivKeys	-			-	-	-	-	-	adbc35c1cab4b94b	-25259
+enumconst	c:@Ea@errSecSuccess@errSecPassphraseRequired	-			-	-	-	-	-	f9b4ee2e287b636c	-25260
+enumconst	c:@Ea@errSecSuccess@errSecInvalidPasswordRef	-			-	-	-	-	-	b9ac3f396f712daf	-25261
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTrustSettings	-			-	-	-	-	-	22eaa3db4e2463f1	-25262
+enumconst	c:@Ea@errSecSuccess@errSecNoTrustSettings	-			-	-	-	-	-	0c9496e48b3d8f35	-25263
+enumconst	c:@Ea@errSecSuccess@errSecPkcs12VerifyFailure	-			-	-	-	-	-	1a87df56ec3c9dac	-25264
+enumconst	c:@Ea@errSecSuccess@errSecNotSigner	-			-	-	-	-	-	4170a1cbe58a8130	-26267
+enumconst	c:@Ea@errSecSuccess@errSecDecode	-			-	-	-	-	-	bab294e683f77437	-26275
+enumconst	c:@Ea@errSecSuccess@errSecServiceNotAvailable	-			-	-	-	-	-	4b65e7ec71bfeb84	-67585
+enumconst	c:@Ea@errSecSuccess@errSecInsufficientClientID	-			-	-	-	-	-	0ffd46cbb27d6f25	-67586
+enumconst	c:@Ea@errSecSuccess@errSecDeviceReset	-			-	-	-	-	-	4c35b4eaab0b19f6	-67587
+enumconst	c:@Ea@errSecSuccess@errSecDeviceFailed	-			-	-	-	-	-	760db3cab20613cc	-67588
+enumconst	c:@Ea@errSecSuccess@errSecAppleAddAppACLSubject	-			-	-	-	-	-	5c697511ebaa7ffd	-67589
+enumconst	c:@Ea@errSecSuccess@errSecApplePublicKeyIncomplete	-			-	-	-	-	-	721810b9c7263111	-67590
+enumconst	c:@Ea@errSecSuccess@errSecAppleSignatureMismatch	-			-	-	-	-	-	1a6d877e40396029	-67591
+enumconst	c:@Ea@errSecSuccess@errSecAppleInvalidKeyStartDate	-			-	-	-	-	-	8ae037c50c85c160	-67592
+enumconst	c:@Ea@errSecSuccess@errSecAppleInvalidKeyEndDate	-			-	-	-	-	-	f9595b9f1b2c1dd8	-67593
+enumconst	c:@Ea@errSecSuccess@errSecConversionError	-			-	-	-	-	-	aa1351f5d2e337b1	-67594
+enumconst	c:@Ea@errSecSuccess@errSecAppleSSLv2Rollback	-			-	-	-	-	-	b03ef71109bb5994	-67595
+enumconst	c:@Ea@errSecSuccess@errSecQuotaExceeded	-			-	-	-	-	-	59e304a86a74fefe	-67596
+enumconst	c:@Ea@errSecSuccess@errSecFileTooBig	-			-	-	-	-	-	387403fa65040e07	-67597
+enumconst	c:@Ea@errSecSuccess@errSecInvalidDatabaseBlob	-			-	-	-	-	-	0378920380f447ef	-67598
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyBlob	-			-	-	-	-	-	eabee55cda04036d	-67599
+enumconst	c:@Ea@errSecSuccess@errSecIncompatibleDatabaseBlob	-			-	-	-	-	-	0b5ac2f3cab4b19d	-67600
+enumconst	c:@Ea@errSecSuccess@errSecIncompatibleKeyBlob	-			-	-	-	-	-	a98f6b7b0da9c629	-67601
+enumconst	c:@Ea@errSecSuccess@errSecHostNameMismatch	-			-	-	-	-	-	1e5cbc50ec26f141	-67602
+enumconst	c:@Ea@errSecSuccess@errSecUnknownCriticalExtensionFlag	-			-	-	-	-	-	7ce258aa16758f52	-67603
+enumconst	c:@Ea@errSecSuccess@errSecNoBasicConstraints	-			-	-	-	-	-	3da8da2b2026759f	-67604
+enumconst	c:@Ea@errSecSuccess@errSecNoBasicConstraintsCA	-			-	-	-	-	-	4744e111eb64e61f	-67605
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAuthorityKeyID	-			-	-	-	-	-	3151d2fb3543197f	-67606
+enumconst	c:@Ea@errSecSuccess@errSecInvalidSubjectKeyID	-			-	-	-	-	-	5528cc863b761fd2	-67607
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyUsageForPolicy	-			-	-	-	-	-	0bd263a15e54c8c0	-67608
+enumconst	c:@Ea@errSecSuccess@errSecInvalidExtendedKeyUsage	-			-	-	-	-	-	0c1fbfadf356f091	-67609
+enumconst	c:@Ea@errSecSuccess@errSecInvalidIDLinkage	-			-	-	-	-	-	a3a8ebe7cdf61ff3	-67610
+enumconst	c:@Ea@errSecSuccess@errSecPathLengthConstraintExceeded	-			-	-	-	-	-	b9e69e6f38fde123	-67611
+enumconst	c:@Ea@errSecSuccess@errSecInvalidRoot	-			-	-	-	-	-	e4fd1ff6e9ac9425	-67612
+enumconst	c:@Ea@errSecSuccess@errSecCRLExpired	-			-	-	-	-	-	0cff1ff7681ee3a5	-67613
+enumconst	c:@Ea@errSecSuccess@errSecCRLNotValidYet	-			-	-	-	-	-	68a3f129e3d6011e	-67614
+enumconst	c:@Ea@errSecSuccess@errSecCRLNotFound	-			-	-	-	-	-	2ff241d6f2d8272a	-67615
+enumconst	c:@Ea@errSecSuccess@errSecCRLServerDown	-			-	-	-	-	-	9dc98d921a5cea15	-67616
+enumconst	c:@Ea@errSecSuccess@errSecCRLBadURI	-			-	-	-	-	-	fee39febb14a1a00	-67617
+enumconst	c:@Ea@errSecSuccess@errSecUnknownCertExtension	-			-	-	-	-	-	86236bd40ae96372	-67618
+enumconst	c:@Ea@errSecSuccess@errSecUnknownCRLExtension	-			-	-	-	-	-	8c34a757d67f132c	-67619
+enumconst	c:@Ea@errSecSuccess@errSecCRLNotTrusted	-			-	-	-	-	-	c43ed9e1baf0c97a	-67620
+enumconst	c:@Ea@errSecSuccess@errSecCRLPolicyFailed	-			-	-	-	-	-	b16ac754b1c4c306	-67621
+enumconst	c:@Ea@errSecSuccess@errSecIDPFailure	-			-	-	-	-	-	f214a2e857ccdbdc	-67622
+enumconst	c:@Ea@errSecSuccess@errSecSMIMEEmailAddressesNotFound	-			-	-	-	-	-	6c1940a64c8fa926	-67623
+enumconst	c:@Ea@errSecSuccess@errSecSMIMEBadExtendedKeyUsage	-			-	-	-	-	-	889b3c71db0f0f81	-67624
+enumconst	c:@Ea@errSecSuccess@errSecSMIMEBadKeyUsage	-			-	-	-	-	-	0c7aeac970844ece	-67625
+enumconst	c:@Ea@errSecSuccess@errSecSMIMEKeyUsageNotCritical	-			-	-	-	-	-	6dc5bcc8447a1bd3	-67626
+enumconst	c:@Ea@errSecSuccess@errSecSMIMENoEmailAddress	-			-	-	-	-	-	db32487037dd6f43	-67627
+enumconst	c:@Ea@errSecSuccess@errSecSMIMESubjAltNameNotCritical	-			-	-	-	-	-	cc3eab3221d0a8c8	-67628
+enumconst	c:@Ea@errSecSuccess@errSecSSLBadExtendedKeyUsage	-			-	-	-	-	-	3164a295e04088f1	-67629
+enumconst	c:@Ea@errSecSuccess@errSecOCSPBadResponse	-			-	-	-	-	-	60d031bfac7f47ab	-67630
+enumconst	c:@Ea@errSecSuccess@errSecOCSPBadRequest	-			-	-	-	-	-	2f17a87d5f40e673	-67631
+enumconst	c:@Ea@errSecSuccess@errSecOCSPUnavailable	-			-	-	-	-	-	e78a1e55cf18fe9a	-67632
+enumconst	c:@Ea@errSecSuccess@errSecOCSPStatusUnrecognized	-			-	-	-	-	-	77a746538b3abd46	-67633
+enumconst	c:@Ea@errSecSuccess@errSecEndOfData	-			-	-	-	-	-	85a3c2f60b4f81ad	-67634
+enumconst	c:@Ea@errSecSuccess@errSecIncompleteCertRevocationCheck	-			-	-	-	-	-	7db12aea04454517	-67635
+enumconst	c:@Ea@errSecSuccess@errSecNetworkFailure	-			-	-	-	-	-	8a9e75b95e82c6db	-67636
+enumconst	c:@Ea@errSecSuccess@errSecOCSPNotTrustedToAnchor	-			-	-	-	-	-	2a183540de1e5185	-67637
+enumconst	c:@Ea@errSecSuccess@errSecRecordModified	-			-	-	-	-	-	a8351cf3ce254b45	-67638
+enumconst	c:@Ea@errSecSuccess@errSecOCSPSignatureError	-			-	-	-	-	-	b20eb80a5e5567cf	-67639
+enumconst	c:@Ea@errSecSuccess@errSecOCSPNoSigner	-			-	-	-	-	-	835cd2594d891bd8	-67640
+enumconst	c:@Ea@errSecSuccess@errSecOCSPResponderMalformedReq	-			-	-	-	-	-	8c066865b34372b3	-67641
+enumconst	c:@Ea@errSecSuccess@errSecOCSPResponderInternalError	-			-	-	-	-	-	53f6d1ba0126c316	-67642
+enumconst	c:@Ea@errSecSuccess@errSecOCSPResponderTryLater	-			-	-	-	-	-	42db40df8d9d73b5	-67643
+enumconst	c:@Ea@errSecSuccess@errSecOCSPResponderSignatureRequired	-			-	-	-	-	-	166256aaa6378a14	-67644
+enumconst	c:@Ea@errSecSuccess@errSecOCSPResponderUnauthorized	-			-	-	-	-	-	a9cd9f7ca4d70e61	-67645
+enumconst	c:@Ea@errSecSuccess@errSecOCSPResponseNonceMismatch	-			-	-	-	-	-	d94f82993e566054	-67646
+enumconst	c:@Ea@errSecSuccess@errSecCodeSigningBadCertChainLength	-			-	-	-	-	-	854a17570338bba3	-67647
+enumconst	c:@Ea@errSecSuccess@errSecCodeSigningNoBasicConstraints	-			-	-	-	-	-	be8d580b4e4f8c49	-67648
+enumconst	c:@Ea@errSecSuccess@errSecCodeSigningBadPathLengthConstraint	-			-	-	-	-	-	3b5787e3ad2d3f77	-67649
+enumconst	c:@Ea@errSecSuccess@errSecCodeSigningNoExtendedKeyUsage	-			-	-	-	-	-	20737b78b755dd50	-67650
+enumconst	c:@Ea@errSecSuccess@errSecCodeSigningDevelopment	-			-	-	-	-	-	9206ae5309c99acc	-67651
+enumconst	c:@Ea@errSecSuccess@errSecResourceSignBadCertChainLength	-			-	-	-	-	-	a621e7a7c1d9e9e3	-67652
+enumconst	c:@Ea@errSecSuccess@errSecResourceSignBadExtKeyUsage	-			-	-	-	-	-	501e5581045d500d	-67653
+enumconst	c:@Ea@errSecSuccess@errSecTrustSettingDeny	-			-	-	-	-	-	b3753aa9e416541e	-67654
+enumconst	c:@Ea@errSecSuccess@errSecInvalidSubjectName	-			-	-	-	-	-	f299d984470e875d	-67655
+enumconst	c:@Ea@errSecSuccess@errSecUnknownQualifiedCertStatement	-			-	-	-	-	-	e92c867c09f0ba32	-67656
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeRequestQueued	-			-	-	-	-	-	cf7af49bcb14952e	-67657
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeRequestRedirected	-			-	-	-	-	-	4c861eba8eddc105	-67658
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeServerError	-			-	-	-	-	-	67023103c824b79c	-67659
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeServerNotAvailable	-			-	-	-	-	-	ab5bf6290a54c29b	-67660
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeServerAlreadyExists	-			-	-	-	-	-	905b5124efac0ffa	-67661
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeServerServiceErr	-			-	-	-	-	-	47229541ff524120	-67662
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeRequestAlreadyPending	-			-	-	-	-	-	d1fd8f0d17dfeae1	-67663
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeNoRequestPending	-			-	-	-	-	-	0a9a963c09d470df	-67664
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeCSRVerifyFailure	-			-	-	-	-	-	1980d46b3912e38e	-67665
+enumconst	c:@Ea@errSecSuccess@errSecMobileMeFailedConsistencyCheck	-			-	-	-	-	-	d053c5171a08611c	-67666
+enumconst	c:@Ea@errSecSuccess@errSecNotInitialized	-			-	-	-	-	-	979a12183f2ff33d	-67667
+enumconst	c:@Ea@errSecSuccess@errSecInvalidHandleUsage	-			-	-	-	-	-	e1830d980f8852ed	-67668
+enumconst	c:@Ea@errSecSuccess@errSecPVCReferentNotFound	-			-	-	-	-	-	31a42dde9fbb5c13	-67669
+enumconst	c:@Ea@errSecSuccess@errSecFunctionIntegrityFail	-			-	-	-	-	-	e68fd3d089da33bd	-67670
+enumconst	c:@Ea@errSecSuccess@errSecInternalError	-			-	-	-	-	-	0f7cf35772ea34de	-67671
+enumconst	c:@Ea@errSecSuccess@errSecMemoryError	-			-	-	-	-	-	a16d03f8f8d27f2c	-67672
+enumconst	c:@Ea@errSecSuccess@errSecInvalidData	-			-	-	-	-	-	aa3e72b1c49227d8	-67673
+enumconst	c:@Ea@errSecSuccess@errSecMDSError	-			-	-	-	-	-	f220a94e9ebab788	-67674
+enumconst	c:@Ea@errSecSuccess@errSecInvalidPointer	-			-	-	-	-	-	784257a621b0487f	-67675
+enumconst	c:@Ea@errSecSuccess@errSecSelfCheckFailed	-			-	-	-	-	-	3e6a162bdb7965ca	-67676
+enumconst	c:@Ea@errSecSuccess@errSecFunctionFailed	-			-	-	-	-	-	ec70c5075a9a3ede	-67677
+enumconst	c:@Ea@errSecSuccess@errSecModuleManifestVerifyFailed	-			-	-	-	-	-	40e34dba90d103e2	-67678
+enumconst	c:@Ea@errSecSuccess@errSecInvalidGUID	-			-	-	-	-	-	e66e840f05fa5567	-67679
+enumconst	c:@Ea@errSecSuccess@errSecInvalidHandle	-			-	-	-	-	-	1728ec666c65ce4f	-67680
+enumconst	c:@Ea@errSecSuccess@errSecInvalidDBList	-			-	-	-	-	-	9eb584b6ecd8ce07	-67681
+enumconst	c:@Ea@errSecSuccess@errSecInvalidPassthroughID	-			-	-	-	-	-	756cf134e35c82e0	-67682
+enumconst	c:@Ea@errSecSuccess@errSecInvalidNetworkAddress	-			-	-	-	-	-	9137d4f8670480a1	-67683
+enumconst	c:@Ea@errSecSuccess@errSecCRLAlreadySigned	-			-	-	-	-	-	0ae956e53b4cb064	-67684
+enumconst	c:@Ea@errSecSuccess@errSecInvalidNumberOfFields	-			-	-	-	-	-	e1d8d781dac2db4b	-67685
+enumconst	c:@Ea@errSecSuccess@errSecVerificationFailure	-			-	-	-	-	-	682f58be79c29842	-67686
+enumconst	c:@Ea@errSecSuccess@errSecUnknownTag	-			-	-	-	-	-	54de992a25bc9ee0	-67687
+enumconst	c:@Ea@errSecSuccess@errSecInvalidSignature	-			-	-	-	-	-	ebdb1423e53fe0e5	-67688
+enumconst	c:@Ea@errSecSuccess@errSecInvalidName	-			-	-	-	-	-	6469a191352a60fe	-67689
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCertificateRef	-			-	-	-	-	-	a1f7de4a3c89b5ce	-67690
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCertificateGroup	-			-	-	-	-	-	478acb5e42ecfb57	-67691
+enumconst	c:@Ea@errSecSuccess@errSecTagNotFound	-			-	-	-	-	-	ab33b193292e678b	-67692
+enumconst	c:@Ea@errSecSuccess@errSecInvalidQuery	-			-	-	-	-	-	f35f19a7646c42f5	-67693
+enumconst	c:@Ea@errSecSuccess@errSecInvalidValue	-			-	-	-	-	-	af7f08deddfb5b5d	-67694
+enumconst	c:@Ea@errSecSuccess@errSecCallbackFailed	-			-	-	-	-	-	ebf7e26ef2fcf1df	-67695
+enumconst	c:@Ea@errSecSuccess@errSecACLDeleteFailed	-			-	-	-	-	-	0e2867f4690c4e3b	-67696
+enumconst	c:@Ea@errSecSuccess@errSecACLReplaceFailed	-			-	-	-	-	-	c8dca98a5d7b5bed	-67697
+enumconst	c:@Ea@errSecSuccess@errSecACLAddFailed	-			-	-	-	-	-	a8919d254847a6a4	-67698
+enumconst	c:@Ea@errSecSuccess@errSecACLChangeFailed	-			-	-	-	-	-	9f49dec666145cfc	-67699
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAccessCredentials	-			-	-	-	-	-	cff5a25a24cf8929	-67700
+enumconst	c:@Ea@errSecSuccess@errSecInvalidRecord	-			-	-	-	-	-	2dbb130db01aba02	-67701
+enumconst	c:@Ea@errSecSuccess@errSecInvalidACL	-			-	-	-	-	-	6c878c968ef09c57	-67702
+enumconst	c:@Ea@errSecSuccess@errSecInvalidSampleValue	-			-	-	-	-	-	917f86f73415386e	-67703
+enumconst	c:@Ea@errSecSuccess@errSecIncompatibleVersion	-			-	-	-	-	-	408faa1e5e3eecf3	-67704
+enumconst	c:@Ea@errSecSuccess@errSecPrivilegeNotGranted	-			-	-	-	-	-	d44f99a2832274c8	-67705
+enumconst	c:@Ea@errSecSuccess@errSecInvalidScope	-			-	-	-	-	-	651468e2f4ceb1eb	-67706
+enumconst	c:@Ea@errSecSuccess@errSecPVCAlreadyConfigured	-			-	-	-	-	-	3847e8a1e6d6d782	-67707
+enumconst	c:@Ea@errSecSuccess@errSecInvalidPVC	-			-	-	-	-	-	d65c64015453f107	-67708
+enumconst	c:@Ea@errSecSuccess@errSecEMMLoadFailed	-			-	-	-	-	-	4fb6bc4f77171402	-67709
+enumconst	c:@Ea@errSecSuccess@errSecEMMUnloadFailed	-			-	-	-	-	-	7c4ded9fbddd2672	-67710
+enumconst	c:@Ea@errSecSuccess@errSecAddinLoadFailed	-			-	-	-	-	-	33d736c37f05c983	-67711
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyRef	-			-	-	-	-	-	971fab86e8020f2d	-67712
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyHierarchy	-			-	-	-	-	-	523008fa6ba9e80d	-67713
+enumconst	c:@Ea@errSecSuccess@errSecAddinUnloadFailed	-			-	-	-	-	-	748924f9bca123d8	-67714
+enumconst	c:@Ea@errSecSuccess@errSecLibraryReferenceNotFound	-			-	-	-	-	-	46297dc80aaccb58	-67715
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAddinFunctionTable	-			-	-	-	-	-	5708c0f815cea81b	-67716
+enumconst	c:@Ea@errSecSuccess@errSecInvalidServiceMask	-			-	-	-	-	-	7b40ef38dca4cd22	-67717
+enumconst	c:@Ea@errSecSuccess@errSecModuleNotLoaded	-			-	-	-	-	-	d859b47dcc6ba2a8	-67718
+enumconst	c:@Ea@errSecSuccess@errSecInvalidSubServiceID	-			-	-	-	-	-	427291d1f0764898	-67719
+enumconst	c:@Ea@errSecSuccess@errSecAttributeNotInContext	-			-	-	-	-	-	a8b4b068c53994ff	-67720
+enumconst	c:@Ea@errSecSuccess@errSecModuleManagerInitializeFailed	-			-	-	-	-	-	6dd857db9450b779	-67721
+enumconst	c:@Ea@errSecSuccess@errSecModuleManagerNotFound	-			-	-	-	-	-	726bf0d692434368	-67722
+enumconst	c:@Ea@errSecSuccess@errSecEventNotificationCallbackNotFound	-			-	-	-	-	-	9cb8e2f2aa0b8a4c	-67723
+enumconst	c:@Ea@errSecSuccess@errSecInputLengthError	-			-	-	-	-	-	403315792644657f	-67724
+enumconst	c:@Ea@errSecSuccess@errSecOutputLengthError	-			-	-	-	-	-	05129712674f8345	-67725
+enumconst	c:@Ea@errSecSuccess@errSecPrivilegeNotSupported	-			-	-	-	-	-	59ade85ad939bc44	-67726
+enumconst	c:@Ea@errSecSuccess@errSecDeviceError	-			-	-	-	-	-	715388b3efa49b39	-67727
+enumconst	c:@Ea@errSecSuccess@errSecAttachHandleBusy	-			-	-	-	-	-	d9bf21a019ffb0a0	-67728
+enumconst	c:@Ea@errSecSuccess@errSecNotLoggedIn	-			-	-	-	-	-	a4a7d749eed50028	-67729
+enumconst	c:@Ea@errSecSuccess@errSecAlgorithmMismatch	-			-	-	-	-	-	6621a5707c1a6d0b	-67730
+enumconst	c:@Ea@errSecSuccess@errSecKeyUsageIncorrect	-			-	-	-	-	-	e2e57f32f3add6c4	-67731
+enumconst	c:@Ea@errSecSuccess@errSecKeyBlobTypeIncorrect	-			-	-	-	-	-	14622f3ac1696ca5	-67732
+enumconst	c:@Ea@errSecSuccess@errSecKeyHeaderInconsistent	-			-	-	-	-	-	9f717763fcd53e9f	-67733
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedKeyFormat	-			-	-	-	-	-	f667cd77efb341b2	-67734
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedKeySize	-			-	-	-	-	-	fdbef7c228308699	-67735
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyUsageMask	-			-	-	-	-	-	8b547e0b6408e18a	-67736
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedKeyUsageMask	-			-	-	-	-	-	023fc3f04fc265fc	-67737
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyAttributeMask	-			-	-	-	-	-	3a4035323a075a03	-67738
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedKeyAttributeMask	-			-	-	-	-	-	ccf5b3b7ab94f44e	-67739
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyLabel	-			-	-	-	-	-	72c7b6fc84467c96	-67740
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedKeyLabel	-			-	-	-	-	-	202f303f4370c458	-67741
+enumconst	c:@Ea@errSecSuccess@errSecInvalidKeyFormat	-			-	-	-	-	-	577efdda760d2f05	-67742
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedVectorOfBuffers	-			-	-	-	-	-	c25c3c66e152ba43	-67743
+enumconst	c:@Ea@errSecSuccess@errSecInvalidInputVector	-			-	-	-	-	-	67fca1283eff02e2	-67744
+enumconst	c:@Ea@errSecSuccess@errSecInvalidOutputVector	-			-	-	-	-	-	c44d197004a5b32a	-67745
+enumconst	c:@Ea@errSecSuccess@errSecInvalidContext	-			-	-	-	-	-	cf13374344bdcd77	-67746
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAlgorithm	-			-	-	-	-	-	f9c6e587dc777f39	-67747
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeKey	-			-	-	-	-	-	a31c3c19bd541449	-67748
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeKey	-			-	-	-	-	-	6869005a3a3f700a	-67749
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeInitVector	-			-	-	-	-	-	e76aa5dec75a9cbf	-67750
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeInitVector	-			-	-	-	-	-	f2a9d3cce50e5346	-67751
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeSalt	-			-	-	-	-	-	9303362cf70b5b85	-67752
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeSalt	-			-	-	-	-	-	849e32122608d6d5	-67753
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributePadding	-			-	-	-	-	-	649730ba144f8fb7	-67754
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributePadding	-			-	-	-	-	-	d248a01823af8b4b	-67755
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeRandom	-			-	-	-	-	-	bd036f40dee0890a	-67756
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeRandom	-			-	-	-	-	-	e68546055b1039b2	-67757
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeSeed	-			-	-	-	-	-	658c51162357abf8	-67758
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeSeed	-			-	-	-	-	-	7785be7eb0ada34b	-67759
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributePassphrase	-			-	-	-	-	-	1970efd05c6e0742	-67760
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributePassphrase	-			-	-	-	-	-	9f6d11a1856e5273	-67761
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeKeyLength	-			-	-	-	-	-	d92cf65fce1e23a0	-67762
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeKeyLength	-			-	-	-	-	-	807a496eb20ef7f0	-67763
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeBlockSize	-			-	-	-	-	-	0ea24edd265468ff	-67764
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeBlockSize	-			-	-	-	-	-	f96882b5bc4869e7	-67765
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeOutputSize	-			-	-	-	-	-	333ee5f6b040c528	-67766
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeOutputSize	-			-	-	-	-	-	e3069c85bacbcd0a	-67767
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeRounds	-			-	-	-	-	-	7cf37469f5bd8e8a	-67768
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeRounds	-			-	-	-	-	-	91b9a200870327e8	-67769
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAlgorithmParms	-			-	-	-	-	-	78ecb2f8fb764f62	-67770
+enumconst	c:@Ea@errSecSuccess@errSecMissingAlgorithmParms	-			-	-	-	-	-	90c43a42bc6fb070	-67771
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeLabel	-			-	-	-	-	-	1b7efefb155a79e9	-67772
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeLabel	-			-	-	-	-	-	828f094a26af197b	-67773
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeKeyType	-			-	-	-	-	-	7611943b9e414926	-67774
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeKeyType	-			-	-	-	-	-	a57c988a53e3b8bb	-67775
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeMode	-			-	-	-	-	-	7e6049a491471491	-67776
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeMode	-			-	-	-	-	-	253841c13238b519	-67777
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeEffectiveBits	-			-	-	-	-	-	8f7f0f9afeb558ad	-67778
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeEffectiveBits	-			-	-	-	-	-	b681e594ad7f82bd	-67779
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeStartDate	-			-	-	-	-	-	d9b9635ec6d68c10	-67780
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeStartDate	-			-	-	-	-	-	e25410e921517def	-67781
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeEndDate	-			-	-	-	-	-	cb0e8eca1710ac48	-67782
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeEndDate	-			-	-	-	-	-	07d2e93049e9c678	-67783
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeVersion	-			-	-	-	-	-	c9c8a16deda914e6	-67784
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeVersion	-			-	-	-	-	-	b3aca293d5d6967d	-67785
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributePrime	-			-	-	-	-	-	a39da0b320abfe1b	-67786
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributePrime	-			-	-	-	-	-	66368d1012ec28a9	-67787
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeBase	-			-	-	-	-	-	1c6cebd97535ad4c	-67788
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeBase	-			-	-	-	-	-	08a09f2b2f267c85	-67789
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeSubprime	-			-	-	-	-	-	10c8ee8ea7464f3a	-67790
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeSubprime	-			-	-	-	-	-	ee976d18c50a4942	-67791
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeIterationCount	-			-	-	-	-	-	ddeb77b7dff8103c	-67792
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeIterationCount	-			-	-	-	-	-	eb99ad2ade66d883	-67793
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeDLDBHandle	-			-	-	-	-	-	4d831e4e5c2491fd	-67794
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeDLDBHandle	-			-	-	-	-	-	d3c8dc3638de80d0	-67795
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeAccessCredentials	-			-	-	-	-	-	9b07c40dde27f78a	-67796
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeAccessCredentials	-			-	-	-	-	-	e124634fd6d2ca4d	-67797
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributePublicKeyFormat	-			-	-	-	-	-	d2b6fea2c4cbece7	-67798
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributePublicKeyFormat	-			-	-	-	-	-	58dded3e43c13957	-67799
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributePrivateKeyFormat	-			-	-	-	-	-	9683045af693aeb6	-67800
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributePrivateKeyFormat	-			-	-	-	-	-	eef68383be44ecd7	-67801
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeSymmetricKeyFormat	-			-	-	-	-	-	ee0893c2a4333d89	-67802
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeSymmetricKeyFormat	-			-	-	-	-	-	b86e269f66cd711b	-67803
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAttributeWrappedKeyFormat	-			-	-	-	-	-	d04aa3cea3209105	-67804
+enumconst	c:@Ea@errSecSuccess@errSecMissingAttributeWrappedKeyFormat	-			-	-	-	-	-	0cb6b66092f8cf20	-67805
+enumconst	c:@Ea@errSecSuccess@errSecStagedOperationInProgress	-			-	-	-	-	-	deb424c28a775e70	-67806
+enumconst	c:@Ea@errSecSuccess@errSecStagedOperationNotStarted	-			-	-	-	-	-	45dfbe40ce3e0f1a	-67807
+enumconst	c:@Ea@errSecSuccess@errSecVerifyFailed	-			-	-	-	-	-	f22852d8bad1f6dd	-67808
+enumconst	c:@Ea@errSecSuccess@errSecQuerySizeUnknown	-			-	-	-	-	-	c1ed48990857c05e	-67809
+enumconst	c:@Ea@errSecSuccess@errSecBlockSizeMismatch	-			-	-	-	-	-	0ceba6939abf0cfc	-67810
+enumconst	c:@Ea@errSecSuccess@errSecPublicKeyInconsistent	-			-	-	-	-	-	44f25fc262b0cd6c	-67811
+enumconst	c:@Ea@errSecSuccess@errSecDeviceVerifyFailed	-			-	-	-	-	-	a9a890047642be0b	-67812
+enumconst	c:@Ea@errSecSuccess@errSecInvalidLoginName	-			-	-	-	-	-	6aebd3694c77444f	-67813
+enumconst	c:@Ea@errSecSuccess@errSecAlreadyLoggedIn	-			-	-	-	-	-	3021510e17ea9b75	-67814
+enumconst	c:@Ea@errSecSuccess@errSecInvalidDigestAlgorithm	-			-	-	-	-	-	1e32114e2d07c489	-67815
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCRLGroup	-			-	-	-	-	-	85dd2399f5b6df42	-67816
+enumconst	c:@Ea@errSecSuccess@errSecCertificateCannotOperate	-			-	-	-	-	-	5fd60de654775698	-67817
+enumconst	c:@Ea@errSecSuccess@errSecCertificateExpired	-			-	-	-	-	-	0e044d8548b83a74	-67818
+enumconst	c:@Ea@errSecSuccess@errSecCertificateNotValidYet	-			-	-	-	-	-	309afc027091391a	-67819
+enumconst	c:@Ea@errSecSuccess@errSecCertificateRevoked	-			-	-	-	-	-	4e0fff2395736b7a	-67820
+enumconst	c:@Ea@errSecSuccess@errSecCertificateSuspended	-			-	-	-	-	-	080673e49d356b31	-67821
+enumconst	c:@Ea@errSecSuccess@errSecInsufficientCredentials	-			-	-	-	-	-	cd949d9d836afb6a	-67822
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAction	-			-	-	-	-	-	c14f566085f908bc	-67823
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAuthority	-			-	-	-	-	-	081f922351f49f2a	-67824
+enumconst	c:@Ea@errSecSuccess@errSecVerifyActionFailed	-			-	-	-	-	-	dfe94a87a20c4fe3	-67825
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCertAuthority	-			-	-	-	-	-	56937132c66390aa	-67826
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCRLAuthority	-			-	-	-	-	-	089cb5a3145ffd8c	-67827
+enumconst	c:@Ea@errSecSuccess@errSecInvaldCRLAuthority	-			-	-	-	ios=4/15/-/0,macos=10.11/12.0/-/0	deprecated: Use errSecInvalidCRLAuthority instead	13ff996006e573eb	-67827
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCRLEncoding	-			-	-	-	-	-	28f700f3f8029449	-67828
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCRLType	-			-	-	-	-	-	261d9b002b804b51	-67829
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCRL	-			-	-	-	-	-	081895cbedcd3849	-67830
+enumconst	c:@Ea@errSecSuccess@errSecInvalidFormType	-			-	-	-	-	-	a31d4cf86908b8d7	-67831
+enumconst	c:@Ea@errSecSuccess@errSecInvalidID	-			-	-	-	-	-	efac1cc1c9cdb662	-67832
+enumconst	c:@Ea@errSecSuccess@errSecInvalidIdentifier	-			-	-	-	-	-	cc7d08121a520d82	-67833
+enumconst	c:@Ea@errSecSuccess@errSecInvalidIndex	-			-	-	-	-	-	c4deca506cdde1ec	-67834
+enumconst	c:@Ea@errSecSuccess@errSecInvalidPolicyIdentifiers	-			-	-	-	-	-	1efbb5a02da94303	-67835
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTimeString	-			-	-	-	-	-	497e215d41c8c64c	-67836
+enumconst	c:@Ea@errSecSuccess@errSecInvalidReason	-			-	-	-	-	-	bcfa0da9781e4dfa	-67837
+enumconst	c:@Ea@errSecSuccess@errSecInvalidRequestInputs	-			-	-	-	-	-	597cd003584d2068	-67838
+enumconst	c:@Ea@errSecSuccess@errSecInvalidResponseVector	-			-	-	-	-	-	e33011cac75c7cdf	-67839
+enumconst	c:@Ea@errSecSuccess@errSecInvalidStopOnPolicy	-			-	-	-	-	-	8e4365f55d12caf6	-67840
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTuple	-			-	-	-	-	-	8ad976a699cf9089	-67841
+enumconst	c:@Ea@errSecSuccess@errSecMultipleValuesUnsupported	-			-	-	-	-	-	1901c7ceef81f222	-67842
+enumconst	c:@Ea@errSecSuccess@errSecNotTrusted	-			-	-	-	-	-	fc554c02132bc01b	-67843
+enumconst	c:@Ea@errSecSuccess@errSecNoDefaultAuthority	-			-	-	-	-	-	3ed57e9146512f1a	-67844
+enumconst	c:@Ea@errSecSuccess@errSecRejectedForm	-			-	-	-	-	-	3c15d0f817486c55	-67845
+enumconst	c:@Ea@errSecSuccess@errSecRequestLost	-			-	-	-	-	-	04ec49842534b717	-67846
+enumconst	c:@Ea@errSecSuccess@errSecRequestRejected	-			-	-	-	-	-	69edc915aed66499	-67847
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedAddressType	-			-	-	-	-	-	52cfe87710e5e23e	-67848
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedService	-			-	-	-	-	-	d242eb1cb1d1b7bf	-67849
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTupleGroup	-			-	-	-	-	-	4990402654e7e35d	-67850
+enumconst	c:@Ea@errSecSuccess@errSecInvalidBaseACLs	-			-	-	-	-	-	43d99cbe80bb6312	-67851
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTupleCredentials	-			-	-	-	-	-	ab387becb89388ad	-67852
+enumconst	c:@Ea@errSecSuccess@errSecInvalidTupleCredendtials	-			-	-	-	ios=4/15/-/0,macos=10.11/12.0/-/0	deprecated: Use errSecInvalidTupleCredentials instead	b942509eee517fa6	-67852
+enumconst	c:@Ea@errSecSuccess@errSecInvalidEncoding	-			-	-	-	-	-	68f3117474c0e410	-67853
+enumconst	c:@Ea@errSecSuccess@errSecInvalidValidityPeriod	-			-	-	-	-	-	f0f9e2474c7a858d	-67854
+enumconst	c:@Ea@errSecSuccess@errSecInvalidRequestor	-			-	-	-	-	-	ce3a1ef296d42ef5	-67855
+enumconst	c:@Ea@errSecSuccess@errSecRequestDescriptor	-			-	-	-	-	-	df5b29eeafc6a477	-67856
+enumconst	c:@Ea@errSecSuccess@errSecInvalidBundleInfo	-			-	-	-	-	-	9c4f13f315cdce28	-67857
+enumconst	c:@Ea@errSecSuccess@errSecInvalidCRLIndex	-			-	-	-	-	-	63006ca3fa9996b3	-67858
+enumconst	c:@Ea@errSecSuccess@errSecNoFieldValues	-			-	-	-	-	-	53bcd4503d405616	-67859
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedFieldFormat	-			-	-	-	-	-	2056b0f5b87baa58	-67860
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedIndexInfo	-			-	-	-	-	-	2ff46ad5d2d90c54	-67861
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedLocality	-			-	-	-	-	-	077e73cc5098cddb	-67862
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedNumAttributes	-			-	-	-	-	-	f80b0e5788573b83	-67863
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedNumIndexes	-			-	-	-	-	-	606c9032aec01963	-67864
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedNumRecordTypes	-			-	-	-	-	-	37136043d3164c0d	-67865
+enumconst	c:@Ea@errSecSuccess@errSecFieldSpecifiedMultiple	-			-	-	-	-	-	85b3e4c1ac889a3d	-67866
+enumconst	c:@Ea@errSecSuccess@errSecIncompatibleFieldFormat	-			-	-	-	-	-	8812a30a6a4aa025	-67867
+enumconst	c:@Ea@errSecSuccess@errSecInvalidParsingModule	-			-	-	-	-	-	80dc8117b37dbade	-67868
+enumconst	c:@Ea@errSecSuccess@errSecDatabaseLocked	-			-	-	-	-	-	a451c7ef1f268cd6	-67869
+enumconst	c:@Ea@errSecSuccess@errSecDatastoreIsOpen	-			-	-	-	-	-	bb2e03d9da19d8a9	-67870
+enumconst	c:@Ea@errSecSuccess@errSecMissingValue	-			-	-	-	-	-	c90377a1e909fcf3	-67871
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedQueryLimits	-			-	-	-	-	-	95bf7307a15cc26b	-67872
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedNumSelectionPreds	-			-	-	-	-	-	c8af53cf1eb3bfad	-67873
+enumconst	c:@Ea@errSecSuccess@errSecUnsupportedOperator	-			-	-	-	-	-	5cc7187f6cab43de	-67874
+enumconst	c:@Ea@errSecSuccess@errSecInvalidDBLocation	-			-	-	-	-	-	f1c76d0d3e3c1858	-67875
+enumconst	c:@Ea@errSecSuccess@errSecInvalidAccessRequest	-			-	-	-	-	-	8966d3bed923f344	-67876
+enumconst	c:@Ea@errSecSuccess@errSecInvalidIndexInfo	-			-	-	-	-	-	35deb37eec6f17ad	-67877
+enumconst	c:@Ea@errSecSuccess@errSecInvalidNewOwner	-			-	-	-	-	-	0d21295c1e956e29	-67878
+enumconst	c:@Ea@errSecSuccess@errSecInvalidModifyMode	-			-	-	-	-	-	a93c449041bc7db6	-67879
+enumconst	c:@Ea@errSecSuccess@errSecMissingRequiredExtension	-			-	-	-	-	-	6fb135dfafaba99d	-67880
+enumconst	c:@Ea@errSecSuccess@errSecExtendedKeyUsageNotCritical	-			-	-	-	-	-	f3f438b570f2cbbb	-67881
+enumconst	c:@Ea@errSecSuccess@errSecTimestampMissing	-			-	-	-	-	-	ff69e4f02e05fe9d	-67882
+enumconst	c:@Ea@errSecSuccess@errSecTimestampInvalid	-			-	-	-	-	-	eb5210e8437dc572	-67883
+enumconst	c:@Ea@errSecSuccess@errSecTimestampNotTrusted	-			-	-	-	-	-	e45533845178f33a	-67884
+enumconst	c:@Ea@errSecSuccess@errSecTimestampServiceNotAvailable	-			-	-	-	-	-	880f110fd1ddded3	-67885
+enumconst	c:@Ea@errSecSuccess@errSecTimestampBadAlg	-			-	-	-	-	-	0625bade5c18b488	-67886
+enumconst	c:@Ea@errSecSuccess@errSecTimestampBadRequest	-			-	-	-	-	-	f141996416ba2b48	-67887
+enumconst	c:@Ea@errSecSuccess@errSecTimestampBadDataFormat	-			-	-	-	-	-	b573c0771af1d3ed	-67888
+enumconst	c:@Ea@errSecSuccess@errSecTimestampTimeNotAvailable	-			-	-	-	-	-	16f42f2608b34892	-67889
+enumconst	c:@Ea@errSecSuccess@errSecTimestampUnacceptedPolicy	-			-	-	-	-	-	6a366be43588221c	-67890
+enumconst	c:@Ea@errSecSuccess@errSecTimestampUnacceptedExtension	-			-	-	-	-	-	5f5bfe2172e79c82	-67891
+enumconst	c:@Ea@errSecSuccess@errSecTimestampAddInfoNotAvailable	-			-	-	-	-	-	1868947840d2215e	-67892
+enumconst	c:@Ea@errSecSuccess@errSecTimestampSystemFailure	-			-	-	-	-	-	bc7b34f48dbfb512	-67893
+enumconst	c:@Ea@errSecSuccess@errSecSigningTimeMissing	-			-	-	-	-	-	76d899983a8d9eb8	-67894
+enumconst	c:@Ea@errSecSuccess@errSecTimestampRejection	-			-	-	-	-	-	fb5dc59b8352f5da	-67895
+enumconst	c:@Ea@errSecSuccess@errSecTimestampWaiting	-			-	-	-	-	-	25a402d2d3709096	-67896
+enumconst	c:@Ea@errSecSuccess@errSecTimestampRevocationWarning	-			-	-	-	-	-	23bb8b78b4f20fc4	-67897
+enumconst	c:@Ea@errSecSuccess@errSecTimestampRevocationNotification	-			-	-	-	-	-	195ecab7a82d642a	-67898
+enumconst	c:@Ea@errSecSuccess@errSecCertificatePolicyNotAllowed	-			-	-	-	-	-	f4fa9679802d81c6	-67899
+enumconst	c:@Ea@errSecSuccess@errSecCertificateNameNotAllowed	-			-	-	-	-	-	52d0b47874e1199f	-67900
+enumconst	c:@Ea@errSecSuccess@errSecCertificateValidityPeriodTooLong	-			-	-	-	-	-	ccff89c979e4177d	-67901
+enumconst	c:@Ea@errSecSuccess@errSecCertificateIsCA	-			-	-	-	-	-	28bdbc5c2c741558	-67902
+enumconst	c:@Ea@errSecSuccess@errSecCertificateDuplicateExtension	-			-	-	-	-	-	f8f0ba43a225beb0	-67903
+enumconst	c:@Ea@errSecSuccess@errSecMissingQualifiedCertStatement	-			-	-	-	-	-	057b361f42266c31	-67904
+enum	c:@Ea@errSSLProtocol	-	-		OSStatus	-	-	-	-	6ac0b0d5f19e294b	-
+enumconst	c:@Ea@errSSLProtocol@errSSLProtocol	-			-	-	-	-	-	e6be452dbb205340	-9800
+enumconst	c:@Ea@errSSLProtocol@errSSLNegotiation	-			-	-	-	-	-	a6c8268af5cd11f2	-9801
+enumconst	c:@Ea@errSSLProtocol@errSSLFatalAlert	-			-	-	-	-	-	986bc1cdf9001dc8	-9802
+enumconst	c:@Ea@errSSLProtocol@errSSLWouldBlock	-			-	-	-	-	-	08bfd8f512232302	-9803
+enumconst	c:@Ea@errSSLProtocol@errSSLSessionNotFound	-			-	-	-	-	-	d4ea80bdba2d14c3	-9804
+enumconst	c:@Ea@errSSLProtocol@errSSLClosedGraceful	-			-	-	-	-	-	7ab52158d62f1bb3	-9805
+enumconst	c:@Ea@errSSLProtocol@errSSLClosedAbort	-			-	-	-	-	-	2d842a116f73a85f	-9806
+enumconst	c:@Ea@errSSLProtocol@errSSLXCertChainInvalid	-			-	-	-	-	-	1f27602d9bed42c6	-9807
+enumconst	c:@Ea@errSSLProtocol@errSSLBadCert	-			-	-	-	-	-	cdb3bf9883fb26fa	-9808
+enumconst	c:@Ea@errSSLProtocol@errSSLCrypto	-			-	-	-	-	-	a5a9a117c87c94f7	-9809
+enumconst	c:@Ea@errSSLProtocol@errSSLInternal	-			-	-	-	-	-	8e01503ebef401c6	-9810
+enumconst	c:@Ea@errSSLProtocol@errSSLModuleAttach	-			-	-	-	-	-	5311bdd1d3ad7272	-9811
+enumconst	c:@Ea@errSSLProtocol@errSSLUnknownRootCert	-			-	-	-	-	-	81c63cde56fbe8ac	-9812
+enumconst	c:@Ea@errSSLProtocol@errSSLNoRootCert	-			-	-	-	-	-	9adaad34cbe1fe03	-9813
+enumconst	c:@Ea@errSSLProtocol@errSSLCertExpired	-			-	-	-	-	-	e5778f8a6116aa71	-9814
+enumconst	c:@Ea@errSSLProtocol@errSSLCertNotYetValid	-			-	-	-	-	-	6695f25c9e2dbe44	-9815
+enumconst	c:@Ea@errSSLProtocol@errSSLClosedNoNotify	-			-	-	-	-	-	89f85e1ac1c6741d	-9816
+enumconst	c:@Ea@errSSLProtocol@errSSLBufferOverflow	-			-	-	-	-	-	7e59280d3074b14a	-9817
+enumconst	c:@Ea@errSSLProtocol@errSSLBadCipherSuite	-			-	-	-	-	-	09cac04bd16ec6fb	-9818
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerUnexpectedMsg	-			-	-	-	-	-	47347029602b4c25	-9819
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerBadRecordMac	-			-	-	-	-	-	f04330ed5397e0d5	-9820
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerDecryptionFail	-			-	-	-	-	-	e53387f1743dfb83	-9821
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerRecordOverflow	-			-	-	-	-	-	31d0b85523e3cd2e	-9822
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerDecompressFail	-			-	-	-	-	-	b5c305b1e4be6cec	-9823
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerHandshakeFail	-			-	-	-	-	-	c25f2dcebd941e37	-9824
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerBadCert	-			-	-	-	-	-	1ae024eb73ce0e46	-9825
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerUnsupportedCert	-			-	-	-	-	-	efc5f49de811f130	-9826
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerCertRevoked	-			-	-	-	-	-	d7d76b57f175b29b	-9827
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerCertExpired	-			-	-	-	-	-	cd20655dbb0a3a5d	-9828
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerCertUnknown	-			-	-	-	-	-	8fccc9e19e96c58a	-9829
+enumconst	c:@Ea@errSSLProtocol@errSSLIllegalParam	-			-	-	-	-	-	3211e36111f1e04b	-9830
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerUnknownCA	-			-	-	-	-	-	f0e1d98c62d663e7	-9831
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerAccessDenied	-			-	-	-	-	-	0c6aa60413629d15	-9832
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerDecodeError	-			-	-	-	-	-	418d33749a495c7d	-9833
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerDecryptError	-			-	-	-	-	-	15b973810cdf0d04	-9834
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerExportRestriction	-			-	-	-	-	-	c4e87121e01c780d	-9835
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerProtocolVersion	-			-	-	-	-	-	0da00f1f47156619	-9836
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerInsufficientSecurity	-			-	-	-	-	-	52f6b7184a41d73e	-9837
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerInternalError	-			-	-	-	-	-	36ebf6dd1464a225	-9838
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerUserCancelled	-			-	-	-	-	-	d253990e834d4476	-9839
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerNoRenegotiation	-			-	-	-	-	-	9292460cef61af3d	-9840
+enumconst	c:@Ea@errSSLProtocol@errSSLPeerAuthCompleted	-			-	-	-	-	-	f0bf7bcf3db07e7b	-9841
+enumconst	c:@Ea@errSSLProtocol@errSSLClientCertRequested	-			-	-	-	-	-	a17ae27936e73f73	-9842
+enumconst	c:@Ea@errSSLProtocol@errSSLHostNameMismatch	-			-	-	-	-	-	1e8d3ebdd91bce32	-9843
+enumconst	c:@Ea@errSSLProtocol@errSSLConnectionRefused	-			-	-	-	-	-	3f4c5d305d6050f3	-9844
+enumconst	c:@Ea@errSSLProtocol@errSSLDecryptionFail	-			-	-	-	-	-	81f2891f4e38ba05	-9845
+enumconst	c:@Ea@errSSLProtocol@errSSLBadRecordMac	-			-	-	-	-	-	67bfba4c872037ca	-9846
+enumconst	c:@Ea@errSSLProtocol@errSSLRecordOverflow	-			-	-	-	-	-	2dad8f8a1ad555ca	-9847
+enumconst	c:@Ea@errSSLProtocol@errSSLBadConfiguration	-			-	-	-	-	-	5961bfe268d60d39	-9848
+enumconst	c:@Ea@errSSLProtocol@errSSLUnexpectedRecord	-			-	-	-	-	-	2bfa9a2a2fd041ac	-9849
+enumconst	c:@Ea@errSSLProtocol@errSSLWeakPeerEphemeralDHKey	-			-	-	-	-	-	685a2316873902d4	-9850
+enumconst	c:@Ea@errSSLProtocol@errSSLClientHelloReceived	-			-	-	-	-	-	290e4f0661503e88	-9851
+enumconst	c:@Ea@errSSLProtocol@errSSLTransportReset	-			-	-	-	-	-	c0e0d3b36cb2260b	-9852
+enumconst	c:@Ea@errSSLProtocol@errSSLNetworkTimeout	-			-	-	-	-	-	4e289e1e6da6f533	-9853
+enumconst	c:@Ea@errSSLProtocol@errSSLConfigurationFailed	-			-	-	-	-	-	cbbeb1563644af1d	-9854
+enumconst	c:@Ea@errSSLProtocol@errSSLUnsupportedExtension	-			-	-	-	-	-	d570f890619225d1	-9855
+enumconst	c:@Ea@errSSLProtocol@errSSLUnexpectedMessage	-			-	-	-	-	-	a6bec1b0de61d10b	-9856
+enumconst	c:@Ea@errSSLProtocol@errSSLDecompressFail	-			-	-	-	-	-	df190827da48639c	-9857
+enumconst	c:@Ea@errSSLProtocol@errSSLHandshakeFail	-			-	-	-	-	-	896d08d21acca196	-9858
+enumconst	c:@Ea@errSSLProtocol@errSSLDecodeError	-			-	-	-	-	-	fb380235b4e607f6	-9859
+enumconst	c:@Ea@errSSLProtocol@errSSLInappropriateFallback	-			-	-	-	-	-	296571149738bb53	-9860
+enumconst	c:@Ea@errSSLProtocol@errSSLMissingExtension	-			-	-	-	-	-	45668e80a7269ade	-9861
+enumconst	c:@Ea@errSSLProtocol@errSSLBadCertificateStatusResponse	-			-	-	-	-	-	beb4bcfe46f5d698	-9862
+enumconst	c:@Ea@errSSLProtocol@errSSLCertificateRequired	-			-	-	-	-	-	e66d8551706e27fc	-9863
+enumconst	c:@Ea@errSSLProtocol@errSSLUnknownPSKIdentity	-			-	-	-	-	-	3c84de6e6966253f	-9864
+enumconst	c:@Ea@errSSLProtocol@errSSLUnrecognizedName	-			-	-	-	-	-	6018e80cae59f5f5	-9865
+enumconst	c:@Ea@errSSLProtocol@errSSLATSViolation	-			-	-	-	-	-	44e78a306371c5e1	-9880
+enumconst	c:@Ea@errSSLProtocol@errSSLATSMinimumVersionViolation	-			-	-	-	-	-	a6e81fc26b836c1c	-9881
+enumconst	c:@Ea@errSSLProtocol@errSSLATSCiphersuiteViolation	-			-	-	-	-	-	01701359f6095e00	-9882
+enumconst	c:@Ea@errSSLProtocol@errSSLATSMinimumKeySizeViolation	-			-	-	-	-	-	e8c2d574718f8078	-9883
+enumconst	c:@Ea@errSSLProtocol@errSSLATSLeafCertificateHashAlgorithmViolation	-			-	-	-	-	-	fad3bcd95c12f03e	-9884
+enumconst	c:@Ea@errSSLProtocol@errSSLATSCertificateHashAlgorithmViolation	-			-	-	-	-	-	332ebd7f69f48732	-9885
+enumconst	c:@Ea@errSSLProtocol@errSSLATSCertificateTrustViolation	-			-	-	-	-	-	3707b522f24d7ac5	-9886
+enumconst	c:@Ea@errSSLProtocol@errSSLEarlyDataRejected	-			-	-	-	-	-	8de51922f3e85d65	-9890
+typedef	c:@T@SecTrustResultType	-			enum SecTrustResultType	-	-	-	-	9fdaa4d05f0ee529	-
+enum	c:@E@SecTrustResultType	-			uint32_t	-	-	-	-	d3d7d6b4df46bab9	-
+enumconst	c:@E@SecTrustResultType@kSecTrustResultInvalid	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	d40c3c5b3d10db46	0
+enumconst	c:@E@SecTrustResultType@kSecTrustResultProceed	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	0d2be0301f67271f	1
+enumconst	c:@E@SecTrustResultType@kSecTrustResultConfirm	SecTrustResultType			-	-	-	ios=2.0/7.0/-/0	-	d95f913fa02402fe	2
+enumconst	c:@E@SecTrustResultType@kSecTrustResultDeny	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	4ba7ec9fa37bd2d9	3
+enumconst	c:@E@SecTrustResultType@kSecTrustResultUnspecified	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	5ea92082b0c77dee	4
+enumconst	c:@E@SecTrustResultType@kSecTrustResultRecoverableTrustFailure	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	090f008ccbdb879e	5
+enumconst	c:@E@SecTrustResultType@kSecTrustResultFatalTrustFailure	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	776bec154cd9152b	6
+enumconst	c:@E@SecTrustResultType@kSecTrustResultOtherError	SecTrustResultType			-	-	-	ios=2.0/-/-/0	-	a4b452c15ecad0ee	7
+struct	c:@S@__SecTrust	-			-	-	-	-	-	ebdf993f5173e833	-
+typedef	c:@T@SecTrustRef	-			struct __SecTrust *	-	-	-	-	793d9b19f5106e82	-
+var	c:@kSecPropertyTypeTitle	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	88a53901bcb6e9cd	-
+var	c:@kSecPropertyTypeError	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	9b2585e86cb8041b	-
+var	c:@kSecTrustEvaluationDate	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	cd5f8bbcf211d178	-
+var	c:@kSecTrustExtendedValidation	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	380a96d00688e52e	-
+var	c:@kSecTrustOrganizationName	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	74f3912a15aa95a5	-
+var	c:@kSecTrustResultValue	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	9f1c5fb7bbb81319	-
+var	c:@kSecTrustRevocationChecked	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	2f59fa93b23b5b02	-
+var	c:@kSecTrustRevocationValidUntilDate	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	e2fb7c67dd803b7c	-
+var	c:@kSecTrustCertificateTransparency	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	447d864ed3f25c4d	-
+var	c:@kSecTrustCertificateTransparencyWhiteList	-			const CFStringRef	-	-	ios=10.0/11.0/-/0	-	51acaaba6750ce73	-
+var	c:@kSecTrustQCStatements	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	13cb68bb46e094ca	-
+var	c:@kSecTrustQWACValidation	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	d4c7bd4b87111697	-
+typedef	c:@T@SecTrustCallback	-			void ((^))(SecTrustRef, SecTrustResultType)	-	-	-	-	11e3ad2dbcec10c4	-
+function	c:@F@SecTrustGetTypeID	-			CFTypeID (void)	-	-	ios=2.0/-/-/0	-	4297c57a4089930c	-
+function	c:@F@SecTrustCreateWithCertificates	-			OSStatus (CFTypeRef, CFTypeRef, SecTrustRef  _Nullable *)	CFTypeRef certificates | CFTypeRef policies | SecTrustRef  _Nullable * trust	-	ios=2.0/-/-/0	-	8bb5bebbf1c02a56	-
+function	c:@F@SecTrustSetPolicies	-			OSStatus (SecTrustRef, CFTypeRef)	SecTrustRef trust | CFTypeRef policies	-	ios=6.0/-/-/0	-	67e55d6f8886e8a7	-
+function	c:@F@SecTrustCopyPolicies	-			OSStatus (SecTrustRef, CFArrayRef  _Nullable *)	SecTrustRef trust | CFArrayRef  _Nullable * policies	-	ios=7.0/-/-/0	-	bcb113a88b8db25a	-
+function	c:@F@SecTrustSetNetworkFetchAllowed	-			OSStatus (SecTrustRef, Boolean)	SecTrustRef trust | Boolean allowFetch	-	ios=7.0/-/-/0	-	78be74cb1b6ca36a	-
+function	c:@F@SecTrustGetNetworkFetchAllowed	-			OSStatus (SecTrustRef, Boolean *)	SecTrustRef trust | Boolean * allowFetch	-	ios=7.0/-/-/0	-	91e41bafd53490ad	-
+function	c:@F@SecTrustSetAnchorCertificates	-			OSStatus (SecTrustRef, CFArrayRef)	SecTrustRef trust | CFArrayRef anchorCertificates	-	ios=2.0/-/-/0	-	4bb3fd663b0ce1e7	-
+function	c:@F@SecTrustSetAnchorCertificatesOnly	-			OSStatus (SecTrustRef, Boolean)	SecTrustRef trust | Boolean anchorCertificatesOnly	-	ios=2.0/-/-/0	-	410859a414448193	-
+function	c:@F@SecTrustCopyCustomAnchorCertificates	-			OSStatus (SecTrustRef, CFArrayRef  _Nullable *)	SecTrustRef trust | CFArrayRef  _Nullable * anchors	-	ios=7.0/-/-/0	-	8d28c37384f5f8da	-
+function	c:@F@SecTrustSetVerifyDate	-			OSStatus (SecTrustRef, CFDateRef)	SecTrustRef trust | CFDateRef verifyDate	-	ios=2.0/-/-/0	-	eb74e64ed28c2a1a	-
+function	c:@F@SecTrustGetVerifyTime	-			CFAbsoluteTime (SecTrustRef)	SecTrustRef trust	-	ios=2.0/-/-/0	-	72623436a1682983	-
+function	c:@F@SecTrustEvaluate	-			OSStatus (SecTrustRef, SecTrustResultType *)	SecTrustRef trust | SecTrustResultType * result	-	ios=2.0/13.0/-/0,macos=10.3/10.15/-/0,tvos=2.0/13.0/-/0,watchos=1.0/6.0/-/0	deprecated: Use SecTrustEvaluateWithError instead	697d39513781b58a	-
+function	c:@F@SecTrustEvaluateAsync	-			OSStatus (SecTrustRef, dispatch_queue_t, SecTrustCallback)	SecTrustRef trust | dispatch_queue_t queue | SecTrustCallback result	-	ios=7.0/13.0/-/0,macos=10.7/10.15/-/0,tvos=7.0/13.0/-/0,watchos=1.0/6.0/-/0	deprecated: Use SecTrustEvaluateAsyncWithError instead	20f8ee9da1205974	-
+function	c:@F@SecTrustEvaluateWithError	-			_Bool (SecTrustRef, CFErrorRef  _Nullable *)	SecTrustRef trust | CFErrorRef  _Nullable * error	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	55ae1335ffaecd87	-
+typedef	c:@T@SecTrustWithErrorCallback	-			void ((^))(SecTrustRef, _Bool, CFErrorRef)	-	-	-	-	6d8994b6bdff53d0	-
+function	c:@F@SecTrustEvaluateAsyncWithError	-			OSStatus (SecTrustRef, dispatch_queue_t, SecTrustWithErrorCallback)	SecTrustRef trust | dispatch_queue_t queue | SecTrustWithErrorCallback result	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	a5f908867d7a8b07	-
+function	c:@F@SecTrustGetTrustResult	-			OSStatus (SecTrustRef, SecTrustResultType *)	SecTrustRef trust | SecTrustResultType * result	-	ios=7.0/-/-/0	-	74e69336794b5168	-
+function	c:@F@SecTrustCopyPublicKey	-			SecKeyRef (SecTrustRef)	SecTrustRef trust	-	ios=2.0/14.0/-/0,macos=10.7/11.0/-/0,tvos=9.0/14.0/-/0,watchos=1.0/7.0/-/0	-	4883fcc17465a315	-
+function	c:@F@SecTrustCopyKey	-			SecKeyRef (SecTrustRef)	SecTrustRef trust	-	ios=14.0/-/-/0,macos=11.0/-/-/0,tvos=14.0/-/-/0,watchos=7.0/-/-/0	-	3f4917006908c297	-
+function	c:@F@SecTrustGetCertificateCount	-			CFIndex (SecTrustRef)	SecTrustRef trust	-	ios=2.0/-/-/0	-	38dc71f95f7076f0	-
+function	c:@F@SecTrustGetCertificateAtIndex	-			SecCertificateRef (SecTrustRef, CFIndex)	SecTrustRef trust | CFIndex ix	-	ios=2.0/15.0/-/0,macos=10.7/12.0/-/0,tvos=9.0/15.0/-/0,watchos=1.0/8.0/-/0	-	6f1735b80897576c	-
+function	c:@F@SecTrustCopyExceptions	-			CFDataRef (SecTrustRef)	SecTrustRef trust	-	ios=4.0/-/-/0	-	e8e4dd9956f98f7c	-
+function	c:@F@SecTrustSetExceptions	-			_Bool (SecTrustRef, CFDataRef)	SecTrustRef trust | CFDataRef exceptions	-	ios=4.0/-/-/0	-	80ebf204f85c0584	-
+function	c:@F@SecTrustCopyProperties	-			CFArrayRef (SecTrustRef)	SecTrustRef trust	-	ios=2.0/15.0/-/0,maccatalyst=-/-/-/1,macos=10.7/12.0/-/0,tvos=9.0/15.0/-/0,watchos=1.0/8.0/-/0	-	04ca9475a908f8ee	-
+function	c:@F@SecTrustCopyResult	-			CFDictionaryRef (SecTrustRef)	SecTrustRef trust	-	ios=7.0/-/-/0	-	25f28579cdb99bae	-
+function	c:@F@SecTrustSetOCSPResponse	-			OSStatus (SecTrustRef, CFTypeRef)	SecTrustRef trust | CFTypeRef responseData	-	ios=7.0/-/-/0	-	24c9a8112d86dd93	-
+function	c:@F@SecTrustSetSignedCertificateTimestamps	-			OSStatus (SecTrustRef, CFArrayRef)	SecTrustRef trust | CFArrayRef sctArray	-	ios=12.1.1/-/-/0,macos=10.14.2/-/-/0,tvos=12.1.1/-/-/0,watchos=5.1.1/-/-/0	-	9d4928a68d9d7719	-
+function	c:@F@SecTrustCopyCertificateChain	-			CFArrayRef (SecTrustRef)	SecTrustRef trust	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	3e2c349b9aecebdf	-
+function	c:@F@SecCertificateGetTypeID	-			CFTypeID (void)	-	-	ios=2.0/-/-/0	-	b000407f5ec5a462	-
+function	c:@F@SecCertificateCreateWithData	-			SecCertificateRef (CFAllocatorRef, CFDataRef)	CFAllocatorRef allocator | CFDataRef data	-	ios=2.0/-/-/0	-	8a338dcb3eca5434	-
+function	c:@F@SecCertificateCopyData	-			CFDataRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=2.0/-/-/0	-	10f3721cbf804e39	-
+function	c:@F@SecCertificateCopySubjectSummary	-			CFStringRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=2.0/-/-/0	-	e537f4a61f6e75bc	-
+function	c:@F@SecCertificateCopyCommonName	-			OSStatus (SecCertificateRef, CFStringRef  _Nullable *)	SecCertificateRef certificate | CFStringRef  _Nullable * commonName	-	ios=10.3/-/-/0	-	2ca8393e75c32bd2	-
+function	c:@F@SecCertificateCopyEmailAddresses	-			OSStatus (SecCertificateRef, CFArrayRef  _Nullable *)	SecCertificateRef certificate | CFArrayRef  _Nullable * emailAddresses	-	ios=10.3/-/-/0	-	45a17222f0f3f137	-
+function	c:@F@SecCertificateCopyNormalizedIssuerSequence	-			CFDataRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=10.3/-/-/0	-	7f6f167bb01e6719	-
+function	c:@F@SecCertificateCopyNormalizedSubjectSequence	-			CFDataRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=10.3/-/-/0	-	af5580dc18ec9e4d	-
+function	c:@F@SecCertificateCopyKey	-			SecKeyRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	608abe76713fbbca	-
+function	c:@F@SecCertificateCopyPublicKey	-			SecKeyRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=10.3/12.0/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1	-	605d5b6391755460	-
+function	c:@F@SecCertificateCopySerialNumberData	-			CFDataRef (SecCertificateRef, CFErrorRef  _Nullable *)	SecCertificateRef certificate | CFErrorRef  _Nullable * error	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	94c786ce7598f05d	-
+function	c:@F@SecCertificateCopyNotValidBeforeDate	-			CFDateRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	bacdb9af0f320320	-
+function	c:@F@SecCertificateCopyNotValidAfterDate	-			CFDateRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=18.0/-/-/0,macos=15.0/-/-/0,tvos=18.0/-/-/0,watchos=11.0/-/-/0	-	1ddb83986b4247f0	-
+function	c:@F@SecCertificateCopySerialNumber	-			CFDataRef (SecCertificateRef)	SecCertificateRef certificate	-	ios=10.3/11.0/-/0,maccatalyst=-/-/-/1,macos=-/-/-/1	-	f8e5bcc3f17e503b	-
+function	c:@F@SecIdentityGetTypeID	-			CFTypeID (void)	-	-	ios=2.0/-/-/0	-	bbf51d2db602343b	-
+function	c:@F@SecIdentityCreate	-			SecIdentityRef (CFAllocatorRef, SecCertificateRef, SecKeyRef)	CFAllocatorRef allocator | SecCertificateRef certificate | SecKeyRef privateKey	-	ios=11.2/-/-/0,macos=10.12/-/-/0,tvos=11.2/-/-/0,watchos=4.2/-/-/0,xros=1.0/-/-/0	-	e4f6530537babfe8	-
+function	c:@F@SecIdentityCopyCertificate	-			OSStatus (SecIdentityRef, SecCertificateRef  _Nullable *)	SecIdentityRef identityRef | SecCertificateRef  _Nullable * certificateRef	-	ios=2.0/-/-/0	-	93d9303906b8ed97	-
+function	c:@F@SecIdentityCopyPrivateKey	-			OSStatus (SecIdentityRef, SecKeyRef  _Nullable *)	SecIdentityRef identityRef | SecKeyRef  _Nullable * privateKeyRef	-	ios=2.0/-/-/0	-	f3cd526de6b10252	-
+protocol	c:objc(pl)OS_sec_trust	-			-	-	-	-	-	269c0e71056319c6	-
+conforms	c:objc(pl)OS_sec_trust	OS_sec_trust	NSObject		-	-	-	-	-	860c54ef2e7f0ae2	-
+typedef	c:@T@sec_trust_t	-			NSObject<OS_sec_trust> *	-	-	-	-	87044807b4857158	-
+protocol	c:objc(pl)OS_sec_identity	-			-	-	-	-	-	81f87b256605e593	-
+conforms	c:objc(pl)OS_sec_identity	OS_sec_identity	NSObject		-	-	-	-	-	350551880695feb0	-
+typedef	c:@T@sec_identity_t	-			NSObject<OS_sec_identity> *	-	-	-	-	546e41ec1ca46534	-
+protocol	c:objc(pl)OS_sec_certificate	-			-	-	-	-	-	1bcddab2a6d02390	-
+conforms	c:objc(pl)OS_sec_certificate	OS_sec_certificate	NSObject		-	-	-	-	-	e0ceb2db47e5e6aa	-
+typedef	c:@T@sec_certificate_t	-			NSObject<OS_sec_certificate> *	-	-	-	-	0cb86cf34f9f1fa6	-
+typedef	c:@T@tls_protocol_version_t	-			enum tls_protocol_version_t	-	-	ios=13.0/-/-/0	-	78bfdd72d41bf0da	-
+enum	c:@E@tls_protocol_version_t	-			uint16_t	-	-	-	-	f2b7580a737148af	-
+enumconst	c:@E@tls_protocol_version_t@tls_protocol_version_TLSv10	tls_protocol_version_t			-	-	-	ios=13.0/15.0/-/0,macos=10.15/12.0/-/0	deprecated: Use tls_protocol_version_TLSv12 or tls_protocol_version_TLSv13 instead.	0fbe82f9788ecdb5	769
+enumconst	c:@E@tls_protocol_version_t@tls_protocol_version_TLSv11	tls_protocol_version_t			-	-	-	ios=13.0/15.0/-/0,macos=10.15/12.0/-/0	deprecated: Use tls_protocol_version_TLSv12 or tls_protocol_version_TLSv13 instead.	0a447eadb1b03553	770
+enumconst	c:@E@tls_protocol_version_t@tls_protocol_version_TLSv12	tls_protocol_version_t			-	-	-	-	-	da8480cf9ec30951	771
+enumconst	c:@E@tls_protocol_version_t@tls_protocol_version_TLSv13	tls_protocol_version_t			-	-	-	-	-	d486ac5442a0309d	772
+enumconst	c:@E@tls_protocol_version_t@tls_protocol_version_DTLSv10	tls_protocol_version_t			-	-	-	ios=13.0/15.0/-/0,macos=10.15/12.0/-/0	deprecated: Use tls_protocol_version_DTLSv12 instead.	03af690dbfb4af5b	65279
+enumconst	c:@E@tls_protocol_version_t@tls_protocol_version_DTLSv12	tls_protocol_version_t			-	-	-	-	-	e12c81e47661fdf9	65277
+typedef	c:@T@tls_ciphersuite_t	-			enum tls_ciphersuite_t	-	-	-	-	bf8bfd18aa287db8	-
+enum	c:@E@tls_ciphersuite_t	-			uint16_t	-	-	-	-	b6661aadf40c5b7c	-
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_3DES_EDE_CBC_SHA	tls_ciphersuite_t			-	-	-	ios=13.0/18.0/-/0	-	7dc76ec4a78b5ed3	10
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_AES_128_CBC_SHA	tls_ciphersuite_t			-	-	-	-	-	f7e3c15ccdd5d32f	47
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_AES_256_CBC_SHA	tls_ciphersuite_t			-	-	-	-	-	9987d4fb5cc4940e	53
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_AES_128_GCM_SHA256	tls_ciphersuite_t			-	-	-	-	-	e9b6c57fa217c6ee	156
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_AES_256_GCM_SHA384	tls_ciphersuite_t			-	-	-	-	-	b69be87bb9ee87e4	157
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_AES_128_CBC_SHA256	tls_ciphersuite_t			-	-	-	-	-	919dfa9124dc6956	60
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_RSA_WITH_AES_256_CBC_SHA256	tls_ciphersuite_t			-	-	-	-	-	caaf8495db444ba0	61
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA	tls_ciphersuite_t			-	-	-	ios=13.0/18.0/-/0	-	2baf03b334fbbfc2	49160
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_AES_128_CBC_SHA	tls_ciphersuite_t			-	-	-	-	-	d3de4d98ab746683	49161
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_AES_256_CBC_SHA	tls_ciphersuite_t			-	-	-	-	-	b6c66efba0d3e4d5	49162
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA	tls_ciphersuite_t			-	-	-	ios=13.0/18.0/-/0	-	671e473b6f009df1	49170
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_AES_128_CBC_SHA	tls_ciphersuite_t			-	-	-	-	-	636a3c966859dff3	49171
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_AES_256_CBC_SHA	tls_ciphersuite_t			-	-	-	-	-	3c86cf269f663edb	49172
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256	tls_ciphersuite_t			-	-	-	-	-	f638b6f4c8eef776	49187
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384	tls_ciphersuite_t			-	-	-	-	-	7f20ab3fd8f294b9	49188
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_AES_128_CBC_SHA256	tls_ciphersuite_t			-	-	-	-	-	edd01c70e31a00fb	49191
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_AES_256_CBC_SHA384	tls_ciphersuite_t			-	-	-	-	-	b7b296fcd9f27a43	49192
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256	tls_ciphersuite_t			-	-	-	-	-	46ed69f1edc60617	49195
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384	tls_ciphersuite_t			-	-	-	-	-	a855dbaddad5046a	49196
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_AES_128_GCM_SHA256	tls_ciphersuite_t			-	-	-	-	-	d8b38e9f02310a7d	49199
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_AES_256_GCM_SHA384	tls_ciphersuite_t			-	-	-	-	-	71dbf0f5d1ec4589	49200
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256	tls_ciphersuite_t			-	-	-	-	-	8ab080ef1b4f7e2b	52392
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256	tls_ciphersuite_t			-	-	-	-	-	ba5dec9c23293fbb	52393
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_AES_128_GCM_SHA256	tls_ciphersuite_t			-	-	-	-	-	6f942aadd0e3f5a3	4865
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_AES_256_GCM_SHA384	tls_ciphersuite_t			-	-	-	-	-	bc35201a55a2517d	4866
+enumconst	c:@E@tls_ciphersuite_t@tls_ciphersuite_CHACHA20_POLY1305_SHA256	tls_ciphersuite_t			-	-	-	-	-	85f75931dce46e5c	4867
+typedef	c:@T@tls_ciphersuite_group_t	-			enum tls_ciphersuite_group_t	-	-	-	-	edd6776d86b41d12	-
+enum	c:@E@tls_ciphersuite_group_t	-			uint16_t	-	-	-	-	2b6a742b8f386ed9	-
+enumconst	c:@E@tls_ciphersuite_group_t@tls_ciphersuite_group_default	tls_ciphersuite_group_t			-	-	-	-	-	5d48063c013ee973	0
+enumconst	c:@E@tls_ciphersuite_group_t@tls_ciphersuite_group_compatibility	tls_ciphersuite_group_t			-	-	-	-	-	47bf127b94918346	1
+enumconst	c:@E@tls_ciphersuite_group_t@tls_ciphersuite_group_legacy	tls_ciphersuite_group_t			-	-	-	-	-	ac544e7dae74e6a8	2
+enumconst	c:@E@tls_ciphersuite_group_t@tls_ciphersuite_group_ats	tls_ciphersuite_group_t			-	-	-	-	-	40589091bcc2952d	3
+enumconst	c:@E@tls_ciphersuite_group_t@tls_ciphersuite_group_ats_compatibility	tls_ciphersuite_group_t			-	-	-	-	-	56483a8658ba360b	4
+typedef	c:@T@SSLProtocol	-			enum SSLProtocol	-	-	-	-	99053b4121888891	-
+enum	c:@E@SSLProtocol	-			int	-	-	-	-	d24fc7b7c7b93639	-
+enumconst	c:@E@SSLProtocol@kSSLProtocolUnknown	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	a5230d6312df9290	0
+enumconst	c:@E@SSLProtocol@kTLSProtocol1	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	7011cd71fdfdf934	4
+enumconst	c:@E@SSLProtocol@kTLSProtocol11	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	42ef4a841ea9d3a3	7
+enumconst	c:@E@SSLProtocol@kTLSProtocol12	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	5ceeb5d1e24a87f9	8
+enumconst	c:@E@SSLProtocol@kDTLSProtocol1	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	543a18953063fb22	9
+enumconst	c:@E@SSLProtocol@kTLSProtocol13	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	e1fb34976c3831b6	10
+enumconst	c:@E@SSLProtocol@kDTLSProtocol12	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	4bc6883322310f34	11
+enumconst	c:@E@SSLProtocol@kTLSProtocolMaxSupported	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	3276a89b683ae627	999
+enumconst	c:@E@SSLProtocol@kSSLProtocol2	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	2c28c2624b613e6c	1
+enumconst	c:@E@SSLProtocol@kSSLProtocol3	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	e9211430dc821bab	2
+enumconst	c:@E@SSLProtocol@kSSLProtocol3Only	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	8e3b9673452247ad	3
+enumconst	c:@E@SSLProtocol@kTLSProtocol1Only	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	72b8a3f1730ab406	5
+enumconst	c:@E@SSLProtocol@kSSLProtocolAll	SSLProtocol			-	-	-	ios=5.0/13.0/-/0	-	02314d84de958467	6
+function	c:@F@sec_trust_create	-			sec_trust_t (SecTrustRef)	SecTrustRef trust	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	a1f92709502d0727	-
+function	c:@F@sec_trust_copy_ref	-			SecTrustRef (sec_trust_t)	sec_trust_t trust	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	24bb6ba0ee7ab90e	-
+function	c:@F@sec_identity_create	-			sec_identity_t (SecIdentityRef)	SecIdentityRef identity	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	c659ef6f93a55a4d	-
+function	c:@F@sec_identity_create_with_certificates	-			sec_identity_t (SecIdentityRef, CFArrayRef)	SecIdentityRef identity | CFArrayRef certificates	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	528eb2471aec04e6	-
+function	c:@F@sec_identity_access_certificates	-			_Bool (sec_identity_t, void (^)(sec_certificate_t _Nonnull))	sec_identity_t identity | void (^)(sec_certificate_t _Nonnull) handler	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	736daa6def22cdc1	-
+function	c:@F@sec_identity_copy_ref	-			SecIdentityRef (sec_identity_t)	sec_identity_t identity	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	cde3b0282444c133	-
+function	c:@F@sec_identity_copy_certificates_ref	-			CFArrayRef (sec_identity_t)	sec_identity_t identity	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8e51a11645b4651a	-
+function	c:@F@sec_certificate_create	-			sec_certificate_t (SecCertificateRef)	SecCertificateRef certificate	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	5658b7be5f50770b	-
+function	c:@F@sec_certificate_copy_ref	-			SecCertificateRef (sec_certificate_t)	sec_certificate_t certificate	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	1cbdd7c28daa4eab	-
+protocol	c:objc(pl)OS_sec_protocol_metadata	-			-	-	-	-	-	90eb272c1c9f3cc5	-
+conforms	c:objc(pl)OS_sec_protocol_metadata	OS_sec_protocol_metadata	NSObject		-	-	-	-	-	ea12530870d0106f	-
+typedef	c:@T@sec_protocol_metadata_t	-			NSObject<OS_sec_protocol_metadata> *	-	-	-	-	ba65619f6fa8c09a	-
+function	c:@F@sec_protocol_metadata_get_negotiated_protocol	-			const char * (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=12.0/18.5/-/0,macos=10.14/15.5/-/0,tvos=12.0/18.5/-/0,watchos=5.0/11.5/-/0	-	f4feee4b5dc831dc	-
+function	c:@F@sec_protocol_metadata_copy_negotiated_protocol	-			const char * (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=18.5/-/-/0,macos=15.5/-/-/0,tvos=18.5/-/-/0,watchos=11.5/-/-/0	-	3820ef8edeeead88	-
+function	c:@F@sec_protocol_metadata_copy_peer_public_key	-			dispatch_data_t (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	bab06df89fa0abb0	-
+function	c:@F@sec_protocol_metadata_get_negotiated_tls_protocol_version	-			tls_protocol_version_t (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	e81f98977c8ec06f	-
+function	c:@F@sec_protocol_metadata_get_negotiated_protocol_version	-			SSLProtocol (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=12.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	b38e2072775645d8	-
+function	c:@F@sec_protocol_metadata_get_negotiated_tls_ciphersuite	-			tls_ciphersuite_t (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	a04259783bfd748b	-
+function	c:@F@sec_protocol_metadata_get_negotiated_ciphersuite	-			SSLCipherSuite (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=12.0/13.0/-/0,maccatalyst=13.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	7051d609e227b050	-
+function	c:@F@sec_protocol_metadata_get_early_data_accepted	-			_Bool (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	5303100ff2e12cb9	-
+function	c:@F@sec_protocol_metadata_access_peer_certificate_chain	-			_Bool (sec_protocol_metadata_t, void (^)(sec_certificate_t _Nonnull))	sec_protocol_metadata_t metadata | void (^)(sec_certificate_t _Nonnull) handler	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e2b48639a61ff384	-
+function	c:@F@sec_protocol_metadata_access_ocsp_response	-			_Bool (sec_protocol_metadata_t, void (^)(dispatch_data_t _Nonnull))	sec_protocol_metadata_t metadata | void (^)(dispatch_data_t _Nonnull) handler	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	ad60524b3716d017	-
+function	c:@F@sec_protocol_metadata_access_supported_signature_algorithms	-			_Bool (sec_protocol_metadata_t, void (^)(uint16_t))	sec_protocol_metadata_t metadata | void (^)(uint16_t) handler	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	272babf2e04d29f9	-
+function	c:@F@sec_protocol_metadata_access_distinguished_names	-			_Bool (sec_protocol_metadata_t, void (^)(dispatch_data_t _Nonnull))	sec_protocol_metadata_t metadata | void (^)(dispatch_data_t _Nonnull) handler	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	b357f320d926a262	-
+function	c:@F@sec_protocol_metadata_access_pre_shared_keys	-			_Bool (sec_protocol_metadata_t, void (^)(dispatch_data_t _Nonnull, dispatch_data_t _Nonnull))	sec_protocol_metadata_t metadata | void (^)(dispatch_data_t _Nonnull, dispatch_data_t _Nonnull) handler	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	19ab20fb5533a068	-
+function	c:@F@sec_protocol_metadata_get_server_name	-			const char * (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=12.0/18.5/-/0,macos=10.14/15.5/-/0,tvos=12.0/18.5/-/0,watchos=5.0/11.5/-/0	-	d18dc95b223f23f6	-
+function	c:@F@sec_protocol_metadata_copy_server_name	-			const char * (sec_protocol_metadata_t)	sec_protocol_metadata_t metadata	-	ios=18.5/-/-/0,macos=15.5/-/-/0,tvos=18.5/-/-/0,watchos=11.5/-/-/0	-	3737953c9b9974e3	-
+function	c:@F@sec_protocol_metadata_peers_are_equal	-			_Bool (sec_protocol_metadata_t, sec_protocol_metadata_t)	sec_protocol_metadata_t metadataA | sec_protocol_metadata_t metadataB	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	a7a603e79d8a963b	-
+function	c:@F@sec_protocol_metadata_challenge_parameters_are_equal	-			_Bool (sec_protocol_metadata_t, sec_protocol_metadata_t)	sec_protocol_metadata_t metadataA | sec_protocol_metadata_t metadataB	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	e7121817032d0c78	-
+function	c:@F@sec_protocol_metadata_create_secret	-			dispatch_data_t (sec_protocol_metadata_t, size_t, const char *, size_t)	sec_protocol_metadata_t metadata | size_t label_len | const char * label | size_t exporter_length	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	7db2d25c8043855c	-
+function	c:@F@sec_protocol_metadata_create_secret_with_context	-			dispatch_data_t (sec_protocol_metadata_t, size_t, const char *, size_t, const uint8_t *, size_t)	sec_protocol_metadata_t metadata | size_t label_len | const char * label | size_t context_len | const uint8_t * context | size_t exporter_length	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	1d4c40b9868c1c72	-
+protocol	c:objc(pl)OS_sec_protocol_options	-			-	-	-	-	-	feab8647e00f30ae	-
+conforms	c:objc(pl)OS_sec_protocol_options	OS_sec_protocol_options	NSObject		-	-	-	-	-	0c3251b9c58b1cef	-
+typedef	c:@T@sec_protocol_options_t	-			NSObject<OS_sec_protocol_options> *	-	-	-	-	3f53658766b30c47	-
+function	c:@F@sec_protocol_options_are_equal	-			_Bool (sec_protocol_options_t, sec_protocol_options_t)	sec_protocol_options_t optionsA | sec_protocol_options_t optionsB	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	ffddb6a8d6307471	-
+function	c:@F@sec_protocol_options_set_local_identity	-			void (sec_protocol_options_t, sec_identity_t)	sec_protocol_options_t options | sec_identity_t identity	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	7d54a404cbeab842	-
+function	c:@F@sec_protocol_options_append_tls_ciphersuite	-			void (sec_protocol_options_t, tls_ciphersuite_t)	sec_protocol_options_t options | tls_ciphersuite_t ciphersuite	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	23dc301a1459e58c	-
+function	c:@F@sec_protocol_options_add_tls_ciphersuite	-			void (sec_protocol_options_t, SSLCipherSuite)	sec_protocol_options_t options | SSLCipherSuite ciphersuite	-	ios=12.0/13.0/-/0,maccatalyst=13.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	ec01158f82399192	-
+function	c:@F@sec_protocol_options_append_tls_ciphersuite_group	-			void (sec_protocol_options_t, tls_ciphersuite_group_t)	sec_protocol_options_t options | tls_ciphersuite_group_t group	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	ff268eca9b8991c1	-
+function	c:@F@sec_protocol_options_add_tls_ciphersuite_group	-			void (sec_protocol_options_t, SSLCiphersuiteGroup)	sec_protocol_options_t options | SSLCiphersuiteGroup group	-	ios=12.0/13.0/-/0,maccatalyst=13.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	6a675e6679534d09	-
+function	c:@F@sec_protocol_options_set_tls_min_version	-			void (sec_protocol_options_t, SSLProtocol)	sec_protocol_options_t options | SSLProtocol version	-	ios=12.0/13.0/-/0,maccatalyst=13.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	4c9ac6b36584fae5	-
+function	c:@F@sec_protocol_options_set_min_tls_protocol_version	-			void (sec_protocol_options_t, tls_protocol_version_t)	sec_protocol_options_t options | tls_protocol_version_t version	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	cce0d4ba6f915a0e	-
+function	c:@F@sec_protocol_options_get_default_min_tls_protocol_version	-			tls_protocol_version_t (void)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	9e4797d1493a2b1d	-
+function	c:@F@sec_protocol_options_get_default_min_dtls_protocol_version	-			tls_protocol_version_t (void)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	7e89f69f2b4a5fc0	-
+function	c:@F@sec_protocol_options_set_tls_max_version	-			void (sec_protocol_options_t, SSLProtocol)	sec_protocol_options_t options | SSLProtocol version	-	ios=12.0/13.0/-/0,maccatalyst=13.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	c6849d8d46417c9b	-
+function	c:@F@sec_protocol_options_set_max_tls_protocol_version	-			void (sec_protocol_options_t, tls_protocol_version_t)	sec_protocol_options_t options | tls_protocol_version_t version	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	74c1c22a5bc9846c	-
+function	c:@F@sec_protocol_options_get_default_max_tls_protocol_version	-			tls_protocol_version_t (void)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	960fbbd91b40f84f	-
+function	c:@F@sec_protocol_options_get_default_max_dtls_protocol_version	-			tls_protocol_version_t (void)	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	a19343d026f28880	-
+function	c:@F@sec_protocol_options_get_enable_encrypted_client_hello	-			_Bool (sec_protocol_options_t)	sec_protocol_options_t options	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	7d9d24be94b18561	-
+function	c:@F@sec_protocol_options_get_quic_use_legacy_codepoint	-			_Bool (sec_protocol_options_t)	sec_protocol_options_t options	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	cac4840519f4422b	-
+function	c:@F@sec_protocol_options_add_tls_application_protocol	-			void (sec_protocol_options_t, const char *)	sec_protocol_options_t options | const char * application_protocol	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	7e4283c70ad94ced	-
+function	c:@F@sec_protocol_options_set_tls_server_name	-			void (sec_protocol_options_t, const char *)	sec_protocol_options_t options | const char * server_name	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	33ec08d636238c44	-
+function	c:@F@sec_protocol_options_set_tls_diffie_hellman_parameters	-			void (sec_protocol_options_t, dispatch_data_t)	sec_protocol_options_t options | dispatch_data_t params	-	ios=12.0/13.0/-/0,macos=10.14/10.15/-/0,tvos=12.0/13.0/-/0,watchos=5.0/6.0/-/0	-	936b4299dd892bab	-
+function	c:@F@sec_protocol_options_add_pre_shared_key	-			void (sec_protocol_options_t, dispatch_data_t, dispatch_data_t)	sec_protocol_options_t options | dispatch_data_t psk | dispatch_data_t psk_identity	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	a48f170fda6a27b7	-
+function	c:@F@sec_protocol_options_set_tls_pre_shared_key_identity_hint	-			void (sec_protocol_options_t, dispatch_data_t)	sec_protocol_options_t options | dispatch_data_t psk_identity_hint	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	6d8eeafa2d3454c7	-
+typedef	c:@T@sec_protocol_pre_shared_key_selection_complete_t	-			void ((^))(dispatch_data_t)	-	-	-	-	c7ff4d69ed475afa	-
+typedef	c:@T@sec_protocol_pre_shared_key_selection_t	-			void ((^))(sec_protocol_metadata_t, dispatch_data_t, sec_protocol_pre_shared_key_selection_complete_t)	-	-	-	-	53c4ee3e3969b7fc	-
+function	c:@F@sec_protocol_options_set_pre_shared_key_selection_block	-			void (sec_protocol_options_t, sec_protocol_pre_shared_key_selection_t, dispatch_queue_t)	sec_protocol_options_t options | sec_protocol_pre_shared_key_selection_t psk_selection_block | dispatch_queue_t psk_selection_queue	-	ios=13.0/-/-/0,macos=10.15/-/-/0,tvos=13.0/-/-/0,watchos=6.0/-/-/0	-	810fe8bebd3b484d	-
+function	c:@F@sec_protocol_options_set_tls_tickets_enabled	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool tickets_enabled	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	0b03baab34414f05	-
+function	c:@F@sec_protocol_options_set_tls_is_fallback_attempt	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool is_fallback_attempt	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	5592559e5a216e3a	-
+function	c:@F@sec_protocol_options_set_tls_resumption_enabled	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool resumption_enabled	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	ba21572603b456c0	-
+function	c:@F@sec_protocol_options_set_tls_false_start_enabled	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool false_start_enabled	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	225726b136b7598d	-
+function	c:@F@sec_protocol_options_set_tls_ocsp_enabled	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool ocsp_enabled	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8abc173b6cb4f144	-
+function	c:@F@sec_protocol_options_set_tls_sct_enabled	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool sct_enabled	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	828077c654120a03	-
+function	c:@F@sec_protocol_options_set_tls_renegotiation_enabled	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool renegotiation_enabled	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	0ca4562f0b882488	-
+function	c:@F@sec_protocol_options_set_peer_authentication_required	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool peer_authentication_required	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	b7a8500079361bb4	-
+function	c:@F@sec_protocol_options_set_peer_authentication_optional	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool peer_authentication_optional	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	07ab3b49116b6687	-
+function	c:@F@sec_protocol_options_set_enable_encrypted_client_hello	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool enable_encrypted_client_hello	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c23d8780d26dbafd	-
+function	c:@F@sec_protocol_options_set_quic_use_legacy_codepoint	-			void (sec_protocol_options_t, _Bool)	sec_protocol_options_t options | _Bool quic_use_legacy_codepoint	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	c4b505627a2e5a43	-
+typedef	c:@T@sec_protocol_key_update_complete_t	-			void ((^))(void)	-	-	-	-	d2c58084893bb094	-
+typedef	c:@T@sec_protocol_key_update_t	-			void ((^))(sec_protocol_metadata_t, sec_protocol_key_update_complete_t)	-	-	-	-	2f9867da784dc330	-
+typedef	c:@T@sec_protocol_challenge_complete_t	-			void ((^))(sec_identity_t)	-	-	-	-	f2fae513969a2fc4	-
+typedef	c:@T@sec_protocol_challenge_t	-			void ((^))(sec_protocol_metadata_t, sec_protocol_challenge_complete_t)	-	-	-	-	b7a08692255f01c6	-
+typedef	c:@T@sec_protocol_verify_complete_t	-			void ((^))(_Bool)	-	-	-	-	3ff49583a0a1b262	-
+typedef	c:@T@sec_protocol_verify_t	-			void ((^))(sec_protocol_metadata_t, sec_trust_t, sec_protocol_verify_complete_t)	-	-	-	-	053e96006bec521c	-
+function	c:@F@sec_protocol_options_set_key_update_block	-			void (sec_protocol_options_t, sec_protocol_key_update_t, dispatch_queue_t)	sec_protocol_options_t options | sec_protocol_key_update_t key_update_block | dispatch_queue_t key_update_queue	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	9675adb37ee674e4	-
+function	c:@F@sec_protocol_options_set_challenge_block	-			void (sec_protocol_options_t, sec_protocol_challenge_t, dispatch_queue_t)	sec_protocol_options_t options | sec_protocol_challenge_t challenge_block | dispatch_queue_t challenge_queue	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8ae91354f732e674	-
+function	c:@F@sec_protocol_options_set_verify_block	-			void (sec_protocol_options_t, sec_protocol_verify_t, dispatch_queue_t)	sec_protocol_options_t options | sec_protocol_verify_t verify_block | dispatch_queue_t verify_block_queue	-	ios=12.0/-/-/0,macos=10.14/-/-/0,tvos=12.0/-/-/0,watchos=5.0/-/-/0	-	8e499e8c6d446b80	-
+struct	c:@S@SSLContext	-			-	-	-	-	-	97f170b7216d16f3	-
+typedef	c:SecureTransport.h@T@SSLContextRef	-			struct SSLContext *	-	-	-	-	45510122092a08aa	-
+typedef	c:SecureTransport.h@T@SSLConnectionRef	-			const void *	-	-	-	-	bf238d01129fe1d7	-
+typedef	c:SecureTransport.h@T@SSLSessionOption	-			enum SSLSessionOption	-	-	-	-	7c4b9b1b0f8af0bc	-
+enum	c:@E@SSLSessionOption	-			int	-	-	-	-	2a6d03a7e7cf537c	-
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionBreakOnServerAuth	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	df138541d44d6c1a	0
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionBreakOnCertRequested	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	56b0a527c1dfc4c7	1
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionBreakOnClientAuth	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	20e10a114c3ef158	2
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionFalseStart	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	11a822e091f477f3	3
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionSendOneByteRecord	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	a4932d06cf36ca6e	4
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionAllowServerIdentityChange	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	9fb828cdea289056	5
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionFallback	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	74f42889fda9fd2e	6
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionBreakOnClientHello	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	22c4c5833da74c55	7
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionAllowRenegotiation	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	68a8c6610a5cba52	8
+enumconst	c:@E@SSLSessionOption@kSSLSessionOptionEnableSessionTickets	SSLSessionOption			-	-	-	ios=2.0/13.0/-/0	-	e2f680a76db673ec	9
+typedef	c:SecureTransport.h@T@SSLSessionState	-			enum SSLSessionState	-	-	-	-	59101bf339fad456	-
+enum	c:@E@SSLSessionState	-			int	-	-	-	-	69773c62786fe221	-
+enumconst	c:@E@SSLSessionState@kSSLIdle	SSLSessionState			-	-	-	ios=2.0/13.0/-/0	-	9eadac926333dcfa	0
+enumconst	c:@E@SSLSessionState@kSSLHandshake	SSLSessionState			-	-	-	ios=2.0/13.0/-/0	-	da858465d40356f0	1
+enumconst	c:@E@SSLSessionState@kSSLConnected	SSLSessionState			-	-	-	ios=2.0/13.0/-/0	-	d82523db8240ae5e	2
+enumconst	c:@E@SSLSessionState@kSSLClosed	SSLSessionState			-	-	-	ios=2.0/13.0/-/0	-	2fd826cfdebe34f8	3
+enumconst	c:@E@SSLSessionState@kSSLAborted	SSLSessionState			-	-	-	ios=2.0/13.0/-/0	-	99733b250593f196	4
+typedef	c:SecureTransport.h@T@SSLClientCertificateState	-			enum SSLClientCertificateState	-	-	-	-	9e1f154198ee67a5	-
+enum	c:@E@SSLClientCertificateState	-			int	-	-	-	-	ba6a9b36180cb0ee	-
+enumconst	c:@E@SSLClientCertificateState@kSSLClientCertNone	SSLClientCertificateState			-	-	-	ios=2.0/13.0/-/0	-	79310bc2bda9b716	0
+enumconst	c:@E@SSLClientCertificateState@kSSLClientCertRequested	SSLClientCertificateState			-	-	-	ios=2.0/13.0/-/0	-	4739ace9b6ffbd76	1
+enumconst	c:@E@SSLClientCertificateState@kSSLClientCertSent	SSLClientCertificateState			-	-	-	ios=2.0/13.0/-/0	-	03b6af1810ccb13e	2
+enumconst	c:@E@SSLClientCertificateState@kSSLClientCertRejected	SSLClientCertificateState			-	-	-	ios=2.0/13.0/-/0	-	2115c5ab86a1178d	3
+typedef	c:SecureTransport.h@T@SSLReadFunc	-			OSStatus (*)(SSLConnectionRef _Nonnull, void * _Nonnull, size_t * _Nonnull)	-	-	-	-	f29d4c31f721e40e	-
+typedef	c:SecureTransport.h@T@SSLWriteFunc	-			OSStatus (*)(SSLConnectionRef _Nonnull, const void * _Nonnull, size_t * _Nonnull)	-	-	-	-	6c86a43a94b14f0b	-
+typedef	c:SecureTransport.h@T@SSLProtocolSide	-			enum SSLProtocolSide	-	-	-	-	e697c43528aafa6b	-
+enum	c:@E@SSLProtocolSide	-			int	-	-	-	-	4f27b2e66717a1b4	-
+enumconst	c:@E@SSLProtocolSide@kSSLServerSide	SSLProtocolSide			-	-	-	ios=2.0/13.0/-/0	-	527018f89de2c865	0
+enumconst	c:@E@SSLProtocolSide@kSSLClientSide	SSLProtocolSide			-	-	-	ios=2.0/13.0/-/0	-	c28fe5c3fbd70c3b	1
+typedef	c:SecureTransport.h@T@SSLConnectionType	-			enum SSLConnectionType	-	-	-	-	1bffeb6cdba0a16f	-
+enum	c:@E@SSLConnectionType	-			int	-	-	-	-	08e21acdcda1cfb0	-
+enumconst	c:@E@SSLConnectionType@kSSLStreamType	SSLConnectionType			-	-	-	ios=2.0/13.0/-/0	-	fb4e231e5bb5ee15	0
+enumconst	c:@E@SSLConnectionType@kSSLDatagramType	SSLConnectionType			-	-	-	ios=2.0/13.0/-/0	-	6e85ec6d1f29efa8	1
+var	c:@kSSLSessionConfig_default	-			const CFStringRef	-	-	ios=5.0/11.0/-/0,macos=10.2/10.13/-/0	-	9eb0f3028f3d0558	-
+var	c:@kSSLSessionConfig_ATSv1	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	2a331b224c250569	-
+var	c:@kSSLSessionConfig_ATSv1_noPFS	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	be3c5bee91b80d10	-
+var	c:@kSSLSessionConfig_standard	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	5818f0c3b3b96732	-
+var	c:@kSSLSessionConfig_RC4_fallback	-			const CFStringRef	-	-	ios=5.0/11.0/-/0,macos=10.2/10.13/-/0	-	1b66adf9a55a9ce0	-
+var	c:@kSSLSessionConfig_TLSv1_fallback	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	5a5871dd998e7f77	-
+var	c:@kSSLSessionConfig_TLSv1_RC4_fallback	-			const CFStringRef	-	-	ios=5.0/11.0/-/0,macos=10.2/10.13/-/0	-	f1bb0ee5fd0643a9	-
+var	c:@kSSLSessionConfig_legacy	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	47a16e20758e0de2	-
+var	c:@kSSLSessionConfig_legacy_DHE	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	e348cd22e3e174a2	-
+var	c:@kSSLSessionConfig_anonymous	-			const CFStringRef	-	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	c149e464740589c6	-
+var	c:@kSSLSessionConfig_3DES_fallback	-			const CFStringRef	-	-	ios=5.0/11.0/-/0,macos=10.2/10.13/-/0	-	7571296d5abd3497	-
+var	c:@kSSLSessionConfig_TLSv1_3DES_fallback	-			const CFStringRef	-	-	ios=5.0/11.0/-/0,macos=10.2/10.13/-/0	-	3e4dbb3547d54911	-
+function	c:@F@SSLContextGetTypeID	-			CFTypeID (void)	-	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	3bb8e784d79616bd	-
+function	c:@F@SSLCreateContext	-			SSLContextRef (CFAllocatorRef, SSLProtocolSide, SSLConnectionType)	CFAllocatorRef alloc | SSLProtocolSide protocolSide | SSLConnectionType connectionType	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	e97fda6b91844345	-
+function	c:@F@SSLGetSessionState	-			OSStatus (SSLContextRef, SSLSessionState *)	SSLContextRef context | SSLSessionState * state	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	25cec88a0e32b1fc	-
+function	c:@F@SSLSetSessionOption	-			OSStatus (SSLContextRef, SSLSessionOption, Boolean)	SSLContextRef context | SSLSessionOption option | Boolean value	-	ios=5.0/13.0/-/0,macos=10.6/10.15/-/0	-	2bbb922b1d050f93	-
+function	c:@F@SSLGetSessionOption	-			OSStatus (SSLContextRef, SSLSessionOption, Boolean *)	SSLContextRef context | SSLSessionOption option | Boolean * value	-	ios=5.0/13.0/-/0,macos=10.6/10.15/-/0	-	578684845fb5062a	-
+function	c:@F@SSLSetIOFuncs	-			OSStatus (SSLContextRef, SSLReadFunc, SSLWriteFunc)	SSLContextRef context | SSLReadFunc readFunc | SSLWriteFunc writeFunc	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	766ad03eb8a2a0e1	-
+function	c:@F@SSLSetSessionConfig	-			OSStatus (SSLContextRef, CFStringRef)	SSLContextRef context | CFStringRef config	-	ios=10.0/13.0/-/0,macos=10.12/10.15/-/0	-	d604896f80504c85	-
+function	c:@F@SSLSetProtocolVersionMin	-			OSStatus (SSLContextRef, SSLProtocol)	SSLContextRef context | SSLProtocol minVersion	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	027d80b0cc3f7042	-
+function	c:@F@SSLGetProtocolVersionMin	-			OSStatus (SSLContextRef, SSLProtocol *)	SSLContextRef context | SSLProtocol * minVersion	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	4d7cce317e9febc0	-
+function	c:@F@SSLSetProtocolVersionMax	-			OSStatus (SSLContextRef, SSLProtocol)	SSLContextRef context | SSLProtocol maxVersion	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	b026e257a0f180a6	-
+function	c:@F@SSLGetProtocolVersionMax	-			OSStatus (SSLContextRef, SSLProtocol *)	SSLContextRef context | SSLProtocol * maxVersion	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	d26dee0fbf6f90be	-
+function	c:@F@SSLSetCertificate	-			OSStatus (SSLContextRef, CFArrayRef)	SSLContextRef context | CFArrayRef certRefs	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	a4bc649bbc4aa26f	-
+function	c:@F@SSLSetConnection	-			OSStatus (SSLContextRef, SSLConnectionRef)	SSLContextRef context | SSLConnectionRef connection	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	c06482ecc8bb27af	-
+function	c:@F@SSLGetConnection	-			OSStatus (SSLContextRef, SSLConnectionRef  _Nullable *)	SSLContextRef context | SSLConnectionRef  _Nullable * connection	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	e717f1b81258f8e1	-
+function	c:@F@SSLSetPeerDomainName	-			OSStatus (SSLContextRef, const char *, size_t)	SSLContextRef context | const char * peerName | size_t peerNameLen	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	e974287d5fa70bfb	-
+function	c:@F@SSLGetPeerDomainNameLength	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef context | size_t * peerNameLen	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	aef92a207832fc47	-
+function	c:@F@SSLGetPeerDomainName	-			OSStatus (SSLContextRef, char *, size_t *)	SSLContextRef context | char * peerName | size_t * peerNameLen	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	9cc64268067770a8	-
+function	c:@F@SSLCopyRequestedPeerNameLength	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef ctx | size_t * peerNameLen	-	ios=9.0/13.0/-/0,macos=10.11/10.15/-/0	-	fe8456a3292eb7f7	-
+function	c:@F@SSLCopyRequestedPeerName	-			OSStatus (SSLContextRef, char *, size_t *)	SSLContextRef context | char * peerName | size_t * peerNameLen	-	ios=9.0/13.0/-/0,macos=10.11/10.15/-/0	-	1ff3d6c19308590c	-
+function	c:@F@SSLSetDatagramHelloCookie	-			OSStatus (SSLContextRef, const void *, size_t)	SSLContextRef dtlsContext | const void * cookie | size_t cookieLen	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	42ed10e7d076d231	-
+function	c:@F@SSLSetMaxDatagramRecordSize	-			OSStatus (SSLContextRef, size_t)	SSLContextRef dtlsContext | size_t maxSize	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	753da42d32c42441	-
+function	c:@F@SSLGetMaxDatagramRecordSize	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef dtlsContext | size_t * maxSize	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	bd4c8afd24edf2fa	-
+function	c:@F@SSLGetNegotiatedProtocolVersion	-			OSStatus (SSLContextRef, SSLProtocol *)	SSLContextRef context | SSLProtocol * protocol	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	c9e1883f6162d0f1	-
+function	c:@F@SSLGetNumberSupportedCiphers	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef context | size_t * numCiphers	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	96811f6438aa1ff2	-
+function	c:@F@SSLGetSupportedCiphers	-			OSStatus (SSLContextRef, SSLCipherSuite *, size_t *)	SSLContextRef context | SSLCipherSuite * ciphers | size_t * numCiphers	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	064a99c8b8d19640	-
+function	c:@F@SSLGetNumberEnabledCiphers	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef context | size_t * numCiphers	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	71d67409e99c6a12	-
+function	c:@F@SSLSetEnabledCiphers	-			OSStatus (SSLContextRef, const SSLCipherSuite *, size_t)	SSLContextRef context | const SSLCipherSuite * ciphers | size_t numCiphers	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	25698b3f6d7c12de	-
+function	c:@F@SSLGetEnabledCiphers	-			OSStatus (SSLContextRef, SSLCipherSuite *, size_t *)	SSLContextRef context | SSLCipherSuite * ciphers | size_t * numCiphers	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	1a4a412275e36c13	-
+function	c:@F@SSLSetSessionTicketsEnabled	-			OSStatus (SSLContextRef, Boolean)	SSLContextRef context | Boolean enabled	-	ios=11.0/13.0/-/0,macos=10.13/10.15/-/0	-	10b1e5b363d1a016	-
+function	c:@F@SSLCopyPeerTrust	-			OSStatus (SSLContextRef, SecTrustRef  _Nullable *)	SSLContextRef context | SecTrustRef  _Nullable * trust	-	ios=5.0/13.0/-/0,macos=10.6/10.15/-/0	-	b89170be2d168f9f	-
+function	c:@F@SSLSetPeerID	-			OSStatus (SSLContextRef, const void *, size_t)	SSLContextRef context | const void * peerID | size_t peerIDLen	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	3831255ea2886091	-
+function	c:@F@SSLGetPeerID	-			OSStatus (SSLContextRef, const void * _Nullable *, size_t *)	SSLContextRef context | const void * _Nullable * peerID | size_t * peerIDLen	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	f6244d4c28bbb1bc	-
+function	c:@F@SSLGetNegotiatedCipher	-			OSStatus (SSLContextRef, SSLCipherSuite *)	SSLContextRef context | SSLCipherSuite * cipherSuite	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	ca1bce9a4486c2ff	-
+function	c:@F@SSLSetALPNProtocols	-			OSStatus (SSLContextRef, CFArrayRef)	SSLContextRef context | CFArrayRef protocols	-	ios=11.0/13.0/-/0,macos=10.13/10.15/-/0	-	3b820d951cf3fb5b	-
+function	c:@F@SSLCopyALPNProtocols	-			OSStatus (SSLContextRef, CFArrayRef  _Nullable *)	SSLContextRef context | CFArrayRef  _Nullable * protocols	-	ios=11.0/13.0/-/0,macos=10.13/10.15/-/0	-	5de83bd22343f010	-
+function	c:@F@SSLSetOCSPResponse	-			OSStatus (SSLContextRef, CFDataRef)	SSLContextRef context | CFDataRef response	-	ios=11.0/13.0/-/0,macos=10.13/10.15/-/0	-	610673fb05c5b2bc	-
+function	c:@F@SSLSetEncryptionCertificate	-			OSStatus (SSLContextRef, CFArrayRef)	SSLContextRef context | CFArrayRef certRefs	-	ios=5.0/9.0/-/0,macos=10.2/10.11/-/0	-	63349531a26a0394	-
+typedef	c:SecureTransport.h@T@SSLAuthenticate	-			enum SSLAuthenticate	-	-	-	-	77caedf9c6c4aa44	-
+enum	c:@E@SSLAuthenticate	-			int	-	-	-	-	471b9f82755cb385	-
+enumconst	c:@E@SSLAuthenticate@kNeverAuthenticate	SSLAuthenticate			-	-	-	-	-	27f5cd412317acee	0
+enumconst	c:@E@SSLAuthenticate@kAlwaysAuthenticate	SSLAuthenticate			-	-	-	-	-	81d1b85af29b51e6	1
+enumconst	c:@E@SSLAuthenticate@kTryAuthenticate	SSLAuthenticate			-	-	-	-	-	6e772c0e23e338dd	2
+function	c:@F@SSLSetClientSideAuthenticate	-			OSStatus (SSLContextRef, SSLAuthenticate)	SSLContextRef context | SSLAuthenticate auth	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	c54d71865e04c327	-
+function	c:@F@SSLAddDistinguishedName	-			OSStatus (SSLContextRef, const void *, size_t)	SSLContextRef context | const void * derDN | size_t derDNLen	-	ios=5.0/13.0/-/0,macos=10.4/10.15/-/0	-	85663710b20bbf27	-
+function	c:@F@SSLCopyDistinguishedNames	-			OSStatus (SSLContextRef, CFArrayRef  _Nullable *)	SSLContextRef context | CFArrayRef  _Nullable * names	-	ios=5.0/13.0/-/0,macos=10.5/10.15/-/0	-	9dc7598e8b3ba2ad	-
+function	c:@F@SSLGetClientCertificateState	-			OSStatus (SSLContextRef, SSLClientCertificateState *)	SSLContextRef context | SSLClientCertificateState * clientState	-	ios=5.0/13.0/-/0,macos=10.3/10.15/-/0	-	6e6540c0f1aa2f36	-
+function	c:@F@SSLHandshake	-			OSStatus (SSLContextRef)	SSLContextRef context	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	9d599049fd566541	-
+function	c:@F@SSLReHandshake	-			OSStatus (SSLContextRef)	SSLContextRef context	-	ios=10.0/13.0/-/0,macos=10.12/10.15/-/0	-	a64972e2f7bdebb6	-
+function	c:@F@SSLWrite	-			OSStatus (SSLContextRef, const void *, size_t, size_t *)	SSLContextRef context | const void * data | size_t dataLength | size_t * processed	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	e9850afcb5b732ad	-
+function	c:@F@SSLRead	-			OSStatus (SSLContextRef, void *, size_t, size_t *)	SSLContextRef context | void * data | size_t dataLength | size_t * processed	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	fa4105c54807aa32	-
+function	c:@F@SSLGetBufferedReadSize	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef context | size_t * bufferSize	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	5eb897de5e45ab1f	-
+function	c:@F@SSLGetDatagramWriteSize	-			OSStatus (SSLContextRef, size_t *)	SSLContextRef dtlsContext | size_t * bufSize	-	ios=5.0/13.0/-/0,macos=10.8/10.15/-/0	-	43c60023d77c20c3	-
+function	c:@F@SSLClose	-			OSStatus (SSLContextRef)	SSLContextRef context	-	ios=5.0/13.0/-/0,macos=10.2/10.15/-/0	-	890c2347d75bd5f0	-
+function	c:@F@SSLSetError	-			OSStatus (SSLContextRef, OSStatus)	SSLContextRef context | OSStatus status	-	ios=11.0/13.0/-/0,macos=10.13/10.15/-/0	-	3bf690eb12e43dd1	-
+function	c:@F@SecAccessControlGetTypeID	-			CFTypeID (void)	-	-	ios=8.0/-/-/0	-	7163a9b41f94a1ee	-
+typedef	c:@T@SecAccessControlCreateFlags	-			enum SecAccessControlCreateFlags	-	-	-	-	6dd65ddfb001c13a	-
+enum	c:@E@SecAccessControlCreateFlags	-			CFOptionFlags	-	-	ios=8.0/-/-/0	-	a1bb25c314539733	-
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlUserPresence	SecAccessControlCreateFlags			-	-	-	ios=8.0/-/-/0	-	b22aa469c5da7013	1
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlBiometryAny	SecAccessControlCreateFlags			-	-	-	ios=11.3/-/-/0,macos=10.13.4/-/-/0	-	751d434887e1e9d4	2
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlTouchIDAny	SecAccessControlCreateFlags			-	-	-	ios=9.0/11.3/-/0,macos=10.12.1/10.13.4/-/0	deprecated: Use kSecAccessControlBiometryAny instead	59b3b85965e3ac02	2
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlBiometryCurrentSet	SecAccessControlCreateFlags			-	-	-	ios=11.3/-/-/0,macos=10.13.4/-/-/0	-	1fdd18ca15f35b92	8
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlTouchIDCurrentSet	SecAccessControlCreateFlags			-	-	-	ios=9.0/11.3/-/0,macos=10.12.1/10.13.4/-/0	deprecated: Use kSecAccessControlBiometryCurrentSet instead	265f14206c3ebc44	8
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlDevicePasscode	SecAccessControlCreateFlags			-	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	809cacc4c00cdae0	16
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlWatch	SecAccessControlCreateFlags			-	-	-	ios=-/-/-/1,maccatalyst=13.0/18.0/-/0,macos=10.15/15.0/-/0	deprecated: Use kSecAccessControlCompanion instead	cc5154567952e953	32
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlCompanion	SecAccessControlCreateFlags			-	-	-	ios=18.0/-/-/0,maccatalyst=18.0/-/-/0,macos=15.0/-/-/0	-	a97b5b4e4a8320e1	32
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlOr	SecAccessControlCreateFlags			-	-	-	ios=9.0/-/-/0,macos=10.12.1/-/-/0	-	1cb816a08b4d87b7	16384
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlAnd	SecAccessControlCreateFlags			-	-	-	ios=9.0/-/-/0,macos=10.12.1/-/-/0	-	0e2f2707ae43b9a1	32768
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlPrivateKeyUsage	SecAccessControlCreateFlags			-	-	-	ios=9.0/-/-/0,macos=10.12.1/-/-/0	-	4fa9e0499609bedb	1073741824
+enumconst	c:@E@SecAccessControlCreateFlags@kSecAccessControlApplicationPassword	SecAccessControlCreateFlags			-	-	-	ios=9.0/-/-/0,macos=10.12.1/-/-/0	-	edb0f35723aae3f2	2147483648
+function	c:@F@SecAccessControlCreateWithFlags	-			SecAccessControlRef (CFAllocatorRef, CFTypeRef, SecAccessControlCreateFlags, CFErrorRef  _Nullable *)	CFAllocatorRef allocator | CFTypeRef protection | SecAccessControlCreateFlags flags | CFErrorRef  _Nullable * error	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	80a47f662a918924	-
+var	c:@kSecClass	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	1cbe2f09a432004a	-
+var	c:@kSecClassInternetPassword	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	ddaaeefdcc241701	-
+var	c:@kSecClassGenericPassword	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	7cf964d18baa6202	-
+var	c:@kSecClassCertificate	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	45c2343bdec72ca5	-
+var	c:@kSecClassKey	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	0c6b28627bd06502	-
+var	c:@kSecClassIdentity	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	92ee017ee499a9cf	-
+var	c:@kSecAttrAccessible	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.9/-/-/0	-	cff1569084b70105	-
+var	c:@kSecAttrAccess	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	a035dc360bf5ab31	-
+var	c:@kSecAttrAccessControl	-			const CFStringRef	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	899c21247876fc3d	-
+var	c:@kSecAttrAccessGroup	-			const CFStringRef	-	-	ios=3.0/-/-/0,macos=10.9/-/-/0	-	d351c61e06c3113f	-
+var	c:@kSecAttrSynchronizable	-			const CFStringRef	-	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	b42c835541c9aee9	-
+var	c:@kSecAttrSynchronizableAny	-			const CFStringRef	-	-	ios=7.0/-/-/0,macos=10.9/-/-/0	-	73ad7b6edaecb788	-
+var	c:@kSecAttrCreationDate	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	8e8be28841e0c54f	-
+var	c:@kSecAttrModificationDate	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	9546c1ee6c30e16b	-
+var	c:@kSecAttrDescription	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	80d447387175a9cd	-
+var	c:@kSecAttrComment	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	fd954c8aec68bcf2	-
+var	c:@kSecAttrCreator	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f29a96308dc2d67d	-
+var	c:@kSecAttrType	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	12cb1c8a25009594	-
+var	c:@kSecAttrLabel	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e06a779c18a82395	-
+var	c:@kSecAttrIsInvisible	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	8dddd6a40a54d2a1	-
+var	c:@kSecAttrIsNegative	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	7fdf5446dbc1c6d6	-
+var	c:@kSecAttrAccount	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	ef07f10950b39f8c	-
+var	c:@kSecAttrService	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f764b9fedf389b76	-
+var	c:@kSecAttrGeneric	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e14788103045944e	-
+var	c:@kSecAttrSecurityDomain	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f96d6a2835dedda2	-
+var	c:@kSecAttrServer	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	27e362a1c0ec0bcd	-
+var	c:@kSecAttrProtocol	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	4d20d57727b69379	-
+var	c:@kSecAttrAuthenticationType	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	80ac0b4e1e7c9d13	-
+var	c:@kSecAttrPort	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5cd4abac8cf85ca3	-
+var	c:@kSecAttrPath	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	7ffc861b25c6f9fd	-
+var	c:@kSecAttrSubject	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5f96366337bfbca2	-
+var	c:@kSecAttrIssuer	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	b51a4aa7918ec7c0	-
+var	c:@kSecAttrSerialNumber	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	445fde55bda904e7	-
+var	c:@kSecAttrSubjectKeyID	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f285601315da8685	-
+var	c:@kSecAttrPublicKeyHash	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	c131ce689ad09f6c	-
+var	c:@kSecAttrCertificateType	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	c30f37aad649c8f9	-
+var	c:@kSecAttrCertificateEncoding	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	d105e1cb05b8410f	-
+var	c:@kSecAttrKeyClass	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	1c18cfb65914ef7e	-
+var	c:@kSecAttrApplicationLabel	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	6241d7f691fd8ef2	-
+var	c:@kSecAttrIsPermanent	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	fe3e6a4f60145fbe	-
+var	c:@kSecAttrIsSensitive	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	3095fc9831e7b406	-
+var	c:@kSecAttrIsExtractable	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	b2ca430d8be362a3	-
+var	c:@kSecAttrApplicationTag	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	7ec7fe1d3b5c7106	-
+var	c:@kSecAttrKeyType	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	bb4a3ae80cfa7307	-
+var	c:@kSecAttrPRF	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	c7871e7c93afe511	-
+var	c:@kSecAttrSalt	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	0fb94beba926ffba	-
+var	c:@kSecAttrRounds	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	302018093ddd44a0	-
+var	c:@kSecAttrKeySizeInBits	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	63eaf67a070d1fe3	-
+var	c:@kSecAttrEffectiveKeySize	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	19fa16a8d1b0d1d5	-
+var	c:@kSecAttrCanEncrypt	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	7aff79d416bf7e07	-
+var	c:@kSecAttrCanDecrypt	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	d4dc4d474b82abca	-
+var	c:@kSecAttrCanDerive	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	257bfd754638d7bd	-
+var	c:@kSecAttrCanSign	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	85b200d5747bf914	-
+var	c:@kSecAttrCanVerify	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	aa80d597d17082b1	-
+var	c:@kSecAttrCanWrap	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	d69207869887eb68	-
+var	c:@kSecAttrCanUnwrap	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	8e107d8b5c021d7b	-
+var	c:@kSecAttrSyncViewHint	-			const CFStringRef	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	6beb19acee1e6fa1	-
+var	c:@kSecAttrTokenID	-			const CFStringRef	-	-	ios=9.0/-/-/0,macos=10.12/-/-/0	-	aedf17d2a03ef595	-
+var	c:@kSecAttrPersistantReference	-			const CFStringRef	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2f6d8bb852565d3e	-
+var	c:@kSecAttrPersistentReference	-			const CFStringRef	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2f47f5f051d45f10	-
+var	c:@kSecAttrAccessibleWhenUnlocked	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.9/-/-/0	-	05946b5695d0fbfd	-
+var	c:@kSecAttrAccessibleAfterFirstUnlock	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.9/-/-/0	-	ff9e1f6996c8fff9	-
+var	c:@kSecAttrAccessibleAlways	-			const CFStringRef	-	-	ios=4.0/12.0/-/0,macos=10.9/10.14/-/0	-	1a5b3d4d9051de56	-
+var	c:@kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly	-			const CFStringRef	-	-	ios=8.0/-/-/0,macos=10.10/-/-/0	-	a3953034c2b95d63	-
+var	c:@kSecAttrAccessibleWhenUnlockedThisDeviceOnly	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.9/-/-/0	-	6f8f8a99282a847a	-
+var	c:@kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.9/-/-/0	-	c2354f2491173687	-
+var	c:@kSecAttrAccessibleAlwaysThisDeviceOnly	-			const CFStringRef	-	-	ios=4.0/12.0/-/0,macos=10.9/10.14/-/0	-	5da600a4ce401fbb	-
+var	c:@kSecAttrProtocolFTP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	09846ce02ec3ecdc	-
+var	c:@kSecAttrProtocolFTPAccount	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e5cee092a864114d	-
+var	c:@kSecAttrProtocolHTTP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	bc492bac08e550e5	-
+var	c:@kSecAttrProtocolIRC	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	20802f8e2dbb0998	-
+var	c:@kSecAttrProtocolNNTP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	125a19ff6784a41d	-
+var	c:@kSecAttrProtocolPOP3	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	55436e20b7e6e78d	-
+var	c:@kSecAttrProtocolSMTP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	9ff7c121c26ddca4	-
+var	c:@kSecAttrProtocolSOCKS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e7c118c75af89b23	-
+var	c:@kSecAttrProtocolIMAP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	1ca7041521aa5115	-
+var	c:@kSecAttrProtocolLDAP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	fcbcdc3d0f3e1f20	-
+var	c:@kSecAttrProtocolAppleTalk	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	e552c1139f8b25cf	-
+var	c:@kSecAttrProtocolAFP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	6f0c70885f124adb	-
+var	c:@kSecAttrProtocolTelnet	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	10b1da90742fa764	-
+var	c:@kSecAttrProtocolSSH	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	1405d22593825340	-
+var	c:@kSecAttrProtocolFTPS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5fa6324b737ddae0	-
+var	c:@kSecAttrProtocolHTTPS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	d96bacd0f038dfa8	-
+var	c:@kSecAttrProtocolHTTPProxy	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	6eed38ada81801ac	-
+var	c:@kSecAttrProtocolHTTPSProxy	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	aba632163b04988c	-
+var	c:@kSecAttrProtocolFTPProxy	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	37ea35c08cd58432	-
+var	c:@kSecAttrProtocolSMB	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	4fc55c3e6fcab268	-
+var	c:@kSecAttrProtocolRTSP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	146f1b3e77aadb9f	-
+var	c:@kSecAttrProtocolRTSPProxy	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	acc2969ec01f4230	-
+var	c:@kSecAttrProtocolDAAP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	082a86dfbe579fa4	-
+var	c:@kSecAttrProtocolEPPC	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	fd7d2d575e6d07e6	-
+var	c:@kSecAttrProtocolIPP	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	c235f917d4142ef7	-
+var	c:@kSecAttrProtocolNNTPS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	eafc3c38bdf028d2	-
+var	c:@kSecAttrProtocolLDAPS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	a65cc4cf19faf067	-
+var	c:@kSecAttrProtocolTelnetS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	213a1b66a4704842	-
+var	c:@kSecAttrProtocolIMAPS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	44b1d225d6204e9e	-
+var	c:@kSecAttrProtocolIRCS	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	9637848dbecc3b84	-
+var	c:@kSecAttrProtocolPOP3S	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	7b1be7083f899550	-
+var	c:@kSecAttrAuthenticationTypeNTLM	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	cfca15b58b45c9b0	-
+var	c:@kSecAttrAuthenticationTypeMSN	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	762e53d4a0b81c6f	-
+var	c:@kSecAttrAuthenticationTypeDPA	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	d9ca741abf178f74	-
+var	c:@kSecAttrAuthenticationTypeRPA	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	207d6210a193d132	-
+var	c:@kSecAttrAuthenticationTypeHTTPBasic	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	84a3c88c922a4eee	-
+var	c:@kSecAttrAuthenticationTypeHTTPDigest	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5faca4b0e36d88cd	-
+var	c:@kSecAttrAuthenticationTypeHTMLForm	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	7e66dfd002d90698	-
+var	c:@kSecAttrAuthenticationTypeDefault	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	bc008a7b6ba8735d	-
+var	c:@kSecAttrKeyClassPublic	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	c432b97000fc9696	-
+var	c:@kSecAttrKeyClassPrivate	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	5da0fd6fda4cff56	-
+var	c:@kSecAttrKeyClassSymmetric	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	c7693b1a926b5695	-
+var	c:@kSecAttrKeyTypeRSA	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.7/-/-/0	-	664e113c0c0b797b	-
+var	c:@kSecAttrKeyTypeDSA	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	788b6aad223b19d0	-
+var	c:@kSecAttrKeyTypeAES	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	5c9d1040ae7e77f6	-
+var	c:@kSecAttrKeyTypeDES	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	e20edf706a98e9b5	-
+var	c:@kSecAttrKeyType3DES	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	0f24024c31790eff	-
+var	c:@kSecAttrKeyTypeRC4	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	dacc5a17cc621d68	-
+var	c:@kSecAttrKeyTypeRC2	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	d27a77e67e43ea0c	-
+var	c:@kSecAttrKeyTypeCAST	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	af309c3458582775	-
+var	c:@kSecAttrKeyTypeECDSA	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	ddd7ad54d8d70832	-
+var	c:@kSecAttrKeyTypeEC	-			const CFStringRef	-	-	ios=4.0/-/-/0,macos=10.9/-/-/0	-	c962b7feb34a6e31	-
+var	c:@kSecAttrKeyTypeECSECPrimeRandom	-			const CFStringRef	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	e1e23c4e806ece62	-
+var	c:@kSecAttrPRFHmacAlgSHA1	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	7b1f42100cd3fc56	-
+var	c:@kSecAttrPRFHmacAlgSHA224	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	9b2c8479f330d799	-
+var	c:@kSecAttrPRFHmacAlgSHA256	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	47a09411505d756e	-
+var	c:@kSecAttrPRFHmacAlgSHA384	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	2f8159e0e31de551	-
+var	c:@kSecAttrPRFHmacAlgSHA512	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	fa7c1cfa7e7d28e5	-
+var	c:@kSecMatchPolicy	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	4701769ef32001b5	-
+var	c:@kSecMatchItemList	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5c7f26439852f8c2	-
+var	c:@kSecMatchSearchList	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	4e7b5e3edc7f9a51	-
+var	c:@kSecMatchIssuers	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	91dd553a03b3c089	-
+var	c:@kSecMatchEmailAddressIfPresent	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	a6ce0ef052761f05	-
+var	c:@kSecMatchSubjectContains	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	b4bdd2a0a377a982	-
+var	c:@kSecMatchHostOrSubdomainOfHost	-			const CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	d4d1ba14bfc498f4	-
+var	c:@kSecMatchSubjectStartsWith	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	136166dc55d2e634	-
+var	c:@kSecMatchSubjectEndsWith	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	3bfe829a880b32a2	-
+var	c:@kSecMatchSubjectWholeString	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	19fbe3ecbba0d2b3	-
+var	c:@kSecMatchCaseInsensitive	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	92f51c464d25b9f0	-
+var	c:@kSecMatchDiacriticInsensitive	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	af16eb6f878726aa	-
+var	c:@kSecMatchWidthInsensitive	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	d69122a628422f6d	-
+var	c:@kSecMatchTrustedOnly	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	b1cbce1d107d2455	-
+var	c:@kSecMatchValidOnDate	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	309ae2f53736878c	-
+var	c:@kSecMatchLimit	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	f0865a0d4b494cc1	-
+var	c:@kSecMatchLimitOne	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5dde29c063fb5c8e	-
+var	c:@kSecMatchLimitAll	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	301da21823be8c9c	-
+var	c:@kSecReturnData	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	dd3ee28da84eac7f	-
+var	c:@kSecReturnAttributes	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	ce011c219e9a0f90	-
+var	c:@kSecReturnRef	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	d26a986ea1bcf8c9	-
+var	c:@kSecReturnPersistentRef	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	672aa53463b88bdc	-
+var	c:@kSecValueData	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	09d3bb170b8ec22e	-
+var	c:@kSecValueRef	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	53434053caaae296	-
+var	c:@kSecValuePersistentRef	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	49c2b4f78f5b6f27	-
+var	c:@kSecUseItemList	-			const CFStringRef	-	-	ios=2.0/12.0/-/0,maccatalyst=13.0/13.0/-/0,macos=10.6/-/-/0,tvos=9.0/12.0/-/0,watchos=1.0/5.0/-/0	-	fc8a8f2cb26aa08e	-
+var	c:@kSecUseKeychain	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	bd1605d7df6dd051	-
+var	c:@kSecUseOperationPrompt	-			const CFStringRef	-	-	ios=8.0/14.0/-/0,macos=10.10/11.0/-/0	-	46f37e4db6d5d6b0	-
+var	c:@kSecUseNoAuthenticationUI	-			const CFStringRef	-	-	ios=8.0/9.0/-/0,macos=10.10/10.11/-/0	-	99644e37b8e6167b	-
+var	c:@kSecUseAuthenticationUI	-			const CFStringRef	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	1c74743b536d1677	-
+var	c:@kSecUseAuthenticationContext	-			const CFStringRef	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	8fefb486c75dc548	-
+var	c:@kSecUseDataProtectionKeychain	-			const CFStringRef	-	-	ios=13.0/-/-/0,macos=10.15/-/-/0	-	2a4b8baab8ef7478	-
+var	c:@kSecUseUserIndependentKeychain	-			const CFStringRef	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=-/-/-/1,tvos=16.0/-/-/0,watchos=-/-/-/1	-	42f027b94ae9d56f	-
+var	c:@kSecUseAuthenticationUIAllow	-			const CFStringRef	-	-	ios=9.0/14.0/-/0,macos=10.11/11.0/-/0	-	a46902e2d56daea8	-
+var	c:@kSecUseAuthenticationUIFail	-			const CFStringRef	-	-	ios=9.0/14.0/-/0,macos=10.11/11.0/-/0	-	cea39203021c8daa	-
+var	c:@kSecUseAuthenticationUISkip	-			const CFStringRef	-	-	ios=9.0/-/-/0,macos=10.11/-/-/0	-	1cd902a49a0d691c	-
+var	c:@kSecAttrTokenIDSecureEnclave	-			const CFStringRef	-	-	ios=9.0/-/-/0,macos=10.12/-/-/0	-	191ff201cce8ed06	-
+var	c:@kSecAttrAccessGroupToken	-			const CFStringRef	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0	-	1ee3f20d53cb278f	-
+function	c:@F@SecItemCopyMatching	-			OSStatus (CFDictionaryRef, CFTypeRef  _Nullable *)	CFDictionaryRef query | CFTypeRef  _Nullable * result	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	ab3dec4ed4d15469	-
+function	c:@F@SecItemAdd	-			OSStatus (CFDictionaryRef, CFTypeRef  _Nullable *)	CFDictionaryRef attributes | CFTypeRef  _Nullable * result	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	4554ab56832fdfa8	-
+function	c:@F@SecItemUpdate	-			OSStatus (CFDictionaryRef, CFDictionaryRef)	CFDictionaryRef query | CFDictionaryRef attributesToUpdate	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	86b561b0cee068b0	-
+function	c:@F@SecItemDelete	-			OSStatus (CFDictionaryRef)	CFDictionaryRef query	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	aedba5b1f660f0a8	-
+typedef	c:@T@SecPadding	-			enum SecPadding	-	-	-	-	59ed5793c71db103	-
+enum	c:@E@SecPadding	-			uint32_t	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	1285bbfdab16cc58	-
+enumconst	c:@E@SecPadding@kSecPaddingNone	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	d17f306905d92af1	0
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	be5418f4528d78f5	1
+enumconst	c:@E@SecPadding@kSecPaddingOAEP	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	fb60e6218e000baf	2
+enumconst	c:@E@SecPadding@kSecPaddingSigRaw	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	064895c4677a3ce1	16384
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1MD2	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	ada80eddc9aa3a14	32768
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1MD5	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	b8b78774f442338f	32769
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1SHA1	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	a610465a5f6ed07c	32770
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1SHA224	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	b7d31e9d55574bc7	32771
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1SHA256	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	b26672008ee945ba	32772
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1SHA384	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	d383014b3f281f0e	32773
+enumconst	c:@E@SecPadding@kSecPaddingPKCS1SHA512	SecPadding			-	-	-	ios=2.0/15.0/-/0,macos=10.6/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	-	6ceee57d5b20a617	32774
+var	c:@kSecPrivateKeyAttrs	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.8/-/-/0,tvos=4.0/-/-/0,watchos=1.0/-/-/0	-	0cf9f3b8825005c7	-
+var	c:@kSecPublicKeyAttrs	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.8/-/-/0,tvos=4.0/-/-/0,watchos=1.0/-/-/0	-	a4ed3dcc43328ea6	-
+function	c:@F@SecKeyGetTypeID	-			CFTypeID (void)	-	-	ios=2.0/-/-/0,macos=10.3/-/-/0,tvos=4.0/-/-/0,watchos=1.0/-/-/0	-	4b90b174fa040e63	-
+function	c:@F@SecKeyGeneratePair	-			OSStatus (CFDictionaryRef, SecKeyRef  _Nullable *, SecKeyRef  _Nullable *)	CFDictionaryRef parameters | SecKeyRef  _Nullable * publicKey | SecKeyRef  _Nullable * privateKey	-	ios=2.0/15.0/-/0,macos=10.7/12.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	deprecated: Use SecKeyCreateRandomKey	67358f1b4dfeeb04	-
+function	c:@F@SecKeyRawSign	-			OSStatus (SecKeyRef, SecPadding, const uint8_t *, size_t, uint8_t *, size_t *)	SecKeyRef key | SecPadding padding | const uint8_t * dataToSign | size_t dataToSignLen | uint8_t * sig | size_t * sigLen	-	ios=2.0/15.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	deprecated: Use SecKeyCreateSignature	bb91db50a58fe58f	-
+function	c:@F@SecKeyRawVerify	-			OSStatus (SecKeyRef, SecPadding, const uint8_t *, size_t, const uint8_t *, size_t)	SecKeyRef key | SecPadding padding | const uint8_t * signedData | size_t signedDataLen | const uint8_t * sig | size_t sigLen	-	ios=2.0/15.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	deprecated: Use SecKeyVerifySignature	63ea570e64151108	-
+function	c:@F@SecKeyEncrypt	-			OSStatus (SecKeyRef, SecPadding, const uint8_t *, size_t, uint8_t *, size_t *)	SecKeyRef key | SecPadding padding | const uint8_t * plainText | size_t plainTextLen | uint8_t * cipherText | size_t * cipherTextLen	-	ios=2.0/15.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	deprecated: Use SecKeyCreateEncryptedData	d9ac2baec6eeb135	-
+function	c:@F@SecKeyDecrypt	-			OSStatus (SecKeyRef, SecPadding, const uint8_t *, size_t, uint8_t *, size_t *)	SecKeyRef key | SecPadding padding | const uint8_t * cipherText | size_t cipherTextLen | uint8_t * plainText | size_t * plainTextLen	-	ios=2.0/15.0/-/0,tvos=4.0/15.0/-/0,watchos=1.0/8.0/-/0	deprecated: Use SecKeyCreateDecryptedData	cf766fc7dc9c61e5	-
+function	c:@F@SecKeyCreateRandomKey	-			SecKeyRef (CFDictionaryRef, CFErrorRef  _Nullable *)	CFDictionaryRef parameters | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	33ecd612f2e40c73	-
+function	c:@F@SecKeyCreateWithData	-			SecKeyRef (CFDataRef, CFDictionaryRef, CFErrorRef  _Nullable *)	CFDataRef keyData | CFDictionaryRef attributes | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	6e98892dc4c9272e	-
+function	c:@F@SecKeyGetBlockSize	-			size_t (SecKeyRef)	SecKeyRef key	-	ios=2.0/-/-/0,macos=10.6/-/-/0,tvos=4.0/-/-/0,watchos=1.0/-/-/0	-	6dc6a79154f1945a	-
+function	c:@F@SecKeyCopyExternalRepresentation	-			CFDataRef (SecKeyRef, CFErrorRef  _Nullable *)	SecKeyRef key | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c3a199a95fbbbd43	-
+function	c:@F@SecKeyCopyAttributes	-			CFDictionaryRef (SecKeyRef)	SecKeyRef key	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d0491fb8acd99ff4	-
+function	c:@F@SecKeyCopyPublicKey	-			SecKeyRef (SecKeyRef)	SecKeyRef key	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d094b64ebb8fde70	-
+typedef	c:@T@SecKeyAlgorithm	-			CFStringRef	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b999b4356bcec665	-
+var	c:@kSecKeyAlgorithmRSASignatureRaw	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e868db4b6c5706b4	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPKCS1v15Raw	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	34ab11013209febf	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	5bea78a4096a42cc	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c4c1bd9a1584c546	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b48ba72f33615bf9	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	3fc36c8d92095e0e	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e4aafe36995d3130	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c6063f880fcbc71c	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	5775d5b308c8fdbc	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	6b1c1d1113c164b0	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	a4523c12776c96b2	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	851c2a9d4b7f4ccd	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPSSSHA1	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	2137c0bfd1872563	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPSSSHA224	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	1d805391fa331871	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPSSSHA256	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	abd8ac43f5f7b08e	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPSSSHA384	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	3fa072026ff2ada1	-
+var	c:@kSecKeyAlgorithmRSASignatureDigestPSSSHA512	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	5810b34226b32dfd	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePSSSHA1	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	92200c74a2f04bbc	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePSSSHA224	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	80c47701138656eb	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePSSSHA256	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	14957f46bdfecdcb	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePSSSHA384	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f1f6115488f81ca0	-
+var	c:@kSecKeyAlgorithmRSASignatureMessagePSSSHA512	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	f457c3f147523164	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestX962	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	df79edc61b4092bc	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestX962SHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	ef513f76df9d0d91	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestX962SHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c068645e8076f898	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestX962SHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	0ef7e48a7796b3f9	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestX962SHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d4df6c044d71a9f7	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestX962SHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	1333d6a9b1375949	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageX962SHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c0a05261fb98e23a	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageX962SHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8b2b04e7f3374980	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageX962SHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	66f0b5f6aa775f51	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageX962SHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	7228c46e46a729af	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageX962SHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f31da545fbbb39e0	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestRFC4754	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	e9260e7d2f43364c	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA1	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	a0c42e573525fbde	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA224	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	b5ce171f4d9d9590	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA256	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	cdc40a956cc17971	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA384	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	1cbb655b2c34f28e	-
+var	c:@kSecKeyAlgorithmECDSASignatureDigestRFC4754SHA512	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	40d6a406f7f5d1a8	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA1	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	bcaa45cc46f5ef98	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA224	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	4cfee47b06dbe600	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA256	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	88c455eb5e98622c	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA384	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	6d11a348416c1f52	-
+var	c:@kSecKeyAlgorithmECDSASignatureMessageRFC4754SHA512	-			const SecKeyAlgorithm	-	-	ios=17.0/-/-/0,macos=14.0/-/-/0,tvos=17.0/-/-/0,watchos=10.0/-/-/0	-	b59a2e851cd37910	-
+var	c:@kSecKeyAlgorithmECDSASignatureRFC4754	-			const SecKeyAlgorithm	-	-	ios=10.0/17.0/-/0,macos=10.12/14.0/-/0,tvos=10.0/17.0/-/0,watchos=3.0/10.0/-/0	-	fbc405c35fa2eb33	-
+var	c:@kSecKeyAlgorithmRSAEncryptionRaw	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	d2cbcbb78352e2e5	-
+var	c:@kSecKeyAlgorithmRSAEncryptionPKCS1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	af7c323cee05a3d2	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8fa27c4891e012b6	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	68d3679f2ea1d829	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	81b56c46a2cc18bd	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	bd29a98742864fde	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f511954e9e066c35	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA1AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	35468c8482fea694	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA224AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c3d3e6e0a2c7b56f	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA256AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	171838203ad3701f	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA384AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	24584c1b92ce614f	-
+var	c:@kSecKeyAlgorithmRSAEncryptionOAEPSHA512AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	0213f3b68fc91bfc	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardX963SHA1AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	628b989b9ff67f9e	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardX963SHA224AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	7a1857f2244311e5	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardX963SHA256AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8bc15083d153dd2f	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardX963SHA384AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8df7a655829fff87	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardX963SHA512AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	98a404f87bca220d	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorX963SHA1AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	e670274e35c99e6e	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorX963SHA224AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	85b725f82685a674	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorX963SHA256AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	7525993233e665b2	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorX963SHA384AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	f629f0d2c4a394d4	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorX963SHA512AESGCM	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	fcefb8bd4a455a16	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardVariableIVX963SHA224AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ddb7efbb27e5fb38	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardVariableIVX963SHA256AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	ce636ae8fe6f0065	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardVariableIVX963SHA384AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	9553f4dd2c4be30e	-
+var	c:@kSecKeyAlgorithmECIESEncryptionStandardVariableIVX963SHA512AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	012e482b1104c611	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorVariableIVX963SHA224AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	a02d1af690babaee	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorVariableIVX963SHA256AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	d8789e796f74372b	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorVariableIVX963SHA384AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	b0047d1e4cdc59af	-
+var	c:@kSecKeyAlgorithmECIESEncryptionCofactorVariableIVX963SHA512AESGCM	-			const SecKeyAlgorithm	-	-	ios=11.0/-/-/0,macos=10.13/-/-/0,tvos=11.0/-/-/0,watchos=4.0/-/-/0	-	4789a45a8a99bd21	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeStandard	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	b506d2e79523eb70	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeStandardX963SHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	5d3a7ce5aa7da060	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeStandardX963SHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	df0886871d9a3f77	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeStandardX963SHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	3ec1d791c25bb4ba	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeStandardX963SHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	79d90bab3c9176f0	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeStandardX963SHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	2056879f449b9b57	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeCofactor	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	764853dc6b80576c	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeCofactorX963SHA1	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	348ae912848753a1	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeCofactorX963SHA224	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	8063f505ded1c930	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeCofactorX963SHA256	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	6657d34c0eb2b0da	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeCofactorX963SHA384	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	83339b66e227b410	-
+var	c:@kSecKeyAlgorithmECDHKeyExchangeCofactorX963SHA512	-			const SecKeyAlgorithm	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	babc9df21e862401	-
+function	c:@F@SecKeyCreateSignature	-			CFDataRef (SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef  _Nullable *)	SecKeyRef key | SecKeyAlgorithm algorithm | CFDataRef dataToSign | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	70d76ccf1696f5ad	-
+function	c:@F@SecKeyVerifySignature	-			Boolean (SecKeyRef, SecKeyAlgorithm, CFDataRef, CFDataRef, CFErrorRef  _Nullable *)	SecKeyRef key | SecKeyAlgorithm algorithm | CFDataRef signedData | CFDataRef signature | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c0090bc426367b40	-
+function	c:@F@SecKeyCreateEncryptedData	-			CFDataRef (SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef  _Nullable *)	SecKeyRef key | SecKeyAlgorithm algorithm | CFDataRef plaintext | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	93403f3a870f95dd	-
+function	c:@F@SecKeyCreateDecryptedData	-			CFDataRef (SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef  _Nullable *)	SecKeyRef key | SecKeyAlgorithm algorithm | CFDataRef ciphertext | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	04e582580f86ef8e	-
+typedef	c:@T@SecKeyKeyExchangeParameter	-			CFStringRef	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c520057c3910134c	-
+var	c:@kSecKeyKeyExchangeParameterRequestedSize	-			const SecKeyKeyExchangeParameter	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	eca64c2eab127791	-
+var	c:@kSecKeyKeyExchangeParameterSharedInfo	-			const SecKeyKeyExchangeParameter	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	733e6a9207f3179c	-
+function	c:@F@SecKeyCopyKeyExchangeResult	-			CFDataRef (SecKeyRef, SecKeyAlgorithm, SecKeyRef, CFDictionaryRef, CFErrorRef  _Nullable *)	SecKeyRef privateKey | SecKeyAlgorithm algorithm | SecKeyRef publicKey | CFDictionaryRef parameters | CFErrorRef  _Nullable * error	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	7386fd9ecc2fae25	-
+typedef	c:@T@SecKeyOperationType	-			enum SecKeyOperationType	-	-	-	-	fd2069ba89ce7b2e	-
+enum	c:@E@SecKeyOperationType	-			CFIndex	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	0c11109934db4aa3	-
+enumconst	c:@E@SecKeyOperationType@kSecKeyOperationTypeSign	SecKeyOperationType			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	0b24d82a63a672b5	0
+enumconst	c:@E@SecKeyOperationType@kSecKeyOperationTypeVerify	SecKeyOperationType			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	076ee0e5cdff0c02	1
+enumconst	c:@E@SecKeyOperationType@kSecKeyOperationTypeEncrypt	SecKeyOperationType			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	c9ca95154e41072c	2
+enumconst	c:@E@SecKeyOperationType@kSecKeyOperationTypeDecrypt	SecKeyOperationType			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	bde0b3b48aa9cd99	3
+enumconst	c:@E@SecKeyOperationType@kSecKeyOperationTypeKeyExchange	SecKeyOperationType			-	-	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	940b29592986b6cb	4
+function	c:@F@SecKeyIsAlgorithmSupported	-			Boolean (SecKeyRef, SecKeyOperationType, SecKeyAlgorithm)	SecKeyRef key | SecKeyOperationType operation | SecKeyAlgorithm algorithm	-	ios=10.0/-/-/0,macos=10.12/-/-/0,tvos=10.0/-/-/0,watchos=3.0/-/-/0	-	dd876675529a21cc	-
+var	c:@kSecPolicyAppleX509Basic	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	c23094016592020e	-
+var	c:@kSecPolicyAppleSSL	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	b9eadfdf9ceb6c44	-
+var	c:@kSecPolicyAppleSMIME	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	64b01996c32d1226	-
+var	c:@kSecPolicyAppleEAP	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	8641f74c0573e758	-
+var	c:@kSecPolicyAppleIPsec	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	ec01605800ca018d	-
+var	c:@kSecPolicyApplePKINITClient	-			const CFStringRef	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	84ba020d9f76bdaf	-
+var	c:@kSecPolicyApplePKINITServer	-			const CFStringRef	-	-	ios=-/-/-/1,maccatalyst=-/-/-/1,macos=10.7/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	d83c96cc474de3a4	-
+var	c:@kSecPolicyAppleCodeSigning	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	8506d99529714b7d	-
+var	c:@kSecPolicyMacAppStoreReceipt	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	21b8d0bfef96972b	-
+var	c:@kSecPolicyAppleIDValidation	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	d90f29998243b436	-
+var	c:@kSecPolicyAppleTimeStamping	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	e6d8505fed01119c	-
+var	c:@kSecPolicyAppleRevocation	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	f6de775193e5797e	-
+var	c:@kSecPolicyApplePassbookSigning	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	1f2424d0ffc5da03	-
+var	c:@kSecPolicyApplePayIssuerEncryption	-			const CFStringRef	-	-	ios=9.0/-/-/0	-	95544c0aa9293526	-
+var	c:@kSecPolicyAppleSSLServer	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	e25a99f887e438d7	-
+var	c:@kSecPolicyAppleSSLClient	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	879b1217aa94f5e0	-
+var	c:@kSecPolicyAppleEAPServer	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	8d71571f4615852d	-
+var	c:@kSecPolicyAppleEAPClient	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	f6caba7246474666	-
+var	c:@kSecPolicyAppleIPSecServer	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	b5d7a24baddef520	-
+var	c:@kSecPolicyAppleIPSecClient	-			const CFStringRef	-	-	ios=18.4/-/-/0,macos=15.4/-/-/0,tvos=18.4/-/-/0,watchos=11.4/-/-/0	-	bd03dc8c2ac18bc3	-
+var	c:@kSecPolicyOid	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	e0ff62d32ff3c1ac	-
+var	c:@kSecPolicyName	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	1c1098d6419dcbba	-
+var	c:@kSecPolicyClient	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	ad5086cd62dcb584	-
+var	c:@kSecPolicyRevocationFlags	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	c8fdc205f83f6805	-
+var	c:@kSecPolicyTeamIdentifier	-			const CFStringRef	-	-	ios=7.0/-/-/0	-	5523b4e6d4d102df	-
+function	c:@F@SecPolicyGetTypeID	-			CFTypeID (void)	-	-	ios=2.0/-/-/0	-	9153f00eb0dd8d1e	-
+function	c:@F@SecPolicyCopyProperties	-			CFDictionaryRef (SecPolicyRef)	SecPolicyRef policyRef	-	ios=7.0/-/-/0	-	9fbbbe1391812cec	-
+function	c:@F@SecPolicyCreateBasicX509	-			SecPolicyRef (void)	-	-	ios=2.0/-/-/0	-	493e7ff5f689010f	-
+function	c:@F@SecPolicyCreateSSL	-			SecPolicyRef (Boolean, CFStringRef)	Boolean server | CFStringRef hostname	-	ios=2.0/-/-/0	-	a94bb0fe1a2f5404	-
+enum	c:@Ea@kSecRevocationOCSPMethod	-	-		CFOptionFlags	-	-	-	-	78904a198bf0a5a4	-
+enumconst	c:@Ea@kSecRevocationOCSPMethod@kSecRevocationOCSPMethod	-			-	-	-	-	-	bd9fe5f1cb79fe41	1
+enumconst	c:@Ea@kSecRevocationOCSPMethod@kSecRevocationCRLMethod	-			-	-	-	-	-	73d542dafc80086d	2
+enumconst	c:@Ea@kSecRevocationOCSPMethod@kSecRevocationPreferCRL	-			-	-	-	-	-	01d728d71341ead4	4
+enumconst	c:@Ea@kSecRevocationOCSPMethod@kSecRevocationRequirePositiveResponse	-			-	-	-	-	-	319eac4b3080395d	8
+enumconst	c:@Ea@kSecRevocationOCSPMethod@kSecRevocationNetworkAccessDisabled	-			-	-	-	-	-	a6a020f38f7b3580	16
+enumconst	c:@Ea@kSecRevocationOCSPMethod@kSecRevocationUseAnyAvailableMethod	-			-	-	-	-	-	19a6fdf1416c3bf5	3
+function	c:@F@SecPolicyCreateRevocation	-			SecPolicyRef (CFOptionFlags)	CFOptionFlags revocationFlags	-	ios=7.0/-/-/0	-	f44887ac38f28a7b	-
+function	c:@F@SecPolicyCreateWithProperties	-			SecPolicyRef (CFTypeRef, CFDictionaryRef)	CFTypeRef policyIdentifier | CFDictionaryRef properties	-	ios=7.0/-/-/0	-	0f278a7c3f08dfe3	-
+struct	c:@S@__SecRandom	-			-	-	-	-	-	eb26ded5f09a6beb	-
+typedef	c:@T@SecRandomRef	-			const struct __SecRandom *	-	-	-	-	b2eb89037adbce45	-
+var	c:@kSecRandomDefault	-			const SecRandomRef	-	-	ios=2.0/-/-/0	-	4ce0557476e95c1d	-
+function	c:@F@SecRandomCopyBytes	-			int (SecRandomRef, size_t, void *)	SecRandomRef rnd | size_t count | void * bytes	-	ios=2.0/-/-/0	-	86661da2ee57f385	-
+var	c:@kSecImportExportPassphrase	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	a5a5be5fa0fcc3e5	-
+var	c:@kSecImportExportKeychain	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	6c2911b3553755a4	-
+var	c:@kSecImportExportAccess	-			const CFStringRef	-	-	ios=-/-/-/1,macos=10.7/-/-/0	-	29c45598ceb93968	-
+var	c:@kSecImportToMemoryOnly	-			const CFStringRef	-	-	ios=18.0/-/-/0,macos=15.0/-/-/0	-	82f43c5a43dc7175	-
+var	c:@kSecImportItemLabel	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	5c21fd98e9b33bdb	-
+var	c:@kSecImportItemKeyID	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	fabfff2d3da56541	-
+var	c:@kSecImportItemTrust	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	486f4ac39550e6b3	-
+var	c:@kSecImportItemCertChain	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	b109cae5dd9fd998	-
+var	c:@kSecImportItemIdentity	-			const CFStringRef	-	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	92a66235626da895	-
+function	c:@F@SecPKCS12Import	-			OSStatus (CFDataRef, CFDictionaryRef, CFArrayRef  _Nullable *)	CFDataRef pkcs12_data | CFDictionaryRef options | CFArrayRef  _Nullable * items	-	ios=2.0/-/-/0,macos=10.6/-/-/0	-	41e1ec09613b5ec2	-
+var	c:@kSecSharedPassword	-			const CFStringRef	-	-	ios=8.0/-/-/0,maccatalyst=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	f3404e1bfc9c7a7b	-
+function	c:@F@SecAddSharedWebCredential	-			void (CFStringRef, CFStringRef, CFStringRef, void (^)(CFErrorRef _Nullable))	CFStringRef fqdn | CFStringRef account | CFStringRef password | void (^)(CFErrorRef _Nullable) completionHandler	-	ios=8.0/26.2/-/0,maccatalyst=14.0/26.2/-/0,macos=11.0/26.2/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use ASCredentialDataManager.save(password:for:title:anchor:)  (AuthenticationServices framework)	58775d6da9354619	-
+function	c:@F@SecRequestSharedWebCredential	-			void (CFStringRef, CFStringRef, void (^)(CFArrayRef _Nullable, CFErrorRef _Nullable))	CFStringRef fqdn | CFStringRef account | void (^)(CFArrayRef _Nullable, CFErrorRef _Nullable) completionHandler	-	ios=8.0/14.0/-/0,maccatalyst=14.0/14.0/-/0,macos=11.0/11.0/-/0,tvos=-/-/-/1,watchos=-/-/-/1	deprecated: Use ASAuthorizationController to make an ASAuthorizationPasswordRequest (AuthenticationServices framework)	83710abf6835c1db	-
+function	c:@F@SecCreateSharedWebCredentialPassword	-			CFStringRef (void)	-	-	ios=8.0/-/-/0,maccatalyst=14.0/-/-/0,macos=11.0/-/-/0,tvos=-/-/-/1,watchos=-/-/-/1	-	e4b338970860e422	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@OSType	-			FourCharCode	-	-	-	-	01d4dcaaf78349ee	-
+typedef	c:@T@FourCharCode	-			UInt32	-	-	-	-	a0f4e71a4dbfcb9b	-
+typedef	c:@T@UInt32	-			unsigned int	-	-	-	-	9c97778bf2686a2b	-
+typedef	c:@T@CFStringRef	-			const struct __CFString *	-	-	-	-	e422c620371887ac	-
+typedef	c:@T@OSStatus	-			SInt32	-	-	-	-	c9d4cae3c2778a27	-
+typedef	c:@T@SInt32	-			int	-	-	-	-	fea52187db3d8de0	-
+typedef	c:@T@CFTypeID	-			unsigned long	-	-	-	-	1a1b10310e893e1f	-
+typedef	c:@T@CFTypeRef	-			const void *	-	-	-	-	bfc2940caeb1f461	-
+typedef	c:@T@Boolean	-			unsigned char	-	-	-	-	693cf733304c39d9	-
+typedef	c:@T@CFArrayRef	-			const struct __CFArray *	-	-	-	-	d3655b482ae0664e	-
+typedef	c:@T@CFDateRef	-			const struct __CFDate *	-	-	-	-	49644d654a7fc91f	-
+typedef	c:@T@CFAbsoluteTime	-			CFTimeInterval	-	-	-	-	28db4ad74a7edc7f	-
+typedef	c:@T@CFTimeInterval	-			double	-	-	-	-	11d627848397cf44	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-
+typedef	c:@T@CFErrorRef	-			struct __CFError *	-	-	-	-	7e66b8cb53b22edb	-
+typedef	c:@T@CFIndex	-			long	-	-	-	-	9f50caf8b7c4f278	-
+typedef	c:@T@CFDataRef	-			const struct __CFData *	-	-	-	-	d9fe21afe938f144	-
+typedef	c:@T@CFDictionaryRef	-			const struct __CFDictionary *	-	-	-	-	95ab67be7d9fad28	-
+typedef	c:@T@CFAllocatorRef	-			const struct __CFAllocator *	-	-	-	-	d153ce1dfad01936	-
+typedef	c:@T@dispatch_data_t	-			NSObject<OS_dispatch_data> *	-	-	-	-	b1e775f000ec6171	-
+typedef	c:@T@size_t	-			unsigned long	-	-	-	-	90a4ad5785adb724	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@CFOptionFlags	-			unsigned long	-	-	-	-	e34ec2b1f3701ad3	-

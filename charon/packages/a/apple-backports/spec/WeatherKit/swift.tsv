@@ -1,0 +1,624 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+WeatherKit	swift-struct	s:10WeatherKit28MonthPrecipitationStatisticsV	-	MonthPrecipitationStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	008f7aafdca438ca
+WeatherKit	swift-property	s:10WeatherKit28MonthPrecipitationStatisticsV5monthSivp	MonthPrecipitationStatistics	month	-	Swift.Int	-	-	-	bef3d999684997a7
+WeatherKit	swift-property	s:10WeatherKit28MonthPrecipitationStatisticsV07averageD11ProbabilitySdvp	MonthPrecipitationStatistics	averagePrecipitationProbability	-	Swift.Double	-	-	-	617c8efc6c22cb21
+WeatherKit	swift-property	s:10WeatherKit28MonthPrecipitationStatisticsV07averageD6Amount10Foundation11MeasurementVySo12NSUnitLengthCGvp	MonthPrecipitationStatistics	averagePrecipitationAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	6ac8ba3209795c31
+WeatherKit	swift-property	s:10WeatherKit28MonthPrecipitationStatisticsV21averageSnowfallAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	MonthPrecipitationStatistics	averageSnowfallAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	0805b02cdafa925b
+WeatherKit	swift-method	s:10WeatherKit28MonthPrecipitationStatisticsV2eeoiySbAC_ACtFZ	MonthPrecipitationStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.MonthPrecipitationStatistics | WeatherKit.MonthPrecipitationStatistics	-	-	124bc1d16fd42d91
+WeatherKit	swift-method	s:10WeatherKit28MonthPrecipitationStatisticsV6encode2toys7Encoder_p_tKF	MonthPrecipitationStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	b14472fae5244bb8
+WeatherKit	swift-method	s:10WeatherKit28MonthPrecipitationStatisticsV4fromACs7Decoder_p_tKcfc	MonthPrecipitationStatistics	init(from:)	-	-	WeatherKit.MonthPrecipitationStatistics | any Swift.Decoder	-	-	1f793b1586d07ead
+WeatherKit	swift-struct	s:10WeatherKit0A12AvailabilityV	-	WeatherAvailability	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	24268371de5a28e8
+WeatherKit	swift-property	s:10WeatherKit0A12AvailabilityV06minuteC0AC0C4KindOvp	WeatherAvailability	minuteAvailability	-	WeatherKit.WeatherAvailability.AvailabilityKind	-	-	-	71b519c41425fb07
+WeatherKit	swift-property	s:10WeatherKit0A12AvailabilityV05alertC0AC0C4KindOvp	WeatherAvailability	alertAvailability	-	WeatherKit.WeatherAvailability.AvailabilityKind	-	-	-	cea63d6983ce1eb5
+WeatherKit	swift-enum	s:10WeatherKit0A12AvailabilityV0C4KindO	WeatherAvailability	AvailabilityKind	-	-	-	-	-	00eb7c5e4a935f56
+WeatherKit	swift-constant	s:10WeatherKit0A12AvailabilityV0C4KindO9availableyA2EmF	WeatherAvailability.AvailabilityKind	available	-	-	-	-	-	b621e1793fc80d3d
+WeatherKit	swift-constant	s:10WeatherKit0A12AvailabilityV0C4KindO22temporarilyUnavailableyA2EmF	WeatherAvailability.AvailabilityKind	temporarilyUnavailable	-	-	-	-	-	e7602b67c823dc6a
+WeatherKit	swift-constant	s:10WeatherKit0A12AvailabilityV0C4KindO11unsupportedyA2EmF	WeatherAvailability.AvailabilityKind	unsupported	-	-	-	-	-	1f564d092f09dcd1
+WeatherKit	swift-constant	s:10WeatherKit0A12AvailabilityV0C4KindO7unknownyA2EmF	WeatherAvailability.AvailabilityKind	unknown	-	-	-	-	-	5dba2a017da8e7df
+WeatherKit	swift-method	s:10WeatherKit0A12AvailabilityV0C4KindO8rawValueAESgSS_tcfc	WeatherAvailability.AvailabilityKind	init(rawValue:)	-	-	WeatherKit.WeatherAvailability.AvailabilityKind? | Swift.String	-	-	3e4352a996323a58
+WeatherKit	swift-typealias	s:10WeatherKit0A12AvailabilityV0C4KindO8RawValuea	WeatherAvailability.AvailabilityKind	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	175b3d971b05a3c1
+WeatherKit	swift-property	s:10WeatherKit0A12AvailabilityV0C4KindO8rawValueSSvp	WeatherAvailability.AvailabilityKind	rawValue	-	Swift.String	-	-	-	fa0273f8b446eb41
+WeatherKit	swift-method	s:10WeatherKit0A12AvailabilityV2eeoiySbAC_ACtFZ	WeatherAvailability	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherAvailability | WeatherKit.WeatherAvailability	-	-	379c7ee6af1ff10f
+WeatherKit	swift-method	s:10WeatherKit0A12AvailabilityV6encode2toys7Encoder_p_tKF	WeatherAvailability	encode(to:)	-	()	any Swift.Encoder	-	-	509a012eed639b7a
+WeatherKit	swift-method	s:10WeatherKit0A12AvailabilityV4fromACs7Decoder_p_tKcfc	WeatherAvailability	init(from:)	-	-	WeatherKit.WeatherAvailability | any Swift.Decoder	-	-	a58bc2bd69d95011
+WeatherKit	swift-struct	s:10WeatherKit06MinuteA0V	-	MinuteWeather	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	0c8eb61e897d4258
+WeatherKit	swift-property	s:10WeatherKit06MinuteA0V4date10Foundation4DateVvp	MinuteWeather	date	-	Foundation.Date	-	-	-	acd00b3782e1fb8b
+WeatherKit	swift-property	s:10WeatherKit06MinuteA0V13precipitationAA13PrecipitationOvp	MinuteWeather	precipitation	-	WeatherKit.Precipitation	-	-	-	1994c01c2ab31ef2
+WeatherKit	swift-property	s:10WeatherKit06MinuteA0V19precipitationChanceSdvp	MinuteWeather	precipitationChance	-	Swift.Double	-	-	-	4d398f0f6bc99689
+WeatherKit	swift-property	s:10WeatherKit06MinuteA0V22precipitationIntensity10Foundation11MeasurementVySo11NSUnitSpeedCGvp	MinuteWeather	precipitationIntensity	-	Foundation.Measurement<Foundation.UnitSpeed>	-	-	-	ecde3d9a75b0cb0c
+WeatherKit	swift-method	s:10WeatherKit06MinuteA0V2eeoiySbAC_ACtFZ	MinuteWeather	==(_:_:)	+	Swift.Bool	WeatherKit.MinuteWeather | WeatherKit.MinuteWeather	-	-	301350b15148652d
+WeatherKit	swift-method	s:10WeatherKit06MinuteA0V6encode2toys7Encoder_p_tKF	MinuteWeather	encode(to:)	-	()	any Swift.Encoder	-	-	cb046505033c0cf9
+WeatherKit	swift-method	s:10WeatherKit06MinuteA0V4fromACs7Decoder_p_tKcfc	MinuteWeather	init(from:)	-	-	WeatherKit.MinuteWeather | any Swift.Decoder	-	-	2f16e62842f6f08c
+WeatherKit	swift-struct	s:10WeatherKit03DayA0V	-	DayWeather	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	d095a0d883bb3f5b
+WeatherKit	swift-property	s:10WeatherKit03DayA0V4date10Foundation4DateVvp	DayWeather	date	-	Foundation.Date	-	-	-	2f556ee721843cf2
+WeatherKit	swift-property	s:10WeatherKit03DayA0V9conditionAA0A9ConditionOvp	DayWeather	condition	-	WeatherKit.WeatherCondition	-	-	-	ea421d672c52526b
+WeatherKit	swift-property	s:10WeatherKit03DayA0V10symbolNameSSvp	DayWeather	symbolName	-	Swift.String	-	-	-	461533f0fca1e0de
+WeatherKit	swift-property	s:10WeatherKit03DayA0V15highTemperature10Foundation11MeasurementVySo06NSUnitE0CGvp	DayWeather	highTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	520415aa56686d7a
+WeatherKit	swift-property	s:10WeatherKit03DayA0V19highTemperatureTime10Foundation4DateVSgvp	DayWeather	highTemperatureTime	-	Foundation.Date?	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	288d3c92e8879f74
+WeatherKit	swift-property	s:10WeatherKit03DayA0V14lowTemperature10Foundation11MeasurementVySo06NSUnitE0CGvp	DayWeather	lowTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	892596f60cd1637e
+WeatherKit	swift-property	s:10WeatherKit03DayA0V18lowTemperatureTime10Foundation4DateVSgvp	DayWeather	lowTemperatureTime	-	Foundation.Date?	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	cdef16864f5273b6
+WeatherKit	swift-property	s:10WeatherKit03DayA0V15maximumHumiditySdvp	DayWeather	maximumHumidity	-	Swift.Double	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8b70729bb7e7a813
+WeatherKit	swift-property	s:10WeatherKit03DayA0V15minimumHumiditySdvp	DayWeather	minimumHumidity	-	Swift.Double	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	9861287db032d5fe
+WeatherKit	swift-property	s:10WeatherKit03DayA0V13precipitationAA13PrecipitationOvp	DayWeather	precipitation	-	WeatherKit.Precipitation	-	-	-	d2e5446c39fc4996
+WeatherKit	swift-property	s:10WeatherKit03DayA0V19precipitationChanceSdvp	DayWeather	precipitationChance	-	Swift.Double	-	-	-	07441626c453a5c0
+WeatherKit	swift-property	s:10WeatherKit03DayA0V19precipitationAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayWeather	precipitationAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	7178a53848fc21b2
+WeatherKit	swift-property	s:10WeatherKit03DayA0V14rainfallAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayWeather	rainfallAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	b3246cfa4bc426d8
+WeatherKit	swift-property	s:10WeatherKit03DayA0V14snowfallAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayWeather	snowfallAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	0ea12dd4a43a0e43
+WeatherKit	swift-property	s:10WeatherKit03DayA0V25precipitationAmountByTypeAA013PrecipitationefG0Vvp	DayWeather	precipitationAmountByType	-	WeatherKit.PrecipitationAmountByType	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	40bc9021164e2f12
+WeatherKit	swift-property	s:10WeatherKit03DayA0V3sunAA9SunEventsVvp	DayWeather	sun	-	WeatherKit.SunEvents	-	-	-	2b05afa275b239e4
+WeatherKit	swift-property	s:10WeatherKit03DayA0V4moonAA10MoonEventsVvp	DayWeather	moon	-	WeatherKit.MoonEvents	-	-	-	3f606dfb28ffdaa9
+WeatherKit	swift-property	s:10WeatherKit03DayA0V7uvIndexAA7UVIndexVvp	DayWeather	uvIndex	-	WeatherKit.UVIndex	-	-	-	e842b27a489fb668
+WeatherKit	swift-property	s:10WeatherKit03DayA0V17maximumVisibilitySdvp	DayWeather	maximumVisibility	-	Swift.Double	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	96d690afc0a7e005
+WeatherKit	swift-property	s:10WeatherKit03DayA0V17minimumVisibilitySdvp	DayWeather	minimumVisibility	-	Swift.Double	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	bf150710c8d38c3f
+WeatherKit	swift-property	s:10WeatherKit03DayA0V4windAA4WindVvp	DayWeather	wind	-	WeatherKit.Wind	-	-	-	ffc4a10c25f8a075
+WeatherKit	swift-property	s:10WeatherKit03DayA0V13highWindSpeed10Foundation11MeasurementVySo06NSUnitF0CGSgvp	DayWeather	highWindSpeed	-	Foundation.Measurement<Foundation.UnitSpeed>?	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	f15370e185c42c52
+WeatherKit	swift-property	s:10WeatherKit03DayA0V15daytimeForecastAA0c4PartE0Vvp	DayWeather	daytimeForecast	-	WeatherKit.DayPartForecast	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	9c262ad72fb2e732
+WeatherKit	swift-property	s:10WeatherKit03DayA0V17overnightForecastAA0c4PartE0Vvp	DayWeather	overnightForecast	-	WeatherKit.DayPartForecast	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	f88088df382ac5c6
+WeatherKit	swift-property	s:10WeatherKit03DayA0V06restOfC8ForecastAA0c4PartF0VSgvp	DayWeather	restOfDayForecast	-	WeatherKit.DayPartForecast?	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	609481c292b36bd5
+WeatherKit	swift-method	s:10WeatherKit03DayA0V2eeoiySbAC_ACtFZ	DayWeather	==(_:_:)	+	Swift.Bool	WeatherKit.DayWeather | WeatherKit.DayWeather	-	-	d1657147c760a8e7
+WeatherKit	swift-method	s:10WeatherKit03DayA0V6encode2toys7Encoder_p_tKF	DayWeather	encode(to:)	-	()	any Swift.Encoder	-	-	43a6b3e4ef94552c
+WeatherKit	swift-method	s:10WeatherKit03DayA0V4fromACs7Decoder_p_tKcfc	DayWeather	init(from:)	-	-	WeatherKit.DayWeather | any Swift.Decoder	-	-	b74fc6b4366d52fb
+WeatherKit	swift-struct	s:10WeatherKit25PrecipitationAmountByTypeV	-	PrecipitationAmountByType	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	ad597c994b4f5c17
+WeatherKit	swift-property	s:10WeatherKit25PrecipitationAmountByTypeV4hail10Foundation11MeasurementVySo12NSUnitLengthCGvp	PrecipitationAmountByType	hail	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	083411e8376585df
+WeatherKit	swift-property	s:10WeatherKit25PrecipitationAmountByTypeV5mixed10Foundation11MeasurementVySo12NSUnitLengthCGvp	PrecipitationAmountByType	mixed	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	a28c8537fe62e7f0
+WeatherKit	swift-property	s:10WeatherKit25PrecipitationAmountByTypeV8rainfall10Foundation11MeasurementVySo12NSUnitLengthCGvp	PrecipitationAmountByType	rainfall	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	b72d62431b9e24a4
+WeatherKit	swift-property	s:10WeatherKit25PrecipitationAmountByTypeV5sleet10Foundation11MeasurementVySo12NSUnitLengthCGvp	PrecipitationAmountByType	sleet	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	9e34d3aa405b5cfd
+WeatherKit	swift-property	s:10WeatherKit25PrecipitationAmountByTypeV13precipitation10Foundation11MeasurementVySo12NSUnitLengthCGvp	PrecipitationAmountByType	precipitation	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	3b79eea6abc98730
+WeatherKit	swift-property	s:10WeatherKit25PrecipitationAmountByTypeV08snowfallD0AA08SnowfallD0Vvp	PrecipitationAmountByType	snowfallAmount	-	WeatherKit.SnowfallAmount	-	-	-	6dd66c4edf37f4ea
+WeatherKit	swift-method	s:10WeatherKit25PrecipitationAmountByTypeV2eeoiySbAC_ACtFZ	PrecipitationAmountByType	==(_:_:)	+	Swift.Bool	WeatherKit.PrecipitationAmountByType | WeatherKit.PrecipitationAmountByType	-	-	2fbab78f3b1bfcb8
+WeatherKit	swift-method	s:10WeatherKit25PrecipitationAmountByTypeV6encode2toys7Encoder_p_tKF	PrecipitationAmountByType	encode(to:)	-	()	any Swift.Encoder	-	-	dde6adab5700697e
+WeatherKit	swift-method	s:10WeatherKit25PrecipitationAmountByTypeV4fromACs7Decoder_p_tKcfc	PrecipitationAmountByType	init(from:)	-	-	WeatherKit.PrecipitationAmountByType | any Swift.Decoder	-	-	386d6424cfa4516a
+WeatherKit	swift-struct	s:10WeatherKit5TrendV	-	Trend	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	b9f52f62b3ba790f
+WeatherKit	swift-property	s:10WeatherKit5TrendV8baselineAA0C8BaselineVyxGvp	Trend	baseline	-	WeatherKit.TrendBaseline<Dimension>	-	-	-	32da3b7d80f9dc4f
+WeatherKit	swift-property	s:10WeatherKit5TrendV12currentValue10Foundation11MeasurementVyxGvp	Trend	currentValue	-	Foundation.Measurement<Dimension>	-	-	-	3f257ee9c867ed8e
+WeatherKit	swift-property	s:10WeatherKit5TrendV9deviationAA9DeviationOvp	Trend	deviation	-	WeatherKit.Deviation	-	-	-	0020579bcdfe432e
+WeatherKit	swift-method	s:10WeatherKit5TrendV2eeoiySbACyxG_AEtFZ	Trend	==(_:_:)	+	Swift.Bool	WeatherKit.Trend<Dimension> | WeatherKit.Trend<Dimension>	-	-	e39eb0c9d7f4fe6d
+WeatherKit	swift-method	s:10WeatherKit5TrendV6encode2toys7Encoder_p_tKF	Trend	encode(to:)	-	()	any Swift.Encoder	-	-	cdcfe296cb6d7b3d
+WeatherKit	swift-method	s:10WeatherKit5TrendV4fromACyxGs7Decoder_p_tKcfc	Trend	init(from:)	-	-	WeatherKit.Trend<Dimension> | any Swift.Decoder	-	-	6c3a9bb0d45da02e
+WeatherKit	swift-struct	s:10WeatherKit21HistoricalComparisonsV	-	HistoricalComparisons	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	430a16b052900401
+WeatherKit	swift-typealias	s:10WeatherKit21HistoricalComparisonsV7Elementa	HistoricalComparisons	Element	-	-	-	-	-	378203212c864ae2
+WeatherKit	swift-typealias	s:10WeatherKit21HistoricalComparisonsV5Indexa	HistoricalComparisons	Index	-	-	-	-	-	b0c46153661366c0
+WeatherKit	swift-property	s:10WeatherKit21HistoricalComparisonsV11comparisonsSayAA0C10ComparisonOGvp	HistoricalComparisons	comparisons	-	[WeatherKit.HistoricalComparison]	-	-	-	34bb4565fb3c3746
+WeatherKit	swift-property	s:10WeatherKit21HistoricalComparisonsV8metadataAA0A8MetadataVvp	HistoricalComparisons	metadata	-	WeatherKit.WeatherMetadata	-	-	-	01785362cd477cb5
+WeatherKit	swift-property	s:10WeatherKit21HistoricalComparisonsV10startIndexSivp	HistoricalComparisons	startIndex	-	WeatherKit.HistoricalComparisons.Index	-	-	-	5539f6acae2b9606
+WeatherKit	swift-property	s:10WeatherKit21HistoricalComparisonsV8endIndexSivp	HistoricalComparisons	endIndex	-	WeatherKit.HistoricalComparisons.Index	-	-	-	331e1cf88f35d2bf
+WeatherKit	swift-method	s:10WeatherKit21HistoricalComparisonsVyAA0C10ComparisonOSicip	HistoricalComparisons	subscript(_:)	-	WeatherKit.HistoricalComparisons.Element	WeatherKit.HistoricalComparisons.Index	-	-	bf1fa9829601d017
+WeatherKit	swift-method	s:10WeatherKit21HistoricalComparisonsV2eeoiySbAC_ACtFZ	HistoricalComparisons	==(_:_:)	+	Swift.Bool	WeatherKit.HistoricalComparisons | WeatherKit.HistoricalComparisons	-	-	fa958ef5baf7e912
+WeatherKit	swift-typealias	s:10WeatherKit21HistoricalComparisonsV7Indicesa	HistoricalComparisons	Indices	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	3b078c2c0765e11e
+WeatherKit	swift-typealias	s:10WeatherKit21HistoricalComparisonsV8Iteratora	HistoricalComparisons	Iterator	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	da91b019ef3325b3
+WeatherKit	swift-typealias	s:10WeatherKit21HistoricalComparisonsV11SubSequencea	HistoricalComparisons	SubSequence	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	7b88840168cee483
+WeatherKit	swift-method	s:10WeatherKit21HistoricalComparisonsV6encode2toys7Encoder_p_tKF	HistoricalComparisons	encode(to:)	-	()	any Swift.Encoder	-	-	a7159f428afc5177
+WeatherKit	swift-method	s:10WeatherKit21HistoricalComparisonsV4fromACs7Decoder_p_tKcfc	HistoricalComparisons	init(from:)	-	-	WeatherKit.HistoricalComparisons | any Swift.Decoder	-	-	540287d4c20129f9
+WeatherKit	swift-struct	s:10WeatherKit24DayTemperatureStatisticsV	-	DayTemperatureStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	e613204b30112f52
+WeatherKit	swift-property	s:10WeatherKit24DayTemperatureStatisticsV3daySivp	DayTemperatureStatistics	day	-	Swift.Int	-	-	-	cbb85390e4ddde41
+WeatherKit	swift-property	s:10WeatherKit24DayTemperatureStatisticsV010averageLowD010Foundation11MeasurementVySo06NSUnitD0CGvp	DayTemperatureStatistics	averageLowTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	efd4904a5da7f123
+WeatherKit	swift-property	s:10WeatherKit24DayTemperatureStatisticsV011averageHighD010Foundation11MeasurementVySo06NSUnitD0CGvp	DayTemperatureStatistics	averageHighTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	c273b8b3082e47f3
+WeatherKit	swift-method	s:10WeatherKit24DayTemperatureStatisticsV2eeoiySbAC_ACtFZ	DayTemperatureStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.DayTemperatureStatistics | WeatherKit.DayTemperatureStatistics	-	-	a5cb77e8461eaced
+WeatherKit	swift-method	s:10WeatherKit24DayTemperatureStatisticsV6encode2toys7Encoder_p_tKF	DayTemperatureStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	ad9d1b14ac3a32bf
+WeatherKit	swift-method	s:10WeatherKit24DayTemperatureStatisticsV4fromACs7Decoder_p_tKcfc	DayTemperatureStatistics	init(from:)	-	-	WeatherKit.DayTemperatureStatistics | any Swift.Decoder	-	-	558c5b56ee8ed9e9
+WeatherKit	swift-struct	s:10WeatherKit7UVIndexV	-	UVIndex	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	e9527fd58f5236c8
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV5valueSivp	UVIndex	value	-	Swift.Int	-	-	-	a0797073c3d077a5
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV8categoryAC16ExposureCategoryOvp	UVIndex	category	-	WeatherKit.UVIndex.ExposureCategory	-	-	-	c259321efcf458e3
+WeatherKit	swift-enum	s:10WeatherKit7UVIndexV16ExposureCategoryO	UVIndex	ExposureCategory	-	-	-	-	-	196bf9bf5fa82fe9
+WeatherKit	swift-constant	s:10WeatherKit7UVIndexV16ExposureCategoryO3lowyA2EmF	UVIndex.ExposureCategory	low	-	-	-	-	-	e2b6bec08615ccff
+WeatherKit	swift-constant	s:10WeatherKit7UVIndexV16ExposureCategoryO8moderateyA2EmF	UVIndex.ExposureCategory	moderate	-	-	-	-	-	5b105872272ea24d
+WeatherKit	swift-constant	s:10WeatherKit7UVIndexV16ExposureCategoryO4highyA2EmF	UVIndex.ExposureCategory	high	-	-	-	-	-	eb1bb49691e29e49
+WeatherKit	swift-constant	s:10WeatherKit7UVIndexV16ExposureCategoryO8veryHighyA2EmF	UVIndex.ExposureCategory	veryHigh	-	-	-	-	-	7e2a9c56cf62c25b
+WeatherKit	swift-constant	s:10WeatherKit7UVIndexV16ExposureCategoryO7extremeyA2EmF	UVIndex.ExposureCategory	extreme	-	-	-	-	-	ccfd9b82eb914d03
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV16ExposureCategoryO10rangeValueSNySiGvp	UVIndex.ExposureCategory	rangeValue	-	Swift.ClosedRange<Swift.Int>	-	-	-	3322618a0e0d11a9
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV16ExposureCategoryO11descriptionSSvp	UVIndex.ExposureCategory	description	-	Swift.String	-	-	-	46588fdd0559b14c
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV16ExposureCategoryO24accessibilityDescriptionSSvp	UVIndex.ExposureCategory	accessibilityDescription	-	Swift.String	-	-	-	8ab8a9e1179673f7
+WeatherKit	swift-method	s:10WeatherKit7UVIndexV16ExposureCategoryO1loiySbAE_AEtFZ	UVIndex.ExposureCategory	<(_:_:)	+	Swift.Bool	WeatherKit.UVIndex.ExposureCategory | WeatherKit.UVIndex.ExposureCategory	-	-	832255ba394ae588
+WeatherKit	swift-method	s:10WeatherKit7UVIndexV16ExposureCategoryO8rawValueAESgSS_tcfc	UVIndex.ExposureCategory	init(rawValue:)	-	-	WeatherKit.UVIndex.ExposureCategory? | Swift.String	-	-	d698121f6d3503ac
+WeatherKit	swift-typealias	s:10WeatherKit7UVIndexV16ExposureCategoryO8AllCasesa	UVIndex.ExposureCategory	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	8976ee7b172d8a1e
+WeatherKit	swift-typealias	s:10WeatherKit7UVIndexV16ExposureCategoryO8RawValuea	UVIndex.ExposureCategory	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	4b75d9527ec0362f
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV16ExposureCategoryO8allCasesSayAEGvpZ	UVIndex.ExposureCategory	allCases	+	[WeatherKit.UVIndex.ExposureCategory]	-	-	-	daac5109ae325ad6
+WeatherKit	swift-property	s:10WeatherKit7UVIndexV16ExposureCategoryO8rawValueSSvp	UVIndex.ExposureCategory	rawValue	-	Swift.String	-	-	-	a14b32d3f351ce3b
+WeatherKit	swift-method	s:10WeatherKit7UVIndexV2eeoiySbAC_ACtFZ	UVIndex	==(_:_:)	+	Swift.Bool	WeatherKit.UVIndex | WeatherKit.UVIndex	-	-	ba1f1761fe440bb7
+WeatherKit	swift-method	s:10WeatherKit7UVIndexV6encode2toys7Encoder_p_tKF	UVIndex	encode(to:)	-	()	any Swift.Encoder	-	-	4f6c036f5ce364b0
+WeatherKit	swift-method	s:10WeatherKit7UVIndexV4fromACs7Decoder_p_tKcfc	UVIndex	init(from:)	-	-	WeatherKit.UVIndex | any Swift.Decoder	-	-	f6711d803e756c6b
+WeatherKit	swift-struct	s:10WeatherKit0A7ChangesV	-	WeatherChanges	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	fd6d6303e81fc146
+WeatherKit	swift-typealias	s:10WeatherKit0A7ChangesV7Elementa	WeatherChanges	Element	-	-	-	-	-	885c2727919b8cc3
+WeatherKit	swift-typealias	s:10WeatherKit0A7ChangesV5Indexa	WeatherChanges	Index	-	-	-	-	-	59a10350f9b8a73b
+WeatherKit	swift-property	s:10WeatherKit0A7ChangesV7changesSayAA0A6ChangeVGvp	WeatherChanges	changes	-	[WeatherKit.WeatherChange]	-	-	-	9dcdfceebea69d94
+WeatherKit	swift-property	s:10WeatherKit0A7ChangesV8metadataAA0A8MetadataVvp	WeatherChanges	metadata	-	WeatherKit.WeatherMetadata	-	-	-	549e62236944ea36
+WeatherKit	swift-property	s:10WeatherKit0A7ChangesV10startIndexSivp	WeatherChanges	startIndex	-	WeatherKit.WeatherChanges.Index	-	-	-	95b7e129be5f5cf7
+WeatherKit	swift-property	s:10WeatherKit0A7ChangesV8endIndexSivp	WeatherChanges	endIndex	-	WeatherKit.WeatherChanges.Index	-	-	-	d96c3b060ba0ee54
+WeatherKit	swift-method	s:10WeatherKit0A7ChangesVyAA0A6ChangeVSicip	WeatherChanges	subscript(_:)	-	WeatherKit.WeatherChanges.Element	WeatherKit.WeatherChanges.Index	-	-	56d970a706fb9b71
+WeatherKit	swift-typealias	s:10WeatherKit0A7ChangesV7Indicesa	WeatherChanges	Indices	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	810b75b1d8e24330
+WeatherKit	swift-typealias	s:10WeatherKit0A7ChangesV8Iteratora	WeatherChanges	Iterator	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	504e27a569d9f2d8
+WeatherKit	swift-typealias	s:10WeatherKit0A7ChangesV11SubSequencea	WeatherChanges	SubSequence	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	f657bcbaf943e851
+WeatherKit	swift-method	s:10WeatherKit0A7ChangesV2eeoiySbAC_ACtFZ	WeatherChanges	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherChanges | WeatherKit.WeatherChanges	-	-	c82e23d62c5f5ec8
+WeatherKit	swift-method	s:10WeatherKit0A7ChangesV6encode2toys7Encoder_p_tKF	WeatherChanges	encode(to:)	-	()	any Swift.Encoder	-	-	dec5584cc5432ca5
+WeatherKit	swift-method	s:10WeatherKit0A7ChangesV4fromACs7Decoder_p_tKcfc	WeatherChanges	init(from:)	-	-	WeatherKit.WeatherChanges | any Swift.Decoder	-	-	3d7d63c3df45d921
+WeatherKit	swift-struct	s:10WeatherKit04HourA0V	-	HourWeather	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a0e1fac5429236e6
+WeatherKit	swift-property	s:10WeatherKit04HourA0V4date10Foundation4DateVvp	HourWeather	date	-	Foundation.Date	-	-	-	3d46bc8eea586270
+WeatherKit	swift-property	s:10WeatherKit04HourA0V10cloudCoverSdvp	HourWeather	cloudCover	-	Swift.Double	-	-	-	28f7c9648e0707a5
+WeatherKit	swift-property	s:10WeatherKit04HourA0V20cloudCoverByAltitudeAA05CloudefG0Vvp	HourWeather	cloudCoverByAltitude	-	WeatherKit.CloudCoverByAltitude	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	dc459f172d5e2854
+WeatherKit	swift-property	s:10WeatherKit04HourA0V9conditionAA0A9ConditionOvp	HourWeather	condition	-	WeatherKit.WeatherCondition	-	-	-	15c1baa1ab178ce7
+WeatherKit	swift-property	s:10WeatherKit04HourA0V10symbolNameSSvp	HourWeather	symbolName	-	Swift.String	-	-	-	9714326bb3b1716d
+WeatherKit	swift-property	s:10WeatherKit04HourA0V8dewPoint10Foundation11MeasurementVySo17NSUnitTemperatureCGvp	HourWeather	dewPoint	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	0b93d1b5ef8a9f0c
+WeatherKit	swift-property	s:10WeatherKit04HourA0V8humiditySdvp	HourWeather	humidity	-	Swift.Double	-	-	-	c11af9c08a7621c9
+WeatherKit	swift-property	s:10WeatherKit04HourA0V10isDaylightSbvp	HourWeather	isDaylight	-	Swift.Bool	-	-	-	983325f90527452a
+WeatherKit	swift-property	s:10WeatherKit04HourA0V13precipitationAA13PrecipitationOvp	HourWeather	precipitation	-	WeatherKit.Precipitation	-	-	-	aabb92b3ec496512
+WeatherKit	swift-property	s:10WeatherKit04HourA0V19precipitationChanceSdvp	HourWeather	precipitationChance	-	Swift.Double	-	-	-	5ff05a4f73677914
+WeatherKit	swift-property	s:10WeatherKit04HourA0V19precipitationAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	HourWeather	precipitationAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	a1c89c4cdc62da18
+WeatherKit	swift-property	s:10WeatherKit04HourA0V14snowfallAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	HourWeather	snowfallAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	9ae5cb81bc9a3358
+WeatherKit	swift-property	s:10WeatherKit04HourA0V8pressure10Foundation11MeasurementVySo14NSUnitPressureCGvp	HourWeather	pressure	-	Foundation.Measurement<Foundation.UnitPressure>	-	-	-	9bbcedd1df3bd02d
+WeatherKit	swift-property	s:10WeatherKit04HourA0V13pressureTrendAA08PressureE0Ovp	HourWeather	pressureTrend	-	WeatherKit.PressureTrend	-	-	-	5df3619ee0ae5932
+WeatherKit	swift-property	s:10WeatherKit04HourA0V11temperature10Foundation11MeasurementVySo17NSUnitTemperatureCGvp	HourWeather	temperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	d883c08c123a5332
+WeatherKit	swift-property	s:10WeatherKit04HourA0V19apparentTemperature10Foundation11MeasurementVySo06NSUnitE0CGvp	HourWeather	apparentTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	5d267e657a73b86a
+WeatherKit	swift-property	s:10WeatherKit04HourA0V7uvIndexAA7UVIndexVvp	HourWeather	uvIndex	-	WeatherKit.UVIndex	-	-	-	6fc946774c2e51bd
+WeatherKit	swift-property	s:10WeatherKit04HourA0V10visibility10Foundation11MeasurementVySo12NSUnitLengthCGvp	HourWeather	visibility	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	fa5beb0252624956
+WeatherKit	swift-property	s:10WeatherKit04HourA0V4windAA4WindVvp	HourWeather	wind	-	WeatherKit.Wind	-	-	-	4df6fc8ae9e64c98
+WeatherKit	swift-method	s:10WeatherKit04HourA0V2eeoiySbAC_ACtFZ	HourWeather	==(_:_:)	+	Swift.Bool	WeatherKit.HourWeather | WeatherKit.HourWeather	-	-	6d1a33b186bed2b0
+WeatherKit	swift-method	s:10WeatherKit04HourA0V6encode2toys7Encoder_p_tKF	HourWeather	encode(to:)	-	()	any Swift.Encoder	-	-	a87aace132c526af
+WeatherKit	swift-method	s:10WeatherKit04HourA0V4fromACs7Decoder_p_tKcfc	HourWeather	init(from:)	-	-	WeatherKit.HourWeather | any Swift.Decoder	-	-	58cad98fb19fe90f
+WeatherKit	swift-enum	s:10WeatherKit0A5ErrorO	-	WeatherError	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	0135085e02c030ca
+WeatherKit	swift-constant	s:10WeatherKit0A5ErrorO16permissionDeniedyA2CmF	WeatherError	permissionDenied	-	-	-	-	-	502cb9b1f5ab721c
+WeatherKit	swift-constant	s:10WeatherKit0A5ErrorO7unknownyA2CmF	WeatherError	unknown	-	-	-	-	-	8e08d8f59b4e3280
+WeatherKit	swift-property	s:10WeatherKit0A5ErrorO16errorDescriptionSSSgvp	WeatherError	errorDescription	-	Swift.String?	-	-	-	19e4557cd6d9f76b
+WeatherKit	swift-property	s:10WeatherKit0A5ErrorO13failureReasonSSSgvp	WeatherError	failureReason	-	Swift.String?	-	-	-	c6c6f08d2baf6638
+WeatherKit	swift-property	s:10WeatherKit0A5ErrorO10helpAnchorSSSgvp	WeatherError	helpAnchor	-	Swift.String?	-	-	-	a398c803e254b045
+WeatherKit	swift-property	s:10WeatherKit0A5ErrorO18recoverySuggestionSSSgvp	WeatherError	recoverySuggestion	-	Swift.String?	-	-	-	abca378c2925f1c7
+WeatherKit	swift-method	s:10WeatherKit0A5ErrorO2eeoiySbAC_ACtFZ	WeatherError	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherError | WeatherKit.WeatherError	-	-	66075d486d9fa0e2
+WeatherKit	swift-method	s:10WeatherKit0A5ErrorO4hash4intoys6HasherVz_tF	WeatherError	hash(into:)	-	()	Swift.Hasher	-	-	d7bb3efbddb7e069
+WeatherKit	swift-property	s:10WeatherKit0A5ErrorO9hashValueSivp	WeatherError	hashValue	-	Swift.Int	-	-	-	1c18c9ed8a868c4b
+WeatherKit	swift-struct	s:10WeatherKit05DailyA15StatisticsQueryV	-	DailyWeatherStatisticsQuery	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	e1ac2118d1416d58
+WeatherKit	swift-property	s:10WeatherKit05DailyA15StatisticsQueryV11temperatureACyAA014DayTemperatureD0VGvpZ	DailyWeatherStatisticsQuery	temperature	+	WeatherKit.DailyWeatherStatisticsQuery<WeatherKit.DayTemperatureStatistics>	-	-	-	037f3fb96467cee4
+WeatherKit	swift-property	s:10WeatherKit05DailyA15StatisticsQueryV13precipitationACyAA016DayPrecipitationD0VGvpZ	DailyWeatherStatisticsQuery	precipitation	+	WeatherKit.DailyWeatherStatisticsQuery<WeatherKit.DayPrecipitationStatistics>	-	-	-	b46723f285fbe3cc
+WeatherKit	swift-struct	s:10WeatherKit9SunEventsV	-	SunEvents	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	7c6b08446e774369
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV16astronomicalDawn10Foundation4DateVSgvp	SunEvents	astronomicalDawn	-	Foundation.Date?	-	-	-	1b6fbde50653980a
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV12nauticalDawn10Foundation4DateVSgvp	SunEvents	nauticalDawn	-	Foundation.Date?	-	-	-	b7a0050d6bc17fac
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV9civilDawn10Foundation4DateVSgvp	SunEvents	civilDawn	-	Foundation.Date?	-	-	-	477f2e6c9f578a59
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV7sunrise10Foundation4DateVSgvp	SunEvents	sunrise	-	Foundation.Date?	-	-	-	39fc7a3b36c6ec13
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV9solarNoon10Foundation4DateVSgvp	SunEvents	solarNoon	-	Foundation.Date?	-	-	-	18903826c0f32e07
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV6sunset10Foundation4DateVSgvp	SunEvents	sunset	-	Foundation.Date?	-	-	-	42aafd8e7f72a5ea
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV9civilDusk10Foundation4DateVSgvp	SunEvents	civilDusk	-	Foundation.Date?	-	-	-	093178d171690246
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV12nauticalDusk10Foundation4DateVSgvp	SunEvents	nauticalDusk	-	Foundation.Date?	-	-	-	ba15b2557a0604a5
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV16astronomicalDusk10Foundation4DateVSgvp	SunEvents	astronomicalDusk	-	Foundation.Date?	-	-	-	4067ed792c79a60b
+WeatherKit	swift-property	s:10WeatherKit9SunEventsV13solarMidnight10Foundation4DateVSgvp	SunEvents	solarMidnight	-	Foundation.Date?	-	-	-	f00fdcb814e79315
+WeatherKit	swift-method	s:10WeatherKit9SunEventsV2eeoiySbAC_ACtFZ	SunEvents	==(_:_:)	+	Swift.Bool	WeatherKit.SunEvents | WeatherKit.SunEvents	-	-	8064144ce7235ed5
+WeatherKit	swift-method	s:10WeatherKit9SunEventsV6encode2toys7Encoder_p_tKF	SunEvents	encode(to:)	-	()	any Swift.Encoder	-	-	edd7a5b318a3c4d6
+WeatherKit	swift-method	s:10WeatherKit9SunEventsV4fromACs7Decoder_p_tKcfc	SunEvents	init(from:)	-	-	WeatherKit.SunEvents | any Swift.Decoder	-	-	21f7eec7c1713d9d
+WeatherKit	swift-enum	s:10WeatherKit0A9ConditionO	-	WeatherCondition	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	0b229b56fceefbe5
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO8blizzardyA2CmF	WeatherCondition	blizzard	-	-	-	-	-	9678019c41924820
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO11blowingDustyA2CmF	WeatherCondition	blowingDust	-	-	-	-	-	73a6efe3ba4ccd5d
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO11blowingSnowyA2CmF	WeatherCondition	blowingSnow	-	-	-	-	-	a63bd057ce8aec49
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO6breezyyA2CmF	WeatherCondition	breezy	-	-	-	-	-	6fd6da2eaf266a3f
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO5clearyA2CmF	WeatherCondition	clear	-	-	-	-	-	0ce908b6549867d4
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO6cloudyyA2CmF	WeatherCondition	cloudy	-	-	-	-	-	5de093b9d4f082ec
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO7drizzleyA2CmF	WeatherCondition	drizzle	-	-	-	-	-	871ba4a2249f369c
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO8flurriesyA2CmF	WeatherCondition	flurries	-	-	-	-	-	85f032c7e366d98d
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO5foggyyA2CmF	WeatherCondition	foggy	-	-	-	-	-	be206fbcc5001882
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO15freezingDrizzleyA2CmF	WeatherCondition	freezingDrizzle	-	-	-	-	-	16a22b6cace9a74e
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO12freezingRainyA2CmF	WeatherCondition	freezingRain	-	-	-	-	-	ecd6ecad0c8d6475
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO6frigidyA2CmF	WeatherCondition	frigid	-	-	-	-	-	ddd5f2836d0c7d22
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO4hailyA2CmF	WeatherCondition	hail	-	-	-	-	-	c90677b99a68b46b
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO4hazeyA2CmF	WeatherCondition	haze	-	-	-	-	-	1ae10b2bc7f3aa0a
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO9heavyRainyA2CmF	WeatherCondition	heavyRain	-	-	-	-	-	61552417650968e3
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO9heavySnowyA2CmF	WeatherCondition	heavySnow	-	-	-	-	-	f2e83c27ea7e865d
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO3hotyA2CmF	WeatherCondition	hot	-	-	-	-	-	1de179666ad1c6a0
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO9hurricaneyA2CmF	WeatherCondition	hurricane	-	-	-	-	-	5043d822222a2dcb
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO21isolatedThunderstormsyA2CmF	WeatherCondition	isolatedThunderstorms	-	-	-	-	-	aa1b3d5261609a98
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO11mostlyClearyA2CmF	WeatherCondition	mostlyClear	-	-	-	-	-	e30860d4bb9b9ecb
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO12mostlyCloudyyA2CmF	WeatherCondition	mostlyCloudy	-	-	-	-	-	c6537760f0be224e
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO12partlyCloudyyA2CmF	WeatherCondition	partlyCloudy	-	-	-	-	-	8575e32bdd62e56c
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO4rainyA2CmF	WeatherCondition	rain	-	-	-	-	-	b42a70e96f513693
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO22scatteredThunderstormsyA2CmF	WeatherCondition	scatteredThunderstorms	-	-	-	-	-	58f4f6bc6b0588a3
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO5sleetyA2CmF	WeatherCondition	sleet	-	-	-	-	-	6144eb11c8d7fc69
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO5smokyyA2CmF	WeatherCondition	smoky	-	-	-	-	-	250537fa51c5c007
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO4snowyA2CmF	WeatherCondition	snow	-	-	-	-	-	8aa4ce090296a47a
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO12strongStormsyA2CmF	WeatherCondition	strongStorms	-	-	-	-	-	e3153bfff1943ede
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO11sunFlurriesyA2CmF	WeatherCondition	sunFlurries	-	-	-	-	-	0a6214241b81fef8
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO10sunShowersyA2CmF	WeatherCondition	sunShowers	-	-	-	-	-	9fd862c96bd99682
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO13thunderstormsyA2CmF	WeatherCondition	thunderstorms	-	-	-	-	-	5886d2cf3efdc910
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO13tropicalStormyA2CmF	WeatherCondition	tropicalStorm	-	-	-	-	-	251f78ebf7a97cca
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO5windyyA2CmF	WeatherCondition	windy	-	-	-	-	-	cb51213feb2583df
+WeatherKit	swift-constant	s:10WeatherKit0A9ConditionO9wintryMixyA2CmF	WeatherCondition	wintryMix	-	-	-	-	-	3ca96cdfd0ed2b6b
+WeatherKit	swift-property	s:10WeatherKit0A9ConditionO11descriptionSSvp	WeatherCondition	description	-	Swift.String	-	-	-	6cab31c74e8e9f48
+WeatherKit	swift-property	s:10WeatherKit0A9ConditionO24accessibilityDescriptionSSvp	WeatherCondition	accessibilityDescription	-	Swift.String	-	-	-	b39b980dc5eda200
+WeatherKit	swift-method	s:10WeatherKit0A9ConditionO8rawValueACSgSS_tcfc	WeatherCondition	init(rawValue:)	-	-	WeatherKit.WeatherCondition? | Swift.String	-	-	4b8eef290fd5fdc9
+WeatherKit	swift-typealias	s:10WeatherKit0A9ConditionO8AllCasesa	WeatherCondition	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	2bbf84d37b0cad1f
+WeatherKit	swift-typealias	s:10WeatherKit0A9ConditionO8RawValuea	WeatherCondition	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a6631ee2185e88ad
+WeatherKit	swift-property	s:10WeatherKit0A9ConditionO8allCasesSayACGvpZ	WeatherCondition	allCases	+	[WeatherKit.WeatherCondition]	-	-	-	1a3f5e35aadcdca7
+WeatherKit	swift-property	s:10WeatherKit0A9ConditionO8rawValueSSvp	WeatherCondition	rawValue	-	Swift.String	-	-	-	8f40d76de9c06323
+WeatherKit	swift-struct	s:10WeatherKit0A11AttributionV	-	WeatherAttribution	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	543a62aff30ba9dc
+WeatherKit	swift-property	s:10WeatherKit0A11AttributionV11serviceNameSSvp	WeatherAttribution	serviceName	-	Swift.String	-	-	-	2d5f5869fa257e0c
+WeatherKit	swift-property	s:10WeatherKit0A11AttributionV12legalPageURL10Foundation0F0Vvp	WeatherAttribution	legalPageURL	-	Foundation.URL	-	-	-	0f13c91fb6a33424
+WeatherKit	swift-property	s:10WeatherKit0A11AttributionV13squareMarkURL10Foundation0F0Vvp	WeatherAttribution	squareMarkURL	-	Foundation.URL	-	-	-	87fd96cf069dab75
+WeatherKit	swift-property	s:10WeatherKit0A11AttributionV19combinedMarkDarkURL10Foundation0G0Vvp	WeatherAttribution	combinedMarkDarkURL	-	Foundation.URL	-	-	-	791595e60df6297f
+WeatherKit	swift-property	s:10WeatherKit0A11AttributionV20combinedMarkLightURL10Foundation0G0Vvp	WeatherAttribution	combinedMarkLightURL	-	Foundation.URL	-	-	-	5ce4798eb7f70833
+WeatherKit	swift-property	s:10WeatherKit0A11AttributionV05legalC4TextSSvp	WeatherAttribution	legalAttributionText	-	Swift.String	-	ios=16.4,macos=13.3,tvos=16.4,watchos=9.4	-	4a81f342664494b7
+WeatherKit	swift-method	s:10WeatherKit0A11AttributionV2eeoiySbAC_ACtFZ	WeatherAttribution	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherAttribution | WeatherKit.WeatherAttribution	-	-	710417d6c984d43c
+WeatherKit	swift-method	s:10WeatherKit0A11AttributionV6encode2toys7Encoder_p_tKF	WeatherAttribution	encode(to:)	-	()	any Swift.Encoder	-	-	541dfa38cec35e10
+WeatherKit	swift-method	s:10WeatherKit0A11AttributionV4fromACs7Decoder_p_tKcfc	WeatherAttribution	init(from:)	-	-	WeatherKit.WeatherAttribution | any Swift.Decoder	-	-	2c03e8f393e2c5bd
+WeatherKit	swift-struct	s:10WeatherKit20CloudCoverByAltitudeV	-	CloudCoverByAltitude	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	6b5f1083f12a255d
+WeatherKit	swift-property	s:10WeatherKit20CloudCoverByAltitudeV3lowSdvp	CloudCoverByAltitude	low	-	Swift.Double	-	-	-	b2fe05a26c14af12
+WeatherKit	swift-property	s:10WeatherKit20CloudCoverByAltitudeV6mediumSdvp	CloudCoverByAltitude	medium	-	Swift.Double	-	-	-	719a46bf286a841f
+WeatherKit	swift-property	s:10WeatherKit20CloudCoverByAltitudeV4highSdvp	CloudCoverByAltitude	high	-	Swift.Double	-	-	-	a245d3b489b0e7f8
+WeatherKit	swift-method	s:10WeatherKit20CloudCoverByAltitudeV2eeoiySbAC_ACtFZ	CloudCoverByAltitude	==(_:_:)	+	Swift.Bool	WeatherKit.CloudCoverByAltitude | WeatherKit.CloudCoverByAltitude	-	-	629c12d0c981726c
+WeatherKit	swift-method	s:10WeatherKit20CloudCoverByAltitudeV6encode2toys7Encoder_p_tKF	CloudCoverByAltitude	encode(to:)	-	()	any Swift.Encoder	-	-	fda72c29bf3f9b9f
+WeatherKit	swift-method	s:10WeatherKit20CloudCoverByAltitudeV4fromACs7Decoder_p_tKcfc	CloudCoverByAltitude	init(from:)	-	-	WeatherKit.CloudCoverByAltitude | any Swift.Decoder	-	-	9d32abd78cb34410
+WeatherKit	swift-struct	s:10WeatherKit07MonthlyA15StatisticsQueryV	-	MonthlyWeatherStatisticsQuery	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	9712d1a298b77c2a
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA15StatisticsQueryV11temperatureACyAA016MonthTemperatureD0VGvpZ	MonthlyWeatherStatisticsQuery	temperature	+	WeatherKit.MonthlyWeatherStatisticsQuery<WeatherKit.MonthTemperatureStatistics>	-	-	-	5fb1f8b5ba4f9149
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA15StatisticsQueryV13precipitationACyAA018MonthPrecipitationD0VGvpZ	MonthlyWeatherStatisticsQuery	precipitation	+	WeatherKit.MonthlyWeatherStatisticsQuery<WeatherKit.MonthPrecipitationStatistics>	-	-	-	50073f548f13aae4
+WeatherKit	swift-struct	s:10WeatherKit0A5QueryV	-	WeatherQuery	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	c4fa414038a692c5
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV7currentACyAA07CurrentA0VGvpZ	WeatherQuery	current	+	WeatherKit.WeatherQuery<WeatherKit.CurrentWeather>	-	-	-	eb28c5c4f6ee18fc
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV6minuteACyAA8ForecastVyAA06MinuteA0VGSgGvpZ	WeatherQuery	minute	+	WeatherKit.WeatherQuery<WeatherKit.Forecast<WeatherKit.MinuteWeather>?>	-	-	-	f9cfafe908a21ebd
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV6hourlyACyAA8ForecastVyAA04HourA0VGGvpZ	WeatherQuery	hourly	+	WeatherKit.WeatherQuery<WeatherKit.Forecast<WeatherKit.HourWeather>>	-	-	-	ce02870695dae206
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV5dailyACyAA8ForecastVyAA03DayA0VGGvpZ	WeatherQuery	daily	+	WeatherKit.WeatherQuery<WeatherKit.Forecast<WeatherKit.DayWeather>>	-	-	-	9419068d8252dd0a
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV6alertsACySayAA0A5AlertVGSgGvpZ	WeatherQuery	alerts	+	WeatherKit.WeatherQuery<[WeatherKit.WeatherAlert]?>	-	-	-	60a3451bbcb64281
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV12availabilityACyAA0A12AvailabilityVGvpZ	WeatherQuery	availability	+	WeatherKit.WeatherQuery<WeatherKit.WeatherAvailability>	-	-	-	a0ef8fcbaca034ea
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV7changesACyAA0A7ChangesVSgGvpZ	WeatherQuery	changes	+	WeatherKit.WeatherQuery<WeatherKit.WeatherChanges?>	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	ffd59d9582a885d9
+WeatherKit	swift-property	s:10WeatherKit0A5QueryV21historicalComparisonsACyAA010HistoricalE0VSgGvpZ	WeatherQuery	historicalComparisons	+	WeatherKit.WeatherQuery<WeatherKit.HistoricalComparisons?>	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	541e674707678271
+WeatherKit	swift-method	s:10WeatherKit0A5QueryVA2A8ForecastVyAA03DayA0VGRszlE5daily9startDate03endH0ACyAHG10Foundation0H0V_AOtFZ	WeatherQuery	daily(startDate:endDate:)	+	WeatherKit.WeatherQuery<T>	Foundation.Date | Foundation.Date	-	-	81af134f1d2769d3
+WeatherKit	swift-method	s:10WeatherKit0A5QueryVA2A8ForecastVyAA04HourA0VGRszlE6hourly9startDate03endH0ACyAHG10Foundation0H0V_AOtFZ	WeatherQuery	hourly(startDate:endDate:)	+	WeatherKit.WeatherQuery<T>	Foundation.Date | Foundation.Date	-	-	d0134644fefa6510
+WeatherKit	swift-enum	s:10WeatherKit20HistoricalComparisonO	-	HistoricalComparison	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	9f5353e76ecb2bdd
+WeatherKit	swift-constant	s:10WeatherKit20HistoricalComparisonO15highTemperatureyAcA5TrendVySo06NSUnitF0CGcACmF	HistoricalComparison	highTemperature	-	-	-	-	-	0bfecf75109e1875
+WeatherKit	swift-constant	s:10WeatherKit20HistoricalComparisonO14lowTemperatureyAcA5TrendVySo06NSUnitF0CGcACmF	HistoricalComparison	lowTemperature	-	-	-	-	-	05c72ea9a6099703
+WeatherKit	swift-constant	s:10WeatherKit20HistoricalComparisonO19precipitationAmountyAcA5TrendVySo12NSUnitLengthCGcACmF	HistoricalComparison	precipitationAmount	-	-	-	-	-	84e874129981b2a4
+WeatherKit	swift-constant	s:10WeatherKit20HistoricalComparisonO14snowfallAmountyAcA5TrendVySo12NSUnitLengthCGcACmF	HistoricalComparison	snowfallAmount	-	-	-	-	-	63063af72e04ef88
+WeatherKit	swift-method	s:10WeatherKit20HistoricalComparisonO2eeoiySbAC_ACtFZ	HistoricalComparison	==(_:_:)	+	Swift.Bool	WeatherKit.HistoricalComparison | WeatherKit.HistoricalComparison	-	-	b1289659f0953cd8
+WeatherKit	swift-method	s:10WeatherKit20HistoricalComparisonO6encode2toys7Encoder_p_tKF	HistoricalComparison	encode(to:)	-	()	any Swift.Encoder	-	-	71baa4f3df471f2d
+WeatherKit	swift-method	s:10WeatherKit20HistoricalComparisonO4fromACs7Decoder_p_tKcfc	HistoricalComparison	init(from:)	-	-	WeatherKit.HistoricalComparison | any Swift.Decoder	-	-	496c442f36990a0e
+WeatherKit	swift-struct	s:10WeatherKit05DailyA12SummaryQueryV	-	DailyWeatherSummaryQuery	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	79c901eddd781153
+WeatherKit	swift-property	s:10WeatherKit05DailyA12SummaryQueryV11temperatureACyAA014DayTemperatureD0VGvpZ	DailyWeatherSummaryQuery	temperature	+	WeatherKit.DailyWeatherSummaryQuery<WeatherKit.DayTemperatureSummary>	-	-	-	b6be5fcd82fb5731
+WeatherKit	swift-property	s:10WeatherKit05DailyA12SummaryQueryV13precipitationACyAA016DayPrecipitationD0VGvpZ	DailyWeatherSummaryQuery	precipitation	+	WeatherKit.DailyWeatherSummaryQuery<WeatherKit.DayPrecipitationSummary>	-	-	-	5494cf8ed9ccb8ce
+WeatherKit	swift-struct	s:10WeatherKit10MoonEventsV	-	MoonEvents	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	981a85ec5b8f5853
+WeatherKit	swift-property	s:10WeatherKit10MoonEventsV5phaseAA0C5PhaseOvp	MoonEvents	phase	-	WeatherKit.MoonPhase	-	-	-	1876bbc7f2e16df0
+WeatherKit	swift-property	s:10WeatherKit10MoonEventsV8moonrise10Foundation4DateVSgvp	MoonEvents	moonrise	-	Foundation.Date?	-	-	-	43b5880b57299d2c
+WeatherKit	swift-property	s:10WeatherKit10MoonEventsV7moonset10Foundation4DateVSgvp	MoonEvents	moonset	-	Foundation.Date?	-	-	-	d6d5cf81bbe217d0
+WeatherKit	swift-method	s:10WeatherKit10MoonEventsV2eeoiySbAC_ACtFZ	MoonEvents	==(_:_:)	+	Swift.Bool	WeatherKit.MoonEvents | WeatherKit.MoonEvents	-	-	c935e01a984a774e
+WeatherKit	swift-method	s:10WeatherKit10MoonEventsV6encode2toys7Encoder_p_tKF	MoonEvents	encode(to:)	-	()	any Swift.Encoder	-	-	cc0e353b0667eb97
+WeatherKit	swift-method	s:10WeatherKit10MoonEventsV4fromACs7Decoder_p_tKcfc	MoonEvents	init(from:)	-	-	WeatherKit.MoonEvents | any Swift.Decoder	-	-	046a213ee5f2b4e7
+WeatherKit	swift-struct	s:10WeatherKit21DayTemperatureSummaryV	-	DayTemperatureSummary	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8a64bcfe03814510
+WeatherKit	swift-property	s:10WeatherKit21DayTemperatureSummaryV4date10Foundation4DateVvp	DayTemperatureSummary	date	-	Foundation.Date	-	-	-	2a21baa76ea851c0
+WeatherKit	swift-property	s:10WeatherKit21DayTemperatureSummaryV03lowD010Foundation11MeasurementVySo06NSUnitD0CGvp	DayTemperatureSummary	lowTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	ccbc2d4f3922384b
+WeatherKit	swift-property	s:10WeatherKit21DayTemperatureSummaryV04highD010Foundation11MeasurementVySo06NSUnitD0CGvp	DayTemperatureSummary	highTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	c858cabddc1174b6
+WeatherKit	swift-method	s:10WeatherKit21DayTemperatureSummaryV2eeoiySbAC_ACtFZ	DayTemperatureSummary	==(_:_:)	+	Swift.Bool	WeatherKit.DayTemperatureSummary | WeatherKit.DayTemperatureSummary	-	-	5806185dacf222ea
+WeatherKit	swift-method	s:10WeatherKit21DayTemperatureSummaryV6encode2toys7Encoder_p_tKF	DayTemperatureSummary	encode(to:)	-	()	any Swift.Encoder	-	-	30ccdfdee0da4bca
+WeatherKit	swift-method	s:10WeatherKit21DayTemperatureSummaryV4fromACs7Decoder_p_tKcfc	DayTemperatureSummary	init(from:)	-	-	WeatherKit.DayTemperatureSummary | any Swift.Decoder	-	-	6eb7498a1a0c5854
+WeatherKit	swift-struct	s:10WeatherKit14SnowfallAmountV	-	SnowfallAmount	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	b9aef3d162344209
+WeatherKit	swift-property	s:10WeatherKit14SnowfallAmountV6amount10Foundation11MeasurementVySo12NSUnitLengthCGvp	SnowfallAmount	amount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	d284946d82f71230
+WeatherKit	swift-property	s:10WeatherKit14SnowfallAmountV7maximum10Foundation11MeasurementVySo12NSUnitLengthCGvp	SnowfallAmount	maximum	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	94e8821e332b87e7
+WeatherKit	swift-property	s:10WeatherKit14SnowfallAmountV7minimum10Foundation11MeasurementVySo12NSUnitLengthCGvp	SnowfallAmount	minimum	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	4cdd431af5d9a8a8
+WeatherKit	swift-property	s:10WeatherKit14SnowfallAmountV22amountLiquidEquivalent10Foundation11MeasurementVySo12NSUnitLengthCGvp	SnowfallAmount	amountLiquidEquivalent	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	cd51398a5738810f
+WeatherKit	swift-property	s:10WeatherKit14SnowfallAmountV23maximumLiquidEquivalent10Foundation11MeasurementVySo12NSUnitLengthCGvp	SnowfallAmount	maximumLiquidEquivalent	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	7ce53d786a32749b
+WeatherKit	swift-property	s:10WeatherKit14SnowfallAmountV23minimumLiquidEquivalent10Foundation11MeasurementVySo12NSUnitLengthCGvp	SnowfallAmount	minimumLiquidEquivalent	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	6a4ab398a39b8955
+WeatherKit	swift-method	s:10WeatherKit14SnowfallAmountV2eeoiySbAC_ACtFZ	SnowfallAmount	==(_:_:)	+	Swift.Bool	WeatherKit.SnowfallAmount | WeatherKit.SnowfallAmount	-	-	24bccd51b7297b8c
+WeatherKit	swift-method	s:10WeatherKit14SnowfallAmountV6encode2toys7Encoder_p_tKF	SnowfallAmount	encode(to:)	-	()	any Swift.Encoder	-	-	0673f3811e7dbc20
+WeatherKit	swift-method	s:10WeatherKit14SnowfallAmountV4fromACs7Decoder_p_tKcfc	SnowfallAmount	init(from:)	-	-	WeatherKit.SnowfallAmount | any Swift.Decoder	-	-	2a75d42e504eaf59
+WeatherKit	swift-struct	s:10WeatherKit13TrendBaselineV	-	TrendBaseline	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	eb6a423d90cce1f5
+WeatherKit	swift-enum	s:10WeatherKit13TrendBaselineV4KindO	TrendBaseline	Kind	-	-	-	-	-	21d35a84d005f9ef
+WeatherKit	swift-constant	s:10WeatherKit13TrendBaselineV4KindO4meanyAEyx_GAGmSo11NSDimensionCRbzlF	TrendBaseline.Kind	mean	-	-	-	-	-	8782502fa43d5378
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV4KindO2eeoiySbAEyx_G_AGtFZ	TrendBaseline.Kind	==(_:_:)	+	Swift.Bool	WeatherKit.TrendBaseline<Dimension>.Kind | WeatherKit.TrendBaseline<Dimension>.Kind	-	-	9fc3e3e21f4a60f3
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV4KindO6encode2toys7Encoder_p_tKF	TrendBaseline.Kind	encode(to:)	-	()	any Swift.Encoder	-	-	09fe78a1bfef9c90
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV4KindO4hash4intoys6HasherVz_tF	TrendBaseline.Kind	hash(into:)	-	()	Swift.Hasher	-	-	2086f92b17ca88df
+WeatherKit	swift-property	s:10WeatherKit13TrendBaselineV4KindO9hashValueSivp	TrendBaseline.Kind	hashValue	-	Swift.Int	-	-	-	92d71c41f18f9b03
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV4KindO4fromAEyx_Gs7Decoder_p_tKcfc	TrendBaseline.Kind	init(from:)	-	-	WeatherKit.TrendBaseline<Dimension>.Kind | any Swift.Decoder	-	-	ff422d2819bc03a8
+WeatherKit	swift-property	s:10WeatherKit13TrendBaselineV4kindAC4KindOyx_Gvp	TrendBaseline	kind	-	WeatherKit.TrendBaseline<Dimension>.Kind	-	-	-	5028b09ceae6f731
+WeatherKit	swift-property	s:10WeatherKit13TrendBaselineV5value10Foundation11MeasurementVyxGvp	TrendBaseline	value	-	Foundation.Measurement<Dimension>	-	-	-	634ec9e233963bbe
+WeatherKit	swift-property	s:10WeatherKit13TrendBaselineV9startDate10Foundation0F0Vvp	TrendBaseline	startDate	-	Foundation.Date	-	-	-	85f18fb19e14ae56
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV2eeoiySbACyxG_AEtFZ	TrendBaseline	==(_:_:)	+	Swift.Bool	WeatherKit.TrendBaseline<Dimension> | WeatherKit.TrendBaseline<Dimension>	-	-	412a63fc311eb7af
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV6encode2toys7Encoder_p_tKF	TrendBaseline	encode(to:)	-	()	any Swift.Encoder	-	-	44b65241879d84c4
+WeatherKit	swift-method	s:10WeatherKit13TrendBaselineV4fromACyxGs7Decoder_p_tKcfc	TrendBaseline	init(from:)	-	-	WeatherKit.TrendBaseline<Dimension> | any Swift.Decoder	-	-	114080beaea5f2ea
+WeatherKit	swift-struct	s:10WeatherKit0A8MetadataV	-	WeatherMetadata	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	d7a56073a70abbe1
+WeatherKit	swift-property	s:10WeatherKit0A8MetadataV4date10Foundation4DateVvp	WeatherMetadata	date	-	Foundation.Date	-	-	-	b3afcf0a0e1791fb
+WeatherKit	swift-property	s:10WeatherKit0A8MetadataV14expirationDate10Foundation0E0Vvp	WeatherMetadata	expirationDate	-	Foundation.Date	-	-	-	15b2579fc33a6e00
+WeatherKit	swift-property	s:10WeatherKit0A8MetadataV8locationSo10CLLocationCvp	WeatherMetadata	location	-	_LocationEssentials.CLLocation	-	-	-	cf82d0a9cfce100e
+WeatherKit	swift-method	s:10WeatherKit0A8MetadataV2eeoiySbAC_ACtFZ	WeatherMetadata	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherMetadata | WeatherKit.WeatherMetadata	-	-	335983da93bc13e8
+WeatherKit	swift-method	s:10WeatherKit0A8MetadataV6encode2toys7Encoder_p_tKF	WeatherMetadata	encode(to:)	-	()	any Swift.Encoder	-	-	b9ae23f94ce4bafe
+WeatherKit	swift-method	s:10WeatherKit0A8MetadataV4fromACs7Decoder_p_tKcfc	WeatherMetadata	init(from:)	-	-	WeatherKit.WeatherMetadata | any Swift.Decoder	-	-	e9d0b1aae1ab6b3c
+WeatherKit	swift-struct	s:10WeatherKit06HourlyA10StatisticsV	-	HourlyWeatherStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	66c6b0848b7ad18a
+WeatherKit	swift-typealias	s:10WeatherKit06HourlyA10StatisticsV7Elementa	HourlyWeatherStatistics	Element	-	-	-	-	-	eba581fc74dfa9e5
+WeatherKit	swift-typealias	s:10WeatherKit06HourlyA10StatisticsV5Indexa	HourlyWeatherStatistics	Index	-	-	-	-	-	0457a38c3c8ec703
+WeatherKit	swift-property	s:10WeatherKit06HourlyA10StatisticsV5hoursSayxGvp	HourlyWeatherStatistics	hours	-	[T]	-	-	-	151fe061f71417b5
+WeatherKit	swift-property	s:10WeatherKit06HourlyA10StatisticsV17baselineStartDate10Foundation0G0Vvp	HourlyWeatherStatistics	baselineStartDate	-	Foundation.Date	-	-	-	9ee3edbc963f90d2
+WeatherKit	swift-property	s:10WeatherKit06HourlyA10StatisticsV8metadataAA0A8MetadataVvp	HourlyWeatherStatistics	metadata	-	WeatherKit.WeatherMetadata	-	-	-	bf2d1b84c4ab670d
+WeatherKit	swift-property	s:10WeatherKit06HourlyA10StatisticsV10startIndexSivp	HourlyWeatherStatistics	startIndex	-	WeatherKit.HourlyWeatherStatistics<T>.Index	-	-	-	57f8e5d8d92f3134
+WeatherKit	swift-property	s:10WeatherKit06HourlyA10StatisticsV8endIndexSivp	HourlyWeatherStatistics	endIndex	-	WeatherKit.HourlyWeatherStatistics<T>.Index	-	-	-	e1444383a7c570f1
+WeatherKit	swift-method	s:10WeatherKit06HourlyA10StatisticsVyxSicip	HourlyWeatherStatistics	subscript(_:)	-	WeatherKit.HourlyWeatherStatistics<T>.Element	WeatherKit.HourlyWeatherStatistics<T>.Index	-	-	c1c0e5f93c1b202e
+WeatherKit	swift-method	s:10WeatherKit06HourlyA10StatisticsV2eeoiySbACyxG_AEtFZ	HourlyWeatherStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.HourlyWeatherStatistics<T> | WeatherKit.HourlyWeatherStatistics<T>	-	-	b05ace80967a7f5d
+WeatherKit	swift-typealias	s:10WeatherKit06HourlyA10StatisticsV7Indicesa	HourlyWeatherStatistics	Indices	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	ece5ed2728060926
+WeatherKit	swift-typealias	s:10WeatherKit06HourlyA10StatisticsV8Iteratora	HourlyWeatherStatistics	Iterator	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8fdf5659acb89e08
+WeatherKit	swift-typealias	s:10WeatherKit06HourlyA10StatisticsV11SubSequencea	HourlyWeatherStatistics	SubSequence	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	facae66464524381
+WeatherKit	swift-method	s:10WeatherKit06HourlyA10StatisticsV6encode2toys7Encoder_p_tKF	HourlyWeatherStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	7fd297dbc3b879ba
+WeatherKit	swift-method	s:10WeatherKit06HourlyA10StatisticsV4fromACyxGs7Decoder_p_tKcfc	HourlyWeatherStatistics	init(from:)	-	-	WeatherKit.HourlyWeatherStatistics<T> | any Swift.Decoder	-	-	52ee1a3ebcca15be
+WeatherKit	swift-struct	s:10WeatherKit0A0V	-	Weather	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a38931fb7e11984d
+WeatherKit	swift-property	s:10WeatherKit0A0V07currentA0AA07CurrentA0Vvp	Weather	currentWeather	-	WeatherKit.CurrentWeather	-	-	-	3a8d90f761cfbda8
+WeatherKit	swift-property	s:10WeatherKit0A0V14minuteForecastAA0D0VyAA06MinuteA0VGSgvp	Weather	minuteForecast	-	WeatherKit.Forecast<WeatherKit.MinuteWeather>?	-	-	-	3c3afbb8d0fce222
+WeatherKit	swift-property	s:10WeatherKit0A0V14hourlyForecastAA0D0VyAA04HourA0VGvp	Weather	hourlyForecast	-	WeatherKit.Forecast<WeatherKit.HourWeather>	-	-	-	c1d0c2724b35b60e
+WeatherKit	swift-property	s:10WeatherKit0A0V13dailyForecastAA0D0VyAA03DayA0VGvp	Weather	dailyForecast	-	WeatherKit.Forecast<WeatherKit.DayWeather>	-	-	-	a77e42bb40f26295
+WeatherKit	swift-property	s:10WeatherKit0A0V13weatherAlertsSayAA0A5AlertVGSgvp	Weather	weatherAlerts	-	[WeatherKit.WeatherAlert]?	-	-	-	cbc74685634a6390
+WeatherKit	swift-property	s:10WeatherKit0A0V12availabilityAA0A12AvailabilityVvp	Weather	availability	-	WeatherKit.WeatherAvailability	-	-	-	ded1ae2767a9b3e8
+WeatherKit	swift-method	s:10WeatherKit0A0V2eeoiySbAC_ACtFZ	Weather	==(_:_:)	+	Swift.Bool	WeatherKit.Weather | WeatherKit.Weather	-	-	e4a2d3b129f393cb
+WeatherKit	swift-method	s:10WeatherKit0A0V6encode2toys7Encoder_p_tKF	Weather	encode(to:)	-	()	any Swift.Encoder	-	-	fda262635c0f6a95
+WeatherKit	swift-method	s:10WeatherKit0A0V4fromACs7Decoder_p_tKcfc	Weather	init(from:)	-	-	WeatherKit.Weather | any Swift.Decoder	-	-	743c14655252ce7b
+WeatherKit	swift-struct	s:10WeatherKit05DailyA10StatisticsV	-	DailyWeatherStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8aa5487649170978
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA10StatisticsV7Elementa	DailyWeatherStatistics	Element	-	-	-	-	-	347a5aa64f9289c1
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA10StatisticsV5Indexa	DailyWeatherStatistics	Index	-	-	-	-	-	6dac1d2ca709648e
+WeatherKit	swift-property	s:10WeatherKit05DailyA10StatisticsV4daysSayxGvp	DailyWeatherStatistics	days	-	[T]	-	-	-	df7b223a1fede272
+WeatherKit	swift-property	s:10WeatherKit05DailyA10StatisticsV17baselineStartDate10Foundation0G0Vvp	DailyWeatherStatistics	baselineStartDate	-	Foundation.Date	-	-	-	b2c1ce09007a280f
+WeatherKit	swift-property	s:10WeatherKit05DailyA10StatisticsV8metadataAA0A8MetadataVvp	DailyWeatherStatistics	metadata	-	WeatherKit.WeatherMetadata	-	-	-	2bb9c348d6731f61
+WeatherKit	swift-property	s:10WeatherKit05DailyA10StatisticsV10startIndexSivp	DailyWeatherStatistics	startIndex	-	WeatherKit.DailyWeatherStatistics<T>.Index	-	-	-	1c0b7c1b8e928863
+WeatherKit	swift-property	s:10WeatherKit05DailyA10StatisticsV8endIndexSivp	DailyWeatherStatistics	endIndex	-	WeatherKit.DailyWeatherStatistics<T>.Index	-	-	-	f0c80a8a2f0c267f
+WeatherKit	swift-method	s:10WeatherKit05DailyA10StatisticsVyxSicip	DailyWeatherStatistics	subscript(_:)	-	WeatherKit.DailyWeatherStatistics<T>.Element	WeatherKit.DailyWeatherStatistics<T>.Index	-	-	f1fc60c8a998483a
+WeatherKit	swift-method	s:10WeatherKit05DailyA10StatisticsV2eeoiySbACyxG_AEtFZ	DailyWeatherStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.DailyWeatherStatistics<T> | WeatherKit.DailyWeatherStatistics<T>	-	-	7530802b3662c978
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA10StatisticsV7Indicesa	DailyWeatherStatistics	Indices	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	49974dac186d1dc7
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA10StatisticsV8Iteratora	DailyWeatherStatistics	Iterator	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	076009fefe8e7f60
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA10StatisticsV11SubSequencea	DailyWeatherStatistics	SubSequence	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	c71b71cb23f773b9
+WeatherKit	swift-method	s:10WeatherKit05DailyA10StatisticsV6encode2toys7Encoder_p_tKF	DailyWeatherStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	91d1bf286839f0c8
+WeatherKit	swift-method	s:10WeatherKit05DailyA10StatisticsV4fromACyxGs7Decoder_p_tKcfc	DailyWeatherStatistics	init(from:)	-	-	WeatherKit.DailyWeatherStatistics<T> | any Swift.Decoder	-	-	21ed98fd2f7ad3ee
+WeatherKit	swift-struct	s:10WeatherKit11PercentilesV	-	Percentiles	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	ce566e66ff70d3ad
+WeatherKit	swift-property	s:10WeatherKit11PercentilesV3p1010Foundation11MeasurementVyxGvp	Percentiles	p10	-	Foundation.Measurement<Dimension>	-	-	-	a6c0b3b77bd0e4b1
+WeatherKit	swift-property	s:10WeatherKit11PercentilesV3p5010Foundation11MeasurementVyxGvp	Percentiles	p50	-	Foundation.Measurement<Dimension>	-	-	-	d769fd1d1068f3e6
+WeatherKit	swift-property	s:10WeatherKit11PercentilesV3p9010Foundation11MeasurementVyxGvp	Percentiles	p90	-	Foundation.Measurement<Dimension>	-	-	-	7ff1fc2e91d20df0
+WeatherKit	swift-method	s:10WeatherKit11PercentilesV2eeoiySbACyxG_AEtFZ	Percentiles	==(_:_:)	+	Swift.Bool	WeatherKit.Percentiles<Dimension> | WeatherKit.Percentiles<Dimension>	-	-	2ee44329a1898b03
+WeatherKit	swift-method	s:10WeatherKit11PercentilesV6encode2toys7Encoder_p_tKF	Percentiles	encode(to:)	-	()	any Swift.Encoder	-	-	cbcb5d974b733df8
+WeatherKit	swift-method	s:10WeatherKit11PercentilesV4fromACyxGs7Decoder_p_tKcfc	Percentiles	init(from:)	-	-	WeatherKit.Percentiles<Dimension> | any Swift.Decoder	-	-	b558fc9c6987d35a
+WeatherKit	swift-struct	s:10WeatherKit26DayPrecipitationStatisticsV	-	DayPrecipitationStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	3af153f544f120ac
+WeatherKit	swift-property	s:10WeatherKit26DayPrecipitationStatisticsV3daySivp	DayPrecipitationStatistics	day	-	Swift.Int	-	-	-	dcb7bcb6ef9cf62a
+WeatherKit	swift-property	s:10WeatherKit26DayPrecipitationStatisticsV07averageD11ProbabilitySdvp	DayPrecipitationStatistics	averagePrecipitationProbability	-	Swift.Double	-	-	-	bda323facd5e6e86
+WeatherKit	swift-property	s:10WeatherKit26DayPrecipitationStatisticsV07averageD6Amount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayPrecipitationStatistics	averagePrecipitationAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	b76a33f24fbc648e
+WeatherKit	swift-property	s:10WeatherKit26DayPrecipitationStatisticsV21averageSnowfallAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayPrecipitationStatistics	averageSnowfallAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	0a5214bb311744e2
+WeatherKit	swift-method	s:10WeatherKit26DayPrecipitationStatisticsV2eeoiySbAC_ACtFZ	DayPrecipitationStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.DayPrecipitationStatistics | WeatherKit.DayPrecipitationStatistics	-	-	f13c892e23cbed56
+WeatherKit	swift-method	s:10WeatherKit26DayPrecipitationStatisticsV6encode2toys7Encoder_p_tKF	DayPrecipitationStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	0d2795d32bfdb8e2
+WeatherKit	swift-method	s:10WeatherKit26DayPrecipitationStatisticsV4fromACs7Decoder_p_tKcfc	DayPrecipitationStatistics	init(from:)	-	-	WeatherKit.DayPrecipitationStatistics | any Swift.Decoder	-	-	7818c3bd37b3c625
+WeatherKit	swift-struct	s:10WeatherKit07MonthlyA10StatisticsV	-	MonthlyWeatherStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	7b70f3b9cf25a8bd
+WeatherKit	swift-typealias	s:10WeatherKit07MonthlyA10StatisticsV7Elementa	MonthlyWeatherStatistics	Element	-	-	-	-	-	a2da92d886000e91
+WeatherKit	swift-typealias	s:10WeatherKit07MonthlyA10StatisticsV5Indexa	MonthlyWeatherStatistics	Index	-	-	-	-	-	7e882b7dce957a4d
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA10StatisticsV6monthsSayxGvp	MonthlyWeatherStatistics	months	-	[T]	-	-	-	658ffd39aeffc23a
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA10StatisticsV17baselineStartDate10Foundation0G0Vvp	MonthlyWeatherStatistics	baselineStartDate	-	Foundation.Date	-	-	-	c1d1b441e50266c4
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA10StatisticsV8metadataAA0A8MetadataVvp	MonthlyWeatherStatistics	metadata	-	WeatherKit.WeatherMetadata	-	-	-	f9e020366cc05c1f
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA10StatisticsV10startIndexSivp	MonthlyWeatherStatistics	startIndex	-	WeatherKit.MonthlyWeatherStatistics<T>.Index	-	-	-	31f169d22cb2e36c
+WeatherKit	swift-property	s:10WeatherKit07MonthlyA10StatisticsV8endIndexSivp	MonthlyWeatherStatistics	endIndex	-	WeatherKit.MonthlyWeatherStatistics<T>.Index	-	-	-	ad93442abe1fcf9f
+WeatherKit	swift-method	s:10WeatherKit07MonthlyA10StatisticsVyxSicip	MonthlyWeatherStatistics	subscript(_:)	-	WeatherKit.MonthlyWeatherStatistics<T>.Element	WeatherKit.MonthlyWeatherStatistics<T>.Index	-	-	c45c4f9d14ff3be7
+WeatherKit	swift-method	s:10WeatherKit07MonthlyA10StatisticsV2eeoiySbACyxG_AEtFZ	MonthlyWeatherStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.MonthlyWeatherStatistics<T> | WeatherKit.MonthlyWeatherStatistics<T>	-	-	237873de660c9eb0
+WeatherKit	swift-typealias	s:10WeatherKit07MonthlyA10StatisticsV7Indicesa	MonthlyWeatherStatistics	Indices	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	974ae6db8370aab9
+WeatherKit	swift-typealias	s:10WeatherKit07MonthlyA10StatisticsV8Iteratora	MonthlyWeatherStatistics	Iterator	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	639260f6efc4fc0d
+WeatherKit	swift-typealias	s:10WeatherKit07MonthlyA10StatisticsV11SubSequencea	MonthlyWeatherStatistics	SubSequence	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	321377c468481569
+WeatherKit	swift-method	s:10WeatherKit07MonthlyA10StatisticsV6encode2toys7Encoder_p_tKF	MonthlyWeatherStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	0de0cc6884eeb5b3
+WeatherKit	swift-method	s:10WeatherKit07MonthlyA10StatisticsV4fromACyxGs7Decoder_p_tKcfc	MonthlyWeatherStatistics	init(from:)	-	-	WeatherKit.MonthlyWeatherStatistics<T> | any Swift.Decoder	-	-	d4c68f8c27752df0
+WeatherKit	swift-struct	s:10WeatherKit8ForecastV	-	Forecast	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	77c86a87ed74ba32
+WeatherKit	swift-typealias	s:10WeatherKit8ForecastV5Indexa	Forecast	Index	-	-	-	-	-	faa08e7b01220b45
+WeatherKit	swift-property	s:10WeatherKit8ForecastV8forecastSayxGvp	Forecast	forecast	-	[Element]	-	-	-	a07be6d3b92aa8ff
+WeatherKit	swift-property	s:10WeatherKit8ForecastV8metadataAA0A8MetadataVvp	Forecast	metadata	-	WeatherKit.WeatherMetadata	-	-	-	9842400d3912ed12
+WeatherKit	swift-property	s:10WeatherKit8ForecastV10startIndexSivp	Forecast	startIndex	-	WeatherKit.Forecast<Element>.Index	-	-	-	9a21878f3cad584e
+WeatherKit	swift-property	s:10WeatherKit8ForecastV8endIndexSivp	Forecast	endIndex	-	WeatherKit.Forecast<Element>.Index	-	-	-	18fcc5aedd702bdb
+WeatherKit	swift-method	s:10WeatherKit8ForecastVyxSicip	Forecast	subscript(_:)	-	Element	WeatherKit.Forecast<Element>.Index	-	-	0535c563260c8e67
+WeatherKit	swift-method	s:10WeatherKit8ForecastV2eeoiySbACyxG_AEtFZ	Forecast	==(_:_:)	+	Swift.Bool	WeatherKit.Forecast<Element> | WeatherKit.Forecast<Element>	-	-	ac26e704e19fa589
+WeatherKit	swift-typealias	s:10WeatherKit8ForecastV7Indicesa	Forecast	Indices	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	afac56cdfbefe122
+WeatherKit	swift-typealias	s:10WeatherKit8ForecastV8Iteratora	Forecast	Iterator	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a61a295dd27ed1ac
+WeatherKit	swift-typealias	s:10WeatherKit8ForecastV11SubSequencea	Forecast	SubSequence	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	190287572c266a3f
+WeatherKit	swift-method	s:10WeatherKit8ForecastV6encode2toys7Encoder_p_tKF	Forecast	encode(to:)	-	()	any Swift.Encoder	-	-	9d2a6e51c5ca58b6
+WeatherKit	swift-method	s:10WeatherKit8ForecastV4fromACyxGs7Decoder_p_tKcfc	Forecast	init(from:)	-	-	WeatherKit.Forecast<Element> | any Swift.Decoder	-	-	32656294611afbd8
+WeatherKit	swift-typealias	s:10WeatherKit8ForecastV7Elementa	Forecast	Element	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	b18e6a3ebaf32fc5
+WeatherKit	swift-property	s:10WeatherKit8ForecastVA2A06MinuteA0VRszrlE7summarySSvp	Forecast	summary	-	Swift.String	-	-	-	be5eba9236c11a49
+WeatherKit	swift-method	s:10WeatherKit8ForecastV2eeoiySbACyAA06MinuteA0VG_AGtFZ	Forecast	==(_:_:)	+	Swift.Bool	WeatherKit.Forecast<WeatherKit.MinuteWeather> | WeatherKit.Forecast<WeatherKit.MinuteWeather>	-	-	0c28d34e71b6413c
+WeatherKit	swift-method	s:10WeatherKit8ForecastVA2A04HourA0VRszrlE4fromACyAEGs7Decoder_p_tKcfc	Forecast	init(from:)	-	-	WeatherKit.Forecast<Element> | any Swift.Decoder	-	-	fe18f2b515ed0575
+WeatherKit	swift-method	s:10WeatherKit8ForecastVA2A04HourA0VRszrlE6encode2toys7Encoder_p_tKF	Forecast	encode(to:)	-	()	any Swift.Encoder	-	-	ab30a4d730dca543
+WeatherKit	swift-method	s:10WeatherKit8ForecastVA2A03DayA0VRszrlE4fromACyAEGs7Decoder_p_tKcfc	Forecast	init(from:)	-	-	WeatherKit.Forecast<Element> | any Swift.Decoder	-	-	1637b5196f613ac7
+WeatherKit	swift-method	s:10WeatherKit8ForecastVA2A03DayA0VRszrlE6encode2toys7Encoder_p_tKF	Forecast	encode(to:)	-	()	any Swift.Encoder	-	-	8b113aa77143831e
+WeatherKit	swift-enum	s:10WeatherKit13PrecipitationO	-	Precipitation	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	182617ca2db49449
+WeatherKit	swift-constant	s:10WeatherKit13PrecipitationO4noneyA2CmF	Precipitation	none	-	-	-	-	-	c0c30f7657f74f96
+WeatherKit	swift-constant	s:10WeatherKit13PrecipitationO4hailyA2CmF	Precipitation	hail	-	-	-	-	-	c10239e5690681c3
+WeatherKit	swift-constant	s:10WeatherKit13PrecipitationO5mixedyA2CmF	Precipitation	mixed	-	-	-	-	-	4506bc21102768cd
+WeatherKit	swift-constant	s:10WeatherKit13PrecipitationO4rainyA2CmF	Precipitation	rain	-	-	-	-	-	6c32e1acd1929838
+WeatherKit	swift-constant	s:10WeatherKit13PrecipitationO5sleetyA2CmF	Precipitation	sleet	-	-	-	-	-	685684f1c2d3cf17
+WeatherKit	swift-constant	s:10WeatherKit13PrecipitationO4snowyA2CmF	Precipitation	snow	-	-	-	-	-	d210e30132aa235e
+WeatherKit	swift-property	s:10WeatherKit13PrecipitationO11descriptionSSvp	Precipitation	description	-	Swift.String	-	-	-	14ecaa131cb5aea1
+WeatherKit	swift-property	s:10WeatherKit13PrecipitationO24accessibilityDescriptionSSvp	Precipitation	accessibilityDescription	-	Swift.String	-	-	-	962cac94e7cd2c2b
+WeatherKit	swift-method	s:10WeatherKit13PrecipitationO8rawValueACSgSS_tcfc	Precipitation	init(rawValue:)	-	-	WeatherKit.Precipitation? | Swift.String	-	-	b4fc6503ce6251e6
+WeatherKit	swift-typealias	s:10WeatherKit13PrecipitationO8AllCasesa	Precipitation	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	2b67a71f3f99797a
+WeatherKit	swift-typealias	s:10WeatherKit13PrecipitationO8RawValuea	Precipitation	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	9b6a440245040a36
+WeatherKit	swift-property	s:10WeatherKit13PrecipitationO8allCasesSayACGvpZ	Precipitation	allCases	+	[WeatherKit.Precipitation]	-	-	-	07b45e809bc5784c
+WeatherKit	swift-property	s:10WeatherKit13PrecipitationO8rawValueSSvp	Precipitation	rawValue	-	Swift.String	-	-	-	705882b99a49648c
+WeatherKit	swift-struct	s:10WeatherKit0A6ChangeV	-	WeatherChange	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	2c61baf3d6774507
+WeatherKit	swift-enum	s:10WeatherKit0A6ChangeV9DirectionO	WeatherChange	Direction	-	-	-	-	-	33a913ac5c912e59
+WeatherKit	swift-constant	s:10WeatherKit0A6ChangeV9DirectionO8increaseyA2EmF	WeatherChange.Direction	increase	-	-	-	-	-	e572d4da37143a55
+WeatherKit	swift-constant	s:10WeatherKit0A6ChangeV9DirectionO8decreaseyA2EmF	WeatherChange.Direction	decrease	-	-	-	-	-	1878b92f0f448660
+WeatherKit	swift-constant	s:10WeatherKit0A6ChangeV9DirectionO6steadyyA2EmF	WeatherChange.Direction	steady	-	-	-	-	-	83223d2bbc1ca9af
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV9DirectionO4hash4intoys6HasherVz_tF	WeatherChange.Direction	hash(into:)	-	()	Swift.Hasher	-	-	6c561d48fdf97654
+WeatherKit	swift-property	s:10WeatherKit0A6ChangeV9DirectionO9hashValueSivp	WeatherChange.Direction	hashValue	-	Swift.Int	-	-	-	977a3b81c8b6413e
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV9DirectionO2eeoiySbAE_AEtFZ	WeatherChange.Direction	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherChange.Direction | WeatherKit.WeatherChange.Direction	-	-	2e7da8d14fb749e0
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV9DirectionO6encode2toys7Encoder_p_tKF	WeatherChange.Direction	encode(to:)	-	()	any Swift.Encoder	-	-	2e8f1ffa0c352a60
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV9DirectionO4fromAEs7Decoder_p_tKcfc	WeatherChange.Direction	init(from:)	-	-	WeatherKit.WeatherChange.Direction | any Swift.Decoder	-	-	169936a66d2e20b3
+WeatherKit	swift-property	s:10WeatherKit0A6ChangeV4date10Foundation4DateVvp	WeatherChange	date	-	Foundation.Date	-	-	-	177489b6bf2fdf9e
+WeatherKit	swift-property	s:10WeatherKit0A6ChangeV15highTemperatureAC9DirectionOvp	WeatherChange	highTemperature	-	WeatherKit.WeatherChange.Direction	-	-	-	834fce8dde823260
+WeatherKit	swift-property	s:10WeatherKit0A6ChangeV14lowTemperatureAC9DirectionOvp	WeatherChange	lowTemperature	-	WeatherKit.WeatherChange.Direction	-	-	-	c8fa89850d9bdca2
+WeatherKit	swift-property	s:10WeatherKit0A6ChangeV22dayPrecipitationAmountAC9DirectionOvp	WeatherChange	dayPrecipitationAmount	-	WeatherKit.WeatherChange.Direction	-	-	-	d09d30538920660b
+WeatherKit	swift-property	s:10WeatherKit0A6ChangeV24nightPrecipitationAmountAC9DirectionOvp	WeatherChange	nightPrecipitationAmount	-	WeatherKit.WeatherChange.Direction	-	-	-	542c40a1b9dcbd7e
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV2eeoiySbAC_ACtFZ	WeatherChange	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherChange | WeatherKit.WeatherChange	-	-	977b24b7b58dcb55
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV6encode2toys7Encoder_p_tKF	WeatherChange	encode(to:)	-	()	any Swift.Encoder	-	-	c5f5a55adf448112
+WeatherKit	swift-method	s:10WeatherKit0A6ChangeV4fromACs7Decoder_p_tKcfc	WeatherChange	init(from:)	-	-	WeatherKit.WeatherChange | any Swift.Decoder	-	-	fb86c4a8df26e823
+WeatherKit	swift-enum	s:10WeatherKit13PressureTrendO	-	PressureTrend	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	0f7e55608a108e51
+WeatherKit	swift-constant	s:10WeatherKit13PressureTrendO6risingyA2CmF	PressureTrend	rising	-	-	-	-	-	e7a5539bd6bf07e9
+WeatherKit	swift-constant	s:10WeatherKit13PressureTrendO7fallingyA2CmF	PressureTrend	falling	-	-	-	-	-	2ae7c17b8c6d43ad
+WeatherKit	swift-constant	s:10WeatherKit13PressureTrendO6steadyyA2CmF	PressureTrend	steady	-	-	-	-	-	ad258090ef84586f
+WeatherKit	swift-property	s:10WeatherKit13PressureTrendO11descriptionSSvp	PressureTrend	description	-	Swift.String	-	-	-	d4735793b5813524
+WeatherKit	swift-property	s:10WeatherKit13PressureTrendO24accessibilityDescriptionSSvp	PressureTrend	accessibilityDescription	-	Swift.String	-	-	-	817623ce0fed878f
+WeatherKit	swift-method	s:10WeatherKit13PressureTrendO8rawValueACSgSS_tcfc	PressureTrend	init(rawValue:)	-	-	WeatherKit.PressureTrend? | Swift.String	-	-	e7c3cd1071e43be8
+WeatherKit	swift-typealias	s:10WeatherKit13PressureTrendO8AllCasesa	PressureTrend	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a83bcedb5b7ddf2d
+WeatherKit	swift-typealias	s:10WeatherKit13PressureTrendO8RawValuea	PressureTrend	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	156b37069d7c8128
+WeatherKit	swift-property	s:10WeatherKit13PressureTrendO8allCasesSayACGvpZ	PressureTrend	allCases	+	[WeatherKit.PressureTrend]	-	-	-	079f22e9677db783
+WeatherKit	swift-property	s:10WeatherKit13PressureTrendO8rawValueSSvp	PressureTrend	rawValue	-	Swift.String	-	-	-	95ecb08ae7228959
+WeatherKit	swift-struct	s:10WeatherKit4WindV	-	Wind	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	8253a87fc3fe4ce2
+WeatherKit	swift-property	s:10WeatherKit4WindV16compassDirectionAC07CompassE0Ovp	Wind	compassDirection	-	WeatherKit.Wind.CompassDirection	-	-	-	4dac1a00416f56ff
+WeatherKit	swift-property	s:10WeatherKit4WindV9direction10Foundation11MeasurementVySo11NSUnitAngleCGvp	Wind	direction	-	Foundation.Measurement<Foundation.UnitAngle>	-	-	-	9958e065f8945cc8
+WeatherKit	swift-property	s:10WeatherKit4WindV5speed10Foundation11MeasurementVySo11NSUnitSpeedCGvp	Wind	speed	-	Foundation.Measurement<Foundation.UnitSpeed>	-	-	-	f1891336cc3ee545
+WeatherKit	swift-property	s:10WeatherKit4WindV4gust10Foundation11MeasurementVySo11NSUnitSpeedCGSgvp	Wind	gust	-	Foundation.Measurement<Foundation.UnitSpeed>?	-	-	-	ae151298000fbb4b
+WeatherKit	swift-enum	s:10WeatherKit4WindV16CompassDirectionO	Wind	CompassDirection	-	-	-	-	-	aa3af7603171415b
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO5northyA2EmF	Wind.CompassDirection	north	-	-	-	-	-	ac3b682b97638f89
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO14northNortheastyA2EmF	Wind.CompassDirection	northNortheast	-	-	-	-	-	12c86f27179a40aa
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO9northeastyA2EmF	Wind.CompassDirection	northeast	-	-	-	-	-	577c5a14c5fb33c8
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO13eastNortheastyA2EmF	Wind.CompassDirection	eastNortheast	-	-	-	-	-	c856acf908db6415
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO4eastyA2EmF	Wind.CompassDirection	east	-	-	-	-	-	71acbe3650058a84
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO13eastSoutheastyA2EmF	Wind.CompassDirection	eastSoutheast	-	-	-	-	-	a009c2893a81f78c
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO9southeastyA2EmF	Wind.CompassDirection	southeast	-	-	-	-	-	cacbd06ad6d93157
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO14southSoutheastyA2EmF	Wind.CompassDirection	southSoutheast	-	-	-	-	-	73e4ba21a3b85691
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO5southyA2EmF	Wind.CompassDirection	south	-	-	-	-	-	b32edf97e56be66e
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO14southSouthwestyA2EmF	Wind.CompassDirection	southSouthwest	-	-	-	-	-	eb1b3f040fc2dcfa
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO9southwestyA2EmF	Wind.CompassDirection	southwest	-	-	-	-	-	dc430975a3ed91c3
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO13westSouthwestyA2EmF	Wind.CompassDirection	westSouthwest	-	-	-	-	-	f71276362c461e8b
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO4westyA2EmF	Wind.CompassDirection	west	-	-	-	-	-	159ac0ca1b1ad24d
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO13westNorthwestyA2EmF	Wind.CompassDirection	westNorthwest	-	-	-	-	-	ed24c81536e11419
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO9northwestyA2EmF	Wind.CompassDirection	northwest	-	-	-	-	-	66f3eff2bf178a35
+WeatherKit	swift-constant	s:10WeatherKit4WindV16CompassDirectionO14northNorthwestyA2EmF	Wind.CompassDirection	northNorthwest	-	-	-	-	-	44eb6e2b993ae544
+WeatherKit	swift-property	s:10WeatherKit4WindV16CompassDirectionO12abbreviationSSvp	Wind.CompassDirection	abbreviation	-	Swift.String	-	-	-	b897b98e2a5b6f77
+WeatherKit	swift-property	s:10WeatherKit4WindV16CompassDirectionO11descriptionSSvp	Wind.CompassDirection	description	-	Swift.String	-	-	-	9c0761238efe0576
+WeatherKit	swift-property	s:10WeatherKit4WindV16CompassDirectionO24accessibilityDescriptionSSvp	Wind.CompassDirection	accessibilityDescription	-	Swift.String	-	-	-	635510682037af92
+WeatherKit	swift-method	s:10WeatherKit4WindV16CompassDirectionO8rawValueAESgSS_tcfc	Wind.CompassDirection	init(rawValue:)	-	-	WeatherKit.Wind.CompassDirection? | Swift.String	-	-	c5a700305cf5054d
+WeatherKit	swift-typealias	s:10WeatherKit4WindV16CompassDirectionO8AllCasesa	Wind.CompassDirection	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a0d5cc25fa89e77a
+WeatherKit	swift-typealias	s:10WeatherKit4WindV16CompassDirectionO8RawValuea	Wind.CompassDirection	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	792b9fee850f13eb
+WeatherKit	swift-property	s:10WeatherKit4WindV16CompassDirectionO8allCasesSayAEGvpZ	Wind.CompassDirection	allCases	+	[WeatherKit.Wind.CompassDirection]	-	-	-	62a84dbeb79fa0ab
+WeatherKit	swift-property	s:10WeatherKit4WindV16CompassDirectionO8rawValueSSvp	Wind.CompassDirection	rawValue	-	Swift.String	-	-	-	84859d2a9bf23e5b
+WeatherKit	swift-method	s:10WeatherKit4WindV2eeoiySbAC_ACtFZ	Wind	==(_:_:)	+	Swift.Bool	WeatherKit.Wind | WeatherKit.Wind	-	-	f87edb5d518323a7
+WeatherKit	swift-method	s:10WeatherKit4WindV6encode2toys7Encoder_p_tKF	Wind	encode(to:)	-	()	any Swift.Encoder	-	-	108e9ad28e9eaf0b
+WeatherKit	swift-method	s:10WeatherKit4WindV4fromACs7Decoder_p_tKcfc	Wind	init(from:)	-	-	WeatherKit.Wind | any Swift.Decoder	-	-	64389cec60a6fc5d
+WeatherKit	swift-struct	s:10WeatherKit25HourTemperatureStatisticsV	-	HourTemperatureStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	574da432d6cd42ce
+WeatherKit	swift-property	s:10WeatherKit25HourTemperatureStatisticsV4hourSivp	HourTemperatureStatistics	hour	-	Swift.Int	-	-	-	919d9ba2819fb7a0
+WeatherKit	swift-property	s:10WeatherKit25HourTemperatureStatisticsV11percentilesAA11PercentilesVySo06NSUnitD0CGvp	HourTemperatureStatistics	percentiles	-	WeatherKit.Percentiles<Foundation.UnitTemperature>	-	-	-	4dbce2043f93b7bd
+WeatherKit	swift-method	s:10WeatherKit25HourTemperatureStatisticsV2eeoiySbAC_ACtFZ	HourTemperatureStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.HourTemperatureStatistics | WeatherKit.HourTemperatureStatistics	-	-	041782b3f363ba27
+WeatherKit	swift-method	s:10WeatherKit25HourTemperatureStatisticsV6encode2toys7Encoder_p_tKF	HourTemperatureStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	df8dcd675299b0eb
+WeatherKit	swift-method	s:10WeatherKit25HourTemperatureStatisticsV4fromACs7Decoder_p_tKcfc	HourTemperatureStatistics	init(from:)	-	-	WeatherKit.HourTemperatureStatistics | any Swift.Decoder	-	-	9646bb4953034397
+WeatherKit	swift-class	s:10WeatherKit0A7ServiceC	-	WeatherService	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	b5e55b2f636e7ab1
+WeatherKit	swift-property	s:10WeatherKit0A7ServiceC6sharedACvpZ	WeatherService	shared	+	WeatherKit.WeatherService	-	-	-	9da862832c9bd32b
+WeatherKit	swift-property	s:10WeatherKit0A7ServiceC11attributionAA0A11AttributionVvp	WeatherService	attribution	-	WeatherKit.WeatherAttribution	-	-	-	b3f4e0f70c8be93c
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceCACycfc	WeatherService	init()	-	-	WeatherKit.WeatherService	-	-	caae1b935d57ae02
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3forAA0A0VSo10CLLocationC_tYaKF	WeatherService	weather(for:)	-	WeatherKit.Weather	_LocationEssentials.CLLocation	-	-	81ecd65bf653fbd7
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9includingxSo10CLLocationC_AA0A5QueryVyxGtYaKlF	WeatherService	weather(for:including:)	-	T	_LocationEssentials.CLLocation | WeatherKit.WeatherQuery<T>	-	-	12a3870eedcbcaa8
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9including_x_q_tSo10CLLocationC_AA0A5QueryVyxGAJyq_GtYaKr0_lF	WeatherService	weather(for:including:_:)	-	(T1, T2)	_LocationEssentials.CLLocation | WeatherKit.WeatherQuery<T1> | WeatherKit.WeatherQuery<T2>	-	-	24d954cb78ec9023
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9including__x_q_q0_tSo10CLLocationC_AA0A5QueryVyxGAJyq_GAJyq0_GtYaKr1_lF	WeatherService	weather(for:including:_:_:)	-	(T1, T2, T3)	_LocationEssentials.CLLocation | WeatherKit.WeatherQuery<T1> | WeatherKit.WeatherQuery<T2> | WeatherKit.WeatherQuery<T3>	-	-	793dbbc608d7225e
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9including___x_q_q0_q1_tSo10CLLocationC_AA0A5QueryVyxGAJyq_GAJyq0_GAJyq1_GtYaKr2_lF	WeatherService	weather(for:including:_:_:_:)	-	(T1, T2, T3, T4)	_LocationEssentials.CLLocation | WeatherKit.WeatherQuery<T1> | WeatherKit.WeatherQuery<T2> | WeatherKit.WeatherQuery<T3> | WeatherKit.WeatherQuery<T4>	-	-	2987839de24ce28e
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9including____x_q_q0_q1_q2_tSo10CLLocationC_AA0A5QueryVyxGAJyq_GAJyq0_GAJyq1_GAJyq2_GtYaKr3_lF	WeatherService	weather(for:including:_:_:_:_:)	-	(T1, T2, T3, T4, T5)	_LocationEssentials.CLLocation | WeatherKit.WeatherQuery<T1> | WeatherKit.WeatherQuery<T2> | WeatherKit.WeatherQuery<T3> | WeatherKit.WeatherQuery<T4> | WeatherKit.WeatherQuery<T5>	-	-	48bd4bca0d3983f0
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9including_____x_q_q0_q1_q2_q3_tSo10CLLocationC_AA0A5QueryVyxGAJyq_GAJyq0_GAJyq1_GAJyq2_GAJyq3_GtYaKr4_lF	WeatherService	weather(for:including:_:_:_:_:_:)	-	(T1, T2, T3, T4, T5, T6)	_LocationEssentials.CLLocation | WeatherKit.WeatherQuery<T1> | WeatherKit.WeatherQuery<T2> | WeatherKit.WeatherQuery<T3> | WeatherKit.WeatherQuery<T4> | WeatherKit.WeatherQuery<T5> | WeatherKit.WeatherQuery<T6>	-	-	d5f1273b06b8dd9e
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC7weather3for9includingxxQp_tSo10CLLocationC_AA0A5QueryVyxGxQptYaKRvzlF	WeatherService	weather(for:including:)	-	(repeat each T)	_LocationEssentials.CLLocation | repeat WeatherKit.WeatherQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	3802b7d8cb482394
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC15dailyStatistics3for0F6DaysIn9includingAA05DailyaE0VyxGxQp_tSo10CLLocationC_10Foundation12DateIntervalVAA0jaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	dailyStatistics(for:forDaysIn:including:)	-	(repeat WeatherKit.DailyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | Foundation.DateInterval | repeat WeatherKit.DailyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	aafcb536dc9e119a
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC15dailyStatistics3for9includingAA05DailyaE0VyxGxQp_tSo10CLLocationC_AA0haE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	dailyStatistics(for:including:)	-	(repeat WeatherKit.DailyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | repeat WeatherKit.DailyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	1c39e7041a43c724
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC15dailyStatistics3for8startDay03endH09includingAA05DailyaE0VyxGxQp_tSo10CLLocationC_S2iAA0kaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	dailyStatistics(for:startDay:endDay:including:)	-	(repeat WeatherKit.DailyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | Swift.Int | Swift.Int | repeat WeatherKit.DailyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	aaef0ee58bd735cd
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC12dailySummary3for0F6DaysIn9includingAA05DailyaE0VyxGxQp_tSo10CLLocationC_10Foundation12DateIntervalVAA0jaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	dailySummary(for:forDaysIn:including:)	-	(repeat WeatherKit.DailyWeatherSummary<each T>)	_LocationEssentials.CLLocation | Foundation.DateInterval | repeat WeatherKit.DailyWeatherSummaryQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	31e2322ce14f75a2
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC12dailySummary3for9includingAA05DailyaE0VyxGxQp_tSo10CLLocationC_AA0haE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	dailySummary(for:including:)	-	(repeat WeatherKit.DailyWeatherSummary<each T>)	_LocationEssentials.CLLocation | repeat WeatherKit.DailyWeatherSummaryQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	cbf5d8450476aa9d
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC16hourlyStatistics3for0F7HoursIn9includingAA06HourlyaE0VyxGxQp_tSo10CLLocationC_10Foundation12DateIntervalVAA0jaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	hourlyStatistics(for:forHoursIn:including:)	-	(repeat WeatherKit.HourlyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | Foundation.DateInterval | repeat WeatherKit.HourlyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	427453b853d59331
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC16hourlyStatistics3for9includingAA06HourlyaE0VyxGxQp_tSo10CLLocationC_AA0haE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	hourlyStatistics(for:including:)	-	(repeat WeatherKit.HourlyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | repeat WeatherKit.HourlyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	fb464f72e7129019
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC16hourlyStatistics3for9startHour03endH09includingAA06HourlyaE0VyxGxQp_tSo10CLLocationC_S2iAA0kaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	hourlyStatistics(for:startHour:endHour:including:)	-	(repeat WeatherKit.HourlyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | Swift.Int | Swift.Int | repeat WeatherKit.HourlyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	2aa953a253d367d4
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC17monthlyStatistics3for9includingAA07MonthlyaE0VyxGxQp_tSo10CLLocationC_AA0haE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	monthlyStatistics(for:including:)	-	(repeat WeatherKit.MonthlyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | repeat WeatherKit.MonthlyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	844d67f4b2325d1a
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC17monthlyStatistics3for0F8MonthsIn9includingAA07MonthlyaE0VyxGxQp_tSo10CLLocationC_10Foundation12DateIntervalVAA0jaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	monthlyStatistics(for:forMonthsIn:including:)	-	(repeat WeatherKit.MonthlyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | Foundation.DateInterval | repeat WeatherKit.MonthlyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	75d512c25274595b
+WeatherKit	swift-method	s:10WeatherKit0A7ServiceC17monthlyStatistics3for10startMonth03endH09includingAA07MonthlyaE0VyxGxQp_tSo10CLLocationC_S2iAA0kaE5QueryVyxGxQptYaKRvzSeRzSERzSQRzs8SendableRzlF	WeatherService	monthlyStatistics(for:startMonth:endMonth:including:)	-	(repeat WeatherKit.MonthlyWeatherStatistics<each T>)	_LocationEssentials.CLLocation | Swift.Int | Swift.Int | repeat WeatherKit.MonthlyWeatherStatisticsQuery<each T>	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	1e46e2fbaa213dca
+WeatherKit	swift-struct	s:10WeatherKit05DailyA7SummaryV	-	DailyWeatherSummary	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	8f8d2dacccd774bc
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA7SummaryV7Elementa	DailyWeatherSummary	Element	-	-	-	-	-	3b92fece33b6833f
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA7SummaryV5Indexa	DailyWeatherSummary	Index	-	-	-	-	-	441dded3307051a0
+WeatherKit	swift-property	s:10WeatherKit05DailyA7SummaryV4daysSayxGvp	DailyWeatherSummary	days	-	[T]	-	-	-	67afb3115847a99a
+WeatherKit	swift-property	s:10WeatherKit05DailyA7SummaryV8metadataAA0A8MetadataVvp	DailyWeatherSummary	metadata	-	WeatherKit.WeatherMetadata	-	-	-	6ca1d8dc32b8ae70
+WeatherKit	swift-property	s:10WeatherKit05DailyA7SummaryV10startIndexSivp	DailyWeatherSummary	startIndex	-	WeatherKit.DailyWeatherSummary<T>.Index	-	-	-	bd894745345008ed
+WeatherKit	swift-property	s:10WeatherKit05DailyA7SummaryV8endIndexSivp	DailyWeatherSummary	endIndex	-	WeatherKit.DailyWeatherSummary<T>.Index	-	-	-	a0594976ca069e6f
+WeatherKit	swift-method	s:10WeatherKit05DailyA7SummaryVyxSicip	DailyWeatherSummary	subscript(_:)	-	WeatherKit.DailyWeatherSummary<T>.Element	WeatherKit.DailyWeatherSummary<T>.Index	-	-	799e15fb9ead5561
+WeatherKit	swift-method	s:10WeatherKit05DailyA7SummaryV2eeoiySbACyxG_AEtFZ	DailyWeatherSummary	==(_:_:)	+	Swift.Bool	WeatherKit.DailyWeatherSummary<T> | WeatherKit.DailyWeatherSummary<T>	-	-	2bcf7037c4528617
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA7SummaryV7Indicesa	DailyWeatherSummary	Indices	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	1bb7a939d1a56d21
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA7SummaryV8Iteratora	DailyWeatherSummary	Iterator	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	e974fdc01c9adca5
+WeatherKit	swift-typealias	s:10WeatherKit05DailyA7SummaryV11SubSequencea	DailyWeatherSummary	SubSequence	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	b3c02cf3f4cbf400
+WeatherKit	swift-method	s:10WeatherKit05DailyA7SummaryV6encode2toys7Encoder_p_tKF	DailyWeatherSummary	encode(to:)	-	()	any Swift.Encoder	-	-	c82d09371f1094f0
+WeatherKit	swift-method	s:10WeatherKit05DailyA7SummaryV4fromACyxGs7Decoder_p_tKcfc	DailyWeatherSummary	init(from:)	-	-	WeatherKit.DailyWeatherSummary<T> | any Swift.Decoder	-	-	b04387fe3a2819d1
+WeatherKit	swift-struct	s:10WeatherKit26MonthTemperatureStatisticsV	-	MonthTemperatureStatistics	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	509ae92a666f8a17
+WeatherKit	swift-property	s:10WeatherKit26MonthTemperatureStatisticsV5monthSivp	MonthTemperatureStatistics	month	-	Swift.Int	-	-	-	0e4c25a0d40a4e53
+WeatherKit	swift-property	s:10WeatherKit26MonthTemperatureStatisticsV010averageLowD010Foundation11MeasurementVySo06NSUnitD0CGvp	MonthTemperatureStatistics	averageLowTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	ec9bbd24c24a7d61
+WeatherKit	swift-property	s:10WeatherKit26MonthTemperatureStatisticsV011averageHighD010Foundation11MeasurementVySo06NSUnitD0CGvp	MonthTemperatureStatistics	averageHighTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	49f67fc87b5dbd7b
+WeatherKit	swift-method	s:10WeatherKit26MonthTemperatureStatisticsV2eeoiySbAC_ACtFZ	MonthTemperatureStatistics	==(_:_:)	+	Swift.Bool	WeatherKit.MonthTemperatureStatistics | WeatherKit.MonthTemperatureStatistics	-	-	cb8033d492e94f91
+WeatherKit	swift-method	s:10WeatherKit26MonthTemperatureStatisticsV6encode2toys7Encoder_p_tKF	MonthTemperatureStatistics	encode(to:)	-	()	any Swift.Encoder	-	-	41e8c7690247375b
+WeatherKit	swift-method	s:10WeatherKit26MonthTemperatureStatisticsV4fromACs7Decoder_p_tKcfc	MonthTemperatureStatistics	init(from:)	-	-	WeatherKit.MonthTemperatureStatistics | any Swift.Decoder	-	-	b29fb8ed41d63b08
+WeatherKit	swift-struct	s:10WeatherKit23DayPrecipitationSummaryV	-	DayPrecipitationSummary	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	de331ea6f4e26145
+WeatherKit	swift-property	s:10WeatherKit23DayPrecipitationSummaryV4date10Foundation4DateVvp	DayPrecipitationSummary	date	-	Foundation.Date	-	-	-	02f392ef379a29a3
+WeatherKit	swift-property	s:10WeatherKit23DayPrecipitationSummaryV19precipitationAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayPrecipitationSummary	precipitationAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	a92f736e70a3a91a
+WeatherKit	swift-property	s:10WeatherKit23DayPrecipitationSummaryV14snowfallAmount10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayPrecipitationSummary	snowfallAmount	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	8002116fb90c26ba
+WeatherKit	swift-method	s:10WeatherKit23DayPrecipitationSummaryV2eeoiySbAC_ACtFZ	DayPrecipitationSummary	==(_:_:)	+	Swift.Bool	WeatherKit.DayPrecipitationSummary | WeatherKit.DayPrecipitationSummary	-	-	088f7dcb0e159c22
+WeatherKit	swift-method	s:10WeatherKit23DayPrecipitationSummaryV6encode2toys7Encoder_p_tKF	DayPrecipitationSummary	encode(to:)	-	()	any Swift.Encoder	-	-	d270cb52caf3d144
+WeatherKit	swift-method	s:10WeatherKit23DayPrecipitationSummaryV4fromACs7Decoder_p_tKcfc	DayPrecipitationSummary	init(from:)	-	-	WeatherKit.DayPrecipitationSummary | any Swift.Decoder	-	-	d1928300e3dd1595
+WeatherKit	swift-enum	s:10WeatherKit0A8SeverityO	-	WeatherSeverity	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	56f7eb1732ec6d1a
+WeatherKit	swift-constant	s:10WeatherKit0A8SeverityO5minoryA2CmF	WeatherSeverity	minor	-	-	-	-	-	d8a21129f62ee8bc
+WeatherKit	swift-constant	s:10WeatherKit0A8SeverityO8moderateyA2CmF	WeatherSeverity	moderate	-	-	-	-	-	df62d2f69814a11c
+WeatherKit	swift-constant	s:10WeatherKit0A8SeverityO6severeyA2CmF	WeatherSeverity	severe	-	-	-	-	-	4ff53b4bfd061fec
+WeatherKit	swift-constant	s:10WeatherKit0A8SeverityO7extremeyA2CmF	WeatherSeverity	extreme	-	-	-	-	-	d45c5937d77457ed
+WeatherKit	swift-constant	s:10WeatherKit0A8SeverityO7unknownyA2CmF	WeatherSeverity	unknown	-	-	-	-	-	616b524b059621cd
+WeatherKit	swift-property	s:10WeatherKit0A8SeverityO11descriptionSSvp	WeatherSeverity	description	-	Swift.String	-	-	-	f7a0957b653dac9d
+WeatherKit	swift-property	s:10WeatherKit0A8SeverityO24accessibilityDescriptionSSvp	WeatherSeverity	accessibilityDescription	-	Swift.String	-	-	-	de7bfc585423f402
+WeatherKit	swift-method	s:10WeatherKit0A8SeverityO8rawValueACSgSS_tcfc	WeatherSeverity	init(rawValue:)	-	-	WeatherKit.WeatherSeverity? | Swift.String	-	-	92431e6e0c36f2ef
+WeatherKit	swift-typealias	s:10WeatherKit0A8SeverityO8AllCasesa	WeatherSeverity	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	865acd8ee7bb173c
+WeatherKit	swift-typealias	s:10WeatherKit0A8SeverityO8RawValuea	WeatherSeverity	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	3ebfc77d75932a20
+WeatherKit	swift-property	s:10WeatherKit0A8SeverityO8allCasesSayACGvpZ	WeatherSeverity	allCases	+	[WeatherKit.WeatherSeverity]	-	-	-	42d14ed25e6e3e41
+WeatherKit	swift-property	s:10WeatherKit0A8SeverityO8rawValueSSvp	WeatherSeverity	rawValue	-	Swift.String	-	-	-	63b3fb9a49278350
+WeatherKit	swift-enum	s:10WeatherKit9DeviationO	-	Deviation	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	f9423f503946682e
+WeatherKit	swift-constant	s:10WeatherKit9DeviationO10muchHigheryA2CmF	Deviation	muchHigher	-	-	-	-	-	7afcf582166cda8d
+WeatherKit	swift-constant	s:10WeatherKit9DeviationO6higheryA2CmF	Deviation	higher	-	-	-	-	-	2cb4264ff49e0f87
+WeatherKit	swift-constant	s:10WeatherKit9DeviationO6normalyA2CmF	Deviation	normal	-	-	-	-	-	42d4522edfc19542
+WeatherKit	swift-constant	s:10WeatherKit9DeviationO5loweryA2CmF	Deviation	lower	-	-	-	-	-	4b089820f776acc2
+WeatherKit	swift-constant	s:10WeatherKit9DeviationO9muchLoweryA2CmF	Deviation	muchLower	-	-	-	-	-	cd94f3aea22d9fef
+WeatherKit	swift-method	s:10WeatherKit9DeviationO2eeoiySbAC_ACtFZ	Deviation	==(_:_:)	+	Swift.Bool	WeatherKit.Deviation | WeatherKit.Deviation	-	-	ec6ec1326ab453c4
+WeatherKit	swift-method	s:10WeatherKit9DeviationO6encode2toys7Encoder_p_tKF	Deviation	encode(to:)	-	()	any Swift.Encoder	-	-	a1e4f99771cdc0df
+WeatherKit	swift-method	s:10WeatherKit9DeviationO4hash4intoys6HasherVz_tF	Deviation	hash(into:)	-	()	Swift.Hasher	-	-	eb4395fcf9422885
+WeatherKit	swift-property	s:10WeatherKit9DeviationO9hashValueSivp	Deviation	hashValue	-	Swift.Int	-	-	-	077d4cc00a78edd9
+WeatherKit	swift-method	s:10WeatherKit9DeviationO4fromACs7Decoder_p_tKcfc	Deviation	init(from:)	-	-	WeatherKit.Deviation | any Swift.Decoder	-	-	5b4a5ed8b5abdaec
+WeatherKit	swift-enum	s:10WeatherKit9MoonPhaseO	-	MoonPhase	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	e73e375076f856ba
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO3newyA2CmF	MoonPhase	new	-	-	-	-	-	e7c9c96ebae4ffb5
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO14waxingCrescentyA2CmF	MoonPhase	waxingCrescent	-	-	-	-	-	43ce4e675b100a2e
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO12firstQuarteryA2CmF	MoonPhase	firstQuarter	-	-	-	-	-	3a11e4c2aa09d200
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO13waxingGibbousyA2CmF	MoonPhase	waxingGibbous	-	-	-	-	-	696ea4a13ef86d3b
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO4fullyA2CmF	MoonPhase	full	-	-	-	-	-	0c2e36794e7cd505
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO13waningGibbousyA2CmF	MoonPhase	waningGibbous	-	-	-	-	-	e11fc0a31b870aec
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO11lastQuarteryA2CmF	MoonPhase	lastQuarter	-	-	-	-	-	c3463b6bfdb9ecee
+WeatherKit	swift-constant	s:10WeatherKit9MoonPhaseO14waningCrescentyA2CmF	MoonPhase	waningCrescent	-	-	-	-	-	b004b5284ff41439
+WeatherKit	swift-property	s:10WeatherKit9MoonPhaseO11descriptionSSvp	MoonPhase	description	-	Swift.String	-	-	-	7c10562fcbdc796b
+WeatherKit	swift-property	s:10WeatherKit9MoonPhaseO24accessibilityDescriptionSSvp	MoonPhase	accessibilityDescription	-	Swift.String	-	-	-	bbfd7366b631b8db
+WeatherKit	swift-property	s:10WeatherKit9MoonPhaseO10symbolNameSSvp	MoonPhase	symbolName	-	Swift.String	-	-	-	1511c4fc08a8779c
+WeatherKit	swift-method	s:10WeatherKit9MoonPhaseO8rawValueACSgSS_tcfc	MoonPhase	init(rawValue:)	-	-	WeatherKit.MoonPhase? | Swift.String	-	-	e7f132ee1af52b44
+WeatherKit	swift-typealias	s:10WeatherKit9MoonPhaseO8AllCasesa	MoonPhase	AllCases	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	f14abc77e2ed01df
+WeatherKit	swift-typealias	s:10WeatherKit9MoonPhaseO8RawValuea	MoonPhase	RawValue	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	a460d6a0d3986c4f
+WeatherKit	swift-property	s:10WeatherKit9MoonPhaseO8allCasesSayACGvpZ	MoonPhase	allCases	+	[WeatherKit.MoonPhase]	-	-	-	eef6901a3b8071cd
+WeatherKit	swift-property	s:10WeatherKit9MoonPhaseO8rawValueSSvp	MoonPhase	rawValue	-	Swift.String	-	-	-	1e217ca0b4ae270d
+WeatherKit	swift-struct	s:10WeatherKit06HourlyA15StatisticsQueryV	-	HourlyWeatherStatisticsQuery	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	f1502ade032ff0f9
+WeatherKit	swift-property	s:10WeatherKit06HourlyA15StatisticsQueryV11temperatureACyAA015HourTemperatureD0VGvpZ	HourlyWeatherStatisticsQuery	temperature	+	WeatherKit.HourlyWeatherStatisticsQuery<WeatherKit.HourTemperatureStatistics>	-	-	-	daf5c970b1bd08a4
+WeatherKit	swift-struct	s:10WeatherKit07CurrentA0V	-	CurrentWeather	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	de4b1cb13765f060
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V4date10Foundation4DateVvp	CurrentWeather	date	-	Foundation.Date	-	-	-	dd425a4867ce5834
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V10cloudCoverSdvp	CurrentWeather	cloudCover	-	Swift.Double	-	-	-	a2579c45711dd51a
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V20cloudCoverByAltitudeAA05CloudefG0Vvp	CurrentWeather	cloudCoverByAltitude	-	WeatherKit.CloudCoverByAltitude	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	474a27e46fc6bbe3
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V9conditionAA0A9ConditionOvp	CurrentWeather	condition	-	WeatherKit.WeatherCondition	-	-	-	569ee2a20307a4ae
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V10symbolNameSSvp	CurrentWeather	symbolName	-	Swift.String	-	-	-	8b48f322359e4900
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V8dewPoint10Foundation11MeasurementVySo17NSUnitTemperatureCGvp	CurrentWeather	dewPoint	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	c159d249c49c07be
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V8humiditySdvp	CurrentWeather	humidity	-	Swift.Double	-	-	-	311d7edef019db1e
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V22precipitationIntensity10Foundation11MeasurementVySo11NSUnitSpeedCGvp	CurrentWeather	precipitationIntensity	-	Foundation.Measurement<Foundation.UnitSpeed>	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	7cc19176749dbd4d
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V8pressure10Foundation11MeasurementVySo14NSUnitPressureCGvp	CurrentWeather	pressure	-	Foundation.Measurement<Foundation.UnitPressure>	-	-	-	3bafa5a3c4764a33
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V13pressureTrendAA08PressureE0Ovp	CurrentWeather	pressureTrend	-	WeatherKit.PressureTrend	-	-	-	addc42a1d9f87324
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V10isDaylightSbvp	CurrentWeather	isDaylight	-	Swift.Bool	-	-	-	2a454cd7bb401726
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V11temperature10Foundation11MeasurementVySo17NSUnitTemperatureCGvp	CurrentWeather	temperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	a4f35078c7d979fa
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V19apparentTemperature10Foundation11MeasurementVySo06NSUnitE0CGvp	CurrentWeather	apparentTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	556fde948410f280
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V7uvIndexAA7UVIndexVvp	CurrentWeather	uvIndex	-	WeatherKit.UVIndex	-	-	-	fefb4abcc9e94192
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V10visibility10Foundation11MeasurementVySo12NSUnitLengthCGvp	CurrentWeather	visibility	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	76d5726d68b7f2d4
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V4windAA4WindVvp	CurrentWeather	wind	-	WeatherKit.Wind	-	-	-	f3f01235403c70ec
+WeatherKit	swift-property	s:10WeatherKit07CurrentA0V8metadataAA0A8MetadataVvp	CurrentWeather	metadata	-	WeatherKit.WeatherMetadata	-	-	-	a69d2665142e8057
+WeatherKit	swift-method	s:10WeatherKit07CurrentA0V2eeoiySbAC_ACtFZ	CurrentWeather	==(_:_:)	+	Swift.Bool	WeatherKit.CurrentWeather | WeatherKit.CurrentWeather	-	-	ff29d5122240d41e
+WeatherKit	swift-method	s:10WeatherKit07CurrentA0V6encode2toys7Encoder_p_tKF	CurrentWeather	encode(to:)	-	()	any Swift.Encoder	-	-	7e3f84f265e6b4b9
+WeatherKit	swift-method	s:10WeatherKit07CurrentA0V4fromACs7Decoder_p_tKcfc	CurrentWeather	init(from:)	-	-	WeatherKit.CurrentWeather | any Swift.Decoder	-	-	3f97c387919f119f
+WeatherKit	swift-struct	s:10WeatherKit15DayPartForecastV	-	DayPartForecast	-	-	-	ios=18.0,macos=15.0,tvos=18.0,watchos=11.0	-	5b85bd4040bc08a8
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV10cloudCoverSdvp	DayPartForecast	cloudCover	-	Swift.Double	-	-	-	a9c2a8b255d79b93
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV20cloudCoverByAltitudeAA05CloudghI0Vvp	DayPartForecast	cloudCoverByAltitude	-	WeatherKit.CloudCoverByAltitude	-	-	-	8f557fcdc19d6d95
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV9conditionAA0A9ConditionOvp	DayPartForecast	condition	-	WeatherKit.WeatherCondition	-	-	-	7ce97745de9751aa
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV15highTemperature10Foundation11MeasurementVySo06NSUnitG0CGvp	DayPartForecast	highTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	8a2014680ccc6c69
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV14lowTemperature10Foundation11MeasurementVySo06NSUnitG0CGvp	DayPartForecast	lowTemperature	-	Foundation.Measurement<Foundation.UnitTemperature>	-	-	-	0854ddd9f58f3da8
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV13precipitationAA13PrecipitationOvp	DayPartForecast	precipitation	-	WeatherKit.Precipitation	-	-	-	8c948de961d9c886
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV25precipitationAmountByTypeAA013PrecipitationghI0Vvp	DayPartForecast	precipitationAmountByType	-	WeatherKit.PrecipitationAmountByType	-	-	-	0b0af1a97c4f17b0
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV19precipitationChanceSdvp	DayPartForecast	precipitationChance	-	Swift.Double	-	-	-	6eb0505754cb6aba
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV15maximumHumiditySdvp	DayPartForecast	maximumHumidity	-	Swift.Double	-	-	-	eaa95d43bd9ef155
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV15minimumHumiditySdvp	DayPartForecast	minimumHumidity	-	Swift.Double	-	-	-	c207813d44fb8a33
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV17maximumVisibility10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayPartForecast	maximumVisibility	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	a5548ad020c336e3
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV17minimumVisibility10Foundation11MeasurementVySo12NSUnitLengthCGvp	DayPartForecast	minimumVisibility	-	Foundation.Measurement<Foundation.UnitLength>	-	-	-	c55cfa99d5434e42
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV4windAA4WindVvp	DayPartForecast	wind	-	WeatherKit.Wind	-	-	-	c453eae9b3fb2a78
+WeatherKit	swift-property	s:10WeatherKit15DayPartForecastV13highWindSpeed10Foundation11MeasurementVySo06NSUnitH0CGvp	DayPartForecast	highWindSpeed	-	Foundation.Measurement<Foundation.UnitSpeed>	-	-	-	1d469787d7c912bb
+WeatherKit	swift-struct	s:10WeatherKit0A5AlertV	-	WeatherAlert	-	-	-	ios=16.0,macos=13.0,tvos=16.0,watchos=9.0	-	dd2b1cf456b83803
+WeatherKit	swift-property	s:10WeatherKit0A5AlertV10detailsURL10Foundation0E0Vvp	WeatherAlert	detailsURL	-	Foundation.URL	-	-	-	8ce93d229374aff9
+WeatherKit	swift-property	s:10WeatherKit0A5AlertV6sourceSSvp	WeatherAlert	source	-	Swift.String	-	-	-	cf8b5828b91f8357
+WeatherKit	swift-property	s:10WeatherKit0A5AlertV7summarySSvp	WeatherAlert	summary	-	Swift.String	-	-	-	89b360bd0c634c7d
+WeatherKit	swift-property	s:10WeatherKit0A5AlertV6regionSSSgvp	WeatherAlert	region	-	Swift.String?	-	-	-	764f4d8be91b9552
+WeatherKit	swift-property	s:10WeatherKit0A5AlertV8severityAA0A8SeverityOvp	WeatherAlert	severity	-	WeatherKit.WeatherSeverity	-	-	-	6d1c36ab17f447d9
+WeatherKit	swift-property	s:10WeatherKit0A5AlertV8metadataAA0A8MetadataVvp	WeatherAlert	metadata	-	WeatherKit.WeatherMetadata	-	-	-	6d3c544eedefe674
+WeatherKit	swift-method	s:10WeatherKit0A5AlertV2eeoiySbAC_ACtFZ	WeatherAlert	==(_:_:)	+	Swift.Bool	WeatherKit.WeatherAlert | WeatherKit.WeatherAlert	-	-	6732d6276ae102d4
+WeatherKit	swift-method	s:10WeatherKit0A5AlertV6encode2toys7Encoder_p_tKF	WeatherAlert	encode(to:)	-	()	any Swift.Encoder	-	-	0889cc5cad5e5106
+WeatherKit	swift-method	s:10WeatherKit0A5AlertV4fromACs7Decoder_p_tKcfc	WeatherAlert	init(from:)	-	-	WeatherKit.WeatherAlert | any Swift.Decoder	-	-	677fba2bda65ebc0

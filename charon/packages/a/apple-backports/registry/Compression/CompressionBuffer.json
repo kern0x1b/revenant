@@ -1,0 +1,45 @@
+{
+  "framework": "Compression",
+  "entries": [
+    {
+      "api": "compression_encode_buffer()",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "encodes the source with the codec of the algorithm and writes it at the destination, answering the number of bytes written; 0 when the output does not fit or the source cannot be encoded; a NULL scratch buffer is allocated by the layer; the framing of each algorithm is in facts/Compression/CompressionBuffer.md",
+      "source": "the declaration of the Compression header of the SDK (the name and the signature); the output of the host's libcompression for LZFSE, ZLIB, LZ4, LZ4_RAW and LZMA, measured on macOS in tests/backports/host/compression",
+      "facts": "facts/Compression/CompressionBuffer.md"
+    },
+    {
+      "api": "compression_decode_buffer()",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "decodes the source into the destination and answers the number of bytes written; a destination too short gets its first bytes and answers the destination size (LZFSE, ZLIB, LZ4 and LZ4_RAW), and answers 0 for LZMA, as the host does; corrupt input answers 0; two differences from the host are open and named in facts/Compression/CompressionBuffer.md: ZLIB truncated streams, and LZ4_RAW with a destination one byte short of the output for two inputs over 64 KiB",
+      "source": "the declaration of the Compression header of the SDK (the name and the signature); the output of the host's libcompression, measured on macOS in tests/backports/host/compression",
+      "facts": "facts/Compression/CompressionBuffer.md"
+    },
+    {
+      "api": "compression_encode_scratch_buffer_size()",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "answers the scratch size the LZFSE encoder of the port needs, and 0 for the other algorithms, whose state the layer keeps itself; the host's number differs and is not a contract (facts/Compression/CompressionBuffer.md)",
+      "source": "the declaration of the Compression header of the SDK (the name and the signature); the scratch sizes the host's libcompression answers, measured on macOS in tests/backports/host/compression",
+      "facts": "facts/Compression/CompressionBuffer.md"
+    },
+    {
+      "api": "compression_decode_scratch_buffer_size()",
+      "kind": "function",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "answers the scratch size the LZFSE decoder of the port needs, and 0 for the other algorithms (LZMA included), whose state the layer keeps itself; the host's number differs and is not a contract (facts/Compression/CompressionBuffer.md)",
+      "source": "the declaration of the Compression header of the SDK (the name and the signature); the scratch sizes the host's libcompression answers, measured on macOS in tests/backports/host/compression",
+      "facts": "facts/Compression/CompressionBuffer.md"
+    }
+  ]
+}

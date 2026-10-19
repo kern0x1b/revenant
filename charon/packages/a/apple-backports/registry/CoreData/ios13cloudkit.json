@@ -1,0 +1,76 @@
+{
+  "framework": "CoreData",
+  "entries": [
+    {
+      "api": "NSPersistentCloudKitContainer",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a subclass of NSPersistentContainer, so everything the container does on the device it does here: the model is found by name, the store descriptions are built, the stores are loaded and the view context and background contexts work as they do on the plain container. Nothing is mirrored to CloudKit and no record ever leaves the device; the first container made says so once in the log",
+      "facts": "facts/CoreData/CloudKitContainer.md",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    },
+    {
+      "api": "NSPersistentCloudKitContainerOptions",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a value object that keeps the container identifier it was made with and hands it back",
+      "facts": "facts/CoreData/CloudKitContainer.md",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    },
+    {
+      "api": "-[NSPersistentCloudKitContainerOptions initWithContainerIdentifier:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "keeps a copy of the identifier, which containerIdentifier answers",
+      "facts": "facts/CoreData/CloudKitContainer.md",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    },
+    {
+      "api": "NSPersistentCloudKitContainerOptions.containerIdentifier",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the identifier the options were made with, copied",
+      "facts": "facts/CoreData/CloudKitContainer.md",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    },
+    {
+      "api": "NSPersistentCloudKitContainerOptions.databaseScope",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property NSPersistentCloudKitContainerOptions.databaseScope",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    },
+    {
+      "api": "NSPersistentStoreDescription.cloudKitContainerOptions",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property NSPersistentStoreDescription.cloudKitContainerOptions",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/CoreData/CloudKitContainer.md",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    },
+    {
+      "api": "NSPersistentStoreRemoteChangeNotificationPostOptionKey",
+      "kind": "constant",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string NSPersistentStoreRemoteChangeNotificationOptionKey, read from the host's own CoreData. Setting it to YES in a store's options is accepted and changes nothing: no store here watches for changes made by another process, so NSPersistentStoreRemoteChangeNotification is never posted, which is what the entry of that notification already says",
+      "facts": "facts/CoreData/CloudKitContainer.md",
+      "source": "the CoreData headers of SDK 16.4 for the declarations; the host's own CoreData for the value of the option key, read at run time; nothing of a release was read for the mirroring, as no release this port runs on has CloudKit"
+    }
+  ]
+}

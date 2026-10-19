@@ -1,0 +1,245 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "-[NSEnergyFormatter getObjectValue:forString:errorDescription:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "answers NO and writes neither the object nor the reason, which is what the header documents and what the system answers for every text"
+    },
+    {
+      "api": "-[NSEnergyFormatter stringFromJoules:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSEnergyFormatter stringFromValue:unit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSEnergyFormatter unitStringFromJoules:usedUnit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSEnergyFormatter unitStringFromValue:unit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "NSEnergyFormatter.forFoodEnergyUse",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "whether an energy is a food energy, which writes a kilocalorie C, Cal or Calories where it is kcal otherwise"
+    },
+    {
+      "api": "NSEnergyFormatter.numberFormatter",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the number formatter the value is written through, a decimal one of the locale on first use and nil again after nil is set"
+    },
+    {
+      "api": "NSEnergyFormatter.unitStyle",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSEnergyFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the style a unit name is written in, the medium style to begin with and the long one for every value outside the short and the medium"
+    },
+    {
+      "api": "-[NSLengthFormatter getObjectValue:forString:errorDescription:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "answers NO and writes neither the object nor the reason, which is what the header documents and what the system answers for every text"
+    },
+    {
+      "api": "-[NSLengthFormatter stringFromMeters:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSLengthFormatter stringFromValue:unit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSLengthFormatter unitStringFromMeters:usedUnit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSLengthFormatter unitStringFromValue:unit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "NSLengthFormatter.forPersonHeightUse",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "whether a length is a person's height, which writes feet and inches in the U.S. and centimetres in the U.K. and the metric"
+    },
+    {
+      "api": "NSLengthFormatter.numberFormatter",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the number formatter the value is written through, a decimal one of the locale on first use and nil again after nil is set"
+    },
+    {
+      "api": "NSLengthFormatter.unitStyle",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSLengthFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the style a unit name is written in, the medium style to begin with and the long one for every value outside the short and the medium"
+    },
+    {
+      "api": "-[NSMassFormatter getObjectValue:forString:errorDescription:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "answers NO and writes neither the object nor the reason, which is what the header documents and what the system answers for every text"
+    },
+    {
+      "api": "-[NSMassFormatter stringFromKilograms:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSMassFormatter stringFromValue:unit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSMassFormatter unitStringFromKilograms:usedUnit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "-[NSMassFormatter unitStringFromValue:unit:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the written form of a value in the unit the locale's system of units chooses, in the style asked for, with the number written through the formatter's own"
+    },
+    {
+      "api": "NSMassFormatter.forPersonMassUse",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "whether a mass is a person's mass, which the system writes no differently from any other mass"
+    },
+    {
+      "api": "NSMassFormatter.numberFormatter",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the number formatter the value is written through, a decimal one of the locale on first use and nil again after nil is set"
+    },
+    {
+      "api": "NSMassFormatter.unitStyle",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUnitFormat.md",
+      "source": "the host's own NSMassFormatter, held against the port by tests/backports/host/unitformat (six English locales at 40479 comparisons each and six others, none differing), the selector read out of the object the 6.1.3 gate built, and called on the release by tests/backports/device/unitfmt.m",
+      "effect": "the style a unit name is written in, the medium style to begin with and the long one for every value outside the short and the medium"
+    }
+  ]
+}

@@ -1,0 +1,271 @@
+{
+  "framework": "CoreGraphics",
+  "entries": [
+    {
+      "api": "CGColorSpaceGetName()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 12.0 in one name: iOS 6 makes a space named kCGColorSpaceGenericRGB out of its device RGB space, so the name it holds, and this function answers, is kCGColorSpaceDeviceRGB where iOS 12 answers kCGColorSpaceGenericRGB",
+      "effect": "the name of a space as the release's own CGColorSpaceCopyName gives it, without a retain, the same object for the same name every time; NULL for NULL and for a space that has no name; the names of a generic RGB space and a device RGB space are not told apart",
+      "facts": "facts/CoreGraphics/CGColorSpaceGetName.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: _CGColorSpaceGetName at 0x182b69080, which answers the name a space holds without retaining it, and _CGColorSpaceCopyName at 0x182b69090, which answers the same name retained; an iPad 2 running 6.1.3 for what the release has and says"
+    },
+    {
+      "api": "kCGColorSpaceGenericLab",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a Lab space by name",
+      "effect": "the constant is there with the value iOS 12 gives it; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpaceGetName.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: the string of the constant; an iPad 2 running 6.1.3, where CGColorSpaceCreateWithName answers NULL for the names the release does not make and has no such symbol"
+    },
+    {
+      "api": "CGPathApplyWithBlock()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the block is called once for each element of the path in the order of the path, with the element and its points, and not at all for a NULL path or a NULL block; it is carried over the release's own CGPathApply, which walks the same elements",
+      "facts": "facts/CoreGraphics/CGApplyBlocks.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: _CGPathApplyWithBlock at 0x182d20840 and its block at 0x182d208f4, which call the path's own apply and hand each element to the block; the host's CoreGraphics through the differential test for what comes out"
+    },
+    {
+      "api": "CGImageGetByteOrderInfo()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the byte order bits of the bitmap info of the image, 0 for a NULL image",
+      "facts": "facts/CoreGraphics/CGApplyBlocks.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: _CGImageGetByteOrderInfo at 0x182b15310, the bitmap info of the image masked with 0x7000"
+    },
+    {
+      "api": "CGImageGetPixelFormatInfo()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the pixel format bits of the bitmap info of the image, 0 for a NULL image",
+      "facts": "facts/CoreGraphics/CGApplyBlocks.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: _CGImageGetPixelFormatInfo at 0x182b15320, the bitmap info of the image masked with 0xF0000"
+    },
+    {
+      "api": "CGPDFArrayApplyBlock()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the block is called for each element that can be read, in order, with the index, the object and the info pointer, and the walk stops when the block answers false; nothing is called for a NULL array or block",
+      "facts": "facts/CoreGraphics/CGApplyBlocks.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: _CGPDFArrayApplyBlock at 0x182b43f74; the host's CoreGraphics through the differential test for what comes out"
+    },
+    {
+      "api": "CGPDFDictionaryApplyBlock()",
+      "kind": "function",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 12.0 in what it cannot do: the release's own walk over a dictionary cannot be stopped, so after the block answers false the block is not called again and the walk runs to its end unseen",
+      "effect": "the block is called for each entry, in the order the release walks the dictionary, with the key, the object and the info pointer, and not again once it answered false; nothing is called for a NULL dictionary or block",
+      "facts": "facts/CoreGraphics/CGApplyBlocks.md",
+      "source": "CoreGraphics of iOS 12.0 arm64: _CGPDFDictionaryApplyBlock at 0x182cebb00; the host's CoreGraphics through the differential test for what comes out"
+    },
+    {
+      "api": "CGColorConversionInfoCreateFromListWithArguments()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function CGColorConversionInfoCreateFromListWithArguments()",
+      "effect": "until built: the symbol is not exported",
+      "source": "the SDK 16.4 headers of CoreGraphics"
+    },
+    {
+      "api": "kCGColorConversionTRCSize",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the colour conversion objects that read it are not carried",
+      "effect": "the constant is there with the text the release gives it; no colour conversion of the port reads it",
+      "facts": "facts/CoreGraphics/ColourKeys.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
+    },
+    {
+      "api": "CGDataProviderGetInfo()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function CGDataProviderGetInfo()",
+      "effect": "until built: the symbol is not exported",
+      "source": "the SDK 16.4 headers of CoreGraphics"
+    },
+    {
+      "api": "CGPDFContextSetOutline()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function CGPDFContextSetOutline()",
+      "effect": "until built: the symbol is not exported",
+      "source": "the SDK 16.4 headers of CoreGraphics"
+    },
+    {
+      "api": "CGPDFDocumentGetOutline()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function CGPDFDocumentGetOutline()",
+      "effect": "until built: the symbol is not exported",
+      "source": "the SDK 16.4 headers of CoreGraphics"
+    },
+    {
+      "api": "CGPDFDocumentGetAccessPermissions()",
+      "kind": "function",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the function CGPDFDocumentGetAccessPermissions()",
+      "effect": "until built: the symbol is not exported",
+      "source": "the SDK 16.4 headers of CoreGraphics"
+    },
+    {
+      "api": "kCGPDFContextAccessPermissions",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the PDF functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF context of the port reads the key",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
+    },
+    {
+      "api": "kCGPDFOutlineChildren",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
+    },
+    {
+      "api": "kCGPDFOutlineDestination",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
+    },
+    {
+      "api": "kCGPDFOutlineDestinationRect",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
+    },
+    {
+      "api": "kCGPDFOutlineTitle",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the outline functions that read the key are not carried",
+      "effect": "the constant is there with the text the release gives it; no PDF function of the port reads it",
+      "facts": "facts/CoreGraphics/PDFNames.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; SDK 16.4 header for the release that added it"
+    },
+    {
+      "api": "kCGAdaptiveMaximumBitDepth",
+      "kind": "constant",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "carried so that an application which names it loads; the bitmap context that takes it is not carried",
+      "effect": "the constant is there with the text the release gives it; no bitmap context of the port reads it",
+      "facts": "facts/CoreGraphics/ColourKeys.md",
+      "source": "macOS CoreGraphics of the host: the text of the constant, read by the probe of tests/backports/host/cgpdf-names; 11.0 is the SDK 26.2 header's API_AVAILABLE, not a measurement: release-split finds no held cache (11.0 to 18.0) that names it"
+    },
+    {
+      "api": "kCGColorSpaceExtendedLinearDisplayP3",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a space of this name",
+      "effect": "the constant is there with the value the host's CoreGraphics gives it; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpace.md",
+      "source": "CoreGraphics of the macOS host, which holds the string of the constant, read with dlsym; the cache ladder, whose first held release with it in CoreGraphics is 16.0, an upper bound: nothing is held between 12.0 and 16.0 (the SDK 16.4 header dates it 12.3)"
+    },
+    {
+      "api": "kCGColorSpaceExtendedLinearITUR_2020",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a space of this name",
+      "effect": "the constant is there with the value the host's CoreGraphics gives it; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpace.md",
+      "source": "CoreGraphics of the macOS host, which holds the string of the constant, read with dlsym; the cache ladder, whose first held release with it in CoreGraphics is 16.0, an upper bound: nothing is held between 12.0 and 16.0 (the SDK 16.4 header dates it 12.3)"
+    },
+    {
+      "api": "kCGColorSpaceDisplayP3_HLG",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a space of this name",
+      "effect": "the constant is there with the value the host's CoreGraphics gives it; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpace.md",
+      "source": "CoreGraphics of the macOS host, which holds the string of the constant, read with dlsym; the cache ladder, whose first held release with it in CoreGraphics is 16.0, an upper bound: nothing is held between 12.0 and 16.0 (the SDK 16.4 header dates it 12.6)"
+    },
+    {
+      "api": "kCGColorSpaceDisplayP3_PQ_EOTF",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a space of this name",
+      "effect": "the constant is there with the value the host's CoreGraphics gives it; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpace.md",
+      "source": "CoreGraphics of the macOS host, which holds the string of the constant, read with dlsym; the cache ladder, whose first held release with it in CoreGraphics is 16.0, an upper bound: nothing is held between 12.0 and 16.0 (the SDK 16.4 header dates it 12.6)"
+    },
+    {
+      "api": "kCGColorSpaceITUR_2020_HLG",
+      "kind": "constant",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a space of this name",
+      "effect": "the constant is there with the value the host's CoreGraphics gives it; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpace.md",
+      "source": "CoreGraphics of the macOS host, which holds the string of the constant, read with dlsym; the cache ladder, whose first held release with it in CoreGraphics is 16.0, an upper bound: nothing is held between 12.0 and 16.0 (the SDK 16.4 header dates it 12.6)"
+    },
+    {
+      "api": "kCGColorSpaceITUR_2020_PQ_EOTF",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the symbol is carried so that an application which names it loads; iOS 6 cannot make a space of this name",
+      "effect": "the constant is there with the value 12.0 gives it, its own name; CGColorSpaceCreateWithName answers NULL for it, as it does for every name of the release that it cannot make, and an application that checks the result handles it",
+      "facts": "facts/CoreGraphics/CGColorSpace.md",
+      "source": "CoreGraphics of the arm64 cache of 12.0, the first held release whose CoreGraphics exports it (the gate's ladder): the value read through the symbol, its __cfstring and the bytes it names, kCGColorSpaceDisplayP3, kCGColorSpaceSRGB and kCGColorSpaceExtendedSRGB of the same image as the control; the SDK 16.4 header dates it 12.6"
+    }
+  ]
+}

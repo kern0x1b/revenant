@@ -1,0 +1,67 @@
+diff --git a/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift b/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
+--- a/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
++++ b/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
+@@ -20,7 +20,7 @@
+ extension CGAffineTransform: Equatable {
+   public static func ==(lhs: CGAffineTransform,
+                         rhs: CGAffineTransform) -> Bool {
+-    return lhs.__equalTo(rhs)
++    return CGAffineTransformEqualToTransform(lhs, rhs)
+   }
+ }
+ 
+@@ -252,7 +252,7 @@
+   
+   init?(dictionaryRepresentation dict: CFDictionary) {
+     var point = CGPoint()
+-    if CGPoint.__setFromDictionaryRepresentation(dict, &point) {
++    if CGPointMakeWithDictionaryRepresentation(dict, &point) {
+       self = point
+     } else {
+       return nil
+@@ -319,7 +319,7 @@
+ 
+   init?(dictionaryRepresentation dict: CFDictionary) {
+     var size = CGSize()
+-    if CGSize.__setFromDictionaryRepresentation(dict, &size) {
++    if CGSizeMakeWithDictionaryRepresentation(dict, &size) {
+       self = size
+     } else {
+       return nil
+@@ -442,7 +442,7 @@
+ 
+   init?(dictionaryRepresentation dict: CFDictionary) {
+     var rect = CGRect()
+-    if CGRect.__setFromDictionaryRepresentation(dict, &rect) {
++    if CGRectMakeWithDictionaryRepresentation(dict, &rect) {
+       self = rect
+     } else {
+       return nil
+@@ -455,8 +455,7 @@
+   {
+     var slice = CGRect.zero
+     var remainder = CGRect.zero
+-    self.__divided(slice: &slice, remainder: &remainder, atDistance: atDistance,
+-           from: fromEdge)
++    __CGRectDivide(self, &slice, &remainder, atDistance, fromEdge)
+     return (slice, remainder)
+   }
+ 
+@@ -494,7 +493,7 @@
+ extension CGRect : Equatable {
+   @_transparent // @fragile
+   public static func == (lhs: CGRect, rhs: CGRect) -> Bool {
+-    return lhs.equalTo(rhs)
++    return CGRectEqualToRect(lhs, rhs)
+   }
+ }
+ 
+@@ -623,6 +622,8 @@
+ 
+ extension CGMutablePath {
+ 
++  /* A call iOS 7 brought, on a runtime a port may take to a release before it: the port asks for it where it is. */
++  @available(iOS 7.0, macOS 10.9, tvOS 9.0, watchOS 2.0, *)
+   public func addRoundedRect(in rect: CGRect, cornerWidth: CGFloat,
+    cornerHeight: CGFloat, transform: CGAffineTransform = .identity) {
+     self.__addRoundedRect(transform: [transform], rect: rect,

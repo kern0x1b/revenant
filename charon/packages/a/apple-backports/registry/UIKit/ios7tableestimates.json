@@ -1,0 +1,38 @@
+{
+  "framework": "UIKit",
+  "entries": [
+    {
+      "api": "UITableView.estimatedRowHeight",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UITableView.estimatedRowHeight",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UITableViewEstimatedHeights.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/tableestimates (the defaults, kept values, the refusal of a negative one, key-value coding), and tests/backports/device/tableestimates.m on iOS 6"
+    },
+    {
+      "api": "UITableView.estimatedSectionHeaderHeight",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UITableView.estimatedSectionHeaderHeight",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UITableViewEstimatedHeights.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/tableestimates (the defaults, kept values, the refusal of a negative one, key-value coding), and tests/backports/device/tableestimates.m on iOS 6"
+    },
+    {
+      "api": "UITableView.estimatedSectionFooterHeight",
+      "kind": "property",
+      "introduced": "7.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property UITableView.estimatedSectionFooterHeight",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/UIKit/UITableViewEstimatedHeights.md",
+      "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/tableestimates (the defaults, kept values, the refusal of a negative one, key-value coding), and tests/backports/device/tableestimates.m on iOS 6"
+    }
+  ]
+}

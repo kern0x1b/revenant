@@ -1,0 +1,38 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+LockedCameraCapture	swift-constant	c:@LockedCameraCaptureVersionNumber	-	LockedCameraCaptureVersionNumber	-	Swift.Double	-	-	-	d35b41b71e146216
+LockedCameraCapture	swift-constant	c:@LockedCameraCaptureVersionString	-	LockedCameraCaptureVersionString	-	_	-	-	-	1cf372fdc0414956
+LockedCameraCapture	swift-constant	c:@NSUserActivityTypeLockedCameraCapture	-	NSUserActivityTypeLockedCameraCapture	-	Swift.String	-	-	-	85a42fe0c484e071
+LockedCameraCapture	swift-protocol	s:19LockedCameraCapture0abC9ExtensionP	-	LockedCameraCaptureExtension	-	-	-	ios=18.0	-	4508c462182f397f
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC9ExtensionP4body4BodyQzvp	LockedCameraCaptureExtension	body	-	Self.Body	-	-	-	ec0868559c0482ce
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC9ExtensionPAAE13configuration0D3Kit03AppD18SceneConfigurationVvp	LockedCameraCaptureExtension	configuration	-	ExtensionKit.AppExtensionSceneConfiguration	-	-	-	88232177ffd7feaa
+LockedCameraCapture	swift-protocol	s:19LockedCameraCapture0abC14ExtensionSceneP	-	LockedCameraCaptureExtensionScene	-	-	-	ios=18.0	-	64e11a0a6489990b
+LockedCameraCapture	swift-struct	s:19LockedCameraCapture0abC7UISceneV	-	LockedCameraCaptureUIScene	-	-	-	ios=18.0	-	93d852f65f3ada5b
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7UISceneV7sessionAA0abC7SessionCvp	LockedCameraCaptureUIScene	session	-	LockedCameraCapture.LockedCameraCaptureSession	-	ios=18.0	-	6e409e25fdb14e17
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7UISceneV7contentACyxGxAA0abC7SessionCc_tcfc	LockedCameraCaptureUIScene	init(content:)	-	-	LockedCameraCapture.LockedCameraCaptureUIScene<Content> | (LockedCameraCapture.LockedCameraCaptureSession) -> Content	ios=18.0	-	1b66762baf99ae48
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7UISceneV4bodyQrvp	LockedCameraCaptureUIScene	body	-	some ExtensionKit.AppExtensionScene	-	ios=18.0	-	554ebeddfcd66bc8
+LockedCameraCapture	swift-typealias	s:19LockedCameraCapture0abC7UISceneV4Bodya	LockedCameraCaptureUIScene	Body	-	-	-	ios=18.0	-	e855012838f162e7
+LockedCameraCapture	swift-class	s:19LockedCameraCapture0abC7SessionC	-	LockedCameraCaptureSession	-	-	-	ios=18.0	-	f9f44e86f78310c9
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7SessionC17sessionContentURL10Foundation0G0Vvp	LockedCameraCaptureSession	sessionContentURL	-	Foundation.URL	-	ios=18.0	-	e8c033afd3bd0593
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7SessionC15openApplication3forySo14NSUserActivityC_tYaKF	LockedCameraCaptureSession	openApplication(for:)	-	()	Foundation.NSUserActivity	ios=18.0	-	a660c87227d7f370
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7SessionC010invalidateD7ContentyyYaKF	LockedCameraCaptureSession	invalidateSessionContent()	-	()	-	ios=18.0	-	285103f4d723e650
+LockedCameraCapture	swift-enum	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO	LockedCameraCaptureSession	ApplicationLaunchError	-	-	-	ios=18.0	-	4494c54c2d1c4fda
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO11errorDomainSSvpZ	LockedCameraCaptureSession.ApplicationLaunchError	errorDomain	+	Swift.String	-	ios=18.0	-	dfeb090fcf434258
+LockedCameraCapture	swift-constant	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO7unknownyA2EmF	LockedCameraCaptureSession.ApplicationLaunchError	unknown	-	-	-	-	-	8f39a88971b22c64
+LockedCameraCapture	swift-constant	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO19applicationNotFoundyA2EmF	LockedCameraCaptureSession.ApplicationLaunchError	applicationNotFound	-	-	-	-	-	0539f9d55dc1045e
+LockedCameraCapture	swift-constant	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO20authenticationFailedyA2EmF	LockedCameraCaptureSession.ApplicationLaunchError	authenticationFailed	-	-	-	-	-	da521a86d483e0ce
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO9errorCodeSivp	LockedCameraCaptureSession.ApplicationLaunchError	errorCode	-	Swift.Int	-	ios=18.0	-	9e5606197546bc17
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO13failureReasonSSSgvp	LockedCameraCaptureSession.ApplicationLaunchError	failureReason	-	Swift.String?	-	ios=18.0	-	0dad3e0389452987
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO2eeoiySbAE_AEtFZ	LockedCameraCaptureSession.ApplicationLaunchError	==(_:_:)	+	Swift.Bool	LockedCameraCapture.LockedCameraCaptureSession.ApplicationLaunchError | LockedCameraCapture.LockedCameraCaptureSession.ApplicationLaunchError	-	-	c97b6958e4826222
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO4hash4intoys6HasherVz_tF	LockedCameraCaptureSession.ApplicationLaunchError	hash(into:)	-	()	Swift.Hasher	-	-	4e050d5098017073
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7SessionC22ApplicationLaunchErrorO9hashValueSivp	LockedCameraCaptureSession.ApplicationLaunchError	hashValue	-	Swift.Int	-	-	-	0df3b4561650b668
+LockedCameraCapture	swift-class	s:19LockedCameraCapture0abC7ManagerC	-	LockedCameraCaptureManager	-	-	-	ios=18.0	-	b25fef84c86aa9ff
+LockedCameraCapture	swift-enum	s:19LockedCameraCapture0abC7ManagerC20SessionContentUpdateO	LockedCameraCaptureManager	SessionContentUpdate	-	-	-	ios=18.0	-	38b7dd02bd9714e9
+LockedCameraCapture	swift-constant	s:19LockedCameraCapture0abC7ManagerC20SessionContentUpdateO7initialyAESay10Foundation3URLVG_tcAEmF	LockedCameraCaptureManager.SessionContentUpdate	initial	-	-	-	-	-	77e1ba7ea11247e4
+LockedCameraCapture	swift-constant	s:19LockedCameraCapture0abC7ManagerC20SessionContentUpdateO5addedyAE10Foundation3URLV_tcAEmF	LockedCameraCaptureManager.SessionContentUpdate	added	-	-	-	-	-	2b9cba84209e8700
+LockedCameraCapture	swift-constant	s:19LockedCameraCapture0abC7ManagerC20SessionContentUpdateO7removedyAE10Foundation3URLV_tcAEmF	LockedCameraCaptureManager.SessionContentUpdate	removed	-	-	-	-	-	fcf690f8d04d27a9
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7ManagerC6sharedACvpZ	LockedCameraCaptureManager	shared	+	LockedCameraCapture.LockedCameraCaptureManager	-	ios=18.0	-	85be68c99ce52f07
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7ManagerC18sessionContentURLsSay10Foundation3URLVGvp	LockedCameraCaptureManager	sessionContentURLs	-	[Foundation.URL]	-	ios=18.0	-	dba325d83e2e70d6
+LockedCameraCapture	swift-property	s:19LockedCameraCapture0abC7ManagerC21sessionContentUpdatesQrvp	LockedCameraCaptureManager	sessionContentUpdates	-	some _Concurrency.AsyncSequence<LockedCameraCapture.LockedCameraCaptureManager.SessionContentUpdate, Swift.Never>	-	ios=18.0	-	7a0017c64110d79c
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7ManagerC24invalidateSessionContent2aty10Foundation3URLV_tYaKF	LockedCameraCaptureManager	invalidateSessionContent(at:)	-	()	Foundation.URL	ios=18.0	-	1565f39f25850510
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7ManagerC23beginDelayingAppearanceyyF	LockedCameraCaptureManager	beginDelayingAppearance()	-	()	-	ios=18.1	-	105e4d9b90b04ad9
+LockedCameraCapture	swift-method	s:19LockedCameraCapture0abC7ManagerC21endDelayingAppearanceyyF	LockedCameraCaptureManager	endDelayingAppearance()	-	()	-	ios=18.1	-	276048d0399c00b0

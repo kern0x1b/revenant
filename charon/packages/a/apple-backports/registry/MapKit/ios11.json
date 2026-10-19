@@ -1,0 +1,236 @@
+{
+  "framework": "MapKit",
+  "entries": [
+    {
+      "api": "-[MKClusterAnnotation initWithMemberAnnotations:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the members it was built with, and the coordinate at the middle of them through the release's own projection, which is where a map draws a cluster",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "-[MKClusterAnnotation init]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the members it was built with, and the coordinate at the middle of them through the release's own projection, which is where a map draws a cluster",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "-[MKCompassButton compassVisibility]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the header's own visibility on the button this port carries",
+      "effect": "hidden, always shown, or shown only when the map is not facing north, which is what adaptive means here",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header"
+    },
+    {
+      "api": "-[MKMapView dequeueReusableAnnotationViewWithIdentifier:forAnnotation:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the release's own MKMapView has no register/dequeue pair at all; the category keeps what a program registered and gives the release's own pin for what it did not",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "-[MKMapView registerClass:forAnnotationViewWithReuseIdentifier:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the release's own MKMapView has no register/dequeue pair at all; the category keeps what a program registered and gives the release's own pin for what it did not",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "-[MKUserTrackingButton setTrackingMode:animated:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[MKUserTrackingButton setTrackingMode:animated:]",
+      "effect": "a stand-in is built and answers; the real behaviour is owed",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the release's own map view, measured with apple.objc.inventory against the armv7 dyld shared cache of 6.1.3"
+    },
+    {
+      "api": "MKClusterAnnotation",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has the MKMapView and the whole of the MKOverlayView drawing path and none of the iOS 7 renderer tree, so this class is the missing half, built over the release's own",
+      "effect": "the members it was built with, and the coordinate at the middle of them through the release's own projection, which is where a map draws a cluster",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the armv7 dyld shared cache ladder (6.1.3 through 10.3.4) and the arm64/arm64e rungs of 11.0, 12.0, 16.0 and 18.0 through apple.dyld's first_releases, and the SDK 16.4 header this port compiles against"
+    },
+    {
+      "api": "MKClusterAnnotation.memberAnnotations",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the members it was built with, and the coordinate at the middle of them through the release's own projection, which is where a map draws a cluster",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKClusterAnnotation.subtitle",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the members it was built with, and the coordinate at the middle of them through the release's own projection, which is where a map draws a cluster",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKClusterAnnotation.title",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "the members it was built with, and the coordinate at the middle of them through the release's own projection, which is where a map draws a cluster",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKCompassButton",
+      "kind": "class",
+      "introduced": "11",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's map view has no button of its own for this",
+      "effect": "a rose drawn at the map's own turn, -compassVisibility as the header documents (adaptive hides it when the map is already facing north), and a tap that animates the map back to north through the release's own -setRegion:animated:",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "apple.dyld's first_releases over the held cache ladder: first exported at 11.0"
+    },
+    {
+      "api": "MKMarkerAnnotationView",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 has the MKMapView and the whole of the MKOverlayView drawing path and none of the iOS 7 renderer tree, so this class is the missing half, built over the release's own",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the armv7 dyld shared cache ladder (6.1.3 through 10.3.4) and the arm64/arm64e rungs of 11.0, 12.0, 16.0 and 18.0 through apple.dyld's first_releases, and the SDK 16.4 header this port compiles against"
+    },
+    {
+      "api": "MKMarkerAnnotationView.animatesWhenAdded",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.glyphImage",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.glyphText",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.glyphTintColor",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.markerTintColor",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.selectedGlyphImage",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.subtitleVisibility",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKMarkerAnnotationView.titleVisibility",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the member of a class the release has no answer for at all, so it is carried with the class and behaves as the SDK's own header says",
+      "effect": "a pin drawn with a circle and a stalk and the caller's own glyph in the circle, the marker and glyph colours, the two glyph images, the title and subtitle visibilities and animatesWhenAdded",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "the SDK 16.4 header, and the release's own projection and geometry functions, measured in the armv7 cache of 6.1.3"
+    },
+    {
+      "api": "MKUserTrackingButton",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release's map view has no button of its own for this",
+      "effect": "a crosshair bound to the release's own -userTrackingMode, whose tap turns following on and off through the release's own -setUserTrackingMode:animated:",
+      "facts": "facts/MapKit/MapKit.md",
+      "source": "apple.dyld's first_releases over the held cache ladder: first exported at 11.0"
+    }
+  ]
+}

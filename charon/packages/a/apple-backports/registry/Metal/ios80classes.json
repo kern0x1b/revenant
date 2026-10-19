@@ -1,0 +1,181 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "CharonMetalBlitEncoder",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalBlitEncoder",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of MTLBlitCommandEncoder, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalBuffer",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalBuffer",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalCommandBuffer",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalCommandBuffer",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalComputeEncoder",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalComputeEncoder",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalComputePipeline",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalComputePipeline",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalDepthStencil",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalDepthStencil",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalDevice",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalDevice",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalDrawable",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalDrawable",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalEncoder",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalEncoder",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalFunction",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalFunction",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalLayerState",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalLayerState",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalLibrary",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalLibrary",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalPipeline",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalPipeline",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalQueue",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalQueue",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalSampler",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalSampler",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    },
+    {
+      "api": "CharonMetalTexture",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class CharonMetalTexture",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 16.4, Metal, the header of the render surface, whose API arrived in 8.0",
+      "facts": "facts/Metal/PortInternals.md"
+    }
+  ]
+}

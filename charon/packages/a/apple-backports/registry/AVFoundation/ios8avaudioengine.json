@@ -1,0 +1,185 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "AVAudioEngine",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "-[AVAudioEngine attachNode:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioEngine detachNode:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioEngine connect:to:format:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioEngine disconnectNodeOutput:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioEngine prepare]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioEngine startAndReturnError:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioEngine outputConnectionPointsForNode:outputBus:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioEngine.mainMixerNode",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioEngine.inputNode",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; real hardware capture through this node is not yet exercised, see facts"
+    },
+    {
+      "api": "AVAudioEngine.autoShutdownEnabled",
+      "kind": "property",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kept as a real stored flag, this port does no power-driven auto-stop either way"
+    },
+    {
+      "api": "AVAudioConnectionPoint",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioNode",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioIONode",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioMixerNode",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioOutputNode",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioInputNode",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; real hardware capture is not yet exercised, see facts"
+    },
+    {
+      "api": "AVAudioPlayerNode",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "-[AVAudioPlayerNode scheduleBuffer:completionHandler:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioPlayerNode scheduleBuffer:atTime:options:completionHandler:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; `when`/`options` are accepted but not yet honoured - every buffer plays in schedule order at the engine's own rate, see facts"
+    }
+  ]
+}

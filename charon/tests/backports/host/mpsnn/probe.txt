@@ -1,0 +1,66 @@
+== 1. the device, the queue and the command buffer ==
+MTLCreateSystemDefaultDevice: 0x7997070000 class AGXG16SDevice name Apple M4 Pro
+device responds to -newCommandBuffer (the selector the earlier probe blamed): 1
+device newCommandQueue: 0x104da1dc0 class AGXG16XFamilyCommandQueue
+queue commandBuffer: 0x104daa6e0 class AGXG16XFamilyCommandBuffer
+  empty commit + waitUntilCompleted: OK, status 4, error (none)
+computeCommandEncoder: 0x7996c050e0
+  commit with an encoder: OK, status 4, error (none)
+
+== 2. the class names, Apple's and the invented four ==
+  no Apple header declares: MPSNNAddNode                 -> nil
+  no Apple header declares: MPSNNConvolutionNode         -> nil
+  no Apple header declares: MPSNNPoolingMaxNode          -> nil
+  no Apple header declares: MPSNNActivationNode          -> nil
+  declared by Apple:       MPSNNGraph                   -> present
+  declared by Apple:       MPSNNImageNode               -> present
+  declared by Apple:       MPSNNStateNode               -> present
+  declared by Apple:       MPSNNFilterNode              -> present
+  declared by Apple:       MPSNNDefaultPadding          -> present
+  declared by Apple:       MPSNNBinaryArithmeticNode    -> present
+  declared by Apple:       MPSNNAdditionNode            -> present
+  declared by Apple:       MPSNNSubtractionNode         -> present
+  declared by Apple:       MPSNNMultiplicationNode      -> present
+  declared by Apple:       MPSNNDivisionNode            -> present
+  declared by Apple:       MPSNNConcatenationNode       -> present
+  declared by Apple:       MPSCNNPoolingNode            -> present
+  declared by Apple:       MPSCNNPoolingAverageNode     -> present
+  declared by Apple:       MPSCNNPoolingMaxNode         -> present
+  declared by Apple:       MPSCNNPoolingL2NormNode      -> present
+  declared by Apple:       MPSCNNConvolutionNode        -> present
+  declared by Apple:       MPSCNNNeuronNode             -> present
+  declared by Apple:       MPSCNNNeuronReLUNode         -> present
+  declared by Apple:       MPSNNScaleNode               -> present
+  declared by Apple:       MPSNNPadNode                 -> present
+  declared by Apple:       MPSNNReshapeNode             -> present
+  declared by Apple:       MPSImage                     -> present
+  declared by Apple:       MPSImageAdd                  -> present
+  Apple's names absent from the loaded framework: 0
+
+== 3. an addition graph, Apple's own ==
+images: 0x104dae520 0x104db1010  (width 2 height 2 channels 1 format 4 pixelFormat 55)
+  wrote both inputs through -writeBytes:dataLayout:imageIndex:
+  read the left image back: 1 2 3 4  (the control on the input side)
+nodes 0x7997039080 0x7997039100 0x79970391c0, addition node 0x7996c71c00 class MPSNNAdditionNode superclass MPSNNBinaryArithmeticNode
+addition node's resultImage: 0x79970391c0 (the one just set: 0x79970391c0)
+addition default primaryScale 1 secondaryScale 1 bias 0
+  MPSNNGraph graphWithDevice:resultImage:resultImageIsNeeded: -> 0x7997104900
+  sourceImageHandles: (
+    "<MPSImage: 0x104dae520>",
+    "<MPSImage: 0x104db1010>"
+)
+  sourceStateHandles: (
+)
+  intermediateImageHandles: (
+)
+  resultHandle: 0x0
+  -encodeToCommandBuffer:sourceImages: -> 0x7996d10000
+  graph.format 3, result image 2x2x1 featureChannelFormat 3 pixelFormat 25
+  graph buffer: status 4, error (none)
+  Apple's MPSNNGraph answers (float16 bits): 4980 4d80 5020 5180
+
+== 4. the control the graph's answer needs: one MPSImage kernel, no graph ==
+MPSImageAdd: 0x7996c74640 class MPSImageAdd
+  MPSImageAdd encode returned
+  buffer status 4 error (none)
+  Apple's MPSImageAdd answers: 11 22 33 44

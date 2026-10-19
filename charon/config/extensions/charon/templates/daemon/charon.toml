@@ -1,0 +1,25 @@
+[port]
+name = "$name"
+version = "0.1.0"
+description = "$name, a LaunchDaemon"
+
+[platform]
+use = "apple-ios"
+arch = "armv7"
+os-version = "6.0"
+distribution = "jailbreak"
+
+[[executable]]
+name = "$name"
+sources = ["src/*.c"]
+install = "/usr/libexec"
+installs-into = "stage"
+frameworks = ["CoreFoundation"]
+options = ["-Wall", "-Wextra"]
+resources = [{ from = "packaging/launchd.plist", as = "/Library/LaunchDaemons/$identifier.plist" }]
+
+[package]
+control = "packaging/control"
+
+[pipeline]
+system = ["stage:clear", "build:executable", "check:imports"]

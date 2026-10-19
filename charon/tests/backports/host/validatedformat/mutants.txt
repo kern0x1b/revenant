@@ -1,0 +1,12 @@
+%C against an integer	s/(case CharonFormatWideCharacter:\n\s*return) allowed == CharonFormatInteger;/$1 NO;/
+a positional moves the count	s/visit\(&spec, spec\.main >= 0 \? \(NSUInteger\)spec\.main : next\+\+, widthSlot/visit(&spec, spec.main >= 0 ? (next++, (NSUInteger)spec.main) : next++, widthSlot/
+any allowed specifier counts, not the first	s/\[offered\[0\]\[0\] unsignedIntegerValue\]\)\)/[offered.lastObject[0] unsignedIntegerValue]))/
+a star takes no slot	s/if \(spec\.width == -2\)\n(\s*)widthSlot = next\+\+;/if (spec.width == -2)\n$1widthSlot = NSNotFound;/
+one slot more than allowed	s/if \(wanted\.count > allowed\.count\)/if (wanted.count > allowed.count + 1)/
+%s against %p refused	s/(case CharonFormatCString:\n\s*return) allowed == CharonFormatPointer \|\| /$1 /
+bytes of a %c read as UTF-8	s/initWithData:piece encoding:NSISOLatin1StringEncoding/initWithData:piece encoding:NSUTF8StringEncoding/
+bytes kept as Latin-1 in a wide string	s/    if \(wide\) \{/    if (NO) {/
+a slot takes the size of its first specifier	s/(\n\s*)sizes\[slot\] = 1 \+ spec->size;/$1if (!sizes[slot]) sizes[slot] = 1 + spec->size;/
+a NUL byte kept	s/return \[NSData dataWithBytes:buffer length:strlen\(buffer\)\];/return [NSData dataWithBytes:buffer length:(NSUInteger)written];/
+output past 512 bytes dropped	s/(\n)(\s*)NSMutableData \*large = /$1$2return [NSData data];\n$2NSMutableData *large = /
+an argument read at the size of the allowed specifier only	s/(\n\s*)if \(sizes\[slot\]\)\n/$1if (NO)\n/

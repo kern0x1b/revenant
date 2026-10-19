@@ -1,0 +1,1543 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@char16_t	-			uint16_t	-	-	-	-	88d042bd359a6e5a	-
+typedef	c:@T@UBool	-			int8_t	-	-	-	-	ba936724865189af	-
+typedef	c:@T@UChar	-			uint16_t	-	-	-	-	a0c26e17aad10204	-
+typedef	c:@T@OldUChar	-			unsigned short	-	-	-	-	994b3d4bf2ef4147	-
+typedef	c:@T@UChar32	-			int32_t	-	-	-	-	05c82d4a1da46fc1	-
+typedef	c:@T@UVersionInfo	-			uint8_t[4]	-	-	-	-	648b7903ec6be56c	-
+function	c:@F@u_versionFromString	-			void (UVersionInfo, const char *)	UVersionInfo versionArray | const char * versionString	-	-	-	4ed1c8379b9568f9	-
+function	c:@F@u_versionFromUString	-			void (UVersionInfo, const UChar *)	UVersionInfo versionArray | const UChar * versionString	-	-	-	27ef23f970af3933	-
+function	c:@F@u_versionToString	-			void (const UVersionInfo, char *)	const UVersionInfo versionArray | char * versionString	-	-	-	7f4911bbdb349ffe	-
+function	c:@F@u_getVersion	-			void (UVersionInfo)	UVersionInfo versionArray	-	-	-	8999a14b55bddf45	-
+function	c:@F@utf8_nextCharSafeBody	-			UChar32 (const uint8_t *, int32_t *, int32_t, UChar32, UBool)	const uint8_t * s | int32_t * pi | int32_t length | UChar32 c | UBool strict	-	-	-	d19d62533943bf61	-
+function	c:@F@utf8_appendCharSafeBody	-			int32_t (uint8_t *, int32_t, int32_t, UChar32, UBool *)	uint8_t * s | int32_t i | int32_t length | UChar32 c | UBool * pIsError	-	-	-	80001e0a65b4b090	-
+function	c:@F@utf8_prevCharSafeBody	-			UChar32 (const uint8_t *, int32_t, int32_t *, UChar32, UBool)	const uint8_t * s | int32_t start | int32_t * pi | UChar32 c | UBool strict	-	-	-	d97e46e83b7ab3f5	-
+function	c:@F@utf8_back1SafeBody	-			int32_t (const uint8_t *, int32_t, int32_t)	const uint8_t * s | int32_t start | int32_t i	-	-	-	7a24e50b4d9514cb	-
+var	c:@utf8_countTrailBytes	-			const uint8_t[]	-	-	-	-	a403bc116c5d9c0c	-
+typedef	c:@T@UDate	-			double	-	-	-	-	da7bf92a39f95127	-
+enum	c:@E@UErrorCode	-			int	-	-	-	-	f413b2b2daaf8961	-
+enumconst	c:@E@UErrorCode@U_USING_FALLBACK_WARNING	UErrorCode			-	-	-	-	-	23030009ca722f61	-128
+enumconst	c:@E@UErrorCode@U_ERROR_WARNING_START	UErrorCode			-	-	-	-	-	5c8e609a26548da7	-128
+enumconst	c:@E@UErrorCode@U_USING_DEFAULT_WARNING	UErrorCode			-	-	-	-	-	06e92b4d9f350e17	-127
+enumconst	c:@E@UErrorCode@U_SAFECLONE_ALLOCATED_WARNING	UErrorCode			-	-	-	-	-	0b78be74e0b6d721	-126
+enumconst	c:@E@UErrorCode@U_STATE_OLD_WARNING	UErrorCode			-	-	-	-	-	60534f5b168780eb	-125
+enumconst	c:@E@UErrorCode@U_STRING_NOT_TERMINATED_WARNING	UErrorCode			-	-	-	-	-	438709cf9857d04f	-124
+enumconst	c:@E@UErrorCode@U_SORT_KEY_TOO_SHORT_WARNING	UErrorCode			-	-	-	-	-	473d255474166b33	-123
+enumconst	c:@E@UErrorCode@U_AMBIGUOUS_ALIAS_WARNING	UErrorCode			-	-	-	-	-	712d470b7f0ec574	-122
+enumconst	c:@E@UErrorCode@U_DIFFERENT_UCA_VERSION	UErrorCode			-	-	-	-	-	2e6eed43d16b9d98	-121
+enumconst	c:@E@UErrorCode@U_PLUGIN_CHANGED_LEVEL_WARNING	UErrorCode			-	-	-	-	-	a3bd3cab455fa2ab	-120
+enumconst	c:@E@UErrorCode@U_ERROR_WARNING_LIMIT	UErrorCode			-	-	-	-	-	77dace8fea363d00	-119
+enumconst	c:@E@UErrorCode@U_ZERO_ERROR	UErrorCode			-	-	-	-	-	b32eba88b0d4ad3e	0
+enumconst	c:@E@UErrorCode@U_ILLEGAL_ARGUMENT_ERROR	UErrorCode			-	-	-	-	-	6191f034785ee39e	1
+enumconst	c:@E@UErrorCode@U_MISSING_RESOURCE_ERROR	UErrorCode			-	-	-	-	-	1a42b375c4285242	2
+enumconst	c:@E@UErrorCode@U_INVALID_FORMAT_ERROR	UErrorCode			-	-	-	-	-	85fbbd3a4f06b721	3
+enumconst	c:@E@UErrorCode@U_FILE_ACCESS_ERROR	UErrorCode			-	-	-	-	-	efb17dfdf51b7506	4
+enumconst	c:@E@UErrorCode@U_INTERNAL_PROGRAM_ERROR	UErrorCode			-	-	-	-	-	bc66b196e41c57cb	5
+enumconst	c:@E@UErrorCode@U_MESSAGE_PARSE_ERROR	UErrorCode			-	-	-	-	-	be41753a5231e474	6
+enumconst	c:@E@UErrorCode@U_MEMORY_ALLOCATION_ERROR	UErrorCode			-	-	-	-	-	72e2ebfbd4b70208	7
+enumconst	c:@E@UErrorCode@U_INDEX_OUTOFBOUNDS_ERROR	UErrorCode			-	-	-	-	-	5cbd4cf3e9d86c69	8
+enumconst	c:@E@UErrorCode@U_PARSE_ERROR	UErrorCode			-	-	-	-	-	01ef090714474d09	9
+enumconst	c:@E@UErrorCode@U_INVALID_CHAR_FOUND	UErrorCode			-	-	-	-	-	c9cfbd171ebe0941	10
+enumconst	c:@E@UErrorCode@U_TRUNCATED_CHAR_FOUND	UErrorCode			-	-	-	-	-	863d645c78000a5d	11
+enumconst	c:@E@UErrorCode@U_ILLEGAL_CHAR_FOUND	UErrorCode			-	-	-	-	-	9686aa9dbc2586ac	12
+enumconst	c:@E@UErrorCode@U_INVALID_TABLE_FORMAT	UErrorCode			-	-	-	-	-	f93adfe6595e9d07	13
+enumconst	c:@E@UErrorCode@U_INVALID_TABLE_FILE	UErrorCode			-	-	-	-	-	26e1f390539d88c9	14
+enumconst	c:@E@UErrorCode@U_BUFFER_OVERFLOW_ERROR	UErrorCode			-	-	-	-	-	2c82f1a55e12ef34	15
+enumconst	c:@E@UErrorCode@U_UNSUPPORTED_ERROR	UErrorCode			-	-	-	-	-	d2768b1b69a6bd49	16
+enumconst	c:@E@UErrorCode@U_RESOURCE_TYPE_MISMATCH	UErrorCode			-	-	-	-	-	6f9e1e3e0748366d	17
+enumconst	c:@E@UErrorCode@U_ILLEGAL_ESCAPE_SEQUENCE	UErrorCode			-	-	-	-	-	4174106f0cc57709	18
+enumconst	c:@E@UErrorCode@U_UNSUPPORTED_ESCAPE_SEQUENCE	UErrorCode			-	-	-	-	-	122b422617e49383	19
+enumconst	c:@E@UErrorCode@U_NO_SPACE_AVAILABLE	UErrorCode			-	-	-	-	-	e901101c7c73f7cb	20
+enumconst	c:@E@UErrorCode@U_CE_NOT_FOUND_ERROR	UErrorCode			-	-	-	-	-	e12bf9bda9c7a86b	21
+enumconst	c:@E@UErrorCode@U_PRIMARY_TOO_LONG_ERROR	UErrorCode			-	-	-	-	-	d80197af11e690b2	22
+enumconst	c:@E@UErrorCode@U_STATE_TOO_OLD_ERROR	UErrorCode			-	-	-	-	-	811dc7629a04c3fd	23
+enumconst	c:@E@UErrorCode@U_TOO_MANY_ALIASES_ERROR	UErrorCode			-	-	-	-	-	3b6fdc7afa5cfa05	24
+enumconst	c:@E@UErrorCode@U_ENUM_OUT_OF_SYNC_ERROR	UErrorCode			-	-	-	-	-	e6c8bdcadb7f6958	25
+enumconst	c:@E@UErrorCode@U_INVARIANT_CONVERSION_ERROR	UErrorCode			-	-	-	-	-	c9702dab31fca83d	26
+enumconst	c:@E@UErrorCode@U_INVALID_STATE_ERROR	UErrorCode			-	-	-	-	-	363dec8c1ca1342e	27
+enumconst	c:@E@UErrorCode@U_COLLATOR_VERSION_MISMATCH	UErrorCode			-	-	-	-	-	b8cb66e933731765	28
+enumconst	c:@E@UErrorCode@U_USELESS_COLLATOR_ERROR	UErrorCode			-	-	-	-	-	91f2d3d6ba59daa9	29
+enumconst	c:@E@UErrorCode@U_NO_WRITE_PERMISSION	UErrorCode			-	-	-	-	-	93829ede9264ade3	30
+enumconst	c:@E@UErrorCode@U_INPUT_TOO_LONG_ERROR	UErrorCode			-	-	-	-	-	52eb6f0e36f4ece0	31
+enumconst	c:@E@UErrorCode@U_STANDARD_ERROR_LIMIT	UErrorCode			-	-	-	-	-	76080c04b8c6166d	32
+enumconst	c:@E@UErrorCode@U_BAD_VARIABLE_DEFINITION	UErrorCode			-	-	-	-	-	1e5a2802f8824dbf	65536
+enumconst	c:@E@UErrorCode@U_PARSE_ERROR_START	UErrorCode			-	-	-	-	-	55a0fb5720cdd375	65536
+enumconst	c:@E@UErrorCode@U_MALFORMED_RULE	UErrorCode			-	-	-	-	-	8a788e52340fdc76	65537
+enumconst	c:@E@UErrorCode@U_MALFORMED_SET	UErrorCode			-	-	-	-	-	0476bd3a1db5f19d	65538
+enumconst	c:@E@UErrorCode@U_MALFORMED_SYMBOL_REFERENCE	UErrorCode			-	-	-	-	-	1b8cf214a6835ece	65539
+enumconst	c:@E@UErrorCode@U_MALFORMED_UNICODE_ESCAPE	UErrorCode			-	-	-	-	-	0d2f59987b0bd477	65540
+enumconst	c:@E@UErrorCode@U_MALFORMED_VARIABLE_DEFINITION	UErrorCode			-	-	-	-	-	f2ee42a09448bfca	65541
+enumconst	c:@E@UErrorCode@U_MALFORMED_VARIABLE_REFERENCE	UErrorCode			-	-	-	-	-	7c0db280c714d863	65542
+enumconst	c:@E@UErrorCode@U_MISMATCHED_SEGMENT_DELIMITERS	UErrorCode			-	-	-	-	-	09d614dd671182ba	65543
+enumconst	c:@E@UErrorCode@U_MISPLACED_ANCHOR_START	UErrorCode			-	-	-	-	-	16e40800aa8f990f	65544
+enumconst	c:@E@UErrorCode@U_MISPLACED_CURSOR_OFFSET	UErrorCode			-	-	-	-	-	510bc78e45f2c0f8	65545
+enumconst	c:@E@UErrorCode@U_MISPLACED_QUANTIFIER	UErrorCode			-	-	-	-	-	e484b2448d7644d8	65546
+enumconst	c:@E@UErrorCode@U_MISSING_OPERATOR	UErrorCode			-	-	-	-	-	45dfd6259eb5bf13	65547
+enumconst	c:@E@UErrorCode@U_MISSING_SEGMENT_CLOSE	UErrorCode			-	-	-	-	-	b2fac3d00bfffa1e	65548
+enumconst	c:@E@UErrorCode@U_MULTIPLE_ANTE_CONTEXTS	UErrorCode			-	-	-	-	-	59e74dc2bbc753a5	65549
+enumconst	c:@E@UErrorCode@U_MULTIPLE_CURSORS	UErrorCode			-	-	-	-	-	72435e9fa492a253	65550
+enumconst	c:@E@UErrorCode@U_MULTIPLE_POST_CONTEXTS	UErrorCode			-	-	-	-	-	81f4bacf39292885	65551
+enumconst	c:@E@UErrorCode@U_TRAILING_BACKSLASH	UErrorCode			-	-	-	-	-	b4350357bac7a432	65552
+enumconst	c:@E@UErrorCode@U_UNDEFINED_SEGMENT_REFERENCE	UErrorCode			-	-	-	-	-	63a0cd930f804e75	65553
+enumconst	c:@E@UErrorCode@U_UNDEFINED_VARIABLE	UErrorCode			-	-	-	-	-	d8d4375f91cc94a1	65554
+enumconst	c:@E@UErrorCode@U_UNQUOTED_SPECIAL	UErrorCode			-	-	-	-	-	d3906a821668dd65	65555
+enumconst	c:@E@UErrorCode@U_UNTERMINATED_QUOTE	UErrorCode			-	-	-	-	-	46d1ab76d0a6e354	65556
+enumconst	c:@E@UErrorCode@U_RULE_MASK_ERROR	UErrorCode			-	-	-	-	-	e070896b37987eec	65557
+enumconst	c:@E@UErrorCode@U_MISPLACED_COMPOUND_FILTER	UErrorCode			-	-	-	-	-	f1b0d6c5883692c7	65558
+enumconst	c:@E@UErrorCode@U_MULTIPLE_COMPOUND_FILTERS	UErrorCode			-	-	-	-	-	502d07d1efa2e4a1	65559
+enumconst	c:@E@UErrorCode@U_INVALID_RBT_SYNTAX	UErrorCode			-	-	-	-	-	d09a3bd7a1c36fe2	65560
+enumconst	c:@E@UErrorCode@U_INVALID_PROPERTY_PATTERN	UErrorCode			-	-	-	-	-	fe8f5e7b09e1bfa6	65561
+enumconst	c:@E@UErrorCode@U_MALFORMED_PRAGMA	UErrorCode			-	-	-	-	-	9406e436d10346d4	65562
+enumconst	c:@E@UErrorCode@U_UNCLOSED_SEGMENT	UErrorCode			-	-	-	-	-	6468941889e5df10	65563
+enumconst	c:@E@UErrorCode@U_ILLEGAL_CHAR_IN_SEGMENT	UErrorCode			-	-	-	-	-	eeeb61d508eb9747	65564
+enumconst	c:@E@UErrorCode@U_VARIABLE_RANGE_EXHAUSTED	UErrorCode			-	-	-	-	-	3586e37d7e70e198	65565
+enumconst	c:@E@UErrorCode@U_VARIABLE_RANGE_OVERLAP	UErrorCode			-	-	-	-	-	25c4d9121c5d4b68	65566
+enumconst	c:@E@UErrorCode@U_ILLEGAL_CHARACTER	UErrorCode			-	-	-	-	-	0bfd543aa3266a4a	65567
+enumconst	c:@E@UErrorCode@U_INTERNAL_TRANSLITERATOR_ERROR	UErrorCode			-	-	-	-	-	696094dca03dfb27	65568
+enumconst	c:@E@UErrorCode@U_INVALID_ID	UErrorCode			-	-	-	-	-	b3c989d359ef1684	65569
+enumconst	c:@E@UErrorCode@U_INVALID_FUNCTION	UErrorCode			-	-	-	-	-	59aa81f7de37700c	65570
+enumconst	c:@E@UErrorCode@U_PARSE_ERROR_LIMIT	UErrorCode			-	-	-	-	-	ba9e6028e8deea7d	65571
+enumconst	c:@E@UErrorCode@U_UNEXPECTED_TOKEN	UErrorCode			-	-	-	-	-	51c16b35880bf1fa	65792
+enumconst	c:@E@UErrorCode@U_FMT_PARSE_ERROR_START	UErrorCode			-	-	-	-	-	0dff96591b23d1c9	65792
+enumconst	c:@E@UErrorCode@U_MULTIPLE_DECIMAL_SEPARATORS	UErrorCode			-	-	-	-	-	2df2d3669e850615	65793
+enumconst	c:@E@UErrorCode@U_MULTIPLE_DECIMAL_SEPERATORS	UErrorCode			-	-	-	-	-	ebcf8b601c409f24	65793
+enumconst	c:@E@UErrorCode@U_MULTIPLE_EXPONENTIAL_SYMBOLS	UErrorCode			-	-	-	-	-	fe565734e774c0d9	65794
+enumconst	c:@E@UErrorCode@U_MALFORMED_EXPONENTIAL_PATTERN	UErrorCode			-	-	-	-	-	cc27fb60643d2f15	65795
+enumconst	c:@E@UErrorCode@U_MULTIPLE_PERCENT_SYMBOLS	UErrorCode			-	-	-	-	-	9b162b644b9fa853	65796
+enumconst	c:@E@UErrorCode@U_MULTIPLE_PERMILL_SYMBOLS	UErrorCode			-	-	-	-	-	225ef31cff4f7051	65797
+enumconst	c:@E@UErrorCode@U_MULTIPLE_PAD_SPECIFIERS	UErrorCode			-	-	-	-	-	b72d77c98b4d0875	65798
+enumconst	c:@E@UErrorCode@U_PATTERN_SYNTAX_ERROR	UErrorCode			-	-	-	-	-	4f3ddd931d4e2ff2	65799
+enumconst	c:@E@UErrorCode@U_ILLEGAL_PAD_POSITION	UErrorCode			-	-	-	-	-	84ef93c2b588663d	65800
+enumconst	c:@E@UErrorCode@U_UNMATCHED_BRACES	UErrorCode			-	-	-	-	-	cd61f092284453ae	65801
+enumconst	c:@E@UErrorCode@U_UNSUPPORTED_PROPERTY	UErrorCode			-	-	-	-	-	73c14a439f59bf9f	65802
+enumconst	c:@E@UErrorCode@U_UNSUPPORTED_ATTRIBUTE	UErrorCode			-	-	-	-	-	f66980d4e672e559	65803
+enumconst	c:@E@UErrorCode@U_ARGUMENT_TYPE_MISMATCH	UErrorCode			-	-	-	-	-	b223d01e0b6f08c2	65804
+enumconst	c:@E@UErrorCode@U_DUPLICATE_KEYWORD	UErrorCode			-	-	-	-	-	055cdd8c8e59c36f	65805
+enumconst	c:@E@UErrorCode@U_UNDEFINED_KEYWORD	UErrorCode			-	-	-	-	-	545c5f658b61f25d	65806
+enumconst	c:@E@UErrorCode@U_DEFAULT_KEYWORD_MISSING	UErrorCode			-	-	-	-	-	b87ce7e03746efa5	65807
+enumconst	c:@E@UErrorCode@U_DECIMAL_NUMBER_SYNTAX_ERROR	UErrorCode			-	-	-	-	-	d02bcd11b9bf470b	65808
+enumconst	c:@E@UErrorCode@U_FORMAT_INEXACT_ERROR	UErrorCode			-	-	-	-	-	c7f8148fc0cb65ec	65809
+enumconst	c:@E@UErrorCode@U_NUMBER_ARG_OUTOFBOUNDS_ERROR	UErrorCode			-	-	-	-	-	47bc3adcf6195f5d	65810
+enumconst	c:@E@UErrorCode@U_NUMBER_SKELETON_SYNTAX_ERROR	UErrorCode			-	-	-	-	-	15222672b4f5a917	65811
+enumconst	c:@E@UErrorCode@U_MF_UNRESOLVED_VARIABLE_ERROR	UErrorCode			-	-	-	-	-	ffc8119e1acfeda2	65812
+enumconst	c:@E@UErrorCode@U_MF_SYNTAX_ERROR	UErrorCode			-	-	-	-	-	4968aca0c4fcb04f	65813
+enumconst	c:@E@UErrorCode@U_MF_UNKNOWN_FUNCTION_ERROR	UErrorCode			-	-	-	-	-	d92258ab67857f04	65814
+enumconst	c:@E@UErrorCode@U_MF_VARIANT_KEY_MISMATCH_ERROR	UErrorCode			-	-	-	-	-	2a7ff0141a30e68c	65815
+enumconst	c:@E@UErrorCode@U_MF_FORMATTING_ERROR	UErrorCode			-	-	-	-	-	0439d176d01f8e6b	65816
+enumconst	c:@E@UErrorCode@U_MF_NONEXHAUSTIVE_PATTERN_ERROR	UErrorCode			-	-	-	-	-	50a6e74d7c9c0e2c	65817
+enumconst	c:@E@UErrorCode@U_MF_DUPLICATE_OPTION_NAME_ERROR	UErrorCode			-	-	-	-	-	a8430afca6aa0824	65818
+enumconst	c:@E@UErrorCode@U_MF_SELECTOR_ERROR	UErrorCode			-	-	-	-	-	4848b4ff8a9009f3	65819
+enumconst	c:@E@UErrorCode@U_MF_MISSING_SELECTOR_ANNOTATION_ERROR	UErrorCode			-	-	-	-	-	b747f2a5988038dd	65820
+enumconst	c:@E@UErrorCode@U_MF_DUPLICATE_DECLARATION_ERROR	UErrorCode			-	-	-	-	-	411d8b50f5537104	65821
+enumconst	c:@E@UErrorCode@U_MF_OPERAND_MISMATCH_ERROR	UErrorCode			-	-	-	-	-	8c5014999bd33a73	65822
+enumconst	c:@E@UErrorCode@U_MF_DUPLICATE_VARIANT_ERROR	UErrorCode			-	-	-	-	-	a90b22bcf18838ae	65823
+enumconst	c:@E@UErrorCode@U_FMT_PARSE_ERROR_LIMIT	UErrorCode			-	-	-	-	-	62ff745f535b54fa	65824
+enumconst	c:@E@UErrorCode@U_BRK_INTERNAL_ERROR	UErrorCode			-	-	-	-	-	647006008ca9014c	66048
+enumconst	c:@E@UErrorCode@U_BRK_ERROR_START	UErrorCode			-	-	-	-	-	6d30749b9aa567f8	66048
+enumconst	c:@E@UErrorCode@U_BRK_HEX_DIGITS_EXPECTED	UErrorCode			-	-	-	-	-	b7b78e95eabf77dc	66049
+enumconst	c:@E@UErrorCode@U_BRK_SEMICOLON_EXPECTED	UErrorCode			-	-	-	-	-	68fbba94f7207957	66050
+enumconst	c:@E@UErrorCode@U_BRK_RULE_SYNTAX	UErrorCode			-	-	-	-	-	d57361bbc9a5791d	66051
+enumconst	c:@E@UErrorCode@U_BRK_UNCLOSED_SET	UErrorCode			-	-	-	-	-	3b56c796bade2b5e	66052
+enumconst	c:@E@UErrorCode@U_BRK_ASSIGN_ERROR	UErrorCode			-	-	-	-	-	e802a5bf9a7a3b11	66053
+enumconst	c:@E@UErrorCode@U_BRK_VARIABLE_REDFINITION	UErrorCode			-	-	-	-	-	902f015d0a946ee3	66054
+enumconst	c:@E@UErrorCode@U_BRK_MISMATCHED_PAREN	UErrorCode			-	-	-	-	-	3bb57a706d00bd83	66055
+enumconst	c:@E@UErrorCode@U_BRK_NEW_LINE_IN_QUOTED_STRING	UErrorCode			-	-	-	-	-	a1d1818343f9bea3	66056
+enumconst	c:@E@UErrorCode@U_BRK_UNDEFINED_VARIABLE	UErrorCode			-	-	-	-	-	8d131319aa0b4677	66057
+enumconst	c:@E@UErrorCode@U_BRK_INIT_ERROR	UErrorCode			-	-	-	-	-	aeec0d464246fa9d	66058
+enumconst	c:@E@UErrorCode@U_BRK_RULE_EMPTY_SET	UErrorCode			-	-	-	-	-	8a26a9dcb705d38d	66059
+enumconst	c:@E@UErrorCode@U_BRK_UNRECOGNIZED_OPTION	UErrorCode			-	-	-	-	-	a95e169efea01adc	66060
+enumconst	c:@E@UErrorCode@U_BRK_MALFORMED_RULE_TAG	UErrorCode			-	-	-	-	-	4c89a146c3480646	66061
+enumconst	c:@E@UErrorCode@U_BRK_ERROR_LIMIT	UErrorCode			-	-	-	-	-	00b445d6d1819a96	66062
+enumconst	c:@E@UErrorCode@U_REGEX_INTERNAL_ERROR	UErrorCode			-	-	-	-	-	19f05a8f4fd6f145	66304
+enumconst	c:@E@UErrorCode@U_REGEX_ERROR_START	UErrorCode			-	-	-	-	-	ec49c3aa4aa8f045	66304
+enumconst	c:@E@UErrorCode@U_REGEX_RULE_SYNTAX	UErrorCode			-	-	-	-	-	a17c1faf8d3075a1	66305
+enumconst	c:@E@UErrorCode@U_REGEX_INVALID_STATE	UErrorCode			-	-	-	-	-	836634ea6d00c4a4	66306
+enumconst	c:@E@UErrorCode@U_REGEX_BAD_ESCAPE_SEQUENCE	UErrorCode			-	-	-	-	-	34fed6462a3df31e	66307
+enumconst	c:@E@UErrorCode@U_REGEX_PROPERTY_SYNTAX	UErrorCode			-	-	-	-	-	654630cb1ac1c3be	66308
+enumconst	c:@E@UErrorCode@U_REGEX_UNIMPLEMENTED	UErrorCode			-	-	-	-	-	ebc6076fbcb20274	66309
+enumconst	c:@E@UErrorCode@U_REGEX_MISMATCHED_PAREN	UErrorCode			-	-	-	-	-	b970684a64b6ea2c	66310
+enumconst	c:@E@UErrorCode@U_REGEX_NUMBER_TOO_BIG	UErrorCode			-	-	-	-	-	dedf0eea462587e2	66311
+enumconst	c:@E@UErrorCode@U_REGEX_BAD_INTERVAL	UErrorCode			-	-	-	-	-	9a77782e9b210358	66312
+enumconst	c:@E@UErrorCode@U_REGEX_MAX_LT_MIN	UErrorCode			-	-	-	-	-	af399a1e24de692f	66313
+enumconst	c:@E@UErrorCode@U_REGEX_INVALID_BACK_REF	UErrorCode			-	-	-	-	-	9b664d346e285152	66314
+enumconst	c:@E@UErrorCode@U_REGEX_INVALID_FLAG	UErrorCode			-	-	-	-	-	dd8ed8595a184299	66315
+enumconst	c:@E@UErrorCode@U_REGEX_LOOK_BEHIND_LIMIT	UErrorCode			-	-	-	-	-	8e9e280df955bdba	66316
+enumconst	c:@E@UErrorCode@U_REGEX_SET_CONTAINS_STRING	UErrorCode			-	-	-	-	-	11a3e11f775c6370	66317
+enumconst	c:@E@UErrorCode@U_REGEX_OCTAL_TOO_BIG	UErrorCode			-	-	-	-	-	0504dc65c5079a19	66318
+enumconst	c:@E@UErrorCode@U_REGEX_MISSING_CLOSE_BRACKET	UErrorCode			-	-	-	-	-	9fedc7e13f65216d	66319
+enumconst	c:@E@UErrorCode@U_REGEX_INVALID_RANGE	UErrorCode			-	-	-	-	-	83cbe36c9d20598e	66320
+enumconst	c:@E@UErrorCode@U_REGEX_STACK_OVERFLOW	UErrorCode			-	-	-	-	-	62fb7dd3aa1334ab	66321
+enumconst	c:@E@UErrorCode@U_REGEX_TIME_OUT	UErrorCode			-	-	-	-	-	106caa574d8b8ae4	66322
+enumconst	c:@E@UErrorCode@U_REGEX_STOPPED_BY_CALLER	UErrorCode			-	-	-	-	-	1e7a9aa2317be330	66323
+enumconst	c:@E@UErrorCode@U_REGEX_PATTERN_TOO_BIG	UErrorCode			-	-	-	-	-	e6bc96311c05655f	66324
+enumconst	c:@E@UErrorCode@U_REGEX_INVALID_CAPTURE_GROUP_NAME	UErrorCode			-	-	-	-	-	ea3f2932e4fcc086	66325
+enumconst	c:@E@UErrorCode@U_REGEX_ERROR_LIMIT	UErrorCode			-	-	-	-	-	9b7959b429173a8e	66326
+enumconst	c:@E@UErrorCode@U_IDNA_PROHIBITED_ERROR	UErrorCode			-	-	-	-	-	e74c919c6b3b0752	66560
+enumconst	c:@E@UErrorCode@U_IDNA_ERROR_START	UErrorCode			-	-	-	-	-	33adea34bc2f6376	66560
+enumconst	c:@E@UErrorCode@U_IDNA_UNASSIGNED_ERROR	UErrorCode			-	-	-	-	-	ceecd5e23d6e6959	66561
+enumconst	c:@E@UErrorCode@U_IDNA_CHECK_BIDI_ERROR	UErrorCode			-	-	-	-	-	5d6ca733477d4e43	66562
+enumconst	c:@E@UErrorCode@U_IDNA_STD3_ASCII_RULES_ERROR	UErrorCode			-	-	-	-	-	b82aca82e45273af	66563
+enumconst	c:@E@UErrorCode@U_IDNA_ACE_PREFIX_ERROR	UErrorCode			-	-	-	-	-	84008a8e23bfbfee	66564
+enumconst	c:@E@UErrorCode@U_IDNA_VERIFICATION_ERROR	UErrorCode			-	-	-	-	-	62ada8257049d3ce	66565
+enumconst	c:@E@UErrorCode@U_IDNA_LABEL_TOO_LONG_ERROR	UErrorCode			-	-	-	-	-	3e431a935826a2f0	66566
+enumconst	c:@E@UErrorCode@U_IDNA_ZERO_LENGTH_LABEL_ERROR	UErrorCode			-	-	-	-	-	d4789e8c943d8af4	66567
+enumconst	c:@E@UErrorCode@U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR	UErrorCode			-	-	-	-	-	b051fa5cfd5bea2c	66568
+enumconst	c:@E@UErrorCode@U_IDNA_ERROR_LIMIT	UErrorCode			-	-	-	-	-	2668749bfc462ce9	66569
+enumconst	c:@E@UErrorCode@U_STRINGPREP_PROHIBITED_ERROR	UErrorCode			-	-	-	-	-	da0ae3565f75b6b2	66560
+enumconst	c:@E@UErrorCode@U_STRINGPREP_UNASSIGNED_ERROR	UErrorCode			-	-	-	-	-	cf33118f4542f3a1	66561
+enumconst	c:@E@UErrorCode@U_STRINGPREP_CHECK_BIDI_ERROR	UErrorCode			-	-	-	-	-	e8e46b78987a9c8b	66562
+enumconst	c:@E@UErrorCode@U_PLUGIN_ERROR_START	UErrorCode			-	-	-	-	-	d3696130a29ccf64	66816
+enumconst	c:@E@UErrorCode@U_PLUGIN_TOO_HIGH	UErrorCode			-	-	-	-	-	75e79459bcb23db0	66816
+enumconst	c:@E@UErrorCode@U_PLUGIN_DIDNT_SET_LEVEL	UErrorCode			-	-	-	-	-	c950f4035c05a603	66817
+enumconst	c:@E@UErrorCode@U_PLUGIN_ERROR_LIMIT	UErrorCode			-	-	-	-	-	20e675a5ca86efee	66818
+enumconst	c:@E@UErrorCode@U_ERROR_LIMIT	UErrorCode			-	-	-	-	-	bd49ce7aaf78c942	66818
+typedef	c:@T@UErrorCode	-			enum UErrorCode	-	-	-	-	7d0c6191b239ad1a	-
+function	c:@F@u_errorName	-			const char * (UErrorCode)	UErrorCode code	-	-	-	9906f5a2bd9172cc	-
+enum	c:@Ea@U_PARSE_CONTEXT_LEN	-	-		unsigned int	-	-	-	-	bcdeb7e43a1f8aa0	-
+enumconst	c:@Ea@U_PARSE_CONTEXT_LEN@U_PARSE_CONTEXT_LEN	-			-	-	-	-	-	4973fb210c79a125	16
+struct	c:@S@UParseError	-			-	-	-	-	-	1823b002caf9d904	-
+field	c:@S@UParseError@FI@line	UParseError			int32_t	-	-	-	-	6c0745a79b13f3a7	-
+field	c:@S@UParseError@FI@offset	UParseError			int32_t	-	-	-	-	9bdf55b89460ddd1	-
+field	c:@S@UParseError@FI@preContext	UParseError			UChar[16]	-	-	-	-	4c90fb20c8dba19c	-
+field	c:@S@UParseError@FI@postContext	UParseError			UChar[16]	-	-	-	-	d8a1811346ab9405	-
+typedef	c:@T@UParseError	-			struct UParseError	-	-	-	-	70fb1d1ec053121a	-
+function	c:@F@u_getDataDirectory	-			const char * (void)	-	-	-	-	641853cfecfd834a	-
+function	c:@F@u_setDataDirectory	-			void (const char *)	const char * directory	-	-	-	a49041d13b76ed3c	-
+function	c:@F@u_getTimeZoneFilesDirectory	-			const char * (UErrorCode *)	UErrorCode * status	-	-	-	e7667e92a101af40	-
+function	c:@F@u_setTimeZoneFilesDirectory	-			void (const char *, UErrorCode *)	const char * path | UErrorCode * status	-	-	-	417c4b9a7b7fe48c	-
+function	c:@F@u_charsToUChars	-			void (const char *, UChar *, int32_t)	const char * cs | UChar * us | int32_t length	-	-	-	710d34b96984026c	-
+function	c:@F@u_UCharsToChars	-			void (const UChar *, char *, int32_t)	const UChar * us | char * cs | int32_t length	-	-	-	7c7ed25b2e41a239	-
+struct	c:@S@UCPMap	-			-	-	-	-	-	20c64f11ba76d046	-
+typedef	c:@T@UCPMap	-			struct UCPMap	-	-	-	-	006ce06056b9c6a8	-
+enum	c:@E@UCPMapRangeOption	-			unsigned int	-	-	-	-	38198883e7591bf0	-
+enumconst	c:@E@UCPMapRangeOption@UCPMAP_RANGE_NORMAL	UCPMapRangeOption			-	-	-	-	-	3848d5c416957369	0
+enumconst	c:@E@UCPMapRangeOption@UCPMAP_RANGE_FIXED_LEAD_SURROGATES	UCPMapRangeOption			-	-	-	-	-	067533ecbcb932fa	1
+enumconst	c:@E@UCPMapRangeOption@UCPMAP_RANGE_FIXED_ALL_SURROGATES	UCPMapRangeOption			-	-	-	-	-	84c09e4ea18bb97d	2
+typedef	c:@T@UCPMapRangeOption	-			enum UCPMapRangeOption	-	-	-	-	3f810e51e8c0fb9f	-
+function	c:@F@ucpmap_get	-			uint32_t (const UCPMap *, UChar32)	const UCPMap * map | UChar32 c	-	-	-	836ba55a70292004	-
+typedef	c:@T@UCPMapValueFilter	-			uint32_t (const void *, uint32_t)	-	-	-	-	2f26fa637accaafa	-
+function	c:@F@ucpmap_getRange	-			UChar32 (const UCPMap *, UChar32, UCPMapRangeOption, uint32_t, UCPMapValueFilter *, const void *, uint32_t *)	const UCPMap * map | UChar32 start | UCPMapRangeOption option | uint32_t surrogateValue | UCPMapValueFilter * filter | const void * context | uint32_t * pValue	-	-	-	7151a69557521360	-
+struct	c:@S@USet	-			-	-	-	-	-	b9e1a48b131c7d0e	-
+typedef	c:@T@USet	-			struct USet	-	-	-	-	81d05ddb474c0e9c	-
+enum	c:@E@UProperty	-			int	-	-	-	-	495395411d1e7b69	-
+enumconst	c:@E@UProperty@UCHAR_ALPHABETIC	UProperty			-	-	-	-	-	1b745c78b251eebc	0
+enumconst	c:@E@UProperty@UCHAR_BINARY_START	UProperty			-	-	-	-	-	cd6cc09ec83b7859	0
+enumconst	c:@E@UProperty@UCHAR_ASCII_HEX_DIGIT	UProperty			-	-	-	-	-	827c75326e739a7c	1
+enumconst	c:@E@UProperty@UCHAR_BIDI_CONTROL	UProperty			-	-	-	-	-	ede1a80dc7d9720d	2
+enumconst	c:@E@UProperty@UCHAR_BIDI_MIRRORED	UProperty			-	-	-	-	-	6b5de7bdfaa707dc	3
+enumconst	c:@E@UProperty@UCHAR_DASH	UProperty			-	-	-	-	-	d1be15a49737ab10	4
+enumconst	c:@E@UProperty@UCHAR_DEFAULT_IGNORABLE_CODE_POINT	UProperty			-	-	-	-	-	ec177beea837e369	5
+enumconst	c:@E@UProperty@UCHAR_DEPRECATED	UProperty			-	-	-	-	-	396259132077af8e	6
+enumconst	c:@E@UProperty@UCHAR_DIACRITIC	UProperty			-	-	-	-	-	6f1c2d991225ebf6	7
+enumconst	c:@E@UProperty@UCHAR_EXTENDER	UProperty			-	-	-	-	-	bee5578f784245f8	8
+enumconst	c:@E@UProperty@UCHAR_FULL_COMPOSITION_EXCLUSION	UProperty			-	-	-	-	-	3d1f73584277030b	9
+enumconst	c:@E@UProperty@UCHAR_GRAPHEME_BASE	UProperty			-	-	-	-	-	ac065fb8af95fe30	10
+enumconst	c:@E@UProperty@UCHAR_GRAPHEME_EXTEND	UProperty			-	-	-	-	-	b141d70d76aed574	11
+enumconst	c:@E@UProperty@UCHAR_GRAPHEME_LINK	UProperty			-	-	-	-	-	cf5d37e68dce946e	12
+enumconst	c:@E@UProperty@UCHAR_HEX_DIGIT	UProperty			-	-	-	-	-	1390141e88437cb5	13
+enumconst	c:@E@UProperty@UCHAR_HYPHEN	UProperty			-	-	-	-	-	dcbcd539d44aa2d7	14
+enumconst	c:@E@UProperty@UCHAR_ID_CONTINUE	UProperty			-	-	-	-	-	90fcb8673a464b23	15
+enumconst	c:@E@UProperty@UCHAR_ID_START	UProperty			-	-	-	-	-	6e7c10d5ff1fc861	16
+enumconst	c:@E@UProperty@UCHAR_IDEOGRAPHIC	UProperty			-	-	-	-	-	a96adbd2abc534b2	17
+enumconst	c:@E@UProperty@UCHAR_IDS_BINARY_OPERATOR	UProperty			-	-	-	-	-	a78fff258b5f5bb0	18
+enumconst	c:@E@UProperty@UCHAR_IDS_TRINARY_OPERATOR	UProperty			-	-	-	-	-	96515389ab400120	19
+enumconst	c:@E@UProperty@UCHAR_JOIN_CONTROL	UProperty			-	-	-	-	-	3b20e27f9b278c87	20
+enumconst	c:@E@UProperty@UCHAR_LOGICAL_ORDER_EXCEPTION	UProperty			-	-	-	-	-	0d137608c0be7654	21
+enumconst	c:@E@UProperty@UCHAR_LOWERCASE	UProperty			-	-	-	-	-	01ef9972e3a4a9cd	22
+enumconst	c:@E@UProperty@UCHAR_MATH	UProperty			-	-	-	-	-	e937e1a244c6ed9e	23
+enumconst	c:@E@UProperty@UCHAR_NONCHARACTER_CODE_POINT	UProperty			-	-	-	-	-	8ef857409042b356	24
+enumconst	c:@E@UProperty@UCHAR_QUOTATION_MARK	UProperty			-	-	-	-	-	a643a32b2bf10b68	25
+enumconst	c:@E@UProperty@UCHAR_RADICAL	UProperty			-	-	-	-	-	eac3eda1420b292d	26
+enumconst	c:@E@UProperty@UCHAR_SOFT_DOTTED	UProperty			-	-	-	-	-	e2aef8dfb59e0f7e	27
+enumconst	c:@E@UProperty@UCHAR_TERMINAL_PUNCTUATION	UProperty			-	-	-	-	-	6b1242cb1a788139	28
+enumconst	c:@E@UProperty@UCHAR_UNIFIED_IDEOGRAPH	UProperty			-	-	-	-	-	ef7f78f2717029c2	29
+enumconst	c:@E@UProperty@UCHAR_UPPERCASE	UProperty			-	-	-	-	-	9f0906a22caab800	30
+enumconst	c:@E@UProperty@UCHAR_WHITE_SPACE	UProperty			-	-	-	-	-	1e2de9755b4df1ab	31
+enumconst	c:@E@UProperty@UCHAR_XID_CONTINUE	UProperty			-	-	-	-	-	c74522b315394e4b	32
+enumconst	c:@E@UProperty@UCHAR_XID_START	UProperty			-	-	-	-	-	163e83d8830402b0	33
+enumconst	c:@E@UProperty@UCHAR_CASE_SENSITIVE	UProperty			-	-	-	-	-	048417b1e8f34d77	34
+enumconst	c:@E@UProperty@UCHAR_S_TERM	UProperty			-	-	-	-	-	c9abe5eb4dd62183	35
+enumconst	c:@E@UProperty@UCHAR_VARIATION_SELECTOR	UProperty			-	-	-	-	-	87b1fa2960e65cba	36
+enumconst	c:@E@UProperty@UCHAR_NFD_INERT	UProperty			-	-	-	-	-	072038322fe4b794	37
+enumconst	c:@E@UProperty@UCHAR_NFKD_INERT	UProperty			-	-	-	-	-	7b0b94bd3fe4c577	38
+enumconst	c:@E@UProperty@UCHAR_NFC_INERT	UProperty			-	-	-	-	-	bcd90d0c0ef21a90	39
+enumconst	c:@E@UProperty@UCHAR_NFKC_INERT	UProperty			-	-	-	-	-	d67acbfe75339840	40
+enumconst	c:@E@UProperty@UCHAR_SEGMENT_STARTER	UProperty			-	-	-	-	-	a72e8942d2b41456	41
+enumconst	c:@E@UProperty@UCHAR_PATTERN_SYNTAX	UProperty			-	-	-	-	-	d659f353d3929d26	42
+enumconst	c:@E@UProperty@UCHAR_PATTERN_WHITE_SPACE	UProperty			-	-	-	-	-	85aab699ff819617	43
+enumconst	c:@E@UProperty@UCHAR_POSIX_ALNUM	UProperty			-	-	-	-	-	68ab3518d090f754	44
+enumconst	c:@E@UProperty@UCHAR_POSIX_BLANK	UProperty			-	-	-	-	-	10068c1cc3d409e7	45
+enumconst	c:@E@UProperty@UCHAR_POSIX_GRAPH	UProperty			-	-	-	-	-	fd2d3326851e4dca	46
+enumconst	c:@E@UProperty@UCHAR_POSIX_PRINT	UProperty			-	-	-	-	-	f952fd61ede3860e	47
+enumconst	c:@E@UProperty@UCHAR_POSIX_XDIGIT	UProperty			-	-	-	-	-	3b14cb7d87a269eb	48
+enumconst	c:@E@UProperty@UCHAR_CASED	UProperty			-	-	-	-	-	8e704562ebfdeb48	49
+enumconst	c:@E@UProperty@UCHAR_CASE_IGNORABLE	UProperty			-	-	-	-	-	3a4a51655c0fd69e	50
+enumconst	c:@E@UProperty@UCHAR_CHANGES_WHEN_LOWERCASED	UProperty			-	-	-	-	-	b984109ee4abc24a	51
+enumconst	c:@E@UProperty@UCHAR_CHANGES_WHEN_UPPERCASED	UProperty			-	-	-	-	-	43cf78082e57a3d0	52
+enumconst	c:@E@UProperty@UCHAR_CHANGES_WHEN_TITLECASED	UProperty			-	-	-	-	-	318fd0bf59488179	53
+enumconst	c:@E@UProperty@UCHAR_CHANGES_WHEN_CASEFOLDED	UProperty			-	-	-	-	-	cc657cb5fe4166fb	54
+enumconst	c:@E@UProperty@UCHAR_CHANGES_WHEN_CASEMAPPED	UProperty			-	-	-	-	-	0ad52c17d46c95eb	55
+enumconst	c:@E@UProperty@UCHAR_CHANGES_WHEN_NFKC_CASEFOLDED	UProperty			-	-	-	-	-	000a3f6b2d7d4608	56
+enumconst	c:@E@UProperty@UCHAR_EMOJI	UProperty			-	-	-	-	-	49d60738bd19af5e	57
+enumconst	c:@E@UProperty@UCHAR_EMOJI_PRESENTATION	UProperty			-	-	-	-	-	89b4c82c8b9eff2b	58
+enumconst	c:@E@UProperty@UCHAR_EMOJI_MODIFIER	UProperty			-	-	-	-	-	925f26972a215c66	59
+enumconst	c:@E@UProperty@UCHAR_EMOJI_MODIFIER_BASE	UProperty			-	-	-	-	-	2484d923a68aa98c	60
+enumconst	c:@E@UProperty@UCHAR_EMOJI_COMPONENT	UProperty			-	-	-	-	-	81dd370c406a96fd	61
+enumconst	c:@E@UProperty@UCHAR_REGIONAL_INDICATOR	UProperty			-	-	-	-	-	e991032ae6af5a1e	62
+enumconst	c:@E@UProperty@UCHAR_PREPENDED_CONCATENATION_MARK	UProperty			-	-	-	-	-	c375f071aaf0daae	63
+enumconst	c:@E@UProperty@UCHAR_EXTENDED_PICTOGRAPHIC	UProperty			-	-	-	-	-	4de995f73d9e3b4c	64
+enumconst	c:@E@UProperty@UCHAR_BASIC_EMOJI	UProperty			-	-	-	-	-	50fa47c7a799b6eb	65
+enumconst	c:@E@UProperty@UCHAR_EMOJI_KEYCAP_SEQUENCE	UProperty			-	-	-	-	-	71ae21754eb5593b	66
+enumconst	c:@E@UProperty@UCHAR_RGI_EMOJI_MODIFIER_SEQUENCE	UProperty			-	-	-	-	-	efc3fd578a2aa63c	67
+enumconst	c:@E@UProperty@UCHAR_RGI_EMOJI_FLAG_SEQUENCE	UProperty			-	-	-	-	-	40273f38f3f22951	68
+enumconst	c:@E@UProperty@UCHAR_RGI_EMOJI_TAG_SEQUENCE	UProperty			-	-	-	-	-	92244eb04ad324f9	69
+enumconst	c:@E@UProperty@UCHAR_RGI_EMOJI_ZWJ_SEQUENCE	UProperty			-	-	-	-	-	7a4281502c465e41	70
+enumconst	c:@E@UProperty@UCHAR_RGI_EMOJI	UProperty			-	-	-	-	-	556eb0b323098944	71
+enumconst	c:@E@UProperty@UCHAR_IDS_UNARY_OPERATOR	UProperty			-	-	-	-	-	e4d2e6f4095a742f	72
+enumconst	c:@E@UProperty@UCHAR_ID_COMPAT_MATH_START	UProperty			-	-	-	-	-	0939e86091d392c0	73
+enumconst	c:@E@UProperty@UCHAR_ID_COMPAT_MATH_CONTINUE	UProperty			-	-	-	-	-	928d97a3c4911b14	74
+enumconst	c:@E@UProperty@UCHAR_MODIFIER_COMBINING_MARK	UProperty			-	-	-	-	-	7e6156fdefa166d6	75
+enumconst	c:@E@UProperty@UCHAR_BINARY_LIMIT	UProperty			-	-	-	-	-	6e09755b402dcd39	76
+enumconst	c:@E@UProperty@UCHAR_BIDI_CLASS	UProperty			-	-	-	-	-	3449f60872852557	4096
+enumconst	c:@E@UProperty@UCHAR_INT_START	UProperty			-	-	-	-	-	e473e9da6568c7b7	4096
+enumconst	c:@E@UProperty@UCHAR_BLOCK	UProperty			-	-	-	-	-	1ad49fbe924eaac5	4097
+enumconst	c:@E@UProperty@UCHAR_CANONICAL_COMBINING_CLASS	UProperty			-	-	-	-	-	61a90a955d0f30b1	4098
+enumconst	c:@E@UProperty@UCHAR_DECOMPOSITION_TYPE	UProperty			-	-	-	-	-	9763df84259611aa	4099
+enumconst	c:@E@UProperty@UCHAR_EAST_ASIAN_WIDTH	UProperty			-	-	-	-	-	ce975c1974973713	4100
+enumconst	c:@E@UProperty@UCHAR_GENERAL_CATEGORY	UProperty			-	-	-	-	-	f9b0e54fa319195e	4101
+enumconst	c:@E@UProperty@UCHAR_JOINING_GROUP	UProperty			-	-	-	-	-	6a8c21994e0e0616	4102
+enumconst	c:@E@UProperty@UCHAR_JOINING_TYPE	UProperty			-	-	-	-	-	c9393fece84f988b	4103
+enumconst	c:@E@UProperty@UCHAR_LINE_BREAK	UProperty			-	-	-	-	-	a6b728baa5be074d	4104
+enumconst	c:@E@UProperty@UCHAR_NUMERIC_TYPE	UProperty			-	-	-	-	-	f83d74b36b24ef62	4105
+enumconst	c:@E@UProperty@UCHAR_SCRIPT	UProperty			-	-	-	-	-	5da41be6e5d4e884	4106
+enumconst	c:@E@UProperty@UCHAR_HANGUL_SYLLABLE_TYPE	UProperty			-	-	-	-	-	34897f8a13c84a37	4107
+enumconst	c:@E@UProperty@UCHAR_NFD_QUICK_CHECK	UProperty			-	-	-	-	-	37b1433b95a7107b	4108
+enumconst	c:@E@UProperty@UCHAR_NFKD_QUICK_CHECK	UProperty			-	-	-	-	-	27cbc3337f4fc0dc	4109
+enumconst	c:@E@UProperty@UCHAR_NFC_QUICK_CHECK	UProperty			-	-	-	-	-	e0a2f0961e738445	4110
+enumconst	c:@E@UProperty@UCHAR_NFKC_QUICK_CHECK	UProperty			-	-	-	-	-	743062b6bdaa7345	4111
+enumconst	c:@E@UProperty@UCHAR_LEAD_CANONICAL_COMBINING_CLASS	UProperty			-	-	-	-	-	a17a8e937ce03d7a	4112
+enumconst	c:@E@UProperty@UCHAR_TRAIL_CANONICAL_COMBINING_CLASS	UProperty			-	-	-	-	-	668f06fc4701557d	4113
+enumconst	c:@E@UProperty@UCHAR_GRAPHEME_CLUSTER_BREAK	UProperty			-	-	-	-	-	7a330485eb30ffd9	4114
+enumconst	c:@E@UProperty@UCHAR_SENTENCE_BREAK	UProperty			-	-	-	-	-	af2bac642b834133	4115
+enumconst	c:@E@UProperty@UCHAR_WORD_BREAK	UProperty			-	-	-	-	-	3e04876676e8c1e9	4116
+enumconst	c:@E@UProperty@UCHAR_BIDI_PAIRED_BRACKET_TYPE	UProperty			-	-	-	-	-	4ad5f83f3beb4493	4117
+enumconst	c:@E@UProperty@UCHAR_INDIC_POSITIONAL_CATEGORY	UProperty			-	-	-	-	-	5d50e7f4424b4481	4118
+enumconst	c:@E@UProperty@UCHAR_INDIC_SYLLABIC_CATEGORY	UProperty			-	-	-	-	-	fad01f51f219c5db	4119
+enumconst	c:@E@UProperty@UCHAR_VERTICAL_ORIENTATION	UProperty			-	-	-	-	-	6fa41ba63dcc00df	4120
+enumconst	c:@E@UProperty@UCHAR_IDENTIFIER_STATUS	UProperty			-	-	-	-	-	53a2db157033d6fe	4121
+enumconst	c:@E@UProperty@UCHAR_INDIC_CONJUNCT_BREAK	UProperty			-	-	-	-	-	26368c8da4c4022c	4122
+enumconst	c:@E@UProperty@UCHAR_INT_LIMIT	UProperty			-	-	-	-	-	7084e8d6cd874906	4123
+enumconst	c:@E@UProperty@UCHAR_GENERAL_CATEGORY_MASK	UProperty			-	-	-	-	-	9525228c1b389511	8192
+enumconst	c:@E@UProperty@UCHAR_MASK_START	UProperty			-	-	-	-	-	9fefd3e58df2de6e	8192
+enumconst	c:@E@UProperty@UCHAR_MASK_LIMIT	UProperty			-	-	-	-	-	0e7feaeca429aebd	8193
+enumconst	c:@E@UProperty@UCHAR_NUMERIC_VALUE	UProperty			-	-	-	-	-	1421ba801500dd06	12288
+enumconst	c:@E@UProperty@UCHAR_DOUBLE_START	UProperty			-	-	-	-	-	70da77f96db16aa0	12288
+enumconst	c:@E@UProperty@UCHAR_DOUBLE_LIMIT	UProperty			-	-	-	-	-	d62c930bd8ea9a8d	12289
+enumconst	c:@E@UProperty@UCHAR_AGE	UProperty			-	-	-	-	-	1c23932c4b351ba9	16384
+enumconst	c:@E@UProperty@UCHAR_STRING_START	UProperty			-	-	-	-	-	9d60dbad209fcfc2	16384
+enumconst	c:@E@UProperty@UCHAR_BIDI_MIRRORING_GLYPH	UProperty			-	-	-	-	-	7eabbfe33e12bd83	16385
+enumconst	c:@E@UProperty@UCHAR_CASE_FOLDING	UProperty			-	-	-	-	-	7912e7d85737158e	16386
+enumconst	c:@E@UProperty@UCHAR_ISO_COMMENT	UProperty			-	-	-	-	-	8f5c40e3b156ae0e	16387
+enumconst	c:@E@UProperty@UCHAR_LOWERCASE_MAPPING	UProperty			-	-	-	-	-	c17a7353ed90af16	16388
+enumconst	c:@E@UProperty@UCHAR_NAME	UProperty			-	-	-	-	-	71907bd72788bfaf	16389
+enumconst	c:@E@UProperty@UCHAR_SIMPLE_CASE_FOLDING	UProperty			-	-	-	-	-	4a0b4ebdc7c8cade	16390
+enumconst	c:@E@UProperty@UCHAR_SIMPLE_LOWERCASE_MAPPING	UProperty			-	-	-	-	-	0519569bd885e196	16391
+enumconst	c:@E@UProperty@UCHAR_SIMPLE_TITLECASE_MAPPING	UProperty			-	-	-	-	-	d07a4f6d9c774a34	16392
+enumconst	c:@E@UProperty@UCHAR_SIMPLE_UPPERCASE_MAPPING	UProperty			-	-	-	-	-	0a3c9eb5c754c039	16393
+enumconst	c:@E@UProperty@UCHAR_TITLECASE_MAPPING	UProperty			-	-	-	-	-	44a0f50dcea200f2	16394
+enumconst	c:@E@UProperty@UCHAR_UNICODE_1_NAME	UProperty			-	-	-	-	-	2fdd6b0a856e7cab	16395
+enumconst	c:@E@UProperty@UCHAR_UPPERCASE_MAPPING	UProperty			-	-	-	-	-	efec7052c72bb0a3	16396
+enumconst	c:@E@UProperty@UCHAR_BIDI_PAIRED_BRACKET	UProperty			-	-	-	-	-	b35d0dce42911e9a	16397
+enumconst	c:@E@UProperty@UCHAR_STRING_LIMIT	UProperty			-	-	-	-	-	007815f37c315e53	16398
+enumconst	c:@E@UProperty@UCHAR_SCRIPT_EXTENSIONS	UProperty			-	-	-	-	-	8be4c5311ebddcea	28672
+enumconst	c:@E@UProperty@UCHAR_OTHER_PROPERTY_START	UProperty			-	-	-	-	-	33a866d71ff26bd2	28672
+enumconst	c:@E@UProperty@UCHAR_IDENTIFIER_TYPE	UProperty			-	-	-	-	-	53173172586413e3	28673
+enumconst	c:@E@UProperty@UCHAR_OTHER_PROPERTY_LIMIT	UProperty			-	-	-	-	-	9c43377e10b497c1	28674
+enumconst	c:@E@UProperty@UCHAR_INVALID_CODE	UProperty			-	-	-	-	-	d886a8b7dad14020	-1
+typedef	c:@T@UProperty	-			enum UProperty	-	-	-	-	cae3c09d755e2f7a	-
+enum	c:@E@UCharCategory	-			unsigned int	-	-	-	-	9d29a001fb9c460b	-
+enumconst	c:@E@UCharCategory@U_UNASSIGNED	UCharCategory			-	-	-	-	-	dd5c33806d91a1c3	0
+enumconst	c:@E@UCharCategory@U_GENERAL_OTHER_TYPES	UCharCategory			-	-	-	-	-	e4be7743df6f2095	0
+enumconst	c:@E@UCharCategory@U_UPPERCASE_LETTER	UCharCategory			-	-	-	-	-	229c25dac0b06b53	1
+enumconst	c:@E@UCharCategory@U_LOWERCASE_LETTER	UCharCategory			-	-	-	-	-	b5191a97a903ef82	2
+enumconst	c:@E@UCharCategory@U_TITLECASE_LETTER	UCharCategory			-	-	-	-	-	1426bd60d0903b3c	3
+enumconst	c:@E@UCharCategory@U_MODIFIER_LETTER	UCharCategory			-	-	-	-	-	892111e0822d733a	4
+enumconst	c:@E@UCharCategory@U_OTHER_LETTER	UCharCategory			-	-	-	-	-	564c5bc85901f0cf	5
+enumconst	c:@E@UCharCategory@U_NON_SPACING_MARK	UCharCategory			-	-	-	-	-	e32f6a7c4fee7a32	6
+enumconst	c:@E@UCharCategory@U_ENCLOSING_MARK	UCharCategory			-	-	-	-	-	8a333375c7a35675	7
+enumconst	c:@E@UCharCategory@U_COMBINING_SPACING_MARK	UCharCategory			-	-	-	-	-	f1bcce5eb0bf4219	8
+enumconst	c:@E@UCharCategory@U_DECIMAL_DIGIT_NUMBER	UCharCategory			-	-	-	-	-	ca8830100ae965d4	9
+enumconst	c:@E@UCharCategory@U_LETTER_NUMBER	UCharCategory			-	-	-	-	-	b9aab28af30be91f	10
+enumconst	c:@E@UCharCategory@U_OTHER_NUMBER	UCharCategory			-	-	-	-	-	e32fa5dbce37cb41	11
+enumconst	c:@E@UCharCategory@U_SPACE_SEPARATOR	UCharCategory			-	-	-	-	-	1736fe3443f81848	12
+enumconst	c:@E@UCharCategory@U_LINE_SEPARATOR	UCharCategory			-	-	-	-	-	9a339ed7654923d1	13
+enumconst	c:@E@UCharCategory@U_PARAGRAPH_SEPARATOR	UCharCategory			-	-	-	-	-	6f12f785d6a1207d	14
+enumconst	c:@E@UCharCategory@U_CONTROL_CHAR	UCharCategory			-	-	-	-	-	4788b5a60043fd42	15
+enumconst	c:@E@UCharCategory@U_FORMAT_CHAR	UCharCategory			-	-	-	-	-	fd9394f0123d918d	16
+enumconst	c:@E@UCharCategory@U_PRIVATE_USE_CHAR	UCharCategory			-	-	-	-	-	b7a14872b9d80dea	17
+enumconst	c:@E@UCharCategory@U_SURROGATE	UCharCategory			-	-	-	-	-	ca9a6405376a6439	18
+enumconst	c:@E@UCharCategory@U_DASH_PUNCTUATION	UCharCategory			-	-	-	-	-	1e83c2cb246ba77a	19
+enumconst	c:@E@UCharCategory@U_START_PUNCTUATION	UCharCategory			-	-	-	-	-	be44b386e087e3fa	20
+enumconst	c:@E@UCharCategory@U_END_PUNCTUATION	UCharCategory			-	-	-	-	-	669f521850c60593	21
+enumconst	c:@E@UCharCategory@U_CONNECTOR_PUNCTUATION	UCharCategory			-	-	-	-	-	b03985a1012970f4	22
+enumconst	c:@E@UCharCategory@U_OTHER_PUNCTUATION	UCharCategory			-	-	-	-	-	f354566422e392e3	23
+enumconst	c:@E@UCharCategory@U_MATH_SYMBOL	UCharCategory			-	-	-	-	-	09066737bd849d62	24
+enumconst	c:@E@UCharCategory@U_CURRENCY_SYMBOL	UCharCategory			-	-	-	-	-	fdb87c5b9c3458a9	25
+enumconst	c:@E@UCharCategory@U_MODIFIER_SYMBOL	UCharCategory			-	-	-	-	-	debb4214d589ca96	26
+enumconst	c:@E@UCharCategory@U_OTHER_SYMBOL	UCharCategory			-	-	-	-	-	efba9f6e971b32cf	27
+enumconst	c:@E@UCharCategory@U_INITIAL_PUNCTUATION	UCharCategory			-	-	-	-	-	4d5dd4b8da04461b	28
+enumconst	c:@E@UCharCategory@U_FINAL_PUNCTUATION	UCharCategory			-	-	-	-	-	5c82d9e713498c7b	29
+enumconst	c:@E@UCharCategory@U_CHAR_CATEGORY_COUNT	UCharCategory			-	-	-	-	-	898b75d3da7b3301	30
+typedef	c:@T@UCharCategory	-			enum UCharCategory	-	-	-	-	c8b280a7cfe892fc	-
+enum	c:@E@UCharDirection	-			unsigned int	-	-	-	-	d8f00ba56ec9a398	-
+enumconst	c:@E@UCharDirection@U_LEFT_TO_RIGHT	UCharDirection			-	-	-	-	-	1e308652a4fed17e	0
+enumconst	c:@E@UCharDirection@U_RIGHT_TO_LEFT	UCharDirection			-	-	-	-	-	621c0a36a8e679c9	1
+enumconst	c:@E@UCharDirection@U_EUROPEAN_NUMBER	UCharDirection			-	-	-	-	-	d82494d23d527ad3	2
+enumconst	c:@E@UCharDirection@U_EUROPEAN_NUMBER_SEPARATOR	UCharDirection			-	-	-	-	-	95bfb772c76ae99b	3
+enumconst	c:@E@UCharDirection@U_EUROPEAN_NUMBER_TERMINATOR	UCharDirection			-	-	-	-	-	db72dd5fb86b6f45	4
+enumconst	c:@E@UCharDirection@U_ARABIC_NUMBER	UCharDirection			-	-	-	-	-	e85f840378042dc0	5
+enumconst	c:@E@UCharDirection@U_COMMON_NUMBER_SEPARATOR	UCharDirection			-	-	-	-	-	d58ab4cb42b18e3c	6
+enumconst	c:@E@UCharDirection@U_BLOCK_SEPARATOR	UCharDirection			-	-	-	-	-	ea134ac4726964f6	7
+enumconst	c:@E@UCharDirection@U_SEGMENT_SEPARATOR	UCharDirection			-	-	-	-	-	24204d0346df9367	8
+enumconst	c:@E@UCharDirection@U_WHITE_SPACE_NEUTRAL	UCharDirection			-	-	-	-	-	1d5fa50b4f76f02a	9
+enumconst	c:@E@UCharDirection@U_OTHER_NEUTRAL	UCharDirection			-	-	-	-	-	d48eb08593e91a76	10
+enumconst	c:@E@UCharDirection@U_LEFT_TO_RIGHT_EMBEDDING	UCharDirection			-	-	-	-	-	1661a4bcac6481be	11
+enumconst	c:@E@UCharDirection@U_LEFT_TO_RIGHT_OVERRIDE	UCharDirection			-	-	-	-	-	3e86d40088d8181a	12
+enumconst	c:@E@UCharDirection@U_RIGHT_TO_LEFT_ARABIC	UCharDirection			-	-	-	-	-	dbb4738683b2ee39	13
+enumconst	c:@E@UCharDirection@U_RIGHT_TO_LEFT_EMBEDDING	UCharDirection			-	-	-	-	-	eb4b649fa961eb71	14
+enumconst	c:@E@UCharDirection@U_RIGHT_TO_LEFT_OVERRIDE	UCharDirection			-	-	-	-	-	9450de5824cdb60c	15
+enumconst	c:@E@UCharDirection@U_POP_DIRECTIONAL_FORMAT	UCharDirection			-	-	-	-	-	ad9b4226821421e9	16
+enumconst	c:@E@UCharDirection@U_DIR_NON_SPACING_MARK	UCharDirection			-	-	-	-	-	8761495a09cce1aa	17
+enumconst	c:@E@UCharDirection@U_BOUNDARY_NEUTRAL	UCharDirection			-	-	-	-	-	076db2e1f8eb88b6	18
+enumconst	c:@E@UCharDirection@U_FIRST_STRONG_ISOLATE	UCharDirection			-	-	-	-	-	6e8eaa71cacdf975	19
+enumconst	c:@E@UCharDirection@U_LEFT_TO_RIGHT_ISOLATE	UCharDirection			-	-	-	-	-	9d32be0a994edd6c	20
+enumconst	c:@E@UCharDirection@U_RIGHT_TO_LEFT_ISOLATE	UCharDirection			-	-	-	-	-	d797429ba9e263b1	21
+enumconst	c:@E@UCharDirection@U_POP_DIRECTIONAL_ISOLATE	UCharDirection			-	-	-	-	-	cbc9f1953603a463	22
+enumconst	c:@E@UCharDirection@U_CHAR_DIRECTION_COUNT	UCharDirection			-	-	-	-	-	296bcffcecd8ec99	23
+typedef	c:@T@UCharDirection	-			enum UCharDirection	-	-	-	-	2ac21ec6392e6323	-
+enum	c:@E@UBidiPairedBracketType	-			unsigned int	-	-	-	-	65df888a72d83fcd	-
+enumconst	c:@E@UBidiPairedBracketType@U_BPT_NONE	UBidiPairedBracketType			-	-	-	-	-	947c6c5711ffb71b	0
+enumconst	c:@E@UBidiPairedBracketType@U_BPT_OPEN	UBidiPairedBracketType			-	-	-	-	-	39c24b32f8dd2111	1
+enumconst	c:@E@UBidiPairedBracketType@U_BPT_CLOSE	UBidiPairedBracketType			-	-	-	-	-	efaf27ac130350d9	2
+enumconst	c:@E@UBidiPairedBracketType@U_BPT_COUNT	UBidiPairedBracketType			-	-	-	-	-	70a526fe467992f1	3
+typedef	c:@T@UBidiPairedBracketType	-			enum UBidiPairedBracketType	-	-	-	-	72ae795dbe848198	-
+enum	c:@E@UBlockCode	-			int	-	-	-	-	40debf3222bccedf	-
+enumconst	c:@E@UBlockCode@UBLOCK_NO_BLOCK	UBlockCode			-	-	-	-	-	6550d98edf11c908	0
+enumconst	c:@E@UBlockCode@UBLOCK_BASIC_LATIN	UBlockCode			-	-	-	-	-	e8ab167a7d915ce3	1
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_1_SUPPLEMENT	UBlockCode			-	-	-	-	-	92a767a50c2b92c3	2
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_A	UBlockCode			-	-	-	-	-	79f0601e7b5ea2c1	3
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_B	UBlockCode			-	-	-	-	-	3525800fc3c21db0	4
+enumconst	c:@E@UBlockCode@UBLOCK_IPA_EXTENSIONS	UBlockCode			-	-	-	-	-	7aefd731bf66c6e5	5
+enumconst	c:@E@UBlockCode@UBLOCK_SPACING_MODIFIER_LETTERS	UBlockCode			-	-	-	-	-	bab492a30ae842f8	6
+enumconst	c:@E@UBlockCode@UBLOCK_COMBINING_DIACRITICAL_MARKS	UBlockCode			-	-	-	-	-	d426af246ffe4d5b	7
+enumconst	c:@E@UBlockCode@UBLOCK_GREEK	UBlockCode			-	-	-	-	-	59292d9c66db8f46	8
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC	UBlockCode			-	-	-	-	-	118cb731507f8c15	9
+enumconst	c:@E@UBlockCode@UBLOCK_ARMENIAN	UBlockCode			-	-	-	-	-	7a7d640ef65f076b	10
+enumconst	c:@E@UBlockCode@UBLOCK_HEBREW	UBlockCode			-	-	-	-	-	c91ae5c881f66257	11
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC	UBlockCode			-	-	-	-	-	2c3fab42a99f04dc	12
+enumconst	c:@E@UBlockCode@UBLOCK_SYRIAC	UBlockCode			-	-	-	-	-	939554ccbd13ea03	13
+enumconst	c:@E@UBlockCode@UBLOCK_THAANA	UBlockCode			-	-	-	-	-	b61f9c175a5f4526	14
+enumconst	c:@E@UBlockCode@UBLOCK_DEVANAGARI	UBlockCode			-	-	-	-	-	f01fdd68d5fe02dc	15
+enumconst	c:@E@UBlockCode@UBLOCK_BENGALI	UBlockCode			-	-	-	-	-	ea5980e90fd3aeee	16
+enumconst	c:@E@UBlockCode@UBLOCK_GURMUKHI	UBlockCode			-	-	-	-	-	4ed5ca297793fa78	17
+enumconst	c:@E@UBlockCode@UBLOCK_GUJARATI	UBlockCode			-	-	-	-	-	b4e3f8ac2a9f7f24	18
+enumconst	c:@E@UBlockCode@UBLOCK_ORIYA	UBlockCode			-	-	-	-	-	d76f90f006974527	19
+enumconst	c:@E@UBlockCode@UBLOCK_TAMIL	UBlockCode			-	-	-	-	-	638e0a1c270c6472	20
+enumconst	c:@E@UBlockCode@UBLOCK_TELUGU	UBlockCode			-	-	-	-	-	4285ce4a611518f1	21
+enumconst	c:@E@UBlockCode@UBLOCK_KANNADA	UBlockCode			-	-	-	-	-	b992aad3ce0fda18	22
+enumconst	c:@E@UBlockCode@UBLOCK_MALAYALAM	UBlockCode			-	-	-	-	-	a41193349c7e8c7a	23
+enumconst	c:@E@UBlockCode@UBLOCK_SINHALA	UBlockCode			-	-	-	-	-	97cdcaa672279c3e	24
+enumconst	c:@E@UBlockCode@UBLOCK_THAI	UBlockCode			-	-	-	-	-	58d16119742692f5	25
+enumconst	c:@E@UBlockCode@UBLOCK_LAO	UBlockCode			-	-	-	-	-	9d4f151892eeab5d	26
+enumconst	c:@E@UBlockCode@UBLOCK_TIBETAN	UBlockCode			-	-	-	-	-	a2eafe73cb54ddfb	27
+enumconst	c:@E@UBlockCode@UBLOCK_MYANMAR	UBlockCode			-	-	-	-	-	f9f6f136537eb074	28
+enumconst	c:@E@UBlockCode@UBLOCK_GEORGIAN	UBlockCode			-	-	-	-	-	fe60c57d53f2226d	29
+enumconst	c:@E@UBlockCode@UBLOCK_HANGUL_JAMO	UBlockCode			-	-	-	-	-	d0d85b58bc3baeff	30
+enumconst	c:@E@UBlockCode@UBLOCK_ETHIOPIC	UBlockCode			-	-	-	-	-	9de044018ff52277	31
+enumconst	c:@E@UBlockCode@UBLOCK_CHEROKEE	UBlockCode			-	-	-	-	-	acf805576c8189d7	32
+enumconst	c:@E@UBlockCode@UBLOCK_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS	UBlockCode			-	-	-	-	-	5b24ddf41cf8669b	33
+enumconst	c:@E@UBlockCode@UBLOCK_OGHAM	UBlockCode			-	-	-	-	-	056acba3b3d9503f	34
+enumconst	c:@E@UBlockCode@UBLOCK_RUNIC	UBlockCode			-	-	-	-	-	dc295a12ed9b0337	35
+enumconst	c:@E@UBlockCode@UBLOCK_KHMER	UBlockCode			-	-	-	-	-	cbbb48f81eef9364	36
+enumconst	c:@E@UBlockCode@UBLOCK_MONGOLIAN	UBlockCode			-	-	-	-	-	c050ac7f70e8c211	37
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_ADDITIONAL	UBlockCode			-	-	-	-	-	fa3635e9415ea2ca	38
+enumconst	c:@E@UBlockCode@UBLOCK_GREEK_EXTENDED	UBlockCode			-	-	-	-	-	2cdaeeb55ea558dd	39
+enumconst	c:@E@UBlockCode@UBLOCK_GENERAL_PUNCTUATION	UBlockCode			-	-	-	-	-	09b2c9cd8ef93a5d	40
+enumconst	c:@E@UBlockCode@UBLOCK_SUPERSCRIPTS_AND_SUBSCRIPTS	UBlockCode			-	-	-	-	-	9bdabce578fb2d12	41
+enumconst	c:@E@UBlockCode@UBLOCK_CURRENCY_SYMBOLS	UBlockCode			-	-	-	-	-	81feb4e53fffd901	42
+enumconst	c:@E@UBlockCode@UBLOCK_COMBINING_MARKS_FOR_SYMBOLS	UBlockCode			-	-	-	-	-	3f9f1a33434c899e	43
+enumconst	c:@E@UBlockCode@UBLOCK_LETTERLIKE_SYMBOLS	UBlockCode			-	-	-	-	-	a993f44ebbcb1948	44
+enumconst	c:@E@UBlockCode@UBLOCK_NUMBER_FORMS	UBlockCode			-	-	-	-	-	9f7d8cdae283e4fa	45
+enumconst	c:@E@UBlockCode@UBLOCK_ARROWS	UBlockCode			-	-	-	-	-	1e7cdbdf99cdd90d	46
+enumconst	c:@E@UBlockCode@UBLOCK_MATHEMATICAL_OPERATORS	UBlockCode			-	-	-	-	-	67923e80e6d56ad7	47
+enumconst	c:@E@UBlockCode@UBLOCK_MISCELLANEOUS_TECHNICAL	UBlockCode			-	-	-	-	-	48d9b62302b1a04b	48
+enumconst	c:@E@UBlockCode@UBLOCK_CONTROL_PICTURES	UBlockCode			-	-	-	-	-	44876ede0e804209	49
+enumconst	c:@E@UBlockCode@UBLOCK_OPTICAL_CHARACTER_RECOGNITION	UBlockCode			-	-	-	-	-	78f1dfaa6e9fea39	50
+enumconst	c:@E@UBlockCode@UBLOCK_ENCLOSED_ALPHANUMERICS	UBlockCode			-	-	-	-	-	7140ab3604219671	51
+enumconst	c:@E@UBlockCode@UBLOCK_BOX_DRAWING	UBlockCode			-	-	-	-	-	00802c648fc8295d	52
+enumconst	c:@E@UBlockCode@UBLOCK_BLOCK_ELEMENTS	UBlockCode			-	-	-	-	-	55c271e0e1e763af	53
+enumconst	c:@E@UBlockCode@UBLOCK_GEOMETRIC_SHAPES	UBlockCode			-	-	-	-	-	6b736dacebc1ed3f	54
+enumconst	c:@E@UBlockCode@UBLOCK_MISCELLANEOUS_SYMBOLS	UBlockCode			-	-	-	-	-	b300f1be8a3e0c00	55
+enumconst	c:@E@UBlockCode@UBLOCK_DINGBATS	UBlockCode			-	-	-	-	-	f5c82b6769a6d8ab	56
+enumconst	c:@E@UBlockCode@UBLOCK_BRAILLE_PATTERNS	UBlockCode			-	-	-	-	-	ada00c4706e99e0b	57
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_RADICALS_SUPPLEMENT	UBlockCode			-	-	-	-	-	5fb178536de759c7	58
+enumconst	c:@E@UBlockCode@UBLOCK_KANGXI_RADICALS	UBlockCode			-	-	-	-	-	3749bc5df4d4ad5c	59
+enumconst	c:@E@UBlockCode@UBLOCK_IDEOGRAPHIC_DESCRIPTION_CHARACTERS	UBlockCode			-	-	-	-	-	7fc961b8e1864c3e	60
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION	UBlockCode			-	-	-	-	-	69079ae383b7c242	61
+enumconst	c:@E@UBlockCode@UBLOCK_HIRAGANA	UBlockCode			-	-	-	-	-	38fa57482085c2ac	62
+enumconst	c:@E@UBlockCode@UBLOCK_KATAKANA	UBlockCode			-	-	-	-	-	2f9cd2ec8d7f886e	63
+enumconst	c:@E@UBlockCode@UBLOCK_BOPOMOFO	UBlockCode			-	-	-	-	-	c905b75d021c3ffe	64
+enumconst	c:@E@UBlockCode@UBLOCK_HANGUL_COMPATIBILITY_JAMO	UBlockCode			-	-	-	-	-	0da06b22872be270	65
+enumconst	c:@E@UBlockCode@UBLOCK_KANBUN	UBlockCode			-	-	-	-	-	a094a9cf927e06ad	66
+enumconst	c:@E@UBlockCode@UBLOCK_BOPOMOFO_EXTENDED	UBlockCode			-	-	-	-	-	28818dfa63540b3e	67
+enumconst	c:@E@UBlockCode@UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS	UBlockCode			-	-	-	-	-	fb8f343bcef3348a	68
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_COMPATIBILITY	UBlockCode			-	-	-	-	-	479406a0900582c4	69
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A	UBlockCode			-	-	-	-	-	837e48eb3d6aea25	70
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS	UBlockCode			-	-	-	-	-	b5de6140f856296c	71
+enumconst	c:@E@UBlockCode@UBLOCK_YI_SYLLABLES	UBlockCode			-	-	-	-	-	72ce7ca685c8abff	72
+enumconst	c:@E@UBlockCode@UBLOCK_YI_RADICALS	UBlockCode			-	-	-	-	-	36cac927b7a6b2a7	73
+enumconst	c:@E@UBlockCode@UBLOCK_HANGUL_SYLLABLES	UBlockCode			-	-	-	-	-	26c6b8763ffc3419	74
+enumconst	c:@E@UBlockCode@UBLOCK_HIGH_SURROGATES	UBlockCode			-	-	-	-	-	4c7d8d7620a578d5	75
+enumconst	c:@E@UBlockCode@UBLOCK_HIGH_PRIVATE_USE_SURROGATES	UBlockCode			-	-	-	-	-	d8d24496e43d4623	76
+enumconst	c:@E@UBlockCode@UBLOCK_LOW_SURROGATES	UBlockCode			-	-	-	-	-	d00d6ffdc0b0aa2b	77
+enumconst	c:@E@UBlockCode@UBLOCK_PRIVATE_USE_AREA	UBlockCode			-	-	-	-	-	74663a6f1aacab86	78
+enumconst	c:@E@UBlockCode@UBLOCK_PRIVATE_USE	UBlockCode			-	-	-	-	-	092bdd7a1d598048	78
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS	UBlockCode			-	-	-	-	-	8ce0204efd26b377	79
+enumconst	c:@E@UBlockCode@UBLOCK_ALPHABETIC_PRESENTATION_FORMS	UBlockCode			-	-	-	-	-	5dd77ca57fd233bb	80
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_PRESENTATION_FORMS_A	UBlockCode			-	-	-	-	-	e5d0edc04c3865fe	81
+enumconst	c:@E@UBlockCode@UBLOCK_COMBINING_HALF_MARKS	UBlockCode			-	-	-	-	-	8c482d874b281bfe	82
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_COMPATIBILITY_FORMS	UBlockCode			-	-	-	-	-	0846897b40953692	83
+enumconst	c:@E@UBlockCode@UBLOCK_SMALL_FORM_VARIANTS	UBlockCode			-	-	-	-	-	07b53b6c3f937c05	84
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_PRESENTATION_FORMS_B	UBlockCode			-	-	-	-	-	c01b95c34ebbd60f	85
+enumconst	c:@E@UBlockCode@UBLOCK_SPECIALS	UBlockCode			-	-	-	-	-	64b2b9487428510e	86
+enumconst	c:@E@UBlockCode@UBLOCK_HALFWIDTH_AND_FULLWIDTH_FORMS	UBlockCode			-	-	-	-	-	766ae2e67e6bbcff	87
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_ITALIC	UBlockCode			-	-	-	-	-	0c039fc2edcc8b44	88
+enumconst	c:@E@UBlockCode@UBLOCK_GOTHIC	UBlockCode			-	-	-	-	-	9bad5e7ff5660928	89
+enumconst	c:@E@UBlockCode@UBLOCK_DESERET	UBlockCode			-	-	-	-	-	10ed49243031e80c	90
+enumconst	c:@E@UBlockCode@UBLOCK_BYZANTINE_MUSICAL_SYMBOLS	UBlockCode			-	-	-	-	-	7fd8fb2476e58cc2	91
+enumconst	c:@E@UBlockCode@UBLOCK_MUSICAL_SYMBOLS	UBlockCode			-	-	-	-	-	74c5c1adf2d8f3b4	92
+enumconst	c:@E@UBlockCode@UBLOCK_MATHEMATICAL_ALPHANUMERIC_SYMBOLS	UBlockCode			-	-	-	-	-	d5163f3185d3fb72	93
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B	UBlockCode			-	-	-	-	-	1e02153129dee1d2	94
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT	UBlockCode			-	-	-	-	-	5535fce39c98fad4	95
+enumconst	c:@E@UBlockCode@UBLOCK_TAGS	UBlockCode			-	-	-	-	-	1b25048220cd86c4	96
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC_SUPPLEMENT	UBlockCode			-	-	-	-	-	4b5d31a9ab80e758	97
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC_SUPPLEMENTARY	UBlockCode			-	-	-	-	-	be6d39be7fb13620	97
+enumconst	c:@E@UBlockCode@UBLOCK_TAGALOG	UBlockCode			-	-	-	-	-	754081cddac28f58	98
+enumconst	c:@E@UBlockCode@UBLOCK_HANUNOO	UBlockCode			-	-	-	-	-	b4625605c01c7e00	99
+enumconst	c:@E@UBlockCode@UBLOCK_BUHID	UBlockCode			-	-	-	-	-	0a4df4e09dc8fe45	100
+enumconst	c:@E@UBlockCode@UBLOCK_TAGBANWA	UBlockCode			-	-	-	-	-	b5b93ab78b0ad568	101
+enumconst	c:@E@UBlockCode@UBLOCK_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A	UBlockCode			-	-	-	-	-	bd83078ebf9c94d5	102
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTAL_ARROWS_A	UBlockCode			-	-	-	-	-	9c6dbbdb9465816c	103
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTAL_ARROWS_B	UBlockCode			-	-	-	-	-	947ca4fbc247311e	104
+enumconst	c:@E@UBlockCode@UBLOCK_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B	UBlockCode			-	-	-	-	-	1bc58f7307fea9b2	105
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTAL_MATHEMATICAL_OPERATORS	UBlockCode			-	-	-	-	-	ab8aa8de824fab27	106
+enumconst	c:@E@UBlockCode@UBLOCK_KATAKANA_PHONETIC_EXTENSIONS	UBlockCode			-	-	-	-	-	ed0eaed9f7df9a1c	107
+enumconst	c:@E@UBlockCode@UBLOCK_VARIATION_SELECTORS	UBlockCode			-	-	-	-	-	9d2903925b011895	108
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_A	UBlockCode			-	-	-	-	-	b5583144fc71c11d	109
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTARY_PRIVATE_USE_AREA_B	UBlockCode			-	-	-	-	-	bb8ddcbc0fc2113b	110
+enumconst	c:@E@UBlockCode@UBLOCK_LIMBU	UBlockCode			-	-	-	-	-	8735f16d70d79eca	111
+enumconst	c:@E@UBlockCode@UBLOCK_TAI_LE	UBlockCode			-	-	-	-	-	2c164f23fb8da265	112
+enumconst	c:@E@UBlockCode@UBLOCK_KHMER_SYMBOLS	UBlockCode			-	-	-	-	-	e45758e635222949	113
+enumconst	c:@E@UBlockCode@UBLOCK_PHONETIC_EXTENSIONS	UBlockCode			-	-	-	-	-	c216a7cff87e69c9	114
+enumconst	c:@E@UBlockCode@UBLOCK_MISCELLANEOUS_SYMBOLS_AND_ARROWS	UBlockCode			-	-	-	-	-	f819521e21774052	115
+enumconst	c:@E@UBlockCode@UBLOCK_YIJING_HEXAGRAM_SYMBOLS	UBlockCode			-	-	-	-	-	b12709f8f10f8402	116
+enumconst	c:@E@UBlockCode@UBLOCK_LINEAR_B_SYLLABARY	UBlockCode			-	-	-	-	-	9739d9d80c16120b	117
+enumconst	c:@E@UBlockCode@UBLOCK_LINEAR_B_IDEOGRAMS	UBlockCode			-	-	-	-	-	ec7f20c0c6d1a7b8	118
+enumconst	c:@E@UBlockCode@UBLOCK_AEGEAN_NUMBERS	UBlockCode			-	-	-	-	-	26c66b094228b76c	119
+enumconst	c:@E@UBlockCode@UBLOCK_UGARITIC	UBlockCode			-	-	-	-	-	8057cf05bf22decb	120
+enumconst	c:@E@UBlockCode@UBLOCK_SHAVIAN	UBlockCode			-	-	-	-	-	13ab24576ad1ea10	121
+enumconst	c:@E@UBlockCode@UBLOCK_OSMANYA	UBlockCode			-	-	-	-	-	80137586bf657eb8	122
+enumconst	c:@E@UBlockCode@UBLOCK_CYPRIOT_SYLLABARY	UBlockCode			-	-	-	-	-	c83cc987ca7f9c34	123
+enumconst	c:@E@UBlockCode@UBLOCK_TAI_XUAN_JING_SYMBOLS	UBlockCode			-	-	-	-	-	b77700b90a938c28	124
+enumconst	c:@E@UBlockCode@UBLOCK_VARIATION_SELECTORS_SUPPLEMENT	UBlockCode			-	-	-	-	-	2b731529335699e1	125
+enumconst	c:@E@UBlockCode@UBLOCK_ANCIENT_GREEK_MUSICAL_NOTATION	UBlockCode			-	-	-	-	-	9084d3062e3f468b	126
+enumconst	c:@E@UBlockCode@UBLOCK_ANCIENT_GREEK_NUMBERS	UBlockCode			-	-	-	-	-	69d647a976e4e44e	127
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_SUPPLEMENT	UBlockCode			-	-	-	-	-	5136bd309413b909	128
+enumconst	c:@E@UBlockCode@UBLOCK_BUGINESE	UBlockCode			-	-	-	-	-	69b7256af832ee3e	129
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_STROKES	UBlockCode			-	-	-	-	-	ab501b0e73e16dd5	130
+enumconst	c:@E@UBlockCode@UBLOCK_COMBINING_DIACRITICAL_MARKS_SUPPLEMENT	UBlockCode			-	-	-	-	-	348a91c662c85db9	131
+enumconst	c:@E@UBlockCode@UBLOCK_COPTIC	UBlockCode			-	-	-	-	-	cee20b8582c40600	132
+enumconst	c:@E@UBlockCode@UBLOCK_ETHIOPIC_EXTENDED	UBlockCode			-	-	-	-	-	b279662ffe962486	133
+enumconst	c:@E@UBlockCode@UBLOCK_ETHIOPIC_SUPPLEMENT	UBlockCode			-	-	-	-	-	2d4bd75719b5e213	134
+enumconst	c:@E@UBlockCode@UBLOCK_GEORGIAN_SUPPLEMENT	UBlockCode			-	-	-	-	-	89339c27d37a35fb	135
+enumconst	c:@E@UBlockCode@UBLOCK_GLAGOLITIC	UBlockCode			-	-	-	-	-	1147e0b30790d337	136
+enumconst	c:@E@UBlockCode@UBLOCK_KHAROSHTHI	UBlockCode			-	-	-	-	-	1ad5f11e086821d5	137
+enumconst	c:@E@UBlockCode@UBLOCK_MODIFIER_TONE_LETTERS	UBlockCode			-	-	-	-	-	6201d818850e92a1	138
+enumconst	c:@E@UBlockCode@UBLOCK_NEW_TAI_LUE	UBlockCode			-	-	-	-	-	4947179e92ecb7f3	139
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_PERSIAN	UBlockCode			-	-	-	-	-	49df3844b9d73735	140
+enumconst	c:@E@UBlockCode@UBLOCK_PHONETIC_EXTENSIONS_SUPPLEMENT	UBlockCode			-	-	-	-	-	9d8158f0f7555c86	141
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTAL_PUNCTUATION	UBlockCode			-	-	-	-	-	bb1499c45c5d7f9e	142
+enumconst	c:@E@UBlockCode@UBLOCK_SYLOTI_NAGRI	UBlockCode			-	-	-	-	-	ff3387a257c23b25	143
+enumconst	c:@E@UBlockCode@UBLOCK_TIFINAGH	UBlockCode			-	-	-	-	-	b13a1a5638a98be3	144
+enumconst	c:@E@UBlockCode@UBLOCK_VERTICAL_FORMS	UBlockCode			-	-	-	-	-	b02afb718a1e9230	145
+enumconst	c:@E@UBlockCode@UBLOCK_NKO	UBlockCode			-	-	-	-	-	3c6c7b7ed6ab9f47	146
+enumconst	c:@E@UBlockCode@UBLOCK_BALINESE	UBlockCode			-	-	-	-	-	d01e36cebd603788	147
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_C	UBlockCode			-	-	-	-	-	c90ba53fafeb06ce	148
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_D	UBlockCode			-	-	-	-	-	7ba9182efd807ef5	149
+enumconst	c:@E@UBlockCode@UBLOCK_PHAGS_PA	UBlockCode			-	-	-	-	-	1c60b8c443db1d17	150
+enumconst	c:@E@UBlockCode@UBLOCK_PHOENICIAN	UBlockCode			-	-	-	-	-	84eef24a40ba66a3	151
+enumconst	c:@E@UBlockCode@UBLOCK_CUNEIFORM	UBlockCode			-	-	-	-	-	30e2f8b066ec37f0	152
+enumconst	c:@E@UBlockCode@UBLOCK_CUNEIFORM_NUMBERS_AND_PUNCTUATION	UBlockCode			-	-	-	-	-	2e8d644c944c82a8	153
+enumconst	c:@E@UBlockCode@UBLOCK_COUNTING_ROD_NUMERALS	UBlockCode			-	-	-	-	-	2d717bfda6e2a9b5	154
+enumconst	c:@E@UBlockCode@UBLOCK_SUNDANESE	UBlockCode			-	-	-	-	-	a5fe4776cd354369	155
+enumconst	c:@E@UBlockCode@UBLOCK_LEPCHA	UBlockCode			-	-	-	-	-	6122d31eacaa69e1	156
+enumconst	c:@E@UBlockCode@UBLOCK_OL_CHIKI	UBlockCode			-	-	-	-	-	918af05e4b32f71a	157
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC_EXTENDED_A	UBlockCode			-	-	-	-	-	3cc59b952ec313e0	158
+enumconst	c:@E@UBlockCode@UBLOCK_VAI	UBlockCode			-	-	-	-	-	f8c95c116e1207fb	159
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC_EXTENDED_B	UBlockCode			-	-	-	-	-	00dd630535e0c6e5	160
+enumconst	c:@E@UBlockCode@UBLOCK_SAURASHTRA	UBlockCode			-	-	-	-	-	24c64e00bcf953ba	161
+enumconst	c:@E@UBlockCode@UBLOCK_KAYAH_LI	UBlockCode			-	-	-	-	-	09b0db8358a76d69	162
+enumconst	c:@E@UBlockCode@UBLOCK_REJANG	UBlockCode			-	-	-	-	-	a3ccbb0e72fadc85	163
+enumconst	c:@E@UBlockCode@UBLOCK_CHAM	UBlockCode			-	-	-	-	-	ae0b6cfccaf67088	164
+enumconst	c:@E@UBlockCode@UBLOCK_ANCIENT_SYMBOLS	UBlockCode			-	-	-	-	-	738033536d94a9ac	165
+enumconst	c:@E@UBlockCode@UBLOCK_PHAISTOS_DISC	UBlockCode			-	-	-	-	-	8df55e132b87c3df	166
+enumconst	c:@E@UBlockCode@UBLOCK_LYCIAN	UBlockCode			-	-	-	-	-	77ddb14a211b1dd2	167
+enumconst	c:@E@UBlockCode@UBLOCK_CARIAN	UBlockCode			-	-	-	-	-	424f4ebaa8297ac7	168
+enumconst	c:@E@UBlockCode@UBLOCK_LYDIAN	UBlockCode			-	-	-	-	-	b33ebf63e56dc211	169
+enumconst	c:@E@UBlockCode@UBLOCK_MAHJONG_TILES	UBlockCode			-	-	-	-	-	1ea5cb5483c942d7	170
+enumconst	c:@E@UBlockCode@UBLOCK_DOMINO_TILES	UBlockCode			-	-	-	-	-	0dccc8e2df2d8de5	171
+enumconst	c:@E@UBlockCode@UBLOCK_SAMARITAN	UBlockCode			-	-	-	-	-	828ad5788473abd1	172
+enumconst	c:@E@UBlockCode@UBLOCK_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED	UBlockCode			-	-	-	-	-	c445812b8c24fb58	173
+enumconst	c:@E@UBlockCode@UBLOCK_TAI_THAM	UBlockCode			-	-	-	-	-	91b81201e47942da	174
+enumconst	c:@E@UBlockCode@UBLOCK_VEDIC_EXTENSIONS	UBlockCode			-	-	-	-	-	e04a0ecdf93f0010	175
+enumconst	c:@E@UBlockCode@UBLOCK_LISU	UBlockCode			-	-	-	-	-	253d8d4b7ea83999	176
+enumconst	c:@E@UBlockCode@UBLOCK_BAMUM	UBlockCode			-	-	-	-	-	852b7e711998d69b	177
+enumconst	c:@E@UBlockCode@UBLOCK_COMMON_INDIC_NUMBER_FORMS	UBlockCode			-	-	-	-	-	b2630220af303ea0	178
+enumconst	c:@E@UBlockCode@UBLOCK_DEVANAGARI_EXTENDED	UBlockCode			-	-	-	-	-	c28ff75164979b83	179
+enumconst	c:@E@UBlockCode@UBLOCK_HANGUL_JAMO_EXTENDED_A	UBlockCode			-	-	-	-	-	11b52116db2eb303	180
+enumconst	c:@E@UBlockCode@UBLOCK_JAVANESE	UBlockCode			-	-	-	-	-	0da53f796f8bbd81	181
+enumconst	c:@E@UBlockCode@UBLOCK_MYANMAR_EXTENDED_A	UBlockCode			-	-	-	-	-	5b2d88e9b9b40ea8	182
+enumconst	c:@E@UBlockCode@UBLOCK_TAI_VIET	UBlockCode			-	-	-	-	-	7e9ae2680c89100b	183
+enumconst	c:@E@UBlockCode@UBLOCK_MEETEI_MAYEK	UBlockCode			-	-	-	-	-	061d3a3f83c6c78e	184
+enumconst	c:@E@UBlockCode@UBLOCK_HANGUL_JAMO_EXTENDED_B	UBlockCode			-	-	-	-	-	835ab4f1175c00f3	185
+enumconst	c:@E@UBlockCode@UBLOCK_IMPERIAL_ARAMAIC	UBlockCode			-	-	-	-	-	48fd4a894cc11e7f	186
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_SOUTH_ARABIAN	UBlockCode			-	-	-	-	-	1c957c6a347c0078	187
+enumconst	c:@E@UBlockCode@UBLOCK_AVESTAN	UBlockCode			-	-	-	-	-	ee636721cd5b359a	188
+enumconst	c:@E@UBlockCode@UBLOCK_INSCRIPTIONAL_PARTHIAN	UBlockCode			-	-	-	-	-	cdff97e07e88b2fb	189
+enumconst	c:@E@UBlockCode@UBLOCK_INSCRIPTIONAL_PAHLAVI	UBlockCode			-	-	-	-	-	d1e3bc6883cc8b89	190
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_TURKIC	UBlockCode			-	-	-	-	-	acd126e652011e5c	191
+enumconst	c:@E@UBlockCode@UBLOCK_RUMI_NUMERAL_SYMBOLS	UBlockCode			-	-	-	-	-	b8697f90931261bc	192
+enumconst	c:@E@UBlockCode@UBLOCK_KAITHI	UBlockCode			-	-	-	-	-	af4547303173b88a	193
+enumconst	c:@E@UBlockCode@UBLOCK_EGYPTIAN_HIEROGLYPHS	UBlockCode			-	-	-	-	-	370c21d2ac06d5c6	194
+enumconst	c:@E@UBlockCode@UBLOCK_ENCLOSED_ALPHANUMERIC_SUPPLEMENT	UBlockCode			-	-	-	-	-	b3b796ce8c50ab96	195
+enumconst	c:@E@UBlockCode@UBLOCK_ENCLOSED_IDEOGRAPHIC_SUPPLEMENT	UBlockCode			-	-	-	-	-	9ec388866dab7a15	196
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C	UBlockCode			-	-	-	-	-	8b45b8ff68bddd73	197
+enumconst	c:@E@UBlockCode@UBLOCK_MANDAIC	UBlockCode			-	-	-	-	-	0372ee3353c99265	198
+enumconst	c:@E@UBlockCode@UBLOCK_BATAK	UBlockCode			-	-	-	-	-	befc3699871109b1	199
+enumconst	c:@E@UBlockCode@UBLOCK_ETHIOPIC_EXTENDED_A	UBlockCode			-	-	-	-	-	f26d236d4ccd595e	200
+enumconst	c:@E@UBlockCode@UBLOCK_BRAHMI	UBlockCode			-	-	-	-	-	a98374101b29271a	201
+enumconst	c:@E@UBlockCode@UBLOCK_BAMUM_SUPPLEMENT	UBlockCode			-	-	-	-	-	f5038db7a137be2b	202
+enumconst	c:@E@UBlockCode@UBLOCK_KANA_SUPPLEMENT	UBlockCode			-	-	-	-	-	cd46fa8f26b5920b	203
+enumconst	c:@E@UBlockCode@UBLOCK_PLAYING_CARDS	UBlockCode			-	-	-	-	-	ee6191a822716834	204
+enumconst	c:@E@UBlockCode@UBLOCK_MISCELLANEOUS_SYMBOLS_AND_PICTOGRAPHS	UBlockCode			-	-	-	-	-	838498861765973f	205
+enumconst	c:@E@UBlockCode@UBLOCK_EMOTICONS	UBlockCode			-	-	-	-	-	09f45cc3a814b28a	206
+enumconst	c:@E@UBlockCode@UBLOCK_TRANSPORT_AND_MAP_SYMBOLS	UBlockCode			-	-	-	-	-	1a0c2d3b9d894ff8	207
+enumconst	c:@E@UBlockCode@UBLOCK_ALCHEMICAL_SYMBOLS	UBlockCode			-	-	-	-	-	69984cb2cc85b808	208
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D	UBlockCode			-	-	-	-	-	fdfc5949f8770b1b	209
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_EXTENDED_A	UBlockCode			-	-	-	-	-	c73144e645d1de03	210
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS	UBlockCode			-	-	-	-	-	323bb115c9c86b20	211
+enumconst	c:@E@UBlockCode@UBLOCK_CHAKMA	UBlockCode			-	-	-	-	-	4b335d228a46e8b4	212
+enumconst	c:@E@UBlockCode@UBLOCK_MEETEI_MAYEK_EXTENSIONS	UBlockCode			-	-	-	-	-	716c33930f5e44ac	213
+enumconst	c:@E@UBlockCode@UBLOCK_MEROITIC_CURSIVE	UBlockCode			-	-	-	-	-	8e912b4c39db192b	214
+enumconst	c:@E@UBlockCode@UBLOCK_MEROITIC_HIEROGLYPHS	UBlockCode			-	-	-	-	-	9cd7d4febae1861c	215
+enumconst	c:@E@UBlockCode@UBLOCK_MIAO	UBlockCode			-	-	-	-	-	ebe231df6d8bab05	216
+enumconst	c:@E@UBlockCode@UBLOCK_SHARADA	UBlockCode			-	-	-	-	-	bae0d9e1eb74780e	217
+enumconst	c:@E@UBlockCode@UBLOCK_SORA_SOMPENG	UBlockCode			-	-	-	-	-	beeb8eeb983e7b25	218
+enumconst	c:@E@UBlockCode@UBLOCK_SUNDANESE_SUPPLEMENT	UBlockCode			-	-	-	-	-	dc48616d9210acea	219
+enumconst	c:@E@UBlockCode@UBLOCK_TAKRI	UBlockCode			-	-	-	-	-	b976123620fb8c14	220
+enumconst	c:@E@UBlockCode@UBLOCK_BASSA_VAH	UBlockCode			-	-	-	-	-	298ff50a4e6ae649	221
+enumconst	c:@E@UBlockCode@UBLOCK_CAUCASIAN_ALBANIAN	UBlockCode			-	-	-	-	-	57f29df59e5cd6c8	222
+enumconst	c:@E@UBlockCode@UBLOCK_COPTIC_EPACT_NUMBERS	UBlockCode			-	-	-	-	-	435034a8951ab469	223
+enumconst	c:@E@UBlockCode@UBLOCK_COMBINING_DIACRITICAL_MARKS_EXTENDED	UBlockCode			-	-	-	-	-	ca310c85e151a8e1	224
+enumconst	c:@E@UBlockCode@UBLOCK_DUPLOYAN	UBlockCode			-	-	-	-	-	3160e62aff893cce	225
+enumconst	c:@E@UBlockCode@UBLOCK_ELBASAN	UBlockCode			-	-	-	-	-	396e1a35e10a012e	226
+enumconst	c:@E@UBlockCode@UBLOCK_GEOMETRIC_SHAPES_EXTENDED	UBlockCode			-	-	-	-	-	f93e58d8ab48f0ad	227
+enumconst	c:@E@UBlockCode@UBLOCK_GRANTHA	UBlockCode			-	-	-	-	-	7416f803a7c9c3e6	228
+enumconst	c:@E@UBlockCode@UBLOCK_KHOJKI	UBlockCode			-	-	-	-	-	bdfe11c13f7ba0af	229
+enumconst	c:@E@UBlockCode@UBLOCK_KHUDAWADI	UBlockCode			-	-	-	-	-	e59ccfa0b4fec30d	230
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_E	UBlockCode			-	-	-	-	-	18e12b76ddd04fd1	231
+enumconst	c:@E@UBlockCode@UBLOCK_LINEAR_A	UBlockCode			-	-	-	-	-	ff1e2c96b3bcdc25	232
+enumconst	c:@E@UBlockCode@UBLOCK_MAHAJANI	UBlockCode			-	-	-	-	-	4f2cdfc84589d07a	233
+enumconst	c:@E@UBlockCode@UBLOCK_MANICHAEAN	UBlockCode			-	-	-	-	-	5810d46a4b5eec48	234
+enumconst	c:@E@UBlockCode@UBLOCK_MENDE_KIKAKUI	UBlockCode			-	-	-	-	-	27b3297ffe8a9721	235
+enumconst	c:@E@UBlockCode@UBLOCK_MODI	UBlockCode			-	-	-	-	-	7578e17f550aff1b	236
+enumconst	c:@E@UBlockCode@UBLOCK_MRO	UBlockCode			-	-	-	-	-	5bae8d07daec9356	237
+enumconst	c:@E@UBlockCode@UBLOCK_MYANMAR_EXTENDED_B	UBlockCode			-	-	-	-	-	e136fbf5af5a3329	238
+enumconst	c:@E@UBlockCode@UBLOCK_NABATAEAN	UBlockCode			-	-	-	-	-	b7f81a336a4f4816	239
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_NORTH_ARABIAN	UBlockCode			-	-	-	-	-	fd234508746ec867	240
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_PERMIC	UBlockCode			-	-	-	-	-	d9c5d9dfda052aed	241
+enumconst	c:@E@UBlockCode@UBLOCK_ORNAMENTAL_DINGBATS	UBlockCode			-	-	-	-	-	0aaf53c4e9fb8dd1	242
+enumconst	c:@E@UBlockCode@UBLOCK_PAHAWH_HMONG	UBlockCode			-	-	-	-	-	8edabcd0949d5275	243
+enumconst	c:@E@UBlockCode@UBLOCK_PALMYRENE	UBlockCode			-	-	-	-	-	7db1b0653c90d3e8	244
+enumconst	c:@E@UBlockCode@UBLOCK_PAU_CIN_HAU	UBlockCode			-	-	-	-	-	1261e1dd68d3bc97	245
+enumconst	c:@E@UBlockCode@UBLOCK_PSALTER_PAHLAVI	UBlockCode			-	-	-	-	-	46d031fc418698d1	246
+enumconst	c:@E@UBlockCode@UBLOCK_SHORTHAND_FORMAT_CONTROLS	UBlockCode			-	-	-	-	-	727a9428af49bbf7	247
+enumconst	c:@E@UBlockCode@UBLOCK_SIDDHAM	UBlockCode			-	-	-	-	-	aa41c7db878e803a	248
+enumconst	c:@E@UBlockCode@UBLOCK_SINHALA_ARCHAIC_NUMBERS	UBlockCode			-	-	-	-	-	65f91c4438dfb734	249
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTAL_ARROWS_C	UBlockCode			-	-	-	-	-	e49af57f6007f1e5	250
+enumconst	c:@E@UBlockCode@UBLOCK_TIRHUTA	UBlockCode			-	-	-	-	-	65c2934746357c03	251
+enumconst	c:@E@UBlockCode@UBLOCK_WARANG_CITI	UBlockCode			-	-	-	-	-	ddc60a89bdc3d336	252
+enumconst	c:@E@UBlockCode@UBLOCK_AHOM	UBlockCode			-	-	-	-	-	698d0cf17fe2f8c7	253
+enumconst	c:@E@UBlockCode@UBLOCK_ANATOLIAN_HIEROGLYPHS	UBlockCode			-	-	-	-	-	0aab04f3386545f2	254
+enumconst	c:@E@UBlockCode@UBLOCK_CHEROKEE_SUPPLEMENT	UBlockCode			-	-	-	-	-	c854a5cc52dbd2b0	255
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_E	UBlockCode			-	-	-	-	-	36d25b7072e004cc	256
+enumconst	c:@E@UBlockCode@UBLOCK_EARLY_DYNASTIC_CUNEIFORM	UBlockCode			-	-	-	-	-	5ea5973bbce55650	257
+enumconst	c:@E@UBlockCode@UBLOCK_HATRAN	UBlockCode			-	-	-	-	-	9bf07370644786d6	258
+enumconst	c:@E@UBlockCode@UBLOCK_MULTANI	UBlockCode			-	-	-	-	-	35b4cf974ffffae1	259
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_HUNGARIAN	UBlockCode			-	-	-	-	-	d04fca439b309886	260
+enumconst	c:@E@UBlockCode@UBLOCK_SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS	UBlockCode			-	-	-	-	-	1489ff490eba983d	261
+enumconst	c:@E@UBlockCode@UBLOCK_SUTTON_SIGNWRITING	UBlockCode			-	-	-	-	-	2a7471be47e548f0	262
+enumconst	c:@E@UBlockCode@UBLOCK_ADLAM	UBlockCode			-	-	-	-	-	6a52580431161872	263
+enumconst	c:@E@UBlockCode@UBLOCK_BHAIKSUKI	UBlockCode			-	-	-	-	-	76603bd48b91b1be	264
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC_EXTENDED_C	UBlockCode			-	-	-	-	-	29472fa81ede801c	265
+enumconst	c:@E@UBlockCode@UBLOCK_GLAGOLITIC_SUPPLEMENT	UBlockCode			-	-	-	-	-	c8b3760cd89cb431	266
+enumconst	c:@E@UBlockCode@UBLOCK_IDEOGRAPHIC_SYMBOLS_AND_PUNCTUATION	UBlockCode			-	-	-	-	-	b8dc0101bf9f40aa	267
+enumconst	c:@E@UBlockCode@UBLOCK_MARCHEN	UBlockCode			-	-	-	-	-	0b926a6afb8f624e	268
+enumconst	c:@E@UBlockCode@UBLOCK_MONGOLIAN_SUPPLEMENT	UBlockCode			-	-	-	-	-	88272b2084330000	269
+enumconst	c:@E@UBlockCode@UBLOCK_NEWA	UBlockCode			-	-	-	-	-	84c1b688e92cc1ab	270
+enumconst	c:@E@UBlockCode@UBLOCK_OSAGE	UBlockCode			-	-	-	-	-	fc020296dcad9407	271
+enumconst	c:@E@UBlockCode@UBLOCK_TANGUT	UBlockCode			-	-	-	-	-	70f5b26bec35162a	272
+enumconst	c:@E@UBlockCode@UBLOCK_TANGUT_COMPONENTS	UBlockCode			-	-	-	-	-	c0184b0f8bf2d005	273
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_F	UBlockCode			-	-	-	-	-	31f8eaa285b6dff7	274
+enumconst	c:@E@UBlockCode@UBLOCK_KANA_EXTENDED_A	UBlockCode			-	-	-	-	-	099223e59318063f	275
+enumconst	c:@E@UBlockCode@UBLOCK_MASARAM_GONDI	UBlockCode			-	-	-	-	-	4eeea91f5e5183dd	276
+enumconst	c:@E@UBlockCode@UBLOCK_NUSHU	UBlockCode			-	-	-	-	-	290519b7c0b1f993	277
+enumconst	c:@E@UBlockCode@UBLOCK_SOYOMBO	UBlockCode			-	-	-	-	-	271581424bd38556	278
+enumconst	c:@E@UBlockCode@UBLOCK_SYRIAC_SUPPLEMENT	UBlockCode			-	-	-	-	-	f802154c97934633	279
+enumconst	c:@E@UBlockCode@UBLOCK_ZANABAZAR_SQUARE	UBlockCode			-	-	-	-	-	8d854d73bdf6b026	280
+enumconst	c:@E@UBlockCode@UBLOCK_CHESS_SYMBOLS	UBlockCode			-	-	-	-	-	ebe777e81613af54	281
+enumconst	c:@E@UBlockCode@UBLOCK_DOGRA	UBlockCode			-	-	-	-	-	f8f850f5f49b0b67	282
+enumconst	c:@E@UBlockCode@UBLOCK_GEORGIAN_EXTENDED	UBlockCode			-	-	-	-	-	e56e96b4461ca482	283
+enumconst	c:@E@UBlockCode@UBLOCK_GUNJALA_GONDI	UBlockCode			-	-	-	-	-	b9c7632a108926a4	284
+enumconst	c:@E@UBlockCode@UBLOCK_HANIFI_ROHINGYA	UBlockCode			-	-	-	-	-	6adb9afaab9e888d	285
+enumconst	c:@E@UBlockCode@UBLOCK_INDIC_SIYAQ_NUMBERS	UBlockCode			-	-	-	-	-	589835bdb24a5765	286
+enumconst	c:@E@UBlockCode@UBLOCK_MAKASAR	UBlockCode			-	-	-	-	-	a8d6727eaf177a4c	287
+enumconst	c:@E@UBlockCode@UBLOCK_MAYAN_NUMERALS	UBlockCode			-	-	-	-	-	431088cbf68ab5ea	288
+enumconst	c:@E@UBlockCode@UBLOCK_MEDEFAIDRIN	UBlockCode			-	-	-	-	-	326fe590865ddb0d	289
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_SOGDIAN	UBlockCode			-	-	-	-	-	ab9759b1569fe780	290
+enumconst	c:@E@UBlockCode@UBLOCK_SOGDIAN	UBlockCode			-	-	-	-	-	86805268b8424b55	291
+enumconst	c:@E@UBlockCode@UBLOCK_EGYPTIAN_HIEROGLYPH_FORMAT_CONTROLS	UBlockCode			-	-	-	-	-	417af380b16cb30d	292
+enumconst	c:@E@UBlockCode@UBLOCK_ELYMAIC	UBlockCode			-	-	-	-	-	70813c88cb68c95a	293
+enumconst	c:@E@UBlockCode@UBLOCK_NANDINAGARI	UBlockCode			-	-	-	-	-	68c8d5c9283cbf94	294
+enumconst	c:@E@UBlockCode@UBLOCK_NYIAKENG_PUACHUE_HMONG	UBlockCode			-	-	-	-	-	fba7bf98824fe7e6	295
+enumconst	c:@E@UBlockCode@UBLOCK_OTTOMAN_SIYAQ_NUMBERS	UBlockCode			-	-	-	-	-	8428c10c51116e4e	296
+enumconst	c:@E@UBlockCode@UBLOCK_SMALL_KANA_EXTENSION	UBlockCode			-	-	-	-	-	d67d4e5c90e1ddc5	297
+enumconst	c:@E@UBlockCode@UBLOCK_SYMBOLS_AND_PICTOGRAPHS_EXTENDED_A	UBlockCode			-	-	-	-	-	a3f3aa837dba124c	298
+enumconst	c:@E@UBlockCode@UBLOCK_TAMIL_SUPPLEMENT	UBlockCode			-	-	-	-	-	c2306334313019e8	299
+enumconst	c:@E@UBlockCode@UBLOCK_WANCHO	UBlockCode			-	-	-	-	-	b233923e00670ac8	300
+enumconst	c:@E@UBlockCode@UBLOCK_CHORASMIAN	UBlockCode			-	-	-	-	-	dea208dda66b4bae	301
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G	UBlockCode			-	-	-	-	-	a595a6962019b2d0	302
+enumconst	c:@E@UBlockCode@UBLOCK_DIVES_AKURU	UBlockCode			-	-	-	-	-	ecf8aebf334b3e0f	303
+enumconst	c:@E@UBlockCode@UBLOCK_KHITAN_SMALL_SCRIPT	UBlockCode			-	-	-	-	-	eec6ed766f12211f	304
+enumconst	c:@E@UBlockCode@UBLOCK_LISU_SUPPLEMENT	UBlockCode			-	-	-	-	-	037f5cda4cfe4875	305
+enumconst	c:@E@UBlockCode@UBLOCK_SYMBOLS_FOR_LEGACY_COMPUTING	UBlockCode			-	-	-	-	-	7fd674b0047bf62e	306
+enumconst	c:@E@UBlockCode@UBLOCK_TANGUT_SUPPLEMENT	UBlockCode			-	-	-	-	-	b6c90262574598be	307
+enumconst	c:@E@UBlockCode@UBLOCK_YEZIDI	UBlockCode			-	-	-	-	-	830543c493d4ba64	308
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_EXTENDED_B	UBlockCode			-	-	-	-	-	f47921ec505f0aee	309
+enumconst	c:@E@UBlockCode@UBLOCK_CYPRO_MINOAN	UBlockCode			-	-	-	-	-	f2d874ea6e576983	310
+enumconst	c:@E@UBlockCode@UBLOCK_ETHIOPIC_EXTENDED_B	UBlockCode			-	-	-	-	-	6fc4190d0a9373dd	311
+enumconst	c:@E@UBlockCode@UBLOCK_KANA_EXTENDED_B	UBlockCode			-	-	-	-	-	d43d2ca3a8f29059	312
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_F	UBlockCode			-	-	-	-	-	abbdbb3501f1cb97	313
+enumconst	c:@E@UBlockCode@UBLOCK_LATIN_EXTENDED_G	UBlockCode			-	-	-	-	-	ee633c0c95cba450	314
+enumconst	c:@E@UBlockCode@UBLOCK_OLD_UYGHUR	UBlockCode			-	-	-	-	-	298886960a9f1fcc	315
+enumconst	c:@E@UBlockCode@UBLOCK_TANGSA	UBlockCode			-	-	-	-	-	97c88fc57b525178	316
+enumconst	c:@E@UBlockCode@UBLOCK_TOTO	UBlockCode			-	-	-	-	-	3e4a7c8a553eb913	317
+enumconst	c:@E@UBlockCode@UBLOCK_UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS_EXTENDED_A	UBlockCode			-	-	-	-	-	03b5c54655ac3588	318
+enumconst	c:@E@UBlockCode@UBLOCK_VITHKUQI	UBlockCode			-	-	-	-	-	5dd73361e73536f3	319
+enumconst	c:@E@UBlockCode@UBLOCK_ZNAMENNY_MUSICAL_NOTATION	UBlockCode			-	-	-	-	-	488e2a82f8609891	320
+enumconst	c:@E@UBlockCode@UBLOCK_ARABIC_EXTENDED_C	UBlockCode			-	-	-	-	-	1b101c8ee080ef19	321
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_H	UBlockCode			-	-	-	-	-	dcc0f227440d8d7c	322
+enumconst	c:@E@UBlockCode@UBLOCK_CYRILLIC_EXTENDED_D	UBlockCode			-	-	-	-	-	7f3c25b80a06503d	323
+enumconst	c:@E@UBlockCode@UBLOCK_DEVANAGARI_EXTENDED_A	UBlockCode			-	-	-	-	-	1b44f19b78f00a98	324
+enumconst	c:@E@UBlockCode@UBLOCK_KAKTOVIK_NUMERALS	UBlockCode			-	-	-	-	-	4a4a2c30d8e0360b	325
+enumconst	c:@E@UBlockCode@UBLOCK_KAWI	UBlockCode			-	-	-	-	-	b97a0b88d295e9f2	326
+enumconst	c:@E@UBlockCode@UBLOCK_NAG_MUNDARI	UBlockCode			-	-	-	-	-	7953c0bb68dcaf27	327
+enumconst	c:@E@UBlockCode@UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_I	UBlockCode			-	-	-	-	-	0001f3096fe79fff	328
+enumconst	c:@E@UBlockCode@UBLOCK_EGYPTIAN_HIEROGLYPHS_EXTENDED_A	UBlockCode			-	-	-	-	-	0842d6f7102f20e0	329
+enumconst	c:@E@UBlockCode@UBLOCK_GARAY	UBlockCode			-	-	-	-	-	987bb70623836f1a	330
+enumconst	c:@E@UBlockCode@UBLOCK_GURUNG_KHEMA	UBlockCode			-	-	-	-	-	2fbcc39b01d933e5	331
+enumconst	c:@E@UBlockCode@UBLOCK_KIRAT_RAI	UBlockCode			-	-	-	-	-	698ea16143c88ce2	332
+enumconst	c:@E@UBlockCode@UBLOCK_MYANMAR_EXTENDED_C	UBlockCode			-	-	-	-	-	a400948d037e1b1b	333
+enumconst	c:@E@UBlockCode@UBLOCK_OL_ONAL	UBlockCode			-	-	-	-	-	f2c48cc827462149	334
+enumconst	c:@E@UBlockCode@UBLOCK_SUNUWAR	UBlockCode			-	-	-	-	-	7c7f25e03b51463e	335
+enumconst	c:@E@UBlockCode@UBLOCK_SYMBOLS_FOR_LEGACY_COMPUTING_SUPPLEMENT	UBlockCode			-	-	-	-	-	1b0818c97ecf8036	336
+enumconst	c:@E@UBlockCode@UBLOCK_TODHRI	UBlockCode			-	-	-	-	-	b164410144dc7d40	337
+enumconst	c:@E@UBlockCode@UBLOCK_TULU_TIGALARI	UBlockCode			-	-	-	-	-	edf016c254d16abc	338
+enumconst	c:@E@UBlockCode@UBLOCK_COUNT	UBlockCode			-	-	-	-	-	232f3541a232e39c	339
+enumconst	c:@E@UBlockCode@UBLOCK_INVALID_CODE	UBlockCode			-	-	-	-	-	2b9a1b9022d62a7f	-1
+typedef	c:@T@UBlockCode	-			enum UBlockCode	-	-	-	-	528352c2df9254f2	-
+enum	c:@E@UEastAsianWidth	-			unsigned int	-	-	-	-	d50dcbc35e4b5b9f	-
+enumconst	c:@E@UEastAsianWidth@U_EA_NEUTRAL	UEastAsianWidth			-	-	-	-	-	6f2a728f4773c60c	0
+enumconst	c:@E@UEastAsianWidth@U_EA_AMBIGUOUS	UEastAsianWidth			-	-	-	-	-	2f87063ee8b6d2ae	1
+enumconst	c:@E@UEastAsianWidth@U_EA_HALFWIDTH	UEastAsianWidth			-	-	-	-	-	5cfdddf933e46437	2
+enumconst	c:@E@UEastAsianWidth@U_EA_FULLWIDTH	UEastAsianWidth			-	-	-	-	-	fe35ef2bbb2c2c3f	3
+enumconst	c:@E@UEastAsianWidth@U_EA_NARROW	UEastAsianWidth			-	-	-	-	-	b7a35d27e768f6f0	4
+enumconst	c:@E@UEastAsianWidth@U_EA_WIDE	UEastAsianWidth			-	-	-	-	-	463fd2066f2a5d1f	5
+enumconst	c:@E@UEastAsianWidth@U_EA_COUNT	UEastAsianWidth			-	-	-	-	-	528e3c167e64ce04	6
+typedef	c:@T@UEastAsianWidth	-			enum UEastAsianWidth	-	-	-	-	90c569b658164de8	-
+enum	c:@E@UCharNameChoice	-			unsigned int	-	-	-	-	17e311bd7ed8b858	-
+enumconst	c:@E@UCharNameChoice@U_UNICODE_CHAR_NAME	UCharNameChoice			-	-	-	-	-	b6e1a8ed485b4d67	0
+enumconst	c:@E@UCharNameChoice@U_UNICODE_10_CHAR_NAME	UCharNameChoice			-	-	-	-	-	441fdc66c51bbec9	1
+enumconst	c:@E@UCharNameChoice@U_EXTENDED_CHAR_NAME	UCharNameChoice			-	-	-	-	-	e2b3e8be6e300023	2
+enumconst	c:@E@UCharNameChoice@U_CHAR_NAME_ALIAS	UCharNameChoice			-	-	-	-	-	5e28c65a968862e1	3
+enumconst	c:@E@UCharNameChoice@U_CHAR_NAME_CHOICE_COUNT	UCharNameChoice			-	-	-	-	-	9aa178e96e98aac7	4
+typedef	c:@T@UCharNameChoice	-			enum UCharNameChoice	-	-	-	-	2cab5f712d78b51d	-
+enum	c:@E@UPropertyNameChoice	-			unsigned int	-	-	-	-	d91e47f54711d919	-
+enumconst	c:@E@UPropertyNameChoice@U_SHORT_PROPERTY_NAME	UPropertyNameChoice			-	-	-	-	-	29973788a24dc70e	0
+enumconst	c:@E@UPropertyNameChoice@U_LONG_PROPERTY_NAME	UPropertyNameChoice			-	-	-	-	-	04e1a8c5d60e9e6f	1
+enumconst	c:@E@UPropertyNameChoice@U_PROPERTY_NAME_CHOICE_COUNT	UPropertyNameChoice			-	-	-	-	-	825cf94342510db4	2
+typedef	c:@T@UPropertyNameChoice	-			enum UPropertyNameChoice	-	-	-	-	615485f8b61564a8	-
+enum	c:@E@UDecompositionType	-			unsigned int	-	-	-	-	ae9f1a2ec4f98565	-
+enumconst	c:@E@UDecompositionType@U_DT_NONE	UDecompositionType			-	-	-	-	-	75a34b8246c4313a	0
+enumconst	c:@E@UDecompositionType@U_DT_CANONICAL	UDecompositionType			-	-	-	-	-	febd419e58ece02e	1
+enumconst	c:@E@UDecompositionType@U_DT_COMPAT	UDecompositionType			-	-	-	-	-	45206954092c550e	2
+enumconst	c:@E@UDecompositionType@U_DT_CIRCLE	UDecompositionType			-	-	-	-	-	2357cda70f669261	3
+enumconst	c:@E@UDecompositionType@U_DT_FINAL	UDecompositionType			-	-	-	-	-	62da72daddffeea3	4
+enumconst	c:@E@UDecompositionType@U_DT_FONT	UDecompositionType			-	-	-	-	-	90b28e2733d5031c	5
+enumconst	c:@E@UDecompositionType@U_DT_FRACTION	UDecompositionType			-	-	-	-	-	3fdf52d30ceb2193	6
+enumconst	c:@E@UDecompositionType@U_DT_INITIAL	UDecompositionType			-	-	-	-	-	98771b326cd9a88e	7
+enumconst	c:@E@UDecompositionType@U_DT_ISOLATED	UDecompositionType			-	-	-	-	-	042635006e065a05	8
+enumconst	c:@E@UDecompositionType@U_DT_MEDIAL	UDecompositionType			-	-	-	-	-	e1cc9391abcd971f	9
+enumconst	c:@E@UDecompositionType@U_DT_NARROW	UDecompositionType			-	-	-	-	-	4032f5db931336e0	10
+enumconst	c:@E@UDecompositionType@U_DT_NOBREAK	UDecompositionType			-	-	-	-	-	a74fa2602cd2b2f5	11
+enumconst	c:@E@UDecompositionType@U_DT_SMALL	UDecompositionType			-	-	-	-	-	d0ddaa488162ed05	12
+enumconst	c:@E@UDecompositionType@U_DT_SQUARE	UDecompositionType			-	-	-	-	-	02421bd41cf96fd0	13
+enumconst	c:@E@UDecompositionType@U_DT_SUB	UDecompositionType			-	-	-	-	-	393f240079e0b3d1	14
+enumconst	c:@E@UDecompositionType@U_DT_SUPER	UDecompositionType			-	-	-	-	-	71ceb4941b4c61eb	15
+enumconst	c:@E@UDecompositionType@U_DT_VERTICAL	UDecompositionType			-	-	-	-	-	76ca119273ef29c5	16
+enumconst	c:@E@UDecompositionType@U_DT_WIDE	UDecompositionType			-	-	-	-	-	70edc177930adeef	17
+enumconst	c:@E@UDecompositionType@U_DT_COUNT	UDecompositionType			-	-	-	-	-	f63ba57d7abb50ab	18
+typedef	c:@T@UDecompositionType	-			enum UDecompositionType	-	-	-	-	572143ab3f48baa0	-
+enum	c:@E@UJoiningType	-			unsigned int	-	-	-	-	802ed40f0b822eb0	-
+enumconst	c:@E@UJoiningType@U_JT_NON_JOINING	UJoiningType			-	-	-	-	-	d236bf5d32c43f6e	0
+enumconst	c:@E@UJoiningType@U_JT_JOIN_CAUSING	UJoiningType			-	-	-	-	-	fc8f65bdfb4a8c0c	1
+enumconst	c:@E@UJoiningType@U_JT_DUAL_JOINING	UJoiningType			-	-	-	-	-	8d8039d8b1429347	2
+enumconst	c:@E@UJoiningType@U_JT_LEFT_JOINING	UJoiningType			-	-	-	-	-	24b13cbdc3fe9de4	3
+enumconst	c:@E@UJoiningType@U_JT_RIGHT_JOINING	UJoiningType			-	-	-	-	-	f7231970a165aa06	4
+enumconst	c:@E@UJoiningType@U_JT_TRANSPARENT	UJoiningType			-	-	-	-	-	4d209f715dc4facb	5
+enumconst	c:@E@UJoiningType@U_JT_COUNT	UJoiningType			-	-	-	-	-	ffbe2b12b9736fe2	6
+typedef	c:@T@UJoiningType	-			enum UJoiningType	-	-	-	-	68d3c5db8eb988d5	-
+enum	c:@E@UJoiningGroup	-			unsigned int	-	-	-	-	5138f019a05a99f8	-
+enumconst	c:@E@UJoiningGroup@U_JG_NO_JOINING_GROUP	UJoiningGroup			-	-	-	-	-	eb8d59cd37d9f67b	0
+enumconst	c:@E@UJoiningGroup@U_JG_AIN	UJoiningGroup			-	-	-	-	-	53178672663fbe1f	1
+enumconst	c:@E@UJoiningGroup@U_JG_ALAPH	UJoiningGroup			-	-	-	-	-	a756e8ad27b9ec0e	2
+enumconst	c:@E@UJoiningGroup@U_JG_ALEF	UJoiningGroup			-	-	-	-	-	92fae3c9a8175417	3
+enumconst	c:@E@UJoiningGroup@U_JG_BEH	UJoiningGroup			-	-	-	-	-	0d51fbba2c560eae	4
+enumconst	c:@E@UJoiningGroup@U_JG_BETH	UJoiningGroup			-	-	-	-	-	678d0b67da353587	5
+enumconst	c:@E@UJoiningGroup@U_JG_DAL	UJoiningGroup			-	-	-	-	-	f368bdcc794e379a	6
+enumconst	c:@E@UJoiningGroup@U_JG_DALATH_RISH	UJoiningGroup			-	-	-	-	-	d8c21b0f2da81f50	7
+enumconst	c:@E@UJoiningGroup@U_JG_E	UJoiningGroup			-	-	-	-	-	7cd67be35decdb33	8
+enumconst	c:@E@UJoiningGroup@U_JG_FEH	UJoiningGroup			-	-	-	-	-	85a80886e6275940	9
+enumconst	c:@E@UJoiningGroup@U_JG_FINAL_SEMKATH	UJoiningGroup			-	-	-	-	-	c96d088e8ac417a9	10
+enumconst	c:@E@UJoiningGroup@U_JG_GAF	UJoiningGroup			-	-	-	-	-	fd6133bb0e480066	11
+enumconst	c:@E@UJoiningGroup@U_JG_GAMAL	UJoiningGroup			-	-	-	-	-	e57341e856c6439c	12
+enumconst	c:@E@UJoiningGroup@U_JG_HAH	UJoiningGroup			-	-	-	-	-	c046c9cb62fedc60	13
+enumconst	c:@E@UJoiningGroup@U_JG_TEH_MARBUTA_GOAL	UJoiningGroup			-	-	-	-	-	21156a825d0393bd	14
+enumconst	c:@E@UJoiningGroup@U_JG_HAMZA_ON_HEH_GOAL	UJoiningGroup			-	-	-	-	-	94bf5c81da685241	14
+enumconst	c:@E@UJoiningGroup@U_JG_HE	UJoiningGroup			-	-	-	-	-	fc1bd80179bd047a	15
+enumconst	c:@E@UJoiningGroup@U_JG_HEH	UJoiningGroup			-	-	-	-	-	9f9edefd9f77716b	16
+enumconst	c:@E@UJoiningGroup@U_JG_HEH_GOAL	UJoiningGroup			-	-	-	-	-	8538c02e22e768a7	17
+enumconst	c:@E@UJoiningGroup@U_JG_HETH	UJoiningGroup			-	-	-	-	-	9f03f69e8981b727	18
+enumconst	c:@E@UJoiningGroup@U_JG_KAF	UJoiningGroup			-	-	-	-	-	b8606482b7fdfaf8	19
+enumconst	c:@E@UJoiningGroup@U_JG_KAPH	UJoiningGroup			-	-	-	-	-	217c1c1dc85cd292	20
+enumconst	c:@E@UJoiningGroup@U_JG_KNOTTED_HEH	UJoiningGroup			-	-	-	-	-	1d2b960f52c9f831	21
+enumconst	c:@E@UJoiningGroup@U_JG_LAM	UJoiningGroup			-	-	-	-	-	595d54ac34333283	22
+enumconst	c:@E@UJoiningGroup@U_JG_LAMADH	UJoiningGroup			-	-	-	-	-	a66c596422444eb0	23
+enumconst	c:@E@UJoiningGroup@U_JG_MEEM	UJoiningGroup			-	-	-	-	-	8b78185c9a721e99	24
+enumconst	c:@E@UJoiningGroup@U_JG_MIM	UJoiningGroup			-	-	-	-	-	e49b2e832906b91d	25
+enumconst	c:@E@UJoiningGroup@U_JG_NOON	UJoiningGroup			-	-	-	-	-	a1e7e5e023b7d929	26
+enumconst	c:@E@UJoiningGroup@U_JG_NUN	UJoiningGroup			-	-	-	-	-	0214354dbb18d6eb	27
+enumconst	c:@E@UJoiningGroup@U_JG_PE	UJoiningGroup			-	-	-	-	-	e0c15faf2e652b46	28
+enumconst	c:@E@UJoiningGroup@U_JG_QAF	UJoiningGroup			-	-	-	-	-	6dfcc738d005b7e6	29
+enumconst	c:@E@UJoiningGroup@U_JG_QAPH	UJoiningGroup			-	-	-	-	-	a9d828bdc7ee4325	30
+enumconst	c:@E@UJoiningGroup@U_JG_REH	UJoiningGroup			-	-	-	-	-	c65b643653fd8c77	31
+enumconst	c:@E@UJoiningGroup@U_JG_REVERSED_PE	UJoiningGroup			-	-	-	-	-	1c3ebd3e761b9506	32
+enumconst	c:@E@UJoiningGroup@U_JG_SAD	UJoiningGroup			-	-	-	-	-	c9e5b5c685bfdd33	33
+enumconst	c:@E@UJoiningGroup@U_JG_SADHE	UJoiningGroup			-	-	-	-	-	01bbbb238d8f247b	34
+enumconst	c:@E@UJoiningGroup@U_JG_SEEN	UJoiningGroup			-	-	-	-	-	31ef3465a92a958c	35
+enumconst	c:@E@UJoiningGroup@U_JG_SEMKATH	UJoiningGroup			-	-	-	-	-	9766f52eaab1fef8	36
+enumconst	c:@E@UJoiningGroup@U_JG_SHIN	UJoiningGroup			-	-	-	-	-	630308f091565d30	37
+enumconst	c:@E@UJoiningGroup@U_JG_SWASH_KAF	UJoiningGroup			-	-	-	-	-	48ea0c3a9304f04c	38
+enumconst	c:@E@UJoiningGroup@U_JG_SYRIAC_WAW	UJoiningGroup			-	-	-	-	-	3c8f8a13070a8030	39
+enumconst	c:@E@UJoiningGroup@U_JG_TAH	UJoiningGroup			-	-	-	-	-	7a44fea0fe8f9850	40
+enumconst	c:@E@UJoiningGroup@U_JG_TAW	UJoiningGroup			-	-	-	-	-	50f7000f80854fb4	41
+enumconst	c:@E@UJoiningGroup@U_JG_TEH_MARBUTA	UJoiningGroup			-	-	-	-	-	56ea13cc66effb36	42
+enumconst	c:@E@UJoiningGroup@U_JG_TETH	UJoiningGroup			-	-	-	-	-	b33005e013a8bd96	43
+enumconst	c:@E@UJoiningGroup@U_JG_WAW	UJoiningGroup			-	-	-	-	-	82daa16a87d38352	44
+enumconst	c:@E@UJoiningGroup@U_JG_YEH	UJoiningGroup			-	-	-	-	-	e1cc68897afb42aa	45
+enumconst	c:@E@UJoiningGroup@U_JG_YEH_BARREE	UJoiningGroup			-	-	-	-	-	2afb6994abd3949b	46
+enumconst	c:@E@UJoiningGroup@U_JG_YEH_WITH_TAIL	UJoiningGroup			-	-	-	-	-	cf77f0007d510a29	47
+enumconst	c:@E@UJoiningGroup@U_JG_YUDH	UJoiningGroup			-	-	-	-	-	889dbb48d31eae38	48
+enumconst	c:@E@UJoiningGroup@U_JG_YUDH_HE	UJoiningGroup			-	-	-	-	-	6b5e3b99692dc11d	49
+enumconst	c:@E@UJoiningGroup@U_JG_ZAIN	UJoiningGroup			-	-	-	-	-	67ce9c4a6303f094	50
+enumconst	c:@E@UJoiningGroup@U_JG_FE	UJoiningGroup			-	-	-	-	-	d26940597ef247ed	51
+enumconst	c:@E@UJoiningGroup@U_JG_KHAPH	UJoiningGroup			-	-	-	-	-	6e5fa4eba4f1a73f	52
+enumconst	c:@E@UJoiningGroup@U_JG_ZHAIN	UJoiningGroup			-	-	-	-	-	b4a3e09f8bcf4780	53
+enumconst	c:@E@UJoiningGroup@U_JG_BURUSHASKI_YEH_BARREE	UJoiningGroup			-	-	-	-	-	79fa2d8e6810551c	54
+enumconst	c:@E@UJoiningGroup@U_JG_FARSI_YEH	UJoiningGroup			-	-	-	-	-	65d8545fd2b99660	55
+enumconst	c:@E@UJoiningGroup@U_JG_NYA	UJoiningGroup			-	-	-	-	-	283ce2d48d16b454	56
+enumconst	c:@E@UJoiningGroup@U_JG_ROHINGYA_YEH	UJoiningGroup			-	-	-	-	-	0813fb0aa8e0aa73	57
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_ALEPH	UJoiningGroup			-	-	-	-	-	316a32af2e6e03f6	58
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_AYIN	UJoiningGroup			-	-	-	-	-	b0a49f6e65c5c403	59
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_BETH	UJoiningGroup			-	-	-	-	-	27751765ed2dc517	60
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_DALETH	UJoiningGroup			-	-	-	-	-	494d6850942aca89	61
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_DHAMEDH	UJoiningGroup			-	-	-	-	-	30311c8e29a0bb40	62
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_FIVE	UJoiningGroup			-	-	-	-	-	cdfb004945d7590d	63
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_GIMEL	UJoiningGroup			-	-	-	-	-	6371c9fa4d9839b7	64
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_HETH	UJoiningGroup			-	-	-	-	-	c2646dd8f2b53eed	65
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_HUNDRED	UJoiningGroup			-	-	-	-	-	874735182d586399	66
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_KAPH	UJoiningGroup			-	-	-	-	-	e5f149df4d06895b	67
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_LAMEDH	UJoiningGroup			-	-	-	-	-	8079d03c381942ce	68
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_MEM	UJoiningGroup			-	-	-	-	-	7b3e95ece5aa521e	69
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_NUN	UJoiningGroup			-	-	-	-	-	a4434d696f282e17	70
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_ONE	UJoiningGroup			-	-	-	-	-	9918a620d4561209	71
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_PE	UJoiningGroup			-	-	-	-	-	c309fc0054beb963	72
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_QOPH	UJoiningGroup			-	-	-	-	-	f503d6f2b1d8fc98	73
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_RESH	UJoiningGroup			-	-	-	-	-	6dd9e167a6cb9709	74
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_SADHE	UJoiningGroup			-	-	-	-	-	8c1bf37669e26422	75
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_SAMEKH	UJoiningGroup			-	-	-	-	-	4cf57425ef92f1a6	76
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_TAW	UJoiningGroup			-	-	-	-	-	ffd99c9c1ed0e847	77
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_TEN	UJoiningGroup			-	-	-	-	-	7955a03db0eb65fb	78
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_TETH	UJoiningGroup			-	-	-	-	-	648a6318339f1b28	79
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_THAMEDH	UJoiningGroup			-	-	-	-	-	8d976824f4547639	80
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_TWENTY	UJoiningGroup			-	-	-	-	-	e2c06bcd3e6ff061	81
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_WAW	UJoiningGroup			-	-	-	-	-	a9a94bf7bce5f7e3	82
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_YODH	UJoiningGroup			-	-	-	-	-	943392e7e5c649b3	83
+enumconst	c:@E@UJoiningGroup@U_JG_MANICHAEAN_ZAYIN	UJoiningGroup			-	-	-	-	-	08b28ce459888856	84
+enumconst	c:@E@UJoiningGroup@U_JG_STRAIGHT_WAW	UJoiningGroup			-	-	-	-	-	94793d69dc24d32e	85
+enumconst	c:@E@UJoiningGroup@U_JG_AFRICAN_FEH	UJoiningGroup			-	-	-	-	-	f47b774f4ba13f53	86
+enumconst	c:@E@UJoiningGroup@U_JG_AFRICAN_NOON	UJoiningGroup			-	-	-	-	-	1762d892fddb40d7	87
+enumconst	c:@E@UJoiningGroup@U_JG_AFRICAN_QAF	UJoiningGroup			-	-	-	-	-	dd89987b85743f96	88
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_BHA	UJoiningGroup			-	-	-	-	-	b594e8311b7abc31	89
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_JA	UJoiningGroup			-	-	-	-	-	05800a89db2a6146	90
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_LLA	UJoiningGroup			-	-	-	-	-	639bb1f468a4023e	91
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_LLLA	UJoiningGroup			-	-	-	-	-	d8332f0df4c0c631	92
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_NGA	UJoiningGroup			-	-	-	-	-	70cf839d8be11f2c	93
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_NNA	UJoiningGroup			-	-	-	-	-	c9a2b2217b369197	94
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_NNNA	UJoiningGroup			-	-	-	-	-	b12346ad679b2cfe	95
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_NYA	UJoiningGroup			-	-	-	-	-	c54004efd9f3dc5c	96
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_RA	UJoiningGroup			-	-	-	-	-	0411663af6be2b72	97
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_SSA	UJoiningGroup			-	-	-	-	-	1204ef89256be790	98
+enumconst	c:@E@UJoiningGroup@U_JG_MALAYALAM_TTA	UJoiningGroup			-	-	-	-	-	c69ac94eb3016c8b	99
+enumconst	c:@E@UJoiningGroup@U_JG_HANIFI_ROHINGYA_KINNA_YA	UJoiningGroup			-	-	-	-	-	f6f391a1f1758e4a	100
+enumconst	c:@E@UJoiningGroup@U_JG_HANIFI_ROHINGYA_PA	UJoiningGroup			-	-	-	-	-	25a445a1a0bb0785	101
+enumconst	c:@E@UJoiningGroup@U_JG_THIN_YEH	UJoiningGroup			-	-	-	-	-	c60f635bd8586bbb	102
+enumconst	c:@E@UJoiningGroup@U_JG_VERTICAL_TAIL	UJoiningGroup			-	-	-	-	-	4449a01a6291c969	103
+enumconst	c:@E@UJoiningGroup@U_JG_KASHMIRI_YEH	UJoiningGroup			-	-	-	-	-	c09b58f1768a2308	104
+enumconst	c:@E@UJoiningGroup@U_JG_COUNT	UJoiningGroup			-	-	-	-	-	f5577c55fb08dbac	105
+typedef	c:@T@UJoiningGroup	-			enum UJoiningGroup	-	-	-	-	b2173b3912b4f8b6	-
+enum	c:@E@UGraphemeClusterBreak	-			unsigned int	-	-	-	-	64171a3af532b311	-
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_OTHER	UGraphemeClusterBreak			-	-	-	-	-	22c0fcf34debfbeb	0
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_CONTROL	UGraphemeClusterBreak			-	-	-	-	-	d79320b583fe6741	1
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_CR	UGraphemeClusterBreak			-	-	-	-	-	e2c6e4bc5f9a63aa	2
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_EXTEND	UGraphemeClusterBreak			-	-	-	-	-	158e5c73839e70d3	3
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_L	UGraphemeClusterBreak			-	-	-	-	-	6240be0a99b2d546	4
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_LF	UGraphemeClusterBreak			-	-	-	-	-	ec5501c20d28e137	5
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_LV	UGraphemeClusterBreak			-	-	-	-	-	6cd2e67423621237	6
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_LVT	UGraphemeClusterBreak			-	-	-	-	-	b7c3c415da5d9917	7
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_T	UGraphemeClusterBreak			-	-	-	-	-	56c06f17c6359185	8
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_V	UGraphemeClusterBreak			-	-	-	-	-	3c1081fc66190f01	9
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_SPACING_MARK	UGraphemeClusterBreak			-	-	-	-	-	1ae9798849c082f4	10
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_PREPEND	UGraphemeClusterBreak			-	-	-	-	-	d9f084203d15e1f2	11
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_REGIONAL_INDICATOR	UGraphemeClusterBreak			-	-	-	-	-	6b1846493746edcb	12
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_E_BASE	UGraphemeClusterBreak			-	-	-	-	-	ce529006460f9ff3	13
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_E_BASE_GAZ	UGraphemeClusterBreak			-	-	-	-	-	dde5714d0a11c7b7	14
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_E_MODIFIER	UGraphemeClusterBreak			-	-	-	-	-	38143ba6b3b02c3e	15
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_GLUE_AFTER_ZWJ	UGraphemeClusterBreak			-	-	-	-	-	ea5806b095c83762	16
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_ZWJ	UGraphemeClusterBreak			-	-	-	-	-	f02ece0f99e087b0	17
+enumconst	c:@E@UGraphemeClusterBreak@U_GCB_COUNT	UGraphemeClusterBreak			-	-	-	-	-	2608cee743aebf0f	18
+typedef	c:@T@UGraphemeClusterBreak	-			enum UGraphemeClusterBreak	-	-	-	-	080a9023d3fe1d21	-
+enum	c:@E@UWordBreakValues	-			unsigned int	-	-	-	-	8022938ba5839727	-
+enumconst	c:@E@UWordBreakValues@U_WB_OTHER	UWordBreakValues			-	-	-	-	-	7cde3f3345d0946e	0
+enumconst	c:@E@UWordBreakValues@U_WB_ALETTER	UWordBreakValues			-	-	-	-	-	5d83b261ebf01a53	1
+enumconst	c:@E@UWordBreakValues@U_WB_FORMAT	UWordBreakValues			-	-	-	-	-	3d2fbe0e384e0b42	2
+enumconst	c:@E@UWordBreakValues@U_WB_KATAKANA	UWordBreakValues			-	-	-	-	-	5c0ca88e2ea17cb8	3
+enumconst	c:@E@UWordBreakValues@U_WB_MIDLETTER	UWordBreakValues			-	-	-	-	-	f974ca9fc98191a9	4
+enumconst	c:@E@UWordBreakValues@U_WB_MIDNUM	UWordBreakValues			-	-	-	-	-	e96ee6b10630c958	5
+enumconst	c:@E@UWordBreakValues@U_WB_NUMERIC	UWordBreakValues			-	-	-	-	-	d32bb2ab2d2da624	6
+enumconst	c:@E@UWordBreakValues@U_WB_EXTENDNUMLET	UWordBreakValues			-	-	-	-	-	39a31de6db3d206a	7
+enumconst	c:@E@UWordBreakValues@U_WB_CR	UWordBreakValues			-	-	-	-	-	a701c1784cc7b129	8
+enumconst	c:@E@UWordBreakValues@U_WB_EXTEND	UWordBreakValues			-	-	-	-	-	cc8296cd01ee3cc0	9
+enumconst	c:@E@UWordBreakValues@U_WB_LF	UWordBreakValues			-	-	-	-	-	921f875b936dcf49	10
+enumconst	c:@E@UWordBreakValues@U_WB_MIDNUMLET	UWordBreakValues			-	-	-	-	-	1235a09379ffcbb2	11
+enumconst	c:@E@UWordBreakValues@U_WB_NEWLINE	UWordBreakValues			-	-	-	-	-	a4b960e3acb85877	12
+enumconst	c:@E@UWordBreakValues@U_WB_REGIONAL_INDICATOR	UWordBreakValues			-	-	-	-	-	d7c1a29fda7b8a78	13
+enumconst	c:@E@UWordBreakValues@U_WB_HEBREW_LETTER	UWordBreakValues			-	-	-	-	-	ac4fae6b20b9bfd9	14
+enumconst	c:@E@UWordBreakValues@U_WB_SINGLE_QUOTE	UWordBreakValues			-	-	-	-	-	93c53764d28d7662	15
+enumconst	c:@E@UWordBreakValues@U_WB_DOUBLE_QUOTE	UWordBreakValues			-	-	-	-	-	010c5cdef7f1e3a0	16
+enumconst	c:@E@UWordBreakValues@U_WB_E_BASE	UWordBreakValues			-	-	-	-	-	cdd250cd869690bc	17
+enumconst	c:@E@UWordBreakValues@U_WB_E_BASE_GAZ	UWordBreakValues			-	-	-	-	-	712bcf13352c0ba5	18
+enumconst	c:@E@UWordBreakValues@U_WB_E_MODIFIER	UWordBreakValues			-	-	-	-	-	78077fbbc3ddeb6c	19
+enumconst	c:@E@UWordBreakValues@U_WB_GLUE_AFTER_ZWJ	UWordBreakValues			-	-	-	-	-	2b60f1ee4fef326c	20
+enumconst	c:@E@UWordBreakValues@U_WB_ZWJ	UWordBreakValues			-	-	-	-	-	6e41914373fd958a	21
+enumconst	c:@E@UWordBreakValues@U_WB_WSEGSPACE	UWordBreakValues			-	-	-	-	-	d412fbbe02688408	22
+enumconst	c:@E@UWordBreakValues@U_WB_COUNT	UWordBreakValues			-	-	-	-	-	c29401366e9426ed	23
+typedef	c:@T@UWordBreakValues	-			enum UWordBreakValues	-	-	-	-	31c1f57343b4abd3	-
+enum	c:@E@USentenceBreak	-			unsigned int	-	-	-	-	892b32efc713d6a4	-
+enumconst	c:@E@USentenceBreak@U_SB_OTHER	USentenceBreak			-	-	-	-	-	c79cca7aa72e86fb	0
+enumconst	c:@E@USentenceBreak@U_SB_ATERM	USentenceBreak			-	-	-	-	-	1968f1757a319e79	1
+enumconst	c:@E@USentenceBreak@U_SB_CLOSE	USentenceBreak			-	-	-	-	-	814eab652da194c0	2
+enumconst	c:@E@USentenceBreak@U_SB_FORMAT	USentenceBreak			-	-	-	-	-	41b1c9257bf15fe7	3
+enumconst	c:@E@USentenceBreak@U_SB_LOWER	USentenceBreak			-	-	-	-	-	c1953c9c9a12afbe	4
+enumconst	c:@E@USentenceBreak@U_SB_NUMERIC	USentenceBreak			-	-	-	-	-	40cb4729590697b4	5
+enumconst	c:@E@USentenceBreak@U_SB_OLETTER	USentenceBreak			-	-	-	-	-	86fd214cdab9fca0	6
+enumconst	c:@E@USentenceBreak@U_SB_SEP	USentenceBreak			-	-	-	-	-	52a677067e9518d0	7
+enumconst	c:@E@USentenceBreak@U_SB_SP	USentenceBreak			-	-	-	-	-	b1ab0d8c4ab91ebe	8
+enumconst	c:@E@USentenceBreak@U_SB_STERM	USentenceBreak			-	-	-	-	-	55a1662aa58dbf48	9
+enumconst	c:@E@USentenceBreak@U_SB_UPPER	USentenceBreak			-	-	-	-	-	68337f079a983b2c	10
+enumconst	c:@E@USentenceBreak@U_SB_CR	USentenceBreak			-	-	-	-	-	c45bbb2e06bc8925	11
+enumconst	c:@E@USentenceBreak@U_SB_EXTEND	USentenceBreak			-	-	-	-	-	c0ae06d0d41452de	12
+enumconst	c:@E@USentenceBreak@U_SB_LF	USentenceBreak			-	-	-	-	-	f9812353f0363ff7	13
+enumconst	c:@E@USentenceBreak@U_SB_SCONTINUE	USentenceBreak			-	-	-	-	-	2380ac22b4fbca09	14
+enumconst	c:@E@USentenceBreak@U_SB_COUNT	USentenceBreak			-	-	-	-	-	3f5d8a1d035e4c32	15
+typedef	c:@T@USentenceBreak	-			enum USentenceBreak	-	-	-	-	fe61810525b6725b	-
+enum	c:@E@ULineBreak	-			unsigned int	-	-	-	-	710f72c58a3aaef2	-
+enumconst	c:@E@ULineBreak@U_LB_UNKNOWN	ULineBreak			-	-	-	-	-	0a374a694d6b640c	0
+enumconst	c:@E@ULineBreak@U_LB_AMBIGUOUS	ULineBreak			-	-	-	-	-	1df226b1181a0eb6	1
+enumconst	c:@E@ULineBreak@U_LB_ALPHABETIC	ULineBreak			-	-	-	-	-	501f6a3a1fe92ceb	2
+enumconst	c:@E@ULineBreak@U_LB_BREAK_BOTH	ULineBreak			-	-	-	-	-	2ca6e6e69c1ed958	3
+enumconst	c:@E@ULineBreak@U_LB_BREAK_AFTER	ULineBreak			-	-	-	-	-	029bcefcaf48adc9	4
+enumconst	c:@E@ULineBreak@U_LB_BREAK_BEFORE	ULineBreak			-	-	-	-	-	f98ac003c60261b4	5
+enumconst	c:@E@ULineBreak@U_LB_MANDATORY_BREAK	ULineBreak			-	-	-	-	-	b0e1ad224558e780	6
+enumconst	c:@E@ULineBreak@U_LB_CONTINGENT_BREAK	ULineBreak			-	-	-	-	-	1a34f6d7ac05dbc7	7
+enumconst	c:@E@ULineBreak@U_LB_CLOSE_PUNCTUATION	ULineBreak			-	-	-	-	-	d6d38f13ffba685b	8
+enumconst	c:@E@ULineBreak@U_LB_COMBINING_MARK	ULineBreak			-	-	-	-	-	9144d419a43ef78e	9
+enumconst	c:@E@ULineBreak@U_LB_CARRIAGE_RETURN	ULineBreak			-	-	-	-	-	367f93a356047a15	10
+enumconst	c:@E@ULineBreak@U_LB_EXCLAMATION	ULineBreak			-	-	-	-	-	30835ce3aaf9a038	11
+enumconst	c:@E@ULineBreak@U_LB_GLUE	ULineBreak			-	-	-	-	-	9c5b8a45b1cd847e	12
+enumconst	c:@E@ULineBreak@U_LB_HYPHEN	ULineBreak			-	-	-	-	-	c83fc7f565daa0bc	13
+enumconst	c:@E@ULineBreak@U_LB_IDEOGRAPHIC	ULineBreak			-	-	-	-	-	a25371adbf467d34	14
+enumconst	c:@E@ULineBreak@U_LB_INSEPARABLE	ULineBreak			-	-	-	-	-	6b5a7fbec6a1a538	15
+enumconst	c:@E@ULineBreak@U_LB_INSEPERABLE	ULineBreak			-	-	-	-	-	64e5acbf0da836fe	15
+enumconst	c:@E@ULineBreak@U_LB_INFIX_NUMERIC	ULineBreak			-	-	-	-	-	9528863693536278	16
+enumconst	c:@E@ULineBreak@U_LB_LINE_FEED	ULineBreak			-	-	-	-	-	f484371bc666c063	17
+enumconst	c:@E@ULineBreak@U_LB_NONSTARTER	ULineBreak			-	-	-	-	-	0a3db22a5e75a440	18
+enumconst	c:@E@ULineBreak@U_LB_NUMERIC	ULineBreak			-	-	-	-	-	a0c7adc9a4af1295	19
+enumconst	c:@E@ULineBreak@U_LB_OPEN_PUNCTUATION	ULineBreak			-	-	-	-	-	ecd4e5214e7cc29e	20
+enumconst	c:@E@ULineBreak@U_LB_POSTFIX_NUMERIC	ULineBreak			-	-	-	-	-	9efb78fe18d259f7	21
+enumconst	c:@E@ULineBreak@U_LB_PREFIX_NUMERIC	ULineBreak			-	-	-	-	-	b60c09b7b2f2f40a	22
+enumconst	c:@E@ULineBreak@U_LB_QUOTATION	ULineBreak			-	-	-	-	-	2459b04641c50cfc	23
+enumconst	c:@E@ULineBreak@U_LB_COMPLEX_CONTEXT	ULineBreak			-	-	-	-	-	e032ddb4e8de1fbc	24
+enumconst	c:@E@ULineBreak@U_LB_SURROGATE	ULineBreak			-	-	-	-	-	b9bc13b10a9fc815	25
+enumconst	c:@E@ULineBreak@U_LB_SPACE	ULineBreak			-	-	-	-	-	246a6ca44d3dd981	26
+enumconst	c:@E@ULineBreak@U_LB_BREAK_SYMBOLS	ULineBreak			-	-	-	-	-	bbc0e2b361d50c89	27
+enumconst	c:@E@ULineBreak@U_LB_ZWSPACE	ULineBreak			-	-	-	-	-	0922fd1d51e02d0f	28
+enumconst	c:@E@ULineBreak@U_LB_NEXT_LINE	ULineBreak			-	-	-	-	-	33ae181905f8fd1f	29
+enumconst	c:@E@ULineBreak@U_LB_WORD_JOINER	ULineBreak			-	-	-	-	-	9f4165e991871e05	30
+enumconst	c:@E@ULineBreak@U_LB_H2	ULineBreak			-	-	-	-	-	35a44a4cf714f8cf	31
+enumconst	c:@E@ULineBreak@U_LB_H3	ULineBreak			-	-	-	-	-	2d8d35db3b444eee	32
+enumconst	c:@E@ULineBreak@U_LB_JL	ULineBreak			-	-	-	-	-	140307b2e3b22f0b	33
+enumconst	c:@E@ULineBreak@U_LB_JT	ULineBreak			-	-	-	-	-	6a5df06ac85e939b	34
+enumconst	c:@E@ULineBreak@U_LB_JV	ULineBreak			-	-	-	-	-	b66b5bf1d72ccba1	35
+enumconst	c:@E@ULineBreak@U_LB_CLOSE_PARENTHESIS	ULineBreak			-	-	-	-	-	e085915f23cc4c15	36
+enumconst	c:@E@ULineBreak@U_LB_CONDITIONAL_JAPANESE_STARTER	ULineBreak			-	-	-	-	-	0036c4877775db9e	37
+enumconst	c:@E@ULineBreak@U_LB_HEBREW_LETTER	ULineBreak			-	-	-	-	-	a4b2ed5705abe716	38
+enumconst	c:@E@ULineBreak@U_LB_REGIONAL_INDICATOR	ULineBreak			-	-	-	-	-	9ab93d9489c18812	39
+enumconst	c:@E@ULineBreak@U_LB_E_BASE	ULineBreak			-	-	-	-	-	6c8ab2af9721843e	40
+enumconst	c:@E@ULineBreak@U_LB_E_MODIFIER	ULineBreak			-	-	-	-	-	2c956a61b5fc56b2	41
+enumconst	c:@E@ULineBreak@U_LB_ZWJ	ULineBreak			-	-	-	-	-	04551b9651d2b5f9	42
+enumconst	c:@E@ULineBreak@U_LB_AKSARA	ULineBreak			-	-	-	-	-	7c08ffd92b436637	43
+enumconst	c:@E@ULineBreak@U_LB_AKSARA_PREBASE	ULineBreak			-	-	-	-	-	4eb766c97378944a	44
+enumconst	c:@E@ULineBreak@U_LB_AKSARA_START	ULineBreak			-	-	-	-	-	e8af5a1efc041d67	45
+enumconst	c:@E@ULineBreak@U_LB_VIRAMA_FINAL	ULineBreak			-	-	-	-	-	f1a9b52a470cb653	46
+enumconst	c:@E@ULineBreak@U_LB_VIRAMA	ULineBreak			-	-	-	-	-	ce77bdeada11119d	47
+enumconst	c:@E@ULineBreak@U_LB_COUNT	ULineBreak			-	-	-	-	-	ec90c42aa831b732	48
+typedef	c:@T@ULineBreak	-			enum ULineBreak	-	-	-	-	0eb0ff5cc0a1bc4f	-
+enum	c:@E@UNumericType	-			unsigned int	-	-	-	-	bb229d1d5ddc0b2f	-
+enumconst	c:@E@UNumericType@U_NT_NONE	UNumericType			-	-	-	-	-	02c1135c1ce56bfa	0
+enumconst	c:@E@UNumericType@U_NT_DECIMAL	UNumericType			-	-	-	-	-	9bb018ad5db91f4e	1
+enumconst	c:@E@UNumericType@U_NT_DIGIT	UNumericType			-	-	-	-	-	ef0472c64858c416	2
+enumconst	c:@E@UNumericType@U_NT_NUMERIC	UNumericType			-	-	-	-	-	3718bf7696960184	3
+enumconst	c:@E@UNumericType@U_NT_COUNT	UNumericType			-	-	-	-	-	8a9b55e750617535	4
+typedef	c:@T@UNumericType	-			enum UNumericType	-	-	-	-	6975ebfc700939e5	-
+enum	c:@E@UHangulSyllableType	-			unsigned int	-	-	-	-	fcd43c4ca62d3982	-
+enumconst	c:@E@UHangulSyllableType@U_HST_NOT_APPLICABLE	UHangulSyllableType			-	-	-	-	-	64c43f94adf1a4b4	0
+enumconst	c:@E@UHangulSyllableType@U_HST_LEADING_JAMO	UHangulSyllableType			-	-	-	-	-	fe7c965b3b594dcf	1
+enumconst	c:@E@UHangulSyllableType@U_HST_VOWEL_JAMO	UHangulSyllableType			-	-	-	-	-	904db94dc677a697	2
+enumconst	c:@E@UHangulSyllableType@U_HST_TRAILING_JAMO	UHangulSyllableType			-	-	-	-	-	19943cf7dbda9607	3
+enumconst	c:@E@UHangulSyllableType@U_HST_LV_SYLLABLE	UHangulSyllableType			-	-	-	-	-	94bded29a45eef46	4
+enumconst	c:@E@UHangulSyllableType@U_HST_LVT_SYLLABLE	UHangulSyllableType			-	-	-	-	-	42cfab3ef1fbb932	5
+enumconst	c:@E@UHangulSyllableType@U_HST_COUNT	UHangulSyllableType			-	-	-	-	-	9f2bc7ee8d2eb838	6
+typedef	c:@T@UHangulSyllableType	-			enum UHangulSyllableType	-	-	-	-	380810f6cf4ad26e	-
+enum	c:@E@UIndicPositionalCategory	-			unsigned int	-	-	-	-	159bfa7d3f767893	-
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_NA	UIndicPositionalCategory			-	-	-	-	-	8586a3bf32ca8403	0
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_BOTTOM	UIndicPositionalCategory			-	-	-	-	-	054850e5a6465a47	1
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_BOTTOM_AND_LEFT	UIndicPositionalCategory			-	-	-	-	-	fb5f9f53d09e85a8	2
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_BOTTOM_AND_RIGHT	UIndicPositionalCategory			-	-	-	-	-	d4d8b709acfb3fc3	3
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_LEFT	UIndicPositionalCategory			-	-	-	-	-	5e93d02cb3c30e20	4
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_LEFT_AND_RIGHT	UIndicPositionalCategory			-	-	-	-	-	61a305db853a5ea2	5
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_OVERSTRUCK	UIndicPositionalCategory			-	-	-	-	-	51cd535d62cac980	6
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_RIGHT	UIndicPositionalCategory			-	-	-	-	-	4533554ddafa6fed	7
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP	UIndicPositionalCategory			-	-	-	-	-	5b773aefb166c416	8
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP_AND_BOTTOM	UIndicPositionalCategory			-	-	-	-	-	11fbb308d5ba15aa	9
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP_AND_BOTTOM_AND_RIGHT	UIndicPositionalCategory			-	-	-	-	-	94b8c5ae3dcbe2b3	10
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP_AND_LEFT	UIndicPositionalCategory			-	-	-	-	-	761d5a542bed7d68	11
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP_AND_LEFT_AND_RIGHT	UIndicPositionalCategory			-	-	-	-	-	1c55592584e2bbb9	12
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP_AND_RIGHT	UIndicPositionalCategory			-	-	-	-	-	35997e235808a6cb	13
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_VISUAL_ORDER_LEFT	UIndicPositionalCategory			-	-	-	-	-	8b4a4676be03023a	14
+enumconst	c:@E@UIndicPositionalCategory@U_INPC_TOP_AND_BOTTOM_AND_LEFT	UIndicPositionalCategory			-	-	-	-	-	003be0d5e8536e11	15
+typedef	c:@T@UIndicPositionalCategory	-			enum UIndicPositionalCategory	-	-	-	-	782566e7289fa833	-
+enum	c:@E@UIndicSyllabicCategory	-			unsigned int	-	-	-	-	f1752d238e7aa2c3	-
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_OTHER	UIndicSyllabicCategory			-	-	-	-	-	4545d21a93549b5c	0
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_AVAGRAHA	UIndicSyllabicCategory			-	-	-	-	-	db34e097ae744d5e	1
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_BINDU	UIndicSyllabicCategory			-	-	-	-	-	ecfce1f2611ad3a1	2
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_BRAHMI_JOINING_NUMBER	UIndicSyllabicCategory			-	-	-	-	-	3d56b56676c080aa	3
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CANTILLATION_MARK	UIndicSyllabicCategory			-	-	-	-	-	0896f4211575e5cb	4
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT	UIndicSyllabicCategory			-	-	-	-	-	55d81827bca60db8	5
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_DEAD	UIndicSyllabicCategory			-	-	-	-	-	7877e7b44be6d694	6
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_FINAL	UIndicSyllabicCategory			-	-	-	-	-	b84022ca481629fd	7
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_HEAD_LETTER	UIndicSyllabicCategory			-	-	-	-	-	092db2b5777823f4	8
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_INITIAL_POSTFIXED	UIndicSyllabicCategory			-	-	-	-	-	7c6bbd657b00b31e	9
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_KILLER	UIndicSyllabicCategory			-	-	-	-	-	7e49a51dda752587	10
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_MEDIAL	UIndicSyllabicCategory			-	-	-	-	-	b6e50bdda7532fc5	11
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_PLACEHOLDER	UIndicSyllabicCategory			-	-	-	-	-	034cb314f5287640	12
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_PRECEDING_REPHA	UIndicSyllabicCategory			-	-	-	-	-	746e6153fa4a2a96	13
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_PREFIXED	UIndicSyllabicCategory			-	-	-	-	-	18eac56f06f56980	14
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_SUBJOINED	UIndicSyllabicCategory			-	-	-	-	-	def0d5f6190bfeda	15
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_SUCCEEDING_REPHA	UIndicSyllabicCategory			-	-	-	-	-	2fdfc04b96e2b84d	16
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_CONSONANT_WITH_STACKER	UIndicSyllabicCategory			-	-	-	-	-	ea195ede378c8aa7	17
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_GEMINATION_MARK	UIndicSyllabicCategory			-	-	-	-	-	da3dc89781661b40	18
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_INVISIBLE_STACKER	UIndicSyllabicCategory			-	-	-	-	-	2ad3efb39d15e98e	19
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_JOINER	UIndicSyllabicCategory			-	-	-	-	-	fccb74720382ca67	20
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_MODIFYING_LETTER	UIndicSyllabicCategory			-	-	-	-	-	181a58ba5bf23989	21
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_NON_JOINER	UIndicSyllabicCategory			-	-	-	-	-	95db8b8546d42414	22
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_NUKTA	UIndicSyllabicCategory			-	-	-	-	-	56f1d2fabc8767f6	23
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_NUMBER	UIndicSyllabicCategory			-	-	-	-	-	af85a9bebe5f3630	24
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_NUMBER_JOINER	UIndicSyllabicCategory			-	-	-	-	-	76bcc2fa95e724b3	25
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_PURE_KILLER	UIndicSyllabicCategory			-	-	-	-	-	fb2e6cc6b23a443f	26
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_REGISTER_SHIFTER	UIndicSyllabicCategory			-	-	-	-	-	624aa5528771d98a	27
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_SYLLABLE_MODIFIER	UIndicSyllabicCategory			-	-	-	-	-	733b5a899e75326d	28
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_TONE_LETTER	UIndicSyllabicCategory			-	-	-	-	-	c15a1f0c6164203c	29
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_TONE_MARK	UIndicSyllabicCategory			-	-	-	-	-	8971bcfc00657abf	30
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_VIRAMA	UIndicSyllabicCategory			-	-	-	-	-	cddf3a21f48dd7bb	31
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_VISARGA	UIndicSyllabicCategory			-	-	-	-	-	8e2eefd87b6ac849	32
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_VOWEL	UIndicSyllabicCategory			-	-	-	-	-	dc08fd3f98a5a66d	33
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_VOWEL_DEPENDENT	UIndicSyllabicCategory			-	-	-	-	-	21a05ba88422ee4d	34
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_VOWEL_INDEPENDENT	UIndicSyllabicCategory			-	-	-	-	-	bfb515a4808f222a	35
+enumconst	c:@E@UIndicSyllabicCategory@U_INSC_REORDERING_KILLER	UIndicSyllabicCategory			-	-	-	-	-	f340c95253f74e33	36
+typedef	c:@T@UIndicSyllabicCategory	-			enum UIndicSyllabicCategory	-	-	-	-	14b7247117d96497	-
+enum	c:@E@UIndicConjunctBreak	-			unsigned int	-	-	-	-	7a8426d1dbd561f5	-
+enumconst	c:@E@UIndicConjunctBreak@U_INCB_NONE	UIndicConjunctBreak			-	-	-	-	-	37a4dd42d2fdc898	0
+enumconst	c:@E@UIndicConjunctBreak@U_INCB_CONSONANT	UIndicConjunctBreak			-	-	-	-	-	4a833eec074b859c	1
+enumconst	c:@E@UIndicConjunctBreak@U_INCB_EXTEND	UIndicConjunctBreak			-	-	-	-	-	be9c408240740b19	2
+enumconst	c:@E@UIndicConjunctBreak@U_INCB_LINKER	UIndicConjunctBreak			-	-	-	-	-	033735955dd1eaa8	3
+typedef	c:@T@UIndicConjunctBreak	-			enum UIndicConjunctBreak	-	-	-	-	34985a4563958800	-
+enum	c:@E@UVerticalOrientation	-			unsigned int	-	-	-	-	e91ee2dbfb019f31	-
+enumconst	c:@E@UVerticalOrientation@U_VO_ROTATED	UVerticalOrientation			-	-	-	-	-	1f2b607d234c4dc1	0
+enumconst	c:@E@UVerticalOrientation@U_VO_TRANSFORMED_ROTATED	UVerticalOrientation			-	-	-	-	-	036017b37db8a014	1
+enumconst	c:@E@UVerticalOrientation@U_VO_TRANSFORMED_UPRIGHT	UVerticalOrientation			-	-	-	-	-	8c9534fc608f12b2	2
+enumconst	c:@E@UVerticalOrientation@U_VO_UPRIGHT	UVerticalOrientation			-	-	-	-	-	0ca62eaec7581f6d	3
+typedef	c:@T@UVerticalOrientation	-			enum UVerticalOrientation	-	-	-	-	30cf784693f22487	-
+enum	c:@E@UIdentifierStatus	-			unsigned int	-	-	-	-	6cb83fec1904e617	-
+enumconst	c:@E@UIdentifierStatus@U_ID_STATUS_RESTRICTED	UIdentifierStatus			-	-	-	-	-	6fc26fb97922780a	0
+enumconst	c:@E@UIdentifierStatus@U_ID_STATUS_ALLOWED	UIdentifierStatus			-	-	-	-	-	0035face0eb0a14a	1
+typedef	c:@T@UIdentifierStatus	-			enum UIdentifierStatus	-	-	-	-	625b02a1dc9e5303	-
+enum	c:@E@UIdentifierType	-			unsigned int	-	-	-	-	96cc5522e14ee453	-
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_NOT_CHARACTER	UIdentifierType			-	-	-	-	-	523761fee9b60d49	0
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_DEPRECATED	UIdentifierType			-	-	-	-	-	3861003711b7017d	1
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_DEFAULT_IGNORABLE	UIdentifierType			-	-	-	-	-	deabdd2da3f4e542	2
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_NOT_NFKC	UIdentifierType			-	-	-	-	-	210b1561bdac0bc0	3
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_NOT_XID	UIdentifierType			-	-	-	-	-	85393a424d10feb6	4
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_EXCLUSION	UIdentifierType			-	-	-	-	-	3da0c8932f50a2d8	5
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_OBSOLETE	UIdentifierType			-	-	-	-	-	6ba836b8b0d85d41	6
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_TECHNICAL	UIdentifierType			-	-	-	-	-	7309e22e6acc6dfd	7
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_UNCOMMON_USE	UIdentifierType			-	-	-	-	-	9f15373569edca3f	8
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_LIMITED_USE	UIdentifierType			-	-	-	-	-	710dcebb4a40c98d	9
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_INCLUSION	UIdentifierType			-	-	-	-	-	4bd7bf7d3947aa6c	10
+enumconst	c:@E@UIdentifierType@U_ID_TYPE_RECOMMENDED	UIdentifierType			-	-	-	-	-	6cef4b2ff03d0318	11
+typedef	c:@T@UIdentifierType	-			enum UIdentifierType	-	-	-	-	18f614ae360adff5	-
+function	c:@F@u_hasBinaryProperty	-			UBool (UChar32, UProperty)	UChar32 c | UProperty which	-	-	-	8c32e9230b732157	-
+function	c:@F@u_stringHasBinaryProperty	-			UBool (const UChar *, int32_t, UProperty)	const UChar * s | int32_t length | UProperty which	-	-	-	79cbdda3fed62d59	-
+function	c:@F@u_getBinaryPropertySet	-			const USet * (UProperty, UErrorCode *)	UProperty property | UErrorCode * pErrorCode	-	-	-	a6fdb8da54914344	-
+function	c:@F@u_isUAlphabetic	-			UBool (UChar32)	UChar32 c	-	-	-	11fa2e97704dfe15	-
+function	c:@F@u_isULowercase	-			UBool (UChar32)	UChar32 c	-	-	-	5f300109ceebb34b	-
+function	c:@F@u_isUUppercase	-			UBool (UChar32)	UChar32 c	-	-	-	a69344ac3e4539bb	-
+function	c:@F@u_isUWhiteSpace	-			UBool (UChar32)	UChar32 c	-	-	-	d6afe7bebfc8dd4c	-
+function	c:@F@u_getIntPropertyValue	-			int32_t (UChar32, UProperty)	UChar32 c | UProperty which	-	-	-	055d74babe025686	-
+function	c:@F@u_getIntPropertyMinValue	-			int32_t (UProperty)	UProperty which	-	-	-	c6010ef58ef9e68b	-
+function	c:@F@u_getIntPropertyMaxValue	-			int32_t (UProperty)	UProperty which	-	-	-	7d9f5222782739ae	-
+function	c:@F@u_getIntPropertyMap	-			const UCPMap * (UProperty, UErrorCode *)	UProperty property | UErrorCode * pErrorCode	-	-	-	92179b3a7200e75b	-
+function	c:@F@u_getNumericValue	-			double (UChar32)	UChar32 c	-	-	-	d6dea97ee8b6c1d4	-
+function	c:@F@u_islower	-			UBool (UChar32)	UChar32 c	-	-	-	6ec3d7c6fa5c2d22	-
+function	c:@F@u_isupper	-			UBool (UChar32)	UChar32 c	-	-	-	49d690500de55950	-
+function	c:@F@u_istitle	-			UBool (UChar32)	UChar32 c	-	-	-	0e83eaf22f9e3ed2	-
+function	c:@F@u_isdigit	-			UBool (UChar32)	UChar32 c	-	-	-	b1bb4bff0b67ed3c	-
+function	c:@F@u_isalpha	-			UBool (UChar32)	UChar32 c	-	-	-	bfd26b3fd35fdc5f	-
+function	c:@F@u_isalnum	-			UBool (UChar32)	UChar32 c	-	-	-	34f705f6627774f1	-
+function	c:@F@u_isxdigit	-			UBool (UChar32)	UChar32 c	-	-	-	19f686f724f07418	-
+function	c:@F@u_ispunct	-			UBool (UChar32)	UChar32 c	-	-	-	9767fd41bfd37208	-
+function	c:@F@u_isgraph	-			UBool (UChar32)	UChar32 c	-	-	-	63a92fd21074c313	-
+function	c:@F@u_isblank	-			UBool (UChar32)	UChar32 c	-	-	-	b976af8f76f3b003	-
+function	c:@F@u_isdefined	-			UBool (UChar32)	UChar32 c	-	-	-	8417d3b1583e998a	-
+function	c:@F@u_isspace	-			UBool (UChar32)	UChar32 c	-	-	-	e3beea051978bf39	-
+function	c:@F@u_isJavaSpaceChar	-			UBool (UChar32)	UChar32 c	-	-	-	45b581618d55df9d	-
+function	c:@F@u_isWhitespace	-			UBool (UChar32)	UChar32 c	-	-	-	e6d8c7da296243d5	-
+function	c:@F@u_iscntrl	-			UBool (UChar32)	UChar32 c	-	-	-	b91e998150878643	-
+function	c:@F@u_isISOControl	-			UBool (UChar32)	UChar32 c	-	-	-	68d24f0864fb53b7	-
+function	c:@F@u_isprint	-			UBool (UChar32)	UChar32 c	-	-	-	15702ec1223b8661	-
+function	c:@F@u_isbase	-			UBool (UChar32)	UChar32 c	-	-	-	0e6cedd3db92fe71	-
+function	c:@F@u_charDirection	-			UCharDirection (UChar32)	UChar32 c	-	-	-	86f4087bfe55f7b7	-
+function	c:@F@u_isMirrored	-			UBool (UChar32)	UChar32 c	-	-	-	5882274ba5a85373	-
+function	c:@F@u_charMirror	-			UChar32 (UChar32)	UChar32 c	-	-	-	c2326c363e75179c	-
+function	c:@F@u_getBidiPairedBracket	-			UChar32 (UChar32)	UChar32 c	-	-	-	88b33d7934857fe9	-
+function	c:@F@u_charType	-			int8_t (UChar32)	UChar32 c	-	-	-	51cc372fb3d49b0b	-
+typedef	c:@T@UCharEnumTypeRange	-			UBool (const void *, UChar32, UChar32, UCharCategory)	-	-	-	-	7c6115adfe64fed7	-
+function	c:@F@u_enumCharTypes	-			void (UCharEnumTypeRange *, const void *)	UCharEnumTypeRange * enumRange | const void * context	-	-	-	5046210981ca1675	-
+function	c:@F@u_getCombiningClass	-			uint8_t (UChar32)	UChar32 c	-	-	-	0218adacd0346c04	-
+function	c:@F@u_charDigitValue	-			int32_t (UChar32)	UChar32 c	-	-	-	c8124d948dc9c747	-
+function	c:@F@ublock_getCode	-			UBlockCode (UChar32)	UChar32 c	-	-	-	464bdf108b1cc5e0	-
+function	c:@F@u_charName	-			int32_t (UChar32, UCharNameChoice, char *, int32_t, UErrorCode *)	UChar32 code | UCharNameChoice nameChoice | char * buffer | int32_t bufferLength | UErrorCode * pErrorCode	-	-	-	389dbca8f8bc0bce	-
+function	c:@F@u_getISOComment	-			int32_t (UChar32, char *, int32_t, UErrorCode *)	UChar32 c | char * dest | int32_t destCapacity | UErrorCode * pErrorCode	-	*deprecated	-	e938cbc6efc26cba	-
+function	c:@F@u_charFromName	-			UChar32 (UCharNameChoice, const char *, UErrorCode *)	UCharNameChoice nameChoice | const char * name | UErrorCode * pErrorCode	-	-	-	be0c7f8049cb8e3f	-
+typedef	c:@T@UEnumCharNamesFn	-			UBool (void *, UChar32, UCharNameChoice, const char *, int32_t)	-	-	-	-	742c738b7828734b	-
+function	c:@F@u_enumCharNames	-			void (UChar32, UChar32, UEnumCharNamesFn *, void *, UCharNameChoice, UErrorCode *)	UChar32 start | UChar32 limit | UEnumCharNamesFn * fn | void * context | UCharNameChoice nameChoice | UErrorCode * pErrorCode	-	-	-	b3070b4fb651a680	-
+function	c:@F@u_getPropertyName	-			const char * (UProperty, UPropertyNameChoice)	UProperty property | UPropertyNameChoice nameChoice	-	-	-	492dddb48cd13541	-
+function	c:@F@u_getPropertyEnum	-			UProperty (const char *)	const char * alias	-	-	-	945dcfe6ba07f907	-
+function	c:@F@u_getPropertyValueName	-			const char * (UProperty, int32_t, UPropertyNameChoice)	UProperty property | int32_t value | UPropertyNameChoice nameChoice	-	-	-	3f3f3b96452ffc3d	-
+function	c:@F@u_getPropertyValueEnum	-			int32_t (UProperty, const char *)	UProperty property | const char * alias	-	-	-	12b026eac28c6cbe	-
+function	c:@F@u_isIDStart	-			UBool (UChar32)	UChar32 c	-	-	-	bbc5c5377f248714	-
+function	c:@F@u_isIDPart	-			UBool (UChar32)	UChar32 c	-	-	-	2e785200e76dad4b	-
+function	c:@F@u_hasIDType	-			_Bool (UChar32, UIdentifierType)	UChar32 c | UIdentifierType type	-	-	-	627665ed6ca5e860	-
+function	c:@F@u_getIDTypes	-			int32_t (UChar32, UIdentifierType *, int32_t, UErrorCode *)	UChar32 c | UIdentifierType * types | int32_t capacity | UErrorCode * pErrorCode	-	-	-	d0b0e5002b389c4c	-
+function	c:@F@u_isIDIgnorable	-			UBool (UChar32)	UChar32 c	-	-	-	ad72c6532498321c	-
+function	c:@F@u_isJavaIDStart	-			UBool (UChar32)	UChar32 c	-	-	-	8637937c7e83c52a	-
+function	c:@F@u_isJavaIDPart	-			UBool (UChar32)	UChar32 c	-	-	-	e9adc035e009e2f1	-
+function	c:@F@u_tolower	-			UChar32 (UChar32)	UChar32 c	-	-	-	a95877414d9c93f6	-
+function	c:@F@u_toupper	-			UChar32 (UChar32)	UChar32 c	-	-	-	0253cab7c3b884bd	-
+function	c:@F@u_totitle	-			UChar32 (UChar32)	UChar32 c	-	-	-	638921ac075207d2	-
+function	c:@F@u_foldCase	-			UChar32 (UChar32, uint32_t)	UChar32 c | uint32_t options	-	-	-	d5afa4f5d9e9d349	-
+function	c:@F@u_digit	-			int32_t (UChar32, int8_t)	UChar32 ch | int8_t radix	-	-	-	6cf9f5195644292e	-
+function	c:@F@u_forDigit	-			UChar32 (int32_t, int8_t)	int32_t digit | int8_t radix	-	-	-	641c647a16b85a10	-
+function	c:@F@u_charAge	-			void (UChar32, UVersionInfo)	UChar32 c | UVersionInfo versionArray	-	-	-	eceb945aa2de1fba	-
+function	c:@F@u_getUnicodeVersion	-			void (UVersionInfo)	UVersionInfo versionArray	-	-	-	90771f741f841c76	-
+function	c:@F@u_getFC_NFKC_Closure	-			int32_t (UChar32, UChar *, int32_t, UErrorCode *)	UChar32 c | UChar * dest | int32_t destCapacity | UErrorCode * pErrorCode	-	-	-	a499e91bbf24989c	-
+typedef	c:@T@UCharIterator	-			struct UCharIterator	-	-	-	-	f1deaa873d55d694	-
+enum	c:@E@UCharIteratorOrigin	-			unsigned int	-	-	-	-	989ed2758270c9da	-
+enumconst	c:@E@UCharIteratorOrigin@UITER_START	UCharIteratorOrigin			-	-	-	-	-	b587fdb8630e31db	0
+enumconst	c:@E@UCharIteratorOrigin@UITER_CURRENT	UCharIteratorOrigin			-	-	-	-	-	9e50b14b5415ab78	1
+enumconst	c:@E@UCharIteratorOrigin@UITER_LIMIT	UCharIteratorOrigin			-	-	-	-	-	c7e349a883e47d83	2
+enumconst	c:@E@UCharIteratorOrigin@UITER_ZERO	UCharIteratorOrigin			-	-	-	-	-	2e5c5b26a2c71cf7	3
+enumconst	c:@E@UCharIteratorOrigin@UITER_LENGTH	UCharIteratorOrigin			-	-	-	-	-	7d78a6aa5fec033a	4
+typedef	c:@T@UCharIteratorOrigin	-			enum UCharIteratorOrigin	-	-	-	-	31e0f88ea5163704	-
+enum	c:@Ea@UITER_UNKNOWN_INDEX	-	-		int	-	-	-	-	7224deb834aa44b6	-
+enumconst	c:@Ea@UITER_UNKNOWN_INDEX@UITER_UNKNOWN_INDEX	-			-	-	-	-	-	45075be706948581	-2
+typedef	c:@T@UCharIteratorGetIndex	-			int32_t (UCharIterator *, UCharIteratorOrigin)	-	-	-	-	6e7b64bd7269e78a	-
+typedef	c:@T@UCharIteratorMove	-			int32_t (UCharIterator *, int32_t, UCharIteratorOrigin)	-	-	-	-	075232346cb69a68	-
+typedef	c:@T@UCharIteratorHasNext	-			UBool (UCharIterator *)	-	-	-	-	58c3f005cc734612	-
+typedef	c:@T@UCharIteratorHasPrevious	-			UBool (UCharIterator *)	-	-	-	-	3f0e5f4db7e073da	-
+typedef	c:@T@UCharIteratorCurrent	-			UChar32 (UCharIterator *)	-	-	-	-	e5ab79f722bd2583	-
+typedef	c:@T@UCharIteratorNext	-			UChar32 (UCharIterator *)	-	-	-	-	c5eb6169c2a03ad0	-
+typedef	c:@T@UCharIteratorPrevious	-			UChar32 (UCharIterator *)	-	-	-	-	4fa8404c08eabaff	-
+typedef	c:@T@UCharIteratorReserved	-			int32_t (UCharIterator *, int32_t)	-	-	-	-	811953106f59eba4	-
+typedef	c:@T@UCharIteratorGetState	-			uint32_t (const UCharIterator *)	-	-	-	-	11f5d44fd09dcf1f	-
+typedef	c:@T@UCharIteratorSetState	-			void (UCharIterator *, uint32_t, UErrorCode *)	-	-	-	-	59d89d34dff2c6ea	-
+struct	c:@S@UCharIterator	-			-	-	-	-	-	a283413b2d8dc3b3	-
+field	c:@S@UCharIterator@FI@context	UCharIterator			const void *	-	-	-	-	dbad484e22d719cd	-
+field	c:@S@UCharIterator@FI@length	UCharIterator			int32_t	-	-	-	-	b51cce3dcb0b56ae	-
+field	c:@S@UCharIterator@FI@start	UCharIterator			int32_t	-	-	-	-	a1b174e61ec90e46	-
+field	c:@S@UCharIterator@FI@index	UCharIterator			int32_t	-	-	-	-	791fc9ff96d9e78a	-
+field	c:@S@UCharIterator@FI@limit	UCharIterator			int32_t	-	-	-	-	2bac9cad20ad0bf6	-
+field	c:@S@UCharIterator@FI@reservedField	UCharIterator			int32_t	-	-	-	-	a63de0361982d14a	-
+field	c:@S@UCharIterator@FI@getIndex	UCharIterator			UCharIteratorGetIndex *	-	-	-	-	82d236e04812efa5	-
+field	c:@S@UCharIterator@FI@move	UCharIterator			UCharIteratorMove *	-	-	-	-	bb1f3e122c527dbd	-
+field	c:@S@UCharIterator@FI@hasNext	UCharIterator			UCharIteratorHasNext *	-	-	-	-	85aba3f0d2ab16db	-
+field	c:@S@UCharIterator@FI@hasPrevious	UCharIterator			UCharIteratorHasPrevious *	-	-	-	-	bab26ed502b915ef	-
+field	c:@S@UCharIterator@FI@current	UCharIterator			UCharIteratorCurrent *	-	-	-	-	8c05a46d65e2d795	-
+field	c:@S@UCharIterator@FI@next	UCharIterator			UCharIteratorNext *	-	-	-	-	47ad4c1cfd013187	-
+field	c:@S@UCharIterator@FI@previous	UCharIterator			UCharIteratorPrevious *	-	-	-	-	830f529f1b37448d	-
+field	c:@S@UCharIterator@FI@reservedFn	UCharIterator			UCharIteratorReserved *	-	-	-	-	44fbf58154bc353d	-
+field	c:@S@UCharIterator@FI@getState	UCharIterator			UCharIteratorGetState *	-	-	-	-	4445a0102ce5552d	-
+field	c:@S@UCharIterator@FI@setState	UCharIterator			UCharIteratorSetState *	-	-	-	-	fefe2e10430b103d	-
+function	c:@F@uiter_current32	-			UChar32 (UCharIterator *)	UCharIterator * iter	-	-	-	dd8064e5f29ccb4b	-
+function	c:@F@uiter_next32	-			UChar32 (UCharIterator *)	UCharIterator * iter	-	-	-	e404ef133c5d2a58	-
+function	c:@F@uiter_previous32	-			UChar32 (UCharIterator *)	UCharIterator * iter	-	-	-	a03486658d7f3497	-
+function	c:@F@uiter_getState	-			uint32_t (const UCharIterator *)	const UCharIterator * iter	-	-	-	8edc4da0ccf32cfd	-
+function	c:@F@uiter_setState	-			void (UCharIterator *, uint32_t, UErrorCode *)	UCharIterator * iter | uint32_t state | UErrorCode * pErrorCode	-	-	-	4c8841e0a486b132	-
+function	c:@F@uiter_setString	-			void (UCharIterator *, const UChar *, int32_t)	UCharIterator * iter | const UChar * s | int32_t length	-	-	-	17e121539859c436	-
+function	c:@F@uiter_setUTF16BE	-			void (UCharIterator *, const char *, int32_t)	UCharIterator * iter | const char * s | int32_t length	-	-	-	84a11e1fc1f35240	-
+function	c:@F@uiter_setUTF8	-			void (UCharIterator *, const char *, int32_t)	UCharIterator * iter | const char * s | int32_t length	-	-	-	3a097b8925947561	-
+typedef	c:@T@UText	-			struct UText	-	-	-	-	06c41489d860af12	-
+function	c:@F@utext_close	-			UText * (UText *)	UText * ut	-	-	-	f71e5e7cd539bcd1	-
+function	c:@F@utext_openUTF8	-			UText * (UText *, const char *, int64_t, UErrorCode *)	UText * ut | const char * s | int64_t length | UErrorCode * status	-	-	-	e2de899af5aafed4	-
+function	c:@F@utext_openUChars	-			UText * (UText *, const UChar *, int64_t, UErrorCode *)	UText * ut | const UChar * s | int64_t length | UErrorCode * status	-	-	-	6b82f53ed706630b	-
+function	c:@F@utext_clone	-			UText * (UText *, const UText *, UBool, UBool, UErrorCode *)	UText * dest | const UText * src | UBool deep | UBool readOnly | UErrorCode * status	-	-	-	a00816ab84dbcf4b	-
+function	c:@F@utext_equals	-			UBool (const UText *, const UText *)	const UText * a | const UText * b	-	-	-	849e9ecfec9cbde0	-
+function	c:@F@utext_nativeLength	-			int64_t (UText *)	UText * ut	-	-	-	94e5f930f57ca349	-
+function	c:@F@utext_isLengthExpensive	-			UBool (const UText *)	const UText * ut	-	-	-	142e66fa0a1d05d9	-
+function	c:@F@utext_char32At	-			UChar32 (UText *, int64_t)	UText * ut | int64_t nativeIndex	-	-	-	22c2660bcdb854ac	-
+function	c:@F@utext_current32	-			UChar32 (UText *)	UText * ut	-	-	-	2aff12686c16adfe	-
+function	c:@F@utext_next32	-			UChar32 (UText *)	UText * ut	-	-	-	698b53ba8f653c3d	-
+function	c:@F@utext_previous32	-			UChar32 (UText *)	UText * ut	-	-	-	ffec3819d1d11d93	-
+function	c:@F@utext_next32From	-			UChar32 (UText *, int64_t)	UText * ut | int64_t nativeIndex	-	-	-	32e1d78d72c13045	-
+function	c:@F@utext_previous32From	-			UChar32 (UText *, int64_t)	UText * ut | int64_t nativeIndex	-	-	-	62565c3d3583e717	-
+function	c:@F@utext_getNativeIndex	-			int64_t (const UText *)	const UText * ut	-	-	-	b772395008ddc595	-
+function	c:@F@utext_setNativeIndex	-			void (UText *, int64_t)	UText * ut | int64_t nativeIndex	-	-	-	5b55baadf65027ee	-
+function	c:@F@utext_moveIndex32	-			UBool (UText *, int32_t)	UText * ut | int32_t delta	-	-	-	8e2532ff89193de6	-
+function	c:@F@utext_getPreviousNativeIndex	-			int64_t (UText *)	UText * ut	-	-	-	6de09a17c6e62432	-
+function	c:@F@utext_extract	-			int32_t (UText *, int64_t, int64_t, UChar *, int32_t, UErrorCode *)	UText * ut | int64_t nativeStart | int64_t nativeLimit | UChar * dest | int32_t destCapacity | UErrorCode * status	-	-	-	3d75ba8bb0b8fd83	-
+function	c:@F@utext_isWritable	-			UBool (const UText *)	const UText * ut	-	-	-	8ad5171c4e84f9d6	-
+function	c:@F@utext_hasMetaData	-			UBool (const UText *)	const UText * ut	-	-	-	964bebf430ab47ce	-
+function	c:@F@utext_replace	-			int32_t (UText *, int64_t, int64_t, const UChar *, int32_t, UErrorCode *)	UText * ut | int64_t nativeStart | int64_t nativeLimit | const UChar * replacementText | int32_t replacementLength | UErrorCode * status	-	-	-	283ba718cc163820	-
+function	c:@F@utext_copy	-			void (UText *, int64_t, int64_t, int64_t, UBool, UErrorCode *)	UText * ut | int64_t nativeStart | int64_t nativeLimit | int64_t destIndex | UBool move | UErrorCode * status	-	-	-	fd14fe38a1ba975c	-
+function	c:@F@utext_freeze	-			void (UText *)	UText * ut	-	-	-	2e6924300a4b39fc	-
+enum	c:@Ea@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE	-	-		unsigned int	-	-	-	-	7dca86d54a7c83cc	-
+enumconst	c:@Ea@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE	-			-	-	-	-	-	a9d809c85d550e03	1
+enumconst	c:@Ea@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE@UTEXT_PROVIDER_STABLE_CHUNKS	-			-	-	-	-	-	03d42d138530c19d	2
+enumconst	c:@Ea@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE@UTEXT_PROVIDER_WRITABLE	-			-	-	-	-	-	0e9910bb2c2051ab	3
+enumconst	c:@Ea@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE@UTEXT_PROVIDER_HAS_META_DATA	-			-	-	-	-	-	f26dee1bf4a3e460	4
+enumconst	c:@Ea@UTEXT_PROVIDER_LENGTH_IS_EXPENSIVE@UTEXT_PROVIDER_OWNS_TEXT	-			-	-	-	-	-	69cdd72b3e028cef	5
+typedef	c:@T@UTextClone	-			UText *(UText *, const UText *, UBool, UErrorCode *)	-	-	-	-	fdd1ccb53dec2e30	-
+typedef	c:@T@UTextNativeLength	-			int64_t (UText *)	-	-	-	-	29a1ff6769da2625	-
+typedef	c:@T@UTextAccess	-			UBool (UText *, int64_t, UBool)	-	-	-	-	081400c189c259ab	-
+typedef	c:@T@UTextExtract	-			int32_t (UText *, int64_t, int64_t, UChar *, int32_t, UErrorCode *)	-	-	-	-	c405d10a95026553	-
+typedef	c:@T@UTextReplace	-			int32_t (UText *, int64_t, int64_t, const UChar *, int32_t, UErrorCode *)	-	-	-	-	3abdbff6346b331f	-
+typedef	c:@T@UTextCopy	-			void (UText *, int64_t, int64_t, int64_t, UBool, UErrorCode *)	-	-	-	-	1928845ff104c4ce	-
+typedef	c:@T@UTextMapOffsetToNative	-			int64_t (const UText *)	-	-	-	-	9858d8674890c211	-
+typedef	c:@T@UTextMapNativeIndexToUTF16	-			int32_t (const UText *, int64_t)	-	-	-	-	b9a8249a08ad14c0	-
+typedef	c:@T@UTextClose	-			void (UText *)	-	-	-	-	f25586f5e545d1c5	-
+struct	c:@S@UTextFuncs	-			-	-	-	-	-	9b55ce516755e4c1	-
+field	c:@S@UTextFuncs@FI@tableSize	UTextFuncs			int32_t	-	-	-	-	1318e8aa3f051826	-
+field	c:@S@UTextFuncs@FI@reserved1	UTextFuncs			int32_t	-	-	-	-	1b248a329f316f18	-
+field	c:@S@UTextFuncs@FI@reserved2	UTextFuncs			int32_t	-	-	-	-	7297266ef6038afd	-
+field	c:@S@UTextFuncs@FI@reserved3	UTextFuncs			int32_t	-	-	-	-	0185281db1e0848b	-
+field	c:@S@UTextFuncs@FI@clone	UTextFuncs			UTextClone *	-	-	-	-	aadc65fcc1feae5e	-
+field	c:@S@UTextFuncs@FI@nativeLength	UTextFuncs			UTextNativeLength *	-	-	-	-	389df5d5dd8789cb	-
+field	c:@S@UTextFuncs@FI@access	UTextFuncs			UTextAccess *	-	-	-	-	0ab57e622f035653	-
+field	c:@S@UTextFuncs@FI@extract	UTextFuncs			UTextExtract *	-	-	-	-	51ebb31851d76b35	-
+field	c:@S@UTextFuncs@FI@replace	UTextFuncs			UTextReplace *	-	-	-	-	5e3e0a60f56b40ad	-
+field	c:@S@UTextFuncs@FI@copy	UTextFuncs			UTextCopy *	-	-	-	-	096c067ac995bff4	-
+field	c:@S@UTextFuncs@FI@mapOffsetToNative	UTextFuncs			UTextMapOffsetToNative *	-	-	-	-	3e33d9c02c95afe6	-
+field	c:@S@UTextFuncs@FI@mapNativeIndexToUTF16	UTextFuncs			UTextMapNativeIndexToUTF16 *	-	-	-	-	dc9190594f240cd3	-
+field	c:@S@UTextFuncs@FI@close	UTextFuncs			UTextClose *	-	-	-	-	6f0d2c7f7a0ee438	-
+field	c:@S@UTextFuncs@FI@spare1	UTextFuncs			UTextClose *	-	-	-	-	4ccdff331ef0aa26	-
+field	c:@S@UTextFuncs@FI@spare2	UTextFuncs			UTextClose *	-	-	-	-	b01ed73a52f008f9	-
+field	c:@S@UTextFuncs@FI@spare3	UTextFuncs			UTextClose *	-	-	-	-	a3913131ffe7d882	-
+typedef	c:@T@UTextFuncs	-			struct UTextFuncs	-	-	-	-	96246a51fab716d9	-
+struct	c:@S@UText	-			-	-	-	-	-	cfa124da9e0f6312	-
+field	c:@S@UText@FI@magic	UText			uint32_t	-	-	-	-	ffe34da2a5922369	-
+field	c:@S@UText@FI@flags	UText			int32_t	-	-	-	-	75b09c1db1d1736c	-
+field	c:@S@UText@FI@providerProperties	UText			int32_t	-	-	-	-	cbf5d0d7213ed6bd	-
+field	c:@S@UText@FI@sizeOfStruct	UText			int32_t	-	-	-	-	8cf8e105ee27e02c	-
+field	c:@S@UText@FI@chunkNativeLimit	UText			int64_t	-	-	-	-	09f54e4d4de7609a	-
+field	c:@S@UText@FI@extraSize	UText			int32_t	-	-	-	-	0070ed13771016bb	-
+field	c:@S@UText@FI@nativeIndexingLimit	UText			int32_t	-	-	-	-	7e6e8dd7c75f3a7b	-
+field	c:@S@UText@FI@chunkNativeStart	UText			int64_t	-	-	-	-	7ceea188d71f83f4	-
+field	c:@S@UText@FI@chunkOffset	UText			int32_t	-	-	-	-	0315e333bd94854b	-
+field	c:@S@UText@FI@chunkLength	UText			int32_t	-	-	-	-	f8a009932a0568e9	-
+field	c:@S@UText@FI@chunkContents	UText			const UChar *	-	-	-	-	e3fff145845bb835	-
+field	c:@S@UText@FI@pFuncs	UText			const UTextFuncs *	-	-	-	-	6c339ef8c2e8fe43	-
+field	c:@S@UText@FI@pExtra	UText			void *	-	-	-	-	9b33d815ec0cbc48	-
+field	c:@S@UText@FI@context	UText			const void *	-	-	-	-	2f0319c324ca78ec	-
+field	c:@S@UText@FI@p	UText			const void *	-	-	-	-	4b927f91cea10318	-
+field	c:@S@UText@FI@q	UText			const void *	-	-	-	-	183565cbf8145011	-
+field	c:@S@UText@FI@r	UText			const void *	-	-	-	-	a76891466cab85d6	-
+field	c:@S@UText@FI@privP	UText			void *	-	-	-	-	11a821cb653a017c	-
+field	c:@S@UText@FI@a	UText			int64_t	-	-	-	-	d6296d55fb5929e6	-
+field	c:@S@UText@FI@b	UText			int32_t	-	-	-	-	2d57847f48f62ed9	-
+field	c:@S@UText@FI@c	UText			int32_t	-	-	-	-	9d0d2ed7fa38a591	-
+field	c:@S@UText@FI@privA	UText			int64_t	-	-	-	-	54bbc66f32d7fad5	-
+field	c:@S@UText@FI@privB	UText			int32_t	-	-	-	-	5f5781e9e052624f	-
+field	c:@S@UText@FI@privC	UText			int32_t	-	-	-	-	21823afd6c415435	-
+function	c:@F@utext_setup	-			UText * (UText *, int32_t, UErrorCode *)	UText * ut | int32_t extraSpace | UErrorCode * status	-	-	-	2d6df67091557530	-
+enum	c:@Ea@UTEXT_MAGIC	-	-		unsigned int	-	-	-	-	31cd7cfee13070e7	-
+enumconst	c:@Ea@UTEXT_MAGIC@UTEXT_MAGIC	-			-	-	-	-	-	23f7fb5617847a85	878368812
+enum	c:@Ea@UIDNA_DEFAULT	-	-		unsigned int	-	-	-	-	fe118ade7863bc7c	-
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_DEFAULT	-			-	-	-	-	-	63f6650d0a72b5fb	48
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_ALLOW_UNASSIGNED	-			-	-	-	-	-	29d21a5bf41efeec	1
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_USE_STD3_RULES	-			-	-	-	-	-	7ede19374a0bad05	2
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_CHECK_BIDI	-			-	-	-	-	-	bcfeef6b27126d5e	4
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_CHECK_CONTEXTJ	-			-	-	-	-	-	d2cb0fb2e4651585	8
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_NONTRANSITIONAL_TO_ASCII	-			-	-	-	-	-	93ab2b682266aea1	16
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_NONTRANSITIONAL_TO_UNICODE	-			-	-	-	-	-	60938676648e6ea2	32
+enumconst	c:@Ea@UIDNA_DEFAULT@UIDNA_CHECK_CONTEXTO	-			-	-	-	-	-	2a9a3ac479497a5d	64
+struct	c:@S@UIDNA	-			-	-	-	-	-	f58288bc82453500	-
+typedef	c:@T@UIDNA	-			struct UIDNA	-	-	-	-	305bd2ad8acb54b8	-
+function	c:@F@uidna_openUTS46	-			UIDNA * (uint32_t, UErrorCode *)	uint32_t options | UErrorCode * pErrorCode	-	-	-	1434c64976b7c0e3	-
+function	c:@F@uidna_close	-			void (UIDNA *)	UIDNA * idna	-	-	-	cab3f6d0492dc03e	-
+struct	c:@S@UIDNAInfo	-			-	-	-	-	-	f28fb7b91f69e193	-
+field	c:@S@UIDNAInfo@FI@size	UIDNAInfo			int16_t	-	-	-	-	d4cbaa87f8efbece	-
+field	c:@S@UIDNAInfo@FI@isTransitionalDifferent	UIDNAInfo			UBool	-	-	-	-	45d4d0519a15ae2f	-
+field	c:@S@UIDNAInfo@FI@reservedB3	UIDNAInfo			UBool	-	-	-	-	2e4ee1a6565dae94	-
+field	c:@S@UIDNAInfo@FI@errors	UIDNAInfo			uint32_t	-	-	-	-	63d1b3a6867969e3	-
+field	c:@S@UIDNAInfo@FI@reservedI2	UIDNAInfo			int32_t	-	-	-	-	fb3abaaf34164352	-
+field	c:@S@UIDNAInfo@FI@reservedI3	UIDNAInfo			int32_t	-	-	-	-	ccecf272e88d9575	-
+typedef	c:@T@UIDNAInfo	-			struct UIDNAInfo	-	-	-	-	6bbbb5d541e09ca2	-
+function	c:@F@uidna_labelToASCII	-			int32_t (const UIDNA *, const UChar *, int32_t, UChar *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const UChar * label | int32_t length | UChar * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	6f4d054f9cd99303	-
+function	c:@F@uidna_labelToUnicode	-			int32_t (const UIDNA *, const UChar *, int32_t, UChar *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const UChar * label | int32_t length | UChar * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	f186f6604043f67a	-
+function	c:@F@uidna_nameToASCII	-			int32_t (const UIDNA *, const UChar *, int32_t, UChar *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const UChar * name | int32_t length | UChar * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	bf58e838834eed9c	-
+function	c:@F@uidna_nameToUnicode	-			int32_t (const UIDNA *, const UChar *, int32_t, UChar *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const UChar * name | int32_t length | UChar * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	b715b55c5b631679	-
+function	c:@F@uidna_labelToASCII_UTF8	-			int32_t (const UIDNA *, const char *, int32_t, char *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const char * label | int32_t length | char * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	9c708469d6c968eb	-
+function	c:@F@uidna_labelToUnicodeUTF8	-			int32_t (const UIDNA *, const char *, int32_t, char *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const char * label | int32_t length | char * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	048d592445f70548	-
+function	c:@F@uidna_nameToASCII_UTF8	-			int32_t (const UIDNA *, const char *, int32_t, char *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const char * name | int32_t length | char * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	fe756e997736c183	-
+function	c:@F@uidna_nameToUnicodeUTF8	-			int32_t (const UIDNA *, const char *, int32_t, char *, int32_t, UIDNAInfo *, UErrorCode *)	const UIDNA * idna | const char * name | int32_t length | char * dest | int32_t capacity | UIDNAInfo * pInfo | UErrorCode * pErrorCode	-	-	-	9704cbee4d2801c8	-
+enum	c:@Ea@UIDNA_ERROR_EMPTY_LABEL	-	-		unsigned int	-	-	-	-	e6d73405eaaa37a6	-
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_EMPTY_LABEL	-			-	-	-	-	-	2f34eb7200a24a6b	1
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_LABEL_TOO_LONG	-			-	-	-	-	-	3f96677c9dd3d1c4	2
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_DOMAIN_NAME_TOO_LONG	-			-	-	-	-	-	e61d2610d92c0939	4
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_LEADING_HYPHEN	-			-	-	-	-	-	5e34f4f8c5ca4762	8
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_TRAILING_HYPHEN	-			-	-	-	-	-	4dd9628fdf232a77	16
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_HYPHEN_3_4	-			-	-	-	-	-	922d1b784ba8a1f1	32
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_LEADING_COMBINING_MARK	-			-	-	-	-	-	2e3a1b63950512e6	64
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_DISALLOWED	-			-	-	-	-	-	e3228244ac7ec5b3	128
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_PUNYCODE	-			-	-	-	-	-	feb9c693a1084cca	256
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_LABEL_HAS_DOT	-			-	-	-	-	-	95057d36ca4bf2fd	512
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_INVALID_ACE_LABEL	-			-	-	-	-	-	09c52a8d919c40d5	1024
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_BIDI	-			-	-	-	-	-	d7166fe1e7ce248c	2048
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_CONTEXTJ	-			-	-	-	-	-	6b6b30729d99fe3d	4096
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_CONTEXTO_PUNCTUATION	-			-	-	-	-	-	f07170e4deece742	8192
+enumconst	c:@Ea@UIDNA_ERROR_EMPTY_LABEL@UIDNA_ERROR_CONTEXTO_DIGITS	-			-	-	-	-	-	c6e41a07827926b2	16384
+function	c:@F@uidna_toASCII	-			int32_t (const UChar *, int32_t, UChar *, int32_t, int32_t, UParseError *, UErrorCode *)	const UChar * src | int32_t srcLength | UChar * dest | int32_t destCapacity | int32_t options | UParseError * parseError | UErrorCode * status	-	*deprecated	-	92e4f36fb95abaa9	-
+function	c:@F@uidna_toUnicode	-			int32_t (const UChar *, int32_t, UChar *, int32_t, int32_t, UParseError *, UErrorCode *)	const UChar * src | int32_t srcLength | UChar * dest | int32_t destCapacity | int32_t options | UParseError * parseError | UErrorCode * status	-	*deprecated	-	8a9a4a7c54a93ee4	-
+function	c:@F@uidna_IDNToASCII	-			int32_t (const UChar *, int32_t, UChar *, int32_t, int32_t, UParseError *, UErrorCode *)	const UChar * src | int32_t srcLength | UChar * dest | int32_t destCapacity | int32_t options | UParseError * parseError | UErrorCode * status	-	*deprecated	-	3a1dfe4550137a77	-
+function	c:@F@uidna_IDNToUnicode	-			int32_t (const UChar *, int32_t, UChar *, int32_t, int32_t, UParseError *, UErrorCode *)	const UChar * src | int32_t srcLength | UChar * dest | int32_t destCapacity | int32_t options | UParseError * parseError | UErrorCode * status	-	*deprecated	-	6c10234711dac502	-
+function	c:@F@uidna_compare	-			int32_t (const UChar *, int32_t, const UChar *, int32_t, int32_t, UErrorCode *)	const UChar * s1 | int32_t length1 | const UChar * s2 | int32_t length2 | int32_t options | UErrorCode * status	-	*deprecated	-	b9e0d574b8acd83f	-
+struct	c:@S@URegularExpression	-			-	-	-	-	-	a582f3e735b7eae7	-
+typedef	c:@T@URegularExpression	-			struct URegularExpression	-	-	-	-	28ada55b71951795	-
+enum	c:@E@URegexpFlag	-			unsigned int	-	-	-	-	2a1af2c64510761a	-
+enumconst	c:@E@URegexpFlag@UREGEX_CANON_EQ	URegexpFlag			-	-	-	-	-	b528505898604c20	128
+enumconst	c:@E@URegexpFlag@UREGEX_CASE_INSENSITIVE	URegexpFlag			-	-	-	-	-	fe9b938718c7911f	2
+enumconst	c:@E@URegexpFlag@UREGEX_COMMENTS	URegexpFlag			-	-	-	-	-	ca530e08ce71eec0	4
+enumconst	c:@E@URegexpFlag@UREGEX_DOTALL	URegexpFlag			-	-	-	-	-	3613b11dcd4c782f	32
+enumconst	c:@E@URegexpFlag@UREGEX_LITERAL	URegexpFlag			-	-	-	-	-	bfc298d83fb7b7ae	16
+enumconst	c:@E@URegexpFlag@UREGEX_MULTILINE	URegexpFlag			-	-	-	-	-	69c9aa9268ac0891	8
+enumconst	c:@E@URegexpFlag@UREGEX_UNIX_LINES	URegexpFlag			-	-	-	-	-	664cc6d405edb78e	1
+enumconst	c:@E@URegexpFlag@UREGEX_UWORD	URegexpFlag			-	-	-	-	-	fdb4974c1ecb29ed	256
+enumconst	c:@E@URegexpFlag@UREGEX_ERROR_ON_UNKNOWN_ESCAPES	URegexpFlag			-	-	-	-	-	2940b2a56ee24ee1	512
+typedef	c:@T@URegexpFlag	-			enum URegexpFlag	-	-	-	-	9cdd9d82769a20e6	-
+function	c:@F@uregex_open	-			URegularExpression * (const UChar *, int32_t, uint32_t, UParseError *, UErrorCode *)	const UChar * pattern | int32_t patternLength | uint32_t flags | UParseError * pe | UErrorCode * status	-	-	-	2a1d0723bd3bc96d	-
+function	c:@F@uregex_openUText	-			URegularExpression * (UText *, uint32_t, UParseError *, UErrorCode *)	UText * pattern | uint32_t flags | UParseError * pe | UErrorCode * status	-	-	-	aa37608f0a105edb	-
+function	c:@F@uregex_openC	-			URegularExpression * (const char *, uint32_t, UParseError *, UErrorCode *)	const char * pattern | uint32_t flags | UParseError * pe | UErrorCode * status	-	-	-	3e3abb62b84c7b07	-
+function	c:@F@uregex_close	-			void (URegularExpression *)	URegularExpression * regexp	-	-	-	ec433a4fed5be2a7	-
+function	c:@F@uregex_clone	-			URegularExpression * (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	b103fd97b418b428	-
+function	c:@F@uregex_pattern	-			const UChar * (const URegularExpression *, int32_t *, UErrorCode *)	const URegularExpression * regexp | int32_t * patLength | UErrorCode * status	-	-	-	5fca38e084038faf	-
+function	c:@F@uregex_patternUText	-			UText * (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	0e00817a94408be0	-
+function	c:@F@uregex_flags	-			int32_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	0149d9583de3397f	-
+function	c:@F@uregex_setText	-			void (URegularExpression *, const UChar *, int32_t, UErrorCode *)	URegularExpression * regexp | const UChar * text | int32_t textLength | UErrorCode * status	-	-	-	514b4ca65940b6ae	-
+function	c:@F@uregex_setUText	-			void (URegularExpression *, UText *, UErrorCode *)	URegularExpression * regexp | UText * text | UErrorCode * status	-	-	-	aa1f61a6ccf76b1a	-
+function	c:@F@uregex_getText	-			const UChar * (URegularExpression *, int32_t *, UErrorCode *)	URegularExpression * regexp | int32_t * textLength | UErrorCode * status	-	-	-	5d10c171c7648136	-
+function	c:@F@uregex_getUText	-			UText * (URegularExpression *, UText *, UErrorCode *)	URegularExpression * regexp | UText * dest | UErrorCode * status	-	-	-	4e707bc956331ebf	-
+function	c:@F@uregex_refreshUText	-			void (URegularExpression *, UText *, UErrorCode *)	URegularExpression * regexp | UText * text | UErrorCode * status	-	-	-	5bac4603813781c3	-
+function	c:@F@uregex_matches	-			UBool (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t startIndex | UErrorCode * status	-	-	-	1e0f6f749ab33ee9	-
+function	c:@F@uregex_matches64	-			UBool (URegularExpression *, int64_t, UErrorCode *)	URegularExpression * regexp | int64_t startIndex | UErrorCode * status	-	-	-	c6107931e4eabb46	-
+function	c:@F@uregex_lookingAt	-			UBool (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t startIndex | UErrorCode * status	-	-	-	84ab3afbe7da7172	-
+function	c:@F@uregex_lookingAt64	-			UBool (URegularExpression *, int64_t, UErrorCode *)	URegularExpression * regexp | int64_t startIndex | UErrorCode * status	-	-	-	45edde0e6b65031a	-
+function	c:@F@uregex_find	-			UBool (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t startIndex | UErrorCode * status	-	-	-	115abac23fe4fe97	-
+function	c:@F@uregex_find64	-			UBool (URegularExpression *, int64_t, UErrorCode *)	URegularExpression * regexp | int64_t startIndex | UErrorCode * status	-	-	-	d7a4b70c9b489e3f	-
+function	c:@F@uregex_findNext	-			UBool (URegularExpression *, UErrorCode *)	URegularExpression * regexp | UErrorCode * status	-	-	-	1114a4449bf47459	-
+function	c:@F@uregex_groupCount	-			int32_t (URegularExpression *, UErrorCode *)	URegularExpression * regexp | UErrorCode * status	-	-	-	40a6896756285831	-
+function	c:@F@uregex_groupNumberFromName	-			int32_t (URegularExpression *, const UChar *, int32_t, UErrorCode *)	URegularExpression * regexp | const UChar * groupName | int32_t nameLength | UErrorCode * status	-	-	-	655f34ea865d17d7	-
+function	c:@F@uregex_groupNumberFromCName	-			int32_t (URegularExpression *, const char *, int32_t, UErrorCode *)	URegularExpression * regexp | const char * groupName | int32_t nameLength | UErrorCode * status	-	-	-	3dedde4583348ba3	-
+function	c:@F@uregex_group	-			int32_t (URegularExpression *, int32_t, UChar *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t groupNum | UChar * dest | int32_t destCapacity | UErrorCode * status	-	-	-	1eb120d3c786af27	-
+function	c:@F@uregex_groupUText	-			UText * (URegularExpression *, int32_t, UText *, int64_t *, UErrorCode *)	URegularExpression * regexp | int32_t groupNum | UText * dest | int64_t * groupLength | UErrorCode * status	-	-	-	352cabe2306ed5e6	-
+function	c:@F@uregex_start	-			int32_t (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t groupNum | UErrorCode * status	-	-	-	1eaabdafaa934d61	-
+function	c:@F@uregex_start64	-			int64_t (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t groupNum | UErrorCode * status	-	-	-	f9a14a1c6427edae	-
+function	c:@F@uregex_end	-			int32_t (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t groupNum | UErrorCode * status	-	-	-	dc4e4e3e89bd3eb9	-
+function	c:@F@uregex_end64	-			int64_t (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t groupNum | UErrorCode * status	-	-	-	ae85d770171829b5	-
+function	c:@F@uregex_reset	-			void (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t index | UErrorCode * status	-	-	-	862c6cb3bce947ba	-
+function	c:@F@uregex_reset64	-			void (URegularExpression *, int64_t, UErrorCode *)	URegularExpression * regexp | int64_t index | UErrorCode * status	-	-	-	083a1f7f75b97648	-
+function	c:@F@uregex_setRegion	-			void (URegularExpression *, int32_t, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t regionStart | int32_t regionLimit | UErrorCode * status	-	-	-	eef514e10b2f8aa5	-
+function	c:@F@uregex_setRegion64	-			void (URegularExpression *, int64_t, int64_t, UErrorCode *)	URegularExpression * regexp | int64_t regionStart | int64_t regionLimit | UErrorCode * status	-	-	-	27d0f8b577bf9db9	-
+function	c:@F@uregex_setRegionAndStart	-			void (URegularExpression *, int64_t, int64_t, int64_t, UErrorCode *)	URegularExpression * regexp | int64_t regionStart | int64_t regionLimit | int64_t startIndex | UErrorCode * status	-	-	-	ffc5e308fe6da1ba	-
+function	c:@F@uregex_regionStart	-			int32_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	d42185de155223c5	-
+function	c:@F@uregex_regionStart64	-			int64_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	c910d27b9b6450f3	-
+function	c:@F@uregex_regionEnd	-			int32_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	5cd84aa37b3867ea	-
+function	c:@F@uregex_regionEnd64	-			int64_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	31d65b395961e91e	-
+function	c:@F@uregex_hasTransparentBounds	-			UBool (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	436695589217998a	-
+function	c:@F@uregex_useTransparentBounds	-			void (URegularExpression *, UBool, UErrorCode *)	URegularExpression * regexp | UBool b | UErrorCode * status	-	-	-	d2c940b8c74ed6df	-
+function	c:@F@uregex_hasAnchoringBounds	-			UBool (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	52487c8c50289189	-
+function	c:@F@uregex_useAnchoringBounds	-			void (URegularExpression *, UBool, UErrorCode *)	URegularExpression * regexp | UBool b | UErrorCode * status	-	-	-	1cda5af94cf13d0b	-
+function	c:@F@uregex_hitEnd	-			UBool (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	e7705dfaf5eba7ec	-
+function	c:@F@uregex_requireEnd	-			UBool (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	2f66b5f604285bf5	-
+function	c:@F@uregex_replaceAll	-			int32_t (URegularExpression *, const UChar *, int32_t, UChar *, int32_t, UErrorCode *)	URegularExpression * regexp | const UChar * replacementText | int32_t replacementLength | UChar * destBuf | int32_t destCapacity | UErrorCode * status	-	-	-	89f57e692c36ec30	-
+function	c:@F@uregex_replaceAllUText	-			UText * (URegularExpression *, UText *, UText *, UErrorCode *)	URegularExpression * regexp | UText * replacement | UText * dest | UErrorCode * status	-	-	-	afd909583fd3dc79	-
+function	c:@F@uregex_replaceFirst	-			int32_t (URegularExpression *, const UChar *, int32_t, UChar *, int32_t, UErrorCode *)	URegularExpression * regexp | const UChar * replacementText | int32_t replacementLength | UChar * destBuf | int32_t destCapacity | UErrorCode * status	-	-	-	ff8b1bb9122253c9	-
+function	c:@F@uregex_replaceFirstUText	-			UText * (URegularExpression *, UText *, UText *, UErrorCode *)	URegularExpression * regexp | UText * replacement | UText * dest | UErrorCode * status	-	-	-	dd6b76f5d800000d	-
+function	c:@F@uregex_appendReplacement	-			int32_t (URegularExpression *, const UChar *, int32_t, UChar **, int32_t *, UErrorCode *)	URegularExpression * regexp | const UChar * replacementText | int32_t replacementLength | UChar ** destBuf | int32_t * destCapacity | UErrorCode * status	-	-	-	1e1138af3ab06905	-
+function	c:@F@uregex_appendReplacementUText	-			void (URegularExpression *, UText *, UText *, UErrorCode *)	URegularExpression * regexp | UText * replacementText | UText * dest | UErrorCode * status	-	-	-	f70a35fc6c724bc6	-
+function	c:@F@uregex_appendTail	-			int32_t (URegularExpression *, UChar **, int32_t *, UErrorCode *)	URegularExpression * regexp | UChar ** destBuf | int32_t * destCapacity | UErrorCode * status	-	-	-	d44d0d3e7dd4a142	-
+function	c:@F@uregex_appendTailUText	-			UText * (URegularExpression *, UText *, UErrorCode *)	URegularExpression * regexp | UText * dest | UErrorCode * status	-	-	-	1707f8a33bea682f	-
+function	c:@F@uregex_split	-			int32_t (URegularExpression *, UChar *, int32_t, int32_t *, UChar *[], int32_t, UErrorCode *)	URegularExpression * regexp | UChar * destBuf | int32_t destCapacity | int32_t * requiredCapacity | UChar *[] destFields | int32_t destFieldsCapacity | UErrorCode * status	-	-	-	50ea39df280fa45e	-
+function	c:@F@uregex_splitUText	-			int32_t (URegularExpression *, UText *[], int32_t, UErrorCode *)	URegularExpression * regexp | UText *[] destFields | int32_t destFieldsCapacity | UErrorCode * status	-	-	-	8d55491dca97fc45	-
+function	c:@F@uregex_setTimeLimit	-			void (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t limit | UErrorCode * status	-	-	-	41fcd64cfbd01efe	-
+function	c:@F@uregex_getTimeLimit	-			int32_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	337ebba5fd1856cc	-
+function	c:@F@uregex_setStackLimit	-			void (URegularExpression *, int32_t, UErrorCode *)	URegularExpression * regexp | int32_t limit | UErrorCode * status	-	-	-	20022b69298da391	-
+function	c:@F@uregex_getStackLimit	-			int32_t (const URegularExpression *, UErrorCode *)	const URegularExpression * regexp | UErrorCode * status	-	-	-	ca476b3c5045131f	-
+typedef	c:@T@URegexMatchCallback	-			UBool (const void *, int32_t)	-	-	-	-	73d4e4c2a0948cc5	-
+function	c:@F@uregex_setMatchCallback	-			void (URegularExpression *, URegexMatchCallback *, const void *, UErrorCode *)	URegularExpression * regexp | URegexMatchCallback * callback | const void * context | UErrorCode * status	-	-	-	e122ca4c4103b841	-
+function	c:@F@uregex_getMatchCallback	-			void (const URegularExpression *, URegexMatchCallback **, const void **, UErrorCode *)	const URegularExpression * regexp | URegexMatchCallback ** callback | const void ** context | UErrorCode * status	-	-	-	1ffad17db9531868	-
+typedef	c:@T@URegexFindProgressCallback	-			UBool (const void *, int64_t)	-	-	-	-	0534c61733a0c58f	-
+function	c:@F@uregex_setFindProgressCallback	-			void (URegularExpression *, URegexFindProgressCallback *, const void *, UErrorCode *)	URegularExpression * regexp | URegexFindProgressCallback * callback | const void * context | UErrorCode * status	-	-	-	fc64f56722c9850f	-
+function	c:@F@uregex_getFindProgressCallback	-			void (const URegularExpression *, URegexFindProgressCallback **, const void **, UErrorCode *)	const URegularExpression * regexp | URegexFindProgressCallback ** callback | const void ** context | UErrorCode * status	-	-	-	68c81c87febc5592	-
+struct	c:@S@UBreakIterator	-			-	-	-	-	-	5eb2eb200eed9c7d	-
+typedef	c:@T@UBreakIterator	-			struct UBreakIterator	-	-	-	-	d4e076662356f061	-
+function	c:@F@u_strlen	-			int32_t (const UChar *)	const UChar * s	-	-	-	63525180c0501d13	-
+function	c:@F@u_countChar32	-			int32_t (const UChar *, int32_t)	const UChar * s | int32_t length	-	-	-	b773fe5a9e28b92c	-
+function	c:@F@u_strHasMoreChar32Than	-			UBool (const UChar *, int32_t, int32_t)	const UChar * s | int32_t length | int32_t number	-	-	-	b57f4b5cdf57c705	-
+function	c:@F@u_strcat	-			UChar * (UChar *, const UChar *)	UChar * dst | const UChar * src	-	-	-	9a4a3c29dfab269f	-
+function	c:@F@u_strncat	-			UChar * (UChar *, const UChar *, int32_t)	UChar * dst | const UChar * src | int32_t n	-	-	-	d4fdba77aaa0618f	-
+function	c:@F@u_strstr	-			UChar * (const UChar *, const UChar *)	const UChar * s | const UChar * substring	-	-	-	944cfc64bf6949a2	-
+function	c:@F@u_strFindFirst	-			UChar * (const UChar *, int32_t, const UChar *, int32_t)	const UChar * s | int32_t length | const UChar * substring | int32_t subLength	-	-	-	457a02ab3cea10d7	-
+function	c:@F@u_strchr	-			UChar * (const UChar *, UChar)	const UChar * s | UChar c	-	-	-	babb0e1b2df56dcf	-
+function	c:@F@u_strchr32	-			UChar * (const UChar *, UChar32)	const UChar * s | UChar32 c	-	-	-	c2b1881398204590	-
+function	c:@F@u_strrstr	-			UChar * (const UChar *, const UChar *)	const UChar * s | const UChar * substring	-	-	-	71a5e7f9c3bd88bd	-
+function	c:@F@u_strFindLast	-			UChar * (const UChar *, int32_t, const UChar *, int32_t)	const UChar * s | int32_t length | const UChar * substring | int32_t subLength	-	-	-	e7370bfebf688a1e	-
+function	c:@F@u_strrchr	-			UChar * (const UChar *, UChar)	const UChar * s | UChar c	-	-	-	2b920fd1ad87539e	-
+function	c:@F@u_strrchr32	-			UChar * (const UChar *, UChar32)	const UChar * s | UChar32 c	-	-	-	4667c252f53a753b	-
+function	c:@F@u_strpbrk	-			UChar * (const UChar *, const UChar *)	const UChar * string | const UChar * matchSet	-	-	-	8516c1247c51b879	-
+function	c:@F@u_strcspn	-			int32_t (const UChar *, const UChar *)	const UChar * string | const UChar * matchSet	-	-	-	dcc5ff2c92e8686b	-
+function	c:@F@u_strspn	-			int32_t (const UChar *, const UChar *)	const UChar * string | const UChar * matchSet	-	-	-	996d45bac6c97bba	-
+function	c:@F@u_strtok_r	-			UChar * (UChar *, const UChar *, UChar **)	UChar * src | const UChar * delim | UChar ** saveState	-	-	-	b51fe287cbf99dc0	-
+function	c:@F@u_strcmp	-			int32_t (const UChar *, const UChar *)	const UChar * s1 | const UChar * s2	-	-	-	f188334eab445e4e	-
+function	c:@F@u_strcmpCodePointOrder	-			int32_t (const UChar *, const UChar *)	const UChar * s1 | const UChar * s2	-	-	-	5ef74be65cfd6492	-
+function	c:@F@u_strCompare	-			int32_t (const UChar *, int32_t, const UChar *, int32_t, UBool)	const UChar * s1 | int32_t length1 | const UChar * s2 | int32_t length2 | UBool codePointOrder	-	-	-	5002544a8a287e1a	-
+function	c:@F@u_strCompareIter	-			int32_t (UCharIterator *, UCharIterator *, UBool)	UCharIterator * iter1 | UCharIterator * iter2 | UBool codePointOrder	-	-	-	5dbb23ee4564331c	-
+function	c:@F@u_strCaseCompare	-			int32_t (const UChar *, int32_t, const UChar *, int32_t, uint32_t, UErrorCode *)	const UChar * s1 | int32_t length1 | const UChar * s2 | int32_t length2 | uint32_t options | UErrorCode * pErrorCode	-	-	-	636e16ad74eafb80	-
+function	c:@F@u_strncmp	-			int32_t (const UChar *, const UChar *, int32_t)	const UChar * ucs1 | const UChar * ucs2 | int32_t n	-	-	-	69a2d06dd48189db	-
+function	c:@F@u_strncmpCodePointOrder	-			int32_t (const UChar *, const UChar *, int32_t)	const UChar * s1 | const UChar * s2 | int32_t n	-	-	-	dca79a718b9c80ad	-
+function	c:@F@u_strcasecmp	-			int32_t (const UChar *, const UChar *, uint32_t)	const UChar * s1 | const UChar * s2 | uint32_t options	-	-	-	d7c4212b471ca51b	-
+function	c:@F@u_strncasecmp	-			int32_t (const UChar *, const UChar *, int32_t, uint32_t)	const UChar * s1 | const UChar * s2 | int32_t n | uint32_t options	-	-	-	470bb717ef77371f	-
+function	c:@F@u_memcasecmp	-			int32_t (const UChar *, const UChar *, int32_t, uint32_t)	const UChar * s1 | const UChar * s2 | int32_t length | uint32_t options	-	-	-	12668fa82f19fd93	-
+function	c:@F@u_strcpy	-			UChar * (UChar *, const UChar *)	UChar * dst | const UChar * src	-	-	-	2ee823ea64303020	-
+function	c:@F@u_strncpy	-			UChar * (UChar *, const UChar *, int32_t)	UChar * dst | const UChar * src | int32_t n	-	-	-	3bc407130671179c	-
+function	c:@F@u_uastrcpy	-			UChar * (UChar *, const char *)	UChar * dst | const char * src	-	-	-	b79010e83dbd6b7c	-
+function	c:@F@u_uastrncpy	-			UChar * (UChar *, const char *, int32_t)	UChar * dst | const char * src | int32_t n	-	-	-	4c443b8c43b737b4	-
+function	c:@F@u_austrcpy	-			char * (char *, const UChar *)	char * dst | const UChar * src	-	-	-	0a89848dadf16b8c	-
+function	c:@F@u_austrncpy	-			char * (char *, const UChar *, int32_t)	char * dst | const UChar * src | int32_t n	-	-	-	9e8a5abb184cfbd1	-
+function	c:@F@u_memcpy	-			UChar * (UChar *, const UChar *, int32_t)	UChar * dest | const UChar * src | int32_t count	-	-	-	e835201f7c22d56a	-
+function	c:@F@u_memmove	-			UChar * (UChar *, const UChar *, int32_t)	UChar * dest | const UChar * src | int32_t count	-	-	-	273c85a7dd7c7f8c	-
+function	c:@F@u_memset	-			UChar * (UChar *, UChar, int32_t)	UChar * dest | UChar c | int32_t count	-	-	-	34cc56e8a1919486	-
+function	c:@F@u_memcmp	-			int32_t (const UChar *, const UChar *, int32_t)	const UChar * buf1 | const UChar * buf2 | int32_t count	-	-	-	a720496bbe76cdd4	-
+function	c:@F@u_memcmpCodePointOrder	-			int32_t (const UChar *, const UChar *, int32_t)	const UChar * s1 | const UChar * s2 | int32_t count	-	-	-	63a99ea5139104f2	-
+function	c:@F@u_memchr	-			UChar * (const UChar *, UChar, int32_t)	const UChar * s | UChar c | int32_t count	-	-	-	b1d459b403f41ab2	-
+function	c:@F@u_memchr32	-			UChar * (const UChar *, UChar32, int32_t)	const UChar * s | UChar32 c | int32_t count	-	-	-	b01366df1d8382ab	-
+function	c:@F@u_memrchr	-			UChar * (const UChar *, UChar, int32_t)	const UChar * s | UChar c | int32_t count	-	-	-	9ad07827073ceac1	-
+function	c:@F@u_memrchr32	-			UChar * (const UChar *, UChar32, int32_t)	const UChar * s | UChar32 c | int32_t count	-	-	-	88f10721b2856a12	-
+function	c:@F@u_unescape	-			int32_t (const char *, UChar *, int32_t)	const char * src | UChar * dest | int32_t destCapacity	-	-	-	7cdea7afeadbbc47	-
+typedef	c:@T@UNESCAPE_CHAR_AT	-			UChar (*)(int32_t, void *)	-	-	-	-	745e15708e9269a6	-
+function	c:@F@u_unescapeAt	-			UChar32 (UNESCAPE_CHAR_AT, int32_t *, int32_t, void *)	UNESCAPE_CHAR_AT charAt | int32_t * offset | int32_t length | void * context	-	-	-	f1211c1200abad82	-
+function	c:@F@u_strToUpper	-			int32_t (UChar *, int32_t, const UChar *, int32_t, const char *, UErrorCode *)	UChar * dest | int32_t destCapacity | const UChar * src | int32_t srcLength | const char * locale | UErrorCode * pErrorCode	-	-	-	01ea86ab54841ba3	-
+function	c:@F@u_strToLower	-			int32_t (UChar *, int32_t, const UChar *, int32_t, const char *, UErrorCode *)	UChar * dest | int32_t destCapacity | const UChar * src | int32_t srcLength | const char * locale | UErrorCode * pErrorCode	-	-	-	f15908817920ba8d	-
+function	c:@F@u_strToTitle	-			int32_t (UChar *, int32_t, const UChar *, int32_t, UBreakIterator *, const char *, UErrorCode *)	UChar * dest | int32_t destCapacity | const UChar * src | int32_t srcLength | UBreakIterator * titleIter | const char * locale | UErrorCode * pErrorCode	-	-	-	97caa4683d3cdcb3	-
+function	c:@F@u_strFoldCase	-			int32_t (UChar *, int32_t, const UChar *, int32_t, uint32_t, UErrorCode *)	UChar * dest | int32_t destCapacity | const UChar * src | int32_t srcLength | uint32_t options | UErrorCode * pErrorCode	-	-	-	bd3d49c0a14de80a	-
+function	c:@F@u_strToWCS	-			wchar_t * (wchar_t *, int32_t, int32_t *, const UChar *, int32_t, UErrorCode *)	wchar_t * dest | int32_t destCapacity | int32_t * pDestLength | const UChar * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	1e2b43d7bd397f08	-
+function	c:@F@u_strFromWCS	-			UChar * (UChar *, int32_t, int32_t *, const wchar_t *, int32_t, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const wchar_t * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	135e6bb022910e13	-
+function	c:@F@u_strToUTF8	-			char * (char *, int32_t, int32_t *, const UChar *, int32_t, UErrorCode *)	char * dest | int32_t destCapacity | int32_t * pDestLength | const UChar * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	07a37297b46f1501	-
+function	c:@F@u_strFromUTF8	-			UChar * (UChar *, int32_t, int32_t *, const char *, int32_t, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const char * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	96605ecc8cd6a2ee	-
+function	c:@F@u_strToUTF8WithSub	-			char * (char *, int32_t, int32_t *, const UChar *, int32_t, UChar32, int32_t *, UErrorCode *)	char * dest | int32_t destCapacity | int32_t * pDestLength | const UChar * src | int32_t srcLength | UChar32 subchar | int32_t * pNumSubstitutions | UErrorCode * pErrorCode	-	-	-	647feeb94f892700	-
+function	c:@F@u_strFromUTF8WithSub	-			UChar * (UChar *, int32_t, int32_t *, const char *, int32_t, UChar32, int32_t *, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const char * src | int32_t srcLength | UChar32 subchar | int32_t * pNumSubstitutions | UErrorCode * pErrorCode	-	-	-	df644fbca6404523	-
+function	c:@F@u_strFromUTF8Lenient	-			UChar * (UChar *, int32_t, int32_t *, const char *, int32_t, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const char * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	87e6f10d33267b5a	-
+function	c:@F@u_strToUTF32	-			UChar32 * (UChar32 *, int32_t, int32_t *, const UChar *, int32_t, UErrorCode *)	UChar32 * dest | int32_t destCapacity | int32_t * pDestLength | const UChar * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	6b9c525df7536b20	-
+function	c:@F@u_strFromUTF32	-			UChar * (UChar *, int32_t, int32_t *, const UChar32 *, int32_t, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const UChar32 * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	bbeb7afcf757cdee	-
+function	c:@F@u_strToUTF32WithSub	-			UChar32 * (UChar32 *, int32_t, int32_t *, const UChar *, int32_t, UChar32, int32_t *, UErrorCode *)	UChar32 * dest | int32_t destCapacity | int32_t * pDestLength | const UChar * src | int32_t srcLength | UChar32 subchar | int32_t * pNumSubstitutions | UErrorCode * pErrorCode	-	-	-	d78bf16e0e440e93	-
+function	c:@F@u_strFromUTF32WithSub	-			UChar * (UChar *, int32_t, int32_t *, const UChar32 *, int32_t, UChar32, int32_t *, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const UChar32 * src | int32_t srcLength | UChar32 subchar | int32_t * pNumSubstitutions | UErrorCode * pErrorCode	-	-	-	e1ca9508bad56794	-
+function	c:@F@u_strToJavaModifiedUTF8	-			char * (char *, int32_t, int32_t *, const UChar *, int32_t, UErrorCode *)	char * dest | int32_t destCapacity | int32_t * pDestLength | const UChar * src | int32_t srcLength | UErrorCode * pErrorCode	-	-	-	c95bd1727dfd7de3	-
+function	c:@F@u_strFromJavaModifiedUTF8WithSub	-			UChar * (UChar *, int32_t, int32_t *, const char *, int32_t, UChar32, int32_t *, UErrorCode *)	UChar * dest | int32_t destCapacity | int32_t * pDestLength | const char * src | int32_t srcLength | UChar32 subchar | int32_t * pNumSubstitutions | UErrorCode * pErrorCode	-	-	-	a26b94ddc5d35486	-
+function	c:@F@u_strIsWellFormed	-			UBool (const UChar *, int32_t)	const UChar * s | int32_t length	-	-	-	1e5a2dc0c9053d76	-
+typedef	c:@T@uint16_t	-			unsigned short	-	-	-	-	a080788dde55e4dc	-
+typedef	c:@T@int8_t	-			signed char	-	-	-	-	e405b6a7be656ab1	-
+typedef	c:@T@int32_t	-			int	-	-	-	-	cd31f577d25bebf5	-
+typedef	c:@T@uint8_t	-			unsigned char	-	-	-	-	3a61fa5c975bd3b3	-
+typedef	c:@T@uint32_t	-			unsigned int	-	-	-	-	d99005f72e0ec68e	-
+typedef	c:@T@int64_t	-			long long	-	-	-	-	85f1e0b43a934ce7	-
+typedef	c:@T@int16_t	-			short	-	-	-	-	a957af8a2c7c6b0a	-
+typedef	c:@T@wchar_t	-			int	-	-	-	-	11d0245765e8e543	-

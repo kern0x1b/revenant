@@ -1,0 +1,2 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	AVCustomRoutingControllerAuthorizedRoutesDidChangeNotification	-	AVCustomRoutingControllerAuthorizedRoutesDidChangeNotification	16.0	NSNotificationName const	API_AVAILABLE(ios(16.0)) API_UNAVAILABLE(macos) API_UNAVAILABLE(tvos, watchos)	6769896cd7e02a3f	found	AVCustomRoutingControllerAuthorizedRoutesDidChangeNotification	AVCustomRoutingControllerAuthorizedRoutesDidChangeNotification	ios-26.2-cache	-	exported	ns	-

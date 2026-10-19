@@ -1,0 +1,60 @@
+{
+  "framework": "MobileCoreServices",
+  "entries": [
+    {
+      "api": "kUTTypeAudioInterchangeFileFormat",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string public.aiff-audio",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kUTTypeFont",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string public.font",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kUTTypeUTF8TabSeparatedText",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string public.utf8-tab-separated-values-text",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kUTTypeWaveformAudio",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string com.microsoft.waveform-audio",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    },
+    {
+      "api": "kUTTypeZipArchive",
+      "kind": "constant",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "iOS 6 does not export the name; it is carried with the text of the newer release",
+      "effect": "the constant is the string public.zip-archive",
+      "facts": "facts/CoreText/Names.md",
+      "source": "AVFoundation, AVFAudio, CoreImage, CoreText, MobileCoreServices and MapKit of the arm64 shared cache of iOS 12.0, where each constant is a string whose text was read; an iPad 2 running 6.1.3 and the iOS 6.0 emulator, asked with dlsym, which export none of the names"
+    }
+  ]
+}

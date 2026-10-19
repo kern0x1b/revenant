@@ -1,0 +1,115 @@
+{
+    "framework": "CreateMLComponents",
+    "entries": [
+        {
+            "api": "PreprocessingEstimator",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "a preprocessor in front of an unsupervised estimator, over ColumnarTable and RowMatrix - the two types this package has. It adds no arithmetic: the fitted preprocessor travels WITH the model, so a prediction goes through the scaler the fit used, and the fit is the preprocessor fitted and applied, then the estimator fitted on its output. preprocessed(from:) answers the intermediate on its own, because a caller who wants to look at it needs a way to",
+            "effect": "the composed transformer: the fitted preprocessor and the estimator's fitted transformer",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the iOS 26.2 CreateMLComponents.swiftinterface for the declarations (PreprocessingEstimator, typealias Transformer = ComposedTransformer<Preprocessor, Estimator.Transformer>); the port's behaviour by tests/backports/host/createml/preprocessing, 17 checks"
+        },
+        {
+            "api": "PreprocessingSupervisedEstimator",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the same with a target column, and the one semantic that is genuinely different: the preprocessor is fitted over the FEATURES ONLY and the target column is put back untouched. Scaling a target is a different model - a tree's thresholds and a logistic regression's coefficients are both in the target's own units. The first version transformed the whole table, so the estimator saw a target whose mean was 0 and the test's `mean 17` came back `0.0`: the arithmetic was right and the column was the wrong one",
+            "effect": "the composed transformer, with the target in its own units",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface; the target-column rule is the port's and its test pins both halves"
+        },
+        {
+            "api": "PreprocessingUpdatableEstimator",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the same pipeline where the inner estimator can be updated on new data. The one semantic the `Updatable` name changes: an update preprocesses the input BY the preprocessor the fit produced and touches the inner estimator only. Refitting the preprocessor would change the features the estimator was fitted on, which is a different model and not an update - and the test compares the preprocessor's statistics before and after an update to hold exactly that",
+            "effect": "the composed transformer, updated in place",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface; the update's semantics are the port's and its test compares the statistics across one"
+        },
+        {
+            "api": "PreprocessingUpdatableSupervisedEstimator",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the supervised and updatable pair, on the same terms: the target column out of the preprocessor's input and the inner estimator updated on what it produced",
+            "effect": "the composed transformer, updated in place, with the target in its own units",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface; checked by tests/backports/host/createml/preprocessing"
+        },
+        {
+            "api": "ComposedTransformer",
+            "kind": "class",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "the fitted half of a pipeline: the preprocessor and the estimator's FITTED transformer (`Base.Transformer`, not `Base` - carrying the unfitted estimator would be carrying the thing the fit replaces). The two are left to the caller to join, because the framework's Transformer and TabularTransformer are different protocols with different input types and one composition cannot name both without erasing the pair",
+            "effect": "the two halves, and nothing joined",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface for the shape"
+        },
+        {
+            "api": "TabularEstimator",
+            "kind": "protocol",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "something fitted on a table and answering a transformer, over ColumnarTable. The framework writes it over DataFrame; this package writes it over the table it has. TemporalSequence and TabularSequence and the shaped-array Input/Output associated types are deliberately NOT here - they need the DataFrame and MLShapedArray work that is next, and a protocol naming a type this package does not have would be a declaration nothing can conform to",
+            "effect": "the fit, and the transformer it answers",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface for the shape; the absences are stated and are this port's"
+        },
+        {
+            "api": "Estimator",
+            "kind": "protocol",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "an estimator fitted without a target. It refines TabularEstimator, as the framework's does",
+            "effect": "the fit, and the transformer it answers",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface for the shape"
+        },
+        {
+            "api": "SupervisedEstimator",
+            "kind": "protocol",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "an estimator fitted against a target column. It is the port's own protocol and does NOT refine Estimator: the framework's own SupervisedEstimator refines Estimator, and refining here would force every supervised type to answer an unsupervised fit as well, which no type in this package does",
+            "effect": "the fit, and the transformer it answers",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface for the shape; the non-refinement is this port's and is stated"
+        },
+        {
+            "api": "UpdatableEstimator",
+            "kind": "protocol",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "an estimator that can be updated on new data without being refitted: makeTransformer() answers the unfitted one and update(_:with:) moves it in place",
+            "effect": "the unfitted transformer, and the update",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface for the shape"
+        },
+        {
+            "api": "UpdatableSupervisedEstimator",
+            "kind": "protocol",
+            "introduced": "15.0",
+            "minimum": "6.0",
+            "status": "implemented",
+            "reason": "both at once: fitted against a target and updatable in place. It refines SupervisedEstimator and UpdatableEstimator, as the framework's does",
+            "effect": "the fit, the unfitted transformer, and the update",
+            "facts": "facts/CreateMLComponents/Preprocessing.md",
+            "source": "the SDK's own interface for the shape"
+        }
+    ]
+}

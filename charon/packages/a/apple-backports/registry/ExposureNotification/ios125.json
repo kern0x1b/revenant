@@ -1,0 +1,895 @@
+{
+ "framework": "ExposureNotification",
+ "entries": [
+  {
+     "api": "ENExposureConfiguration",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h for the twenty-four readwrite properties it declares, every one of which the port stores and returns"
+  },
+  {
+     "api": "ENExposureDaySummary",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from; the class adopts NSSecureCoding, as Apple's own header declares, and carries its properties over the release's own NSKeyedArchiver and NSKeyedUnarchiver, which is the only way any of them is reachable on a release with no exposure-notification service",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the properties and the NSSecureCoding conformance; no SDK header declares a public initialiser for any of these seven classes, which is why they are reached by coding"
+  },
+  {
+     "api": "ENExposureDetectionSummary",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from; the class adopts NSSecureCoding, as Apple's own header declares, and carries its properties over the release's own NSKeyedArchiver and NSKeyedUnarchiver, which is the only way any of them is reachable on a release with no exposure-notification service",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the properties and the NSSecureCoding conformance; no SDK header declares a public initialiser for any of these seven classes, which is why they are reached by coding"
+  },
+  {
+     "api": "ENExposureInfo",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from; the class adopts NSSecureCoding, as Apple's own header declares, and carries its properties over the release's own NSKeyedArchiver and NSKeyedUnarchiver, which is the only way any of them is reachable on a release with no exposure-notification service",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the properties and the NSSecureCoding conformance; no SDK header declares a public initialiser for any of these seven classes, which is why they are reached by coding"
+  },
+  {
+     "api": "ENExposureSummaryItem",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one summary's three accumulated numbers, read back out of the archive it was decoded from; the class adopts NSSecureCoding, as Apple's own header declares, and carries its properties over the release's own NSKeyedArchiver and NSKeyedUnarchiver, which is the only way any of them is reachable on a release with no exposure-notification service",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the properties and the NSSecureCoding conformance; no SDK header declares a public initialiser for any of these seven classes, which is why they are reached by coding"
+  },
+  {
+     "api": "ENExposureWindow",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from; the class adopts NSSecureCoding, as Apple's own header declares, and carries its properties over the release's own NSKeyedArchiver and NSKeyedUnarchiver, which is the only way any of them is reachable on a release with no exposure-notification service",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the properties and the NSSecureCoding conformance; no SDK header declares a public initialiser for any of these seven classes, which is why they are reached by coding"
+  },
+  {
+     "api": "ENManager",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the class an application creates to ask the system whether it has been near another device that reported itself infected; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENCommon.h and ENManager.h for the surface, and 6.1.3's own ObjC inventory and export trie for what the release has, which is no EN class and no EN symbol"
+  },
+  {
+     "api": "ENScanInstance",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one scan instance's three numbers, read back out of the archive it was decoded from; the class adopts NSSecureCoding, as Apple's own header declares, and carries its properties over the release's own NSKeyedArchiver and NSKeyedUnarchiver, which is the only way any of them is reachable on a release with no exposure-notification service",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the properties and the NSSecureCoding conformance; no SDK header declares a public initialiser for any of these seven classes, which is why they are reached by coding"
+  },
+  {
+     "api": "ENTemporaryExposureKey",
+     "kind": "class",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "a diagnosis key: the four members an application publishes, readwrite as the header declares, stored and read back",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h for the four readwrite properties"
+  },
+  {
+     "api": "ENErrorDomain",
+     "kind": "constant",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the domain every NSError this framework answers with is in, so an error from ENManager can be told from any other by its domain alone",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "measured out of a release that has it: the iOS 16.0 arm64e cache exports ENErrorDomain from ExposureNotification.framework at 0x20e5acab8 and the string there is ENErrorDomain, read with charon's own tools/corpus/cache-value.lua over modules/apple/dyld.lua's address space. ExposureNotification arrived in 12.5 and 16.0 is the oldest cache on this machine that has the framework"
+  },
+  {
+     "api": "-[ENManager activateWithCompletionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with success NO and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager detectExposuresWithConfiguration:completionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with no summary and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager detectExposuresWithConfiguration:diagnosisKeyURLs:completionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with no summary and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager getDiagnosisKeysWithCompletionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with no keys and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager getExposureWindowsFromSummary:completionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with no windows and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager getTestDiagnosisKeysWithCompletionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with no keys and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager getUserTraveledWithCompletionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with userTraveled NO and the framework's own ENErrorCodeUnsupported; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager invalidate]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the invalidation handler, exactly once however many times invalidate is called, which is what the header promises; the only member with behaviour that needs no service; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "-[ENManager setExposureNotificationEnabled:completionHandler:]",
+     "kind": "method",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the completion handler, with success NO and the framework's own ENErrorCodeUnsupported, whatever the caller asked to be enabled to; after -invalidate the same handler is answered with ENErrorCodeInvalidated, which is what that code documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the signature and the rule, and the 12.5/13.5/14.4 band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENExposureConfiguration.attenuationDurationThresholds",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.attenuationLevelValues",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.attenuationWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.daysSinceLastExposureLevelValues",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.daysSinceLastExposureThreshold",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.daysSinceLastExposureWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.durationLevelValues",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.durationWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.immediateDurationWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.infectiousnessForDaysSinceOnsetOfSymptoms",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.infectiousnessHighWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.infectiousnessStandardWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.mediumDurationWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.metadata",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.minimumRiskScore",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.minimumRiskScoreFullRange",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.nearDurationWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.otherDurationWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.reportTypeConfirmedClinicalDiagnosisWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.reportTypeConfirmedTestWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.reportTypeNoneMap",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.reportTypeRecursiveWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.reportTypeSelfReportedWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.transmissionRiskLevelValues",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureConfiguration.transmissionRiskWeight",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the weight or threshold, stored and read back exactly as the caller set it; a configuration created and not set answers the zero value of the property's own type",
+     "facts": "facts/ExposureNotification/Configuration.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENExposureDaySummary.confirmedClinicalDiagnosisSummary",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from -- confirmedClinicalDiagnosisSummary",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDaySummary.confirmedTestSummary",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from -- confirmedTestSummary",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDaySummary.date",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from -- date",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDaySummary.daySummary",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from -- daySummary",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDaySummary.recursiveSummary",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from -- recursiveSummary",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDaySummary.selfReportedSummary",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one day's summary, read back out of the archive it was decoded from -- selfReportedSummary",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.attenuationDurations",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- attenuationDurations",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.daySummaries",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- daySummaries",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.daysSinceLastExposure",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- daysSinceLastExposure",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.matchedKeyCount",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- matchedKeyCount",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.maximumRiskScore",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- maximumRiskScore",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.maximumRiskScoreFullRange",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- maximumRiskScoreFullRange",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.metadata",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- metadata",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureDetectionSummary.riskScoreSumFullRange",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the summary of one detection pass, read back out of the archive it was decoded from -- riskScoreSumFullRange",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.attenuationDurations",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- attenuationDurations",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.attenuationValue",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- attenuationValue",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.date",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- date",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.daysSinceOnsetOfSymptoms",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- daysSinceOnsetOfSymptoms",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.diagnosisReportType",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- diagnosisReportType",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.duration",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- duration",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.metadata",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- metadata",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.totalRiskScore",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- totalRiskScore",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.totalRiskScoreFullRange",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- totalRiskScoreFullRange",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureInfo.transmissionRiskLevel",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the information about one exposure, read back out of the archive it was decoded from -- transmissionRiskLevel",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureSummaryItem.maximumScore",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one summary's three accumulated numbers, read back out of the archive it was decoded from -- maximumScore",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureSummaryItem.scoreSum",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one summary's three accumulated numbers, read back out of the archive it was decoded from -- scoreSum",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureSummaryItem.weightedDurationSum",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one summary's three accumulated numbers, read back out of the archive it was decoded from -- weightedDurationSum",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureWindow.calibrationConfidence",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from -- calibrationConfidence",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureWindow.date",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from -- date",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureWindow.diagnosisReportType",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from -- diagnosisReportType",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureWindow.infectiousness",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from -- infectiousness",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENExposureWindow.scanInstances",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the window the system reports a set of scan instances in, read back out of the archive it was decoded from -- scanInstances",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENManager.activityHandler",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the handler, copied on the way in as the header's copy attribute says",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENManager.authorizationStatus",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "ENAuthorizationStatusNotAuthorized, which the header documents as 'This app is not authorized to use Exposure Notification'",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENManager.dispatchQueue",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the queue the caller set, or the main queue, which is the default the header documents",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENManager.exposureNotificationEnabled",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "NO: nothing on this release is enabled, because nothing on this release can be",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENManager.exposureNotificationStatus",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "ENStatusUnauthorized, the status the header documents as 'Exposure Notification is not available due to insufficient authorization'; ENStatus has no unsupported case and this release has neither the service nor the authorization",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENManager.invalidationHandler",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the handler, copied on the way in, and cleared before it is invoked, which is what the header says the property is cleared for",
+     "facts": "facts/ExposureNotification/Manager.md",
+     "source": "SDK 26.2's ENManager.h for the property and what it documents, and the band it arrived in; the release runs no exposure-notification service: the framework arrived in iOS 12.5 and 6.1.3 carries no EN class and no EN symbol, the service needs an entitlement and a per-device authorization no port can grant itself, and ENManager.h says the Bluetooth Low Energy subsystem it broadcasts over is required, which iOS 6 does not run"
+  },
+  {
+     "api": "ENScanInstance.minimumAttenuation",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one scan instance's three numbers, read back out of the archive it was decoded from -- minimumAttenuation",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENScanInstance.secondsSinceLastScan",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one scan instance's three numbers, read back out of the archive it was decoded from -- secondsSinceLastScan",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENScanInstance.typicalAttenuation",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "one scan instance's three numbers, read back out of the archive it was decoded from -- typicalAttenuation",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property and its type"
+  },
+  {
+     "api": "ENTemporaryExposureKey.keyData",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the member of a diagnosis key, stored and read back as the caller set it",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENTemporaryExposureKey.rollingPeriod",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the member of a diagnosis key, stored and read back as the caller set it",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENTemporaryExposureKey.rollingStartNumber",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the member of a diagnosis key, stored and read back as the caller set it",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  },
+  {
+     "api": "ENTemporaryExposureKey.transmissionRiskLevel",
+     "kind": "property",
+     "introduced": "12.5",
+     "minimum": "6.0",
+     "status": "implemented",
+     "effect": "the member of a diagnosis key, stored and read back as the caller set it",
+     "facts": "facts/ExposureNotification/Values.md",
+     "source": "SDK 26.2's ENCommon.h, which declares the property, its type and that it is readwrite"
+  }
+ ]
+}

@@ -1,0 +1,267 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "-[AVAudioEngine disableManualRenderingMode]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine enableManualRenderingMode:format:maximumFrameCount:error:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine manualRenderingBlock]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine manualRenderingFormat]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine manualRenderingMaximumFrameCount]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine manualRenderingMode]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine manualRenderingSampleTime]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine renderOffline:toBuffer:error:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEngine setManualRenderingBlock:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEngineManualRendering.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode destinationForMixer:bus:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode obstruction]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode occlusion]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode pan]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode pointSourceInHeadMode]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode position]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode rate]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode reverbBlend]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setObstruction:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setOcclusion:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setPan:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setPointSourceInHeadMode:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setPosition:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setRate:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setReverbBlend:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setSourceMode:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode setVolume:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode sourceMode]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "-[AVAudioEnvironmentNode volume]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load"
+    },
+    {
+      "api": "AVAudioEnvironmentNode.listenerHeadTrackingEnabled",
+      "kind": "property",
+      "introduced": "18.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFAudio/AVAudioEnvironmentNode.md",
+      "source": "SDK 16.4 and 26.2 AVFAudio AVAudioEnvironmentNode.h and AVAudioEngine.h, over the release's own kAudioUnitSubType_SpatialMixer (the SDK's name for kAudioUnitSubType_AU3DMixerEmbedded) with the k3DMixerParam_ set, kAudioUnitProperty_BypassEffect and the whole AUGraph and AudioUnit families; measured on the real armv7 6.1.3 cache with dyld.load",
+      "effect": "always NO, whatever is set; the value is not kept. The host keeps the value it was given (measured on macOS 27: YES reads back YES), which is a recorded divergence"
+    }
+  ]
+}

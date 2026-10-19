@@ -1,0 +1,1 @@
+            pixel = spatial * winCols;  // MUTATION: a row's stride for a column as well

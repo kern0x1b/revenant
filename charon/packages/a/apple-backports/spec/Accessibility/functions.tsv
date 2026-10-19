@@ -1,0 +1,2 @@
+api	introduced	status	reasons	returns	params	decl
+AXNameFromColor	14.0	generable		NSString *	CGColorRef color	NSString * AXNameFromColor(CGColorRef color)

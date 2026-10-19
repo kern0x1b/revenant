@@ -1,0 +1,9 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	-	-	-	-	-	-
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	required	method	yes	didReceiveNotification:	- (void)didReceiveNotification:(UNNotification * _Nonnull)notification;	yes
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	optional	method	yes	didReceiveNotificationResponse:completionHandler:	- (void)didReceiveNotificationResponse:(UNNotificationResponse * _Nonnull)response completionHandler:(void (^ _Nonnull)(UNNotificationContentExtensionResponseOption))completion;	yes
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	optional	property	no	mediaPlayPauseButtonType	@property (nonatomic, readonly, assign, unsafe_unretained) UNNotificationContentExtensionMediaPlayPauseButtonType mediaPlayPauseButtonType;	yes
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	optional	property	no	mediaPlayPauseButtonFrame	@property (nonatomic, readonly, assign, unsafe_unretained) CGRect mediaPlayPauseButtonFrame;	yes
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	optional	property	no	mediaPlayPauseButtonTintColor	@property (nonatomic, readonly, copy) UIColor * _Nonnull mediaPlayPauseButtonTintColor;	yes
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	optional	method	yes	mediaPlay	- (void)mediaPlay;	yes
+UNNotificationContentExtension	10.0	sdk16 body		NSObject	optional	method	yes	mediaPause	- (void)mediaPause;	yes

@@ -1,0 +1,2 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+_WorkoutKit_SwiftUI	method	SwiftUICore.View.workoutPreview(_:isPresented:)	17.0				container

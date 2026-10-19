@@ -1,0 +1,82 @@
+{
+ "functions": [
+  {
+   "name": "quadVertex",
+   "stage": "vertex",
+   "source": "module0.vert",
+   "reflection": "module0.json"
+  },
+  {
+   "name": "quadFragment",
+   "stage": "fragment",
+   "source": "module1.frag",
+   "reflection": "module1.json"
+  },
+  {
+   "name": "stageInVertex",
+   "stage": "vertex",
+   "source": "module2.vert",
+   "reflection": "module2.json"
+  },
+  {
+   "name": "flowFragment",
+   "stage": "fragment",
+   "source": "module3.frag",
+   "reflection": "module3.json"
+  },
+  {
+   "name": "constFragment",
+   "stage": "fragment",
+   "source": "module4.frag",
+   "reflection": "module4.json"
+  },
+  {
+   "name": "fetchFragment",
+   "stage": "fragment",
+   "source": "module5.frag",
+   "reflection": "module5.json"
+  },
+  {
+   "name": "depthVertex",
+   "stage": "vertex",
+   "source": "module6.vert",
+   "reflection": "module6.json"
+  },
+  {
+   "name": "colorFragment",
+   "stage": "fragment",
+   "source": "module7.frag",
+   "reflection": "module7.json"
+  },
+  {
+   "name": "pairFragment",
+   "stage": "fragment",
+   "source": "module8.frag",
+   "reflection": "module8.json"
+  },
+  {
+   "name": "depthRead",
+   "stage": "fragment",
+   "source": "module9.frag",
+   "reflection": "module9.json"
+  },
+  {
+   "name": "shadowCompare",
+   "stage": "fragment",
+   "source": "module10.frag",
+   "reflection": "module10.json"
+  },
+  {
+   "name": "maskShape",
+   "stage": "fragment",
+   "source": "module11.frag",
+   "reflection": "module11.json"
+  },
+  {
+   "name": "maskMerge",
+   "stage": "fragment",
+   "source": "module12.frag",
+   "reflection": "module12.json"
+  }
+ ]
+}

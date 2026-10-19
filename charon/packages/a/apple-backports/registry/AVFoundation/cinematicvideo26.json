@@ -1,0 +1,115 @@
+{
+  "framework": "AVFoundation",
+  "entries": [
+    {
+      "api": "AVCaptureDevice.cinematicVideoCaptureSceneMonitoringStatuses",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries -cinematicVideoCaptureSceneMonitoringStatuses (tools/corpus/objc-inventory.lua over the 6.1.3 armv7, 16.0 arm64e and 18.0 arm64e caches), and the string type it hands back, AVCaptureSceneMonitoringStatus, is a 26.0 declaration SDK 16.4 does not make",
+      "effect": "an empty NSSet. The statuses report whether the current scene suits Cinematic Video ('Monitor this property ... to present a UI informing the user that they should reframe their scene', AVCaptureDevice.h:2690), and this hardware cannot capture Cinematic Video at all - every format answers NO for AVCaptureDeviceFormat.cinematicVideoCaptureSupported - so no status applies. The type's one constant, AVCaptureSceneMonitoringStatusNotEnoughLight, is a 26.0 code+lift row of its own and is NOT carried here, so nothing a caller can name is ever in the set. This row has NO host oracle: this host's own AVCaptureDevice does not answer the selector at all (measured: doesNotRecognizeSelector, and class_getInstanceMethod finds nothing), so tests/backports/host/avf-capabilities records the host column as absent and checks the port's answer alone",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2682-2696), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "-[AVCaptureDevice setCinematicVideoFixedFocusAtPoint:focusMode:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries this selector, and its focusMode argument names AVCaptureCinematicVideoFocusMode, a 26.0 enum SDK 16.4 does not declare; it needs the same active format that AVCaptureDeviceFormat.cinematicVideoCaptureSupported answers",
+      "effect": "raises NSInvalidArgumentException with Apple's own reason, measured on this host as '*** -[AVCaptureDALDevice setCinematicVideoFixedFocusAtPoint:focusMode:] Not supported - use activeFormat.isCinematicVideoCaptureSupported'; the tail after the class name is what the port raises verbatim, because AVCaptureDALDevice is a private class of Apple's device-access layer while this method belongs to AVCaptureDevice. The rule is the header's own - the refusal names the format member - and the port asks exactly that member through the release's own -activeFormat, so the call is refused wherever the format's cinematicVideoCaptureSupported answers NO",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1320-1328), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "-[AVCaptureDevice setCinematicVideoTrackingFocusAtPoint:focusMode:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries this selector, and it needs the same active format as -[AVCaptureDevice setCinematicVideoFixedFocusAtPoint:focusMode:]",
+      "effect": "the same refusal with Apple's own reason for this selector, measured on the host: '*** -[AVCaptureDALDevice setCinematicVideoTrackingFocusAtPoint:focusMode:] Not supported - use activeFormat.isCinematicVideoCaptureSupported'. Its point is 'a normalized point of interest (i.e., [0,1]) in the coordinate space of the device', the coordinate space the release's own -focusPointOfInterest already uses",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1316-1320), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "-[AVCaptureDevice setCinematicVideoTrackingFocusWithDetectedObjectID:focusMode:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "no release this port's bands are measured against carries this selector, and it needs the same active format as -[AVCaptureDevice setCinematicVideoFixedFocusAtPoint:focusMode:]",
+      "effect": "the same refusal with Apple's own reason for this selector, measured on the host: '*** -[AVCaptureDALDevice setCinematicVideoTrackingFocusWithDetectedObjectID:focusMode:] Not supported - use activeFormat.isCinematicVideoCaptureSupported'. It focuses on an object a metadata output detected, and this port carries no such detection",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:1310-1314), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.cinematicVideoCaptureSupported",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceFormat is a class of 6.0 and -isCinematicVideoCaptureSupported is a selector of no release this port's bands are measured against; the header declares the property getter=isCinematicVideoCaptureSupported (AVCaptureDevice.h:3786)",
+      "effect": "NO, the hardware's answer: 'This property returns true if the format supports Cinematic Video that produces a controllable, simulated depth of field and adds beautiful focus transitions for a cinema-grade look' (:3784), and the feature renders a depth of field out of two lenses and a depth map, which a single-lens iPhone 4S or iPad 2 has not. Measured on this host, whose camera has one lens: 0 for all seven of its formats",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3782-3786), transcribed into CharonAVCaptureDeviceCinematicVideo26.h, getter=isCinematicVideoCaptureSupported"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.videoFrameRateRangeForCinematicVideo",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property is 26.0's (AVCaptureDevice.h:3816) and no release this port's bands are measured against carries the selector",
+      "effect": "nil, the header's own answer for a format that cannot do the feature: 'If this device format does not support Cinematic Video capture, this property returns nil' (:3815). Measured on the host: nil, for all seven of its formats, which report the same NO for AVCaptureDeviceFormat.cinematicVideoCaptureSupported",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3812-3816), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.videoMaxZoomFactorForCinematicVideo",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property is 26.0's (AVCaptureDevice.h:3811) and no release this port's bands are measured against carries the selector",
+      "effect": "1.0, which is the header's own answer for an unsupported format - 'If this device format does not support Cinematic Video capture, this property returns 1.0' (:3810) - and is also this port's own zoom floor: the release's minimum video zoom factor is 1 and its scale-and-crop limit is above it (facts/AVFoundation/Release11.md, 'The two zoom rows'). Measured on the host: 1, for all seven of its formats",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3807-3811), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "AVCaptureDeviceFormat.videoMinZoomFactorForCinematicVideo",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the property is 26.0's (AVCaptureDevice.h:3806) and no release this port's bands are measured against carries the selector",
+      "effect": "1.0, for the reason AVCaptureDeviceFormat.videoMaxZoomFactorForCinematicVideo gives (:3805), and for the same reason the two agree here: with no Cinematic Video the device's own zoom range is the whole of its range, which starts at 1.0",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:3802-3806), transcribed into CharonAVCaptureDeviceCinematicVideo26.h"
+    },
+    {
+      "api": "AVCaptureDeviceInput.cinematicVideoCaptureEnabled",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceInput is a class of 6.0 and neither -isCinematicVideoCaptureEnabled nor -setCinematicVideoCaptureEnabled: is a selector of any release this port's bands are measured against; the header declares the property getter=isCinematicVideoCaptureEnabled (AVCaptureInput.h:439)",
+      "effect": "the value the caller set, false until then, which is the header's own default (:433). Setting YES refuses while AVCaptureDeviceInput.cinematicVideoCaptureSupported is NO - 'You may only set this property to true if cinematicVideoCaptureSupported is true' (:436) - with NSInvalidArgumentException and Apple's own reason, measured on this host as '*** -[AVCaptureDeviceInput setCinematicVideoCaptureEnabled:] Not supported - use isCinematicVideoCaptureSupported', which the port raises unchanged; setting NO is kept, so this is a value and not a refusal",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureInput.h:431-439), transcribed into CharonAVCaptureDeviceCinematicVideo26.h, getter=isCinematicVideoCaptureEnabled"
+    },
+    {
+      "api": "AVCaptureDeviceInput.cinematicVideoCaptureSupported",
+      "kind": "property",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "AVCaptureDeviceInput is there and -isCinematicVideoCaptureSupported is a selector of no release this port's bands are measured against; the header declares the property getter=isCinematicVideoCaptureSupported (AVCaptureInput.h:430), and this is the row -setCinematicVideoCaptureEnabled: asks before it accepts a value",
+      "effect": "the device's ACTIVE FORMAT's answer, because the header's rule is about the session's configuration and not about the input: 'This property returns true if the session's current configuration allows Cinematic Video capture. When switching cameras or formats, this property may change' (AVCaptureInput.h:427). A configuration can only allow what a format supports, so the port asks the release's own -device and -activeFormat and then this port's format member; with no active format - which is what 6.1.3 answers outside a running session, measured on a device, facts/AVFoundation/Release11.md - there is no configuration and the answer is NO. Measured on the host: 0",
+      "facts": "facts/AVFoundation/CaptureDeviceCinematicVideo26.md",
+      "source": "the header of the SDK 26.2 (AVCaptureInput.h:425-430), transcribed into CharonAVCaptureDeviceCinematicVideo26.h, getter=isCinematicVideoCaptureSupported"
+    }
+  ]
+}

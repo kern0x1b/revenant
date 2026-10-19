@@ -1,0 +1,203 @@
+{
+ "framework": "VideoToolbox",
+ "entries": [
+  {
+   "api": "VTCompressionSessionPrepareToEncodeFrames()",
+   "kind": "function",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the function VTCompressionSessionPrepareToEncodeFrames()",
+   "effect": "a stand-in is built and answers; the real behaviour is owed",
+   "facts": "facts/VideoToolbox/H264Encoding.md",
+   "source": "the host's own VideoToolbox, asked with NULL, a live, an invalidated and a JPEG session; the armv7 cache ladder, which first exports the function at 7.0"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Baseline_4_0",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 31 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Baseline_4_0, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Baseline_4_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 32 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Baseline_4_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Baseline_5_0",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 33 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Baseline_5_0, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Baseline_5_1",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 34 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Baseline_5_1, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Baseline_5_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 35 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Baseline_5_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_High_3_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 36 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_High_3_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_High_4_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 37 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_High_4_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_High_5_1",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 38 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_High_5_1, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_High_5_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 39 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_High_5_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Main_4_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 40 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Main_4_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Main_5_1",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 41 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Main_5_1, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTProfileLevel_H264_Main_5_2",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "rank 42 of the frameworks demand table, LOAD-FAIL for session and telegram; one of the twelve H.264 profile levels iOS 7 added to the ones iOS 6 exports",
+   "effect": "the string H264_Main_5_2, the value iOS 7 exports; the 6.1.3 encoder is given it through kVTCompressionPropertyKey_ProfileLevel and answers for itself, see the facts",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder, which first exports it at 7.0; the host's own VideoToolbox for the value"
+  },
+  {
+   "api": "kVTPixelTransferPropertyKey_RealTime",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 13.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 7.0; SDK 26.2, VideoToolbox/Headers, states 13.0"
+  },
+  {
+   "api": "kVTCompressionPropertyKey_GammaLevel",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 8.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 7.0; SDK 26.2, VideoToolbox/Headers, states 8.0"
+  },
+  {
+   "api": "kVTCompressionPropertyKey_MultiPassStorage",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 8.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 7.0; SDK 26.2, VideoToolbox/Headers, states 8.0"
+  },
+  {
+   "api": "kVTDecompressionPropertyKey_OutputPoolRequestedMinimumBufferCount",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 8.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 7.0; SDK 26.2, VideoToolbox/Headers, states 8.0"
+  },
+  {
+   "api": "kVTMultiPassStorageCreationOption_DoNotDelete",
+   "kind": "constant",
+   "introduced": "7.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a VideoToolbox string constant SDK 26.2 declares as 8.0, and the release the port builds for lacks it",
+   "effect": "the string the header's own constant is documented to have, answered from the port",
+   "facts": "facts/VideoToolbox/FrameProcessorConstants.md",
+   "source": "the armv7 cache ladder (tools/release-split.lua), which first exports it at 7.0; SDK 26.2, VideoToolbox/Headers, states 8.0"
+  }
+ ]
+}

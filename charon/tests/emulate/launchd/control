@@ -1,0 +1,5 @@
+Package: org.charon.emulatelaunchd
+Name: emulate launchd order probe
+Architecture: iphoneos-arm
+Description: A program that asks launchd for the Mach services of the firmware's LaunchDaemons at its first
+ instruction, to tell a run that starts its program after launchd has loaded them from one that does not.

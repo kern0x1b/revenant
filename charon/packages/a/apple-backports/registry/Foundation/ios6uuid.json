@@ -1,0 +1,21 @@
+{
+  "framework": "Foundation",
+  "entries": [
+    {
+      "api": "NSUUID",
+      "kind": "class",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUUID.md",
+      "source": "the armv7 caches of 4.3, 5.0 and 6.0 (NSUUID is absent below 6.0), the class measured under xmake emulate on iPhone3,1 6.0 (10A403) and against the host's own by tests/backports/host/uuid; swift-corelibs-foundation's NSUUID.swift read for the archive key"
+    },
+    {
+      "api": "__NSConcreteUUID",
+      "kind": "class",
+      "introduced": "6.0",
+      "status": "implemented",
+      "facts": "facts/Foundation/NSUUID.md",
+      "source": "+[NSUUID alloc] hands this class out on 6.0 (xmake emulate, iPhone3,1 6.0 10A403) and on the host; the port's own concrete class of the NSUUID cluster keeps the same name, measured, not guessed"
+    }
+  ]
+}

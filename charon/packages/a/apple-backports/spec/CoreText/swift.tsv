@@ -1,0 +1,63 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+CoreText	swift-function	c:@F@CTGetCoreTextVersion	-	CTGetCoreTextVersion()	-	Swift.UInt32	-	ios=3.2	-	fdd480895d7573d3
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_10	-	kCTVersionNumber10_10	-	Swift.Int32	-	-	-	7c5732d0ffc30c8b
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_11	-	kCTVersionNumber10_11	-	Swift.Int32	-	-	-	e68c12db3efb69de
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_12	-	kCTVersionNumber10_12	-	Swift.Int32	-	-	-	fd2b306c792f6642
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_13	-	kCTVersionNumber10_13	-	Swift.Int32	-	-	-	dc8080f47feafb78
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_14	-	kCTVersionNumber10_14	-	Swift.Int32	-	-	-	67432688004a7412
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_15	-	kCTVersionNumber10_15	-	Swift.Int32	-	-	-	5e91ce32f2bab1cd
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_5	-	kCTVersionNumber10_5	-	Swift.Int32	-	-	-	c62b454798d7bb04
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_5_2	-	kCTVersionNumber10_5_2	-	Swift.Int32	-	-	-	40f3b5fda337a127
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_5_3	-	kCTVersionNumber10_5_3	-	Swift.Int32	-	-	-	e5d124eed7e5903e
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_5_5	-	kCTVersionNumber10_5_5	-	Swift.Int32	-	-	-	ee86ee30980f337f
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_6	-	kCTVersionNumber10_6	-	Swift.Int32	-	-	-	dce3f81054f18134
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_7	-	kCTVersionNumber10_7	-	Swift.Int32	-	-	-	84cd650c1b3c4cb7
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_8	-	kCTVersionNumber10_8	-	Swift.Int32	-	-	-	37e6060e26750cb9
+CoreText	swift-constant	c:@macro@kCTVersionNumber10_9	-	kCTVersionNumber10_9	-	Swift.Int32	-	-	-	34239a1169c6dea0
+CoreText	swift-constant	c:@macro@kCTVersionNumber11_0	-	kCTVersionNumber11_0	-	Swift.Int32	-	-	-	3b21be62d922880a
+CoreText	swift-struct	s:10Foundation16AttributedStringV	-	AttributedString	-	-	-	ios=15,macos=12,tvos=15,watchos=8	-	6f48fe801735e2f5
+CoreText	swift-struct	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV	AttributedString	LineHeight	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	c147de67ea54cf58
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV8variableAFvpZ	AttributedString.LineHeight	variable	+	Foundation.AttributedString.LineHeight	-	-	-	f98c4564ef267905
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV6normalAFvpZ	AttributedString.LineHeight	normal	+	Foundation.AttributedString.LineHeight	-	-	-	0941a09de0df7908
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV5tightAFvpZ	AttributedString.LineHeight	tight	+	Foundation.AttributedString.LineHeight	-	-	-	dc571853f5e39c4e
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV5looseAFvpZ	AttributedString.LineHeight	loose	+	Foundation.AttributedString.LineHeight	-	-	-	f0e4b9e2d0bd8e7c
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV8multiple6factorAF0dA07CGFloatV_tFZ	AttributedString.LineHeight	multiple(factor:)	+	Foundation.AttributedString.LineHeight	CoreGraphics.CGFloat	-	-	77c97579b937f873
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV7leading8increaseAF0dA07CGFloatV_tFZ	AttributedString.LineHeight	leading(increase:)	+	Foundation.AttributedString.LineHeight	CoreGraphics.CGFloat	-	-	b98a20ed0383ecf0
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV5exact6pointsAF0dA07CGFloatV_tFZ	AttributedString.LineHeight	exact(points:)	+	Foundation.AttributedString.LineHeight	CoreGraphics.CGFloat	-	-	c96281b4deff4487
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV2eeoiySbAF_AFtFZ	AttributedString.LineHeight	==(_:_:)	+	Swift.Bool	Foundation.AttributedString.LineHeight | Foundation.AttributedString.LineHeight	-	-	9c31b6084058461a
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV6encode2toys7Encoder_p_tKF	AttributedString.LineHeight	encode(to:)	-	()	any Swift.Encoder	-	-	5c38cd55ff8fee1f
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV4hash4intoys6HasherVz_tF	AttributedString.LineHeight	hash(into:)	-	()	Swift.Hasher	-	-	57bf47f41a51e9fc
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV9hashValueSivp	AttributedString.LineHeight	hashValue	-	Swift.Int	-	-	-	63156533c68d661d
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE10LineHeightV4fromAFs7Decoder_p_tKcfc	AttributedString.LineHeight	init(from:)	-	-	Foundation.AttributedString.LineHeight | any Swift.Decoder	-	-	cb6c84e790a22a5c
+CoreText	swift-struct	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV	AttributedString	AdaptiveImageGlyph	-	-	-	-	-	241501be7dfb5de2
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV12imageContentAfA4DataV_tcfc	AttributedString.AdaptiveImageGlyph	init(imageContent:)	-	-	Foundation.AttributedString.AdaptiveImageGlyph | Foundation.Data	-	-	d141e02a609092cf
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV12imageContentAA4DataVvp	AttributedString.AdaptiveImageGlyph	imageContent	-	Foundation.Data	-	-	-	94927a9ad4be848d
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV17contentIdentifierSSvp	AttributedString.AdaptiveImageGlyph	contentIdentifier	-	Swift.String	-	-	-	d7680476f4919bc1
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV18contentDescriptionSSvp	AttributedString.AdaptiveImageGlyph	contentDescription	-	Swift.String	-	-	-	7dd9d99e6051dc2e
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV11contentType07UniformJ11Identifiers6UTTypeVvpZ	AttributedString.AdaptiveImageGlyph	contentType	+	UniformTypeIdentifiers.UTType	-	-	-	c308c8ea7e7fc86c
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV2eeoiySbAF_AFtFZ	AttributedString.AdaptiveImageGlyph	==(_:_:)	+	Swift.Bool	Foundation.AttributedString.AdaptiveImageGlyph | Foundation.AttributedString.AdaptiveImageGlyph	-	-	bcdfee611f3f7cae
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV6encode2toys7Encoder_p_tKF	AttributedString.AdaptiveImageGlyph	encode(to:)	-	()	any Swift.Encoder	-	-	9982660a640019c0
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV4hash4intoys6HasherVz_tF	AttributedString.AdaptiveImageGlyph	hash(into:)	-	()	Swift.Hasher	-	-	4dde5622e8afda2d
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV9hashValueSivp	AttributedString.AdaptiveImageGlyph	hashValue	-	Swift.Int	-	-	-	e50d87e4abf7edbf
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE18AdaptiveImageGlyphV4fromAFs7Decoder_p_tKcfc	AttributedString.AdaptiveImageGlyph	init(from:)	-	-	Foundation.AttributedString.AdaptiveImageGlyph | any Swift.Decoder	-	-	9a42c79e2eea7a4f
+CoreText	swift-enum	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO	AttributedString	TextAlignment	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	6820e5617f9040ec
+CoreText	swift-constant	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO4leftyA2FmF	AttributedString.TextAlignment	left	-	-	-	-	-	f99b66b5f178b915
+CoreText	swift-constant	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO6centeryA2FmF	AttributedString.TextAlignment	center	-	-	-	-	-	66f74c92a8d06dee
+CoreText	swift-constant	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO5rightyA2FmF	AttributedString.TextAlignment	right	-	-	-	-	-	2609fb28fada9b3d
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO2eeoiySbAF_AFtFZ	AttributedString.TextAlignment	==(_:_:)	+	Swift.Bool	Foundation.AttributedString.TextAlignment | Foundation.AttributedString.TextAlignment	-	-	5a63bbf079461f3b
+CoreText	swift-typealias	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO8AllCasesa	AttributedString.TextAlignment	AllCases	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	b3c553c782633c3d
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO8allCasesSayAFGvpZ	AttributedString.TextAlignment	allCases	+	[Foundation.AttributedString.TextAlignment]	-	-	-	30d467f82d7c7d39
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO6encode2toys7Encoder_p_tKF	AttributedString.TextAlignment	encode(to:)	-	()	any Swift.Encoder	-	-	434a345c7ea7db52
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO4hash4intoys6HasherVz_tF	AttributedString.TextAlignment	hash(into:)	-	()	Swift.Hasher	-	-	e1e190e517f2a15a
+CoreText	swift-property	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO9hashValueSivp	AttributedString.TextAlignment	hashValue	-	Swift.Int	-	-	-	4eb45d83a59f4e5f
+CoreText	swift-method	s:10Foundation16AttributedStringV8CoreTextE0E9AlignmentO4fromAFs7Decoder_p_tKcfc	AttributedString.TextAlignment	init(from:)	-	-	Foundation.AttributedString.TextAlignment | any Swift.Decoder	-	-	bae1412a34a05b74
+CoreText	swift-enum	s:10Foundation15AttributeScopesO	-	AttributeScopes	-	-	-	ios=15,macos=12,tvos=15,watchos=8	-	d585c0b730cb272a
+CoreText	swift-struct	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV	AttributeScopes	CoreTextAttributes	-	-	-	-	-	bc2a9023e4173512
+CoreText	swift-enum	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV010LineHeightB0O	AttributeScopes.CoreTextAttributes	LineHeightAttribute	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	18e0162abf8d6db4
+CoreText	swift-typealias	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV010LineHeightB0O5Valuea	AttributeScopes.CoreTextAttributes.LineHeightAttribute	Value	-	-	-	-	-	c24a30243575612b
+CoreText	swift-property	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV010LineHeightB0O4nameSSvpZ	AttributeScopes.CoreTextAttributes.LineHeightAttribute	name	+	Swift.String	-	-	-	eaf78e9b2edecbae
+CoreText	swift-property	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV010LineHeightB0O13runBoundariesAA16AttributedStringV0b3RunJ0OSgvpZ	AttributeScopes.CoreTextAttributes.LineHeightAttribute	runBoundaries	+	Foundation.AttributedString.AttributeRunBoundaries?	-	-	-	8a6920f013a68b76
+CoreText	swift-enum	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV0e9AlignmentB0O	AttributeScopes.CoreTextAttributes	TextAlignmentAttribute	-	-	-	ios=26.0,macos=26.0,tvos=26.0,watchos=26.0	-	05ae8b65a07be5d7
+CoreText	swift-typealias	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV0e9AlignmentB0O5Valuea	AttributeScopes.CoreTextAttributes.TextAlignmentAttribute	Value	-	-	-	-	-	737899d256c59a2d
+CoreText	swift-property	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV0e9AlignmentB0O4nameSSvpZ	AttributeScopes.CoreTextAttributes.TextAlignmentAttribute	name	+	Swift.String	-	-	-	a2766e3492da4cbe
+CoreText	swift-property	s:10Foundation15AttributeScopesO8CoreTextE0dE10AttributesV0e9AlignmentB0O13runBoundariesAA16AttributedStringV0b3RunI0OSgvpZ	AttributeScopes.CoreTextAttributes.TextAlignmentAttribute	runBoundaries	+	Foundation.AttributedString.AttributeRunBoundaries?	-	-	-	b0a960f5e0f848ce

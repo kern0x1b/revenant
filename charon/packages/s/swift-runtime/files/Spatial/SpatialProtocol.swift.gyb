@@ -1,0 +1,255 @@
+//===--- SpatialProtocol.swift.gyb -------------*- swift -*-===//
+//
+// The protocols of Spatial, once for each of the framework's two scalars. They are the shape the
+// concrete types share: a caller that only needs "something that can be translated" writes against
+// `Translatable3D` and neither scalar nor matrix is named.
+//
+// The un-parameterised protocols at the end (`Primitive3D`, `Translatable3D` and the rest) are the
+// same requirements without the scalar, which is how a caller that holds both halves at once names
+// them.
+//
+//===----------------------------------------------------------------------===//
+
+import simd
+
+% for scalar, vector, matrix, matrix3, matrix4, quat, suffix in [("Double", "simd_double3", "simd_double4x3", "simd_double3x3", "simd_double4x4", "simd_quatd", ""), ("Float", "simd_float3", "simd_float4x3", "simd_float3x3", "simd_float4x4", "simd_quatf", "Float")]:
+
+/// What every Spatial value of one scalar is: it has a scalar, and it knows the whole family of
+/// types that scalar brings with it.
+public protocol SpatialTypeProtocol${suffix}<Scalar>: Decodable, Encodable, Equatable {
+    associatedtype Scalar: Numeric where Scalar == Self.AffineTransform.Scalar,
+                                       Self.AffineTransform.Scalar == Self.Point.Scalar,
+                                       Self.Point.Scalar == Self.Pose.Scalar,
+                                       Self.Pose.Scalar == Self.ProjectiveTransform.Scalar,
+                                       Self.ProjectiveTransform.Scalar == Self.Rect.Scalar,
+                                       Self.Rect.Scalar == Self.Rotation.Scalar,
+                                       Self.Rotation.Scalar == Self.Size.Scalar,
+                                       Self.Size.Scalar == Self.Vector.Scalar
+    associatedtype AffineTransform: Transform3DProtocol${suffix}
+    associatedtype ProjectiveTransform: Transform3DProtocol${suffix}
+    associatedtype Pose: Rotatable3DProtocol${suffix}, Translatable3DProtocol${suffix}
+    associatedtype Rect: Primitive3DProtocol${suffix}
+    associatedtype Vector: Primitive3DProtocol${suffix}
+    associatedtype Point: Primitive3DProtocol${suffix}
+    associatedtype Size: Primitive3DProtocol${suffix}
+    associatedtype Rotation: Rotatable3DProtocol${suffix}
+    associatedtype Quaternion
+    associatedtype AxisEnumeration
+}
+
+/// A value that carries a direction, and so is turned by a rotation.
+public protocol Rotatable3DProtocol${suffix}<Scalar>: SpatialTypeProtocol${suffix} {
+    /// The rotation that takes this value onto `other`, about the axis they share.
+    func rotation(to other: Self) -> Self.Rotation
+    func rotated(by rotation: Self.Rotation) -> Self
+    func rotated(by quaternion: Self.Quaternion) -> Self
+    mutating func rotate(by rotation: Self.Rotation)
+    mutating func rotate(by quaternion: Self.Quaternion)
+}
+
+extension Rotatable3DProtocol${suffix} {
+    public mutating func rotate(by rotation: Self.Rotation) { self = self.rotated(by: rotation) }
+    public mutating func rotate(by quaternion: Self.Quaternion) { self = self.rotated(by: quaternion) }
+}
+
+/// A value that carries a position, and so is moved by a vector.
+public protocol Translatable3DProtocol${suffix}<Scalar>: SpatialTypeProtocol${suffix} {
+    func translated(by vector: Self.Vector) -> Self
+    mutating func translate(by vector: Self.Vector)
+}
+
+extension Translatable3DProtocol${suffix} {
+    public mutating func translate(by vector: Self.Vector) { self = self.translated(by: vector) }
+}
+
+/// A value with a size, which can be scaled, turned and sheared as a whole.
+public protocol Scalable3DProtocol${suffix}<Scalar>: SpatialTypeProtocol${suffix} {
+    var scale: Self.Size { get }
+    func scaledBy(x: Self.Scalar, y: Self.Scalar, z: Self.Scalar) -> Self
+    func scaled(by scale: Self.Size) -> Self
+    func uniformlyScaled(by scale: Self.Scalar) -> Self
+    mutating func scaleBy(x: Self.Scalar, y: Self.Scalar, z: Self.Scalar)
+    mutating func scale(by scale: Self.Size)
+    mutating func uniformlyScale(by scale: Self.Scalar)
+}
+
+/// A value that can be sheared about one axis.
+public protocol Shearable3DProtocol${suffix}<Scalar>: SpatialTypeProtocol${suffix} {
+    func sheared(_ shear: Self.AxisEnumeration) -> Self
+    mutating func shear(_ shear: Self.AxisEnumeration)
+}
+
+/// A transformation of three dimensions.
+public protocol Transform3DProtocol${suffix}: SpatialTypeProtocol${suffix} {
+    init(shear: Self.AxisEnumeration)
+    init(scale: Self.Size)
+    init(rotation: Self.Rotation)
+    init(translation: Self.Vector)
+    init(scale: Self.Size, rotation: Self.Rotation, translation: Self.Vector)
+
+    var isIdentity: Bool { get }
+    static var identity: Self { get }
+    var isTranslation: Bool { get }
+    var isUniform: Bool { get }
+    func isUniform(overDimensions: Dimension3DSet) -> Bool
+    var isRectilinear: Bool { get }
+
+    func concatenating(_ transform: Self) -> Self
+    var inverse: Self? { get }
+    func inverted() -> Self?
+    func isApproximatelyEqual(to other: Self, tolerance: Self.Scalar) -> Bool
+
+    var translation: Self.Vector { get set }
+    var rotation: Self.Rotation? { get }
+
+    mutating func flip(along axis: Axis3D)
+    func flipped(along axis: Axis3D) -> Self
+}
+
+/// A value that stands for something in three dimensions and can be moved by a transformation.
+public protocol Primitive3DProtocol${suffix}<Scalar>: Rotatable3DProtocol${suffix} {
+    static var zero: Self { get }
+    static var infinity: Self { get }
+    var isZero: Bool { get }
+    var isFinite: Bool { get }
+    var isNaN: Bool { get }
+
+    func applying(_ transform: Self.AffineTransform) -> Self
+    func applying(_ transform: Self.ProjectiveTransform) -> Self
+    func applying(_ pose: Self.Pose) -> Self
+    mutating func apply(_ transform: Self.AffineTransform)
+    mutating func apply(_ transform: Self.ProjectiveTransform)
+    mutating func apply(_ pose: Self.Pose)
+
+    func unapplying(_ transform: Self.AffineTransform) -> Self
+    mutating func unapply(_ transform: Self.AffineTransform)
+    func unapplying(_ transform: Self.ProjectiveTransform) -> Self
+    func unapplying(_ pose: Self.Pose) -> Self
+    mutating func unapply(_ transform: Self.ProjectiveTransform)
+    mutating func unapply(_ pose: Self.Pose)
+}
+
+/// A value with an extent, which holds other values of the same scalar.
+public protocol VolumetricProtocol${suffix}<Scalar>: SpatialTypeProtocol${suffix} {
+    var size: Self.Size { get }
+    func contains(_ other: Self) -> Bool
+    func contains(point: Self.Point) -> Bool
+    func union(_ other: Self) -> Self
+    func intersection(_ other: Self) -> Self?
+    mutating func formIntersection(_ other: Self)
+    mutating func formUnion(_ other: Self)
+    func contains(anyOf points: [Self.Point]) -> Bool
+}
+
+/// A value that can be held inside a box of its own scalar.
+public protocol ClampableWithinRectProtocol${suffix}<Scalar>: SpatialTypeProtocol${suffix} {
+    func clamped(to rect: Self.Rect) -> Self
+    mutating func clamp(to rect: Self.Rect)
+}
+
+/// A value that a projective transformation can carry.
+public protocol ProjectiveTransformable3D${suffix} {
+    func applying(_ transform: ProjectiveTransform3D${suffix}) -> Self
+}
+
+% end
+
+// MARK: - The same requirements without the scalar.
+
+// These are what the concrete types of each half conform to, and what a caller that holds both
+// halves at once names: the same requirements, with the scalar left out.
+
+/// A value that stands for something in three dimensions and can be moved by a transformation.
+public protocol Primitive3D: Decodable, Encodable, Equatable {
+    static var zero: Self { get }
+    static var infinity: Self { get }
+    var isZero: Bool { get }
+    var isFinite: Bool { get }
+    var isNaN: Bool { get }
+
+    func applying(_ transform: AffineTransform3D) -> Self
+    func applying(_ transform: ProjectiveTransform3D) -> Self
+    func applying(_ pose: Pose3D) -> Self
+    mutating func apply(_ transform: AffineTransform3D)
+    mutating func apply(_ transform: ProjectiveTransform3D)
+    mutating func apply(_ pose: Pose3D)
+    func unapplying(_ transform: AffineTransform3D) -> Self
+    mutating func unapply(_ transform: AffineTransform3D)
+    func unapplying(_ transform: ProjectiveTransform3D) -> Self
+    mutating func unapply(_ transform: ProjectiveTransform3D)
+    func unapplying(_ pose: Pose3D) -> Self
+    mutating func unapply(_ pose: Pose3D)
+
+    func translated(by vector: Vector3D) -> Self
+    func rotated(by rotation: Rotation3D) -> Self
+    func rotated(by quaternion: simd_quatd) -> Self
+    func rotation(to other: Self) -> Rotation3D
+}
+
+/// A value that carries a position, and so is moved by a vector.
+public protocol Translatable3D {
+    func translated(by vector: Vector3D) -> Self
+    mutating func translate(by vector: Vector3D)
+}
+
+/// A value with a size, which can be scaled as a whole.
+public protocol Scalable3D {
+    var scale: Size3D { get }
+    func scaledBy(x: Double, y: Double, z: Double) -> Self
+    func scaled(by scale: Size3D) -> Self
+    func uniformlyScaled(by scale: Double) -> Self
+    mutating func scaleBy(x: Double, y: Double, z: Double)
+    mutating func scale(by scale: Size3D)
+    mutating func uniformlyScale(by scale: Double)
+}
+
+extension Scalable3D {
+    public mutating func scaleBy(x: Double = 1, y: Double = 1, z: Double = 1) { self = scaledBy(x: x, y: y, z: z) }
+    public mutating func scale(by scale: Size3D) { self = scaled(by: scale) }
+    public mutating func uniformlyScale(by scale: Double) { self = uniformlyScaled(by: scale) }
+}
+
+/// A value that carries a direction, and so is turned by a rotation.
+public protocol Rotatable3D {
+    func rotated(by rotation: Rotation3D) -> Self
+    func rotated(by quaternion: simd_quatd) -> Self
+    mutating func rotate(by rotation: Rotation3D)
+    mutating func rotate(by quaternion: simd_quatd)
+}
+
+extension Rotatable3D {
+    public mutating func rotate(by rotation: Rotation3D) { self = self.rotated(by: rotation) }
+    public mutating func rotate(by quaternion: simd_quatd) { self = self.rotated(by: quaternion) }
+}
+
+/// A value that can be sheared about one axis.
+public protocol Shearable3D {
+    func sheared(_ shear: AxisWithFactors) -> Self
+    mutating func shear(_ shear: AxisWithFactors)
+}
+
+extension Shearable3D {
+    public mutating func shear(_ shear: AxisWithFactors) { self = self.sheared(shear) }
+}
+
+/// A value with an extent, which holds other values of the same scalar.
+public protocol Volumetric {
+    var size: Size3D { get }
+    func contains(_ other: Self) -> Bool
+    func contains(point: Point3D) -> Bool
+    func contains(anyOf points: [Point3D]) -> Bool
+    func union(_ other: Self) -> Self
+    mutating func formUnion(_ other: Self)
+    func intersection(_ other: Self) -> Self?
+    mutating func formIntersection(_ other: Self)
+}
+
+/// A value that can be held inside a box.
+public protocol ClampableWithinRect {
+    func clamped(to rect: Rect3D) -> Self
+    mutating func clamp(to rect: Rect3D)
+}
+
+extension ClampableWithinRect {
+    public mutating func clamp(to rect: Rect3D) { self = self.clamped(to: rect) }
+}

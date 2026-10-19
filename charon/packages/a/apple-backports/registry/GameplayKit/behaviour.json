@@ -1,0 +1,292 @@
+{
+  "framework": "GameplayKit",
+  "note": "A behaviour and a goal: twenty-six rows, the goals in the order they were given with the weight of each, and the twelve factories that build a goal.",
+  "entries": [
+    {
+      "api": "+[GKBehavior behaviorWithGoal:weight:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKBehavior behaviorWithGoals:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKBehavior behaviorWithGoals:andWeights:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKBehavior behaviorWithWeightedGoals:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToAlignWithAgents:maxDistance:maxAngle:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToAvoidAgents:maxPredictionTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToAvoidObstacles:maxPredictionTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToCohereWithAgents:maxDistance:maxAngle:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToFleeAgent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToFollowPath:maxPredictionTime:forward:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToInterceptAgent:maxPredictionTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToReachTargetSpeed:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToSeekAgent:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToSeparateFromAgents:maxDistance:maxAngle:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToStayOnPath:maxPredictionTime:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "+[GKGoal goalToWander:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior objectAtIndexedSubscript:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior objectForKeyedSubscript:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior removeAllGoals]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior removeGoal:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior setObject:forKeyedSubscript:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior setWeight:forGoal:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "-[GKBehavior weightForGoal:]",
+      "kind": "method",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "GKBehavior",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "GKBehavior.goalCount",
+      "kind": "property",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    },
+    {
+      "api": "GKGoal",
+      "kind": "class",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a behaviour is the goals an agent was asked to satisfy and how much each counts, which is logic over the goals an application gives it, and a goal is nothing but the factory it came from and its arguments",
+      "facts": "facts/GameplayKit/Behavior.md",
+      "source": "the host's own GameplayKit, measured by tests/backports/host/gameplaykit-core/measure.m",
+      "effect": "the goals in the order they were given, the weight of each, a goal the behaviour has not weighing zero, all twelve goal factories, the three that take one agent refusing nil as the host's refuse it, and the weights read by the goal's own index so that fewer weights than goals raises as the host raises"
+    }
+  ]
+}

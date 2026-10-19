@@ -1,0 +1,15 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLCommandEncoder barrierAfterQueueStages:beforeStages:]",
+      "kind": "method",
+      "introduced": "26.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "a barrier on a command encoder, and the port's MTLCommandEncoder protocol does not define it (its three debug-group members are defined, the barrier is not)",
+      "effect": "the selector is not there: respondsToSelector: answers NO and a call through a compile time reference crashes; a stage barrier would have been a no-op on this device anyway, because the port has one queue and issues each command as it is encoded, which facts/Metal/Blits.md records",
+      "source": "SDK 26.2, Metal, MTLCommandEncoder.h; and the SDK of 16.4 this package builds against, which has no MTLStages"
+    }
+  ]
+}

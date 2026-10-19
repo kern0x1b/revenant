@@ -1,0 +1,5 @@
+protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
+OS_dispatch_queue_concurrent	12.0	sdk16 body		OS_dispatch_queue	-	-	-	-	-	-
+OS_dispatch_queue_serial	12.0	sdk16 body		OS_dispatch_queue	-	-	-	-	-	-
+OS_dispatch_queue_serial_executor	17.0	transcribed		OS_dispatch_queue	-	-	-	-	-	-
+OS_dispatch_workloop	12.0	sdk16 body		OS_dispatch_queue	-	-	-	-	-	-

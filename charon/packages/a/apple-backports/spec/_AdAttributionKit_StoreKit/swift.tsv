@@ -1,0 +1,7 @@
+framework	kind	usr	container	name	side	type	params	availability	message	declhash
+_AdAttributionKit_StoreKit	swift-class	c:objc(cs)SKStoreProductViewController	-	SKStoreProductViewController	-	-	-	ios=6.0	-	e1a3559f32e58377
+_AdAttributionKit_StoreKit	swift-method	s:So28SKStoreProductViewControllerC023_AdAttributionKit_StoreG0E04loadB010parameters10impressionySDySSypG_0efG013AppImpressionVtYaKF	SKStoreProductViewController	loadProduct(parameters:impression:)	-	()	[Swift.String : Any] | AdAttributionKit.AppImpression	-	-	9f2ec5030b914e2f
+_AdAttributionKit_StoreKit	swift-method	s:So28SKStoreProductViewControllerC023_AdAttributionKit_StoreG0E04loadB010parameters10impression15reengagementURLySDySSypG_0efG013AppImpressionV10Foundation0M0VtYaKF	SKStoreProductViewController	loadProduct(parameters:impression:reengagementURL:)	-	()	[Swift.String : Any] | AdAttributionKit.AppImpression | Foundation.URL	ios=18.0	-	5aab1d02df572cef
+_AdAttributionKit_StoreKit	swift-class	c:objc(cs)SKOverlayAppConfiguration	-	AppConfiguration	-	-	-	ios=14.0	-	dabc81ec9c0a5dcb
+_AdAttributionKit_StoreKit	swift-property	s:So25SKOverlayAppConfigurationC023_AdAttributionKit_StoreF0E13appImpression0deF00bI0VSgvp	AppConfiguration	appImpression	-	AdAttributionKit.AppImpression?	-	-	-	deedb0d6244194d6
+_AdAttributionKit_StoreKit	swift-property	s:So25SKOverlayAppConfigurationC023_AdAttributionKit_StoreF0E02adE15ReengagementURL10Foundation0J0VSgvp	AppConfiguration	adAttributionReengagementURL	-	Foundation.URL?	-	ios=18.0	-	13f3f836972ab126

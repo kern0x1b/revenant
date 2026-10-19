@@ -1,0 +1,87 @@
+#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
+typedef	c:@T@EABluetoothAccessoryPickerErrorCode	-			enum EABluetoothAccessoryPickerErrorCode	-	-	-	-	0f3ce0080ce8834f	-
+enum	c:@E@EABluetoothAccessoryPickerErrorCode	-			NSInteger	-	-	-	-	aef71cb910858157	-
+enumconst	c:@E@EABluetoothAccessoryPickerErrorCode@EABluetoothAccessoryPickerAlreadyConnected	EABluetoothAccessoryPickerErrorCode			-	-	-	-	-	7a593b3b0f164f57	0
+enumconst	c:@E@EABluetoothAccessoryPickerErrorCode@EABluetoothAccessoryPickerResultNotFound	EABluetoothAccessoryPickerErrorCode			-	-	-	-	-	32953e4ab1c558f0	1
+enumconst	c:@E@EABluetoothAccessoryPickerErrorCode@EABluetoothAccessoryPickerResultCancelled	EABluetoothAccessoryPickerErrorCode			-	-	-	-	-	d4747ee063b3bb19	2
+enumconst	c:@E@EABluetoothAccessoryPickerErrorCode@EABluetoothAccessoryPickerResultFailed	EABluetoothAccessoryPickerErrorCode			-	-	-	-	-	7e7a6f8362ba1859	3
+var	c:@EABluetoothAccessoryPickerErrorDomain	-			NSString *const	-	-	-	-	8478dab747f106e8	-
+typedef	c:@T@EABluetoothAccessoryPickerCompletion	-			void ((^))(NSError *)	-	-	-	-	20e9abf0cd5ed784	-
+var	c:@EAAccessoryDidConnectNotification	-			NSString *const	-	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	5876d06115e32381	-
+var	c:@EAAccessoryDidDisconnectNotification	-			NSString *const	-	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	1dca329259748b94	-
+var	c:@EAAccessoryKey	-			NSString *const	-	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	0f13234f5d66a449	-
+var	c:@EAAccessorySelectedKey	-			NSString *const	-	-	ios=6.0/-/-/0,tvos=10.0/-/-/0	-	976ba65d5a82ab72	-
+interface	c:objc(cs)EAAccessoryManager	-			-	-	-	ios=3.0/-/-/0	-	dda7ca565e8460be	-
+super	-	EAAccessoryManager	NSObject		-	-	-	-	-	7660a5d5b34ae0ca	-
+method	c:objc(cs)EAAccessoryManager(cm)sharedAccessoryManager	-			EAAccessoryManager *	-	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	2adb1c3a2665496c	-
+method	c:objc(cs)EAAccessoryManager(im)showBluetoothAccessoryPickerWithNameFilter:completion:	-			void	NSPredicate * predicate | EABluetoothAccessoryPickerCompletion completion	-	ios=6/-/-/0,maccatalyst=14/-/-/0,macos=-/-/-/1	-	19789638f771a28c	-
+method	c:objc(cs)EAAccessoryManager(im)registerForLocalNotifications	-			void	-	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	9960b462ffa9bf67	-
+method	c:objc(cs)EAAccessoryManager(im)unregisterForLocalNotifications	-			void	-	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	af8c36c11519a8cf	-
+property	c:objc(cs)EAAccessoryManager(py)connectedAccessories	-			NSArray<EAAccessory *> *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	9572a33c33e900bd	-
+enum	c:@Ea@EAConnectionIDNone	-	-		unsigned int	-	-	-	-	1e8ddc76060c0573	-
+enumconst	c:@Ea@EAConnectionIDNone@EAConnectionIDNone	-			-	-	-	-	-	c4c5a84c8feb0d9c	0
+interface	c:objc(cs)EAAccessory	-			-	-	-	ios=3.0/-/-/0	deprecated: Not supported	6ea2921ff018b35f	-
+super	-	EAAccessory	NSObject		-	-	-	-	-	9d9264230921ca98	-
+property	c:objc(cs)EAAccessory(py)connected	-			BOOL	-	readonly,nonatomic,getter=isConnected	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	196674ef6c74d2b0	-
+property	c:objc(cs)EAAccessory(py)connectionID	-			NSUInteger	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	349b887eebf58a8e	-
+property	c:objc(cs)EAAccessory(py)manufacturer	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	2dd72c8d18f48a1d	-
+property	c:objc(cs)EAAccessory(py)name	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	97eaec06b994e1e0	-
+property	c:objc(cs)EAAccessory(py)modelNumber	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	2303ffc6eb494313	-
+property	c:objc(cs)EAAccessory(py)serialNumber	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	b5e4e07d2d508663	-
+property	c:objc(cs)EAAccessory(py)firmwareRevision	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	687b2ba2d8fc2372	-
+property	c:objc(cs)EAAccessory(py)hardwareRevision	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	92ed7bf45123e373	-
+property	c:objc(cs)EAAccessory(py)dockType	-			NSString *	-	readonly,nonatomic	ios=9.3/13.0/-/0,macos=10.13/10.14/-/0,tvos=9.2/13.0/-/0	-	beb2ca819c7697da	-
+property	c:objc(cs)EAAccessory(py)protocolStrings	-			NSArray<NSString *> *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	93fa78b6c8ef251e	-
+property	c:objc(cs)EAAccessory(py)delegate	-			id<EAAccessoryDelegate>	-	assign,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	b8bcdc5efe0e56fc	-
+protocol	c:objc(pl)EAAccessoryDelegate	-			-	-	-	-	-	10feb6172714bf04	-
+conforms	c:objc(pl)EAAccessoryDelegate	EAAccessoryDelegate	NSObject		-	-	-	-	-	f6decf3da6edeb3b	-
+method	c:objc(pl)EAAccessoryDelegate(im)accessoryDidDisconnect:	-			void	EAAccessory * accessory	optional	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	21c4984a727621e8	-
+interface	c:objc(cs)EASession	-			-	-	-	ios=3.0/-/-/0	-	34939d6c12632190	-
+super	-	EASession	NSObject		-	-	-	-	-	1b7775ed8f870152	-
+method	c:objc(cs)EASession(im)initWithAccessory:forProtocol:	-			instancetype	EAAccessory * accessory | NSString * protocolString	-	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	4bb13cb20d9ca18d	-
+property	c:objc(cs)EASession(py)accessory	-			EAAccessory *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	ede303cb4beb4504	-
+property	c:objc(cs)EASession(py)protocolString	-			NSString *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	39ebe28cf5a9af37	-
+property	c:objc(cs)EASession(py)inputStream	-			NSInputStream *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	e386c2a15e86dc3f	-
+property	c:objc(cs)EASession(py)outputStream	-			NSOutputStream *	-	readonly,nonatomic	ios=3.0/-/-/0,tvos=10.0/-/-/0	-	5981499a5d7f18bc	-
+typedef	c:@T@EAWiFiUnconfiguredAccessoryBrowserState	-			enum EAWiFiUnconfiguredAccessoryBrowserState	-	-	-	-	9b7df13633607bda	-
+enum	c:@E@EAWiFiUnconfiguredAccessoryBrowserState	-			NSInteger	-	-	-	-	4c6c217c7dfcc1b3	-
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryBrowserState@EAWiFiUnconfiguredAccessoryBrowserStateWiFiUnavailable	EAWiFiUnconfiguredAccessoryBrowserState			-	-	-	-	-	0d1a2e03aeb071d1	0
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryBrowserState@EAWiFiUnconfiguredAccessoryBrowserStateStopped	EAWiFiUnconfiguredAccessoryBrowserState			-	-	-	-	-	715a9d7e068b5282	1
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryBrowserState@EAWiFiUnconfiguredAccessoryBrowserStateSearching	EAWiFiUnconfiguredAccessoryBrowserState			-	-	-	-	-	0650cdb7258de584	2
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryBrowserState@EAWiFiUnconfiguredAccessoryBrowserStateConfiguring	EAWiFiUnconfiguredAccessoryBrowserState			-	-	-	-	-	aec91c8b29ced121	3
+typedef	c:@T@EAWiFiUnconfiguredAccessoryConfigurationStatus	-			enum EAWiFiUnconfiguredAccessoryConfigurationStatus	-	-	-	-	ebe9052cc5fd8ede	-
+enum	c:@E@EAWiFiUnconfiguredAccessoryConfigurationStatus	-			NSInteger	-	-	-	-	b73023797d7b5421	-
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryConfigurationStatus@EAWiFiUnconfiguredAccessoryConfigurationStatusSuccess	EAWiFiUnconfiguredAccessoryConfigurationStatus			-	-	-	-	-	941a5da8f8f200a9	0
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryConfigurationStatus@EAWiFiUnconfiguredAccessoryConfigurationStatusUserCancelledConfiguration	EAWiFiUnconfiguredAccessoryConfigurationStatus			-	-	-	-	-	92cb8c2e4029b795	1
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryConfigurationStatus@EAWiFiUnconfiguredAccessoryConfigurationStatusFailed	EAWiFiUnconfiguredAccessoryConfigurationStatus			-	-	-	-	-	f9010f3ec8474bbc	2
+interface	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser	-			-	-	-	ios=8.0/-/-/0	-	bc6d3079c04f45b5	-
+super	-	EAWiFiUnconfiguredAccessoryBrowser	NSObject		-	-	-	-	-	a9dc70b4e2b4d0a0	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser(py)delegate	-			id<EAWiFiUnconfiguredAccessoryBrowserDelegate>	-	weak,nonatomic	ios=8.0/-/-/0	-	bd1f79478e17e42b	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser(py)unconfiguredAccessories	-			NSSet<EAWiFiUnconfiguredAccessory *> *	-	readonly,copy,atomic	ios=8.0/-/-/0	-	97717fb286e796d3	-
+method	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser(im)initWithDelegate:queue:	-			instancetype	id<EAWiFiUnconfiguredAccessoryBrowserDelegate> delegate | dispatch_queue_t queue	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	fb4363a26f256cb0	-
+method	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser(im)startSearchingForUnconfiguredAccessoriesMatchingPredicate:	-			void	NSPredicate * predicate	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	0c3a21930b6c61c4	-
+method	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser(im)stopSearchingForUnconfiguredAccessories	-			void	-	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	16d1727b85c52875	-
+method	c:objc(cs)EAWiFiUnconfiguredAccessoryBrowser(im)configureAccessory:withConfigurationUIOnViewController:	-			void	EAWiFiUnconfiguredAccessory * accessory | UIViewController * viewController	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	57cb8874b8e2102c	-
+protocol	c:objc(pl)EAWiFiUnconfiguredAccessoryBrowserDelegate	-			-	-	-	-	-	c0e4098e6717127b	-
+conforms	c:objc(pl)EAWiFiUnconfiguredAccessoryBrowserDelegate	EAWiFiUnconfiguredAccessoryBrowserDelegate	NSObject		-	-	-	-	-	d7adfeeb9aa55518	-
+method	c:objc(pl)EAWiFiUnconfiguredAccessoryBrowserDelegate(im)accessoryBrowser:didUpdateState:	-			void	EAWiFiUnconfiguredAccessoryBrowser * browser | EAWiFiUnconfiguredAccessoryBrowserState state	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	641417f1a08c20e6	-
+method	c:objc(pl)EAWiFiUnconfiguredAccessoryBrowserDelegate(im)accessoryBrowser:didFindUnconfiguredAccessories:	-			void	EAWiFiUnconfiguredAccessoryBrowser * browser | NSSet<EAWiFiUnconfiguredAccessory *> * accessories	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	849eb79dc830de76	-
+method	c:objc(pl)EAWiFiUnconfiguredAccessoryBrowserDelegate(im)accessoryBrowser:didRemoveUnconfiguredAccessories:	-			void	EAWiFiUnconfiguredAccessoryBrowser * browser | NSSet<EAWiFiUnconfiguredAccessory *> * accessories	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	d7a920cc27f2e16f	-
+method	c:objc(pl)EAWiFiUnconfiguredAccessoryBrowserDelegate(im)accessoryBrowser:didFinishConfiguringAccessory:withStatus:	-			void	EAWiFiUnconfiguredAccessoryBrowser * browser | EAWiFiUnconfiguredAccessory * accessory | EAWiFiUnconfiguredAccessoryConfigurationStatus status	-	ios=8.0/-/-/0,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	e9c015d80a9c47d5	-
+typedef	c:@T@EAWiFiUnconfiguredAccessoryProperties	-			enum EAWiFiUnconfiguredAccessoryProperties	-	-	-	-	2700f71f9e30f281	-
+enum	c:@E@EAWiFiUnconfiguredAccessoryProperties	-			NSUInteger	-	-	-	-	6fb7410f83ddf17a	-
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryProperties@EAWiFiUnconfiguredAccessoryPropertySupportsAirPlay	EAWiFiUnconfiguredAccessoryProperties			-	-	-	-	-	5ee4a4d36bfac0d1	1
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryProperties@EAWiFiUnconfiguredAccessoryPropertySupportsAirPrint	EAWiFiUnconfiguredAccessoryProperties			-	-	-	-	-	b38e664794b30d73	2
+enumconst	c:@E@EAWiFiUnconfiguredAccessoryProperties@EAWiFiUnconfiguredAccessoryPropertySupportsHomeKit	EAWiFiUnconfiguredAccessoryProperties			-	-	-	-	-	bddbadc67315ced2	4
+interface	c:objc(cs)EAWiFiUnconfiguredAccessory	-			-	-	-	ios=8.0/-/-/0	-	2b14a4819f21ab56	-
+super	-	EAWiFiUnconfiguredAccessory	NSObject		-	-	-	-	-	58e9cae0faa94a5d	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessory(py)name	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0	-	e4049ae74b6adba4	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessory(py)manufacturer	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0	-	4133040f83fbadc4	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessory(py)model	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0	-	3d4a343e638b3547	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessory(py)ssid	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0	-	155697efd00c684e	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessory(py)macAddress	-			NSString *	-	readonly,copy,nonatomic	ios=8.0/-/-/0	-	8e667a6bdab470a7	-
+property	c:objc(cs)EAWiFiUnconfiguredAccessory(py)properties	-			EAWiFiUnconfiguredAccessoryProperties	-	readonly,nonatomic	ios=8.0/-/-/0	-	317b23bd432ef337	-
+typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-
+typedef	c:@T@NSUInteger	-			unsigned long	-	-	-	-	779263763ed28f23	-
+typedef	c:@T@instancetype	-			id	-	-	-	-	860902bd61de49b7	-
+typedef	c:@T@dispatch_queue_t	-			NSObject<OS_dispatch_queue> *	-	-	-	-	b6bdd422edd29fce	-

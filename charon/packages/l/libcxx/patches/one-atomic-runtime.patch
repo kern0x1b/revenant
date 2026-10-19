@@ -1,0 +1,56 @@
+diff --git a/llvm-project/libcxxabi/CMakeLists.txt b/llvm-project/libcxxabi/CMakeLists.txt
+index 75b18ed1..5cf3d6df 100644
+--- a/llvm-project/libcxxabi/CMakeLists.txt
++++ b/llvm-project/libcxxabi/CMakeLists.txt
+@@ -94,6 +94,12 @@ option(LIBCXXABI_ENABLE_EMULATED_TLS
+    must bind to this one copy: a copy in each image hands out indices from its
+    own counter, and two images then read each other's variables." OFF)
+ 
++option(LIBCXXABI_ENABLE_ATOMIC_LIBCALLS
++  "Build compiler-rt's __atomic_* library calls into the shared library on Apple
++   platforms, for code compiled for a release whose libSystem does not have them
++   (iOS before 7.0). Every image in a process must bind to this one copy, so that
++   the locks guarding a memory location are the same whichever image touches it." OFF)
++
+ option(LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS
+   "Build libc++abi with definitions for operator new/delete. These are normally
+    defined in libc++abi, but it is also possible to define them in libc++, in
+diff --git a/llvm-project/libcxxabi/lib/atomic-libcalls.exp b/llvm-project/libcxxabi/lib/atomic-libcalls.exp
+new file mode 100644
+index 00000000..622a9517
+--- /dev/null
++++ b/llvm-project/libcxxabi/lib/atomic-libcalls.exp
+@@ -0,0 +1,5 @@
++___atomic_load
++___atomic_store
++___atomic_exchange
++___atomic_compare_exchange
++___atomic_is_lock_free
+diff --git a/llvm-project/libcxxabi/src/CMakeLists.txt b/llvm-project/libcxxabi/src/CMakeLists.txt
+index c2f2dbb7..5a428e29 100644
+--- a/llvm-project/libcxxabi/src/CMakeLists.txt
++++ b/llvm-project/libcxxabi/src/CMakeLists.txt
+@@ -53,6 +53,12 @@ if (APPLE AND LIBCXXABI_ENABLE_EMULATED_TLS)
+   )
+ endif()
+ 
++if (APPLE AND LIBCXXABI_ENABLE_ATOMIC_LIBCALLS)
++  set(LIBCXXABI_ATOMIC_LIBCALLS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../../compiler-rt/lib/builtins/atomic.c)
++  set_source_files_properties(${LIBCXXABI_ATOMIC_LIBCALLS_SOURCE} PROPERTIES COMPILE_OPTIONS -fvisibility=default)
++  list(APPEND LIBCXXABI_SOURCES ${LIBCXXABI_ATOMIC_LIBCALLS_SOURCE})
++endif()
++
+ set(LIBCXXABI_HEADERS
+   ../include/cxxabi.h
+ )
+@@ -266,6 +272,10 @@ if (LIBCXXABI_SUPPORTS_SHARED_LIBRARY)
+     reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/emulated-tls.exp")
+   endif()
+ 
++  if (APPLE AND LIBCXXABI_ENABLE_ATOMIC_LIBCALLS)
++    reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/atomic-libcalls.exp")
++  endif()
++
+   if (LIBCXXABI_ENABLE_NEW_DELETE_DEFINITIONS)
+     reexport_symbols("${CMAKE_CURRENT_SOURCE_DIR}/../lib/new-delete.exp")
+   endif()

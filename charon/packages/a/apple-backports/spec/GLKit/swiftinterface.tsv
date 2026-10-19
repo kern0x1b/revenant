@@ -1,0 +1,16 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+GLKit	function	_indexHomogeneousValue(_:_:)					none
+GLKit	method	_GLKMatrix2.subscript(i:)					none
+GLKit	property	_GLKMatrix2.clone					none
+GLKit	method	_GLKVector2.subscript(i:)					none
+GLKit	property	_GLKVector2.clone					none
+GLKit	method	_GLKMatrix3.subscript(i:)					none
+GLKit	property	_GLKMatrix3.clone					none
+GLKit	method	_GLKVector3.subscript(i:)					none
+GLKit	property	_GLKVector3.clone					none
+GLKit	method	_GLKMatrix4.subscript(i:)					none
+GLKit	property	_GLKMatrix4.clone					none
+GLKit	method	_GLKVector4.subscript(i:)					none
+GLKit	property	_GLKVector4.clone					none
+GLKit	method	_GLKQuaternion.subscript(i:)					none
+GLKit	property	_GLKQuaternion.clone					none

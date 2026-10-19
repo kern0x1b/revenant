@@ -1,0 +1,67 @@
+{
+ "framework": "CoreML",
+ "entries": [
+  {
+   "api": "+[MLModel loadContentsOfURL:configuration:completionHandler:]",
+   "kind": "method",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model read from a container or from bytes: the factories, the predictions, the description, the parameters and the compilation",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLModelDescription.classLabels",
+   "kind": "property",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "a model's own description: its inputs and outputs, the two names a classifier answers under, its metadata, its class labels and its parameters",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "the CoreML model specification Apple ships in coremltools (BSD-3-Clause), and the runtime of coremltools 9.0 on this host; the values of the exported constants and the shape of every description are measured against the CoreML of this host by tests/backports/host/coreml/run.sh"
+  },
+  {
+   "api": "MLMultiArrayDataTypeFloat64",
+   "kind": "constant",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the constant MLMultiArrayDataTypeFloat64",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "SDK 16.4, MLMultiArray.h:18-23, the enumerator as the SDK writes it: the value is Apple's own, inlined into the consumer's code at compile time, and no release's Core ML carries a different one",
+   "effect": "until built: the symbol is not exported"
+  },
+  {
+   "api": "MLMultiArrayDataTypeFloat",
+   "kind": "constant",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "owed",
+   "reason": "build the constant MLMultiArrayDataTypeFloat",
+   "facts": "facts/CoreML/CoreML.md",
+   "source": "SDK 16.4, MLMultiArray.h:18-23, the enumerator as the SDK writes it: the value is Apple's own, inlined into the consumer's code at compile time, and no release's Core ML carries a different one",
+   "effect": "until built: the symbol is not exported"
+  },
+  {
+   "api": "+[MLUpdateTask updateTaskForModelAtURL:trainingData:completionHandler:error:]",
+   "kind": "method",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLUpdateTask.h:30-33, the constructor without a configuration, annotated API_AVAILABLE(macos(11.0), ios(14.0)). Built in CoreMLUpdate14.m, which forwards it to the iOS 13 constructor with a nil configuration, so the training is the one CoreMLUpdate13.m runs. Not driven by any host case",
+   "facts": "facts/CoreML/Update13.md",
+   "source": "SDK 16.4, MLUpdateTask.h:30-33"
+  },
+  {
+   "api": "+[MLUpdateTask updateTaskForModelAtURL:trainingData:progressHandlers:error:]",
+   "kind": "method",
+   "introduced": "14.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "MLUpdateTask.h:43-46, the constructor without a configuration, annotated API_AVAILABLE(macos(11.0), ios(14.0)). Built in CoreMLUpdate14.m, which forwards it to the iOS 13 constructor with progress handlers and a nil configuration. Not driven by any host case",
+   "facts": "facts/CoreML/Update13.md",
+   "source": "SDK 16.4, MLUpdateTask.h:43-46"
+  }
+ ]
+}

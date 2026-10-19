@@ -1,0 +1,4 @@
+Package: org.charon.emulateinstall
+Name: emulate install case
+Architecture: iphoneos-arm
+Description: The smallest program an install can be asked to put in, so a missing file in the image is the installs doing

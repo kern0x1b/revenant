@@ -1,0 +1,27 @@
+{
+  "framework": "CoreImage",
+  "entries": [
+    {
+      "api": "CIRectangleFeature",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "CIFeature.h gives the class NS_CLASS_AVAILABLE(10_10, 8_0); the port carries its bounds and four corners, which the host's detected feature answers, and whether the 6.1.3 release exports the class is not measured (facts/CoreImage/Features.md, the open items)",
+      "effect": "a feature whose bounds and four corners are the ones it was made with, and whose type is the rectangle constant; the port makes none by detection (the detector is open), so an application gets one only from a detector the port does not yet carry",
+      "facts": "facts/CoreImage/Features.md",
+      "source": "the 16.4 header for the contract; the host's own CoreImage over the same features, by tests/backports/host/cifeature/differential.m, field by field against the port's class; the 6.1.3 armv7 dyld cache is not read for this entry"
+    },
+    {
+      "api": "CIQRCodeFeature",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "CIFeature.h gives the class NS_CLASS_AVAILABLE(10_10, 8_0), with NSSecureCoding and NSCopying; the port encodes and decodes losslessly, as the header promises, which the host's own round trip does not (facts/CoreImage/Features.md, the pinned known differences); whether the 6.1.3 release exports the class is not measured",
+      "effect": "a feature with its message and four corners, copied and archived as it was made; the message of a feature the port makes fresh is nil, which the header allows; the port makes none by detection (the detector is open)",
+      "facts": "facts/CoreImage/Features.md",
+      "source": "the 16.4 header for the contract; the host's own CoreImage over the same features, by tests/backports/host/cifeature/differential.m, with the QR round trip and fresh messageString pinned as known differences (known-host.txt, known-port.txt); the 6.1.3 armv7 dyld cache is not read for this entry"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+ "framework": "MediaPlayer",
+ "entries": [
+  {
+   "api": "-[MPMediaItemArtwork initWithBoundsSize:requestHandler:]",
+   "kind": "method",
+   "introduced": "10.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the release does not carry it at all: read from 6.1.3's own MediaPlayer with tools/mach32_methods.py, MPMediaItemArtwork's 13 own instance methods do not include initWithBoundsSize:requestHandler: (negative control: a selector no framework has is absent). The release does declare imageWithSize:, so the handler behaviour cannot be a category method - that would be shadowed by the release's own on the release's class.",
+   "effect": "a caller gets a CharonHandlerMediaItemArtwork, a port subclass: isKindOfClass: is true of MPMediaItemArtwork, imageWithSize: asks the handler for the size the caller wanted and returns its result, and bounds is the size the initialiser was given. Real artwork is an MPConcreteMediaItemArtwork and is untouched.",
+   "source": "SDK 26.2, MPMediaItem.h, MP_API(ios(10.0))",
+   "facts": "facts/MediaPlayer/MPMediaItem.md"
+  }
+ ]
+}

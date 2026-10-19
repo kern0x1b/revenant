@@ -1,0 +1,1 @@
+    double divisor = (double)windowWidth * (double)windowHeight - 1.0;  // MUTATION: the divisor the edge mode does not remove

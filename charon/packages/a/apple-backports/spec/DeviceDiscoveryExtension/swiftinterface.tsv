@@ -1,0 +1,13 @@
+module	kind	api	introduced	deprecated	obsoleted	unavailable	via
+DeviceDiscoveryExtension	property	DDDevice.networkEndpoint					none
+DeviceDiscoveryExtension	property	DDDevice.txtRecord					none
+DeviceDiscoveryExtension	protocol	DDDiscoveryExtensionConfigurationProtocol	16.0				own
+DeviceDiscoveryExtension	protocol	DDDiscoveryExtension	16.0				own
+DeviceDiscoveryExtension	method	DDDiscoveryExtension.startDiscovery(session:)	16.0				container
+DeviceDiscoveryExtension	method	DDDiscoveryExtension.stopDiscovery(session:)	16.0				container
+DeviceDiscoveryExtension	method	DDDiscoveryExtension.didReceiveEvent(_:)	17.0				own
+DeviceDiscoveryExtension	property	DDDiscoveryExtension.configuration					none
+DeviceDiscoveryExtension	method	DDDiscoveryExtension.didReceiveEvent(_:)					none
+DeviceDiscoveryExtension	class	DDDiscoveryExtensionConfiguration					none
+DeviceDiscoveryExtension	method	DDDiscoveryExtensionConfiguration.init(discoveryExtension:)					none
+DeviceDiscoveryExtension	method	DDDiscoveryExtensionConfiguration.accept(connection:)					none

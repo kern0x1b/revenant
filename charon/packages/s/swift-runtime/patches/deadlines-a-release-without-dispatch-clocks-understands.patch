@@ -1,0 +1,54 @@
+diff --git a/stdlib/public/Concurrency/DispatchGlobalExecutor.cpp b/stdlib/public/Concurrency/DispatchGlobalExecutor.cpp
+index db649c9..aaf14e4 100644
+--- a/stdlib/public/Concurrency/DispatchGlobalExecutor.cpp
++++ b/stdlib/public/Concurrency/DispatchGlobalExecutor.cpp
+@@ -31,6 +31,7 @@
+ #include <cstddef>
+ 
+ #include "swift/Basic/Casting.h"
++#include "swift/Basic/Lazy.h"
+ #include "swift/Runtime/Concurrency.h"
+ #include "swift/Runtime/EnvironmentVariables.h"
+ 
+@@ -303,6 +304,22 @@ platform_time(uint64_t nsec) {
+ #endif
+ #endif
+ 
++#if defined(__APPLE__)
++// dispatch_time_t carries which clock it counts from iOS 12 and macOS 10.14 on, the release libdispatch gained workloops:
++// bit 63 says uptime or monotonic and bit 62 says wall time. An older libdispatch reads bit 63 as wall time instead, so a
++// suspending or continuous deadline lands about 292 years ahead and the timer never fires; and the nanoseconds are converted
++// here with the 125/3 timebase Apple's ARM devices have, which iLEmu, for one, does not. Both go away by handing libdispatch
++// what every release understands: how long from now, which it converts with the timebase the machine reports.
++static bool checkDispatchTimeCarriesItsClock() {
++  void *dispatch = dlopen("/usr/lib/system/libdispatch.dylib", RTLD_LAZY | RTLD_NOLOAD);
++  return dispatch != nullptr && dlsym(dispatch, "dispatch_workloop_create") != nullptr;
++}
++
++static bool dispatchTimeCarriesItsClock() {
++  return SWIFT_LAZY_CONSTANT(checkDispatchTimeCarriesItsClock());
++}
++#endif
++
+ static inline dispatch_time_t
+ clock_and_value_to_time(int clock, long long sec, long long nsec) {
+   uint64_t deadline;
+@@ -312,6 +329,18 @@ clock_and_value_to_time(int clock, long long sec, long long nsec) {
+       || __builtin_add_overflow(nsec, deadline, &deadline)) {
+     deadline = UINT64_MAX;
+   }
++#if defined(__APPLE__)
++  if (clock != swift_clock_id_wall && !dispatchTimeCarriesItsClock()) {
++    if (deadline == UINT64_MAX) {
++      return DISPATCH_TIME_FOREVER;
++    }
++    long long nowSeconds, nowNanoseconds;
++    swift_get_time(&nowSeconds, &nowNanoseconds, (swift_clock_id)clock);
++    long long now = nowSeconds * (long long)NSEC_PER_SEC + nowNanoseconds;
++    long long remaining = (long long)deadline - now;
++    return dispatch_time(DISPATCH_TIME_NOW, remaining > 0 ? remaining : 0);
++  }
++#endif
+   uint64_t value = platform_time((uint64_t)deadline);
+   if (value >= DISPATCH_TIME_MAX_VALUE) {
+     return DISPATCH_TIME_FOREVER;

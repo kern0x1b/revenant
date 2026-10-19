@@ -1,0 +1,185 @@
+{
+  "framework": "AVFAudio",
+  "entries": [
+    {
+      "api": "AVAudioUnit",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "AVAudioUnit.audioComponentDescription",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnit.audioUnit",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnit.name",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kept as the real component's own display name, not looked up against a live AudioComponent registry entry"
+    },
+    {
+      "api": "AVAudioUnit.manufacturerName",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnit.version",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "-[AVAudioUnit loadAudioUnitPresetAtURL:error:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; honestly refuses (kAudio_UnimplementedError) rather than faking a preset load - no application in the corpus needs a real .aupreset yet, see facts"
+    },
+    {
+      "api": "AVAudioUnitEffect",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "-[AVAudioUnitEffect initWithAudioComponentDescription:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnitEffect.bypass",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; real kAudioUnitProperty_BypassEffect on the underlying AudioUnit, generic to every effect subtype this port carries"
+    },
+    {
+      "api": "AVAudioUnitEQ",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "-[AVAudioUnitEQ initWithNumberOfBands:]",
+      "kind": "method",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnitEQ.bands",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnitEQ.globalGain",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio"
+    },
+    {
+      "api": "AVAudioUnitEQFilterParameters",
+      "kind": "class",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "AVFAudio of the arm64 shared cache of iOS 12.0, and SDK 16.4, AVFAudio; confirmed absent on the real armv7 6.0 and 6.1.3 shared caches via objc.inventory before this was written"
+    },
+    {
+      "api": "AVAudioUnitEQFilterParameters.filterType",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kAUNBandEQParam_FilterType on the real AUNBandEQ unit"
+    },
+    {
+      "api": "AVAudioUnitEQFilterParameters.frequency",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kAUNBandEQParam_Frequency on the real AUNBandEQ unit"
+    },
+    {
+      "api": "AVAudioUnitEQFilterParameters.bandwidth",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kAUNBandEQParam_Bandwidth on the real AUNBandEQ unit"
+    },
+    {
+      "api": "AVAudioUnitEQFilterParameters.gain",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kAUNBandEQParam_Gain on the real AUNBandEQ unit"
+    },
+    {
+      "api": "AVAudioUnitEQFilterParameters.bypass",
+      "kind": "property",
+      "introduced": "8.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/AVFoundation/AVAudioEngine.md",
+      "source": "SDK 16.4, AVFAudio; kAUNBandEQParam_BypassBand on the real AUNBandEQ unit, default YES matching Apple's own documented default"
+    }
+  ]
+}

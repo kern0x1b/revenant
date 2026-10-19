@@ -1,0 +1,4 @@
+framework	kind	surface_rows	demand_rows	demand_apps	missing_6_1_3	missing_4_3	not_checked_6_1_3	not_checked_objc	not_checked_swift	states
+Foo	method	3	0	0	0	0	0	0	0	implemented at 6.1.3: the release answers=2; generable stub=1
+Foo	class	1	0	0	0	0	0	0	0	class object: generated (trace layer; every member a stub)=1
+Bar	function	1	0	0	0	0	0	0	0	no snapshot=1

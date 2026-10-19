@@ -1,0 +1,27 @@
+{
+  "framework": "Metal",
+  "entries": [
+    {
+      "api": "-[MTLBlitCommandEncoder updateFence:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a fence of the port is the signal value of a shared event, and the value it is brought to is how many commands this encoder has encoded, which is how far the work has been brought: a command here is a call into OpenGL ES 2.0 that has already been made",
+      "effect": "the event's signalled value is set, and a fence that is not one of the port's events is named in the log and not touched",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    },
+    {
+      "api": "-[MTLBlitCommandEncoder waitForFence:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a wait for a fence is a wait for the value the fence carries, on the event's own condition",
+      "effect": "the call waits for that value; since the work behind it has already been issued the value has been reached and the call returns, and a fence that is not one of the port's events is named in the log",
+      "facts": "facts/Metal/Blits.md",
+      "source": "SDK 26.2, Metal; the behaviour is the one its header documents, and was not read from a shared cache"
+    }
+  ]
+}

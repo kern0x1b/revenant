@@ -1,0 +1,178 @@
+diff --git a/stdlib/public/Darwin/Dispatch/Dispatch.mm b/stdlib/public/Darwin/Dispatch/Dispatch.mm
+index 6b487ed..665fd1e 100644
+--- a/stdlib/public/Darwin/Dispatch/Dispatch.mm
++++ b/stdlib/public/Darwin/Dispatch/Dispatch.mm
+@@ -10,7 +10,12 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-#include <swift/Runtime/Debug.h>
++#include <stdint.h>
++#include <stdlib.h>
++
++/* The runtime's report of a fatal error, which it exports; the header it is declared in brings the runtime's own
++   headers with it, and the overlay is built apart from them. */
++extern "C" void swift_reportError(uint32_t flags, const char *message);
+ #include <dispatch/dispatch.h>
+ #include <objc/runtime.h>
+ #include <stdio.h>
+@@ -51,7 +56,7 @@ static void _dispatch_overlay_constructor() {
+ extern "C" void
+ _swift_dispatch_source_create_abort(void)
+ {
+-  swift::swift_reportError(0,
++  swift_reportError(0,
+       "dispatch_source_create returned NULL, invalid parameters passed to dispatch_source_create");
+   abort();
+ }
+diff --git a/stdlib/public/Darwin/Dispatch/Dispatch.swift b/stdlib/public/Darwin/Dispatch/Dispatch.swift
+index da987ea..7a76ef0 100644
+--- a/stdlib/public/Darwin/Dispatch/Dispatch.swift
++++ b/stdlib/public/Darwin/Dispatch/Dispatch.swift
+@@ -45,67 +45,70 @@ public func dispatchPrecondition(condition: @autoclosure () -> DispatchPredicate
+ 
+ /// qos_class_t
+ 
++/* The classes of service are values, and a release before iOS 8 takes them too: the global queues answer a class with
++   the priority it stands for (_swift_dispatch_get_global_queue), and what makes a class out of a queue or a work item stays
++   behind the release that has it. The constants are the values sys/qos.h gives them, which that header marks iOS 8. */
+ public struct DispatchQoS : Equatable {
+ 	public let qosClass: QoSClass
+ 	public let relativePriority: Int
+ 
+-	@available(macOS 10.10, iOS 8.0, *)
++	@available(macOS 10.10, *)
+ 	public static let background = DispatchQoS(qosClass: .background, relativePriority: 0)
+ 
+-	@available(macOS 10.10, iOS 8.0, *)
++	@available(macOS 10.10, *)
+ 	public static let utility = DispatchQoS(qosClass: .utility, relativePriority: 0)
+ 
+-	@available(macOS 10.10, iOS 8.0, *)
++	@available(macOS 10.10, *)
+ 	public static let `default` = DispatchQoS(qosClass: .default, relativePriority: 0)
+ 
+-	@available(macOS 10.10, iOS 8.0, *)
++	@available(macOS 10.10, *)
+ 	public static let userInitiated = DispatchQoS(qosClass: .userInitiated, relativePriority: 0)
+ 
+-	@available(macOS 10.10, iOS 8.0, *)
++	@available(macOS 10.10, *)
+ 	public static let userInteractive = DispatchQoS(qosClass: .userInteractive, relativePriority: 0)
+ 
+ 	public static let unspecified = DispatchQoS(qosClass: .unspecified, relativePriority: 0)
+ 
+ 	public enum QoSClass {
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		case background
+ 
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		case utility
+ 
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		case `default`
+ 
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		case userInitiated
+ 
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		case userInteractive
+ 
+ 		case unspecified
+ 
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		public init?(rawValue: qos_class_t) {
+ 			switch rawValue {
+-			case QOS_CLASS_BACKGROUND: self = .background
+-			case QOS_CLASS_UTILITY: self = .utility
+-			case QOS_CLASS_DEFAULT: self = .default
+-			case QOS_CLASS_USER_INITIATED: self = .userInitiated
+-			case QOS_CLASS_USER_INTERACTIVE: self = .userInteractive
+-			case QOS_CLASS_UNSPECIFIED: self = .unspecified
++			case qos_class_t(rawValue: 0x09): self = .background
++			case qos_class_t(rawValue: 0x11): self = .utility
++			case qos_class_t(rawValue: 0x15): self = .default
++			case qos_class_t(rawValue: 0x19): self = .userInitiated
++			case qos_class_t(rawValue: 0x21): self = .userInteractive
++			case qos_class_t(rawValue: 0x00): self = .unspecified
+ 			default: return nil
+ 			}
+ 		}
+ 
+-		@available(macOS 10.10, iOS 8.0, *)
++		@available(macOS 10.10, *)
+ 		public var rawValue: qos_class_t {
+ 			switch self {
+-			case .background: return QOS_CLASS_BACKGROUND
+-			case .utility: return QOS_CLASS_UTILITY
+-			case .default: return QOS_CLASS_DEFAULT
+-			case .userInitiated: return QOS_CLASS_USER_INITIATED
+-			case .userInteractive: return QOS_CLASS_USER_INTERACTIVE
+-			case .unspecified: return QOS_CLASS_UNSPECIFIED
++			case .background: return qos_class_t(rawValue: 0x09)
++			case .utility: return qos_class_t(rawValue: 0x11)
++			case .default: return qos_class_t(rawValue: 0x15)
++			case .userInitiated: return qos_class_t(rawValue: 0x19)
++			case .userInteractive: return qos_class_t(rawValue: 0x21)
++			case .unspecified: return qos_class_t(rawValue: 0x00)
+ 			}
+ 		}
+ 	}
+diff --git a/stdlib/public/Darwin/Dispatch/Queue.swift b/stdlib/public/Darwin/Dispatch/Queue.swift
+index ca26c87..4fd0a7b 100644
+--- a/stdlib/public/Darwin/Dispatch/Queue.swift
++++ b/stdlib/public/Darwin/Dispatch/Queue.swift
+@@ -128,12 +128,12 @@ extension DispatchQueue {
+ 	@available(tvOS, deprecated)
+ 	@available(watchOS, deprecated)
+ 	public class func global(priority: GlobalQueuePriority) -> DispatchQueue {
+-		return __dispatch_get_global_queue(priority._translatedValue, 0)
++		return _swift_dispatch_get_global_queue(priority._translatedValue, 0)
+ 	}
+ 
+-	@available(macOS 10.10, iOS 8.0, *)
++	@available(macOS 10.10, *)
+ 	public class func global(qos: DispatchQoS.QoSClass = .default) -> DispatchQueue {
+-		return __dispatch_get_global_queue(Int(qos.rawValue.rawValue), 0)
++		return _swift_dispatch_get_global_queue(Int(qos.rawValue.rawValue), 0)
+ 	}
+ 
+ 	public class func getSpecific<T>(key: DispatchSpecificKey<T>) -> T? {
+diff --git a/stdlib/public/SwiftShims/DispatchOverlayShims.h b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+index d49e9ad..947d83d 100644
+--- a/stdlib/public/SwiftShims/DispatchOverlayShims.h
++++ b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+@@ -49,6 +49,16 @@ _swift_dispatch_queue_concurrent(void) {
+   return DISPATCH_QUEUE_CONCURRENT;
+ }
+ 
++/* The global queue of a class of service. dispatch_get_global_queue took a class in place of a priority from iOS 8;
++   apple-compat's function hands a release before it the priority each class stands for, and is the call itself where
++   the release has classes. */
++dispatch_queue_t charon_dispatch_get_global_queue(long identifier, unsigned long flags);
++
++static inline dispatch_queue_t
++_swift_dispatch_get_global_queue(long identifier, unsigned long flags) {
++  return charon_dispatch_get_global_queue(identifier, flags);
++}
++
+ static inline dispatch_queue_t
+ _swift_dispatch_get_main_queue(void) {
+   return dispatch_get_main_queue();
+@@ -194,7 +204,9 @@ static inline void _swift_dispatch_after(
+ static inline void _swift_dispatch_apply_current(
+     size_t iterations,
+     void SWIFT_DISPATCH_NOESCAPE (^block)(intptr_t)) {
+-  dispatch_apply(iterations, (dispatch_queue_t _Nonnull)0, ^(size_t i){
++  /* No queue is DISPATCH_APPLY_AUTO, which iOS 11 brought; a release before it takes the queue for NULL. The default
++     global queue is what the automatic choice stands for. */
++  dispatch_apply(iterations, _swift_dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i){
+     block((intptr_t)i);
+   });
+ }

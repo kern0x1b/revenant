@@ -1,0 +1,7 @@
+Package: org.charon.displayprobe
+Name: Charon display probe
+Architecture: iphoneos-arm
+Description: Whether a bare process has a display by the public routes, and what a display link does there
+Maintainer: charon
+Author: charon
+Section: Development
