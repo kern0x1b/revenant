@@ -1,0 +1,90 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Havrysh <kesha1511@gmail.com>
+Date: Mon, 19 Oct 2026 21:45:33 +0200
+Subject: [PATCH 5/5] Lift the AArch64 LSE atomic memory operations
+
+farmdec decodes the ARMv8.1 atomics, but the lifter had no case for
+them, so any function using one failed to lift as an unsupported
+instruction. That includes libc++'s std::atomic and call_once, and any
+code compiled for a baseline that has LSE.
+
+The covered instructions are LDADD, LDCLR, LDEOR, LDSET, LDSMAX,
+LDSMIN, LDUMAX, LDUMIN and SWP, their ST aliases (which write the zero
+register), and CAS, at every access size and ordering. They become
+LLVM atomicrmw and cmpxchg instructions:
+
+- the access width is the one farmdec decodes, so the byte and
+  halfword forms touch only one or two bytes;
+- signed minimum and maximum compare at that width;
+- the old value is zero-extended into the destination register;
+- the acquire and release bits become the matching LLVM orderings.
+
+CASP is left out: it is a pair and has no single LLVM instruction.
+---
+ src/a64/main.cc | 50 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index 1042690..ecd9530 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -687,6 +687,56 @@ bool Lifter::Lift(const Instr& inst) {
+         SetGp(a64.rd, /*w32=*/false, irb.CreateTrunc(high_half, irb.getInt64Ty()));
+         break;
+     }
++    case farmdec::A64_LDADD:
++    case farmdec::A64_LDCLR:
++    case farmdec::A64_LDEOR:
++    case farmdec::A64_LDSET:
++    case farmdec::A64_LDSMAX:
++    case farmdec::A64_LDSMIN:
++    case farmdec::A64_LDUMAX:
++    case farmdec::A64_LDUMIN:
++    case farmdec::A64_SWP: {
++        auto memty = TypeOf(static_cast<farmdec::Size>(fad_get_mem_extend(a64.flags) & 3));
++        auto ptr = Addr(memty, a64.rn);
++        auto val = irb.CreateTrunc(GetGp(a64.rs, w32), memty);
++        llvm::AtomicRMWInst::BinOp binop;
++        switch (a64.op) {
++        case farmdec::A64_LDADD:  binop = llvm::AtomicRMWInst::Add; break;
++        case farmdec::A64_LDCLR:  binop = llvm::AtomicRMWInst::And; val = irb.CreateNot(val); break;
++        case farmdec::A64_LDEOR:  binop = llvm::AtomicRMWInst::Xor; break;
++        case farmdec::A64_LDSET:  binop = llvm::AtomicRMWInst::Or; break;
++        case farmdec::A64_LDSMAX: binop = llvm::AtomicRMWInst::Max; break;
++        case farmdec::A64_LDSMIN: binop = llvm::AtomicRMWInst::Min; break;
++        case farmdec::A64_LDUMAX: binop = llvm::AtomicRMWInst::UMax; break;
++        case farmdec::A64_LDUMIN: binop = llvm::AtomicRMWInst::UMin; break;
++        default:                  binop = llvm::AtomicRMWInst::Xchg; break;
++        }
++        bool acq = a64.ldst_order.load != farmdec::MO_NONE;
++        bool rel = a64.ldst_order.store != farmdec::MO_NONE;
++        auto ord = (acq && rel) ? llvm::AtomicOrdering::AcquireRelease
++                 : acq ? llvm::AtomicOrdering::Acquire
++                 : rel ? llvm::AtomicOrdering::Release
++                 : llvm::AtomicOrdering::Monotonic;
++        auto old = irb.CreateAtomicRMW(binop, ptr, val, llvm::MaybeAlign(memty->getBitWidth() / 8), ord);
++        SetGp(a64.rt, w32, irb.CreateZExt(old, irb.getIntNTy(bits)));
++        break;
++    }
++    case farmdec::A64_CAS: {
++        auto memty = TypeOf(static_cast<farmdec::Size>(fad_get_mem_extend(a64.flags) & 3));
++        auto ptr = Addr(memty, a64.rn);
++        auto expected = irb.CreateTrunc(GetGp(a64.rs, w32), memty);
++        auto desired = irb.CreateTrunc(GetGp(a64.rt, w32), memty);
++        bool acq = a64.ldst_order.load != farmdec::MO_NONE;
++        bool rel = a64.ldst_order.store != farmdec::MO_NONE;
++        auto success = (acq && rel) ? llvm::AtomicOrdering::AcquireRelease
++                     : acq ? llvm::AtomicOrdering::Acquire
++                     : rel ? llvm::AtomicOrdering::Release
++                     : llvm::AtomicOrdering::Monotonic;
++        auto failure = acq ? llvm::AtomicOrdering::Acquire : llvm::AtomicOrdering::Monotonic;
++        auto pair = irb.CreateAtomicCmpXchg(ptr, expected, desired, llvm::MaybeAlign(memty->getBitWidth() / 8), success, failure);
++        SetGp(a64.rs, w32, irb.CreateZExt(irb.CreateExtractValue(pair, 0), irb.getIntNTy(bits)));
++        break;
++    }
+     // Exclusive Loads and Stores always come in pairs and appear in a loop: first the
+     // value is loaded and the address thus locked (LDXR), then the value is compared
+     // and if necessary, a new value is stored to the previously locked address (STXR).
+-- 
+2.54.0 (Apple Git-157)
+
