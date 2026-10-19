@@ -8,7 +8,8 @@
 *.a   binary
 *.dylib binary
 
-# Generated from the utils/gyb generators
+# Source-generation templates and their generated output
+*.swift.gyb linguist-language=Swift
 **/GENERATED-* linguist-generated=true
 
 # Keep generated/vendored bulk out of language stats and diffs
