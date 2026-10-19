@@ -9,7 +9,7 @@ end
 function checks.shade()
     os.execv(os.programfile(), {"f", "-P", root, "-y"}, {curdir = root})
     os.execv(os.programfile(), {"build", "-P", root, "shade"}, {curdir = root})
-    os.execv(os.programfile(), {"test", "-P", root, "shade_*"}, {curdir = root})
+    os.execv(os.programfile(), {"test", "-P", root, "shade_*/*"}, {curdir = root})
 end
 
 function main(...)
