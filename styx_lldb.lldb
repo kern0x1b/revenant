@@ -1,0 +1,15 @@
+# styx_lldb.lldb: the lldb commands that styx_lldb.py had, as an lldb command file. This lldb has no Lua, and the
+# Python one is not used here, so the commands are these.
+#
+# To use it, figure out its full path. Let's say it is `~/projects/styx/styx_lldb.lldb`. Then add the following
+# statement to your `~/.lldbinit` file:
+#
+#     command source ~/projects/styx/styx_lldb.lldb
+
+# Show a Demand as `max(N)`. A rawValue of UInt(Int.max) + 1 is .unlimited, which a summary string cannot test for,
+# so it shows as that number here; the `demand` command below shows it as `unlimited`.
+type summary add -w swift -s "max(${var.rawValue%u})" OpenCombine.Subscribers.Demand
+
+# `demand VALUE` prints a Demand with the exact text of the Python summary: `unlimited` for the rawValue of
+# UInt(Int.max) + 1, `max(N)` otherwise. It evaluates a Swift expression in the stopped process, so it needs one.
+command regex demand 's/(.+)/expression -l swift -- (%1).rawValue == UInt(Int.max) + 1 ? "unlimited" : "max(" + String((%1).rawValue) + ")"/'
