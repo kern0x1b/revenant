@@ -1,0 +1,22 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+*.deb binary
+*.a binary
+*.dylib binary
+*.otf binary
+*.m4a binary
+*.car binary
+*.nib binary
+
+*.lock linguist-generated
+**/GENERATED-* linguist-generated=true
+charon/docs/** linguist-documentation
+shade/docs/** linguist-documentation
+katabasis/docs/** linguist-documentation
+revenant-webkit/docs/** linguist-documentation
+frameworks/styx/docs/** linguist-documentation
+frameworks/eidolon/docs/** linguist-documentation
