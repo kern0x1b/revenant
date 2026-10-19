@@ -1,6 +1,6 @@
 #!/bin/bash
 ourdump.sh ROOT: swift-api-digester dump of the module this tree builds, at .agent-work/api/ours.json.
-The ours side of the API diff; the Apple side is the 26.2 interface, read by tools/slice-diff.py.
+The ours side of the API diff; the Apple side is the 26.2 interface, read by tools/slice-diff.lua.
 # ourdump.sh DIR: swift-api-digester dump of the module this tree builds - the ours side of the API diff.
 set -e
 cd "$1/eidolon"
