@@ -14,6 +14,7 @@
 
 *.lock linguist-generated
 **/GENERATED-* linguist-generated=true
+*.swift.gyb linguist-language=Swift
 charon/docs/** linguist-documentation
 shade/docs/** linguist-documentation
 katabasis/docs/** linguist-documentation

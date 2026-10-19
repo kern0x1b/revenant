@@ -1,20 +1,16 @@
--- python_random.lua: the random.Random of CPython 3, for the generators that draw from it. The Python templates seeded it
--- with 0 and drew randint(1, 6) from it, and the values they print are the committed output, so the sequence has to
--- be CPython's, not any other Mersenne Twister's.
---
---     local state = new(0)
---     randint(state, 1, 6)
-
 local N, M = 624, 397
 
--- random.Random(seed) for a seed below 2**32: CPython hands init_by_array the seed as a one-word key
-function new(seed)
-    local key = {seed}
-    local mt = {[0] = 19650218}
+local function init_genrand(s)
+    local mt = {[0] = s & 0xffffffff}
     for i = 1, N - 1 do
         local prev = mt[i - 1]
         mt[i] = (1812433253 * (prev ~ (prev >> 30)) + i) & 0xffffffff
     end
+    return mt
+end
+
+function new(key)
+    local mt = init_genrand(19650218)
     local i, j = 1, 0
     for _ = 1, math.max(N, #key) do
         local prev = mt[i - 1]
@@ -41,8 +37,7 @@ function new(seed)
     return {mt = mt, index = N}
 end
 
--- genrand_uint32: the next tempered word, with the state regenerated every N words
-local function next_word(state)
+function next_word(state)
     local mt = state.mt
     if state.index >= N then
         for kk = 0, N - 1 do
@@ -60,22 +55,38 @@ local function next_word(state)
     return y & 0xffffffff
 end
 
--- _randbelow_with_getrandbits(n): k is n's bit length, and a draw at or above n is taken again
-local function randbelow(state, n)
-    local k = 0
-    local rest = n
+function getrandbits(state, k)
+    if k <= 32 then
+        return next_word(state) >> (32 - k)
+    end
+    local result, shift = 0, 0
+    while k > 0 do
+        local word = next_word(state)
+        if k < 32 then
+            word = word >> (32 - k)
+        end
+        result = result | (word << shift)
+        shift = shift + 32
+        k = k - 32
+    end
+    return result
+end
+
+function randbelow(state, n)
+    local k, rest = 0, n
     while rest > 0 do
         k = k + 1
         rest = rest >> 1
     end
-    local r = next_word(state) >> (32 - k)
+    local r = getrandbits(state, k)
     while r >= n do
-        r = next_word(state) >> (32 - k)
+        r = getrandbits(state, k)
     end
     return r
 end
 
--- randint(a, b): randrange(a, b + 1)
-function randint(state, a, b)
-    return a + randbelow(state, b - a + 1)
+function random(state)
+    local a = next_word(state) >> 5
+    local b = next_word(state) >> 6
+    return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0)
 end

@@ -1,3 +1,5 @@
+local gyb = import("gyb.template", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+
 local FEATURES = {"Embedded", "Macros", "FreestandingMacros", "Extern", "BitwiseCopyable", "ValueGenerics", "AddressableParameters",
                   "AddressableTypes", "AllowUnsafeAttribute", "SuppressedAssociatedTypesWithDefaults", "Reparenting", "Lifetimes",
                   "BorrowAndMutateAccessors", "BorrowInout", "NonescapableTypes", "LifetimeDependence", "InoutLifetimeDependence",
@@ -64,7 +66,8 @@ function core_sources(source, workdir, architecture)
     for _, entry in ipairs(embedded_entries(listing, "SWIFTLIB_EMBEDDED_GYB_SOURCES")) do
         if entry:endswith(".gyb") then
             local output = path.join(generated, entry:sub(1, -5))
-            os.vrunv("python3", {path.join(source, "utils", "gyb.py"), "-DCMAKE_SIZEOF_VOID_P=" .. (architecture == "arm64" and "8" or "4"), "--line-directive", "", "-o", output, path.join(core, entry)})
+            gyb.expand_to(path.join(core, entry), output, {defines = {CMAKE_SIZEOF_VOID_P = architecture == "arm64" and "8" or "4"},
+                                                           line_directive = "", paths = {path.join(source, "utils")}})
             table.insert(files, output)
         else
             table.insert(files, path.join(core, entry))

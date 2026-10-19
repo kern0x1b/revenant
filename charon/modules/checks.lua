@@ -18,7 +18,7 @@ function matching(files, globs)
     return found
 end
 
-local interpreters = {[".py"] = {"python3"}, [".sh"] = {"bash"}, [".rb"] = {"ruby"}, [".pl"] = {"perl"}, [".js"] = {"node"}}
+local interpreters = {[".sh"] = {"bash"}, [".rb"] = {"ruby"}, [".pl"] = {"perl"}, [".js"] = {"node"}}
 
 function command(target)
     local script = table.wrap(target:values("check.script"))

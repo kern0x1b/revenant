@@ -35,6 +35,13 @@ let package = Package(
                 .target(name: "CombineHelpers",
                         condition: .when(platforms: supportedPlatforms.except([.wasi])))
             ],
+            exclude: [
+                "RootProtocols.swift.gyb",
+                "Concurrency/Publisher+Concurrency.swift.gyb",
+                "Publishers/Publishers.Encode.swift.gyb",
+                "Publishers/Publishers.MapKeyPath.swift.gyb",
+                "Publishers/Publishers.Catch.swift.gyb"
+            ],
             swiftSettings: [.define("WASI", .when(platforms: [.wasi]))]
         ),
         // The upstream regression suite. It runs where no system Combine

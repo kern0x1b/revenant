@@ -49,7 +49,7 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
 | --- | --- |
 | `config/` | Conan configuration: settings, hooks, and the `charon` driver + platform facts under `config/extensions/`. |
 | `recipes/` | Conan recipes - the SDK, ld64, ldid, libplist, libcxx, the imports check, and the `charon-base` / `charon-apple` bases every port extends. |
-| `modules/` | build modules / ports. |
+| `modules/` | build modules / ports. `modules/gyb/` is the only gyb: Swift's `gyb.py` and the Python its templates run, in Lua (README, "No Python runs in that build"); nothing here calls Python to expand a template. |
 | `packages/` | package definitions. |
 | `plugins/` | build plugins. |
 | `rules/` | build rules. |

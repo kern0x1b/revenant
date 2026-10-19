@@ -69,7 +69,9 @@ local RECIPES = {
     -- the modules that make the headers the backports variant installs and every port compiles against
     {folder = "packages/s/swift-runtime", variable = "swift_runtime_sources_digest",
      inputs = {"packages/s/swift-runtime/xmake.lua", "modules/apple/shared_runtime.lua",
-               "modules/apple/backports.lua", "modules/apple/compat.lua", "modules/apple/dyld.lua"}},
+               "modules/apple/backports.lua", "modules/apple/compat.lua", "modules/apple/dyld.lua",
+               "modules/gyb/bigint.lua", "modules/gyb/compiler.lua", "modules/gyb/lexer.lua", "modules/gyb/main.lua",
+               "modules/gyb/parser.lua", "modules/gyb/random.lua", "modules/gyb/runtime.lua", "modules/gyb/template.lua"}},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
      inputs = {"packages/l/libcxx/xmake.lua", "modules/apple/shared_runtime.lua"}}
 }

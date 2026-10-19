@@ -45,7 +45,7 @@ Consequences to respect:
 | `Sources/Combine/` | the module — core at the top, `Schedulers/`, `Foundation/` |
 | `Sources/CombineHelpers/` | the C++ helper the module links (locking primitives) |
 | `Tests/` | the regression suite (runs where no system Combine shadows the module) |
-| `utils/` | Lua generators of the `GENERATED-*` Combine sources (`utils/gyb/`, run by `make gyb` with xmake) |
+| `utils/` | `recursively_gyb.sh` (`make gyb`): expands each `Sources/**/*.swift.gyb` template into the `GENERATED-*` source beside it with charon's gyb (`charon/modules/gyb`, run by xmake) |
 | `Package.swift` | the SwiftPM manifest |
 
 ## 3. How to build, and how to check

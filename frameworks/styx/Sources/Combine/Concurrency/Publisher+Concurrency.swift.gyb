@@ -1,18 +1,3 @@
--- Publisher+Concurrency.swift.gyb as a Lua generator: the template's text, with the loop of its %-lines written as Lua.
--- The output is GENERATED-Publisher+Concurrency.swift, which the Combine target compiles.
-local support = import("support", {rootdir = os.scriptdir(), anonymous = true})
-
-local OUT = path.join(os.scriptdir(), "..", "..", "Sources", "Combine", "Concurrency", "GENERATED-Publisher+Concurrency.swift")
-
-local out, env = {}, {}
-
-local function emit(text)
-    out[#out + 1] = support.fill(text, env)
-end
-
-env.template_header = support.header()
-
-emit([==[
 ${template_header}
 //
 //  Publisher+Concurrency.swift
@@ -26,67 +11,44 @@ import _Concurrency
 #endif
 
 #if canImport(_Concurrency) && compiler(>=5.5) || compiler(>=5.5.1)
-]==])
-local instantiations = {{"AsyncPublisher", false}, {"AsyncThrowingPublisher", true}}
-for _, variant in ipairs(instantiations) do
-    local instantiation, throwing = variant[1], variant[2]
-    env.instantiation = instantiation
-    env.where_clause = throwing and "" or "where Failure == Never "
-    env.article = throwing and "a throwing" or "an"
-    env.throws_keyword = throwing and "throws " or ""
-    env.try_keyword = throwing and "try " or ""
-    env.terminal_error = throwing and "(Error?)" or ""
-    env.failure = throwing and "Error" or "Never"
-    env.terminal_nil = throwing and "(nil)" or ""
-    env.throwing_infix = throwing and "Throwing" or ""
+%{
+instantiations = [('AsyncPublisher', False), ('AsyncThrowingPublisher', True)]
+}%
+% for instantiation, throwing in instantiations:
+extension Publisher ${'' if throwing else 'where Failure == Never '}{
 
-    emit([==[
-extension Publisher ${where_clause}{
-
-    /// The elements produced by the publisher, as ${article} asynchronous sequence.
+    /// The elements produced by the publisher, as ${'a throwing' if throwing else 'an'} asynchronous sequence.
     ///
     /// This property provides an `${instantiation}`, which allows you to use
     /// the Swift `async`-`await` syntax to receive the publisher's elements.
     /// Because `AsyncPublisher` conforms to `AsyncSequence`, you iterate over its
     /// elements with a `for`-`await`-`in` loop, rather than attaching a subscriber.
-]==])
-    if throwing then
-        emit([==[
+% if throwing:
     /// If the publisher terminates with an error, the awaiting caller receives the error
     /// as a `throw`.
-]==])
-    end
-    emit([==[
+% end
     @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     public var values: ${instantiation}<Self> {
         return .init(self)
     }
 }
 
-/// A publisher that exposes its elements as ${article} asynchronous sequence.
+/// A publisher that exposes its elements as ${'a throwing' if throwing else 'an'} asynchronous sequence.
 ///
 /// `${instantiation}` conforms to `AsyncSequence`, which allows callers to receive
 /// values with the `for`-`await`-`in` syntax, rather than attaching a `Subscriber`.
-]==])
-    if throwing then
-        emit([==[
+% if throwing:
 /// If the upstream publisher terminates with an error, `${instantiation}` throws
 /// the error to the awaiting caller.
-]==])
-    end
-    emit([==[
+% end
 ///
 /// Use the `values` property of the `Publisher` protocol to wrap an existing publisher
 /// with an instance of this type.
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 public struct ${instantiation}<Upstream: Publisher>: AsyncSequence
-]==])
-    if not throwing then
-        emit([==[
+%   if not throwing:
     where Upstream.Failure == Never
-]==])
-    end
-    emit([==[
+%   end
 {
 
     public typealias Element = Upstream.Output
@@ -102,17 +64,13 @@ public struct ${instantiation}<Upstream: Publisher>: AsyncSequence
         ///
         /// - Returns: The next published element, or `nil` if the publisher finishes
         ///   normally.
-]==])
-    if throwing then
-        emit([==[
+% if throwing:
         ///   If the publisher terminates with an error, the call point receives
         ///   the error as a `throw`.
-]==])
-    end
-    emit([==[
-        public mutating func next() async ${throws_keyword}-> Element? {
-            return ${try_keyword}await withTaskCancellationHandler(
-                operation: { [inner] in ${try_keyword}await inner.next() },
+% end
+        public mutating func next() async ${'throws ' if throwing else ''}-> Element? {
+            return ${'try ' if throwing else ''}await withTaskCancellationHandler(
+                operation: { [inner] in ${'try ' if throwing else ''}await inner.next() },
                 onCancel: { [inner] in inner.cancel() }
             )
         }
@@ -125,17 +83,11 @@ public struct ${instantiation}<Upstream: Publisher>: AsyncSequence
     private let publisher: Upstream
 
     /// Creates a publisher that exposes elements received from an upstream publisher as
-]==])
-    if throwing then
-        emit([==[
+% if throwing:
     /// an asynchronous sequence.
-]==])
-    else
-        emit([==[
+% else:
     /// a throwing asynchronous sequence.
-]==])
-    end
-    emit([==[
+% end
     ///
     /// - Parameter publisher: An upstream publisher. The asynchronous publisher converts
     ///   elements received from this publisher into an asynchronous sequence.
@@ -165,11 +117,11 @@ extension ${instantiation}.Iterator {
         private enum State {
             case awaitingSubscription
             case subscribed(Subscription)
-            case terminal${terminal_error}
+            case terminal${'(Error?)' if throwing else ''}
         }
 
         private let lock = UnfairLock.allocate()
-        private var pending: [UnsafeContinuation<Input?, ${failure}>] = []
+        private var pending: [UnsafeContinuation<Input?, ${'Error' if throwing else 'Never'}>] = []
         private var state = State.awaitingSubscription
         private var pendingDemand = Subscribers.Demand.none
 
@@ -210,9 +162,7 @@ extension ${instantiation}.Iterator {
 
         func receive(completion: Subscribers.Completion<Failure>) {
             lock.lock()
-]==])
-    if throwing then
-        emit([==[
+%   if throwing:
             switch state {
             case .awaitingSubscription, .subscribed:
                 if let continuation = pending.first {
@@ -235,35 +185,31 @@ extension ${instantiation}.Iterator {
                 lock.unlock()
                 pending.resumeAllWithNil()
             }
-]==])
-    else
-        emit([==[
+%   else:
             state = .terminal
             let pending = self.pending.take()
             lock.unlock()
             pending.resumeAllWithNil()
-]==])
-    end
-    emit([==[
+%   end
         }
 
         func cancel() {
             lock.lock()
             let pending = self.pending.take()
             guard case .subscribed(let subscription) = state else {
-                state = .terminal${terminal_nil}
+                state = .terminal${'(nil)' if throwing else ''}
                 lock.unlock()
                 pending.resumeAllWithNil()
                 return
             }
-            state = .terminal${terminal_nil}
+            state = .terminal${'(nil)' if throwing else ''}
             lock.unlock()
             subscription.cancel()
             pending.resumeAllWithNil()
         }
 
-        fileprivate func next() async ${throws_keyword}-> Input? {
-            return ${try_keyword}await withUnsafe${throwing_infix}Continuation { continuation in
+        fileprivate func next() async ${'throws ' if throwing else ''}-> Input? {
+            return ${'try ' if throwing else ''}await withUnsafe${'Throwing' if throwing else ''}Continuation { continuation in
                 lock.lock()
                 switch state {
                 case .awaitingSubscription:
@@ -274,27 +220,21 @@ extension ${instantiation}.Iterator {
                     pending.append(continuation)
                     lock.unlock()
                     subscription.request(.max(1))
-                case .terminal${terminal_nil}:
+                case .terminal${'(nil)' if throwing else ''}:
                     lock.unlock()
                     continuation.resume(returning: nil)
-]==])
-    if throwing then
-        emit([==[
+%   if throwing:
                 case .terminal(let error?):
                     state = .terminal(nil)
                     lock.unlock()
                     continuation.resume(throwing: error)
-]==])
-    end
-    emit([==[
+%   end
                 }
             }
         }
     }
 }
-]==])
-end
-emit([==[
+% end
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Sequence {
@@ -307,6 +247,3 @@ extension Sequence {
     }
 }
 #endif
-]==])
-
-support.write(OUT, table.concat(out))

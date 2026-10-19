@@ -54,7 +54,7 @@ to the `xmake.lua` that declares the target.
 | `charon.libraries` | `daemon`, `tweak` | packages whose shared libraries it loads, placed in `/usr/lib/charon/<Package>/` | `modules/apple/platform.lua:330-398` |
 | `tweak.filter` | `tweak` | the MobileSubstrate filter plist, installed as `<name>.plist` beside the dylib | `rules/tweak/xmake.lua:25-28` |
 | `swift.module`, `swift.flags` | `swift` | module name; extra `swiftc` options | `rules/swift/xmake.lua` |
-| `check.script`, `check.command` | `check` | a script run by the interpreter its extension names (`.py .sh .rb .pl .js`), or any program, with arguments | `modules/checks.lua:21-37` |
+| `check.script`, `check.command` | `check` | a script run by the interpreter its extension names (`.sh .rb .pl .js`), or any program, with arguments | `modules/checks.lua:21-37` |
 | `check.files`, `check.pass-files`, `check.needs-files` | `check` | globs of tracked files it concerns; pass the matching files as arguments; stay quiet when none match | `modules/checks.lua:57-85` |
 | `charon.control` | any | the Debian control file: makes the target part of a package; required for `charon.libraries` | `modules/packaging.lua:53`, `platform.lua:331` |
 | `charon.version` | any | the package's version instead of `set_version` | `packaging.lua:57` |

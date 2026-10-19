@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
 
-# Writes the GENERATED-*.swift files of the Combine sources. Each one is a Lua generator in utils/gyb/ that writes its own
-# output (see utils/gyb/support.lua), so this runs every generator from the repository root, with xmake.
-
 cd "$(dirname "$0")/.." || exit 1
+gyb="$(pwd)/../../charon/modules/gyb/main.lua"
 
-for generator in utils/gyb/*.lua; do
-    case "$(basename "$generator")" in
-        support.lua | python_random.lua) continue ;;
-    esac
-    xmake l "$generator" > /dev/null || exit 1
+find Sources -name '*.gyb' | sort | while read -r file; do
+    output="$(dirname "${file%.gyb}")/GENERATED-$(basename "${file%.gyb}")"
+    xmake l "$gyb" -Dtemplate_header="$(< utils/template_header.txt)" --line-directive '' -o "$output" "$file" || exit 1
 done

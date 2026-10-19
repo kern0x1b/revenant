@@ -31,6 +31,7 @@ local NOT_STRINGS = {
     ["modules/apple/dyld.lua|table.sort(slots)"] = "numbers",
     ["modules/apple/firmware.lua|table.sort(chosen, function (a, b) return a.size < b.size end)"] = "sizes",
     ["modules/apple/firmware.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
+    ["modules/gyb/runtime.lua|table.sort(keyed, function(a, b)"] = "Python's order, byteorder.less on strings, then the index",
     ["tools/matter-registry.lua|table.sort(types, function (left, right) return #left > #right end)"] = "lengths",
     ["tools/symbol-first-release.lua|table.sort(found, function (a, b) return os.mtime(a) > os.mtime(b) end)"] = "modification times",
     ["tools/corpus/skeleton-table.lua|table.sort(addresses)"] = "numbers",
