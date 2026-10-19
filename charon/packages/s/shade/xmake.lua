@@ -4,14 +4,22 @@ package("shade")
     set_description("Shade, Charon's emulator for an iPhone OS or iOS firmware's own userland: it boots the firmware over an emulated XNU on macOS arm64 hosts, for the devices and releases Charon emulates. Provenance and required attribution in Shade's NOTICE.")
     set_license("MPL-2.0")
 
-    add_urls("https://github.com/kern0x1b/shade.git")
-    -- The revision is a config as well as the version: the version string names a release, and a
-    -- different commit under the same name must be a different install. xmake keeps one source
-    -- checkout per version name and builds what it holds without fetching again, so each commit
-    -- takes a name of its own, and the install checks it built that commit.
-    local revision = "5e9716f1e8fe800cb24c1bc54d2534d490d508ba"
-    add_versions("2026.10.15+1", revision)
-    add_configs("revision", {description = "The Shade commit this package builds, so another commit is another emulator.", default = revision, type = "string", readonly = true})
+    -- Inside hades the sources are the shade folder beside charon, as this checkout has it, with Dynarmic and
+    -- Boost from hades' third_party pins (modules/hades.lua says how it is versioned and staged). Outside
+    -- hades they are a pinned commit of shade's repository with its submodules.
+    local hades_shade = path.join(os.scriptdir(), "..", "..", "..", "..", "shade")
+    if os.isfile(path.join(os.scriptdir(), "..", "..", "..", "..", "third_party", "fetch.lua")) and os.isdir(hades_shade) then
+        set_sourcedir(path.absolute(hades_shade))
+    else
+        add_urls("https://github.com/kern0x1b/shade.git")
+        -- The revision is a config as well as the version: the version string names a release, and a
+        -- different commit under the same name must be a different install. xmake keeps one source
+        -- checkout per version name and builds what it holds without fetching again, so each commit
+        -- takes a name of its own, and the install checks it built that commit.
+        local revision = "5e9716f1e8fe800cb24c1bc54d2534d490d508ba"
+        add_versions("2026.10.15+1", revision)
+        add_configs("revision", {description = "The Shade commit this package builds, so another commit is another emulator.", default = revision, type = "string", readonly = true})
+    end
     add_configs("sdl", {description = "Build the SDL2 window backend, for watching a guest on the desktop.", default = false, type = "boolean"})
     add_configs("ffmpeg", {description = "Build the FFmpeg audio decoder, for a guest that plays compressed audio.", default = false, type = "boolean"})
 
@@ -21,6 +29,12 @@ package("shade")
     add_deps("shaderc", {kind = "binary", system = false})
 
     on_load("macosx|arm64", function (package)
+        if package:sourcedir() then
+            local hades = import("hades", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+            local root = hades.root(package:sourcedir())
+            package:version_set(hades.version(package:sourcedir(), {path.join(root, "third_party", "dynarmic"),
+                                                                    path.join(root, "third_party", "boost")}))
+        end
         if package:config("sdl") then
             package:add("deps", "libsdl2", {system = false})
         end
@@ -30,10 +44,21 @@ package("shade")
     end)
 
     on_install("macosx|arm64", function (package)
-        local head = os.iorunv("git", {"rev-parse", "HEAD"}):trim()
-        if head ~= package:config("revision") then
-            raise("the Shade source xmake holds for %s is commit %s, not the pinned %s; the pin needs a version name of its own",
-                  package:version_str(), head, package:config("revision"))
+        local pinned = {}
+        if package:sourcedir() then
+            local hades = import("hades", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+            local root = hades.root(package:sourcedir())
+            for _, name in ipairs({"dynarmic", "boost"}) do
+                os.vrunv(os.programfile(), {"l", path.join(root, "third_party", "fetch.lua"), name}, {curdir = root})
+                table.insert(pinned, "-DSHADE_" .. name:upper() .. "_DIR=" .. path.join(root, ".deps", name))
+            end
+            os.cd(hades.stage(package, package:sourcedir()))
+        else
+            local head = os.iorunv("git", {"rev-parse", "HEAD"}):trim()
+            if head ~= package:config("revision") then
+                raise("the Shade source xmake holds for %s is commit %s, not the pinned %s; the pin needs a version name of its own",
+                      package:version_str(), head, package:config("revision"))
+            end
         end
         local plist = package:dep("libplist")
         local pkgconfig = path.absolute("pkgconfig")
@@ -59,6 +84,7 @@ package("shade")
                          "-DVulkan_GLSLC_EXECUTABLE=" .. glslc,
                          "-DCMAKE_BUILD_RPATH=" .. path.join(package:dep("vulkan-loader"):installdir(), "lib")}
         table.insert(configs, "-DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew;/usr/local")
+        table.join2(configs, pinned)
         local envs = import("package.tools.cmake").buildenvs(package)
         envs.PKG_CONFIG_PATH = pkgconfig
         envs.PKG_CONFIG_LIBDIR = pkgconfig

@@ -4,10 +4,17 @@ package("styx")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    add_urls("https://github.com/kern0x1b/styx.git")
-    -- The pin names the commit, and the licence it installs is the one at that commit: the upstream's
-    -- MIT notice first, byte for byte, then what the fork adds. aea2b911 is 8793ca9 with only that.
-    add_versions("2026.09.20", "aea2b9115261ddb201c3b6e50cf5a84060b87df3")
+    -- Inside hades the sources are the styx folder beside charon, as this checkout has it (modules/hades.lua
+    -- says how it is versioned and staged). Outside hades they are the pinned commit of styx's repository.
+    local hades_styx = path.join(os.scriptdir(), "..", "..", "..", "..", "styx")
+    if os.isfile(path.join(os.scriptdir(), "..", "..", "..", "..", "third_party", "fetch.lua")) and os.isdir(hades_styx) then
+        set_sourcedir(path.absolute(hades_styx))
+    else
+        add_urls("https://github.com/kern0x1b/styx.git")
+        -- The pin names the commit, and the licence it installs is the one at that commit: the upstream's
+        -- MIT notice first, byte for byte, then what the fork adds. aea2b911 is 8793ca9 with only that.
+        add_versions("2026.09.20", "aea2b9115261ddb201c3b6e50cf5a84060b87df3")
+    end
 
     -- Styx is compiled against the runtime a port takes, and the port links one build of it: what the port asks of the runtime
     -- it asks here too, and Styx passes it on, so that the modules are read against that runtime's own resource directory
@@ -33,6 +40,10 @@ package("styx")
     local libraries = {"Combine", "CombineHelpers"}
 
     on_load("iphoneos", function (package)
+        if package:sourcedir() then
+            local hades = import("hades", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+            package:version_set(hades.version(package:sourcedir()))
+        end
         package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("deps", "charon@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
@@ -44,6 +55,9 @@ package("styx")
 
     on_install("iphoneos", function (package)
         local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        if package:sourcedir() then
+            os.cd(import("hades", {rootdir = modules, anonymous = true}).stage(package, package:sourcedir()))
+        end
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "Styx is built with the apple-ios toolchain")[1]
         toolchain:load()
