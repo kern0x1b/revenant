@@ -21,7 +21,7 @@ target("shade_host_graphics")
         add_files("graphics/vulkan_gles_renderer.cpp", "graphics/vulkan_memory_allocator.cpp")
         add_files("graphics/shaders/gles.vert", "graphics/shaders/gles.frag")
         add_packages("vulkan-headers", "vulkan-loader", "vulkan-memory-allocator")
-        add_defines("SHADE_HAS_VULKAN=1")
+        add_defines("SHADE_HAS_VULKAN=1", 'SHADE_VULKAN_DRIVER_FILE="libvk_swiftshader.dylib"')
     end
 
 target("shade_host_system")

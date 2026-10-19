@@ -17,6 +17,7 @@ its license; the package installs them beside it.
 | Component | Version | License | Copyright | Package |
 | --- | --- | --- | --- | --- |
 | Vulkan Memory Allocator | 3.4.0 | MIT | 2017 - 2026 Advanced Micro Devices, Inc. | xmake-repo `vulkan-memory-allocator`, unmodified single header |
+| SwiftShader | 2026.09.16 | Apache-2.0 | The SwiftShader Authors | charon `swiftshader`, `libvk_swiftshader.dylib` placed beside the program |
 
 OpenSSL and libplist come from charon's packages, libpng, libjpeg-turbo, the Vulkan headers and
 loader and the glslang library (the shader compiler of `tools/glsl`) from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.

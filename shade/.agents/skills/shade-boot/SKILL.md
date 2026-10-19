@@ -43,9 +43,12 @@ perl -e 'alarm 300; exec @ARGV' build/shade boot --rootfs $run/rootfs --device i
 
 A boot runs until it is stopped: the `alarm` bounds it (`--ticks N` bounds it in CPU ticks).
 A build with `--shade_vulkan` (the default) draws through Vulkan, and `--gles-backend software` then means a
-Vulkan CPU driver: without one the boot stops at once with `vkCreateInstance failed with VkResult -9`. Name
-SwiftShader's ICD (charon's `swiftshader` package installs it) in `VK_ICD_FILENAMES`, or configure with
-`--shade_vulkan=n` for the reference renderer.
+Vulkan CPU driver. The build provides one: it takes charon's `swiftshader` package and puts
+`libvk_swiftshader.dylib` beside the program, and Shade hands that file to the Vulkan loader itself
+(`VK_LUNARG_direct_driver_loading`), next to whatever drivers the system has. No environment variable is
+needed; the log names the renderer in `[gles-renderer] selected Shade GLES 1.1 Vulkan (SwiftShader Device ...)`.
+When no Vulkan driver is usable, the boot goes on with the reference renderer and says why in one line:
+`[gles-renderer] Vulkan unavailable (<reason>): drawing with the reference renderer`.
 `--verbose` adds every trace line; without it only the lifecycle lines below are printed.
 
 ## 4. Read the log
