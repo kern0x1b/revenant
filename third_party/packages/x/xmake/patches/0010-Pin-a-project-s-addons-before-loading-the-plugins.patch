@@ -23,23 +23,10 @@ scripts of 39d7488ea the plugin in the project is not that of 1.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- AGENTS.md                    |  1 +
  tests/actions/addon/test.lua | 31 ++++++++++++++++++++++++++++++-
  xmake/core/main.lua          |  7 +++++++
- 3 files changed, 38 insertions(+), 1 deletion(-)
+ 2 files changed, 37 insertions(+), 1 deletion(-)
 
-diff --git a/AGENTS.md b/AGENTS.md
-index cb8861ed1..b7c77ee15 100644
---- a/AGENTS.md
-+++ b/AGENTS.md
-@@ -24,6 +24,7 @@ documents: `README.md`, `CONTRIBUTING.md`, <https://xmake.io>.
-     version of each addon, the per-process pins;
-   - `xmake/core/project/addons.lua` and `xmake/core/project/project.lua` — a project's
-     `xmake-addons.lock`, its auto-fetch and pinning;
-+  - `xmake/core/main.lua` — the command menu, it pins the lock before it reads the addon plugins;
-   - `xmake/modules/private/action/addon/impl/install_addons.lua` — the auto-fetch installer, it
-     writes the lock;
-   - `xmake/modules/private/action/require/impl/actions/install.lua` (`_register_addon`) — the
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
 index 5f0de5f57..ce0a7275c 100644
 --- a/tests/actions/addon/test.lua
