@@ -18,7 +18,7 @@
 # this was measured.
 #
 # The compiler is the Swift 6.4.0 the package builds with (charon@swift 6.4.0), named rather than
-# taken from PATH: SPATIAL_SWIFTC overrides it. The templates are rendered by gyb.lua and the comparison and
+# taken from PATH: SPATIAL_SWIFTC overrides it. The templates are rendered by modules/gyb and the comparison and
 # the control run in Lua (xmake l), so nothing here runs python.
 #
 # What this is not: a test of the module against itself, and not a check of the API's shape. An
@@ -44,7 +44,7 @@ mkdir -p "$build/gen" "$build/ours"
 sources=""
 for source in "$files"/Spatial/*.swift.gyb; do
     name=$(basename "$source" .gyb)
-    xmake l "$here/gyb.lua" -DCMAKE_SIZEOF_VOID_P=4 --line-directive "" -o "$build/gen/$name.swift" "$source" || {
+    xmake l "$here_root/modules/gyb/main.lua" -DCMAKE_SIZEOF_VOID_P=4 --line-directive "" -o "$build/gen/$name.swift" "$source" || {
         echo "FAIL running gyb on $source"; exit 1; }
     sources="$sources $build/gen/$name.swift"
 done

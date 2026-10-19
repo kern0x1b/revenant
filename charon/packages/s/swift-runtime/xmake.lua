@@ -168,6 +168,7 @@ package("swift-runtime")
     on_install("iphoneos", function (package)
         local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
+        local gyb = import("gyb.template", {rootdir = modules, anonymous = true})
         local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
         local compat = import("apple.compat", {rootdir = modules, anonymous = true})
         local compiler = assert(package:dep("swift"), "the runtime is built with charon@swift")
@@ -250,6 +251,12 @@ package("swift-runtime")
         -- CMake takes the flags of a toolchain file only while their cache entries are unset, so a build tree an install
         -- that failed left behind would keep the flags of that run; the stamp above is what decides that now.
         local source = path.absolute("swift-source")
+        local gyb_defines = {CMAKE_SIZEOF_VOID_P = package:arch() == "arm64" and "8" or "4"}
+        local function expand(template, output)
+            gyb.expand_to(template, output, {defines = gyb_defines, line_directive = "", paths = {path.join(source, "utils")}})
+            return output
+        end
+        local gyb_command = "-DGYB_COMMAND=" .. table.concat({os.programfile(), "l", path.join(modules, "gyb", "main.lua")}, ";")
         if not stdlib_kept then
             os.tryrm(source)
             os.vcp(path.join(compiler:installdir("share"), "swift-source"), source)
@@ -378,7 +385,7 @@ package("swift-runtime")
                 swiftflags = {"-Xfrontend", "-disable-legacy-type-info"},
                 shflags = {path.absolute("mark.o")}
             }, {
-                "-DSwiftCore_SWIFTC_SOURCE_DIR=" .. source,
+                "-DSwiftCore_SWIFTC_SOURCE_DIR=" .. source, gyb_command,
                 "-DSwiftCore_ARCH_SUBDIR=" .. package:arch(), "-DSwiftCore_PLATFORM_SUBDIR=iphoneos",
                 "-DSwiftCore_MODULE_TRIPLE=" .. package:arch() .. "-apple-ios",
                 "-Ddispatch_IMPLIB=" .. path.join(toolchain:config("sdkdir"), "usr", "lib", "libSystem.tbd"),
@@ -443,11 +450,7 @@ package("swift-runtime")
         os.mkdir(generated)
         local overlay_sources = {}
         for _, name in ipairs({"Darwin", "tgmath"}) do
-            local output = path.join(generated, name .. ".swift")
-            os.vrunv("python3", {path.join(source, "utils", "gyb.py"),
-                                 "-DCMAKE_SIZEOF_VOID_P=" .. (package:arch() == "arm64" and "8" or "4"),
-                                 "--line-directive", "", "-o", output, path.join(platform_source, name .. ".swift.gyb")})
-            table.insert(overlay_sources, output)
+            table.insert(overlay_sources, expand(path.join(platform_source, name .. ".swift.gyb"), path.join(generated, name .. ".swift")))
         end
         for _, name in ipairs({"Platform.swift", "TiocConstants.swift", "POSIXError.swift", "MachError.swift"}) do
             table.insert(overlay_sources, path.join(platform_source, name))
@@ -696,11 +699,8 @@ package("swift-runtime")
             build_overlay("CoreFoundation", overlay_sources_of("CoreFoundation", {"CoreFoundation.swift"}),
                           {"-lswiftDarwin", "-framework", "CoreFoundation"})
             -- CGFloat is generated for the width of the target's pointer, as the release's own build generated it.
-            local graphics = path.join(generated, "CGFloat.swift")
-            os.vrunv("python3", {path.join(source, "utils", "gyb.py"),
-                                 "-DCMAKE_SIZEOF_VOID_P=" .. (package:arch() == "arm64" and "8" or "4"),
-                                 "--line-directive", "", "-o", graphics,
-                                 path.join(overlays, "stdlib", "public", "Darwin", "CoreGraphics", "CGFloat.swift.gyb")})
+            local graphics = expand(path.join(overlays, "stdlib", "public", "Darwin", "CoreGraphics", "CGFloat.swift.gyb"),
+                                    path.join(generated, "CGFloat.swift"))
             -- Private.swift is left out: it is the release's migration aid, a declaration of each C call the overlay renamed,
             -- unavailable and ending in fatalError, and in the overlay's own module it hides the C calls the patches reach.
             build_overlay("CoreGraphics", table.join({graphics}, overlay_sources_of("CoreGraphics", {"CoreGraphics.swift", "Geometry.swift"})),
@@ -710,9 +710,7 @@ package("swift-runtime")
             -- Foundation: the release's sources but those of Combine, which no release before iOS 13 has, with its value types
             -- generated as its own build generated them and its two files of Objective-C compiled the way the port's own are.
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
-            local values = path.join(generated, "NSValue.swift")
-            os.vrunv("python3", {path.join(source, "utils", "gyb.py"), "-DCMAKE_SIZEOF_VOID_P=" .. (package:arch() == "arm64" and "8" or "4"),
-                                 "--line-directive", "", "-o", values, path.join(foundation, "NSValue.swift.gyb")})
+            local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do
                 local object = path.join(generated, file .. ".o")
@@ -753,10 +751,7 @@ package("swift-runtime")
             -- UIKit's structures compare and are Codable, and its alert and action sheet take their buttons as variadic
             -- arguments through an initializer its one file of Objective-C adds.
             local function generated_from(folder, name)
-                local output = path.join(generated, name)
-                os.vrunv("python3", {path.join(source, "utils", "gyb.py"), "-DCMAKE_SIZEOF_VOID_P=" .. (package:arch() == "arm64" and "8" or "4"),
-                                     "--line-directive", "", "-o", output, path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb")})
-                return output
+                return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
             end
             foundation_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation",
                                 "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"}
@@ -791,7 +786,7 @@ package("swift-runtime")
             configure(library:lower(), path.join(source, "Runtimes", "Supplemental", library),
                       {swiftflags = {"-resource-dir", resources}}, {
                 "-DSwiftCore_DIR=" .. path.join(package:installdir("lib"), "cmake", "SwiftCore"),
-                "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=YES", no_interface})
+                "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=YES", no_interface, gyb_command})
             offer(path.join(install, "*.swiftmodule"))
             offer(path.join(install, "iphoneos", "*.swiftmodule"))
             offer(path.join(install, "iphoneos", package:arch(), "*.dylib"))
@@ -1132,11 +1127,7 @@ package("swift-runtime")
         for _, file in ipairs(os.files(path.join(package:scriptdir(), "files", "Spatial", "*"))) do
             local name = path.filename(file)
             if name:endswith(".gyb") then
-                local output = path.join(spatial, (name:gsub("%.gyb$", "")))
-                os.vrunv("python3", {path.join(source, "utils", "gyb.py"),
-                                     "-DCMAKE_SIZEOF_VOID_P=" .. (package:arch() == "arm64" and "8" or "4"),
-                                     "--line-directive", "", "-o", output, file})
-                table.insert(spatial_sources, output)
+                table.insert(spatial_sources, expand(file, path.join(spatial, (name:gsub("%.gyb$", "")))))
             else
                 local output = path.join(spatial, name)
                 os.cp(file, output)

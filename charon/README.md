@@ -158,12 +158,12 @@ A check is a target:
 
     target("lint-strings")
         add_rules("@addon/charon/check")
-        set_values("check.script", "scripts/lint-strings.py")
+        set_values("check.script", "scripts/lint-strings.sh")
         add_values("check.files", "src/**.m", "src/**.h")
         set_values("check.pass-files", true)
 
-check.script runs a script with the interpreter its extension names (.py, .sh,
-.rb, .pl, .js); check.command runs any program. A check runs when a file it
+check.script runs a script with the interpreter its extension names (.sh, .rb,
+.pl, .js); check.command runs any program. A check runs when a file it
 names is staged or changed, and on every run without --staged or --changed,
 when it is given every tracked file it names; check.needs-files keeps it quiet
 while there are none. A script that calls xmake again passes the task first:
@@ -599,6 +599,21 @@ on ARM; and Synchronization and Observation name `os_unfair_lock_lock` and its
 pair by symbol instead of importing `os/lock.h`, whose declaration carries iOS
 10. The standard library's availability macros are rewritten to `*` for the same
 reason the frontend takes the flag.
+
+No Python runs in that build. The `.gyb` templates the runtime, its overlays,
+Embedded Swift's module and Styx are generated from are expanded by
+`modules/gyb`, a port of Swift's `utils/gyb.py` to Lua: the template language
+itself, and an interpreter for the Python its code blocks and the helper modules
+beside `gyb.py` (`SwiftIntTypes.py`, `SwiftFloatingPointTypes.py`,
+`GYBUnicodeDataUtils.py`, `gyb_stdlib_support.py`) are written in, down to the
+float formatting, arbitrary-precision integers and the Mersenne Twister of
+`random.Random`. A recipe calls `gyb.template`'s `expand_to`; CMake calls
+`xmake l modules/gyb/main.lua`, which takes `gyb.py`'s `-D`, `-o` and
+`--line-directive` and a `--path` that says where `%import` looks, and which the
+runtime's `gyb.cmake` is patched to run (`GYB_COMMAND`). A construct it does
+not implement (a statement, an expression, a builtin, a module) raises an error
+instead of being guessed at. The interpreter's
+sources are part of the runtime's recipe digest (`modules/digest.lua`).
 
 The runtime with Objective-C interoperation has iOS 6.0 as its floor. Built with
 `SWIFT_CLASS_IS_SWIFT_MASK=1`, a Swift class marks itself with the low bit of
