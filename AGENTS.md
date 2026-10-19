@@ -3,7 +3,7 @@
 The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hades:
 
 - Work inside one member folder at a time and read that member's `AGENTS.md` first: `charon/AGENTS.md`,
-  `shade/AGENTS.md`, `eidolon/AGENTS.md`, `styx/AGENTS.md`, `katabasis/AGENTS.md`, `psychopomp/AGENTS.md`,
+  `shade/AGENTS.md`, `frameworks/eidolon/AGENTS.md`, `frameworks/styx/AGENTS.md`, `katabasis/AGENTS.md`, `psychopomp/AGENTS.md`,
   `revenant-webkit/AGENTS.md`.
 - A change that spans members is one series in hades, one commit per member it touches.
 - Nothing but the project lives in the hades folder: no scratch, logs, notes, run output or worktrees. Scratch goes

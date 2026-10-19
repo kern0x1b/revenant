@@ -7,11 +7,15 @@ armv7), in one repository. Each member keeps its own folder, history, `README.md
 | --- | --- |
 | `charon/` | legacy Apple platforms for xmake: toolchains, SDKs and packages, the backports, the gate |
 | `shade/` | Charon's emulator: boots a firmware's own userland on macOS arm64 |
-| `eidolon/` | SwiftUI for iOS 6, implemented on UIKit for armv7 |
-| `styx/` | Combine down to iOS 6, armv7 |
+| `frameworks/eidolon/` | SwiftUI for iOS 6, implemented on UIKit for armv7 (module `SwiftUI`) |
+| `frameworks/styx/` | Combine down to iOS 6, armv7 (module `Combine`) |
 | `katabasis/` | static recompiler of arm64 iOS applications into armv7 binaries for iOS 6 |
 | `psychopomp/` | skills for coding agents that build modern apps for old iOS |
 | `revenant-webkit/` | a current WebKit built for armv7 (the WebKit tree itself is the `webkit-254` submodule) |
+
+Names: a product with its own README, users and releases has a name of its own (charon, shade, styx, eidolon,
+katabasis, psychopomp, revenant); a group of products is named by its role (`frameworks/`); a module that implements
+an Apple framework is named after that framework (`SwiftUI`, `Combine`).
 
 Applications built on the platform (telegram-build, cydia, soundcloud-fix, kindle-sync-fix) are not members: they
 consume charon as an xmake repository.

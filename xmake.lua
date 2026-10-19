@@ -24,7 +24,7 @@ if is_plat("iphoneos") then
 end
 
 if is_plat("iphoneos") then
-    includes("styx/xmake.lua", "eidolon/xmake.lua")
+    includes("frameworks/styx", "frameworks/eidolon")
 else
-    includes("*/xmake.lua")
+    includes("shade", "frameworks/styx", "frameworks/eidolon")
 end
