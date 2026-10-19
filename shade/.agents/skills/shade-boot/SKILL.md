@@ -42,6 +42,10 @@ perl -e 'alarm 300; exec @ARGV' build/shade boot --rootfs $run/rootfs --device i
 ```
 
 A boot runs until it is stopped: the `alarm` bounds it (`--ticks N` bounds it in CPU ticks).
+A build with `--shade_vulkan` (the default) draws through Vulkan, and `--gles-backend software` then means a
+Vulkan CPU driver: without one the boot stops at once with `vkCreateInstance failed with VkResult -9`. Name
+SwiftShader's ICD (charon's `swiftshader` package installs it) in `VK_ICD_FILENAMES`, or configure with
+`--shade_vulkan=n` for the reference renderer.
 `--verbose` adds every trace line; without it only the lifecycle lines below are printed.
 
 ## 4. Read the log

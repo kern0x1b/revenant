@@ -15,7 +15,9 @@ commit with our patches, in `third_party/packages/d/dynarmic`).
 Shade builds with xmake from the top of hades: `xmake f -y`, `xmake build shade`, `xmake test`. Each
 module folder has an `xmake.lua` with its libraries; `shade/xmake.lua` holds the options, the packages
 and the two rules every target uses (`shade.module`: C++20, the warnings, the module's `include/` as its
-public include root, LTO in release; `shade.glsl`: the Vulkan shaders through glslc). The program is
+public include root, LTO in release; `shade.glsl`: the Vulkan shaders through `shade_glsl_to_spirv`, the host tool in `tools/glsl` on the glslang
+library, which writes each shader as the C word list the renderer includes; it is a build fence, so the renderer's
+shaders wait for it). The program is
 `build/macosx/arm64/release/shade`; the skill `shade-boot` (`.agents/skills/shade-boot/SKILL.md`)
 builds it, boots a root filesystem and reads the log.
 

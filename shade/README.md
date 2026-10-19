@@ -36,7 +36,7 @@ boundary, in `src/graphics`, `src/media` and `src/telephony`.
 - macOS on Apple silicon, xmake 3.1.2 or later and a C++20 compiler (Apple clang).
 - Every library comes as an xmake package, installed by the first configure: Dynarmic and Boost from hades'
   `third_party` repository, OpenSSL and libplist from charon's, libpng, libjpeg-turbo, the Vulkan headers, loader
-  and memory allocator and `glslc` (shaderc) from xmake's; optionally SDL2 (a window) and FFmpeg (compressed
+  and memory allocator and the glslang library (for the shader compiler in `tools/glsl`) from xmake's; optionally SDL2 (a window) and FFmpeg (compressed
   audio).
 - A Vulkan driver to draw; a CPU driver such as SwiftShader is enough.
 - A root filesystem of the firmware to run, for example one unpacked by

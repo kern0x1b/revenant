@@ -19,7 +19,7 @@ its license; the package installs them beside it.
 | Vulkan Memory Allocator | 3.4.0 | MIT | 2017 - 2026 Advanced Micro Devices, Inc. | xmake-repo `vulkan-memory-allocator`, unmodified single header |
 
 OpenSSL and libplist come from charon's packages, libpng, libjpeg-turbo, the Vulkan headers and
-loader and shaderc from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.
+loader and the glslang library (the shader compiler of `tools/glsl`) from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.
 
 A binary built from this tree carries the notices above with it; the MIT,
 BSD-3-Clause and BSL texts require that. `NOTICE` is the summary to ship.
