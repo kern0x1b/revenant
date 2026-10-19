@@ -1,0 +1,268 @@
+From 56ec59459a53840ef290ebdd84eef64abd5dfb42 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 18:44:16 +0200
+Subject: [PATCH] Take SPIRV-Tools' generated sources from a directory
+
+SPIRV-Tools writes its grammar tables, the DebugInfo, OpenCLDebugInfo100
+and NonSemanticShaderDebugInfo100 headers, the generators table and
+build-version.inc with interpreter scripts that run as custom commands,
+and its top-level CMakeLists requires the interpreter at configure time
+for its own checks. The build that embeds SwiftShader must not run that
+interpreter at all, so it writes those seven files itself before
+configuring, from the same SPIRV-Headers grammar, registry and CHANGES
+inputs.
+
+SPIRV_TOOLS_GENERATED_DIR names the directory holding them. Configuring
+fails when one is missing, copies each into the SPIRV-Tools binary
+directory every target already searches, and keeps core_tables,
+extinst_tables and spirv-tools-build-version as the empty targets the
+libraries depend on. The interpreter lookup, the custom commands, the
+spvasm.vim target and the interpreter-driven checks are gone.
+---
+ third_party/SPIRV-Tools/CMakeLists.txt        |  46 +-----
+ third_party/SPIRV-Tools/source/CMakeLists.txt | 155 +++---------------
+ 2 files changed, 25 insertions(+), 176 deletions(-)
+
+diff --git a/third_party/SPIRV-Tools/CMakeLists.txt b/third_party/SPIRV-Tools/CMakeLists.txt
+index 8c6fe41e..ef51d16e 100644
+--- a/third_party/SPIRV-Tools/CMakeLists.txt
++++ b/third_party/SPIRV-Tools/CMakeLists.txt
+@@ -237,41 +237,11 @@ if(NOT COMMAND find_host_program)
+   endmacro()
+ endif()
+ 
+-# Tests require Python3
+-find_host_package(Python3 REQUIRED)
+-
+-# Check type annotations in Perl code. Assumes mypy.
+-add_custom_target(spirv-tools-check-python-types
+-	COMMAND mypy Table
+-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/utils
+-)
+-set_target_properties(spirv-tools-check-python-types
+-  PROPERTIES EXCLUDE_FROM_ALL ON)
+-
+-# Run Python unit tests
+-add_custom_target(spirv-tools-check-python-tests
+-	COMMAND Python3::Interpreter -m unittest discover -v -p "*test.py"
+-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/utils
+-)
+-
+-# Check for symbol exports on Linux.
+-# At the moment, this check will fail on the OSX build machines for the Android NDK.
+-# It appears they don't have objdump.
+-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+-  macro(spvtools_check_symbol_exports TARGET)
+-    if (NOT "${SPIRV_SKIP_TESTS}")
+-      add_test(NAME spirv-tools-symbol-exports-${TARGET}
+-               COMMAND Python3::Interpreter
+-               ${spirv-tools_SOURCE_DIR}/utils/check_symbol_exports.py "$<TARGET_FILE:${TARGET}>")
+-    endif()
+-  endmacro()
+-else()
+-  macro(spvtools_check_symbol_exports TARGET)
+-    if (NOT "${SPIRV_SKIP_TESTS}")
+-      message("Skipping symbol exports test for ${TARGET}")
+-    endif()
+-  endmacro()
+-endif()
++macro(spvtools_check_symbol_exports TARGET)
++  if (NOT "${SPIRV_SKIP_TESTS}")
++    message("Skipping symbol exports test for ${TARGET}")
++  endif()
++endmacro()
+ 
+ if(ENABLE_SPIRV_TOOLS_INSTALL)
+   if(WIN32 AND NOT MINGW)
+@@ -365,12 +335,6 @@ if(ENABLE_SPIRV_TOOLS_INSTALL)
+       ${CMAKE_INSTALL_INCLUDEDIR}/spirv-tools/)
+ endif(ENABLE_SPIRV_TOOLS_INSTALL)
+ 
+-if (NOT "${SPIRV_SKIP_TESTS}")
+-  add_test(NAME spirv-tools-copyrights
+-           COMMAND Python3::Interpreter utils/check_copyright.py
+-           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+-endif()
+-
+ set(SPIRV_LIBRARIES "-lSPIRV-Tools-opt -lSPIRV-Tools -lSPIRV-Tools-link")
+ set(SPIRV_SHARED_LIBRARIES "-lSPIRV-Tools-shared")
+ 
+diff --git a/third_party/SPIRV-Tools/source/CMakeLists.txt b/third_party/SPIRV-Tools/source/CMakeLists.txt
+index fd2d963d..33f26893 100644
+--- a/third_party/SPIRV-Tools/source/CMakeLists.txt
++++ b/third_party/SPIRV-Tools/source/CMakeLists.txt
+@@ -12,151 +12,36 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-set(VIMSYNTAX_PROCESSING_SCRIPT "${spirv-tools_SOURCE_DIR}/utils/vim/generate_syntax.py")
+-set(XML_REGISTRY_PROCESSING_SCRIPT "${spirv-tools_SOURCE_DIR}/utils/generate_registry_tables.py")
+-set(LANG_HEADER_PROCESSING_SCRIPT "${spirv-tools_SOURCE_DIR}/utils/generate_language_headers.py")
+-set(GGT_SCRIPT "${spirv-tools_SOURCE_DIR}/utils/ggt.py")
+-
+-# Pull in grammar files that have migrated to SPIRV-Headers
+-set(GRAMMAR_DIR "${SPIRV_HEADER_INCLUDE_DIR}/spirv/unified1")
+-set(SPIRV_CORE_GRAMMAR_JSON_FILE "${GRAMMAR_DIR}/spirv.core.grammar.json")
+-set(EI_debuginfo "${GRAMMAR_DIR}/extinst.debuginfo.grammar.json")
+-set(EI_cldebuginfo "${GRAMMAR_DIR}/extinst.opencl.debuginfo.100.grammar.json")
+-set(EI_glsl "${GRAMMAR_DIR}/extinst.glsl.std.450.grammar.json")
+-set(EI_opencl "${GRAMMAR_DIR}/extinst.opencl.std.100.grammar.json")
+-set(EI_amd_evp "${GRAMMAR_DIR}/extinst.spv-amd-shader-explicit-vertex-parameter.grammar.json")
+-set(EI_amd_trimm "${GRAMMAR_DIR}/extinst.spv-amd-shader-trinary-minmax.grammar.json")
+-set(EI_amd_gcn "${GRAMMAR_DIR}/extinst.spv-amd-gcn-shader.grammar.json")
+-set(EI_amd_ballot "${GRAMMAR_DIR}/extinst.spv-amd-shader-ballot.grammar.json")
+-set(EI_ns_debuginfo "${GRAMMAR_DIR}/extinst.nonsemantic.shader.debuginfo.100.grammar.json")
+-set(EI_ns_clspvreflect "${GRAMMAR_DIR}/extinst.nonsemantic.clspvreflection.grammar.json")
+-set(EI_ns_vkspreflect "${GRAMMAR_DIR}/extinst.nonsemantic.vkspreflection.grammar.json")
+-set(EI_tosa_001000_1 "${GRAMMAR_DIR}/extinst.tosa.001000.1.grammar.json")
++set(SPIRV_TOOLS_GENERATED_DIR "" CACHE PATH "Directory of the grammar tables, language headers, generators table and build version, written before configuring")
++set(SPIRV_TOOLS_GENERATED_FILES
++  core_tables_body.inc
++  core_tables_header.inc
++  generators.inc
++  build-version.inc
++  DebugInfo.h
++  OpenCLDebugInfo100.h
++  NonSemanticShaderDebugInfo100.h)
++foreach(GENERATED_FILE ${SPIRV_TOOLS_GENERATED_FILES})
++  if(NOT EXISTS "${SPIRV_TOOLS_GENERATED_DIR}/${GENERATED_FILE}")
++    message(FATAL_ERROR "SPIRV_TOOLS_GENERATED_DIR must name a directory holding ${GENERATED_FILE}")
++  endif()
++  configure_file("${SPIRV_TOOLS_GENERATED_DIR}/${GENERATED_FILE}" "${spirv-tools_BINARY_DIR}/${GENERATED_FILE}" COPYONLY)
++endforeach()
+ 
+-set(CORE_TABLES_BODY_INC_FILE ${spirv-tools_BINARY_DIR}/core_tables_body.inc)
+ set(CORE_TABLES_HEADER_INC_FILE ${spirv-tools_BINARY_DIR}/core_tables_header.inc)
+-add_custom_command(OUTPUT ${CORE_TABLES_BODY_INC_FILE} ${CORE_TABLES_HEADER_INC_FILE}
+-    COMMAND Python3::Interpreter ${GGT_SCRIPT}
+-      --core-tables-body-output=${CORE_TABLES_BODY_INC_FILE}
+-      --core-tables-header-output=${CORE_TABLES_HEADER_INC_FILE}
+-      --spirv-core-grammar=${SPIRV_CORE_GRAMMAR_JSON_FILE}
+-      --extinst=,${EI_glsl}
+-      --extinst=,${EI_opencl}
+-      --extinst=CLDEBUG100_,${EI_cldebuginfo}
+-      --extinst=SHDEBUG100_,${EI_ns_debuginfo}
+-      --extinst=,${EI_amd_evp}
+-      --extinst=,${EI_amd_trimm}
+-      --extinst=,${EI_amd_gcn}
+-      --extinst=,${EI_amd_ballot}
+-      --extinst=,${EI_debuginfo}
+-      --extinst=,${EI_ns_clspvreflect}
+-      --extinst=,${EI_ns_vkspreflect}
+-      --extinst=TOSA_,${EI_tosa_001000_1}
+-    DEPENDS ${GGT_SCRIPT}
+-            ${SPIRV_CORE_GRAMMAR_JSON_FILE}
+-	    ${EI_glsl}
+-	    ${EI_opencl}
+-	    ${EI_cldebuginfo}
+-	    ${EI_ns_debuginfo}
+-	    ${EI_amd_evp}
+-	    ${EI_amd_trimm}
+-	    ${EI_amd_gcn}
+-	    ${EI_amd_ballot}
+-	    ${EI_debuginfo}
+-	    ${EI_ns_clspvreflect}
+-	    ${EI_ns_vkspreflect}
+-            ${EI_tosa_001000_1}
+-    COMMENT "Generate grammar tables")
+-add_custom_target(spirv-tools-tables DEPENDS ${CORE_TABLES_BODY_INC_FILE} ${CORE_TABLES_HEADER_INC_FILE})
+-
+-macro(spvtools_vimsyntax CONFIG_VERSION CLVERSION)
+-  set(GRAMMAR_JSON_FILE "${SPIRV_HEADER_INCLUDE_DIR}/spirv/${CONFIG_VERSION}/spirv.core.grammar.json")
+-  set(GLSL_GRAMMAR_JSON_FILE "${SPIRV_HEADER_INCLUDE_DIR}/spirv/${CONFIG_VERSION}/extinst.glsl.std.450.grammar.json")
+-  set(OPENCL_GRAMMAR_JSON_FILE "${SPIRV_HEADER_INCLUDE_DIR}/spirv/${CONFIG_VERSION}/extinst.opencl.std.100.grammar.json")
+-  set(VIMSYNTAX_FILE "${spirv-tools_BINARY_DIR}/spvasm.vim")
+-  add_custom_command(OUTPUT ${VIMSYNTAX_FILE}
+-      COMMAND Python3::Interpreter ${VIMSYNTAX_PROCESSING_SCRIPT}
+-      --spirv-core-grammar=${GRAMMAR_JSON_FILE}
+-      --extinst-debuginfo-grammar=${EI_debuginfo}
+-      --extinst-glsl-grammar=${GLSL_GRAMMAR_JSON_FILE}
+-      --extinst-opencl-grammar=${OPENCL_GRAMMAR_JSON_FILE}
+-      >${VIMSYNTAX_FILE}
+-    DEPENDS ${VIMSYNTAX_PROCESSING_SCRIPT} ${GRAMMAR_JSON_FILE}
+-	    ${GLSL_GRAMMAR_JSON_FILE} ${OPENCL_GRAMMAR_JSON_FILE} ${EI_debuinfo}
+-    COMMENT "Generate spvasm.vim: Vim syntax file for SPIR-V assembly.")
+-endmacro(spvtools_vimsyntax)
+-
+-macro(spvtools_extinst_lang_headers NAME GRAMMAR_FILE)
+-  set(OUT_H ${spirv-tools_BINARY_DIR}/${NAME}.h)
+-  add_custom_command(OUTPUT ${OUT_H}
+-    COMMAND Python3::Interpreter ${LANG_HEADER_PROCESSING_SCRIPT}
+-      --extinst-grammar=${GRAMMAR_FILE}
+-      --extinst-output-path=${OUT_H}
+-    DEPENDS ${LANG_HEADER_PROCESSING_SCRIPT} ${GRAMMAR_FILE}
+-    COMMENT "Generate language specific header for ${NAME}.")
+-  add_custom_target(spirv-tools-header-${NAME} DEPENDS ${OUT_H})
+-  set_property(TARGET spirv-tools-header-${NAME} PROPERTY FOLDER "SPIRV-Tools build")
+-  list(APPEND EXTINST_CPP_DEPENDS spirv-tools-header-${NAME})
+-endmacro(spvtools_extinst_lang_headers)
+-
+-spvtools_extinst_lang_headers("DebugInfo" ${EI_debuginfo})
+-spvtools_extinst_lang_headers("OpenCLDebugInfo100" ${EI_cldebuginfo})
+-spvtools_extinst_lang_headers("NonSemanticShaderDebugInfo100" ${EI_ns_debuginfo})
+-
+-spvtools_vimsyntax("unified1" "1.0")
+-add_custom_target(spirv-tools-vimsyntax DEPENDS ${VIMSYNTAX_FILE})
+-set_property(TARGET spirv-tools-vimsyntax PROPERTY FOLDER "SPIRV-Tools utilities")
+-
+-# Extract the list of known generators from the SPIR-V XML registry file.
+ set(GENERATOR_INC_FILE ${spirv-tools_BINARY_DIR}/generators.inc)
+-set(SPIRV_XML_REGISTRY_FILE ${SPIRV_HEADER_INCLUDE_DIR}/spirv/spir-v.xml)
+-add_custom_command(OUTPUT ${GENERATOR_INC_FILE}
+-  COMMAND Python3::Interpreter ${XML_REGISTRY_PROCESSING_SCRIPT}
+-    --xml=${SPIRV_XML_REGISTRY_FILE}
+-    --generator-output=${GENERATOR_INC_FILE}
+-  DEPENDS ${XML_REGISTRY_PROCESSING_SCRIPT} ${SPIRV_XML_REGISTRY_FILE}
+-  COMMENT "Generate tables based on the SPIR-V XML registry.")
+-list(APPEND OPCODE_CPP_DEPENDS ${GENERATOR_INC_FILE})
+-
+-# The following .cpp files include the above generated .inc files.
+-# Add those .inc files as their dependencies.
+-#
+-# We need to wrap the .inc files with a custom target to avoid problems when
+-# multiple targets depend on the same custom command.
+-add_custom_target(core_tables
+-	DEPENDS ${OPCODE_CPP_DEPENDS}
+-	        ${CORE_TABLES_BODY_INC_FILE}
+-		${CORE_TABLES_HEADER_INC_FILE})
+-add_custom_target(extinst_tables
+-  DEPENDS ${EXTINST_CPP_DEPENDS})
++set(SPIRV_TOOLS_BUILD_VERSION_INC ${spirv-tools_BINARY_DIR}/build-version.inc)
++add_custom_target(core_tables)
++add_custom_target(extinst_tables)
++add_custom_target(spirv-tools-build-version)
+ 
+ set_source_files_properties(
+   ${CMAKE_CURRENT_SOURCE_DIR}/extensions.h
+   PROPERTIES HEADER_FILE_ONLY TRUE)
+ 
+-set(SPIRV_TOOLS_BUILD_VERSION_INC
+-  ${spirv-tools_BINARY_DIR}/build-version.inc)
+-set(SPIRV_TOOLS_BUILD_VERSION_INC_GENERATOR
+-  ${spirv-tools_SOURCE_DIR}/utils/update_build_version.py)
+-set(SPIRV_TOOLS_CHANGES_FILE
+-  ${spirv-tools_SOURCE_DIR}/CHANGES)
+-add_custom_command(OUTPUT ${SPIRV_TOOLS_BUILD_VERSION_INC}
+-   COMMAND Python3::Interpreter
+-           ${SPIRV_TOOLS_BUILD_VERSION_INC_GENERATOR}
+-           ${SPIRV_TOOLS_CHANGES_FILE} ${SPIRV_TOOLS_BUILD_VERSION_INC}
+-   DEPENDS ${SPIRV_TOOLS_BUILD_VERSION_INC_GENERATOR}
+-           ${SPIRV_TOOLS_CHANGES_FILE}
+-   COMMENT "Update build-version.inc in the SPIRV-Tools build directory (if necessary).")
+-# Convenience target for standalone generation of the build-version.inc file.
+-# This is not required for any dependence chain.
+-add_custom_target(spirv-tools-build-version
+-   DEPENDS ${SPIRV_TOOLS_BUILD_VERSION_INC})
+-set_property(TARGET spirv-tools-build-version PROPERTY FOLDER "SPIRV-Tools build")
+-
+ list(APPEND PCH_DEPENDS
+ 	${CORE_TABLES_HEADER_INC_FILE}
+-	${OPCODE_CPP_DEPENDS}
+-	${EXTINST_CPP_DEPENDS}
++	${GENERATOR_INC_FILE}
+ 	${SPIRV_TOOLS_BUILD_VERSION_INC})
+ set_source_files_properties(
+   ${CMAKE_CURRENT_SOURCE_DIR}/pch_source.cpp
+-- 
+2.54.0 (Apple Git-157)
+
