@@ -10,7 +10,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
   to `$HOME/.cache/hades/<task>/` and is deleted when the task ends.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in the member's `docs/`.
-  `xmake l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
+  `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
   the files changed since `rev` differ from it in comments only (clang's raw tokens, Swift's parse tree, Lua's
   bytecode). Files that carry upstream text are marked `comments=upstream` in `.gitattributes`.
 - Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
@@ -22,5 +22,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
 - Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session`,
   `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session
   started inside hades does not list them: read `<name>/SKILL.md` there.
-- Before handing a change over: `xmake l tools/check.lua <member>` for each member it touches that has a check
+- xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/packages/x/xmake` (built into
+  `$HOME/.cache/hades/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
+  the charon addon from `charon/` of the checkout; stock xmake would fetch and install charon globally instead.
+- Before handing a change over: `./xmakew l tools/check.lua <member>` for each member it touches that has a check
   there, then that member's own gate (charon's `backports-gate` skill, shade's boot skill).
