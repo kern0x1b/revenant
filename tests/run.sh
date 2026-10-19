@@ -51,6 +51,7 @@ echo "run $run, scratch $scratch"
 real_home=$HOME
 brew_prefix=$(brew --prefix 2>/dev/null || echo /opt/homebrew)
 xmake_bin=$(command -v xmake)
+tests_dir=$(cd "$(dirname "$0")" && pwd)
 
 # The plugin cloned at HEAD, and the guard in front of xmake. Each scenario gets its own HOME.
 plugin=$scratch/plugin guard=$scratch/guard
@@ -74,28 +75,13 @@ fresh_home() {
   vars=(HOME="$home" USER="$USER" LOGNAME="$USER" SHELL=/bin/zsh LANG=en_US.UTF-8 TERM=xterm-256color
         TMPDIR="$scratch/tmp" PATH="$guard:$brew_prefix/bin:$brew_prefix/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         XMAKE_GLOBALDIR="$real_home" CHARON_HOME="$real_home/.charon")
-  (umask 077; security find-generic-password -s "Claude Code-credentials" -w | python3 -c '
-import json, sys
-json.dump({"claudeAiOauth": json.load(sys.stdin)["claudeAiOauth"]}, open(sys.argv[1], "w"))' "$home/.claude/.credentials.json")
-  left=$(python3 -c 'import json, sys, time; print(int(json.load(open(sys.argv[1]))["claudeAiOauth"]["expiresAt"] / 1000 - time.time()))' \
-    "$home/.claude/.credentials.json")
+  (umask 077; security find-generic-password -s "Claude Code-credentials" -w |
+    "$xmake_bin" l "$tests_dir/credentials.lua" store "$home/.claude/.credentials.json")
+  left=$("$xmake_bin" l "$tests_dir/credentials.lua" left "$home/.claude/.credentials.json")
 }
 # The exact token strings, to prove none reached the evidence.
 leaked() {
-  python3 - "$home/.claude/.credentials.json" "$1" <<'PY'
-import json, os, sys
-o = json.load(open(sys.argv[1]))["claudeAiOauth"]
-secrets = [o[k].encode() for k in ("accessToken", "refreshToken") if o.get(k)]
-for d, _, files in os.walk(sys.argv[2]):
-    for f in files:
-        p = os.path.join(d, f)
-        try:
-            data = open(p, "rb").read()
-        except OSError:
-            continue
-        if any(s in data for s in secrets):
-            print(p)
-PY
+  "$xmake_bin" l "$tests_dir/credentials.lua" leaked "$home/.claude/.credentials.json" "$1"
 }
 clean_env() { env -i "${vars[@]}" "$@"; }
 mkdir -p "$scratch/tmp"
