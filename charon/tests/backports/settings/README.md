@@ -1,6 +1,6 @@
 # settings - what the check covers, and what it owes
 
-`run.sh` builds the port's own four settings objects and one program against them, and runs it. It does
+`xmake l tests/backports/settings/run.lua` builds the port's own four settings objects and one program against them, and runs it. It does
 not compare with the system's Accessibility framework, and each row says why: the five settings values
 read a *user's* preference, which on a host is the signed-in Mac's; `AXOpenSettingsFeature` opens the
 Settings app, so calling it there puts a window on somebody's screen; and the three hearing functions are
@@ -10,7 +10,7 @@ would be the signed-in user's own accessory list.
 So the oracle for every answer here is `axs-census.lua` - the release's own accessibility preferences,
 with two controls - and the reading is named next to the assertion it holds. `check.m` counts its own
 assertions as it runs them and prints the total - it is never written down here, because a number in a
-file is a number no run maintains - and `mutants.sh` covers them with eleven mutations: ten killed and
+file is a number no run maintains - and `mutants.lua` covers them with eleven mutations: ten killed and
 one control green.
 The census is its own tool and its own output, and it is committed with the rows that depend on it.
 
@@ -22,7 +22,7 @@ iphonesimulator` answers `SDK "iphonesimulator" cannot be located`. What holds t
 
   * `hearing-check.m`, compiled for `armv7-apple-ios6.0` against the 16.4 SDK, which holds the compiler to
     the SDK's own declarations of the three functions;
-  * `nm` over the built `CharonHearing15.o`, which `run.sh` **asserts** rather than prints - it is what
+  * `nm` over the built `CharonHearing15.o`, which `run.lua` **asserts** rather than prints - it is what
     mutant M9 turns red on;
   * `axs-census.lua`, which is the measurement the answers are readings of, and which is narrower than
     what the code first claimed: the release's Accessibility surface holds 28 hearing-named exports, all

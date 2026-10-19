@@ -686,3 +686,47 @@ function method_imps(source, asked, count)
     cache.close()
     return named
 end
+
+function image_methods(cachefile, name, classes)
+    local wanted = {}
+    for _, class in ipairs(classes or {}) do
+        wanted[class] = true
+    end
+    local cache = dyld.open_cache(cachefile)
+    local read = reader(cache)
+    function read.raw(address, count)
+        return cache.read_address(address, count)
+    end
+    local loaded
+    for _, candidate in ipairs(cache.images) do
+        if not loaded and (candidate.install == name or candidate.install:endswith("/" .. name)) then
+            loaded = candidate
+        end
+    end
+    local rows, listed = {}, false
+    for _, section in ipairs(loaded and loaded.image.sections or {}) do
+        listed = listed or section.name == "__objc_classlist"
+    end
+    local function add(class_name, meta, address)
+        method_entries(read, address, function (selector, imp)
+            table.insert(rows, {class = class_name, meta = meta, selector = selector, imp = imp})
+        end)
+    end
+    for _, class in ipairs(listed and section_entries(read, loaded.image, "__objc_classlist") or {}) do
+        local ro = class_ro(read, class)
+        if ro and ro.name and (#(classes or {}) == 0 or wanted[ro.name]) then
+            add(ro.name, false, ro.methods)
+            local meta_ro = class_ro(read, read.pointer(class))
+            if meta_ro then
+                add(ro.name, true, meta_ro.methods)
+            end
+        end
+    end
+    cache.close()
+    if not loaded then
+        raise("%s holds no image %s", cachefile, name)
+    elseif not listed then
+        raise("%s in %s has no __objc_classlist", loaded.install, cachefile)
+    end
+    return rows
+end

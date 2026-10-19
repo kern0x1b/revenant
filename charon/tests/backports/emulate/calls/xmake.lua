@@ -13,7 +13,12 @@ includes("@addon/charon/emulate")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 
-local calls = os.getenv("CHARCALLS_GENERATED") or path.join(root, "tests/backports/emulate/calls/.agent-work/generated")
+local task = os.getenv("HADES_TASK")
+if not task or task == "" then
+    local checkout = path.normalize(path.absolute(root))
+    task = path.filename(os.exists(path.join(checkout, ".git")) and checkout or path.directory(checkout))
+end
+local calls = os.getenv("CHARCALLS_GENERATED") or path.join(os.getenv("HOME"), ".cache", "hades", task, "charon-calls", "generated")
 
 target("charoncalls")
     add_rules("@addon/charon/daemon")

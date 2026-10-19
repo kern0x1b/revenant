@@ -98,7 +98,7 @@ echo "=== the two answers: $cases cases a side ($behaviour behaviour, $declarati
 # print the diff, and a bare `python3 compare.py` under `set -e` leaves the script at that line, which
 # is what the first version of the chart case did - a failure report six lines long that no failure
 # could ever reach.
-if python3 "$here/../common/compare.py" "$build/host.tsv" "$build/port.tsv" "$here/expected-differences.tsv"; then
+if xmake l "$here/../common/compare.lua" "$build/host.tsv" "$build/port.tsv" "$here/expected-differences.tsv"; then
     # Said with the verdict and not beside it, so the line cannot be read as "N cases nothing looked
     # at": compare.py has just compared them and found no undeclared difference, and this is what it
     # compared.

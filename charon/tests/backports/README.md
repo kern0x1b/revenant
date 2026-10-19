@@ -871,31 +871,34 @@ it has nothing left in the first list.
 ## Reading what a release's library does
 
 The facts behind an `implemented`, `inert` or `ignored` entry come from the release's own library, and
-a shared cache holds it with no symbol for an Objective-C method. `tools/cache-methods.py` lists the
-methods of an image's classes with the address of each implementation, and `tools/cache-disasm.py`
+a shared cache holds it with no symbol for an Objective-C method. `tools/cache-methods.lua` lists the
+methods of an image's classes with the address of each implementation, and `tools/cache-disasm.lua`
 disassembles from an address, naming the string or the selector an `adrp` with an `add` or a `ldr`
 reaches:
 
-    python3 tools/cache-methods.py ~/.charon/dyld/12.0/dyld_shared_cache_arm64 CoreLocation CLLocationManager
-    python3 tools/cache-disasm.py  ~/.charon/dyld/12.0/dyld_shared_cache_arm64 0x187d5acd8 300
+    xmake l tools/cache-methods.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64 CoreLocation CLLocationManager
+    xmake l tools/cache-disasm.lua  ~/.charon/dyld/12.0/dyld_shared_cache_arm64 0x187d5acd8 300
 
-They read the cache file and the sub-caches beside it (`.01`, `.02`, ...) themselves, so they need no
-symbol file: an arm64 cache of iOS 12 has its pointers as a slide chain whose bits they mask off, an
-arm64e cache of iOS 16 has authenticated pointers, and its method lists are the small, relative
-kind whose selectors sit in a table of the shared cache that libobjc names in its `__objc_opt_ro`.
-`tools/cache_reader.py` is the reader they share; `tools/cache-disasm.py` needs `capstone`
-(`pip3 install capstone`). `host/cachereader/run.sh` holds the two to a method a cache is known to
-have.
+They read the cache file and the sub-caches beside it (`.01`, `.02`, ...) through charon's own reader,
+`modules/apple/dyld.lua` and `modules/apple/objc.lua` (`image_methods`), so they need no symbol file:
+an arm64 cache of iOS 12 has its pointers as a slide chain whose bits are masked off, an arm64e cache
+of iOS 16 has authenticated pointers, and its method lists are the small, relative kind whose
+selectors sit in the table the cache's Objective-C optimisation header (or libobjc's `__objc_opt_ro`)
+names. Where the cache builder attached categories to a class, its method list is a list of lists
+and the categories' methods are listed too, with their implementations in the images that carry
+them. `tools/cache-disasm.lua` wraps the bytes in a one-section arm64 object whose `__text` sits at
+the cache address and disassembles it with `xcrun llvm-objdump` from the Command Line Tools.
+`host/cachereader/run.sh` holds the two to a method a cache is known to have.
 
 ## Asking a release which C names it exports
 
-`tools/surface-diff.py` knows the Objective-C classes and selectors the release carries, and no C name, so a
+`../../tools/corpus/surface-diff.lua` knows the Objective-C classes and selectors the release carries, and no C name, so a
 constant or a function that iOS 6 already exports itself shows as a gap, and an `absent` written for it tells an
-application that a name is not there when it is. `tools/probe-exports.py` asks the release: it builds a small
+application that a name is not there when it is. `tools/probe-exports.lua` asks the release: it builds a small
 program, runs it in the emulator, loads every framework of the release and calls `dlsym` for each name.
 
-    python3 tools/probe-exports.py --registry --workdir "$TMPDIR/probe"
-    python3 tools/probe-exports.py --names names.txt --workdir "$TMPDIR/probe"
+    xmake l tools/probe-exports.lua --registry --workdir "$(xmake l ../../modules/workspace.lua fresh probe)"
+    xmake l tools/probe-exports.lua --names names.txt --workdir "$(xmake l ../../modules/workspace.lua fresh probe)"
 
 `--registry` asks about every constant and function the registry lists as `absent`, and exits 1 when the release
 exports one, which is the mistake to correct (the entry is the release's own, and says so in a file of facts).
@@ -906,7 +909,7 @@ iPad 2 and an iPhone 4S running 6.1.3 gave.
 
 ## Measuring how much of an SDK the registry has decided
 
-`tools/surface-diff.py` lists what an SDK declares for a framework - every class,
+`../../tools/corpus/surface-diff.lua` lists what an SDK declares for a framework - every class,
 protocol, method, property, extern constant and function, with the release its
 availability attribute gives for iOS - and says how much of it the registry has
 decided. It reads the SDK the way the build reads one, from clang's AST of the
@@ -916,7 +919,7 @@ by name, lists its property's accessors, lists its class as `absent` or
 the class did; the rest is API nobody has said anything about, which is
 `absent` by default, and is the gap the tool counts by framework and release.
 
-    python3 tests/backports/tools/surface-diff.py Foundation UIKit CoreLocation \
+    xmake l tools/corpus/surface-diff.lua Foundation UIKit CoreLocation \
         --sdk /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk
 
 A macOS SDK is read as Mac Catalyst, whose `System/iOSSupport` carries UIKit and
@@ -976,7 +979,7 @@ A header that lives under a `SubFrameworks` folder of the SDK counts as the fram
 - `coretelephony.m`: a command-line test of the radio access technology of iOS 7: the eleven names as their own strings, the notification name, and `currentRadioAccessTechnology` answering nil or one of the names, with the misspelled WCDMA of 6.1.3 given the value of iOS 7. It needs the package built with `coretelephony = true`, and the name of the technology depends on the network the phone is on.
 - `textkit7.m`: an application of its own, the text batch of iOS 7: the attribute names, the document types, `NSTextTab` and what the release's HTML, RTF and plain-text import gives, read against the host's answers recorded by `host/textkit7/run.sh` from `textkit7-cases.m`.
 - `nsdataasset.m`: an application of its own, `NSDataAsset` reading the small compiled catalogue in `data-assets/Assets.car` (written by `host/nsdataasset/make-car.py`); the group `nsdataasset` of `host/uikit2/run.sh` compares the port to the system's class on a catalogue an application was built with, named by `CHARON_DATA_ASSET_CATALOG`.
-- `opengles.m`: an application of its own, the ES 3.0 functions in an ES 2.0 context: vertex arrays, occlusion queries, fence syncs, mapped buffer ranges, immutable textures and multisampled renderbuffers through the release's extensions, and the errors of the calls with no answer. `tools/gen-es3.py` writes the library from the SDK's two headers. It needs the package built with `opengles = true`.
+- `opengles.m`: an application of its own, the ES 3.0 functions in an ES 2.0 context: vertex arrays, occlusion queries, fence syncs, mapped buffer ranges, immutable textures and multisampled renderbuffers through the release's extensions, and the errors of the calls with no answer. The library is `OpenGLES/ES3Functions.m` and `ES3Queries.m` of the package, first generated from the SDK's two headers and maintained as source since. It needs the package built with `opengles = true`.
 - `imageextract.m`: an application of its own, the files `tools/assets-extract` wrote from a catalogue (`IMAGE_EXTRACT_DIR` in the build script): every name of the index is found by the stock `+[UIImage imageNamed:]`, at the scale and size of the best file for the screen.
 - `uikitnames.m`: an application of its own, the names and small classes of iOS 7 to 10 - the transition context keys, the screenshot and background-refresh notifications, the activity types, the callout and title text styles, the edge pan recognizer and the percent-driven transition - read against the host's answers recorded by `host/uikitnames/run.sh` from `uikitnames-cases.m`.
 - `foundation8b.m`: the names of iCloud metadata and app extensions, the deallocator blocks and file access intents of iOS 7 to 10, read against the host's answers recorded by `host/foundation8b/run.sh`: the intents are coordinated on a real folder, alone, together and for an item that is not there.

@@ -92,7 +92,7 @@ done
 
 cases=$(wc -l < "$build/host.tsv" | tr -d ' ')
 echo "=== the two answers: $cases cases a side"
-if python3 "$here/../common/compare.py" "$build/host.tsv" "$build/port.tsv" "$here/expected-differences.tsv"; then
+if xmake l "$here/../common/compare.lua" "$build/host.tsv" "$build/port.tsv" "$here/expected-differences.tsv"; then
     # The image: the host writes no such line, because the system's method shows a picture on a display
     # and says nothing. The port does, and says it once.
     lines=$(awk '/AXBrailleMap -presentImage:/ {n++} END {print n+0}' "$build/port.stderr")

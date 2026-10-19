@@ -355,7 +355,7 @@ undefined and a value of that type that holds something are different facts.
 there at all on the first releases that have the framework: neither `MLFeatureValue` nor
 `MLMultiArray` carries `+supportsSecureCoding`, `encodeWithCoder:` or `initWithCoder:` in the
 **iOS 11.0**, **12.0**, **16.0** or **18.0** dyld shared cache, read through
-`tests/backports/tools/cache-methods.py`. So on the releases an application met first, a feature
+`tests/backports/tools/cache-methods.lua`. So on the releases an application met first, a feature
 value cannot be archived at all.
 
 Where Core ML *does* have a coder, the multi array value is the one case that does not come back:
