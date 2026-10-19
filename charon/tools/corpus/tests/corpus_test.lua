@@ -2,6 +2,7 @@ local objc = import("objc_text", {rootdir = path.join(os.scriptdir(), "..")})
 local declares, declares_keyword, declares_selector = objc.declares, objc.declares_keyword, objc.declares_selector
 local directive_names, implementations, c_declares, whole_word = objc.directive_names, objc.implementations, objc.c_declares, objc.whole_word
 local json_order = import("json_order", {rootdir = path.join(os.scriptdir(), "..")})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "modules"), anonymous = true})
 
 local function keys_joined(text)
     return table.concat(json_order.top_level_keys(text), "\1")
@@ -113,8 +114,33 @@ function failures(opt)
     return found
 end
 
+local SUITES = {"registry_files_test", "walk_test", "surface_table_test", "ledger_test", "values_test"}
+
+local function suite_failures()
+    local found = {}
+    local scratch = workspace.fresh("corpus-test")
+    for _, name in ipairs(SUITES) do
+        local suite = path.join(os.scriptdir(), name .. ".lua")
+        if os.isfile(suite) then
+            local log = path.join(scratch, name .. ".log")
+            local out = io.open(log, "w")
+            local status = os.execv(os.programfile(), {"l", suite}, {stdout = out, stderr = out, try = true})
+            out:close()
+            local text = (io.readfile(log):gsub("%s+$", ""))
+            if status ~= 0 then
+                table.insert(found, name .. " (exit " .. tostring(status) .. "): " .. text)
+            else
+                print(text)
+            end
+        end
+    end
+    os.tryrm(scratch)
+    return found
+end
+
 function main()
     local found = failures({})
+    table.join2(found, suite_failures())
     if #found == 0 then
         print(string.format("corpus_test: OK (%d checks)", #CASES))
     else

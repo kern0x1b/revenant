@@ -4,8 +4,7 @@ local text = import("objc_text", {rootdir = os.scriptdir()})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 
 local EXPORT = aggregate.registry_export()
-local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
-local CORPUS = path.join(CORPUS_ROOT, "corpus")
+local CORPUS = aggregate.corpus_dir()
 local CHARON = path.directory(path.directory(os.scriptdir()))
 
 local TREE = nil
@@ -77,7 +76,7 @@ end
 local pkg_reg = {}
 local SWIFT = {}
 do
-    local found = walk(TREE, {[".git"] = true, [".agent-work"] = true, build = true, lib = true}, {})
+    local found = walk(TREE, {[".git"] = true, build = true, lib = true}, {})
     byteorder.sort(found)
     for _, file in ipairs(found) do
         local extension = file:match("%.([^./]+)$")

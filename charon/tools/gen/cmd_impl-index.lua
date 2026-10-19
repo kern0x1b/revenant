@@ -2,10 +2,7 @@ local json = import("core.base.json")
 local emit = import("emit", {anonymous = true})
 local surface_impl = import("surface_impl", {anonymous = true})
 
-local function default_corpus()
-    local root = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
-    return path.join(root, "corpus")
-end
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 local function blobs(tree)
     local out = {}
@@ -18,7 +15,7 @@ local function blobs(tree)
 end
 
 function run(args)
-    local corpus = args.coordination or default_corpus()
+    local corpus = args.coordination or workspace.corpus()
     local trees = path.join(corpus, "impl-source-trees")
     os.mkdir(trees)
     for _, entry in ipairs(surface_impl.repositories()) do

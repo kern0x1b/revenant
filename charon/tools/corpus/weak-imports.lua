@@ -3,12 +3,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 
-local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
-local CORPUS = path.join(CORPUS_ROOT, "corpus")
-if not os.isdir(CORPUS) then
-    raise("weak-imports.lua: no corpus/ data directory found at %s. Set CHARON_CORPUS_ROOT to the directory "
-        .. "that contains corpus/.", CORPUS)
-end
+local CORPUS = aggregate.corpus_dir()
 local EXPORT = aggregate.registry_export()
 local CAUGHT = {
     AVAudioSessionPortBluetoothLE = true,
