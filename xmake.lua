@@ -20,5 +20,5 @@ end
 if is_plat("iphoneos") then
     includes("frameworks/styx", "frameworks/eidolon")
 else
-    includes("shade", "frameworks/styx", "frameworks/eidolon")
+    includes("shade", "katabasis", "frameworks/styx", "frameworks/eidolon")
 end
