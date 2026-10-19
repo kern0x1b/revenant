@@ -5,6 +5,7 @@ add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
 add_repositories("hades-third-party third_party")
+add_repositories("charon charon")
 
 set_config("apple_minimum", "6.0")
 if is_plat("iphoneos") then

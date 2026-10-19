@@ -22,5 +22,5 @@ This file only summarizes them.
   zycore       MIT           (c) Florian Bernd, Joel Hoener
   biscuit      MIT           (c) 2021 Lioncash
   Catch2       BSL-1.0       Two Blue Cubes Ltd.
-  Vulkan Memory Allocator (external/vulkan-memory-allocator)
+  Vulkan Memory Allocator 3.4.0
                MIT           (c) 2017-2026 Advanced Micro Devices, Inc.

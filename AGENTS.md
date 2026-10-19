@@ -6,11 +6,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
   `shade/AGENTS.md`, `eidolon/AGENTS.md`, `styx/AGENTS.md`, `katabasis/AGENTS.md`, `psychopomp/AGENTS.md`,
   `revenant-webkit/AGENTS.md`.
 - A change that spans members is one series in hades, one commit per member it touches.
-- The agent work area is `hades/.agent-work/` (worktrees, runs, handoffs), not a member's own `.agent-work/`.
-- Third-party forks live as `third_party/<name>/UPSTREAM` plus `patches/`; never commit a copy of upstream code.
-  A change to a fork is a new or changed patch file: prepare a working copy with
-  `xmake l third_party/fetch.lua <name> .agent-work/runs/<task>/<name>`, commit there, and export with
-  `git format-patch <pinned commit>` into `third_party/<name>/patches/`.
+- Nothing but the project lives in the hades folder: no scratch, logs, notes, run output or worktrees. Scratch goes
+  to `$HOME/.cache/hades/<task>/` and is deleted when the task ends.
+- No comments in code, scripts or recipes. What a change does and why goes in its commit message and in the
+  member's README.
+- Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
+  checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
+  commit a copy of upstream code.
 - Before handing a change over: `xmake l tools/check.lua <member>` for each member it touches that has a check
   there, then that member's own gate (charon's `backports-gate` skill, shade's boot skill).
-- Never commit what `.deps/` or `.build/` hold, and never edit `.deps/` by hand: it is remade from the pins.

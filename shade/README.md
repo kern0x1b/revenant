@@ -33,32 +33,36 @@ boundary, in `src/graphics`, `src/media` and `src/telephony`.
 
 ## Requirements
 
-- macOS on Apple silicon, CMake 3.24 or later, Ninja and a C++20 compiler.
-- OpenSSL, libpng, libjpeg, libplist; optionally SDL2 (a window) and FFmpeg
-  (compressed audio).
-- A Vulkan loader and driver, and `glslc`, to draw and to build the shaders; a CPU
-  driver such as SwiftShader is enough.
+- macOS on Apple silicon, xmake 3.1.2 or later and a C++20 compiler (Apple clang).
+- Every library comes as an xmake package, installed by the first configure: Dynarmic and Boost from hades'
+  `third_party` repository, OpenSSL and libplist from charon's, libpng, libjpeg-turbo, the Vulkan headers, loader
+  and memory allocator and the glslang library (for the shader compiler in `tools/glsl`) from xmake's; optionally SDL2 (a window) and FFmpeg (compressed
+  audio).
+- A Vulkan driver to draw; a CPU driver such as SwiftShader is enough.
 - A root filesystem of the firmware to run, for example one unpacked by
   Charon's `xmake firmware rootfs`.
 
 ## Build
 
+Shade is a member of hades and builds from the top of hades:
+
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+xmake f -y
+xmake build shade
+xmake test
 ```
 
-Configure prepares Dynarmic and Boost from hades' pins (`../third_party/dynarmic`, `../third_party/boost`)
-under `../.deps/` when they are not there yet (`xmake l ../third_party/fetch.lua <name>` does the same by hand).
-Options are `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN` and `SHADE_ENABLE_IPO`. Boost is the 1.81.0
-release and needs no compiler flag with Apple clang 21.
+The options are `--shade_vulkan` (on), `--shade_sdl`, `--shade_ffmpeg`, `--shade_lto` (on, release only) and
+`--shade_dynarmic_test_emit_failure`, given to `xmake f`; `xmake f --menu` lists them. The guest probe in
+`tools/guest` is built when `--shade_guest_rootfs` and `--shade_armv6_ld` name a root filesystem and an ARMv6
+linker. Boost is the 1.81.0 release and needs no compiler flag with Apple clang 21.
 Through Charon the build is the `shade` package: `xmake emulate` builds and runs it.
 
 ## Usage
 
 ```sh
-build/shade profile --list
-build/shade boot --rootfs "$ROOTFS" --device iPhone4,1 --display headless --gles-backend software
+build/macosx/arm64/release/shade profile --list
+build/macosx/arm64/release/shade boot --rootfs "$ROOTFS" --device iPhone4,1 --display headless --gles-backend software
 ```
 
 `shade --help` lists every verb: `profile`, `abi`, `inspect`, `catalog`,
@@ -74,9 +78,11 @@ the host's, which the guest's own watchdogs need.
 | --- | --- |
 | `app/` | the `shade` program: verbs, live control, the desktop window |
 | `src/` | the library: kernel, Mach, device state, graphics, media, network, runtime |
-| `external/vulkan-memory-allocator` | the Vulkan memory allocator, vendored |
-| `../third_party/dynarmic`, `../third_party/boost` | the pins of the JIT core (with our patches) and of Boost; their sources are prepared under `../.deps/` |
+| `xmake.lua`, `*/xmake.lua` | the build: one target per library, as the module folders are laid out |
 | `tools/` | guest-side probes and the boot logo script |
+
+The JIT core (Dynarmic, with our patches) and Boost are hades' `dynarmic` and `boost` packages, in the
+`third_party` package repository at the top of hades.
 
 ## Documentation
 

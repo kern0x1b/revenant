@@ -1,7 +1,0 @@
-Package: org.charon.metalprobes.buffer
-Name: Charon buffer probe
-Architecture: iphoneos-arm
-Description: The port's buffer members against the answers Apple's own Metal gave on this host
-Maintainer: charon
-Author: charon
-Section: Development
