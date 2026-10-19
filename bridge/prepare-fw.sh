@@ -9,12 +9,5 @@ source ../pkg-env.sh
 rm -rf fw
 mkdir -p fw
 cp -R "$SDK/System/Library/Frameworks/SwiftUI.framework" fw/SwiftUI.framework
-python3 - fw/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64-apple-ios.swiftinterface <<'PY'
-import re, sys
-path = sys.argv[1]
-text = open(path).read()
-patched, count = re.subn(r'os_log\(\.fault, log: Log\.runtimeIssuesLog, """\n(?:.*\n)*?\s*"""\)', '_ = Log.runtimeIssuesLog', text, count=1)
-assert count == 1, "the os_log call this script patches was not found in the interface"
-open(path, 'w').write(patched)
-PY
+xmake l patch-interface.lua fw/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64-apple-ios.swiftinterface
 echo "fw/ ready"
