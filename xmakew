@@ -21,7 +21,7 @@ sha256() {
     fi
 }
 
-key=$(printf '%s\n%s\n' "$commit" "$patches" | sha256 | cut -c1-16)
+key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
 cache=$HOME/.cache/hades/xmake
 prefix=$cache/$key
 
@@ -52,6 +52,20 @@ if [ ! -x "$prefix/bin/xmake" ]; then
         ./configure --prefix="$work/install"
         make -j"$(getconf _NPROCESSORS_ONLN)"
         make install
+        mkdir -p "$work/lua"
+        for file in core/src/lua/lua/*.c core/src/lua/lua/*.h; do
+            case ${file##*/} in
+                onelua.c) ;;
+                lparser.c) sed 's/RDKCONST);/VDKREG);/' "$file" > "$work/lua/lparser.c" ;;
+                *) cp "$file" "$work/lua/" ;;
+            esac
+        done
+        if [ "$(uname -s)" = Darwin ]; then
+            system=LUA_USE_MACOSX libs=-lm
+        else
+            system=LUA_USE_LINUX libs="-lm -ldl"
+        fi
+        cc -O2 -DLUA_COMPAT_5_1 -DLUA_COMPAT_5_2 -DLUA_COMPAT_5_3 -D$system -o "$work/install/bin/lua" "$work"/lua/*.c $libs
     ) >> "$log" 2>&1
     [ -e "$prefix" ] || mv "$work/install" "$prefix"
     rm -rf "$work" "$log"

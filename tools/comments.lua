@@ -375,27 +375,33 @@ local function swift_tree(file, name)
 end
 
 local function lua_program()
-    local bin = os.iorunv("xrepo", {"env", "-b", "lua 5.4.7", "sh", "-c", "command -v lua"}):trim()
-    return bin:match("[^\n]+$")
+    local program = path.join(path.directory(os.programfile()), "lua")
+    assert(os.isexec(program), "no Lua beside %s: run this through ./xmakew, which builds xmake's own Lua there", os.programfile())
+    return program
 end
 
 local lua_compare = [[
-assert(_VERSION == "Lua 5.4", "the oracle reads Lua 5.4 bytecode, not " .. _VERSION)
 local function canonical(s)
-    local pos = 33
-    local out = {s:sub(1, 32)}
+    local pos = 42
+    local out = {s:sub(1, 41)}
     local function byte()
         local b = assert(s:byte(pos), "bytecode ends early")
         pos = pos + 1
         return b
     end
-    local function size()
+    local function varint()
         local x = 0
         repeat
             local b = byte()
             x = x * 128 + (b & 0x7f)
-        until b >= 128
+        until b < 128
         return x
+    end
+    local function align(n)
+        local p = (pos - 1) % n
+        if p ~= 0 then
+            pos = pos + n - p
+        end
     end
     local function take(n)
         local v = s:sub(pos, pos + n - 1)
@@ -404,38 +410,41 @@ local function canonical(s)
         return v
     end
     local function str()
-        local n = size()
-        if n == 0 then
-            return "n"
+        local size = varint()
+        if size == 0 then
+            return "s" .. varint()
         end
-        return "S" .. take(n - 1)
+        return "S" .. take(size)
     end
     local function func()
-        table.insert(out, str())
-        size()
-        size()
+        varint()
+        varint()
         table.insert(out, take(3))
-        local n = size()
+        local n = varint()
+        align(4)
         table.insert(out, "c" .. take(4 * n))
-        n = size()
+        n = varint()
         for _ = 1, n do
             local tt = byte()
             table.insert(out, "k" .. tt)
-            if tt == 0x13 or tt == 0x03 then
+            if tt == 0x13 then
                 table.insert(out, take(8))
+            elseif tt == 0x03 then
+                table.insert(out, "i" .. varint())
             elseif tt == 0x04 or tt == 0x14 then
                 table.insert(out, str())
             end
         end
-        n = size()
+        n = varint()
         table.insert(out, "u" .. take(3 * n))
-        n = size()
+        n = varint()
         table.insert(out, "p" .. n)
         for _ = 1, n do
             func()
         end
+        table.insert(out, str())
         for _ = 1, 4 do
-            assert(size() == 0, "debug data in a stripped dump")
+            assert(varint() == 0, "debug data in a stripped dump")
         end
     end
     func()
@@ -446,12 +455,9 @@ print("compared " .. (#arg // 2))
 for i = 1, #arg, 2 do
     local function dump(file)
         local f = assert(io.open(file, "rb"))
-        local chunk, err = load(f:read("a"), "=x")
+        local chunk = load(f:read("a"), "=x")
         f:close()
-        if not chunk then
-            return nil, err
-        end
-        return canonical(string.dump(chunk, true))
+        return chunk and canonical(string.dump(chunk, true))
     end
     local old = dump(arg[i])
     local new = dump(arg[i + 1])
