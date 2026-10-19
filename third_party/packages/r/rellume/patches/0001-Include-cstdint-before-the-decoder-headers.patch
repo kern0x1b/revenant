@@ -1,0 +1,28 @@
+From 4c19dff8e6a7e0d798d7925615653f5e4b5e4e0f Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Thu, 17 Sep 2026 15:54:00 +0200
+Subject: [PATCH 1/4] Include cstdint before the decoder headers
+
+farmdec.h uses uint8_t and its kin and expects its includer to have
+declared them. instr.h included it before <cstdint>, which compiled only
+where some earlier header happened to bring stdint in.
+---
+ src/instr.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/instr.h b/src/instr.h
+index 5233e78..8c16eef 100644
+--- a/src/instr.h
++++ b/src/instr.h
+@@ -24,6 +24,8 @@
+ #ifndef RELLUME_INSTR_H
+ #define RELLUME_INSTR_H
+ 
++#include <cstdint>
++
+ #ifdef RELLUME_WITH_X86_64
+ #include <fadec.h>
+ #endif // RELLUME_WITH_X86_64
+-- 
+2.54.0 (Apple Git-157)
+

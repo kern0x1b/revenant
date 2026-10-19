@@ -1,0 +1,37 @@
+From 135de80879ecaaba985102101db9134b2584ed15 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 08:51:59 +0200
+Subject: [PATCH] Decode UBFM with immr 0 and imms 31 as UBFX
+
+find_bfm_alias returned an error instruction for the 64-bit UBFM with
+immr 0 and imms 31, since there is no UXTW instruction. The encoding is
+valid: it is UBFX #0, #32, which compilers emit to zero-extend the low
+word of a register. Falling through to the bitfield aliases decodes it
+as such instead of failing the whole function.
+---
+ decode.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/decode.c b/decode.c
+index fcabcc0..b35f63d 100644
+--- a/decode.c
++++ b/decode.c
+@@ -468,9 +468,12 @@ static Inst find_bfm_alias(Op op, bool w32, Reg rd, Reg rn, u8 immr, u8 imms) {
+ 		case  7: inst.op = A64_EXTEND; inst.extend.type = (sign) ? SXTB : UXTB; return inst;
+ 		case 15: inst.op = A64_EXTEND; inst.extend.type = (sign) ? SXTH : UXTH; return inst;
+ 		case 31:
+-			inst.op = A64_EXTEND;
+-			inst.extend.type = SXTW;
+-			return (sign) ? inst : errinst("find_bfm_alias: there is no UXTW instruction");
++			if (sign) {
++				inst.op = A64_EXTEND;
++				inst.extend.type = SXTW;
++				return inst;
++			}
++			break;
+ 		}
+ 	}
+ 
+-- 
+2.54.0 (Apple Git-157)
+
