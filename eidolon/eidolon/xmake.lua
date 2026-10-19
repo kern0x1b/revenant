@@ -1,15 +1,18 @@
 -- The port xmake emulate installs and launches: Eidolon's demo application and its engine tests, as
 -- packages, so the emulator image carries them and SpringBoard lists the application by its identifier.
--- The SwiftUI module itself is charon@eidolon, which builds it from this repository's pinned commit.
+-- The SwiftUI module itself is charon@eidolon, which builds it from the eidolon folder of this checkout
+-- inside hades, and from a pinned commit of eidolon's repository outside it.
 set_project("eidolon")
 set_version("0.1")
--- The packages come from charon's released repository, so a build of this port is a build of released
--- packages. CHARON_REPO names a checkout instead, and that is a band's own business: xmake resolves
--- the packages out of it and installs them into the shared store beside everyone's, where they are a
--- different package from the released ones (a recipe digest is in the key) and every other band then
--- reads that tree's. Nothing outside a band should set it, and a build that set it and then failed
--- must not be left running: it holds the shared package lock while it waits for the next one.
-add_repositories("charon " .. (os.getenv("CHARON_REPO") or "https://github.com/kern0x1b/charon.git"))
+-- Inside hades the packages come from the charon folder beside eidolon, so a build of this port is a build
+-- of this checkout as a whole. Outside hades they come from charon's released repository. CHARON_REPO names
+-- another checkout instead: xmake resolves the packages out of it and installs them into the shared store,
+-- where they are a different package from the others (a recipe digest is in the key). A build that set it
+-- and then failed must not be left running: it holds the shared package lock while it waits for the next one.
+local hades_charon = path.join(os.scriptdir(), "..", "..", "charon")
+local in_hades = os.isfile(path.join(os.scriptdir(), "..", "..", "third_party", "fetch.lua")) and os.isdir(hades_charon)
+add_repositories("charon " .. (os.getenv("CHARON_REPO") or (in_hades and path.absolute(hades_charon))
+                               or "https://github.com/kern0x1b/charon.git"))
 add_addons("charon " .. (os.getenv("CHARON_ADDON") or "v0.8.16"))
 set_config("apple_minimum", "6.0")
 includes("@addon/charon/apple-ios")
