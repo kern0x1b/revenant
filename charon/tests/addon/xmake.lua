@@ -52,6 +52,7 @@ light("archive_language_test")
 light("swift_rule_test")
 light("firmware_test")
 light("toolchain_check_test")
+light("workspace_test")
 
 suite("architectures_test")
 suite("macho_test")

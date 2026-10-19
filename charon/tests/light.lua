@@ -2,7 +2,7 @@ function main(checkout)
     local charon = path.absolute(checkout or path.directory(os.scriptdir()))
     local addon = path.join(charon, "tests", "addon")
     local modules = path.join(charon, "modules")
-    local names = {"descriptions_test", "checkout_test", "registry_test", "dependency_test", "swift_rule_test"}
+    local names = {"descriptions_test", "checkout_test", "registry_test", "dependency_test", "swift_rule_test", "workspace_test"}
     if os.isfile(path.join(addon, "lock_test.lua")) then
         table.insert(names, "lock_test")
     end
